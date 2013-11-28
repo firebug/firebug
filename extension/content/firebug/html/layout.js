@@ -476,12 +476,12 @@ LayoutPanel.prototype = Obj.extend(Panel,
         MeasureBox.startMeasuring(node);
 
         var maxWidth = Math.max(
-            MeasureBox.measureText(args.marginLeft + "").width,
-            MeasureBox.measureText(args.marginRight + "").width,
-            MeasureBox.measureText(args.borderLeft + "").width,
-            MeasureBox.measureText(args.borderRight + "").width,
-            MeasureBox.measureText(args.paddingLeft + "").width,
-            MeasureBox.measureText(args.paddingRight + "").width
+            MeasureBox.measureText(String(args.marginLeft)).width,
+            MeasureBox.measureText(String(args.marginRight)).width,
+            MeasureBox.measureText(String(args.borderLeft)).width,
+            MeasureBox.measureText(String(args.borderRight)).width,
+            MeasureBox.measureText(String(args.paddingLeft)).width,
+            MeasureBox.measureText(String(args.paddingRight)).width
         );
 
         MeasureBox.stopMeasuring();

@@ -1,0 +1,453 @@
+<?xml version="1.0"?>
+<!-- See license.txt for terms of usage -->
+
+<bindings xmlns="http://www.mozilla.org/xbl"
+    xmlns:xbl="http://www.mozilla.org/xbl"
+    xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    xmlns:html="http://www.w3.org/1999/xhtml">
+
+<!-- Searchbox is located in the main Firebug toolbar and can be used to search
+    for a keyword within the current panel. -->
+<binding id="searchBox">
+    <content sizetopopup="none" align="center">
+        <xul:textbox anonid="searchBox" flex="1" width="0"
+            rows="1" label="search.Firebug_Search" class="fbsearch-textbox"
+            onkeyup="onSearchBoxKeyUp(event, this);" aria-describedby="fbSearchBoxDescription">
+            <xul:box class="fbsearch-icon" onclick="onSearchIconClick(event, this.parentNode)"/>
+        </xul:textbox>
+        <xul:toolbarbutton anonid="searchPrev"
+            class="fbsearch-options-buttons prev a11yFocus"
+            tooltiptext="search.tip.Previous"
+            role="menuitem"
+            oncommand="searchPrev();"/>
+        <xul:toolbarbutton anonid="searchNext"
+            class="fbsearch-options-buttons next a11yFocus"
+            tooltiptext="search.tip.Next"
+            role="menuitem"
+            oncommand="searchNext();"/>
+        <xul:description anonid="fbSearchBoxDescription"  collapsed="true"/>
+        <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true"
+            ignorekeys="true" role="presentation" type="arrow">
+            <xul:vbox>
+                <xul:label id="fbSearchBoxIsSensitive" value="search.Case_AutoSensitive"/>
+                <xul:label id="fbSearchBoxIsNotSensitive" value="search.Case_Insensitive"/>
+                <xul:vbox class="searchOptionsMenu innerToolbar" role="menu" anonid="fbSearchOptionsMenu">
+                    <xul:box anonid="startPanelFocus" class="panelFocusBound" onfocus="startFocusHandler()" />
+                    <xul:vbox anonid="searchOptionsList" role="presentation" />
+                    <xul:box anonid="endPanelFocus" class="panelFocusBound" onfocus="endFocusHandler()" />
+                </xul:vbox>
+            </xul:vbox>
+        </xul:panel>
+        <xul:box anonid="endTextFocus" class="panelFocusBound" onfocus="endTextFocusHandler()" />
+    </content>
+
+    <implementation>
+        <constructor><![CDATA[
+            var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+            var optionsPopup = document.getElementById("fbSearchOptionsPanel");
+
+            var self = this;
+
+            this.onFocusSearchBox = function(event)
+            {
+                self.focusHandler(event);
+            };
+
+            this.onFocusOptionsPopup = function(event)
+            {
+                self.panelFocusHandler(event);
+            };
+
+            searchBox.addEventListener("focus", this.onFocusSearchBox, true);
+            optionsPopup.addEventListener("focus", this.onFocusOptionsPopup, true);
+
+            // Dynamically set noautohide to avoid mozilla bug 545265.
+            optionsPopup.addEventListener("popupshowing", function runOnce()
+            {
+                optionsPopup.removeEventListener("popupshowing", runOnce, false);
+                optionsPopup.setAttribute("noautohide", true);
+            }, false);
+        ]]></constructor>
+
+        <destructor><![CDATA[
+            var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+            var optionsPopup = document.getElementById("fbSearchOptionsPanel");
+
+            searchBox.removeEventListener("focus", this.onFocusSearchBox, true);
+            optionsPopup.removeEventListener("focus", this.onFocusOptionsPopup, true);
+        ]]></destructor>
+
+        <property name="value">
+            <xbl:getter><![CDATA[
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchBox");
+                return searchBox.value;
+            ]]></xbl:getter>
+
+            <xbl:setter><![CDATA[
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchBox");
+                searchBox.setAttribute("active-search", !!val);
+                searchBox.value = val;
+            ]]></xbl:setter>
+        </property>
+
+        <property name="placeholder">
+            <xbl:getter><![CDATA[
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchBox");
+                return searchBox.placeholder;
+            ]]></xbl:getter>
+
+            <xbl:setter><![CDATA[
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchBox");
+                searchBox.placeholder = val;
+            ]]></xbl:setter>
+        </property>
+
+        <property name="status">
+            <xbl:getter><![CDATA[
+                return Firebug.Search.status;
+            ]]></xbl:getter>
+
+            <xbl:setter><![CDATA[
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchBox");
+                Firebug.Search.status = searchBox.value == "" || val || "notfound";
+                searchBox.setAttribute("status", Firebug.Search.status);
+            ]]></xbl:setter>
+        </property>
+
+        <property name="optionsShown">
+            <xbl:getter><![CDATA[
+                var optionsPopup = document.getElementById("fbSearchOptionsPanel");
+                return optionsPopup.state == "open";
+            ]]></xbl:getter>
+        </property>
+
+        <!-- Flag indicating that the child of the panel has or just had focus -->
+        <field name="panelHasFocus" />
+
+        <!-- Timer to close the popup, set on blur. Any kind of focus that directly follows
+        the blur should clear it with clearBlurTimeout(). -->
+        <field name="blurTimeout">null</field>
+
+        <method name="clearBlurTimeout">
+            <body><![CDATA[
+                if (this.blurTimeout !== null) {
+                    clearTimeout(this.blurTimeout);
+                    this.blurTimeout = null;
+                }
+            ]]></body>
+        </method>
+
+        <method name="updateOptions">
+            <parameter name="menuItems" />
+            <body><![CDATA[
+                var searchOptions = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchOptionsList");
+                FBL.eraseNode(searchOptions);
+
+                if (menuItems)
+                {
+                    for (var i=0; i<menuItems.length; i++)
+                    {
+                        var checkbox = document.createElement("checkbox");
+                        checkbox.className = "fbsearch-options-label a11yFocus";
+                        checkbox.setAttribute("role", "menuitemcheckbox")
+                        FBL.setItemIntoElement(checkbox, menuItems[i]);
+
+                        searchOptions.appendChild(checkbox);
+                    }
+                }
+            ]]></body>
+        </method>
+
+        <method name="showOptions">
+            <body><![CDATA[
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                var searchPrev = document.getAnonymousElementByAttribute(this, "anonid", "searchPrev");
+                var searchNext = document.getAnonymousElementByAttribute(this, "anonid", "searchNext");
+
+                FBL.internationalize(searchBox, "label");
+                FBL.internationalize(searchPrev, "label");
+                FBL.internationalize(searchPrev, "tooltiptext");
+                FBL.internationalize(searchNext, "label");
+                FBL.internationalize(searchNext, "tooltiptext");
+
+                var searchMenu = document.getAnonymousElementByAttribute(this, "anonid",
+                    "fbSearchOptionsMenu");
+                var searchDescription = document.getAnonymousElementByAttribute(this, "anonid",
+                    "fbSearchBoxDescription");
+
+                if (searchMenu)
+                    searchMenu.setAttribute("aria-label", FBL.$STR("a11y.labels.search options"));
+
+                if (searchDescription)
+                {
+                    searchDescription.setAttribute("tooltiptext",
+                        FBL.$STR("a11y.labels.Press up or down arrow key for search options"));
+                }
+
+                var optionsPopup = document.getElementById("fbSearchOptionsPanel");
+                var position = (Firebug.getPlacement() == "detached" ? "after_end" : "before_end");
+
+                this.focused = true;
+                optionsPopup.setAttribute("position", position);
+                var popupBoxObject = optionsPopup.popupBoxObject;
+                popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
+
+                var anchor = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                optionsPopup.openPopup(anchor, position, 0, 0, false, false);
+
+                this.clearBlurTimeout();
+            ]]></body>
+        </method>
+
+        <method name="hideOptions">
+            <body><![CDATA[
+                var optionsPopup = document.getElementById("fbSearchOptionsPanel");
+                optionsPopup.hidePopup();
+
+                this.clearBlurTimeout();
+            ]]></body>
+        </method>
+
+        <method name="searchNext">
+            <body><![CDATA[
+                this.status = Firebug.Search.searchNext(Firebug.currentContext);
+            ]]></body>
+        </method>
+
+        <method name="searchPrev">
+            <body><![CDATA[
+                this.status = Firebug.Search.searchPrev(Firebug.currentContext);
+            ]]></body>
+        </method>
+
+        <method name="focus">
+            <body><![CDATA[
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchBox");
+                searchBox.focus();
+            ]]></body>
+        </method>
+
+        <method name="select">
+            <body><![CDATA[
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchBox");
+                searchBox.select();
+            ]]></body>
+        </method>
+
+        <!-- Focus management handlers. These must be defined as methods and registered
+            using addEventListener or attribute registration as XBL handlers do not
+            appear to allow access to anonymous event targets when capturing. -->
+        <method name="focusHandler">
+            <parameter name="event" />
+            <body><![CDATA[
+                this.panelHasFocus = false;
+                this.clearBlurTimeout();
+
+                if (!FBL.hasClass(event.target, "panelFocusBound") && !this.optionsShown)
+                {
+                    this.showOptions();
+                }
+            ]]></body>
+        </method>
+
+        <method name="panelFocusHandler">
+            <parameter name="event" />
+            <body><![CDATA[
+                this.clearBlurTimeout();
+
+                if (!FBL.hasClass(event.target, "panelFocusBound"))
+                    this.panelHasFocus = true;
+            ]]></body>
+        </method>
+
+        <method name="endTextFocusHandler">
+            <body><![CDATA[
+                this.clearBlurTimeout();
+
+                if (this.panelHasFocus)
+                {
+                    // The user has just tabbed out of the panel
+                    document.commandDispatcher.advanceFocus();
+                    this.panelHasFocus = false;
+                }
+                else if (this.optionsShown)
+                {
+                    // The user has just tabbed out of the search box (and into the panel)
+                    var optionsPopup = document.getElementById("fbSearchOptionsPanel");
+                    document.commandDispatcher.advanceFocusIntoSubtree(optionsPopup);
+                }
+                else
+                {
+                    // The user has just reverse tabbed from the next tab target
+                    this.showOptions();
+
+                    var searchNext = document.getAnonymousElementByAttribute(this, "anonid",
+                        "searchNext");
+                    setTimeout(function() { searchNext.focus(); }, 0);
+                    this.panelHasFocus = true;
+                }
+            ]]></body>
+        </method>
+
+        <method name="startFocusHandler">
+            <body><![CDATA[
+                if (this.panelHasFocus)
+                {
+                    // The user has shift-tabbed out of the panel
+                    var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                        "searchBox");
+                    searchBox.focus();
+                    this.panelHasFocus = false;
+                }
+                else
+                {
+                    // The user has just tabbed into the panel
+                    document.commandDispatcher.advanceFocus();
+                    this.panelHasFocus = true;
+                }
+            ]]></body>
+        </method>
+
+        <method name="endFocusHandler">
+            <body><![CDATA[
+                // The user has just tabbed out of the panel
+                this.hideOptions();
+
+                var endTextFocus = document.getAnonymousElementByAttribute(this, "anonid",
+                    "endTextFocus");
+                endTextFocus.focus();
+            ]]></body>
+        </method>
+
+        <method name="onSearchBoxKeyUp">
+            <parameter name="event" />
+            <parameter name="textbox" />
+            <body><![CDATA[
+                textbox.setAttribute("active-search", !!textbox.value);
+
+                if (!Firebug.A11yModel || !Firebug.A11yModel.isEnabled())
+                    return;
+                if (event.keyCode == KeyEvent.DOM_VK_UP || event.keyCode == KeyEvent.DOM_VK_DOWN)
+                {
+                    var goingDown = (event.keyCode == KeyEvent.DOM_VK_DOWN);
+                    var optionsPopup = document.getElementById("fbSearchOptionsPanel");
+                    var items = optionsPopup.getElementsByClassName("a11yFocus");
+                    if (!optionsPopup || !items)
+                        return;
+                    if (optionsPopup.state == "closed")
+                        this.showOptions();
+
+                    setTimeout(FBL.bindFixed(function()
+                    {
+                        items[goingDown ? 0 : items.length -1].focus();
+                    }));
+                }
+                else if (event.keyCode == KeyEvent.DOM_VK_ESCAPE)
+                {
+                    this.hideOptions();
+                }
+            ]]></body>
+        </method>
+
+        <method name="onSearchIconClick">
+            <parameter name="event" />
+            <parameter name="textbox" />
+            <body><![CDATA[
+                if (textbox.value)
+                {
+                    this.value = "";
+                    Firebug.Search.update(Firebug.currentContext);
+                }
+                else
+                {
+                    this.optionsShown ? this.hideOptions() : this.showOptions();
+                }
+
+                if (!this.focused)
+                    this.focus();
+            ]]></body>
+        </method>
+    </implementation>
+
+    <handlers>
+        <handler event="keypress"><![CDATA[
+            if (event.keyCode == KeyEvent.DOM_VK_UP)
+            {
+                if (!FBL.isControl(event))
+                    this.value = Firebug.Search.cycleHistory(1);
+                else
+                    this.searchPrev();
+            }
+            else if (event.keyCode == KeyEvent.DOM_VK_DOWN)
+            {
+                if (!FBL.isControl(event))
+                    this.value = Firebug.Search.cycleHistory(-1);
+                else
+                    this.searchNext();
+            }
+            else if (event.keyCode == KeyEvent.DOM_VK_ESCAPE)
+            {
+                var optionsPopup = document.getElementById("fbSearchOptionsPanel");
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchBox");
+                if (!optionsPopup || !searchBox)
+                    return;
+                searchBox.focus();
+                if (optionsPopup.state == "open" && this.value.length == 0)
+                {
+                    optionsPopup.hidePopup();
+                }
+                else
+                {
+                    this.value = "";
+                    this.status = "noSearch";
+                    Firebug.Search.setPlaceholder();
+                }
+            }
+            else if (event.keyCode == KeyEvent.DOM_VK_RETURN)
+            {
+                if (FBL.isShift(event))
+                    this.searchPrev();
+                else if (FBL.isControl(event))
+                    FBL.dispatch([Firebug.A11yModel], "moveToSearchMatch");
+                else
+                    this.searchNext();
+            }
+            else
+            {
+                return;
+            }
+
+            FBL.cancelEvent(event);
+        ]]></handler>
+
+        <handler event="input"><![CDATA[
+            Firebug.Search.update(Firebug.currentContext);
+        ]]></handler>
+
+        <handler event="popupshowing"><![CDATA[
+            this.panelHasFocus = false;
+        ]]></handler>
+
+        <handler event="blur" phase="capturing"><![CDATA[
+            this.clearBlurTimeout();
+            this.blurTimeout = setTimeout(function()
+            {
+                hideOptions();
+                status = "noSearch";
+                focused = false;
+                Firebug.Search.setPlaceholder();
+            }, 0);
+        ]]></handler>
+    </handlers>
+</binding>
+
+</bindings>
