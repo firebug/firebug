@@ -197,7 +197,9 @@
                 optionsPopup.setAttribute("position", position);
                 var popupBoxObject = optionsPopup.popupBoxObject;
                 popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
-                optionsPopup.openPopup(this, position, 0, 0, false, false);
+
+                var anchor = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                optionsPopup.openPopup(anchor, position, 0, 0, false, false);
 
                 this.clearBlurTimeout();
             ]]></body>
