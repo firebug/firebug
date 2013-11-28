@@ -126,7 +126,7 @@ var FirebugLoader =
             }
         });
 
-        win.Firebug.browserOverlay.unloadContextMenuOverlay(win);
+        win.Firebug.browserOverlay.stopFirebug();
 
         delete win.Firebug;
         delete win.FBTrace;
