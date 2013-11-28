@@ -6,8 +6,9 @@ define([
     "firebug/firebug",
     "firebug/chrome/firefox",
     "firebug/firefox/customizeShortcuts",
+    "firebug/firefox/browserCommands"
 ],
-function(Module, Obj, Firebug, Firefox, CustomizeShortcuts) {
+function(Module, Obj, Firebug, Firefox, CustomizeShortcuts, BrowserCommands) {
 
 // ********************************************************************************************* //
 // Constants
@@ -40,7 +41,7 @@ Firebug.ShortcutsModel = Obj.extend(Module,
 
         // We need to touch keyset to apply keychanges without restart
         this.keysets = [];
-        this.resetDisabledKeys();
+        BrowserCommands.resetDisabledKeys();
 
         shortcutNames.forEach(this.initShortcut, this);
 
@@ -108,7 +109,7 @@ Firebug.ShortcutsModel = Obj.extend(Module,
         }
 
         // Disable existing global shortcuts
-        disableExistingShortcuts(keyElem.ownerDocument, attr, key, modifiers);
+        BrowserCommands.disableExistingShortcuts(keyElem.ownerDocument, attr, key, modifiers);
 
         keyElem.setAttribute("modifiers", modifiers);
         keyElem.setAttribute(attr, key);
@@ -116,34 +117,6 @@ Firebug.ShortcutsModel = Obj.extend(Module,
 
         if (this.keysets.indexOf(keyElem.parentNode) == -1)
             this.keysets.push(keyElem.parentNode);
-    },
-
-    disableExistingShortcuts: function(doc, attr, key, modifiers)
-    {
-        var selector = ":-moz-any(key[" + attr + "='" + key + "'], key[" + attr + "='" +
-            key.toUpperCase() + "'])[modifiers='" + modifiers + "']" +
-            ":not([id*='firebug']):not([disabled='true'])";
-
-        var existingKeyElements = doc.querySelectorAll(selector);
-        for (var i = existingKeyElements.length - 1; i >= 0; i--)
-        {
-            existingKeyElements[i].setAttribute("disabled", "true");
-            this.disabledKeyElements.push(existingKeyElements[i]);
-        }
-    },
-
-    resetDisabledKeys: function()
-    {
-        if (this.disabledKeyElements)
-        {
-            for (var i=0; i<this.disabledKeyElements.length; i++)
-            {
-                var elem = this.disabledKeyElements[i];
-                elem.removeAttribute("disabled");
-            }
-        }
-
-        this.disabledKeyElements = [];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

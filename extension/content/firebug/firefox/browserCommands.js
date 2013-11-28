@@ -98,16 +98,41 @@ var BrowserCommands =
             $el(doc, "key", keyProps, keyset);
 
             // Disable existing global shortcuts
-            var selector = ":-moz-any(key[" + attr + "='" + key + "'], key[" + attr + "='" +
-                key.toUpperCase() + "'])[modifiers='" + modifiers + "']" +
-                ":not([id*='firebug']):not([disabled='true'])";
-
-            var existingKeyElements = doc.querySelectorAll(selector);
-            for (var j = existingKeyElements.length - 1; j >= 0; j--)
-                existingKeyElements[j].setAttribute("disabled", "true");
+            this.disableExistingShortcuts(doc, attr, key, modifiers);
         }
 
         keyset.parentNode.insertBefore(keyset, keyset.nextSibling);
+    },
+
+    disableExistingShortcuts: function(doc, attr, key, modifiers)
+    {
+        var selector = ":-moz-any(key[" + attr + "='" + key + "'], key[" + attr + "='" +
+            key.toUpperCase() + "'])[modifiers='" + modifiers + "']" +
+            ":not([id*='firebug']):not([disabled='true'])";
+
+        if (!this.disabledKeyElements)
+            this.disabledKeyElements = [];
+
+        var existingKeyElements = doc.querySelectorAll(selector);
+        for (var i = existingKeyElements.length - 1; i >= 0; i--)
+        {
+            existingKeyElements[i].setAttribute("disabled", "true");
+            this.disabledKeyElements.push(existingKeyElements[i]);
+        }
+    },
+
+    resetDisabledKeys: function()
+    {
+        if (this.disabledKeyElements)
+        {
+            for (var i=0; i<this.disabledKeyElements.length; i++)
+            {
+                var elem = this.disabledKeyElements[i];
+                elem.removeAttribute("disabled");
+            }
+        }
+
+        this.disabledKeyElements = [];
     }
 };
 
