@@ -138,8 +138,9 @@
 
 #fbSearchBox {
     margin-left: 0;
-    margin-right: 6px;
+    margin-right: 10px;
     min-width: 100px;
+    margin-bottom: 1px;
 }
 
 .fbsearch-textbox[status="notfound"] {
@@ -158,7 +159,7 @@
     -moz-box-align: center;
     margin: 0;
     border: 1px solid #96969D;
-    border-radius: 3px 0 0 3px;
+    border-radius: 2px 0 0 2px;
     font: message-box;
     font-size: 11px;
     font-size-adjust: inherit;
@@ -200,9 +201,9 @@
 .fbsearch-options-buttons {
     -moz-margin-start: 0;
     -moz-appearance: none;
-    background: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    /* background: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2)); */
     border: 1px solid ThreeDShadow;
-    box-shadow: 0 1px #fff inset;
+    /*box-shadow: 0 1px #fff inset;*/
     list-style-image: url("chrome://firebug/skin/find-arrows.png");
     padding: 1px 5px;
     line-height: 1em;
@@ -217,7 +218,7 @@
 
 .fbsearch-options-buttons.next {
     -moz-image-region: rect(0, 24px, 9px, 12px);
-    border-radius: 0 3px 3px 0;
+    border-radius: 0 2px 2px 0;
 }
 
 .fbsearch-options-buttons:not([disabled]):active,

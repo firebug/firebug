@@ -58,12 +58,14 @@
                 var tab = document.createElement("panelTab");
                 tab.panelType = panelType;
 
+                var typeName = panelType.prototype.name;
                 var title = Firebug.getPanelTitle(panelType);
                 var tooltip = Firebug.getPanelTooltip(panelType);
                 tab.setAttribute("label", title);
                 tab.setAttribute("tooltiptext", tooltip);
+                tab.setAttribute("class", typeName + "PanelTab");
 
-                this.tabMap[panelType.prototype.name] = tab;
+                this.tabMap[typeName] = tab;
                 this.updateTab(panelType);
 
                 return tab;

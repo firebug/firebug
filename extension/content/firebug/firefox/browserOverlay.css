@@ -124,8 +124,9 @@
 /* Firebug Splitter */
 
 #fbContentSplitter{
-    border-color: threedShadow !important;
-    background-color: #FFFFFF;
+    border-color: none;
+    background-color: rgb(221,221,221) !important;
+    border: none;
 }
 
 #fbContentSplitter[dir=reverse]{
@@ -133,19 +134,15 @@
 }
 
 #fbContentSplitter[orient=vertical] {
-    border-top: 1px solid !important;
-    border-bottom: none;
     min-height: 5px;
     max-height: 5px;
-    background-color: -moz-dialog;
+    /*background-color: -moz-dialog;*/
 }
 
 #fbContentSplitter[orient=horizontal] {
-    border-right: 1px solid !important;
-    border-left: none;
     min-width: 5px;
     max-width: 5px;
-    background-color: -moz-dialog;
+    /*background-color: -moz-dialog;*/
 }
 
 /*************************************************************************************************/

@@ -126,7 +126,7 @@
 
 .cm-s-firebug .CodeMirror-debugLocation {
     outline: 1px solid #D9D9B6;
-    background-color: lightgoldenrodyellow;
+    background-color: rgb(255,255,224);
 }
 
 /*************************************************************************************************/
