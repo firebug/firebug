@@ -125,12 +125,124 @@
 /*************************************************************************************************/
 /* Toolbar */
 
+#fbToolbox {
+    -moz-appearance: none;
+    border: none;
+    border-bottom: 1px solid rgba(10, 31, 51, 0.35);
+    background: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+}
+
 #fbToolbar {
     padding-left: 4px;
 }
 
 #fbToolbarInner {
     overflow: hidden;
+    height: 27px;
+}
+
+#fbPanelBar1-buttons toolbarbutton {
+    width: 26px;
+    margin-right: 3px;
+}
+
+#fbPanelBar1-buttons #fbNavigateBackButton {
+    margin-right: 0;
+}
+
+#fbPanelBar1-tabBox {
+    height: 28px;
+}
+
+#fbPanelBar1-panelTabs {
+    padding-left: 5px;
+}
+
+#fbPanelBar1-panelTabs panelTab {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+#fbPanelBar2-tabBox {
+    height: 28px;
+}
+
+#fbPanelBar2-panelTabs {
+    padding-top: 4px;
+    padding-left: 5px;
+}
+
+#fbPanelBar1-tabBoxBackground,
+#fbPanelBar2-tabBoxBackground {
+    border-bottom: 1px solid #A0A0A0;
+}
+
+#fbPanelBar1-tabBoxBackground {
+    background-color: -moz-dialog;
+}
+
+#fbPanelBar2-tabBoxBackground {
+    background-color: rgb(252, 252, 252);
+    background: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+}
+
+#fbPanelBar2-panelTabs > panelTab[selected="true"] {
+    background-color: white;
+    border-bottom: 1px solid white;
+}
+
+#fbPanelBar2-panelTabs > panelTab.watchesPanelTab[selected="true"],
+#fbPanelBar2-panelTabs > panelTab.selectorsPanelTab[selected="true"] {
+    background-color: rgb(255,255,224);
+}
+
+/*************************************************************************************************/
+/* Panel Tabs */
+
+panelTab[selected="true"] {
+    border: 1px solid #A0A0A0;
+    border-bottom: 1px solid rgb(253, 253, 253);
+    background-color: rgb(253, 253, 253);
+    color: inherit;
+}
+
+panelTab:not([selected="true"]):hover {
+    border: 1px solid #C8C8C8;
+    border-bottom: 1px solid transparent;
+    backround-color: transparent;
+}
+
+panelTab[selected="true"] > panelTabMenu .menuTarget,
+panelTab:focus > panelTabMenu .menuTarget {
+    background: url(chrome://firebug/skin/win/optionsMenuTarget.png) no-repeat center;
+    width: 11px;
+    height: 10px;
+    vertical-align: middle;
+    visibility: visible;
+}
+
+panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
+    background-image: url(chrome://firebug/skin/win/optionsMenuTargetHover.png);
+}
+
+/************************************************************************************************/
+
+#fbPanelSplitter {
+    background-color: rgb(221,221,221) !important;
+    border: none;
+}
+
+#fbPanelSplitter > #fbPanelSplitterBox {
+    visibility: visible;
+    height: 28px;
+    width: 6px;
+    background-color: -moz-dialog;
+    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    border-bottom: 1px solid #A0A0A0;
+}
+
+#fbPanelSplitter[orient=vertical] > #fbPanelSplitterBox {
+    visibility: hidden;
 }
 
 /*************************************************************************************************/
@@ -159,7 +271,6 @@
     -moz-box-align: center;
     margin: 0;
     border: 1px solid #96969D;
-    /*border: 1px solid rgb(170, 188, 207); Australis */
     border-radius: 2px 0 0 2px;
     font: message-box;
     font-size: 11px;
@@ -204,7 +315,6 @@
     -moz-appearance: none;
     /* background: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2)); */
     border: 1px solid ThreeDShadow;
-    /* border: 1px solid rgb(170, 188, 207); Australis */
     /*box-shadow: 0 1px #fff inset;*/
     list-style-image: url("chrome://firebug/skin/find-arrows.png");
     padding: 1px 5px;
@@ -549,22 +659,6 @@ textbox[type="fbSearchBox"] > panel {
 /* Collision with CuteButtons - Crystal SVG 0.2.5, see 3374 */
 #fbNetPersist {
     -moz-image-region: rect(0, 1px, 1px, 0);
-}
-
-/*************************************************************************************************/
-/* Panel Tabs */
-
-panelTab[selected="true"] > panelTabMenu .menuTarget,
-panelTab:focus > panelTabMenu .menuTarget {
-    background: url(chrome://firebug/skin/win/optionsMenuTarget.png) no-repeat center;
-    width: 11px;
-    height: 10px;
-    vertical-align: middle;
-    visibility: visible;
-}
-
-panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
-    background-image: url(chrome://firebug/skin/win/optionsMenuTargetHover.png);
 }
 
 /*************************************************************************************************/

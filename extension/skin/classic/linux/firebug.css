@@ -4,3 +4,47 @@
 .userTypedText {
     margin-left: 1px;
 }
+
+#fbToolbox {
+    border-bottom: 1px solid rgb(170, 188, 207);
+    background-color: rgb(219, 234, 249);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.2));
+}
+
+/************************************************************************************************/
+/* Override Australis Styles coming from Win theme xxxHonza: fix me issue 471 */
+
+#fbPanelBar1-tabBoxBackground,
+#fbPanelBar2-tabBoxBackground {
+    border-bottom: 1px solid #A0A0A0;
+}
+
+#fbPanelBar1-tabBoxBackground {
+    background-color: -moz-dialog;
+}
+
+#fbPanelBar2-tabBoxBackground {
+    background-color: rgb(252, 252, 252);
+    background: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#fbPanelSplitter > #fbPanelSplitterBox {
+    background-color: -moz-dialog;
+    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    border-bottom: 1px solid #A0A0A0;
+}
+
+/*************************************************************************************************/
+/* Search Box */
+
+.fbsearch-textbox {
+    border: 1px solid #96969D;
+}
+
+.fbsearch-options-buttons {
+    border: 1px solid ThreeDShadow;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
