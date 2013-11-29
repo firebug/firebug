@@ -1016,14 +1016,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             )
         }
 
-        items.push("-");
-        items.push({
-            label: "script.updateExecutableLines",
-            tooltiptext: "script.tip.updateExecutableLines",
-            command: Obj.bindFixed(this.markExecutableLines, this, 0,
-                this.scriptView.editor.getLineCount())
-        });
-
         return items;
     },
 
@@ -1455,6 +1447,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // Bail out if the exe-flag for this line has been already computed.
             // xxxHonza: don't bail out, some scripts could have been garbage collected,
             // and we need to make sure the executable status is properly updated.
+            // See also issue 6948 (and included links to platform bugs).
+            // xxxHonza: issue 6948 isn't yet closed and this code might change
+            // as soon as the platform bugs are fixed.
             //if (typeof(handle.executableLine) != "undefined")
             //    return;
 
