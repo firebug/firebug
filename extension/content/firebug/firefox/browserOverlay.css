@@ -125,7 +125,8 @@
 
 #fbContentSplitter{
     border-color: none;
-    background-color: rgb(221,221,221) !important;
+    background-color: rgb(221,221,221);
+    /*background-color: rgb(210, 224, 237); Australis*/
     border: none;
 }
 

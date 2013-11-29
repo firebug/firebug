@@ -159,6 +159,7 @@
     -moz-box-align: center;
     margin: 0;
     border: 1px solid #96969D;
+    /*border: 1px solid rgb(170, 188, 207); Australis */
     border-radius: 2px 0 0 2px;
     font: message-box;
     font-size: 11px;
@@ -203,6 +204,7 @@
     -moz-appearance: none;
     /* background: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2)); */
     border: 1px solid ThreeDShadow;
+    /* border: 1px solid rgb(170, 188, 207); Australis */
     /*box-shadow: 0 1px #fff inset;*/
     list-style-image: url("chrome://firebug/skin/find-arrows.png");
     padding: 1px 5px;

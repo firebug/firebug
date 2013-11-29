@@ -24,7 +24,6 @@
     opacity: 0.8;
 }
 
-
 #fbFirebugMenu:hover,
 #fbFirebugMenu[open="true"] {
     opacity: 1.0;
@@ -196,6 +195,10 @@
     border: none;
     border-bottom: 1px solid rgba(10, 31, 51, 0.35);
     background: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+
+    /*border-bottom: 1px solid rgb(170, 188, 207); Australis
+    background-color: rgb(219, 234, 249);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.2));*/
 }
 
 #fbToolbar {
@@ -222,9 +225,14 @@
     visibility: visible;
     height: 28px;
     width: 6px;
+
     background-color: -moz-dialog;
     background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
     border-bottom: 1px solid #A0A0A0;
+
+    /*background-color: rgb(219, 234, 249); Australis
+    background-image: -moz-linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.2));
+    border-bottom: 1px solid rgb(170, 188, 207);*/
 }
 
 #fbPanelSplitter[orient=vertical] > #fbPanelSplitterBox {
@@ -258,10 +266,15 @@ panelTab[selected="true"] {
     border-bottom: 1px solid rgb(253, 253, 253);
     background-color: rgb(253, 253, 253);
     color: inherit;
+
+    /*border: 1px solid rgb(170, 188, 207); Australis
+    background-color: rgb(247, 251, 254);
+    border-bottom: 1px solid rgb(247, 251, 254);*/
 }
 
 panelTab:not([selected="true"]):hover {
     border: 1px solid #C8C8C8;
+    /*border: 1px solid rgb(170, 188, 207); Australis */
     border-bottom: 1px solid transparent;
     backround-color: transparent;
 }
@@ -399,15 +412,20 @@ panelBarTabList > .fb-tabs-alltabs-button {
 #fbPanelBar1-tabBoxBackground,
 #fbPanelBar2-tabBoxBackground {
     border-bottom: 1px solid #A0A0A0;
+    /*border-bottom: 1px solid rgb(170, 188, 207); Australis*/
 }
 
 #fbPanelBar1-tabBoxBackground {
     background-color: -moz-dialog;
+    /*background-color: rgb(219, 234, 249); Australis
+    background-image: linear-gradient(rgba(253, 253, 253, 0.2), transparent);*/
 }
 
 #fbPanelBar2-tabBoxBackground {
     background-color: rgb(252, 252, 252);
     background: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    /*background-color: rgb(219, 234, 249); Australis
+    background-image: -moz-linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.2));*/
 }
 
 #fbPanelBar2-panelTabs > panelTab[selected="true"] {
