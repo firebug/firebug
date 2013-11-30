@@ -7,13 +7,12 @@ define([
     "firebug/lib/trace",
     "firebug/lib/events",
     "firebug/lib/locale",
-    "firebug/lib/dom",
     "firebug/lib/domplate",
     "firebug/chrome/rep",
     "firebug/chrome/reps",
     "firebug/chrome/menu",
 ],
-function(Module, Obj, Firebug, FBTrace, Events, Locale, Dom, Domplate, Rep, FirebugReps, Menu) {
+function(Module, Obj, Firebug, FBTrace, Events, Locale, Domplate, Rep, FirebugReps, Menu) {
 
 "use strict";
 
@@ -382,7 +381,7 @@ var EventLogRep = domplate(FirebugReps.Event,
 
     copyEvent: function(log)
     {
-        return new Dom.EventCopy(log.event);
+        return log.event;
     },
 
     getTarget: function(event)

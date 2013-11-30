@@ -929,7 +929,7 @@ Dom.getDOMMembers = function(object)
         { return domMemberCache.Attr; }
     else if (object instanceof Node)
         { return domMemberCache.Node; }
-    else if (object instanceof Event || object instanceof Dom.EventCopy)
+    else if (object instanceof Event)
         { return domMemberCache.Event; }
     else if (Array.isArray(object))
         { return domMemberCache.Array; }
@@ -970,18 +970,6 @@ Dom.isDOMConstant = function(object, name)
 Dom.isInlineEventHandler = function(name)
 {
     return !!Dom.domInlineEventHandlersMap[name];
-};
-
-Dom.EventCopy = function(event)
-{
-    // Because event objects are destroyed arbitrarily by Gecko, we must make a copy of them to
-    // represent them long term in the inspector.
-    for (var name in event)
-    {
-        try {
-            this[name] = event[name];
-        } catch (exc) { }
-    }
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
