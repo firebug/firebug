@@ -74,9 +74,7 @@ DOMMemberProvider.prototype =
 
                 var addOwn = function(prop)
                 {
-                    // Apparently, Object.prototype.hasOwnProperty.call(object, p) lies
-                    // when 'object' is content and 'Object' is chrome... Bug 658909?
-                    if (Object.getOwnPropertyDescriptor(object, prop) &&
+                    if (Obj.contentObjectHasOwnProperty(object, prop) &&
                         properties.indexOf(prop) === -1)
                     {
                         properties.push(prop);
@@ -399,6 +397,7 @@ DOMMemberProvider.prototype =
         // among simple properties and those defined using getter and/or (only a) setter.
         // XXX This should be rewritten to use 'descriptor', and the unwrapping test is
         // always false! See issue 5377.
+        /*
         if (object && !Dom.isDOMMember(object, name) && (XPCNativeWrapper.unwrap(object) !== object))
         {
             var getter = (object.__lookupGetter__) ? object.__lookupGetter__(name) : null;
@@ -421,6 +420,7 @@ DOMMemberProvider.prototype =
                 member.prefix = "set";
             }
         }
+        */
 
         props.push(member);
         return member;

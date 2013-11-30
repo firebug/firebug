@@ -272,6 +272,13 @@ Obj.getPropertyNames = Object.getPropertyNames || function(subject)
     return Arr.unique(props);
 };
 
+Obj.contentObjectHasOwnProperty = function(subject, name)
+{
+    // Apparently, Object.prototype.hasOwnProperty.call(subject, name) lies
+    // when 'subject' is content and 'Object' is chrome.
+    return !!Object.getOwnPropertyDescriptor(subject, name);
+};
+
 // ********************************************************************************************* //
 
 return Obj;
