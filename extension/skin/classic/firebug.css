@@ -129,11 +129,13 @@
     -moz-appearance: none;
     border: none;
     border-bottom: 1px solid rgba(10, 31, 51, 0.35);
-    background: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
 }
 
 #fbToolbar {
+    -moz-appearance: none;
     padding-left: 4px;
+    border: none;
 }
 
 #fbToolbarInner {
@@ -150,7 +152,8 @@
     margin-right: 0;
 }
 
-#fbPanelBar1-tabBox {
+#fbPanelBar1-tabBox,
+#fbPanelBar2-tabBox {
     height: 28px;
 }
 
@@ -161,10 +164,6 @@
 #fbPanelBar1-panelTabs panelTab {
     padding-top: 5px;
     padding-bottom: 5px;
-}
-
-#fbPanelBar2-tabBox {
-    height: 28px;
 }
 
 #fbPanelBar2-panelTabs {
@@ -199,6 +198,17 @@
 /*************************************************************************************************/
 /* Panel Tabs */
 
+panelTab {
+    margin: 1px 0 0 0;
+    border: 1px solid transparent;
+    border-radius: 4px 4px 0 0;
+    padding: 4px 7px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #565656;
+    direction: ltr;
+}
+
 panelTab[selected="true"] {
     border: 1px solid #A0A0A0;
     border-bottom: 1px solid rgb(253, 253, 253);
@@ -230,6 +240,15 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 #fbPanelSplitter {
     background-color: rgb(221,221,221) !important;
     border: none;
+    min-width: 5px;
+    max-width: 5px;
+}
+
+#fbPanelSplitter[orient="vertical"] {
+    min-height: 5px;
+    max-height: 5px;
+    min-width: 0;
+    max-width: none;
 }
 
 #fbPanelSplitter > #fbPanelSplitterBox {
@@ -321,16 +340,17 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     line-height: 1em;
     width: 22px;
     height: 21px;
-    border-left: none;
 }
 
 .fbsearch-options-buttons.prev {
     -moz-image-region: rect(0, 12px, 9px, 0);
+    border-left: none;
 }
 
 .fbsearch-options-buttons.next {
     -moz-image-region: rect(0, 24px, 9px, 12px);
     border-radius: 0 2px 2px 0;
+    border-left: none;
 }
 
 .fbsearch-options-buttons:not([disabled]):active,

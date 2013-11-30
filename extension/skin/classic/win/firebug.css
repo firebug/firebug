@@ -221,17 +221,6 @@
     -moz-box-align: end;
 }
 
-panelTab {
-    margin: 1px 0 0 0;
-    border: 1px solid transparent;
-    border-radius: 4px 4px 0 0;
-    padding: 4px 7px;
-    font-size: 11px;
-    font-weight: bold;
-    color: #565656;
-    direction: ltr;
-}
-
 panelTab[selected="true"] {
     border: 1px solid rgb(170, 188, 207);
     background-color: rgb(247, 251, 254);
@@ -255,6 +244,10 @@ panelTab[selected="true"] > panelTabMenu {
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#fbPanelSplitter {
+    background-color: rgb(231, 241, 251) !important;
+}
 
 #fbPanelSplitter > #fbPanelSplitterBox {
     background-color: rgb(219, 234, 249);

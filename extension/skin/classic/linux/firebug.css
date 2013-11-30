@@ -1,3 +1,4 @@
+/* xxxHonza: This should be removed, fix me: issue 471 */
 @import "chrome://firebug/skin/win/firebug.css";
 
 /* Add some basic padding to the completion popup (missing on Linux). */
@@ -6,13 +7,43 @@
 }
 
 #fbToolbox {
-    border-bottom: 1px solid rgb(170, 188, 207);
-    background-color: rgb(219, 234, 249);
-    background-image: -moz-linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.2));
+    -moz-appearance: none;
+    background-color: rgb(240, 240, 240);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    border-bottom: 1px solid #A0A0A0;
 }
 
-/************************************************************************************************/
+#fbPanelBar2-tabBox {
+    height: 32px;
+}
+
+panelTab {
+    font-size: 13px;
+}
+
+#fbPanelSplitter > #fbPanelSplitterBox {
+    height: 32px;
+}
+
+.fbsearch-splitter {
+    margin-right: 2px;
+}
+
+/*************************************************************************************************/
 /* Override Australis Styles coming from Win theme xxxHonza: fix me issue 471 */
+
+panelTab[selected="true"] {
+    border: 1px solid #A0A0A0;
+    border-bottom: 1px solid rgb(253, 253, 253);
+    background-color: rgb(253, 253, 253);
+    color: inherit;
+}
+
+panelTab:not([selected="true"]):hover {
+    border: 1px solid #C8C8C8;
+    border-bottom: 1px solid transparent;
+    backround-color: transparent;
+}
 
 #fbPanelBar1-tabBoxBackground,
 #fbPanelBar2-tabBoxBackground {
@@ -20,18 +51,20 @@
 }
 
 #fbPanelBar1-tabBoxBackground {
-    background-color: -moz-dialog;
+    background-color: rgb(240, 240, 240);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.2));
 }
 
 #fbPanelBar2-tabBoxBackground {
-    background-color: rgb(252, 252, 252);
-    background: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    background-color: rgb(240, 240, 240);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    border-bottom: 1px solid #A0A0A0;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #fbPanelSplitter > #fbPanelSplitterBox {
-    background-color: -moz-dialog;
+    background-color: rgb(240, 240, 240);
     background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
     border-bottom: 1px solid #A0A0A0;
 }
