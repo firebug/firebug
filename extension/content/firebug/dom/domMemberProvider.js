@@ -104,6 +104,7 @@ DOMMemberProvider.prototype =
                 this.addMember(object, type, where, name, val, level, isScope);
             }.bind(this);
 
+            var tester = new Dom.DOMMemberTester(object);
             for (var i=0; i<properties.length; i++)
             {
                 name = properties[i];
@@ -121,28 +122,29 @@ DOMMemberProvider.prototype =
                     val = undefined;
                 }
 
+                var isInlineEventHandler = Dom.isInlineEventHandler(name);
+                var isDOMMember = !isInlineEventHandler && tester.isDOMMember(name);
                 if (!isNaN(parseInt(name, 10)))
                 {
                     add("ordinal", ordinals);
                 }
                 else if (typeof val === "function")
                 {
-                    var classFunc = isClassFunction(val);
-                    var domMember = Dom.isDOMMember(object, name);
-                    if (domMember && classFunc)
+                    var isClassFunc = isClassFunction(val);
+                    if (isDOMMember && isClassFunc)
                     {
                         add("domClass", domClasses);
                     }
-                    else if (domMember)
+                    else if (isDOMMember)
                     {
                         add("domFunction", domFuncs);
                     }
-                    else if (classFunc)
+                    else if (isClassFunc)
                     {
                         add("userClass", userClasses);
                     }
                     else if (!Firebug.showUserFuncs && Firebug.showInlineEventHandlers &&
-                        Dom.isInlineEventHandler(name))
+                        isInlineEventHandler)
                     {
                         add("userFunction", domHandlers);
                     }
@@ -157,18 +159,17 @@ DOMMemberProvider.prototype =
                     {
                         add("proto", proto);
                     }
-                    else if (Dom.isDOMMember(object, name))
-                    {
-                        add("dom", domProps);
-                    }
-                    else if (Dom.isDOMConstant(object, name))
+                    else if (tester.isDOMConstant(name))
                     {
                         add("dom", domConstants);
                     }
-                    else if (val === null && object instanceof EventTarget &&
-                        Dom.isInlineEventHandler(name))
+                    else if (isDOMMember)
                     {
-                        add("user", domHandlers);
+                        add("dom", domProps);
+                    }
+                    else if (val === null && object instanceof EventTarget && isInlineEventHandler)
+                    {
+                        add("dom", domHandlers);
                     }
                     else
                     {
