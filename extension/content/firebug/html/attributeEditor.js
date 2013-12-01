@@ -74,9 +74,7 @@ AttributeEditor.prototype = Domplate.domplate(InlineEditor.prototype,
                 // Save changed attribute names here instead of in saveEdit, because otherwise
                 // unrelated properties might get discarded.
                 if (previousValue)
-                {
                     element.removeAttribute(previousValue);
-                }
 
                 if (value)
                 {
@@ -100,10 +98,10 @@ AttributeEditor.prototype = Domplate.domplate(InlineEditor.prototype,
         }
 
         // Remove group unless it is valid for it to be empty.
-        return !this.emptyIsValid(target);
+        return !this.isEmptyValid(target);
     },
 
-    emptyIsValid: function(target)
+    isEmptyValid: function(target)
     {
         return target.classList.contains("nodeValue");
     },
@@ -272,15 +270,23 @@ AttributeEditor.prototype = Domplate.domplate(InlineEditor.prototype,
 
     autoCompleteAdjustSelection: function(value, offset, data)
     {
+        // For CSS, and some SVG attribute values, jump into function parameter lists.
         if (offset >= 2 && value.substr(offset - 2, 2) === "()")
             return offset - 1;
+
         if (!this.isInStyleAttrValue())
             return offset;
 
+        // In the case "prop|:", accepting the completion should jump directly into
+        // the property value (skipping the colons).
         if (offset < value.length && value.substr(offset, 2) === ":")
             value = this.input.value = value + " ";
         if (offset < value.length && value.substr(offset, 2) === ": ")
             return offset + 2;
+
+        // When accepting the completion, except by right arrow key (which should
+        // work only within the property value), skip past semicolons and possibly
+        // add a new separator (colon/semicolon, depending on which part we are in).
         if (data === "styleadvance")
         {
             if (offset < value.length && value.substr(offset, 2) === ";")

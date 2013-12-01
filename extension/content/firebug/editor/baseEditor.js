@@ -19,7 +19,7 @@ var BaseEditor = Obj.extend(MeasureBox,
         return value;
     },
 
-    emptyIsValid: function(target)
+    isEmptyValid: function(target)
     {
         return false;
     },

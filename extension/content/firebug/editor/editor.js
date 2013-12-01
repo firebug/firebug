@@ -299,7 +299,7 @@ Firebug.Editor = Obj.extend(Module,
         // If the value is empty, then jumping to a dependent editor doesn't
         // make sense, so we instead skip out of the group.
         var value = currentEditor.getValue();
-        var skipEmptyGroup = (!value && currentGroup && !currentEditor.emptyIsValid(currentTarget));
+        var skipEmptyGroup = (!value && currentGroup && !currentEditor.isEmptyValid(currentTarget));
         var nextEditable = currentTarget;
         do
         {
