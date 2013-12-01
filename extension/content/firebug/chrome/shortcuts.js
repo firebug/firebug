@@ -41,7 +41,7 @@ Firebug.ShortcutsModel = Obj.extend(Module,
 
         // We need to touch keyset to apply keychanges without restart
         this.keysets = [];
-        BrowserCommands.resetDisabledKeys();
+        BrowserCommands.resetDisabledKeys(window.top);
 
         shortcutNames.forEach(this.initShortcut, this);
 
