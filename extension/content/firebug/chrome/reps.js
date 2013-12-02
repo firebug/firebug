@@ -422,7 +422,11 @@ FirebugReps.Obj = domplate(Firebug.Rep,
         {
             return (t == "boolean" || t == "number" || (t == "string" && value) ||
                 (t == "object" && value && value.toString));
-        };
+        }
+
+        // Work around https://bugzilla.mozilla.org/show_bug.cgi?id=945377
+        if (Object.prototype.toString.call(object) === "[object Generator]")
+            object = Object.getPrototypeOf(object);
 
         // Object members with non-empty values are preferred since it gives the
         // user a better overview of the object.
