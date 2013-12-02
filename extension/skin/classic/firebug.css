@@ -60,8 +60,8 @@
 
 .fbCommandLine {
     -moz-appearance: none;
-    margin: 2px 0 0 0;
-    padding: 0 4px;
+    margin: 0 0 2px 4px !important;
+    padding: 0;
     border: none;
     font-family: monospace;
     font-size: 12px;
@@ -95,16 +95,19 @@
 }
 
 #fbToggleCommandEditorBox {
-    display: block;
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    width: 21px;
-    height: 21px;
     background-color: white;
-    border-top: 1px solid rgb(204, 204, 204);
-    border-left: 1px solid rgb(204, 204, 204);
-    padding: 2px;
+    padding: 0;
+    margin: 0;
+}
+
+#fbToggleCommandEditorBox .column {
+    width: 31px;
+    background-color: rgb(238, 238, 238);
+    border-right: 1px solid rgb(221, 221, 221);
+}
+
+#fbToggleCommandEditor {
+    margin: 2px;
 }
 
 #fbCommandLineHistoryButton {

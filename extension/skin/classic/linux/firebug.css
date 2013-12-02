@@ -31,8 +31,11 @@
 }
 
 .fbCommandLine {
-    margin-top: 0;
-    margin-bottom: 2px;
+    padding-bottom: 2px;
+}
+
+#fbToggleCommandEditorBox {
+    margin-bottom: 1px;
 }
 
 #fbCommandToolbar {

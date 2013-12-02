@@ -486,6 +486,8 @@
                                      src="resource://firebugui/commandEditor.html"/>
                             </hbox>
                             <hbox id="fbToggleCommandEditorBox">
+                                <box class="column"></box>
+                                <toolbarspacer flex="1"/>
                                 <toolbarbutton id="fbToggleCommandEditor"
                                     tooltiptext="console.option.Show_Command_Line"
                                     class="toolbarbutton-iconic fbInternational"
