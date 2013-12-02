@@ -48,6 +48,9 @@ var BrowserOverlayLib =
         if (attributes.label)
             attributes.label = Locale.$STR(attributes.label);
 
+        if (attributes.title)
+            attributes.title = Locale.$STR(attributes.title);
+
         if (attributes.tooltiptext)
             attributes.tooltiptext = Locale.$STR(attributes.tooltiptext);
 
