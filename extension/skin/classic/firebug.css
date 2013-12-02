@@ -88,6 +88,33 @@
     direction: ltr;
 }
 
+#fbCommandToolbar {
+    padding-left: 27px;
+    margin-top: 1px;
+    border-bottom: 1px solid rgba(10, 31, 51, 0.35);
+}
+
+#fbToggleCommandEditorBox {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 21px;
+    height: 21px;
+    background-color: white;
+    border-top: 1px solid rgb(204, 204, 204);
+    border-left: 1px solid rgb(204, 204, 204);
+    padding: 2px;
+}
+
+#fbCommandLineHistoryButton {
+    margin-left: 2px;
+}
+
+#fbToggleCommandLine {
+    margin-right: 2px;
+}
+
 #fbCommandLine > .textbox-input-box > .textbox-textarea {
     overflow: hidden;
 }

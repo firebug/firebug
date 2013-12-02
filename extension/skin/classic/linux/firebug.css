@@ -13,16 +13,34 @@
     border-bottom: 1px solid #A0A0A0;
 }
 
+#fbPanelBar1 toolbarbutton {
+    font-size: 12px;
+}
+
+#fbPanelSplitter > #fbPanelSplitterBox,
 #fbPanelBar2-tabBox {
     height: 32px;
 }
 
-panelTab {
+#fbCommandArrow {
     font-size: 12px;
 }
 
-#fbPanelSplitter > #fbPanelSplitterBox {
-    height: 32px;
+#fbCommandBox {
+    height: 21px;
+}
+
+.fbCommandLine {
+    margin-top: 0;
+    margin-bottom: 2px;
+}
+
+#fbCommandToolbar {
+    height: 31px;
+}
+
+panelTab {
+    font-size: 12px;
 }
 
 .fbsearch-splitter {
@@ -56,6 +74,14 @@ panelTab:not([selected="true"]):hover {
 }
 
 #fbPanelBar2-tabBoxBackground {
+    background-color: rgb(240, 240, 240);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    border-bottom: 1px solid #A0A0A0;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#fbCommandToolbar {
     background-color: rgb(240, 240, 240);
     background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
     border-bottom: 1px solid #A0A0A0;

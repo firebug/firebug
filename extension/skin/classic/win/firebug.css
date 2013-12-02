@@ -178,7 +178,9 @@
 }
 
 #fbCommandToolbar {
-    border-top: 1px solid threedshadow;
+    border-bottom: 1px solid rgb(170, 188, 207);
+    background-color: rgb(219, 234, 249);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.2));
 }
 
 #fbToolbox {

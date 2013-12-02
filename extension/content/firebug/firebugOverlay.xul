@@ -456,13 +456,6 @@
 
                         <!-- Command Editor -->
                         <vbox id="fbCommandEditorBox">
-                            <hbox id="fbCommandEditor" flex="1">
-                                <browser id="fbCommandEditorBrowser" flex="1"
-                                     tooltip="fbTooltip" contextmenu="fbContextMenu"
-                                     disablehistory="true"
-                                     type="content"
-                                     src="resource://firebugui/commandEditor.html"/>
-                            </hbox>
                             <hbox id="fbCommandToolbar">
                                 <toolbarbutton id="fbCmdLineRunButton" label="firebug.Run"
                                     class="toolbar-text-button fbInternational"
@@ -484,6 +477,15 @@
                                     onmousedown="Firebug.CommandLine.commandHistory.show(this);"
                                     disabled="true"/>
                                 <toolbarspacer flex="1"/>
+                            </hbox>
+                            <hbox id="fbCommandEditor" flex="1">
+                                <browser id="fbCommandEditorBrowser" flex="1"
+                                     tooltip="fbTooltip" contextmenu="fbContextMenu"
+                                     disablehistory="true"
+                                     type="content"
+                                     src="resource://firebugui/commandEditor.html"/>
+                            </hbox>
+                            <hbox id="fbToggleCommandEditorBox">
                                 <toolbarbutton id="fbToggleCommandEditor"
                                     tooltiptext="console.option.Show_Command_Line"
                                     class="toolbarbutton-iconic fbInternational"
