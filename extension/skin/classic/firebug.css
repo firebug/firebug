@@ -220,11 +220,6 @@
     border-bottom: 1px solid white;
 }
 
-#fbPanelBar2-panelTabs > panelTab.watchesPanelTab[selected="true"],
-#fbPanelBar2-panelTabs > panelTab.selectorsPanelTab[selected="true"] {
-    background-color: rgb(255,255,224);
-}
-
 /*************************************************************************************************/
 /* Panel Tabs */
 
@@ -263,6 +258,18 @@ panelTab:focus > panelTabMenu .menuTarget {
 
 panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     background-image: url(chrome://firebug/skin/win/optionsMenuTargetHover.png);
+}
+
+/* Panel tab is directly joined with the content (no inner toolbar) if the panel is disabled */
+panelTab[selected="true"][disabled="true"] {
+    background-color: white;
+    border-bottom-color: white;
+}
+
+panelTab.watchesPanelTab[selected="true"],
+panelTab.selectorsPanelTab[selected="true"] {
+    background-color: rgb(255, 255, 224);
+    border-bottom-color: rgb(255, 255, 224);
 }
 
 /************************************************************************************************/

@@ -95,6 +95,7 @@
                 if (tab && panelType.prototype.activable)
                 {
                     var enabled = panelType.prototype.isEnabled();
+                    tab.setAttribute("disabled", enabled ? "false" : "true");
                     tab.setAttribute("aria-disabled", enabled ? "false" : "true");
                 }
 
@@ -350,8 +351,10 @@
                     box = box.nextSibling;
                 }
 
-                var toolbar = Firebug.chrome.$("fbToolbox");
+                var toolbar = Firebug.chrome.$("fbToolbar");
                 FBL.collapse(toolbar, noButtons);
+                var toolbox = Firebug.chrome.$("fbToolbox");
+                FBL.collapse(toolbox, noButtons);
             ]]></body>
         </method>
 
