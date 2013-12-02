@@ -14,7 +14,12 @@
 }
 
 #fbPanelBar1 toolbarbutton {
+    color: #000000;
     font-size: 12px;
+}
+
+#fbCommandEditorHistoryButton[disabled="true"] {
+    color: graytext;
 }
 
 #fbPanelSplitter > #fbPanelSplitterBox,
