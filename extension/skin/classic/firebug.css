@@ -266,8 +266,8 @@ panelTab[selected="true"][disabled="true"] {
     border-bottom-color: white;
 }
 
-panelTab.watchesPanelTab[selected="true"],
-panelTab.selectorsPanelTab[selected="true"] {
+#fbPanelBar2-panelTabs > panelTab.watchesPanelTab[selected="true"],
+#fbPanelBar2-panelTabs > panelTab.selectorsPanelTab[selected="true"] {
     background-color: rgb(255, 255, 224);
     border-bottom-color: rgb(255, 255, 224);
 }
