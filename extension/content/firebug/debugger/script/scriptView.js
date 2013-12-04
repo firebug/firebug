@@ -292,6 +292,7 @@ ScriptView.prototype = Obj.extend(new EventSource(),
             this.currentSearch = {text: text, start: 0};
         }
 
+        // xxxHonza: this.editor.find doesn't exist
         var offset = this.editor.find(text, options);
         Trace.sysout("search", {options: options, offset: offset});
 
@@ -315,7 +316,9 @@ ScriptView.prototype = Obj.extend(new EventSource(),
         var bps = [];
         this.dispatch("getBreakpoints", [bps]);
 
-        for (var i=0; i<bps.length; i++)
+        Trace.sysout("scriptView.initBreakpoints; " + bps.length, bps);
+
+        for (var i = 0; i < bps.length; i++)
         {
             var bp = bps[i];
             this.addBreakpoint(bp);
@@ -421,18 +424,27 @@ ScriptView.prototype = Obj.extend(new EventSource(),
 
     updateBreakpoint: function(bp)
     {
+        var lineCount = this.editor.getLineCount();
+
+        if (bp.lineNo >= lineCount)
+        {
+            Trace.sysout("scriptView.updateBreakpoint; script not ready for a breakpoint.");
+            return;
+        }
+
         var bpMarker = this.editor.getGutterMarker(SourceEditor.Gutters.breakpoints,
             bp.lineNo);
 
         if (!bpMarker)
         {
-            TraceError.sysout("scriptView.updateBreakpoint; ERROR bpMarker is null!", bp);
+            TraceError.sysout("scriptView.updateBreakpoint; ERROR bpMarker is null! " +
+                "Line count: " + lineCount, bp);
             return;
         }
 
-        Trace.sysout("scriptView.updateBreakpoint; (" + bp.lineNo + ") disabled: " +
+        Trace.sysout("scriptView.updateBreakpoint; (line: " + bp.lineNo + ") disabled: " +
             bp.disabled + ", condition: " + bp.condition + ", prev className: " +
-            bpMarker.className, bp);
+            bpMarker.className + ", line count: " + lineCount, bp);
 
         bpMarker.className = "breakpoint";
 

@@ -48,6 +48,16 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
+    /**
+     * Executed by the framework when Firebug is attached to the {@ThreadClient}. The event
+     * is dispatched by {@DebuggerClientTab}. Note that the debugger is paused at this
+     * moment but {@TabContext.stopped} is not set (and of course there is no current frame).
+     * {@DebuggerClientTab} is responsible for resuming the debugger after the 'onThreadAttached'
+     * event is handled by all listeners.
+     *
+     * @param {Boolean} reload Set to true if the current page has been just reloaded. In such
+     * case we are still attached to the same {@ThreadClient} object.
+     */
     attach: function(reload)
     {
         Trace.sysout("debuggerTool.attach; context ID: " + this.context.getId());
@@ -113,7 +123,7 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
         this._onResumed = this.resumed.bind(this);
         this._onFramesAdded = this.framesadded.bind(this);
         this._onFramesCleared = this.framescleared.bind(this);
-        this._onNewScript = this.newScript.bind(this);
+        this._onNewSource = this.newSource.bind(this);
 
         // Add all listeners
         this.context.activeThread.addListener("paused", this._onPause);
@@ -124,7 +134,7 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
         this.context.activeThread.addListener("framesadded", this._onFramesAdded);
         this.context.activeThread.addListener("framescleared", this._onFramesCleared);
 
-        DebuggerClientModule.client.addListener("newSource", this._onNewScript);
+        DebuggerClientModule.client.addListener("newSource", this._onNewSource);
     },
 
     detachListeners: function()
@@ -140,14 +150,14 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
         this.context.activeThread.removeListener("framesadded", this._onFramesAdded);
         this.context.activeThread.removeListener("framescleared", this._onFramesCleared);
 
-        DebuggerClientModule.client.removeListener("newSource", this._onNewScript);
+        DebuggerClientModule.client.removeListener("newSource", this._onNewSource);
 
         this._onPause = null;
         this._onDetached = null;
         this._onResumed = null;
         this._onFramesAdded = null;
         this._onFramesCleared = null;
-        this._onNewScript = null;
+        this._onNewSource = null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -170,17 +180,17 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
         });
     },
 
-    newScript: function(type, response)
+    newSource: function(type, response)
     {
-        Trace.sysout("debuggerTool.newScript; context id: " + this.context.getId() +
+        Trace.sysout("debuggerTool.newSource; context id: " + this.context.getId() +
             ", script url: " + response.source.url, response);
 
         // Ignore scripts coming from different threads.
-        // This is because 'newScript' listener is registered in 'DebuggerClient' not
+        // This is because 'newSource' listener is registered in 'DebuggerClient' not
         // in 'ThreadClient'.
         if (this.context.activeThread.actor != response.from)
         {
-            Trace.sysout("debuggerTool.newScript; coming from different thread");
+            Trace.sysout("debuggerTool.newSource; coming from different thread");
             return;
         }
 
@@ -219,7 +229,7 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
 
         // Notify listeners (e.g. the Script panel) to updated itself. It can happen
         // that the Script panel has been empty until now and need to display a script.
-        this.dispatch("newScript", [sourceFile]);
+        this.dispatch("newSource", [sourceFile]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -232,6 +242,7 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
         Trace.sysout("debuggerTool.paused; " + type + ", " + where.url +
             " (" + where.line + "), context ID: " + this.context.getId(), packet);
 
+        // We ignore cases when the debugger is paused because breakpoints need to be set.
         var ignoreTypes = {
             "interrupted": 1,
         };
@@ -249,17 +260,17 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
 
         if (ignoreTypes[type])
         {
-            FBTrace.sysout("debuggerTool.paused; Type ignored " + type, packet);
+            Trace.sysout("debuggerTool.paused; Type ignored " + type, packet);
+            return;
+        }
+
+        if (!packet.frame)
+        {
+            TraceError.sysout("debuggerTool.paused; ERROR no frame, type: " + type, packet);
             return;
         }
 
         this.context.clientCache.clear();
-
-        if (!packet.frame)
-        {
-            FBTrace.sysout("debuggerTool.paused; ERROR no frame!", packet);
-            return;
-        }
 
         // xxxHonza: this check should go somewhere else.
         // xxxHonza: this might be also done by removing/adding listeners.
@@ -335,11 +346,13 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
 
     resumed: function()
     {
-        Trace.sysout("debuggerTool.resumed; stopped before: " + this.context.stopped, arguments);
+        Trace.sysout("debuggerTool.resumed; currently stopped: " +
+            this.context.stopped, arguments);
 
-        // When the current page is refreshed, the backend sends fake resume event
-        // to make sure the client side is resumed it isn't needed for Firebug, so
-        // ignore it to safe UI update.
+        // When Firebug is attached to the {@ThreadClient} object the debugger is paused.
+        // As soon as all initialization steps are done {@DebuggerClientTab} resumes the
+        // debugger. In such case the {@TabContext} object isn't stopped and there is no
+        // current frame, so we just ignore the event here.
         if (!this.context.stopped)
             return;
 
@@ -488,7 +501,7 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
 
         // xxxHonza: can this happen?
         if (this.context.evalCallback)
-            FBTrace.sysout("debuggerTool.eval; ERROR unhandled case!");
+            TraceError.sysout("debuggerTool.eval; ERROR unhandled case!");
 
         // Will be executed when 'clientEvaluated' packet is received, see paused() method.
         if (callback)
@@ -556,7 +569,8 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
         var ignore = Options.get("ignoreCaughtExceptions");
 
         Trace.sysout("debuggerTool.updateBreakOnErrors; break on errors: " + pause +
-            ", ignore: " + ignore);
+            ", ignore: " + ignore + ", thread paused: " + this.context.activeThread.paused +
+            ", context stopped: " + this.context.stopped);
 
         return this.context.activeThread.pauseOnExceptions(pause, ignore, function(response)
         {
