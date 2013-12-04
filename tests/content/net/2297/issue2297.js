@@ -36,8 +36,8 @@ function runTest()
                 "There must be a Network Error with proper URL");
 
             // Verify status bar text
-            var firebugButton = FW.top.document.getElementById("firebug-button");
-            var errorCount = firebugButton.getAttribute("errorCount");
+            var firebugButton = FW.top.document.getElementById("firebug-error-label");
+            var errorCount = firebugButton.getAttribute("value");
             FBTest.compare(1, errorCount, "There must be 1 Error displayed in the status bar");
 
             FBTest.setPref("showNetworkErrors", prefOrigValue);
