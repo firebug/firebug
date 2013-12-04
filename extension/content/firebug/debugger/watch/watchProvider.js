@@ -97,9 +97,9 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
         // ... otherwise we need to try to get the local object (breaking RDP)
         // and check if it has any JS members.
-        object = this.getLocalObject(object);
-        if (object)
-            return Obj.hasProperties(object);
+        var localObject = this.getLocalObject(object);
+        if (localObject)
+            return Obj.hasProperties(localObject);
 
         return false;
     },
@@ -174,10 +174,12 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
         // If the object is a grip, let's try to get the local JS object (breaks RDP)
         // and return its JS properties.
-        object = this.getLocalObject(object);
-        if (object)
-            return this.memberProvider.getMembers(object, level);
+        var localObject = this.getLocalObject(object);
+        if (localObject)
+            return this.memberProvider.getMembers(localObject, level);
 
+        // return null to symbolize that the member provider method getMember
+        // failed, and the provider method getChildren must be used instead.
         return null;
     },
 

@@ -335,10 +335,6 @@ DomTree.prototype = domplate(
 
     getObjectProperties: function(obj, callback)
     {
-        // Check custom object property iterator first.
-        if (this.objectPropIterator)
-            return this.objectPropIterator.getObjectProperties(obj, callback);
-
         for (var p in obj)
         {
             try
