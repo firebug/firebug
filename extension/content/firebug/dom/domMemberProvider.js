@@ -285,52 +285,65 @@ DOMMemberProvider.prototype =
         }
     },
 
+    hasChildren: function(value)
+    {
+        if (!value || (typeof value !== "object" && typeof value !== "function"))
+            return false;
+
+        if (value instanceof FirebugReps.ErrorCopy)
+            return false;
+
+        var enumerableOnly = Firebug.showEnumerableProperties;
+        var ownOnly = Firebug.showOwnProperties;
+        if (Obj.hasProperties(value, !enumerableOnly, ownOnly))
+            return true;
+
+        // Special case for "arguments", which is not enumerable by for...in statement
+        // and so, Obj.hasProperties always returns false.
+        // XXX(simon): This doesn't seem to be required any more (Fx28).
+        if (isArguments(value) && value.length > 0)
+            return true;
+
+        if (typeof value === "function")
+        {
+            // Special case for functions with a prototype that has values.
+            try
+            {
+                var proto = value.prototype;
+                if (proto && Obj.hasProperties(proto, !enumerableOnly, ownOnly))
+                    return true;
+            }
+            catch (exc) {}
+        }
+
+        // Special case for closure inspection.
+        if (typeof value === "function" && Firebug.showClosures && this.context)
+        {
+            try
+            {
+                var ret = false;
+                var win = this.context.getCurrentGlobal();
+                ClosureInspector.withEnvironmentForObject(win, value, this.context, function(env)
+                {
+                    ret = true;
+                });
+
+                if (ret)
+                    return ret;
+            }
+            catch (e) {}
+        }
+
+        return false;
+    },
+
     addMemberInternal: function(object, type, props, name, value, level, parentIsScope)
     {
         // Do this first in case a call to instanceof (= QI, for XPCOM things) reveals contents.
         var rep = Firebug.getRep(value);
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
 
-        var hasProperties = Obj.hasProperties(value, !Firebug.showEnumerableProperties,
-            Firebug.showOwnProperties);
-
-        var valueType = typeof value;
-        var hasChildren = hasProperties && !(value instanceof FirebugReps.ErrorCopy) &&
-            ((valueType === "function") ||
-             (valueType === "object" && value !== null));
-
-        // Special case for closure inspection.
-        if (!hasChildren && valueType === "function" && Firebug.showClosures && this.context)
-        {
-            try
-            {
-                var win = this.context.getCurrentGlobal();
-                ClosureInspector.withEnvironmentForObject(win, value, this.context, function(env)
-                {
-                    hasChildren = true;
-                });
-            }
-            catch (e) {}
-        }
-
-        // Special case for "arguments", which is not enumerable by for...in statement
-        // and so, Obj.hasProperties always returns false.
-        hasChildren = hasChildren || (!!value && isArguments(value) && value.length > 0);
-
-        if (valueType === "function" && !hasChildren)
-        {
-            try
-            {
-                // Special case for functions with a prototype that has values
-                var proto = value.prototype;
-                if (proto)
-                {
-                    hasChildren = Obj.hasProperties(proto, !Firebug.showEnumerableProperties,
-                        Firebug.showOwnProperties);
-                }
-            }
-            catch (exc) {}
-        }
+        var hasChildren = this.hasChildren(value);
 
         var descriptor = getPropertyDescriptor(object, name);
         if (!descriptor)
