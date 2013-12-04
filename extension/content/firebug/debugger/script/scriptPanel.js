@@ -503,7 +503,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // Sources doesn't have to be fetched from the server yet. In such case there
         // are not compilation units and so, no default location. We need to just wait
         // since sources are coming asynchronously (the UI will auto update after
-        // newScript event).
+        // newSource event).
         if (!compilationUnit)
             return;
 
@@ -1289,13 +1289,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
     },
 
-    newScript: function(sourceFile)
+    newSource: function(sourceFile)
     {
-        // This event can be missed since the newScript packet can be send
+        // This event can be missed since the newSource packet can be send
         // before the ScriptPanel is initialized and adds itself to the DebuggerTool
         // as a listener.
 
-        Trace.sysout("scriptPanel.newScript; " + sourceFile.href, sourceFile);
+        Trace.sysout("scriptPanel.newSource; " + sourceFile.href, sourceFile);
 
         // New script has been appended, update the default location if necessary.
         if (!this.location)

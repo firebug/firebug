@@ -186,6 +186,8 @@ DebuggerClientTab.prototype =
         // Dispatch event to all listeners.
         this.dispatch("onThreadAttached");
 
+        // The 'onThreadAttached' event has been handled by all listeners, and so all
+        // 'debugger-attached' related steps are done. We can resume the debugger now.
         threadClient.resume();
     },
 

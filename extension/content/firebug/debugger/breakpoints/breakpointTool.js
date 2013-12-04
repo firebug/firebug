@@ -41,6 +41,8 @@ BreakpointTool.prototype = Obj.extend(new EventSource(),
 {
     dispatchName: "breakpointTool",
 
+    // xxxHonza: do we really need this? The underlying framework already has a queue
+    // for 'setBreakpoint' packets.
     queue: new Array(),
     setBreakpointInProgress: false,
 
@@ -49,18 +51,32 @@ BreakpointTool.prototype = Obj.extend(new EventSource(),
 
     attach: function(reload)
     {
+        this.attached = true;
+
         Trace.sysout("breakpointTool.attach; context ID: " + this.context.getId());
 
         // Listen for {@BreakpointStore} events to create/remove breakpoints
         // in the related backend (thread actor).
         BreakpointStore.addListener(this);
+
+        // Listen for {@DebuggerTool} events in order to properly initialize breakpoints
+        // for every loaded script (handling 'newSource' event, see newSource method).
+        this.debuggerTool = this.context.getTool("debugger");
+        this.debuggerTool.addListener(this);
     },
 
     detach: function()
     {
+        // If a context is destroyed before {@ThreadClient} is actually attached we don't
+        // have to do any clean up steps.
+        if (!this.attached)
+            return;
+
         Trace.sysout("breakpointTool.detach; context ID: " + this.context.getId());
 
         BreakpointStore.removeListener(this);
+
+        this.debuggerTool.removeListener(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -142,6 +158,53 @@ BreakpointTool.prototype = Obj.extend(new EventSource(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // DebuggerTool Listener
+
+    newSource: function(sourceFile)
+    {
+        var url = sourceFile.getURL();
+        var bps = BreakpointStore.getBreakpoints(url);
+
+        // Filter out those breakpoints that have been already set on the backend
+        // (i.e. there is a corresponding client object already).
+        bps = bps.filter((bp) =>
+        {
+            return !this.getBreakpointClient(bp.href, bp.lineNo);
+        });
+
+        // Bail out if there is nothing to set.
+        if (!bps.length)
+            return;
+
+        // Filter out disabled breakpoints. These won't be set on the server side
+        // (unless the user enables them later).
+        // xxxHonza: we shouldn't create server-side breakpoints for normal disabled
+        // breakpoints, but not in case there are other breakpoints at the same line.
+        /*bps = bps.filter(function(bp, index, array)
+        {
+            return bp.isEnabled();
+        });*/
+
+        Trace.sysout("breakpointTool.newSource; Initialize server side breakpoints: (" +
+            bps.length + ") " + url, bps);
+
+        // Set breakpoints on the server side.
+        this.setBreakpoints(bps, function()
+        {
+            // Some breakpoints could have been auto-corrected so, save all now.
+            // xxxHonza: what about breakpoints in other contexts using the same URL?
+            // Should they be corrected too?
+
+            // xxxHonza: fix me
+            // If the thread is paused the callback is called too soon (before all
+            // breakpoints are set on the server and response packets received).
+            //BreakpointStore.save(url);
+
+            Trace.sysout("breakpointTool.newSource; breakpoints initialized", arguments);
+        });
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Breakpoint Backend API
 
     /**
@@ -167,7 +230,8 @@ BreakpointTool.prototype = Obj.extend(new EventSource(),
             return;
         }
 
-        Trace.sysout("breakpointTool.setBreakpoint; " + url + " (" + lineNumber + ")");
+        Trace.sysout("breakpointTool.setBreakpoint; " + url + " (" + lineNumber + ") " +
+            "thread state: " + thread.state);
 
         // Do not create two server side breakpoints at the same line.
         var bpClient = this.getBreakpointClient(url, lineNumber);
@@ -218,6 +282,9 @@ BreakpointTool.prototype = Obj.extend(new EventSource(),
         this.setBreakpointInProgress = true;
 
         // Otherwise, force a pause in order to set the breakpoint.
+        // xxxHonza: this sometimes generates 'alreadyPaused' packet, fix me.
+        // Or maybe the interrupt call in setBreakpoints. You need a page with two
+        // loaded URLs with breakpoints
         thread.interrupt(function(response)
         {
             if (response.error)
@@ -274,7 +341,7 @@ BreakpointTool.prototype = Obj.extend(new EventSource(),
         // Check if the breakpoint-client object already exist. The line could
         // have been corrected on the server side and there can already be a breakpoint
         // on the new line.
-        if (!this.breakpointActorExists(bpClient))
+        if (bpClient.actor && !this.breakpointActorExists(bpClient))
             this.context.breakpointClients.push(bpClient);
 
         if (callback)
@@ -283,9 +350,22 @@ BreakpointTool.prototype = Obj.extend(new EventSource(),
         this.setBreakpointInProgress = false;
     },
 
-    // xxxHonza: execute the callback as soon as all breakpoints are set on the server side.
+    /**
+     * Creates breakpoint actors on the server side and {@BreakpointClient} objects
+     * on the client side. The client objects are stored within {@TabContext}.
+     *
+     * @param arr {Array} List of breakpoints to be created on the server side
+     * @param cb {Function} Optional callback that is executed as soon as all breakpoints
+     * are created on the server side and the current thread resumed again.
+     */
     setBreakpoints: function(arr, cb)
     {
+        var self = this;
+
+        // Bail out if there is nothing to set.
+        if (!arr.length)
+            return;
+
         var thread = this.context.activeThread;
         if (!thread)
         {
@@ -294,21 +374,31 @@ BreakpointTool.prototype = Obj.extend(new EventSource(),
             return;
         }
 
-        var self = this;
+        Trace.sysout("breakpointTool.setBreakpoints; " + arr.length +
+            ", thread state: " + thread.state, arr);
+
         var doSetBreakpoints = function _doSetBreakpoints(callback)
         {
             Trace.sysout("breakpointTool.doSetBreakpoints; ", arr);
 
-            // Iterate all breakpoints and set them step by step. The thread is
-            // paused at this point.
+            // Iterate all breakpoints in the given array and set them step by step.
+            // The thread is paused at this point. The following loop generates a set of
+            // 'setBreakpoint' packets that are put in an internal queue (in the underlying
+            // RDP framework) and handled step by step, i.e. the next 'setBreakpoint' packet
+            // is sent as soon as a response for the previous one is received.
             for (var i=0; i<arr.length; i++)
                 self.onAddBreakpoint(arr[i]);
+
+            if (callback)
+                callback();
         };
 
         // If the thread is currently paused, go to set all the breakpoints.
         if (thread.paused)
         {
-            doSetBreakpoints();
+            // xxxHonza: the callback should be called when the last breakpoint
+            // is set on the backend, fix me.
+            doSetBreakpoints(cb);
             return;
         }
 
@@ -323,7 +413,15 @@ BreakpointTool.prototype = Obj.extend(new EventSource(),
             }
 
             // When the thread is interrupted, we can set all the breakpoints.
-            doSetBreakpoints(thread.resume.bind(self));
+            doSetBreakpoints(function()
+            {
+                Trace.sysout("breakpointTool.doSetBreakpoints; done", arguments);
+
+                // At this point, all 'setBreakpoint' packets have been generated (the first
+                // on already sent) and they are waiting in a queue. The resume packet will
+                // be received as soon as the last response for 'setBreakpoint' is received.
+                self.debuggerTool.resume(cb);
+            });
         });
     },
 
@@ -331,7 +429,7 @@ BreakpointTool.prototype = Obj.extend(new EventSource(),
     {
         if (!this.context.activeThread)
         {
-            TraceError.sysout("BreakpointTool.removeBreakpoint; Can't remove breakpoints.");
+            TraceError.sysout("breakpointTool.removeBreakpoint; Can't remove breakpoints.");
             return;
         }
 
@@ -354,7 +452,7 @@ BreakpointTool.prototype = Obj.extend(new EventSource(),
         }
         else
         {
-            TraceError.sysout("debuggerToo.removeBreakpoint; ERROR removing " +
+            TraceError.sysout("breakpointTool.removeBreakpoint; ERROR removing " +
                 "non existing breakpoint. " + url + ", " + lineNumber);
         }
     },
