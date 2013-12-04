@@ -337,14 +337,12 @@ panelTab[selected="true"][disabled="true"] {
     padding: 0 2px 0 4px;
 }
 
-/* xxxHonza: the icon is too big
 .fbsearch-icon {
     cursor: default !important;
     background: url(chrome://firebug/skin/search.png) no-repeat 0 0;
-    width: 12px;
-    height: 12px;
+    width: 16px;
+    height: 16px;
 }
-*/
 
 /* Need to use images instead of filters due to https://bugzil.la/891777 */ 
 .fbsearch-icon:hover {
