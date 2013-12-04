@@ -202,7 +202,7 @@ SourceEditor.prototype =
 
         Trace.sysout("sourceEditor.init; ", this.view);
 
-        // Execute callback function. It could be done asynchronously (e.g. for Orion)
+        // Execute callback function. It could be done asynchronously
         callback();
     },
 
