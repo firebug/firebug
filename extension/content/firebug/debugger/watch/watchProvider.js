@@ -91,17 +91,15 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
     hasChildren: function(object)
     {
-        // If the base provider says, the object has children, let's go with it.
-        if (BaseProvider.hasChildren.apply(this, arguments))
-            return true;
+        if (object instanceof WatchExpression)
+            return this.memberProvider.hasChildren(object.value);
 
-        // ... otherwise we need to try to get the local object (breaking RDP)
-        // and check if it has any JS members.
+        // If we have a local JS object, use the member provider for that.
         var localObject = this.getLocalObject(object);
         if (localObject)
-            return Obj.hasProperties(localObject);
+            return this.memberProvider.hasChildren(localObject);
 
-        return false;
+        return BaseProvider.hasChildren.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
