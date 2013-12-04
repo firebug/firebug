@@ -1495,6 +1495,7 @@ function attachStyles(context, doc)
     else
     {
         style = Css.createStyleSheet(doc, highlightCssUrl);
+        style.classList.add("firebugResetStyles");
         highlightStyleCache.set(doc, style);
     }
 

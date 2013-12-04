@@ -3,8 +3,8 @@
 
 function viralActivation()
 {
-    var path = FBTest.getHTTPURLBase()+"firebug/";
-    var viralActivationURL = path+"OpenFirebugOnThisPage.html";
+    var path = FBTest.getHTTPURLBase()+"firebug/activation/";
+    var viralActivationURL = path + "viralActivation.html";
 
     FBTest.openNewTab(viralActivationURL, function openFirebug(win)
     {
