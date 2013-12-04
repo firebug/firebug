@@ -43,7 +43,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         Firebug.ActivableModule.initialize.apply(this, arguments);
 
+        // xxxHonza: scoped logging should automate this (see firebug/lib/trace module).
         Firebug.registerTracePrefix("debuggerTool.", "DBG_DEBUGGERTOOL", false);
+        Firebug.registerTracePrefix("breakpointTool.", "DBG_BREAKPOINTTOOL", false);
 
         // Listen to the debugger-client, which represents the connection to the server.
         // The debugger-client object represents the source of all RDP events.
