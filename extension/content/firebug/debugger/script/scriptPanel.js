@@ -26,6 +26,7 @@ define([
     "firebug/editor/editor",
     "firebug/debugger/script/scriptPanelWarning",
     "firebug/debugger/script/breakNotification",
+    "firebug/debugger/script/scriptPanelLineUpdater",
     "firebug/console/commandLine",
     "firebug/debugger/debuggerLib",
     "firebug/net/netUtils",
@@ -33,7 +34,7 @@ define([
 function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, CompilationUnit,
     ActivablePanel, Menu, Rep, StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore,
     Persist, BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning,
-    BreakNotification, CommandLine, DebuggerLib, NetUtils) {
+    BreakNotification, ScriptPanelLineUpdater, CommandLine, DebuggerLib, NetUtils) {
 
 "use strict";
 
@@ -1450,8 +1451,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // See also issue 6948 (and included links to platform bugs).
             // xxxHonza: issue 6948 isn't yet closed and this code might change
             // as soon as the platform bugs are fixed.
-            //if (typeof(handle.executableLine) != "undefined")
-            //    return;
+            // xxxHonza: See {@ScriptPanelLineUpdater} that is responsible for proper
+            // status update (in case of garbage collected scripts). Fast scrolling needs
+            // this optimization.
+            if (typeof(handle.executableLine) != "undefined")
+                return;
 
             // Check if the line is executable (performance expensive operation).
             handle.executableLine = DebuggerLib.isExecutableLine(self.context, {
