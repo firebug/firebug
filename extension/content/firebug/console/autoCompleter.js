@@ -2367,11 +2367,7 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, opt
             // Complete variables from the local scope
 
             var contentView = Wrapper.getContentView(out.window);
-            if (context.stopped && options.includeCurrentScope)
-            {
-                out.completions = Firebug.Debugger.getCurrentFrameKeys(context);
-            }
-            else if (contentView && contentView.Window &&
+            if (contentView && contentView.Window &&
                 contentView.constructor.toString() === contentView.Window.toString())
                 // Cross window type pseudo-comparison
             {
@@ -2380,6 +2376,12 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, opt
             else  // hopefully sandbox in Chromebug
             {
                 setCompletionsFromObject(out, context.global, context);
+            }
+
+            if (context.stopped && options.includeCurrentScope)
+            {
+                var localVars = Firebug.Debugger.getCurrentFrameKeys(context);
+                out.completions = out.completions.concat(localVars);
             }
         }
 
