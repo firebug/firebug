@@ -227,19 +227,10 @@ ObjectClient.Property.prototype = Obj.descend(Grip.prototype,
 
     hasChildren: function()
     {
-        var result = false;
-
         if (this.value instanceof ObjectClient)
-        {
-            result = this.value.hasProperties();
-        }
-        else
-        {
-            var valueType = typeof(this.value);
-            result = (valueType === "string" && this.value.length > Firebug.stringCropLength);
-        }
+            return this.value.hasProperties();
 
-        return result;
+        return (typeof this.value === "string" && this.value.length > Firebug.stringCropLength);
     },
 
     getChildren: function()
@@ -263,7 +254,7 @@ ObjectClient.Property.prototype = Obj.descend(Grip.prototype,
         if (this.value instanceof ObjectClient)
             return this.value.getType();
 
-        return typeof(this.value);
+        return typeof this.value;
     }
 });
 

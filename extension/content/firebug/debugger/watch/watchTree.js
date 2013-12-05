@@ -31,9 +31,8 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 
 function WatchTree(context, provider, memberProvider)
 {
-    DomBaseTree.call(this, context);
+    DomBaseTree.call(this, context, provider);
 
-    this.provider = provider;
     this.memberProvider = memberProvider;
 }
 

@@ -28,12 +28,7 @@ WatchExpression.prototype = Obj.descend(ObjectClient.Property.prototype,
     getName: function()
     {
         return this.expr;
-    },
-
-    hasChildren: function()
-    {
-        return this.value ? Obj.hasProperties(this.value) : false;
-    },
+    }
 });
 
 // ********************************************************************************************* //

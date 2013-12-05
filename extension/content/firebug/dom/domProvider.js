@@ -48,33 +48,11 @@ DomProvider.prototype = Obj.extend(BaseProvider,
 
     hasChildren: function(object)
     {
-        // If the base provider says, the object has children, let's go with it.
-        if (BaseProvider.hasChildren.apply(this, arguments))
-            return true;
+        var localObject = this.getLocalObject(object);
+        if (localObject)
+            return this.memberProvider.hasChildren(localObject);
 
-        // ... otherwise we need to try to get the local object (breaking RDP)
-        // and check if it has any JS members.
-        object = this.getLocalObject(object);
-        if (object)
-            return Obj.hasProperties(object);
-
-        return false;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Member Provider
-
-    getMembers: function(object, level)
-    {
-        Trace.sysout("DomProvider.getMembers; level: " + level, object);
-
-        // If the object is a grip, let's try to get the local JS object (breaks RDP)
-        // and return its JS properties.
-        object = this.getLocalObject(object);
-        if (object)
-            return this.memberProvider.getMembers(object, level);
-
-        return null;
+        return BaseProvider.hasChildren.apply(this, arguments);
     },
 });
 

@@ -90,7 +90,9 @@ var BreakpointStore = Obj.extend(Module,
     resetAllOptions: function()
     {
         // xxxHonza: remove also on the server side.
-        this.storage.clear();
+        // xxxsz: The storage needs to be cleared immediately, otherwise different storages
+        //   can get in conflict with each other (FBTest lib/storage/storageService.js fails)
+        this.storage.clear(true);
         this.breakpoints = {};
     },
 

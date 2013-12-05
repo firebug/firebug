@@ -40,8 +40,9 @@ var insertInterval = 40;
 // ********************************************************************************************* //
 // DOM Tree Implementation
 
-function DomBaseTree(context)
+function DomBaseTree(context, provider)
 {
+    DomTree.call(this, provider);
     this.context = context;
 
     this.timeouts = new Set();
