@@ -257,6 +257,10 @@ panelTab[selected="true"] > panelTabMenu {
     border-bottom: 1px solid rgb(170, 188, 207);
 }
 
+#fbCommandPopupSplitter {
+    background-color: rgb(231, 241, 251) !important;
+}
+
 /*************************************************************************************************/
 /* Search Box */
 

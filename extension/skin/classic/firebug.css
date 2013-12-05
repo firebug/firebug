@@ -302,6 +302,13 @@ panelTab[selected="true"][disabled="true"] {
     visibility: hidden;
 }
 
+#fbCommandPopupSplitter {
+    background-color: rgb(221,221,221) !important;
+    border: none;
+    min-height: 5px;
+    max-height: 5px;
+}
+
 /*************************************************************************************************/
 /* Search Box */
 
