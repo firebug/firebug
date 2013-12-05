@@ -2371,16 +2371,7 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, opt
             // Complete variables from the local scope
 
             var contentView = Wrapper.getContentView(out.window);
-            if (contentView && contentView.Window &&
-                contentView.constructor.toString() === contentView.Window.toString())
-                // Cross window type pseudo-comparison
-            {
-                setCompletionsFromObject(out, contentView, context);
-            }
-            else  // hopefully sandbox in Chromebug
-            {
-                setCompletionsFromObject(out, context.global, context);
-            }
+            setCompletionsFromObject(out, contentView, context);
 
             if (context.stopped && options.includeCurrentScope)
             {
