@@ -29,9 +29,8 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 
 function DomPanelTree(context, provider, memberProvider)
 {
-    DomBaseTree.call(this, context);
+    DomBaseTree.call(this, context, provider);
 
-    this.provider = provider;
     this.memberProvider = memberProvider;
 }
 
@@ -105,11 +104,6 @@ DomPanelTree.prototype = domplate(BaseTree,
     getRowTag: function(member)
     {
         return this.memberRowTag;
-    },
-
-    memberIterator: function(object)
-    {
-        return this.memberProvider.getMembers(object, 0);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

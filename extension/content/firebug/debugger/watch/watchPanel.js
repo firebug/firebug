@@ -591,6 +591,8 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // When a variable within the scope chain is edited the {@WatchPanel.refresh} method
         // calls {@DebuggerTool.cleanScopes} to get fresh scopes including the new value.
         // So, when we get new frames from the backend we need to refresh the content.
+        // Of course, save the presentation state before refresh.
+        this.tree.saveState(this.toggles);
         this.selection = this.context.currentFrame;
         this.doUpdateSelection(this.selection);
     },

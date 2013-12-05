@@ -26,6 +26,7 @@ define([
     "firebug/editor/editor",
     "firebug/debugger/script/scriptPanelWarning",
     "firebug/debugger/script/breakNotification",
+    "firebug/debugger/script/scriptPanelLineUpdater",
     "firebug/console/commandLine",
     "firebug/debugger/debuggerLib",
     "firebug/net/netUtils",
@@ -33,7 +34,7 @@ define([
 function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, CompilationUnit,
     ActivablePanel, Menu, Rep, StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore,
     Persist, BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning,
-    BreakNotification, CommandLine, DebuggerLib, NetUtils) {
+    BreakNotification, ScriptPanelLineUpdater, CommandLine, DebuggerLib, NetUtils) {
 
 "use strict";
 
@@ -382,16 +383,25 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         return this.context.getAllCompilationUnits();
     },
 
-    getDefaultLocation: function()
+    getDefaultCompilationUnit: function()
     {
         var compilationUnits = this.getLocationList();
-        if (!compilationUnits.length)
+        if (compilationUnits.length)
+            return compilationUnits[0];
+
+        return null;
+    },
+
+    getDefaultLocation: function()
+    {
+        var compilationUnit = this.getDefaultCompilationUnit()
+        if (!compilationUnit)
             return null;
 
         // Mark the default link as 'no highlight'. We don't want to highlight
         // the first line when a default file is automatically displayed in
         // the Script panel.
-        var sourceLink = new SourceLink(compilationUnits[0].getURL(), null, "js");
+        var sourceLink = new SourceLink(compilationUnit.getURL(), null, "js");
         sourceLink.options.highlight = false;
 
         return sourceLink;
@@ -493,17 +503,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("scriptPanel.showSource; " + sourceLink, sourceLink);
 
         var compilationUnit = this.context.getCompilationUnit(sourceLink.href);
-
-        // xxxHonza: fix me, compilation unit is expected, but getDefaultLocation
-        // return SourceLink, so it fails at the bottom of this function when
-        // getSourceLines is called.
         if (!compilationUnit)
-            compilationUnit = this.getDefaultLocation();
+            compilationUnit = this.getDefaultCompilationUnit();
 
         // Sources doesn't have to be fetched from the server yet. In such case there
         // are not compilation units and so, no default location. We need to just wait
         // since sources are coming asynchronously (the UI will auto update after
-        // newSource event).
+        // 'newSource' event).
         if (!compilationUnit)
             return;
 
@@ -1450,8 +1456,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // See also issue 6948 (and included links to platform bugs).
             // xxxHonza: issue 6948 isn't yet closed and this code might change
             // as soon as the platform bugs are fixed.
-            //if (typeof(handle.executableLine) != "undefined")
-            //    return;
+            // xxxHonza: See {@ScriptPanelLineUpdater} that is responsible for proper
+            // status update (in case of garbage collected scripts). Fast scrolling needs
+            // this optimization.
+            if (typeof(handle.executableLine) != "undefined")
+                return;
 
             // Check if the line is executable (performance expensive operation).
             handle.executableLine = DebuggerLib.isExecutableLine(self.context, {

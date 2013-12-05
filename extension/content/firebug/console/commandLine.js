@@ -117,7 +117,7 @@ var CommandLine = Obj.extend(Module,
                 ClosureInspector.withExtendedLanguageSyntax(expr, targetWindow, context, evaluate);
 
             if (!options.noStateChange)
-                context.invalidatePanels("dom", "html");
+                context.invalidatePanels("dom", "html", "watches");
         }
         catch (exc)
         {
