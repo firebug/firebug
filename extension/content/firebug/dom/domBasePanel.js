@@ -305,7 +305,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
             {
                 label: "Refresh",
                 tooltiptext: "panel.tip.Refresh",
-                command: Obj.bindFixed(this.rebuild, this)
+                command: Obj.bindFixed(this.refresh, this)
             }
         );
 
