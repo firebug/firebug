@@ -1942,11 +1942,15 @@ function getNewlyDeclaredNames(js)
     var ar = [], match;
     while ((match = re.exec(js)) !== null)
     {
-        if (!/[.%]/.test(js.charAt(match.index - 1)) &&
-            js.charAt(re.lastIndex) !== ":" && kwAll.indexOf(match[0]) === -1)
-        {
-            ar.push(match[0]);
-        }
+        var afterCh = js.substr(re.lastIndex).trimLeft()[0];
+        if (/[.%]/.test(js.charAt(match.index - 1)) || !/^[=,;\(\)]/.test(afterCh))
+            continue;
+        if (afterCh === "(" && !js.slice(0, match.index).endsWith("function "))
+            continue;
+        if (kwAll.indexOf(match[0]) !== -1)
+            continue;
+
+        ar.push(match[0]);
     }
     return ar;
 }
