@@ -2,8 +2,8 @@
 
 define([
     "firebug/firebug",
-    "firebug/lib/object",
     "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/array",
     "firebug/lib/options",
     "firebug/chrome/eventSource",
@@ -16,7 +16,7 @@ define([
     "firebug/remoting/debuggerClientModule",
     "arch/compilationunit",
 ],
-function (Firebug, Obj, FBTrace, Arr, Options, EventSource, Tool, StackFrame, StackTrace,
+function (Firebug, FBTrace, Obj, Arr, Options, EventSource, Tool, StackFrame, StackTrace,
     ClientCache, SourceFile, DebuggerLib, DebuggerClientModule, CompilationUnit) {
 
 // ********************************************************************************************* //
@@ -38,7 +38,7 @@ function DebuggerTool(context)
  * context. Reference to the current context is passed to the constructor. Life cycle
  * of a tool object is the same as for a panel, but tool doesn't have any UI.
  */
-DebuggerTool.prototype = Obj.extend(Tool.prototype,
+DebuggerTool.prototype = Obj.extend(Tool,
 /** @lends DebuggerTool */
 {
     dispatchName: "DebuggerTool",

@@ -34,7 +34,7 @@ function BreakpointTool(context)
  * server side (using RDP) and forwards results to all registered listeners, which are
  * usually panel objects.
  */
-BreakpointTool.prototype = Obj.extend(Tool.prototype,
+BreakpointTool.prototype = Obj.extend(Tool,
 /** @lends BreakpointTool */
 {
     dispatchName: "breakpointTool",
