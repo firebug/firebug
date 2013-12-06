@@ -58,11 +58,6 @@ BreakpointTool.prototype = Obj.extend(new EventSource(),
         // Listen for {@BreakpointStore} events to create/remove breakpoints
         // in the related backend (thread actor).
         BreakpointStore.addListener(this);
-
-        // Listen for {@DebuggerTool} events in order to properly initialize breakpoints
-        // for every loaded script (handling 'newSource' event, see newSource method).
-        this.debuggerTool = this.context.getTool("debugger");
-        this.debuggerTool.addListener(this);
     },
 
     detach: function()
@@ -75,8 +70,6 @@ BreakpointTool.prototype = Obj.extend(new EventSource(),
         Trace.sysout("breakpointTool.detach; context ID: " + this.context.getId());
 
         BreakpointStore.removeListener(this);
-
-        this.debuggerTool.removeListener(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -158,7 +151,7 @@ BreakpointTool.prototype = Obj.extend(new EventSource(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // DebuggerTool Listener
+    // DebuggerTool
 
     newSource: function(sourceFile)
     {

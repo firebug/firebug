@@ -208,8 +208,15 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
     },
 
+    loadWindow: function(context, win)
+    {
+        // If the Script panel displays a 'no script' warning, let's try to update it.
+        // The page has been just loaded and there might be some new scripts after all.
+        if (!this.location)
+            this.navigate(null);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Show Stack Frames
 
     updateSidePanels: function(panel)
     {
@@ -1084,8 +1091,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     supportsBreakOnNext: function()
     {
-        // xxxHonza: jsDebuggerOn is an artifact from JSD1. Do we need a replacement for JSD2?
-        return this.breakable/* && Firebug.jsDebuggerOn;*/
+        return this.breakable;
     },
 
     breakOnNext: function(enabled)
@@ -1309,9 +1315,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!this.location)
             this.navigate(null);
 
-        // Initialize existing breakpoints
-        //var bps = BreakpointStore.getBreakpoints(sourceFile.href);
-        //self.tool.setBreakpoints(bps, function(response){});
+        // A script has been loaded, so initialize any existing breakpoints for it.
+        var tool = this.context.getTool("breakpointTool");
+        tool.newSource(sourceFile);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
