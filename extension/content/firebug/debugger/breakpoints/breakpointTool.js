@@ -411,7 +411,7 @@ BreakpointTool.prototype = Obj.extend(Tool,
                 // At this point, all 'setBreakpoint' packets have been generated (the first
                 // on already sent) and they are waiting in a queue. The resume packet will
                 // be received as soon as the last response for 'setBreakpoint' is received.
-                self.debuggerTool.resume(cb);
+                self.context.getTool("debugger").resume(cb);
             });
         });
     },
