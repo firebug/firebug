@@ -292,7 +292,7 @@ Http.getRequestLoadContext = function(request)
     return null;
 };
 
-Http.getRequestWebProgress = Deprecated.deprecated("Use getRequestLoadContext function",
+Http.getRequestWebProgress = Deprecated.method("Use getRequestLoadContext function",
     Http.getRequestLoadContext);
 
 // ********************************************************************************************* //
@@ -431,10 +431,10 @@ Http.isXHR = function(request)
 // ********************************************************************************************* //
 // Conversions
 
-Http.convertToUnicode = Deprecated.deprecated("Function moved to 'firebug/lib/string' module",
+Http.convertToUnicode = Deprecated.method("Function moved to 'firebug/lib/string' module",
     Str.convertToUnicode);
 
-Http.convertFromUnicode = Deprecated.deprecated("Function moved to 'firebug/lib/string' module",
+Http.convertFromUnicode = Deprecated.method("Function moved to 'firebug/lib/string' module",
     Str.convertFromUnicode);
 
 // ********************************************************************************************* //

@@ -372,9 +372,9 @@ Str.escapeForCss = createSimpleEscape("css", "normal");
 Str.deprecateEscapeHTML = createSimpleEscape("text", "normal");
 Str.deprecatedUnescapeHTML = createSimpleEscape("text", "reverse");
 
-Str.escapeHTML = Deprecated.deprecated("use appropriate escapeFor... function",
+Str.escapeHTML = Deprecated.method("use appropriate escapeFor... function",
     Str.deprecateEscapeHTML);
-Str.unescapeHTML = Deprecated.deprecated("use appropriate unescapeFor... function",
+Str.unescapeHTML = Deprecated.method("use appropriate unescapeFor... function",
     Str.deprecatedUnescapeHTML);
 
 var escapeForSourceLine = Str.escapeForSourceLine = createSimpleEscape("text", "normal");
@@ -693,7 +693,7 @@ Str.toFixedLocaleString = function(number, decimals)
 
 // xxxsz: May be refactored when Firefox implements the ECMAScript Internationalization API
 // See https://bugzil.la/853301
-Str.formatNumber = Deprecated.deprecated("use <number>.toLocaleString() instead",
+Str.formatNumber = Deprecated.method("use <number>.toLocaleString() instead",
     function(number) { return number.toLocaleString(); });
 
 Str.formatSize = function(bytes)

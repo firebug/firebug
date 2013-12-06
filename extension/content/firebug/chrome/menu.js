@@ -23,7 +23,7 @@ Menu.createMenu = function(popup, item)
 {
     if (typeof item == "string")
     {
-        return Deprecated.deprecated("The function's header changed to "+
+        return Deprecated.method("The function's header changed to " +
             "createMenu(popup, item)",
             Menu.createMenu, [popup, {label: item}])();
     }
@@ -169,7 +169,7 @@ Menu.createMenuSeparator = function(popup, item, before)
 {
     if (item instanceof Node)
     {
-        return Deprecated.deprecated("The function's header changed to "+
+        return Deprecated.method("The function's header changed to "+
             "createMenuSeparator(popup, item, before)",
             Menu.createMenuSeparator, [popup, null, before])();
     }
