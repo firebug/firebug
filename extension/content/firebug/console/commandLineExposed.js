@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
-/*jshint esnext:true, curly:false, evil:true, forin: false*/
+/*jshint esnext:true, curly:false, evil:true, forin:false*/
 /*global Firebug:true, FBTrace:true, Components:true, define:true */
 
 define([
@@ -393,10 +393,13 @@ function updateVars(commandLine, dbgGlobal, context)
 
 function removeConflictingNames(commandLine, context, contentView)
 {
+    var avoidSet = null;
+    if (context.stopped)
+        avoidSet = new Set(Firebug.Debugger.getCurrentFrameKeys(context));
+
     for (var name in commandLine)
     {
-        // Note: we cannot trust contentView.hasOwnProperty, so we use the "in" operator.
-        if (name in contentView)
+        if (name in contentView || (avoidSet && avoidSet.has(name)))
             delete commandLine[name];
     }
 }
@@ -513,7 +516,7 @@ function executeInWindowContext(win, func, args)
         win.document.removeEventListener("firebugCommandLine", listener);
         if (func)
             func.apply(null, args);
-    }
+    };
 
     win.document.addEventListener("firebugCommandLine", listener);
 
