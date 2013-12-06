@@ -1,14 +1,14 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
-    "firebug/chrome/eventSource",
     "firebug/lib/trace",
-    "firebug/lib/tool",
+    "firebug/lib/object",
+    "firebug/chrome/eventSource",
+    "firebug/chrome/tool",
     "firebug/debugger/breakpoints/breakpointStore",
 ],
-function (Obj, Firebug, EventSource, FBTrace, Tool, BreakpointStore) {
+function (Firebug, FBTrace, Obj, EventSource, Tool, BreakpointStore) {
 
 // ********************************************************************************************* //
 // Constants
@@ -33,10 +33,8 @@ function BreakpointTool(context)
  * {@BreakpointStore} (one instance per Firebug), performs async operation with the
  * server side (using RDP) and forwards results to all registered listeners, which are
  * usually panel objects.
- *
- * xxxHonza: It should be derived from Tool base class.
  */
-BreakpointTool.prototype = Obj.extend(new EventSource(),
+BreakpointTool.prototype = Obj.extend(Tool,
 /** @lends BreakpointTool */
 {
     dispatchName: "breakpointTool",
