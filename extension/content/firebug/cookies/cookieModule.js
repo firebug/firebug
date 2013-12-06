@@ -210,7 +210,7 @@ Firebug.CookieModule = Obj.extend(ActivableModule,
             FBTrace.sysout("cookies.cookieModule.registerObservers;");
     },
 
-    unregisterObservers: function(context)
+    unregisterObservers: function()
     {
         if (!this.observersRegistered)
         {
@@ -566,25 +566,33 @@ Firebug.CookieModule = Obj.extend(ActivableModule,
         return ActivableModule.isEnabled.apply(this, arguments);
     },
 
+    hasContexts: function()
+    {
+        var ret = false;
+        TabWatcher.iterateContexts(function()
+        {
+            ret = true;
+        });
+        return ret;
+    },
+
     /**
      * Called when an observer (e.g. panel) is added/removed into/from the model.
      * This is the moment when the model needs to decide whether to activate.
      */
     onObserverChange: function(observer)
     {
-        if (this.hasObservers())
-            TabWatcher.iterateContexts(Firebug.CookieModule.registerObservers);
+        if (this.hasObservers() && this.hasContexts())
+            this.registerObservers();
         else
-            TabWatcher.iterateContexts(Firebug.CookieModule.unregisterObservers);
+            this.unregisterObservers();
 
         this.setStatus();
     },
 
     onSuspendFirebug: function()
     {
-        TabWatcher.iterateContexts(Firebug.CookieModule.unregisterObservers);
-
-        this.setStatus();
+        this.onObserverChange();
 
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.onSuspendFirebug");
@@ -592,10 +600,7 @@ Firebug.CookieModule = Obj.extend(ActivableModule,
 
     onResumeFirebug: function(context)
     {
-        if (Firebug.CookieModule.isAlwaysEnabled())
-            TabWatcher.iterateContexts(Firebug.CookieModule.registerObservers);
-
-        this.setStatus();
+        this.onObserverChange();
 
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.onResumeFirebug");

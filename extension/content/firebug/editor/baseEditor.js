@@ -19,6 +19,11 @@ var BaseEditor = Obj.extend(MeasureBox,
         return value;
     },
 
+    isEmptyValid: function(target)
+    {
+        return false;
+    },
+
     getValue: function()
     {
     },
