@@ -1718,6 +1718,7 @@ domMemberMap.Window =
 
     "speechSynthesis",
     "requestAnimationFrame",
+    "cancelAnimationFrame",
 ];
 
 domMemberMap.Location =
@@ -2779,6 +2780,16 @@ Dom.domInlineEventHandlersMap =
     "onmozpointerlockchange": 1,
     "onmozpointerlockerror": 1,
     "onuserproximity": 1,
+    "ongotpointercapture": 1,
+    "onlostpointercapture": 1,
+    "onpointercancel": 1,
+    "onpointerdown": 1,
+    "onpointerenter": 1,
+    "onpointerleave": 1,
+    "onpointermove": 1,
+    "onpointerout": 1,
+    "onpointerover": 1,
+    "onpointerup": 1,
     "onwheel": 1
 };
 
