@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -9,32 +11,32 @@ define([
     "firebug/lib/css",
     "firebug/lib/url",
     "firebug/lib/domplate",
-    "firebug/debugger/script/scriptView",
-    "arch/compilationunit",
+    "firebug/lib/persist",
+    "firebug/lib/keywords",
+    "firebug/lib/system",
     "firebug/chrome/activablePanel",
     "firebug/chrome/menu",
     "firebug/chrome/rep",
+    "firebug/editor/editor",
+    "firebug/debugger/script/scriptView",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/script/sourceLink",
     "firebug/debugger/script/sourceFile",
     "firebug/debugger/breakpoints/breakpoint",
     "firebug/debugger/breakpoints/breakpointStore",
-    "firebug/lib/persist",
     "firebug/debugger/breakpoints/breakpointConditionEditor",
-    "firebug/lib/keywords",
-    "firebug/lib/system",
-    "firebug/editor/editor",
     "firebug/debugger/script/scriptPanelWarning",
     "firebug/debugger/script/breakNotification",
     "firebug/debugger/script/scriptPanelLineUpdater",
-    "firebug/console/commandLine",
     "firebug/debugger/debuggerLib",
+    "firebug/console/commandLine",
     "firebug/net/netUtils",
+    "arch/compilationunit",
 ],
-function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, CompilationUnit,
-    ActivablePanel, Menu, Rep, StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore,
-    Persist, BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning,
-    BreakNotification, ScriptPanelLineUpdater, CommandLine, DebuggerLib, NetUtils) {
+function (Firebug, FBTrace, Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, Persist, Keywords,
+    System, ActivablePanel, Menu, Rep, Editor, ScriptView, StackFrame, SourceLink, SourceFile,
+    Breakpoint, BreakpointStore, BreakpointConditionEditor, ScriptPanelWarning, BreakNotification,
+    ScriptPanelLineUpdater, DebuggerLib, CommandLine, NetUtils, CompilationUnit) {
 
 "use strict";
 
