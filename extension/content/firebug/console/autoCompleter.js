@@ -2423,12 +2423,16 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, opt
         // Add things from the Command Line API, if we are signalled to,
         // and it is not unavailable due to being stopped in the debugger
         // (issue 5321).
-        if (!spreExpr && options.includeCommandLineAPI && !context.stopped)
+        if (!spreExpr && options.includeCommandLineAPI)
         {
-            var global = Wrapper.unwrapObject(out.window);
+            var usedNames = new Set();
+            out.completions.forEach(function(completion)
+            {
+                usedNames.add(completion.name);
+            });
             CommandLineExposed.getAutoCompletionList().forEach(function(name)
             {
-                if (!(name in global))
+                if (!usedNames.has(name))
                     out.completions.push({type: CompletionType.API, name: name});
             });
         }
