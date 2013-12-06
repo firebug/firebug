@@ -1266,6 +1266,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             Firebug.chrome.focus();
             //this.updateSelection(this.context.currentFrame);
 
+            this.highlight(true);
+
             // Display break notification box.
             BreakNotification.show(this.context, this.panelNode, packet.why.type);
         }
@@ -1293,6 +1295,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             // After main panel is completely updated
             chrome.syncSidePanels();
+
+            this.highlight(false);
 
             // Make sure the break notification box is hidden when debugger resumes.
             BreakNotification.hide(this.context);
