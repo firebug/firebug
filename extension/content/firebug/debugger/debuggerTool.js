@@ -1,23 +1,23 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
-    "firebug/chrome/eventSource",
+    "firebug/lib/object",
     "firebug/lib/trace",
     "firebug/lib/array",
-    "firebug/lib/tool",
-    "arch/compilationunit",
+    "firebug/lib/options",
+    "firebug/chrome/eventSource",
+    "firebug/chrome/tool",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/stack/stackTrace",
-    "firebug/remoting/debuggerClientModule",
     "firebug/debugger/clients/clientCache",
     "firebug/debugger/script/sourceFile",
-    "firebug/lib/options",
     "firebug/debugger/debuggerLib",
+    "firebug/remoting/debuggerClientModule",
+    "arch/compilationunit",
 ],
-function (Obj, Firebug, EventSource, FBTrace, Arr, Tool, CompilationUnit, StackFrame, StackTrace,
-    DebuggerClientModule, ClientCache, SourceFile, Options, DebuggerLib) {
+function (Firebug, Obj, FBTrace, Arr, Options, EventSource, Tool, StackFrame, StackTrace,
+    ClientCache, SourceFile, DebuggerLib, DebuggerClientModule, CompilationUnit) {
 
 // ********************************************************************************************* //
 // Constants
@@ -37,10 +37,8 @@ function DebuggerTool(context)
  * @object DebuggerTool object is automatically instantiated by the framework for each
  * context. Reference to the current context is passed to the constructor. Life cycle
  * of a tool object is the same as for a panel, but tool doesn't have any UI.
- *
- * xxxHonza: It should be derived from Tool base class.
  */
-DebuggerTool.prototype = Obj.extend(new EventSource(),
+DebuggerTool.prototype = Obj.extend(Tool.prototype,
 /** @lends DebuggerTool */
 {
     dispatchName: "DebuggerTool",
