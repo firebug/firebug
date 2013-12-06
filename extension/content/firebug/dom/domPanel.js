@@ -14,6 +14,7 @@ define([
     "firebug/lib/domplate",
     "firebug/lib/locale",
     "firebug/lib/persist",
+    "firebug/lib/deprecated",
     "firebug/chrome/rep",
     "firebug/chrome/reps",
     "firebug/dom/domBasePanel",
@@ -23,9 +24,9 @@ define([
     "firebug/dom/domMemberProvider",
     "firebug/dom/toggleBranch",
 ],
-function(Firebug, FBTrace, Obj, Arr, Events, Dom, Css, Search, Domplate, Locale, Persist, Rep,
-    FirebugReps, DOMBasePanel, DOMModule, DomPanelTree, DomProvider, DOMMemberProvider,
-    ToggleBranch) {
+function(Firebug, FBTrace, Obj, Arr, Events, Dom, Css, Search, Domplate, Locale, Persist,
+    Deprecated, Rep, FirebugReps, DOMBasePanel, DOMModule, DomPanelTree, DomProvider,
+    DOMMemberProvider, ToggleBranch) {
 
 // ********************************************************************************************* //
 // Resources
@@ -651,9 +652,14 @@ var Property = Domplate.domplate(Rep,
 Firebug.registerPanel(DOMPanel);
 Firebug.registerRep(Property);
 
-// xxxHonza: backward compatibility
-DOMPanel.DirTable = DOMBasePanel.prototype.dirTablePlate;
-Firebug.DOMPanel = DOMPanel;
+// DOMPanel.DirTable
+Deprecated.property(DOMPanel, "DirTable", DOMBasePanel.prototype.dirTablePlate,
+    "Using DOMPanel.DirTable is deprecated. Use 'DOMBasePanel.prototype.dirTablePlate' " +
+    "module instead");
+
+// Firebug.DOMPanel
+Deprecated.property(Firebug, "DOMPanel", DOMPanel, "Using Firebug.DOMPanel is deprecated. " +
+    "Load 'firebug/dom/domPanel' module instead");
 
 return DOMPanel;
 
