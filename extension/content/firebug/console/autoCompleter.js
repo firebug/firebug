@@ -1942,11 +1942,15 @@ function getNewlyDeclaredNames(js)
     var ar = [], match;
     while ((match = re.exec(js)) !== null)
     {
-        if (!/[.%]/.test(js.charAt(match.index - 1)) &&
-            js.charAt(re.lastIndex) !== ":" && kwAll.indexOf(match[0]) === -1)
-        {
-            ar.push(match[0]);
-        }
+        var afterCh = js.substr(re.lastIndex).trimLeft()[0];
+        if (/[.%]/.test(js.charAt(match.index - 1)) || !/^[=,;\(\)]/.test(afterCh))
+            continue;
+        if (afterCh === "(" && !js.slice(0, match.index).endsWith("function "))
+            continue;
+        if (kwAll.indexOf(match[0]) !== -1)
+            continue;
+
+        ar.push(match[0]);
     }
     return ar;
 }
@@ -2367,19 +2371,12 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, opt
             // Complete variables from the local scope
 
             var contentView = Wrapper.getContentView(out.window);
+            setCompletionsFromObject(out, contentView, context);
+
             if (context.stopped && options.includeCurrentScope)
             {
-                out.completions = Firebug.Debugger.getCurrentFrameKeys(context);
-            }
-            else if (contentView && contentView.Window &&
-                contentView.constructor.toString() === contentView.Window.toString())
-                // Cross window type pseudo-comparison
-            {
-                setCompletionsFromObject(out, contentView, context);
-            }
-            else  // hopefully sandbox in Chromebug
-            {
-                setCompletionsFromObject(out, context.global, context);
+                var localVars = Firebug.Debugger.getCurrentFrameKeys(context);
+                out.completions = out.completions.concat(localVars);
             }
         }
 
@@ -2426,12 +2423,16 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, opt
         // Add things from the Command Line API, if we are signalled to,
         // and it is not unavailable due to being stopped in the debugger
         // (issue 5321).
-        if (!spreExpr && options.includeCommandLineAPI && !context.stopped)
+        if (!spreExpr && options.includeCommandLineAPI)
         {
-            var global = Wrapper.unwrapObject(out.window);
+            var usedNames = new Set();
+            out.completions.forEach(function(completion)
+            {
+                usedNames.add(completion.name);
+            });
             CommandLineExposed.getAutoCompletionList().forEach(function(name)
             {
-                if (!(name in global))
+                if (!usedNames.has(name))
                     out.completions.push({type: CompletionType.API, name: name});
             });
         }

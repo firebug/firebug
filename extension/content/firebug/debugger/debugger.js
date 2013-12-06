@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
-/*jshint noempty:false, esnext:true, curly:false, unused:false */
-/*global FBTrace:true, Components:true, define:true */
+/*jshint noempty:false, esnext:true, curly:false, unused:false*/
+/*global define:1*/
 
 define([
     "firebug/firebug",
@@ -18,9 +18,6 @@ function(Firebug, FBTrace, Obj, Locale, Options, DebuggerHalter, DebuggerLib, Cl
 
 // ********************************************************************************************* //
 // Constants
-
-var Cc = Components.classes;
-var Ci = Components.interfaces;
 
 var Trace = FBTrace.to("DBG_DEBUGGER");
 var TraceError = FBTrace.to("DBG_ERRORS");
@@ -412,16 +409,17 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     getCurrentFrameKeys: function(context)
     {
-        TraceError.sysout("Debugger.getCurrentFrameKeys; unimplemented => return empty array");
-        return [];
-    },
-
-    getFrameKeys: function(frame, names)
-    {
-    },
-
-    getContextByFrame: function(frame)
-    {
+        var frame = context.stoppedFrame;
+        var ret = [];
+        for (var scope of frame.scopes)
+        {
+            if (!scope.properties)
+                continue;
+            for (var prop of scope.properties)
+                ret.push(prop.name);
+        }
+        ret.push("this");
+        return ret;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
