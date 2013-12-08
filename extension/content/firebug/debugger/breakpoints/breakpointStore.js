@@ -17,7 +17,9 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-Cu["import"]("resource://firebug/storageService.js");
+var storageScope = {}, StorageService;
+Cu.import("resource://firebug/storageService.js", storageScope);
+StorageService = storageScope.StorageService;
 
 var BP_NORMAL = 1;
 var BP_MONITOR = 2;
