@@ -1214,15 +1214,14 @@ FirebugReps.Element = domplate(Rep,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    supportsObject: function(object, type, context)
+    supportsObject: function(object, type)
     {
         // Remote objects can't use instanceof operand so, they use 'type' instead.
         // All HTML element types starts with 'HTML' prefix.
         if (type && Str.hasPrefix(type, "HTML"))
             return true;
 
-        var win = context.getCurrentGlobal();
-        return object instanceof win.Element;
+        return object instanceof window.Element;
     },
 
     browseObject: function(elt, context)
@@ -1462,10 +1461,9 @@ FirebugReps.TextNode = domplate(Rep,
         Firebug.chrome.select(node, "html", "domSide");
     },
 
-    supportsObject: function(object, type, context)
+    supportsObject: function(object, type)
     {
-        var win = context.getCurrentGlobal();
-        return object instanceof win.Text;
+        return object instanceof window.Text;
     },
 
     getTitle: function(win, context)
@@ -1518,10 +1516,9 @@ FirebugReps.Document = domplate(Rep,
 
     className: "object",
 
-    supportsObject: function(object, type, context)
+    supportsObject: function(object, type)
     {
-        var win = context.getCurrentGlobal();
-        return object instanceof win.Document;
+        return object instanceof window.Document;
     },
 
     browseObject: function(doc, context)
@@ -1589,10 +1586,9 @@ FirebugReps.StyleSheet = domplate(Rep,
 
     className: "object",
 
-    supportsObject: function(object, type, context)
+    supportsObject: function(object, type)
     {
-        var win = context.getCurrentGlobal();
-        return object instanceof win.CSSStyleSheet;
+        return object instanceof window.CSSStyleSheet;
     },
 
     browseObject: function(styleSheet, context)
@@ -1755,18 +1751,16 @@ FirebugReps.CSSRule = domplate(Rep,
 
     className: "object",
 
-    supportsObject: function(object, type, context)
+    supportsObject: function(object, type)
     {
-        var win = context.getCurrentGlobal();
-        return object instanceof win.CSSRule;
+        return object instanceof window.CSSRule;
     },
 
-    getTooltip: function(rule, context)
+    getTooltip: function(rule)
     {
-        var win = context.getCurrentGlobal();
-        if (rule instanceof win.CSSFontFaceRule)
+        if (rule instanceof CSSFontFaceRule)
             return Css.extractURLs(rule.style.getPropertyValue("src")).join(", ");
-        else if (rule instanceof win.CSSImportRule)
+        else if (rule instanceof window.CSSImportRule)
             return rule.href;
 
         return "";
@@ -1801,10 +1795,9 @@ FirebugReps.Window = domplate(Rep,
 
     className: "object",
 
-    supportsObject: function(object, type, context)
+    supportsObject: function(object, type)
     {
-        var win = context.getCurrentGlobal();
-        return object instanceof win.Window;
+        return object instanceof window.Window;
     },
 
     browseObject: function(win, context)
@@ -1883,10 +1876,9 @@ FirebugReps.Event = domplate(Rep,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    supportsObject: function(object, type, context)
+    supportsObject: function(object, type)
     {
-        var win = context.getCurrentGlobal();
-        return object instanceof win.Event || object instanceof Dom.EventCopy;
+        return object instanceof window.Event || object instanceof Dom.EventCopy;
     },
 
     getTitle: function(event, context)
@@ -2271,10 +2263,9 @@ FirebugReps.Storage = domplate(Rep,
 
     className: "Storage",
 
-    supportsObject: function(object, type, context)
+    supportsObject: function(object, type)
     {
-        var win = context.getCurrentGlobal();
-        return (object instanceof win.Storage);
+        return (object instanceof window.Storage);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -2330,10 +2321,9 @@ FirebugReps.XPathResult = domplate(FirebugReps.Arr,
         return FirebugReps.Arr.hasSpecialProperties.apply(this, arguments);
     },
 
-    supportsObject: function(xpathresult, type, context)
+    supportsObject: function(xpathresult, type)
     {
-        var win = context.getCurrentGlobal();
-        return (xpathresult instanceof win.XPathResult);
+        return (xpathresult instanceof window.XPathResult);
     },
 
     arrayIterator: function(xpathresult, max)
@@ -2435,10 +2425,9 @@ FirebugReps.Attr = domplate(Rep,
 
     className: "Attr",
 
-    supportsObject: function(object, type, context)
+    supportsObject: function(object, type)
     {
-        var win = context.getCurrentGlobal();
-        return (object instanceof win.Attr);
+        return (object instanceof window.Attr);
     },
 });
 
@@ -2501,12 +2490,11 @@ FirebugReps.NamedNodeMap = domplate(Rep,
 
     className: "NamedNodeMap",
 
-    supportsObject: function(object, type, context)
+    supportsObject: function(object, type)
     {
         // NamedNodeMap is no more since Fx 22 - see https://bugzilla.mozilla.org/show_bug.cgi?id=847195.
         // The temporary Attr-only replacement is MozNamedAttrMap.
-        var win = context.getCurrentGlobal();
-        return (object instanceof (win.NamedNodeMap || win.MozNamedAttrMap));
+        return (object instanceof (window.NamedNodeMap || window.MozNamedAttrMap));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
