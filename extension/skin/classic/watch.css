@@ -24,6 +24,11 @@
     animation: emphasizeFrameResultValue 2s ease;
 }
 
+.memberRow.frameResultValueRow, 
+.memberRow.frameResultValueEmphasizedRow {
+    background-color: beige ;
+}
+
 .memberRow.frameResultValueRow .memberLabel,
 .memberRow.frameResultValueEmphasizedRow .memberLabel {
     font-weight: bold;
