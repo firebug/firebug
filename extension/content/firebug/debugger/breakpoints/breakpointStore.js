@@ -508,7 +508,7 @@ var BreakpointStore = Obj.extend(Module,
         }
         else
         {
-            for (var url in breakpoints)
+            for (var url in this.breakpoints)
                 this.enumerateBreakpoints(url, callback);
         }
     },
@@ -530,7 +530,7 @@ var BreakpointStore = Obj.extend(Module,
         }
         else
         {
-            for (var url in breakpoints)
+            for (var url in this.breakpoints)
                 this.enumerateBreakpoints(url, callback);
         }
     }
