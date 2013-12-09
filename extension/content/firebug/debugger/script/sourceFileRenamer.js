@@ -9,6 +9,7 @@ function(Obj, Firebug) {
 // ********************************************************************************************* //
 // TODO move to mozilla back end
 
+// xxxHonza: this entire module could be probably removed (JSD2 branch)
 function SourceFileRenamer(context)
 {
     this.renamedSourceFiles = [];

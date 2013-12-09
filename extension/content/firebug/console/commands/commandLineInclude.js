@@ -112,7 +112,7 @@ var CommandLineIncludeRep = domplate(TableRep,
         if (keys.length === 0)
         {
             var msg = Locale.$STR("commandline.include.noDefinedAlias");
-            Firebug.Console._log(msg, context, null, FirebugReps.Hint);
+            Firebug.Console.log(msg, context, null, FirebugReps.Hint);
             return returnValue;
         }
 

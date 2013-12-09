@@ -20,9 +20,10 @@ define([
     "firebug/chrome/firefox",
     "firebug/chrome/menu",
     "firebug/chrome/toolbar",
+    "firebug/chrome/statusPath",
 ],
 function (Obj, Dom, Css, System, Url, Locale, String, Events, Options, Win, Firefox,
-    Menu, Toolbar) {
+    Menu, Toolbar, StatusPath) {
 
 // ********************************************************************************************* //
 // Constants
@@ -54,8 +55,6 @@ const firebugURLs =
     extensions: "https://getfirebug.com/wiki/index.php/Firebug_Extensions",
     issue5110: "http://code.google.com/p/fbug/issues/detail?id=5110"
 };
-
-const statusCropSize = 20;
 
 // ********************************************************************************************* //
 
@@ -352,9 +351,6 @@ var FirebugChrome =
         if (name == "textSize")
             this.applyTextSize(value);
 
-        if (name == "omitObjectPathStack")
-            this.obeyOmitObjectPathStack(value);
-
         if (name == "viewPanelOrient")
             this.updateOrient(value);
     },
@@ -602,35 +598,6 @@ var FirebugChrome =
         }
     },
 
-    getNextObject: function(reverse)
-    {
-        var panel = Firebug.currentContext.getPanel(Firebug.currentContext.panelName);
-        if (panel)
-        {
-            var panelStatus = this.getElementById("fbPanelStatus");
-            var item = panelStatus.getItemByObject(panel.selection);
-            if (item)
-            {
-                if (reverse)
-                    item = item.previousSibling ? item.previousSibling.previousSibling : null;
-                else
-                    item = item.nextSibling ? item.nextSibling.nextSibling : null;
-
-                if (item)
-                    return item.repObject;
-            }
-        }
-    },
-
-    gotoNextObject: function(reverse)
-    {
-        var nextObject = this.getNextObject(reverse);
-        if (nextObject)
-            this.select(nextObject);
-        else
-            System.beep();
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Panels
 
@@ -851,8 +818,7 @@ var FirebugChrome =
             FBTrace.sysout("chrome.syncPanel Firebug.currentContext=" +
                 (context ? context.getName() : "undefined"));
 
-        var panelStatus = this.getElementById("fbPanelStatus");
-        panelStatus.clear();
+        StatusPath.clear();
 
         if (context)
         {
@@ -985,93 +951,12 @@ var FirebugChrome =
 
     clearStatusPath: function()
     {
-        var panelStatus = this.getElementById("fbPanelStatus");
-        panelStatus.clear();
+        StatusPath.clear();
     },
 
     syncStatusPath: function()
     {
-        var panelStatus = this.getElementById("fbPanelStatus");
-        var panelStatusSeparator = this.getElementById("fbStatusSeparator");
-        var panel = panelBar1.selectedPanel;
-
-        if (!panel || (panel && !panel.selection))
-        {
-            panelStatus.clear();
-        }
-        else
-        {
-            var path = panel.getObjectPath(panel.selection);
-            if (!path || !path.length)
-            {
-                Dom.hide(panelStatusSeparator, true);
-                panelStatus.clear();
-            }
-            else
-            {
-                // Update the visibility of the separator. The separator
-                // is displayed only if there are some other buttons on the left side.
-                // Before showing the status separator let's see whether there are any other
-                // buttons on the left.
-                var hide = true;
-                var sibling = panelStatusSeparator.parentNode.previousSibling;
-                while (sibling)
-                {
-                    if (!Dom.isCollapsed(sibling))
-                    {
-                        hide = false;
-                        break;
-                    }
-                    sibling = sibling.previousSibling;
-                }
-                Dom.hide(panelStatusSeparator, hide);
-
-                if (panel.name != panelStatus.lastPanelName)
-                    panelStatus.clear();
-
-                panelStatus.lastPanelName = panel.name;
-
-                // If the object already exists in the list, just select it and keep the path.
-                var selection = panel.selection;
-                var existingItem = panelStatus.getItemByObject(panel.selection);
-                if (existingItem)
-                {
-                    // Update the labels of the status path elements, because it can be,
-                    // that the elements changed even when the selected element exists
-                    // inside the path (issue 4826)
-                    var statusItems = panelStatus.getItems();
-                    for (var i = 0; i < statusItems.length; ++i)
-                    {
-                        var object = Firebug.getRepObject(statusItems[i]);
-                        var rep = Firebug.getRep(object, Firebug.currentContext);
-                        var objectTitle = rep.getTitle(object, Firebug.currentContext);
-                        var title = String.cropMultipleLines(objectTitle, statusCropSize);
-
-                        statusItems[i].label = title;
-                    }
-                    panelStatus.selectItem(existingItem);
-                }
-                else
-                {
-                    panelStatus.clear();
-
-                    for (var i = 0; i < path.length; ++i)
-                    {
-                        var object = path[i];
-
-                        var rep = Firebug.getRep(object, Firebug.currentContext);
-                        var objectTitle = rep.getTitle(object, Firebug.currentContext);
-
-                        var title = String.cropMultipleLines(objectTitle, statusCropSize);
-                        panelStatus.addItem(title, object, rep, panel.statusSeparator);
-                    }
-
-                    panelStatus.selectObject(panel.selection);
-                    if (FBTrace.DBG_PANELS)
-                        FBTrace.sysout("syncStatusPath "+path.length+" items ", path);
-                }
-            }
-        }
+        StatusPath.update();
     },
 
     toggleOrient: function(preferredValue)
@@ -1352,20 +1237,6 @@ var FirebugChrome =
         }
 
         Firebug.dispatchToPanels("onTextSizeChange", [zoom, fontSizeAdjust]);
-    },
-
-    obeyOmitObjectPathStack: function(value)
-    {
-        var panelStatus = this.getElementById("fbPanelStatus");
-        // The element does not exist immediately at start-up.
-        if (!panelStatus)
-            return;
-        Dom.hide(panelStatus, (value ? true : false));
-    },
-
-    getPanelStatusElements: function()
-    {
-        return this.getElementById("fbPanelStatus");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -2256,6 +2127,8 @@ return FirebugChrome;
 }; // end of var ChromeFactory object
 
 // ********************************************************************************************* //
+
+Firebug.ChromeFactory = ChromeFactory;
 
 return ChromeFactory;
 

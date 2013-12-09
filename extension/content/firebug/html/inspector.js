@@ -13,11 +13,12 @@ define([
     "firebug/lib/xml",
     "firebug/lib/system",
     "firebug/chrome/window",
+    "firebug/chrome/statusPath",
     "firebug/html/highlighterCache",
     "firebug/html/quickInfoBox",
 ],
 function(Firebug, FBTrace, Module, Obj, Events, Wrapper, Arr, Css, Dom, Xml, System, Win,
-    HighlighterCache, QuickInfoBox) {
+    StatusPath, HighlighterCache, QuickInfoBox) {
 
 "use strict";
 
@@ -383,11 +384,11 @@ Firebug.Inspector = Obj.extend(Module,
 
         if (dir == "up")
         {
-            target = Firebug.chrome.getNextObject();
+            target = StatusPath.getNextObject();
         }
         else if (dir == "down")
         {
-            target = Firebug.chrome.getNextObject(true);
+            target = StatusPath.getNextObject(true);
             if (node && !target)
             {
                 target = node.contentDocument ?

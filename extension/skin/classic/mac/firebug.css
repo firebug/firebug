@@ -70,8 +70,11 @@
     padding: 7px 0 7px 0;   /* Set proper height of window buttons (close, min, detach) */
 }
 
+/*************************************************************************************************/
+/* Search Box */
+
 .fbsearch-textbox {
-    border-radius: 10px !important;
+    border-radius: 10000px 0 0 10000px !important;
     margin-top: 1px;
 }
 
@@ -84,71 +87,52 @@
     background-position: 5px 50%;
 }
 
-/* xxxsz: Use PNG images for condition editor, because using SVGs as border images is broken
-   up to Firefox 22.0. Use SVGs as soon as Firefox 23.0 is the min. supported version.
-   (see issue 6607) */
-#fbSearchOptionsPanel {
-    -moz-appearance: none;
-    -moz-window-shadow: none;
-    background-color: transparent;
-    margin-bottom: 2px;
-    margin-right: -12px;
-    border-image: url(chrome://firebug/skin/mac/searchPanel.png) 16 50 24 12 stretch;
-    border-image-slice: 16 50 24 12 fill;
-    border-width: 16px 50px 24px 12px;
-    border-style: solid;
-    color: #ffffff;
-}
-
-#fbSearchOptionsPanel[position="after_end"] {
-    border-image: url(chrome://firebug/skin/mac/searchPanelDown.png) 25 50 18 12 stretch;
-    border-image-slice: 25 50 18 12 fill;
-    border-width: 25px 50px 18px 12px;
-}
-
-#fbSearchOptionsPanel > vbox {
-    margin-right: -38px;
-}
-
-#fbSearchOptionsPanel > description {
-    margin: 0;
-}
-
 .fbsearch-options-label {
-    color: #ffffff;
+    color: black;
 }
 
 .fbsearch-options-buttons {
     -moz-appearance: none;
-    background: #464646 linear-gradient(
-        to top,
-        rgba(255, 255, 255, 0.3),
-        rgba(255, 255, 255, 0) 55%,
-        rgba(255, 255, 255, 0.1) 55%,
-        rgba(255, 255, 255, 0.2)) repeat-x center center;
-    border: 3px solid;
-    -moz-border-top-colors: rgba(0,0,0,0.35) rgba(26,26,26,0.5) rgba(255,255,255,0.4);
-    -moz-border-right-colors: rgba(53,53,53,1) rgba(53,53,53,1) rgba(162,162,162,1);
-    -moz-border-bottom-colors: rgba(128,128,128,0.35) rgba(0,0,0,0.5) rgba(255,255,255,0.15);
-    -moz-border-left-colors: rgba(0,0,0,0.35) rgba(26,26,26,0.5) rgba(255,255,255,0.4);
-    border-radius: 20px;
-    padding: 1px 9px;
-    margin: 10px 0 0;
-    min-height: 0px;
-    color:  #ffffff;
+    border-radius: 10000px;
+    border: 1px solid rgba(0,0,0,.35);
+    background: linear-gradient(#f6f6f6, #e9e9e9);
+    box-shadow: 0 1px rgba(255,255,255,.5), inset 0 1px 1px rgba(255,255,255,.5);
+    color: buttontext;
+    margin: 0;
+    margin-top: 1px;
 }
 
-.fbsearch-options-buttons > .button-box > .button-text {
+.fbsearch-options-buttons {
+    -moz-margin-start: 0;
+    list-style-image: url(chrome://firebug/skin/mac/find-arrows.png);
+    padding: 2px 6px;
+}
+
+.fbsearch-options-buttons > .toolbarbutton-text {
     margin: 0 !important;
+    padding: 0;
+    width: 0;
 }
 
-.fbsearch-options-buttons:hover {
-    background-color: #666666 !important;
+.fbsearch-options-buttons > .toolbarbutton-icon {
+    margin: 0;
 }
 
-.fbsearch-options-buttons:active {
-    background-color: #86888B !important;
+.fbsearch-options-buttons.prev {
+    border-left: none;
+    border-right: none;
+    -moz-margin-end: 0;
+    -moz-image-region: rect(0, 10px, 9px, 0);
+    border-radius: 0;
 }
+
+.fbsearch-options-buttons.next {
+    -moz-image-region: rect(0, 20px, 9px, 10px);
+    -moz-padding-end: 7px;
+    border-radius: 0 10000px 10000px 0;
+}
+
+/*************************************************************************************************/
 
 /* Don't display label and remove padding for all the following toolbar buttons */
 #fbFirebugMenu,

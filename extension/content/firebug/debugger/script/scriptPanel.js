@@ -17,6 +17,7 @@ define([
     "firebug/chrome/activablePanel",
     "firebug/chrome/menu",
     "firebug/chrome/rep",
+    "firebug/chrome/statusPath",
     "firebug/editor/editor",
     "firebug/debugger/script/scriptView",
     "firebug/debugger/stack/stackFrame",
@@ -34,7 +35,7 @@ define([
     "arch/compilationunit",
 ],
 function (Firebug, FBTrace, Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, Persist, Keywords,
-    System, ActivablePanel, Menu, Rep, Editor, ScriptView, StackFrame, SourceLink, SourceFile,
+    System, ActivablePanel, Menu, Rep, StatusPath, Editor, ScriptView, StackFrame, SourceLink, SourceFile,
     Breakpoint, BreakpointStore, BreakpointConditionEditor, ScriptPanelWarning, BreakNotification,
     ScriptPanelLineUpdater, DebuggerLib, CommandLine, NetUtils, CompilationUnit) {
 
@@ -262,10 +263,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // Clear the stack on the panel toolbar, but only if the Script panel is
         // the currently selected panel.
         if (Firebug.chrome.getSelectedPanel() == this)
-        {
-            var panelStatus = Firebug.chrome.getPanelStatusElements();
-            panelStatus.clear();
-        }
+            StatusPath.clear();
 
         this.updateInfoTip();
     },
@@ -1318,10 +1316,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // New script has been appended, update the default location if necessary.
         if (!this.location)
             this.navigate(null);
-
-        // A script has been loaded, so initialize any existing breakpoints for it.
-        var tool = this.context.getTool("breakpoint");
-        tool.newSource(sourceFile);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

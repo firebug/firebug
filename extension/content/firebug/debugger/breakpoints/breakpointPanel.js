@@ -10,13 +10,12 @@ define([
     "firebug/lib/events",
     "firebug/debugger/stack/stackFrame",
     "firebug/lib/persist",
-    "firebug/debugger/script/sourceFileRenamer",
     "firebug/debugger/breakpoints/breakpoint",
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/lib/url",
 ],
 function(Firebug, Panel, Obj, FBTrace, FirebugReps, Locale, Events, StackFrame, Persist,
-    SourceFileRenamer, Breakpoint, BreakpointStore, Url) {
+    Breakpoint, BreakpointStore, Url) {
 
 "use strict";
 

@@ -196,7 +196,14 @@ Firebug.Editor = Obj.extend(Module,
             TraceError.sysout("Editor.stopEditing FAILS", exc);
         }
 
-        currentEditor.hide();
+        try
+        {
+            currentEditor.hide();
+        }
+        catch (exc)
+        {
+            TraceError.sysout("editor.hide FAILS", exc);
+        }
         currentPanel.editing = false;
 
         Events.dispatch(this.fbListeners, "onStopEdit", [currentPanel, currentEditor,
