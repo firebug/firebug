@@ -53,7 +53,9 @@ HTMLEditor.prototype = domplate(BaseEditor,
 {
     multiLine: true,
     tabNavigation: false,
-    arrowCompletion:false,
+    arrowCompletion: false,
+
+    internalChange: false,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Domplate
@@ -79,7 +81,15 @@ HTMLEditor.prototype = domplate(BaseEditor,
 
     setValue: function(value)
     {
-        return this.editor.setText(value, "htmlmixed");
+        this.internalChange = true;
+        try
+        {
+            this.editor.setText(value, "htmlmixed");
+        }
+        finally
+        {
+            this.internalChange = false;
+        }
     },
 
     show: function(target, panel, value, textSize)
@@ -101,7 +111,7 @@ HTMLEditor.prototype = domplate(BaseEditor,
 
         // Append the editor to the DIV(box);
         this.panel.panelNode.appendChild(this.box);
-        this.editor.setText(value, "htmlmixed");
+        this.setValue(value);
 
         var command = Firebug.chrome.$("cmd_firebug_toggleHTMLEditing");
         command.setAttribute("checked", true);
@@ -153,11 +163,11 @@ HTMLEditor.prototype = domplate(BaseEditor,
         {
             try
             {
-                // xxxHonza: Catch "can't access dead object" exception.
                 this.editingParent.innerHTML = value;
             }
             catch (e)
             {
+                // "can't access dead object" exceptions mostly.
                 TraceError.sysout("htmlPanel.saveEdit; EXCEPTION " + e, e);
             }
         }
@@ -201,7 +211,8 @@ HTMLEditor.prototype = domplate(BaseEditor,
 
     onTextChange: function()
     {
-        Editor.update();
+        if (!this.internalChange)
+            Editor.update();
     },
 
     onContextMenu: function(event)
