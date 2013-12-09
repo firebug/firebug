@@ -37,16 +37,16 @@ var StatusPath =
     clear: function()
     {
         this.clearFlag = true;
-        this.setTimeout();
+        this.flushAsync();
     },
 
     update: function()
     {
         this.updateFlag = true;
-        this.setTimeout();
+        this.flushAsync();
     },
 
-    setTimeout: function()
+    flushAsync: function()
     {
         var panelBar1 = Firebug.chrome.getElementById("fbPanelBar1");
         var panelStatus = Firebug.chrome.getElementById("fbPanelStatus");
@@ -77,6 +77,8 @@ var StatusPath =
 
     flush: function()
     {
+        this.timeout = null;
+
         if (this.clearFlag)
             this.doClear();
 
