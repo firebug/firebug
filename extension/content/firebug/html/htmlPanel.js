@@ -257,10 +257,12 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (Css.nonEditableTags.hasOwnProperty(node.localName))
             return;
 
-        editor.innerEditMode = node.localName in Css.innerEditableTags;
+        Editor.stopEditing();
 
+        editor.innerEditMode = node.localName in Css.innerEditableTags;
         var html = editor.innerEditMode ? node.innerHTML : Xml.getElementHTML(node);
         html = Str.escapeForHtmlEditor(html);
+
         Editor.startEditing(box, html, editor);
     },
 
