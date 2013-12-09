@@ -3,10 +3,13 @@
 define([
     "firebug/firebug",
     "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/dom",
     "firebug/lib/string",
+    "firebug/lib/system",
+    "firebug/chrome/module",
 ],
-function(Firebug, FBTrace, Dom, String) {
+function(Firebug, FBTrace, Obj, Dom, String, System, Module) {
 
 // ********************************************************************************************* //
 // Constants
@@ -23,12 +26,70 @@ var statusCropSize = 20;
  * @object The object is responsible for 'Status path' maintenance (aka breadcrumbs) that
  * is used to display path to the selected element in the {@HTMLPanel}, path to the
  * selected object in the {@DOMPanel} and call-stack in the {@ScriptPanel}.
- * The path is displayed in the panel's toolbar and the logic is based on {@Panel.getObjectPath}
+ *
+ * The path is displayed in panel-toolbar and the logic is based on {@Panel.getObjectPath}
  * method, so any panel can support it.
+ *
+ * The path is updated asynchronously (to avoid flickering) through: clear and update methods.
  */
 var StatusPath =
 {
     clear: function()
+    {
+        this.clearFlag = true;
+        this.setTimeout();
+    },
+
+    update: function()
+    {
+        this.updateFlag = true;
+        this.setTimeout();
+    },
+
+    setTimeout: function()
+    {
+        var panelBar1 = Firebug.chrome.getElementById("fbPanelBar1");
+        var panelStatus = Firebug.chrome.getElementById("fbPanelStatus");
+
+        var panel = panelBar1.selectedPanel;
+        if (!panel)
+            return;
+
+        if (this.timeout)
+            clearTimeout(this.timeout);
+
+        // If different panel has been selected perform synchronous update, so the
+        // user can see the new value immediately. Asynchronous update is mainly useful
+        // when stepping in the debugger.
+        if (panel.name != panelStatus.lastPanelName)
+        {
+            Trace.sysout("statusPath.setTimeout; changing panels, sync update " +
+                panelStatus.lastPanelName + " -> " + panel.name);
+
+            this.flush();
+            return;
+        }
+
+        this.timeout = setTimeout(this.flush.bind(this), 100);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    flush: function()
+    {
+        if (this.clearFlag)
+            this.doClear();
+
+        if (this.updateFlag)
+            this.doUpdate();
+
+        this.clearFlag = false;
+        this.updateFlag = false;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    doClear: function()
     {
         Trace.sysout("statusPath.clear;");
 
@@ -36,7 +97,7 @@ var StatusPath =
         panelStatus.clear();
     },
 
-    update: function()
+    doUpdate: function()
     {
         Trace.sysout("statusPath.update;");
 
@@ -110,7 +171,7 @@ var StatusPath =
                 {
                     panelStatus.clear();
 
-                    for (var i = 0; i < path.length; ++i)
+                    for (var i = 0; i < path.length; i++)
                     {
                         var object = path[i];
                         var rep = Firebug.getRep(object, context);
@@ -127,10 +188,80 @@ var StatusPath =
             }
         }
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Arrow Navigation
+
+    getNextObject: function(reverse)
+    {
+        var panelBar1 = Firebug.chrome.getElementById("fbPanelBar1");
+        var panel = panelBar1.selectedPanel;
+        if (panel)
+        {
+            var panelStatus = Firebug.chrome.getElementById("fbPanelStatus");
+            var item = panelStatus.getItemByObject(panel.selection);
+            if (item)
+            {
+                if (reverse)
+                    item = item.previousSibling ? item.previousSibling.previousSibling : null;
+                else
+                    item = item.nextSibling ? item.nextSibling.nextSibling : null;
+
+                if (item)
+                    return item.repObject;
+            }
+        }
+    },
+
+    gotoNextObject: function(reverse)
+    {
+        var nextObject = this.getNextObject(reverse);
+        if (nextObject)
+            Firebug.chrome.select(nextObject);
+        else
+            System.beep();
+    },
 };
 
 // ********************************************************************************************* //
+// StatusPath Module
+
+/**
+ * @module Responsible for handling 'omitObjectPathStack' option used in the {@CallstackPanel}
+ * Options menu.
+ */
+var StatusPathModule = Obj.extend(Module,
+/** @lends StatusPathModule */
+{
+    dispatchName: "StatusPathModule",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    updateOption: function()
+    {
+        if (name == "omitObjectPathStack")
+            this.obeyOmitObjectPathStack(value);
+    },
+
+    obeyOmitObjectPathStack: function(value)
+    {
+        var panelStatus = Firebug.chrome.getElementById("fbPanelStatus");
+
+        // The element does not exist immediately at start-up.
+        if (!panelStatus)
+            return;
+
+        Dom.hide(panelStatus, (value ? true : false));
+    },
+});
+
+// ********************************************************************************************* //
 // Registration
+
+Firebug.registerModule(StatusPathModule);
+
+// xxxHonza: exposed for XUL (see firebugMenuOverlay.xul)
+Firebug.StatusPath = StatusPath;
 
 return StatusPath;
 

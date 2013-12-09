@@ -351,9 +351,6 @@ var FirebugChrome =
         if (name == "textSize")
             this.applyTextSize(value);
 
-        if (name == "omitObjectPathStack")
-            this.obeyOmitObjectPathStack(value);
-
         if (name == "viewPanelOrient")
             this.updateOrient(value);
     },
@@ -601,35 +598,6 @@ var FirebugChrome =
         }
     },
 
-    getNextObject: function(reverse)
-    {
-        var panel = Firebug.currentContext.getPanel(Firebug.currentContext.panelName);
-        if (panel)
-        {
-            var panelStatus = this.getElementById("fbPanelStatus");
-            var item = panelStatus.getItemByObject(panel.selection);
-            if (item)
-            {
-                if (reverse)
-                    item = item.previousSibling ? item.previousSibling.previousSibling : null;
-                else
-                    item = item.nextSibling ? item.nextSibling.nextSibling : null;
-
-                if (item)
-                    return item.repObject;
-            }
-        }
-    },
-
-    gotoNextObject: function(reverse)
-    {
-        var nextObject = this.getNextObject(reverse);
-        if (nextObject)
-            this.select(nextObject);
-        else
-            System.beep();
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Panels
 
@@ -850,8 +818,7 @@ var FirebugChrome =
             FBTrace.sysout("chrome.syncPanel Firebug.currentContext=" +
                 (context ? context.getName() : "undefined"));
 
-        var panelStatus = this.getElementById("fbPanelStatus");
-        panelStatus.clear();
+        StatusPath.clear();
 
         if (context)
         {
@@ -1270,20 +1237,6 @@ var FirebugChrome =
         }
 
         Firebug.dispatchToPanels("onTextSizeChange", [zoom, fontSizeAdjust]);
-    },
-
-    obeyOmitObjectPathStack: function(value)
-    {
-        var panelStatus = this.getElementById("fbPanelStatus");
-        // The element does not exist immediately at start-up.
-        if (!panelStatus)
-            return;
-        Dom.hide(panelStatus, (value ? true : false));
-    },
-
-    getPanelStatusElements: function()
-    {
-        return this.getElementById("fbPanelStatus");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

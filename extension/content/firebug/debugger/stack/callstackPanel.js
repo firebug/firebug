@@ -263,7 +263,7 @@ CallstackPanel.prototype = Obj.extend(Panel,
     {
         var items = [];
 
-        // an option handled by chrome.js
+        // An option handled by 'firebug/chrome/statusPath' module.
         items.push(Menu.optionMenu("OmitObjectPathStack",
             "omitObjectPathStack",
             "callstack.option.tip.Omit_Object_Path_Stack"));

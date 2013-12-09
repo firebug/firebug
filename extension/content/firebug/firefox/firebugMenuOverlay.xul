@@ -37,8 +37,8 @@
         <command id="cmd_firebug_previousFirebugTab" oncommand="Firebug.chrome.gotoPreviousTab()"/>
         <command id="cmd_firebug_leftFirebugTab" oncommand="Firebug.chrome.gotoSiblingTab(false)"/>
         <command id="cmd_firebug_rightFirebugTab" oncommand="Firebug.chrome.gotoSiblingTab(true)"/>
-        <command id="cmd_firebug_nextObject" oncommand="Firebug.chrome.gotoNextObject()"/>
-        <command id="cmd_firebug_previousObject" oncommand="Firebug.chrome.gotoNextObject(true)"/>
+        <command id="cmd_firebug_nextObject" oncommand="Firebug.StatusPath.gotoNextObject()"/>
+        <command id="cmd_firebug_previousObject" oncommand="Firebug.StatusPath.gotoNextObject(true)"/>
 
         <command id="cmd_firebug_clearAllBreakpoints" oncommand="Firebug.Debugger.clearAllBreakpoints(Firebug.currentContext)"/>
         <command id="cmd_firebug_breakOnErrors" oncommand="Firebug.Options.togglePref('breakOnErrors')"/>
