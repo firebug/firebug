@@ -1854,7 +1854,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 );
             }
 
-            if (!(Css.nonEditableTags.hasOwnProperty(node.localName)))
+            if (!Css.nonEditableTags.hasOwnProperty(node.localName))
             {
                 var type;
 
@@ -1876,14 +1876,17 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     nol10n: true,
                     acceltext: (Locale.getFormattedKey(window, "accel", "E")),
                     command: Obj.bindFixed(this.editNode, this, node)
-                },
-                {
-                    label: "DeleteElement",
-                    tooltiptext: "html.Delete_Element",
-                    acceltext: Locale.getFormattedKey(window, null, null, "VK_DELETE"),
-                    command: Obj.bindFixed(this.deleteNode, this, node),
-                    disabled:(node.localName in Css.innerEditableTags)
                 });
+
+                if (!Css.nonDeletableTags.hasOwnProperty(node.localName))
+                {
+                    items.push({
+                        label: "DeleteElement",
+                        tooltiptext: "html.Delete_Element",
+                        acceltext: Locale.getFormattedKey(window, null, null, "VK_DELETE"),
+                        command: Obj.bindFixed(this.deleteNode, this, node)
+                    });
+                }
             }
 
             var objectBox = Dom.getAncestorByClass(target, "nodeBox");
