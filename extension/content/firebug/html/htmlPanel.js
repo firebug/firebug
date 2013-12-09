@@ -260,6 +260,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         Editor.stopEditing();
 
         editor.innerEditMode = node.localName in Css.innerEditableTags;
+        if (!Dom.isAttached(node))
+        {
+            // For detached nodes, editing HTML around the node is impossible
+            // (document.createRange throws). Enter inner edit mode instead.
+            editor.innerEditMode = true;
+        }
+
         var html = editor.innerEditMode ? node.innerHTML : Xml.getElementHTML(node);
         html = Str.escapeForHtmlEditor(html);
 

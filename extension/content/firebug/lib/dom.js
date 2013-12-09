@@ -168,7 +168,7 @@ Dom.isAttached = function(element)
         return false;
 
     return doc.contains(element);
-}
+};
 
 // ********************************************************************************************* //
 // DOM Modification
