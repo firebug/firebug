@@ -17,7 +17,9 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-Cu["import"]("resource://firebug/storageService.js");
+var storageScope = {}, StorageService;
+Cu.import("resource://firebug/storageService.js", storageScope);
+StorageService = storageScope.StorageService;
 
 var BP_NORMAL = 1;
 var BP_MONITOR = 2;
@@ -506,7 +508,7 @@ var BreakpointStore = Obj.extend(Module,
         }
         else
         {
-            for (var url in breakpoints)
+            for (var url in this.breakpoints)
                 this.enumerateBreakpoints(url, callback);
         }
     },
@@ -528,7 +530,7 @@ var BreakpointStore = Obj.extend(Module,
         }
         else
         {
-            for (var url in breakpoints)
+            for (var url in this.breakpoints)
                 this.enumerateBreakpoints(url, callback);
         }
     }
