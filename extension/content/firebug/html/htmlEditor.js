@@ -113,6 +113,11 @@ HTMLEditor.prototype = domplate(BaseEditor,
         this.panel.panelNode.appendChild(this.box);
         this.setValue(value);
 
+        // Give it focus initially (and note that if editing is triggered through
+        // the toolbar button, we might also need to focus the Firebug chrome).
+        Firebug.chrome.focus();
+        this.editor.focus();
+
         var command = Firebug.chrome.$("cmd_firebug_toggleHTMLEditing");
         command.setAttribute("checked", true);
     },
