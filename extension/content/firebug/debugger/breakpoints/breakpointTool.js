@@ -7,8 +7,9 @@ define([
     "firebug/chrome/eventSource",
     "firebug/chrome/tool",
     "firebug/debugger/breakpoints/breakpointStore",
+    "firebug/remoting/debuggerClientModule",
 ],
-function (Firebug, FBTrace, Obj, EventSource, Tool, BreakpointStore) {
+function (Firebug, FBTrace, Obj, EventSource, Tool, BreakpointStore, DebuggerClientModule) {
 
 // ********************************************************************************************* //
 // Constants
@@ -53,6 +54,10 @@ BreakpointTool.prototype = Obj.extend(Tool,
 
         Trace.sysout("breakpointTool.attach; context ID: " + this.context.getId());
 
+        // Listen for 'newScript' event.
+        var tool = this.context.getTool("debugger");
+        tool.addListener(this);
+
         // Listen for {@BreakpointStore} events to create/remove breakpoints
         // in the related backend (thread actor).
         BreakpointStore.addListener(this);
@@ -65,9 +70,13 @@ BreakpointTool.prototype = Obj.extend(Tool,
         if (!this.attached)
             return;
 
-        Trace.sysout("breakpointTool.detach; context ID: " + this.context.getId());
+        // Listen for 'newScript' event.
+        var tool = this.context.getTool("debugger");
+        tool.removeListener(this);
 
         BreakpointStore.removeListener(this);
+
+        Trace.sysout("breakpointTool.detach; context ID: " + this.context.getId());
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

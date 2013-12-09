@@ -1316,10 +1316,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // New script has been appended, update the default location if necessary.
         if (!this.location)
             this.navigate(null);
-
-        // A script has been loaded, so initialize any existing breakpoints for it.
-        var tool = this.context.getTool("breakpoint");
-        tool.newSource(sourceFile);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
