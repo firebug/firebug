@@ -8,7 +8,6 @@
  *
  * xxxHonza: dependency the following modules should be removed:
  *     "firebug/chrome/firefox"
- *     "firebug/chrome/chrome"
  *     "firebug/trace/traceListener"
  */
 define([
@@ -26,13 +25,12 @@ define([
 
     // xxxHonza: the following dependencies should be also removed.
     "firebug/chrome/firefox",
-    "firebug/chrome/chrome",
     "firebug/debugger/clients/clientFactory",
     "firebug/debugger/clients/grip",
     "firebug/console/commandLineExposed",
 ],
 function(FBL, Obj, Domplate, Options, Locale, Events, Wrapper, Css, Arr, Http, TraceListener,
-    Firefox, ChromeFactory, ClientFactory, Grip, CommandLineExposed) {
+    Firefox, ClientFactory, Grip, CommandLineExposed) {
 
 // ********************************************************************************************* //
 // Constants
@@ -1567,7 +1565,6 @@ if (preFirebugKeys)
 
 // xxxHonza: backward compatibility
 Firebug.Firefox = Firefox;
-Firebug.ChromeFactory = ChromeFactory;
 Firebug.Options = Options;
 
 return Firebug;
