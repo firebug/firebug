@@ -30,23 +30,29 @@ var statusCropSize = 20;
  * The path is displayed in panel-toolbar and the logic is based on {@Panel.getObjectPath}
  * method, so any panel can support it.
  *
- * The path is updated asynchronously (to avoid flickering) through: clear and update methods.
+ * The path can be updated through clear and update methods.
  */
 var StatusPath =
 {
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Public API
+
     clear: function()
     {
         this.clearFlag = true;
-        this.flushAsync();
+        this.executor();
     },
 
     update: function()
     {
         this.updateFlag = true;
-        this.flushAsync();
+        this.executor();
     },
 
-    flushAsync: function()
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Private API
+
+    executor: function()
     {
         var panelBar1 = Firebug.chrome.getElementById("fbPanelBar1");
         var panelStatus = Firebug.chrome.getElementById("fbPanelStatus");
@@ -58,22 +64,17 @@ var StatusPath =
         if (this.timeout)
             clearTimeout(this.timeout);
 
-        // If different panel has been selected perform synchronous update, so the
-        // user can see the new value immediately. Asynchronous update is mainly useful
-        // when stepping in the debugger.
-        if (panel.name != panelStatus.lastPanelName)
-        {
-            Trace.sysout("statusPath.setTimeout; changing panels, sync update " +
-                panelStatus.lastPanelName + " -> " + panel.name);
+        Trace.sysout("statusPath.executor; current panel: " + panel.name);
 
+        // Asynchronous update of the UI is mainly useful when the user is stepping
+        // in the debugger, it avoids flickering. So, do it only if the Script panel
+        // is actually selected. Note that the script panel is using the status path
+        // to display the current JS call-stack (when the debugger is active).
+        if (panel.name == "script")
+            this.timeout = setTimeout(this.flush.bind(this), 100);
+        else
             this.flush();
-            return;
-        }
-
-        this.timeout = setTimeout(this.flush.bind(this), 100);
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     flush: function()
     {
@@ -146,8 +147,6 @@ var StatusPath =
                 if (panel.name != panelStatus.lastPanelName)
                     panelStatus.clear();
 
-                panelStatus.lastPanelName = panel.name;
-
                 // If the object already exists in the list, just select it and keep the path.
                 var selection = panel.selection;
                 var existingItem = panelStatus.getItemByObject(panel.selection);
@@ -189,6 +188,8 @@ var StatusPath =
                 }
             }
         }
+
+        panelStatus.lastPanelName = panel.name;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
