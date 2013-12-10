@@ -485,12 +485,18 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // Invoke breadcrumbs update.
         Firebug.chrome.syncStatusPath();
 
-        // This is how the selected side panel can be synchronized (e.g. the Callstack panel).
-        Firebug.chrome.select(this.context.currentFrame, "script");
+        // Do not use: Firebug.chrome.select(this.context.currentFrame, "script");
+        // at this moment. Since it invokes updateSelection, showStackFrame and
+        // ends up with updating the scroll position, so the current debugging line
+        // is visible to the user. It's wrong in the case where the user just
+        // executed an expression on the command line, which also causes 'framesadded'
+        // to be received (through clearScopes). See also issue 7028.
     },
 
     framescleared: function()
     {
+        Trace.sysout("scriptPanel.framescleared;");
+
         Firebug.chrome.syncStatusPath();
     },
 
@@ -1262,7 +1268,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // issue 3463 and 4213
             Firebug.chrome.syncPanel("script");
             Firebug.chrome.focus();
-            //this.updateSelection(this.context.currentFrame);
+
+            // Make sure the debug location is updated (issue 7028)
+            Firebug.chrome.select(this.context.currentFrame, "script");
 
             this.highlight(true);
 

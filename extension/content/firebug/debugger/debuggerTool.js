@@ -402,7 +402,7 @@ DebuggerTool.prototype = Obj.extend(Tool,
 
     framescleared: function()
     {
-        Trace.sysout("debuggerTool.framescleared; ", arguments);
+        Trace.sysout("debuggerTool.framescleared;", arguments);
 
         this.context.currentTrace = null;
         this.context.stoppedFrame = null;
@@ -413,6 +413,8 @@ DebuggerTool.prototype = Obj.extend(Tool,
 
     cleanScopes: function()
     {
+        Trace.sysout("debuggerTool.cleanScopes;");
+
         if (this.context.activeThread)
         {
             this.context.activeThread._clearFrames();
