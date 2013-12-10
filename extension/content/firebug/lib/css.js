@@ -2889,7 +2889,7 @@ Css.nonDeletableTags =
     "BODY": 1, "body": 1
 };
 
-// lib/xml can't depend on lib/svg, so inject the relevant function from here.
+// lib/xml can't depend on lib/css, so inject the relevant function from here.
 Xml.getPresentationalSVGProperties = function()
 {
     buildKeywordMap("svg");
