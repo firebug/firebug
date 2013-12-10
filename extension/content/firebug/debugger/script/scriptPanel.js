@@ -73,6 +73,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     enableA11y: true,
     order: 40,
 
+    // {@StatusPath} UI component that displays call-stack in the toolbar will be
+    // updated asynchronously.
+    objectPathAsyncUpdate: true,
+
     // Will appear in detached Firebug Remote XUL window.
     remotable: true,
 

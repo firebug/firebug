@@ -30,9 +30,12 @@ var statusCropSize = 20;
  * The path is displayed in panel-toolbar and the logic is based on {@Panel.getObjectPath}
  * method, so any panel can support it.
  *
- * The path can be updated through clear and update methods.
+ * The path can be updated through clear and update methods. A {@Panel} instance can specify
+ * whether the update should be synchronous or asynchronous through: 'objectPathAsyncUpdate'
+ * member.
  */
 var StatusPath =
+/** @lends StatusPath */
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Public API
@@ -64,13 +67,18 @@ var StatusPath =
         if (this.timeout)
             clearTimeout(this.timeout);
 
-        Trace.sysout("statusPath.executor; current panel: " + panel.name);
+        // Asynchronous update is not necessary for every panel,
+        // so it's up to the current panel what to do.
+        var asyncUpdate = panel.objectPathAsyncUpdate;
 
-        // Asynchronous update of the UI is mainly useful when the user is stepping
-        // in the debugger, it avoids flickering. So, do it only if the Script panel
-        // is actually selected. Note that the script panel is using the status path
-        // to display the current JS call-stack (when the debugger is active).
-        if (panel.name == "script")
+        // Synchronous update is always used when panels are switched.
+        if (panel.name != panelStatus.lastPanelName)
+            asyncUpdate = false;
+
+        Trace.sysout("statusPath.executor; asyncUpdate: " + asyncUpdate + ", " +
+            panelStatus.lastPanelName + " -> " + panel.name);
+
+        if (asyncUpdate)
             this.timeout = setTimeout(this.flush.bind(this), 100);
         else
             this.flush();
