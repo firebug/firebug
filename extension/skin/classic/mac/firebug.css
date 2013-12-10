@@ -42,19 +42,41 @@
 
 #fbPanelSplitter {
     background: #f3f3f3 !important;
-    border-left: 1px solid #BBB9BA;
-    border-right: 1px solid #BBB9BA;
-    min-width: 8px;
-    max-width: 8px;
+    border-left: none;
+    border-right: none;
+    min-width: 6px;
+    max-width: 6px;
+}
+
+#fbPanelSplitter > #fbPanelSplitterBox {
+    visibility: visible;
+    height: 32px;
+    width: 6px;
+    background-color: -moz-dialog;
+    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    border-bottom: 1px solid #bebebe;
+    cursor: default;
 }
 
 #fbPanelSplitter[orient="vertical"] {
-    border: none;
+    border-right: none;
+    border-left: none;
     border-top: 1px solid #BBB9BA;
-    min-height: 8px;
-    max-height: 8px;
+    min-height: 6px;
+    max-height: 6px;
     min-width: 0;
     max-width: none;
+}
+
+#fbWindowButtons.innerToolbar {
+    padding: 7px 0 7px 0;   /* Set proper height of window buttons (close, min, detach) */
+}
+
+/*************************************************************************************************/
+/* Toolbars */
+
+#fbToolbox {
+    border-bottom: 1px solid #bebebe;
 }
 
 #fbToolbar {
@@ -66,12 +88,38 @@
     margin-right: 5px;   /* add some space between last button and first tab */
 }
 
-#fbWindowButtons.innerToolbar {
-    padding: 7px 0 7px 0;   /* Set proper height of window buttons (close, min, detach) */
+#fbPanelBar1-tabBox,
+#fbPanelBar2-tabBox {
+    height: 32px;
+}
+
+#fbPanelBar1-tabBox {
+    background: linear-gradient(to bottom, #f1f1f1, #d2d2d2) no-repeat 0 0;
+}
+
+#fbPanelBar2-tabBox {
+    -moz-appearance: none;
+    background-color: transparent;
+}
+
+/* ensure the inner toolbar background looks the same as the other toolbars */
+#fbToolbarInner.innerToolbar {
+    margin-left: -5px;
+    margin-right: 0;
+    height: 31px;
+    background-color: transparent;
+}
+
+#fbPanelBar1-innerToolbar {
+    margin-right: 0;
 }
 
 /*************************************************************************************************/
 /* Search Box */
+
+#fbSearchBox {
+    margin-bottom: 0px;
+}
 
 .fbsearch-textbox {
     border-radius: 10000px 0 0 10000px !important;
@@ -96,7 +144,6 @@
     border-radius: 10000px;
     border: 1px solid rgba(0,0,0,.35);
     background: linear-gradient(#f6f6f6, #e9e9e9);
-    box-shadow: 0 1px rgba(255,255,255,.5), inset 0 1px 1px rgba(255,255,255,.5);
     color: buttontext;
     margin: 0;
     margin-top: 1px;
@@ -120,7 +167,6 @@
 
 .fbsearch-options-buttons.prev {
     border-left: none;
-    border-right: none;
     -moz-margin-end: 0;
     -moz-image-region: rect(0, 10px, 9px, 0);
     border-radius: 0;
@@ -263,7 +309,6 @@
 /********************************************************************************************/
 
 .panelTabBox {
-    background: linear-gradient(to bottom, #f1f1f1, #d2d2d2) no-repeat 0 0;
     border-bottom: 1px solid #bebebe;
     padding: 0;
     overflow: hidden;
@@ -275,7 +320,7 @@
 }
 
 panelTab {
-    margin: 4px 1px 0 3px;
+    margin: 1px 1px 0 3px;
     border: 1px solid transparent;
     border-bottom: none;
     border-radius: 4px 4px 0 0;
@@ -310,6 +355,17 @@ panelTab:not([selected="true"]):hover {
 
 panelTab[selected="true"] > panelTabMenu {
     margin-left: 3px;
+}
+
+#fbPanelBar2-panelTabs > panelTab.watchesPanelTab[selected="true"],
+#fbPanelBar2-panelTabs > panelTab.selectorsPanelTab[selected="true"] {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6)) no-repeat 0 0;
+    background-color: rgb(253, 253, 253);
+}
+
+#fbPanelBar2-panelTabs > panelTab[selected="true"] {
+    background-color: rgb(253, 253, 253);
+    border-bottom: none;
 }
 
 /************************************************************************************************/
@@ -469,14 +525,6 @@ panelTab[selected="true"] > panelTabMenu {
     color: #565656;
 }
 
-/* ensure the inner toolbar background looks the same as the other toolbars */
-#fbToolbarInner.innerToolbar {
-    border-top: 1px solid #fff;
-    margin-left: -5px;
-    margin-right: 0;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6)) no-repeat 0 0;
-}
-
 .useA11y #fbPanelBar1 textbox[focused],
 .searchOptionsMenu button:focus {
     -moz-outline-radius: 10px !important;
@@ -503,10 +551,6 @@ panelTab[selected="true"] > panelTabMenu {
 
 /************************************************************************************************/
 /* Scrollable TabBar + TabList */
-
-#fbPanelBar1-innerToolbar {
-    margin-right: 0;
-}
 
 #fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-up {
     border-right: 2px solid !important;
