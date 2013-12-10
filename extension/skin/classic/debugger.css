@@ -100,17 +100,17 @@
 }
 
 .sourceRow[exe_line="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/executionPointer.png);
+    background-image: url(chrome://firebug/skin/executionPointer.svg);
     background-position: 7px 1px;
     color: #000000;
 }
 
 .sourceRow[breakpoint="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/breakpoint.svg);
 }
 
 .sourceRow[breakpoint="true"][condition="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointCondition.png), url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/breakpointCondition.svg), url(chrome://firebug/skin/breakpoint.svg);
     background-position: 9px 3px, 5px 1px;
 }
 
@@ -125,7 +125,7 @@
     left: 5px;
     width: 12px;
     height: 12px;
-    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
     opacity: 0.5;
 }
 
@@ -136,12 +136,12 @@
     left: 5px;
     width: 12px;
     height: 12px;
-    background: url(chrome://firebug/skin/breakpointCondition.png) no-repeat;
+    background: url(chrome://firebug/skin/breakpointCondition.svg) no-repeat;
     opacity: 0.5;
 }
 
 .sourceRow[breakpoint="true"][exe_line="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/executionPointer.png), url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/executionPointer.svg), url(chrome://firebug/skin/breakpoint.svg);
     background-position: 7px 1px, 5px 1px;
 }
 
@@ -156,7 +156,7 @@
     left: 5px;
     width: 12px;
     height: 12px;
-    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
     opacity: 0.5;
 }
 
@@ -167,19 +167,16 @@
     left: 7px;
     width: 11px;
     height: 12px;
-    background: url(chrome://firebug/skin/executionPointer.png) no-repeat;
+    background: url(chrome://firebug/skin/executionPointer.svg) no-repeat;
 }
 
 .sourceLine.editing {
-    background-image: url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/breakpoint.svg);
 }
 
 /************************************************************************************************/
 /* Breakpoint condition */
 
-/* xxxsz: Use PNG images for condition editor, because using SVGs as border images is broken
-   up to Firefox 22.0. Use SVGs as soon as Firefox 23.0 is the min. supported version.
-   (see issue 6607) */
 .conditionEditor {
     z-index: 2147483647;
     position: absolute;
@@ -188,7 +185,7 @@
     width: 90%;
     border-style: solid;
     border-width: 19px 25px 33px 33px;
-    border-image: url(chrome://firebug/skin/win/breakpointConditionEditor.png) 19 25 33 33 fill stretch;
+    border-image: url(chrome://firebug/skin/win/breakpointConditionEditor.svg) 19 25 33 33 fill stretch;
 }
 
 .conditionCaption {
@@ -214,7 +211,7 @@
 
 .upsideDown {
     border-width: 28px 25px 19px 33px;
-    border-image: url(chrome://firebug/skin/win/breakpointConditionEditorDown.png) 28 25 19 33 fill stretch;
+    border-image: url(chrome://firebug/skin/win/breakpointConditionEditorDown.svg) 28 25 19 33 fill stretch;
 }
 
 /*************************************************************************************************/
@@ -293,7 +290,7 @@
 }
 
 .notificationClose {
-    background: url(chrome://firebug/skin/notificationClose.png) no-repeat scroll 0 0 transparent;
+    background: url(chrome://firebug/skin/notificationClose.svg) no-repeat scroll 0 0 transparent;
     width: 16px;
     height: 16px;
     border: none;
@@ -302,9 +299,9 @@
 }
 
 .notificationClose:hover {
-    background: url(chrome://firebug/skin/notificationClose.png) no-repeat scroll -32px 0 transparent;
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
-.notificationClose:hover:active {
-    background: url(chrome://firebug/skin/notificationClose.png) no-repeat scroll -16px 0 transparent;
+.notificationClose:active {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }

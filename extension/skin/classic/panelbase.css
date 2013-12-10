@@ -93,7 +93,7 @@ code {
     border: 1px solid threedshadow;
     border-radius: 10px;
     padding: 20px 30px 30px 90px;
-    background: #ffffff url(chrome://firebug/skin/firebug32.png) no-repeat 30px 30px;
+    background: #ffffff url(chrome://firebug/skin/firebugBig.svg) no-repeat 30px 30px/32px;
     color: #000000;
     font: message-box;
     min-width: 13em;
@@ -231,7 +231,7 @@ code {
 .infoTipLoading {
     width: 16px;
     height: 16px;
-    background: url(chrome://firebug/skin/loading.png) no-repeat;
+    background: url(chrome://firebug/skin/loading.svg) no-repeat;
 }
 
 .infoTipImageBox {
@@ -310,7 +310,7 @@ code {
     right: 0;
     position: absolute;
     padding: 10px 10px 0px 90px;
-    background: #FFFFFF url(chrome://firebug/skin/firebug32.png) no-repeat 30px 30px;
+    background: #FFFFFF url(chrome://firebug/skin/firebugBig.svg) no-repeat 30px 30px/32px;
     color: #000000;
     font: message-box;
 }
@@ -355,10 +355,6 @@ code {
 
 .disabledPanelBox .descImage-script {
     background-image: url(chrome://firebug/skin/activation-menu-script.png);
-}
-
-.disabledPanelBox .descImage-net {
-    background-image: url(chrome://firebug/skin/activation-menu-net.png);
 }
 
 .disabledPanelBox .descImage-net {

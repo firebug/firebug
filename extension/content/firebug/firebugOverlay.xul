@@ -65,7 +65,7 @@
                                 class="fbInternational">
 
                                 <!-- Button image-->
-                                <image src="chrome://firebug/skin/firebug.png"/>
+                                <image src="chrome://firebug/skin/firebugSmall.svg"/>
 
                                 <menupopup id="menu_firebug_iconMenu" class="fbFirebugMenuPopup"
                                     onpopupshowing="return Firebug.browserOverlay.onMenuShowing(this, event);"

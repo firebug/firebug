@@ -53,7 +53,7 @@ BreakNotification.prototype = domplate(Rep,
                     TR(
                         TD({"class": "imageCol"},
                             IMG({"class": "notificationImage",
-                                src: "chrome://firebug/skin/breakpoint.png"})
+                                src: "chrome://firebug/skin/breakpoint.svg"})
                         ),
                         TD({"class": "descCol"},
                             SPAN({"class": "notificationDesc"}, "$cause|getDescription"),

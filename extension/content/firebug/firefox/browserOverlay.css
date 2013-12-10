@@ -5,22 +5,26 @@
 
 /* Inspector button */
 #firebug-inspectorButton {
-    list-style-image: url(chrome://firebug/skin/inspect.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
+    list-style-image: url(chrome://firebug/skin/inspect.svg);
 }
 
 #firebug-inspectorButton:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
+    filter: url(resource://firebugui/filters.svg#darken);
+}
+
+#firebug-inspectorButton:active {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
 /* Firebug Start Button */
 #firebug-button {
     -moz-binding: url("chrome://firebug/content/firefox/start-button/startButton.xml#start-button");
-    list-style-image: url(chrome://firebug/skin/firebug16Disabled.png) !important;
+    list-style-image: url(chrome://firebug/skin/firebugSmall.svg) !important;
+    filter: url(resource://firebugui/filters.svg#grayscale);
 }
 
 #firebug-button[firebugActive="true"] {
-    list-style-image: url(chrome://firebug/skin/firebug16.png) !important;
+    filter: none;
 }
 
 /* Error badge (displays an error counter). The badge is only visible if error count
@@ -98,17 +102,22 @@
 /*************************************************************************************************/
 /* Firebug Menu & Firefox context menu */
 
-#menu_firebug, #appmenu_firebug, #menu_webDeveloper_firebug {
-    list-style-image: url(chrome://firebug/skin/firebug16.png);
+#menu_firebug,
+#appmenu_firebug,
+#menu_webDeveloper_firebug {
+    list-style-image: url(chrome://firebug/skin/firebugSmall.svg);
 }
 
 #menu_firebug_firebugInspect {
-    list-style-image: url(chrome://firebug/skin/inspect.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
+    list-style-image: url(chrome://firebug/skin/inspect.svg);
 }
 
 #menu_firebug_firebugInspect:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
+    filter: url(resource://firebugui/filters.svg#darken);
+}
+
+#menu_firebug_firebugInspect:active {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
 /*************************************************************************************************/

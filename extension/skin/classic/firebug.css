@@ -249,7 +249,7 @@ panelTab:not([selected="true"]):hover {
 
 panelTab[selected="true"] > panelTabMenu .menuTarget,
 panelTab:focus > panelTabMenu .menuTarget {
-    background: url(chrome://firebug/skin/win/optionsMenuTarget.png) no-repeat center;
+    background: url(chrome://firebug/skin/win/optionsMenuTarget.svg) no-repeat center;
     width: 11px;
     height: 10px;
     vertical-align: middle;
@@ -257,7 +257,7 @@ panelTab:focus > panelTabMenu .menuTarget {
 }
 
 panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
-    background-image: url(chrome://firebug/skin/win/optionsMenuTargetHover.png);
+    background-image: url(chrome://firebug/skin/win/optionsMenuTargetHover.svg);
 }
 
 /* Panel tab is directly joined with the content (no inner toolbar) if the panel is disabled */
@@ -346,30 +346,25 @@ panelTab[selected="true"][disabled="true"] {
 
 .fbsearch-icon {
     cursor: default !important;
-    background: url(chrome://firebug/skin/search.png) no-repeat 0 0;
+    background: url(chrome://firebug/skin/search.svg) no-repeat 0 0;
     width: 16px;
     height: 16px;
 }
 
-/* Need to use images instead of filters due to https://bugzil.la/891777 */ 
+.fbsearch-textbox[active-search="true"] > .fbsearch-icon {
+    background-image: url(chrome://firebug/skin/searchCancel.svg);
+}
+
 .fbsearch-icon:hover {
-    background-position: 0 -16px;
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
 .fbsearch-icon:active {
-    background-position: 0 -32px;
-}
-
-.fbsearch-textbox[active-search="true"] > .fbsearch-icon {
-    background-image: url(chrome://firebug/skin/searchClose.png);
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
 #fbSearchOptionsPanel {
     font-size: 11px;
-}
-
-.fbsearch-options-label {
-
 }
 
 .fbsearch-options-buttons {
@@ -378,7 +373,6 @@ panelTab[selected="true"][disabled="true"] {
     /* background: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2)); */
     border: 1px solid ThreeDShadow;
     /*box-shadow: 0 1px #fff inset;*/
-    list-style-image: url("chrome://firebug/skin/find-arrows.png");
     padding: 1px 5px;
     line-height: 1em;
     width: 22px;
@@ -386,20 +380,23 @@ panelTab[selected="true"][disabled="true"] {
 }
 
 .fbsearch-options-buttons.prev {
-    -moz-image-region: rect(0, 12px, 9px, 0);
+    list-style-image: url("chrome://firebug/skin/searchPrevious.svg");
     border-left: none;
 }
 
 .fbsearch-options-buttons.next {
-    -moz-image-region: rect(0, 24px, 9px, 12px);
+    list-style-image: url("chrome://firebug/skin/searchNext.svg");
     border-radius: 0 2px 2px 0;
     border-left: none;
 }
 
-.fbsearch-options-buttons:not([disabled]):active,
-.fbsearch-options-buttons:not([disabled]):active {
-  background: rgba(23,50,76,.2);
-  box-shadow: 0 1px 2px rgba(10,31,51,.2) inset;
+.fbsearch-options-buttons:hover {
+    filter: url(resource://firebugui/filters.svg#darken);
+}
+
+.fbsearch-options-buttons:active {
+    box-shadow: 0 1px 2px rgba(10,31,51,.2) inset;
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
 textbox[type="fbSearchBox"] > panel {
@@ -471,12 +468,15 @@ textbox[type="fbSearchBox"] > panel {
 /* Firebug toolbar buttons */
 
 #fbInspectButton {
-    list-style-image: url(chrome://firebug/skin/inspect.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
+    list-style-image: url(chrome://firebug/skin/inspect.svg);
 }
 
 #fbInspectButton:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
+    filter: url(resource://firebugui/filters.svg#darken);
+}
+
+#fbInspectButton:active {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
 /*************************************************************************************************/
@@ -487,107 +487,84 @@ textbox[type="fbSearchBox"] > panel {
 }
 
 #fbRerunButton {
-    list-style-image: url(chrome://firebug/skin/rerun.png);
-    -moz-image-region: rect(0px, 16px, 16px, 0px);
-}
-
-/* Need to use images instead of filters due to https://bugzil.la/886883 */ 
-#fbRerunButton:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0px);
-}
-
-#fbRerunButton[disabled=true] {
-    -moz-image-region: rect(32px, 16px, 48px, 0px);
+    list-style-image: url(chrome://firebug/skin/rerun.svg);
 }
 
 #fbContinueButton {
-    list-style-image: url(chrome://firebug/skin/continue.png);
-    -moz-image-region: rect(0px, 16px, 16px, 0px);
-}
-
-#fbContinueButton:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0px);
-}
-
-#fbContinueButton[disabled=true] {
-    -moz-image-region: rect(32px, 16px, 48px, 0px);
+    list-style-image: url(chrome://firebug/skin/continue.svg);
 }
 
 #fbStepOverButton {
-    list-style-image: url(chrome://firebug/skin/stepOver.png);
-    -moz-image-region: rect(0px, 16px, 16px, 0px);
-}
-
-#fbStepOverButton:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0px);
-}
-
-#fbStepOverButton[disabled=true] {
-    -moz-image-region: rect(32px, 16px, 48px, 0px);
+    list-style-image: url(chrome://firebug/skin/stepOver.svg);
 }
 
 #fbStepIntoButton {
-    list-style-image: url(chrome://firebug/skin/stepInto.png);
-    -moz-image-region: rect(0px, 16px, 16px, 0px);
-}
-
-#fbStepIntoButton:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0px);
-}
-
-#fbStepIntoButton[disabled=true] {
-    -moz-image-region: rect(32px, 16px, 48px, 0px);
+    list-style-image: url(chrome://firebug/skin/stepInto.svg);
 }
 
 #fbStepOutButton {
-    list-style-image: url(chrome://firebug/skin/stepOut.png);
-    -moz-image-region: rect(0px, 16px, 16px, 0px);
+    list-style-image: url(chrome://firebug/skin/stepOut.svg);
 }
 
-#fbStepOutButton:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0px);
+:-moz-any(#fbRerunButton,
+          #fbContinueButton,
+          #fbStepOverButton,
+          #fbStepIntoButton,
+          #fbStepOutButton):hover {
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
-#fbStepOutButton[disabled=true] {
-    -moz-image-region: rect(32px, 16px, 48px, 0px);
+:-moz-any(#fbRerunButton,
+          #fbContinueButton,
+          #fbStepOverButton,
+          #fbStepIntoButton,
+          #fbStepOutButton):active {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
+
+:-moz-any(#fbRerunButton,
+          #fbContinueButton,
+          #fbStepOverButton,
+          #fbStepIntoButton,
+          #fbStepOutButton)[disabled=true] {
+    filter: url(resource://firebugui/filters.svg#grayscale);
+}
+
 
 /*************************************************************************************************/
 /* Script history buttons */
-
-#fbNavigateBackButton,
-#fbNavigateForwardButton,
-.navigationHistoryMenuItemForward,
-.navigationHistoryMenuItemBack {
-    -moz-image-region: rect(0, 16px, 16px, 0);
-}
 
 #fbNavigateBackButton:-moz-locale-dir(ltr),
 #fbNavigateForwardButton:-moz-locale-dir(rtl),
 .navigationHistoryMenuItemBack:-moz-locale-dir(ltr),
 .navigationHistoryMenuItemForward:-moz-locale-dir(rtl) {
-    list-style-image: url(chrome://firebug/skin/navigationBack.png);
-    -moz-image-region: rect(0px, 16px, 16px, 0px);
+    list-style-image: url(chrome://firebug/skin/navigationBack.svg);
 }
 
 #fbNavigateForwardButton:-moz-locale-dir(ltr),
 #fbNavigateBackButton:-moz-locale-dir(rtl),
 .navigationHistoryMenuItemForward:-moz-locale-dir(ltr),
 .navigationHistoryMenuItemBack:-moz-locale-dir(rtl) {
-    list-style-image: url(chrome://firebug/skin/navigationForward.png);
-    -moz-image-region: rect(0px, 16px, 16px, 0px);
+    list-style-image: url(chrome://firebug/skin/navigationForward.svg);
 }
 
-#fbNavigateBackButton:hover,
-#fbNavigateForwardButton:hover,
-.navigationHistoryMenuItemBack:hover,
-.navigationHistoryMenuItemForward:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0px);
+:-moz-any(#fbNavigateBackButton,
+          #fbNavigateForwardButton,
+          .navigationHistoryMenuItemBack,
+          .navigationHistoryMenuItemForward):hover {
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
-#fbNavigateBackButton[disabled="true"],
-#fbNavigateForwardButton[disabled="true"] {
-    -moz-image-region: rect(32px, 16px, 48px, 0px);
+:-moz-any(#fbNavigateBackButton,
+          #fbNavigateForwardButton,
+          .navigationHistoryMenuItemBack,
+          .navigationHistoryMenuItemForward):active {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
+}
+
+:-moz-any(#fbNavigateBackButton,
+          #fbNavigateForwardButton)[disabled="true"] {
+    filter: url(resource://firebugui/filters.svg#brightenedGrayscale);
 }
 
 .navigationHistoryMenuItemCurrent {
@@ -595,18 +572,22 @@ textbox[type="fbSearchBox"] > panel {
 }
 
 /*************************************************************************************************/
+/* Command Line Popup */
 
 #fbCommandPopupButton {
-    list-style-image: url(chrome://firebug/skin/commandLinePopup.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
+    list-style-image: url(chrome://firebug/skin/commandLinePopup.svg);
 }
 
 #fbCommandPopupButton:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
+    filter: url(resource://firebugui/filters.svg#darken);
+}
+
+#fbCommandPopupButton:active {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
 #fbCommandPopupButton[disabled="true"] {
-    -moz-image-region: rect(32px, 16px, 48px, 0);
+    filter: url(resource://firebugui/filters.svg#brightenedGrayscale);
 }
 
 /************************************************************************************************/
@@ -628,16 +609,7 @@ textbox[type="fbSearchBox"] > panel {
 }
 
 /*************************************************************************************************/
-
-#fbBreakOnErrors {
-    list-style-image: url(chrome://firebug/skin/breakErrors.png);
-}
-
-#fbBreakOnErrors[checked="true"] {
-    list-style-image: url(chrome://firebug/skin/breakErrorsOn.png);
-}
-
-/*************************************************************************************************/
+/* Break On ... buttons */
 
 /* default is disabled */
 .fbBreakOnImage {
@@ -645,24 +617,26 @@ textbox[type="fbSearchBox"] > panel {
     padding-right: 2px;
 }
 
-/* images */
 #fbBreakOnNextButton #fbBreakOnImage {
-    list-style-image: url(chrome://firebug/skin/breakOn.png);
-    -moz-image-region: rect(0px, 16px, 16px, 0px);
+    list-style-image: url(chrome://firebug/skin/breakOn.svg);
     visibility: visible;
 }
 
-#fbBreakOnNextButton[breakable="true"]:hover #fbBreakOnImage {
-    -moz-image-region: rect(16px, 16px, 32px, 0px);
+#fbBreakOnNextButton[breakable="true"]:hover .fbBreakOnImage {
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
-#fbBreakOnNextButton #fbBreakOnImageArmed {
-    list-style-image: url(chrome://firebug/skin/breakOnArmed.png);
+#fbBreakOnNextButton[breakable="true"]:active .fbBreakOnImage {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
+}
+
+#fbBreakOnImageArmed {
+    list-style-image: url(chrome://firebug/skin/breakOnArmed.svg);
 }
 
 /* disabled */
-#fbBreakOnNextButton[breakable="disabled"] #fbBreakOnImage {
-    -moz-image-region: rect(32px, 16px, 48px, 0px);
+#fbBreakOnNextButton[breakable="disabled"] .fbBreakOnImage {
+    filter: url(resource://firebugui/filters.svg#grayscale);
 }
 
 /* enabled */
@@ -678,22 +652,22 @@ textbox[type="fbSearchBox"] > panel {
 /* panel badges */
 #fbBreakOnNextButton[panelName="script"] #fbBreakOnImageNext {
     visibility: visible;
-    list-style-image: url(chrome://firebug/skin/breakOn/breakOnNext.png);
+    list-style-image: url(chrome://firebug/skin/breakOn/breakOnNext.svg);
 }
 
 #fbBreakOnNextButton[panelName="net"] #fbBreakOnImageXHR {
     visibility: visible;
-    list-style-image: url(chrome://firebug/skin/breakOn/breakOnXHR.png);
+    list-style-image: url(chrome://firebug/skin/breakOn/breakOnXHR.svg);
 }
 
 #fbBreakOnNextButton[panelName="console"] #fbBreakOnImageError {
     visibility: visible;
-    list-style-image: url(chrome://firebug/skin/breakOn/breakOnError.png);
+    list-style-image: url(chrome://firebug/skin/breakOn/breakOnError.svg);
 }
 
 #fbBreakOnNextButton[panelName="html"] #fbBreakOnImageMutate {
     visibility: visible;
-    list-style-image: url(chrome://firebug/skin/breakOn/breakOnMutate.png);
+    list-style-image: url(chrome://firebug/skin/breakOn/breakOnMutate.svg);
 }
 
 /*************************************************************************************************/
@@ -728,29 +702,11 @@ textbox[type="fbSearchBox"] > panel {
 /* Toggle Side Panels */
 
 #fbToggleSidePanels {
-    list-style-image: url(chrome://firebug/skin/collapseSidePanels.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
-}
-
-#fbToggleSidePanels:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
-}
-
-#fbToggleSidePanels:active {
-    -moz-image-region: rect(32px, 16px, 48px, 0);
+    list-style-image: url(chrome://firebug/skin/collapseSidePanels.svg);
 }
 
 #fbToggleSidePanels.closed {
-    list-style-image: url(chrome://firebug/skin/expandSidePanels.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
-}
-
-#fbToggleSidePanels.closed:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
-}
-
-#fbToggleSidePanels.closed:active {
-    -moz-image-region: rect(32px, 16px, 48px, 0);
+    list-style-image: url(chrome://firebug/skin/expandSidePanels.svg);
 }
 
 #fbPanelPane:not([orient="vertical"]) #fbToggleSidePanels {
@@ -758,27 +714,17 @@ textbox[type="fbSearchBox"] > panel {
 }
 
 #fbPanelPane[orient="vertical"] #fbToggleSidePanels {
-    list-style-image: url(chrome://firebug/skin/collapseSidePanelsVertical.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
-}
-
-#fbPanelPane[orient="vertical"] #fbToggleSidePanels:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
-}
-
-#fbPanelPane[orient="vertical"] #fbToggleSidePanels:active {
-    -moz-image-region: rect(32px, 16px, 48px, 0);
+    list-style-image: url(chrome://firebug/skin/collapseSidePanelsVertical.svg);
 }
 
 #fbPanelPane[orient="vertical"] #fbToggleSidePanels.closed {
-    list-style-image: url(chrome://firebug/skin/expandSidePanelsVertical.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
+    list-style-image: url(chrome://firebug/skin/expandSidePanelsVertical.svg);
 }
 
-#fbPanelPane[orient="vertical"] #fbToggleSidePanels.closed:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
+#fbToggleSidePanels:hover {
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
-#fbPanelPane[orient="vertical"] #fbToggleSidePanels.closed:active {
-    -moz-image-region: rect(32px, 16px, 48px, 0);
+#fbToggleSidePanels:active {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }

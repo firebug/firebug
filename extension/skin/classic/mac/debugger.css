@@ -99,7 +99,7 @@
 }
 
 .sourceRow[exe_line="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/executionPointer.png);
+    background-image: url(chrome://firebug/skin/executionPointer.svg);
     background-position: 7px 1px;
     color: #000000;
 }
@@ -115,7 +115,7 @@
     left: 5px;
     width: 12px;
     height: 12px;
-    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
     opacity: 0.5;
 }
 
@@ -126,12 +126,12 @@
     left: 5px;
     width: 12px;
     height: 12px;
-    background: url(chrome://firebug/skin/breakpointCondition.png) no-repeat 4px 2px, url(chrome://firebug/skin/breakpoint.png) no-repeat;
+    background: url(chrome://firebug/skin/breakpointCondition.svg) no-repeat 4px 2px, url(chrome://firebug/skin/breakpoint.svg) no-repeat;
     opacity: 0.5;
 }
 
 .sourceRow[breakpoint="true"][exe_line="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/executionPointer.png), url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/executionPointer.svg), url(chrome://firebug/skin/breakpoint.svg);
     background-position: 7px 1px, 5px 1px;
 }
 
@@ -146,7 +146,7 @@
     left: 5px;
     width: 12px;
     height: 12px;
-    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
     opacity: 0.5;
 }
 
@@ -156,11 +156,11 @@
     left: 7px;
     width: 11px;
     height: 12px;
-    background: url(chrome://firebug/skin/executionPointer.png) no-repeat;
+    background: url(chrome://firebug/skin/executionPointer.svg) no-repeat;
 }
 
 .sourceLine.editing {
-    background-image: url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/breakpoint.svg);
 }
 
 /************************************************************************************************/
@@ -172,7 +172,7 @@
 .conditionEditor {
     border-style: solid;
     border-width: 19px 25px 33px 33px;
-    border-image: url(chrome://firebug/skin/mac/breakpointConditionEditor.png) 19 25 33 33 fill
+    border-image: url(chrome://firebug/skin/mac/breakpointConditionEditor.svg) 19 25 33 33 fill
         stretch;
 }
 
@@ -197,7 +197,7 @@
 
 .upsideDown {
     border-width: 28px 25px 19px 33px;
-    border-image: url(chrome://firebug/skin/mac/breakpointConditionEditorDown.png) 28 25 19 33 fill
+    border-image: url(chrome://firebug/skin/mac/breakpointConditionEditorDown.svg) 28 25 19 33 fill
         stretch;
 }
 

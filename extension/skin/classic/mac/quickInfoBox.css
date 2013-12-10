@@ -12,27 +12,17 @@
 }
 
 .fbQuickInfoPin {
-    background: url(chrome://firebug/skin/mac/pin.png) no-repeat;
+    background: url(chrome://firebug/skin/mac/pin.svg) no-repeat;
     width: 13px;
     height: 13px;
 }
 
 .fbQuickInfoClose {
-    background: url(chrome://firebug/skin/mac/close.png) no-repeat;
+    background: url(chrome://firebug/skin/mac/close.svg) no-repeat;
     width: 13px;
     height: 13px;
 }
 
-.fbQuickInfoPin:hover,
-.fbQuickInfoClose:hover {
-    background-position: 0 -13px;
-}
-
-.fbQuickInfoPin.pin,
-.fbQuickInfoPin:active {
-    background: url(chrome://firebug/skin/mac/pinned.png) no-repeat;
-}
-
-.fbQuickInfoClose:active {
-    background-position: 0 -26px;
+.fbQuickInfoPin.pin {
+    background: url(chrome://firebug/skin/mac/pinned.svg) no-repeat;
 }

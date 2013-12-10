@@ -151,7 +151,7 @@ Firebug.CookieModule = Obj.extend(ActivableModule,
             var image = document.createElement("image");
             image.setAttribute("id", "fbBreakOnImageCookies");
             image.setAttribute("class", "fbBreakOnImage");
-            image.setAttribute("src", "chrome://firebug/skin/cookies/breakOnCookie.png");
+            image.setAttribute("src", "chrome://firebug/skin/cookies/breakOnCookie.svg");
             bonStack.appendChild(image);
         }
 
