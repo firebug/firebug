@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- See license.txt for terms of usage -->
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -36,10 +37,10 @@
          offset="1" />
     </linearGradient>
     <linearGradient
-       x1="0.083576456"
-       y1="-4.6856079"
-       x2="0.083576456"
-       y2="7.8533344"
+       x1="1.4718857"
+       y1="-4.0977812"
+       x2="1.4718857"
+       y2="6.7719789"
        id="linearGradient3810"
        xlink:href="#linearGradient3804"
        gradientUnits="userSpaceOnUse"
@@ -65,20 +66,37 @@
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(0.65608541,0,0,-1.019247,4.493557,9.4013942)" />
     <linearGradient
-       x1="2.7122469"
-       y1="13.960968"
-       x2="2.7122469"
-       y2="0.10765414"
-       id="linearGradient3813"
-       xlink:href="#linearGradient3858"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(14.576271,0.76271164)" />
-    <linearGradient
        x1="7.5084748"
        y1="12.491526"
        x2="4.3220339"
        y2="1.559322"
        id="linearGradient3805"
+       xlink:href="#linearGradient3858"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       x1="-0.34518898"
+       y1="1.3749298"
+       x2="1.9048694"
+       y2="1.3749298"
+       id="linearGradient3773"
+       xlink:href="#linearGradient3804-4"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.65608541,0,0,-1.019247,5.7639522,8.3227568)" />
+    <linearGradient
+       x1="7.5084748"
+       y1="12.491526"
+       x2="4.3220339"
+       y2="1.559322"
+       id="linearGradient3775"
+       xlink:href="#linearGradient3858"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(1.2703952,-1.0786375)" />
+    <linearGradient
+       x1="10.180225"
+       y1="8.7670307"
+       x2="3.926167"
+       y2="2.9903283"
+       id="linearGradient3783"
        xlink:href="#linearGradient3858"
        gradientUnits="userSpaceOnUse" />
   </defs>
@@ -95,11 +113,7 @@
     </rdf:RDF>
   </metadata>
   <path
-     d="M 11.788236,7.9999998 7.9999997,4.6022184 4.2117642,1.2044372 l 0,6.7955628 0,6.795563 3.7882357,-3.397782 z"
+     d="M 11.788236,7.9999998 4.5,1.2044372 4.5,8 l 0,6.795563 z"
      id="path30"
-     style="fill:url(#linearGradient3810);fill-opacity:1;stroke:none" />
-  <path
-     d="M 11.788236,8.0000005 7.9999992,4.602219 4.2117642,1.2044378 l 0,6.7955629 0,6.7955613 3.7882362,-3.397781 z"
-     id="path3802-4"
-     style="fill:url(#linearGradient3154);fill-opacity:1;stroke:url(#linearGradient3805);stroke-linejoin:round;stroke-opacity:1" />
+     style="fill:url(#linearGradient3810);fill-opacity:1;stroke:url(#linearGradient3783);stroke-linejoin:round" />
 </svg>

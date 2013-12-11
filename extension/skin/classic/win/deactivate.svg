@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- See license.txt for terms of usage -->
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -67,8 +68,8 @@
        color-interpolation-filters="sRGB"
        id="filter3841">
       <feGaussianBlur
-         stdDeviation="0.7125"
-         id="feGaussianBlur3843" />
+         id="feGaussianBlur3843"
+         stdDeviation="0.7125" />
     </filter>
     <filter
        x="-0.23999999"
@@ -78,8 +79,8 @@
        color-interpolation-filters="sRGB"
        id="filter3901">
       <feGaussianBlur
-         stdDeviation="0.8"
-         id="feGaussianBlur3903" />
+         id="feGaussianBlur3903"
+         stdDeviation="0.8" />
     </filter>
     <filter
        x="-0.19499999"
@@ -89,8 +90,8 @@
        color-interpolation-filters="sRGB"
        id="filter3963">
       <feGaussianBlur
-         stdDeviation="0.65"
-         id="feGaussianBlur3965" />
+         id="feGaussianBlur3965"
+         stdDeviation="0.65" />
     </filter>
     <linearGradient
        x1="8.7688313"
@@ -118,8 +119,8 @@
        color-interpolation-filters="sRGB"
        id="filter3820">
       <feGaussianBlur
-         id="feGaussianBlur3822"
-         stdDeviation="0.5" />
+         stdDeviation="0.5"
+         id="feGaussianBlur3822" />
     </filter>
     <filter
        x="-0.25078124"
@@ -129,8 +130,8 @@
        color-interpolation-filters="sRGB"
        id="filter3864">
       <feGaussianBlur
-         id="feGaussianBlur3866"
-         stdDeviation="0.8359375" />
+         stdDeviation="0.8359375"
+         id="feGaussianBlur3866" />
     </filter>
   </defs>
   <metadata
@@ -159,7 +160,7 @@
      id="path3835-7"
      style="opacity:0.4;fill:#000000;fill-opacity:1;stroke:none;filter:url(#filter3864)" />
   <path
-     d="m 7.5,3.28125 0,5 1,0 0,-5 -1,0 z m -1,1 C 5.0306621,4.8730251 4,6.3188452 4,8 c 0,2.209139 1.790861,4 4,4 2.209139,0 4,-1.790861 4,-4 C 12,6.3188452 10.969338,4.8730251 9.5,4.28125 l 0,1.125 C 10.395413,5.9252959 11,6.8905413 11,8 11,9.6568543 9.6568543,11 8,11 6.3431457,11 5,9.6568543 5,8 5,6.8905413 5.6045867,5.9252959 6.5,5.40625 l 0,-1.125 z"
+     d="m 7.3515625,3.5 0,4.5 1.546875,0 0,-4.5 -1.546875,0 z M 6.3847656,4.375 C 4.9768464,5.0120053 4,6.3938542 4,8 c 0,2.209139 1.8468254,4 4.125,4 2.278175,0 4.125,-1.790861 4.125,-4 0,-1.6061458 -0.976846,-2.9879947 -2.3847656,-3.625 l 0,1.1875 C 10.671653,6.1035441 11.21875,6.9770791 11.21875,8 c 0,1.6568543 -1.385119,3 -3.09375,3 -1.708631,0 -3.09375,-1.3431457 -3.09375,-3 0,-1.0229209 0.5470977,-1.8964559 1.3535156,-2.4375 l 0,-1.1875 z"
      id="path3835"
      style="fill:#ffffff;fill-opacity:1;stroke:none" />
 </svg>
