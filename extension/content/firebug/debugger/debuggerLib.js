@@ -110,6 +110,9 @@ DebuggerLib.withTemporaryDebugger = function(context, global, callback)
         throw new Error("Script panel must be enabled");
 
     var dbg = getInactiveDebuggerForContext(context);
+    if (dbg.hasDebuggee(global))
+        return callback(DebuggerLib.getDebuggeeGlobal(context, global));
+
     var dbgGlobal = dbg.addDebuggee(global);
     try
     {
