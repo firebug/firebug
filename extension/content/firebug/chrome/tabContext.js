@@ -691,12 +691,11 @@ TabContext.prototype =
 
         this.throttleQueue.push(message, object, args);
 
-        if (this.throttleTimeout)
-            this.clearTimeout(this.throttleTimeout);
-
-        var self = this;
-        this.throttleTimeout =
-            this.setTimeout(function() { self.flushThrottleQueue(); }, throttleInterval);
+        if (!this.throttleTimeout)
+        {
+            this.throttleTimeout =
+                this.setTimeout(this.flushThrottleQueue.bind(this), throttleInterval);
+        }
 
         return true;
     },

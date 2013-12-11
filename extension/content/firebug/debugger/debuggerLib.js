@@ -109,10 +109,10 @@ DebuggerLib.withTemporaryDebugger = function(context, global, callback)
     if (!DebuggerLib._closureInspectionRequiresDebugger())
         return callback(DebuggerLib.getDebuggeeGlobal(context, global));
 
-    if (!Firebug.PanelActivation.isPanelEnabled(Firebug.getPanelType("script")))
-        throw new Error("Script panel must be enabled");
-
     var dbg = getInactiveDebuggerForContext(context);
+    if (dbg.hasDebuggee(global))
+        return callback(DebuggerLib.getDebuggeeGlobal(context, global));
+
     var dbgGlobal = dbg.addDebuggee(global);
     try
     {
