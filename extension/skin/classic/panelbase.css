@@ -93,7 +93,7 @@ code {
     border: 1px solid threedshadow;
     border-radius: 10px;
     padding: 20px 30px 30px 90px;
-    background: #ffffff url(chrome://firebug/skin/firebugBig.svg) no-repeat 30px 30px/32px;
+    background: #ffffff url(chrome://firebug/skin/firebugBig.png) no-repeat 30px 30px/32px;
     color: #000000;
     font: message-box;
     min-width: 13em;
@@ -310,7 +310,7 @@ code {
     right: 0;
     position: absolute;
     padding: 10px 10px 0px 90px;
-    background: #FFFFFF url(chrome://firebug/skin/firebugBig.svg) no-repeat 30px 30px/32px;
+    background: #FFFFFF url(chrome://firebug/skin/firebugBig.png) no-repeat 30px 30px/32px;
     color: #000000;
     font: message-box;
 }
