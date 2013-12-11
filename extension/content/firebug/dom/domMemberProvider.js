@@ -11,9 +11,12 @@ define([
     "firebug/lib/dom",
     "firebug/lib/locale",
     "firebug/console/closureInspector",
+    "firebug/chrome/panelActivation",
     "firebug/chrome/reps",
+    "firebug/debugger/debuggerLib",
 ],
-function(Firebug, FBTrace, Obj, Arr, Wrapper, Dom, Locale, ClosureInspector, FirebugReps) {
+function(Firebug, FBTrace, Obj, Arr, Wrapper, Dom, Locale, ClosureInspector, PanelActivation,
+    FirebugReps, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -187,7 +190,8 @@ DOMMemberProvider.prototype =
                 }
             }
 
-            if (isScope || (typeof object === "function" && Firebug.showClosures && this.context))
+            if (this.shouldShowClosures() &&
+                (isScope || (typeof object === "function" && this.context)))
             {
                 this.maybeAddClosureMember(object, "proto", proto, level, isScope);
             }
@@ -285,6 +289,16 @@ DOMMemberProvider.prototype =
         }
     },
 
+    shouldShowClosures: function()
+    {
+        if (!Firebug.showClosures)
+            return false;
+        var requireScriptPanel = DebuggerLib._closureInspectionRequiresDebugger();
+        if (requireScriptPanel && !PanelActivation.isPanelEnabled(Firebug.getPanelType("script")))
+            return false;
+        return true;
+    },
+
     hasChildren: function(value)
     {
         if (!value || (typeof value !== "object" && typeof value !== "function"))
@@ -317,7 +331,7 @@ DOMMemberProvider.prototype =
         }
 
         // Special case for closure inspection.
-        if (typeof value === "function" && Firebug.showClosures && this.context)
+        if (typeof value === "function" && this.shouldShowClosures() && this.context)
         {
             try
             {

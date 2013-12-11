@@ -45,6 +45,8 @@ var Panel = Obj.extend(new EventSource(),
     deriveA11yFrom: null, // Name of the panel that uses the same a11y logic.
     inspectable: false,   // true to support inspecting elements inside this panel
 
+    objectPathAsyncUpdate: false, // true if {@StatusPath} should be updated asynchronously.
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
