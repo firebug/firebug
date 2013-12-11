@@ -717,9 +717,19 @@
 }
 
 /*************************************************************************************************/
+/* console.dir() */
 
 .logRow-dir {
     padding: 0;
+}
+
+.logRow-dir .memberRow td {
+    border-bottom: none;
+}
+
+/* Overwrite the default y value defined in panel.css */
+.logRow-dir .memberRow.hasChildren > .memberLabelCell > .memberLabel {
+    background-position: 2px 2px;
 }
 
 /*************************************************************************************************/

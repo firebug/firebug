@@ -612,6 +612,24 @@ DOMPanel.prototype = Obj.extend(BasePanel,
         // Restore tree state.
         this.tree.restoreState(toggles);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Backward Compatibility with 'firebug/dom/domReps'
+
+    /**
+     * xxxHonza: following methods should be removed as soon as 'firebug/dom/domReps'
+     * module is removed.
+     */
+    getMembers: function(object, level)
+    {
+        return this.tree.memberProvider.getMembers(object, level);
+    },
+
+    addMember: function()
+    {
+        var provider = this.tree.memberProvider;
+        provider.addMember.apply(provider, arguments);
+    },
 });
 
 // ********************************************************************************************* //
