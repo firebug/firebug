@@ -100,7 +100,7 @@
 }
 
 .memberRow[breakpoint="true"] .memberRowHeader {
-    background-image: url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/breakpoint.svg);
 }
 
 .memberRow[breakpoint="true"][disabledBreakpoint="true"] .memberRowHeader {
@@ -114,7 +114,7 @@
     left: 5px;
     width: 12px;
     height: 12px;
-    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
     opacity: 0.5;
 }
 

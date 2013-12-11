@@ -19,7 +19,7 @@
 .breakpointHeader > .twisty,
 .computedStyle.hasSelectors > .stylePropName,
 .cookieRow > .cookieNameCol > .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/win/twistyClosed.png);
+    background-image: url(chrome://firebug/skin/win/twistyClosed.svg);
     background-repeat: no-repeat;
     background-position: 2px calc(0.5em - 3px);
     min-height: 12px;
@@ -43,7 +43,7 @@
 .breakpointBlock.opened > .breakpointHeader > .twisty,
 .computedStyle.hasSelectors.opened > .stylePropName,
 .cookieRow.opened > .cookieNameCol > .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/win/twistyOpen.png);
+    background-image: url(chrome://firebug/skin/win/twistyOpen.svg);
     background-repeat: no-repeat;
     min-height: 12px;
 }
@@ -56,19 +56,19 @@
 }
 
 /************************************************************************************************/
-/* DOM panel */
+/* Watch side panel */
 
 .closeButton {
     display: inline-block;
     width: 16px;
     height: 16px;
-    background: url(chrome://firebug/skin/win/close.png) no-repeat 0 0;
+    background: url(chrome://firebug/skin/win/close.svg) no-repeat 0 0;
 }
 
 .closeButton:hover {
-    background-position: 0 -16px;
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
-.closeButton:hover:active {
-    background-position: 0 -32px;
+.closeButton:active {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }

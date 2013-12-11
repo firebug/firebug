@@ -103,7 +103,7 @@
 
 .watchTable .objectBox-errorMessage {
     padding: 0 0 0 18px;
-    background: url(chrome://firebug/skin/errorSmall.png) no-repeat 0 0;
+    background: url(chrome://firebug/skin/error.svg) no-repeat 0 0/13px;
     color: red;
 }
 

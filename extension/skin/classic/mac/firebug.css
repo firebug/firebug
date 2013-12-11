@@ -151,7 +151,6 @@
 
 .fbsearch-options-buttons {
     -moz-margin-start: 0;
-    list-style-image: url(chrome://firebug/skin/mac/find-arrows.png);
     padding: 2px 6px;
 }
 
@@ -168,13 +167,13 @@
 .fbsearch-options-buttons.prev {
     border-left: none;
     -moz-margin-end: 0;
-    -moz-image-region: rect(0, 10px, 9px, 0);
+    list-style-image: url(chrome://firebug/skin/searchPrevious.svg);
     border-radius: 0;
 }
 
 .fbsearch-options-buttons.next {
-    -moz-image-region: rect(0, 20px, 9px, 10px);
     -moz-padding-end: 7px;
+    list-style-image: url(chrome://firebug/skin/searchNext.svg);
     border-radius: 0 10000px 10000px 0;
 }
 
@@ -213,35 +212,12 @@
 
 #fbMinimizeButton,
 #fbToggleCommandEditor {
-    list-style-image: url(chrome://firebug/skin/mac/minimize.png);
-    -moz-image-region: rect(0px, 13px, 13px, 0px);
-}
-
-/* Need to use images instead of filters due to https://bugzil.la/886883 */
-#fbMinimizeButton:hover,
-#fbToggleCommandEditor:hover {
-    -moz-image-region: rect(13px, 13px, 26px, 0px);
-}
-
-#fbMinimizeButton:hover:active,
-#fbToggleCommandEditor:hover:active {
-    -moz-image-region: rect(26px, 13px, 39px, 0px);
+    list-style-image: url(chrome://firebug/skin/mac/minimize.svg);
 }
 
 #fbDetachButton,
 #fbToggleCommandLine {
-    list-style-image: url(chrome://firebug/skin/mac/detach.png);
-    -moz-image-region: rect(0px, 13px, 13px, 0px);
-}
-
-#fbDetachButton:hover,
-#fbToggleCommandLine:hover {
-    -moz-image-region: rect(13px, 13px, 26px, 0px);
-}
-
-#fbDetachButton:hover:active,
-#fbToggleCommandLine:hover:active {
-    -moz-image-region: rect(26px, 13px, 39px, 0px);
+    list-style-image: url(chrome://firebug/skin/mac/detach.svg);
 }
 
 #fbToggleCommandLine,
@@ -250,46 +226,39 @@
 }
 
 #fbCloseButton {
-    list-style-image: url(chrome://firebug/skin/mac/close.png);
-    -moz-image-region: rect(0px, 13px, 13px, 0px);
-}
-
-#fbCloseButton:hover {
-    -moz-image-region: rect(13px, 13px, 26px, 0px);
-}
-
-#fbCloseButton:hover:active {
-    -moz-image-region: rect(26px, 13px, 39px, 0px);
+    list-style-image: url(chrome://firebug/skin/mac/close.svg);
 }
 
 #fbCommandLineHistoryButton {
-    list-style-image: url(chrome://firebug/skin/mac/commandHistory.png);
-    -moz-image-region: rect(0px, 13px, 13px, 0px);
-}
-
-#fbCommandLineHistoryButton:hover {
-    -moz-image-region: rect(13px, 13px, 26px, 0px);
-}
-
-#fbCommandLineHistoryButton:hover:active {
-    -moz-image-region: rect(26px, 13px, 39px, 0px);
-}
-
-#fbCommandLineHistoryButton[disabled] {
-    -moz-image-region: rect(39px, 13px, 52px, 0px);
+    list-style-image: url(chrome://firebug/skin/mac/commandHistory.svg);
 }
 
 #fbToggleCommandEditor {
-    list-style-image: url(chrome://firebug/skin/mac/minimize.png);
-    -moz-image-region: rect(0px, 13px, 13px, 0px);
+    list-style-image: url(chrome://firebug/skin/mac/minimize.svg);
 }
 
-#fbToggleCommandEditor:hover {
-    -moz-image-region: rect(13px, 13px, 26px, 0px);
+:-moz-any(#fbMinimizeButton,
+          #fbToggleCommandEditor,
+          #fbDetachButton,
+          #fbToggleCommandLine,
+          #fbCloseButton,
+          #fbCommandLineHistoryButton,
+          #fbToggleCommandEditor):hover {
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
-#fbToggleCommandEditor:hover:active {
-    -moz-image-region: rect(26px, 13px, 39px, 0px);
+:-moz-any(#fbMinimizeButton,
+          #fbToggleCommandEditor,
+          #fbDetachButton,
+          #fbToggleCommandLine,
+          #fbCloseButton,
+          #fbCommandLineHistoryButton,
+          #fbToggleCommandEditor):active {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
+}
+
+#fbCommandLineHistoryButton[disabled] {
+    filter: url(resource://firebugui/filters.svg#brightenedGrayscale);
 }
 
 /********************************************************************************************/
@@ -509,13 +478,11 @@ panelTab[selected="true"] > panelTabMenu {
     -moz-appearance: none;
     border: none;
     padding-left: 8px;
-    background: url(chrome://firebug/skin/menulistLeft.png) no-repeat left center;
 }
 
 .toolbar-text-menulist > .menulist-dropmarker {
     -moz-appearance: none;
     width: 20px;
-    background: url(chrome://firebug/skin/menulistRight.png) no-repeat left center;
 }
 
 .toolbar-text-menulist > .menulist-dropmarker > .dropmarker-icon {
@@ -583,7 +550,7 @@ panelTab[selected="true"] > panelTabMenu {
 
 panelTab[selected="true"] > panelTabMenu .menuTarget,
 panelTab:focus > panelTabMenu .menuTarget {
-    background: url(chrome://firebug/skin/mac/optionsMenuTarget.png) no-repeat center;
+    background: url(chrome://firebug/skin/mac/optionsMenuTarget.svg) no-repeat center;
     width: 11px;
     height: 10px;
     vertical-align: middle;
@@ -591,7 +558,11 @@ panelTab:focus > panelTabMenu .menuTarget {
 }
 
 panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
-    background-image: url(chrome://firebug/skin/mac/optionsMenuTargetHover.png);
+    background-image: url(chrome://firebug/skin/mac/optionsMenuTargetHover.svg);
+}
+
+panelTab[selected="true"]:active > panelTabMenu .menuTarget {
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
 /************************************************************************************************/

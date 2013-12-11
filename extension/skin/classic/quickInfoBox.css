@@ -50,7 +50,7 @@
 }
 
 .fbQuickInfoPin {
-    background: url(chrome://firebug/skin/win/pin.png) no-repeat;
+    background: url(chrome://firebug/skin/win/pin.svg) no-repeat;
     width: 16px;
     height: 16px;
     border: none;
@@ -59,8 +59,13 @@
     right: 22px;
 }
 
+.fbQuickInfoPin.pin {
+    background-image: url(chrome://firebug/skin/win/pinned.svg);
+    filter: url(resource://firebugui/filters.svg#darken);
+}
+
 .fbQuickInfoClose {
-    background: url(chrome://firebug/skin/win/close.png) no-repeat;
+    background: url(chrome://firebug/skin/win/close.svg) no-repeat;
     width: 16px;
     height: 16px;
     border: none;
@@ -71,14 +76,10 @@
 
 .fbQuickInfoPin:hover,
 .fbQuickInfoClose:hover {
-    background-position: 0 -16px;
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
-.fbQuickInfoPin.pin,
+.fbQuickInfoClose:active,
 .fbQuickInfoPin:active {
-    background: url(chrome://firebug/skin/win/pinned.png) no-repeat;
-}
-
-.fbQuickInfoClose:active {
-    background-position: 0 -32px;
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
