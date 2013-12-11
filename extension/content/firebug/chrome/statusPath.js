@@ -197,7 +197,8 @@ var StatusPath =
             }
         }
 
-        panelStatus.lastPanelName = panel.name;
+        // If the current panel is disabled there is no panel instance.
+        panelStatus.lastPanelName = panel ? panel.name : "";
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -247,6 +248,14 @@ var StatusPathModule = Obj.extend(Module,
     dispatchName: "StatusPathModule",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    initialize: function()
+    {
+        Module.initialize.apply(this, arguments);
+
+        var panelStatus = Firebug.chrome.getElementById("fbPanelStatus");
+        panelStatus.lastPanelName = "";
+    },
 
     updateOption: function()
     {
