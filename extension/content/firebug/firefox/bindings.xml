@@ -676,7 +676,7 @@
             var iconNode = document.getAnonymousElementByAttribute(this, "class",
                 "menu-iconic-left");
             iconNode.allowEvents = true;
-            iconNode.addEventListener("click", FBL.bind(this.onTogglePanel, this), true);
+            iconNode.addEventListener("mousedown", FBL.bind(this.onTogglePanel, this), true);
             iconNode.addEventListener("mouseover", FBL.bind(this.onOverToggleCheckmark, this,
                 iconNode), true);
             this.panelBar = FBL.getAncestorByClass(this, "panelBar");
@@ -686,6 +686,8 @@
         <method name="onTogglePanel">
             <parameter name="event"/>
             <body><![CDATA[
+                event.stopPropagation();
+
                 if (this.getAttribute("disabled") == "true")
                     return;
 
@@ -694,7 +696,7 @@
                 this.setAttribute("checked", checked ? "false" : "true");
                 this.panelBar.togglePanel(panelName, !checked);
 
-                Firebug.chrome.$("panelBarTabList").updateMenuItems();
+                Firebug.PanelSelector.updateMenuItems(this.parentNode);
             ]]></body>
         </method>
 

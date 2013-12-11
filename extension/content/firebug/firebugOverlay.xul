@@ -80,6 +80,8 @@
                                 class="fbInternational">
                             </toolbarbutton>
 
+                            <toolbarseparator id="fbInspectSeparator" collapsed="true"/>
+
                             <!-- History of Navigation -->
                             <toolbaritem contextmenu="fbNavigationHistoryMenu" class="noTabStop">
                                 <toolbarbutton id="fbNavigateBackButton" disabled="true"
@@ -90,16 +92,19 @@
                                     command="cmd_firebug_navForward" class="fbInternational"/>
                             </toolbaritem>
 
+                            <toolbarseparator id="fbNavigationSeparator" collapsed="true"/>
+
                             <toolbarbutton id="fbCommandPopupButton"
                                 tooltiptext="panel.tooltip.Show_Command_Line_Popup"
                                 command="cmd_firebug_toggleCommandPopup" class="fbInternational">
                             </toolbarbutton>
                         </hbox>
 
-                        <!-- Panel selector (list of all panels) -->
+                        <!-- Panel selector (list of all panels)
                         <panelBarTabList id="panelBarTabList" tooltiptext="firebug.panel selector"
-                            class="fbInternational"/>
+                            class="fbInternational"/> -->
                     </hbox>
+
 
                     <!-- xxxHonza: ltr should come from &locale.dir; -->
                     <panelBarArrowscrollbox id="fbPanelBar1-Arrowscrollbox" orient="horizontal"

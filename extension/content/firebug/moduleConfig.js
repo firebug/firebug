@@ -49,6 +49,7 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/firefox/start-button/startButtonOverlay",
         "firebug/firefox/external-editors/externalEditors",
         "firebug/chrome/panelActivation",
+        "firebug/chrome/panelSelector",
         "firebug/chrome/tableRep",
         "firebug/html/htmlPanel",
         "firebug/dom/domPanel",

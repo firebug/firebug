@@ -376,6 +376,27 @@ BrowserOverlay.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Firebug PanelSelector Menu
+
+    onPanelSelectorShowing: function(popup)
+    {
+        var self = this;
+        this.startFirebug(function()
+        {
+            self.win.Firebug.PanelSelector.onMenuShowing(popup);
+        });
+    },
+
+    onPanelSelectorHiding: function(popup)
+    {
+        var self = this;
+        this.startFirebug(function()
+        {
+            self.win.Firebug.PanelSelector.onMenuHiding(popup);
+        });
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Firebug Version
 
     getVersion: function()

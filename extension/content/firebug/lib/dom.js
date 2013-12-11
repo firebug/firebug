@@ -74,6 +74,17 @@ Dom.getAncestorByTagName = function(node, tagName)
     return null;
 };
 
+Dom.getTopAncestorByTagName = function(node, tagName)
+{
+    var topNode = node;
+    for (var parent = node; parent; parent = parent.parentNode)
+    {
+        if (parent.localName && parent.tagName.toLowerCase() == tagName)
+            topNode = parent;
+    }
+    return topNode;
+};
+
 /* @Deprecated  Use native Firefox: node.getElementsByClassName(names).item(0) */
 Dom.getElementByClass = function(node, className)  // className, className, ...
 {

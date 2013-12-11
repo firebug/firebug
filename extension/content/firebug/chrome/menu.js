@@ -149,6 +149,10 @@ Menu.setItemIntoElement = function(element, item)
     if (item.checked)
         element.setAttribute("checked", "true");
 
+    // Allows to perform additional custom initialization of the menu-item.
+    if (item.initialize)
+        item.initialize(element);
+
     return element;
 };
 
