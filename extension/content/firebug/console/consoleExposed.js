@@ -16,9 +16,11 @@ define([
     "firebug/console/errorMessageObj",
     "firebug/console/commands/profiler",
     "firebug/chrome/tableRep",
+    "firebug/chrome/domTree",
 ],
 function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, StackTrace,
-    Errors, Debug, Console, Options, DebuggerLib, ErrorMessageObj, Profiler, TableRep) {
+    Errors, Debug, Console, Options, DebuggerLib, ErrorMessageObj, Profiler,
+    TableRep, DomTree) {
 
 // Note: since we are using .caller and .arguments for stack walking, we can not use strict mode.
 //"use strict";
@@ -82,7 +84,7 @@ function createFirebugConsole(context, win)
 
     console.dir = function dir(o)
     {
-        Firebug.Console.log(o, context, "dir", Firebug.DOMPanel.DirTable);
+        Console.log(o, context, "dir", DomTree.prototype);
         return Console.getDefaultReturnValue();
     };
 
@@ -93,7 +95,7 @@ function createFirebugConsole(context, win)
         else if (o instanceof Wrapper.getContentView(win).Document)
             o = o.documentElement;
 
-        Firebug.Console.log(o, context, "dirxml", Firebug.HTMLPanel.SoloElement);
+        Console.log(o, context, "dirxml", Firebug.HTMLPanel.SoloElement);
         return Console.getDefaultReturnValue();
     };
 
@@ -105,20 +107,20 @@ function createFirebugConsole(context, win)
         if (!trace)
             trace = "(No stack trace available)";
 
-        Firebug.Console.log(trace, context, "stackTrace");
+        Console.log(trace, context, "stackTrace");
         return Console.getDefaultReturnValue();
     };
 
     console.group = function group()
     {
         var sourceLink = getStackLink();
-        Firebug.Console.openGroup(arguments, null, "group", null, false, sourceLink);
+        Console.openGroup(arguments, null, "group", null, false, sourceLink);
         return Console.getDefaultReturnValue();
     };
 
     console.groupEnd = function()
     {
-        Firebug.Console.closeGroup(context);
+        Console.closeGroup(context);
         return Console.getDefaultReturnValue();
     };
 
@@ -131,7 +133,7 @@ function createFirebugConsole(context, win)
         // in a different group.
         // Use rather a different method that causes auto collapsing of the group
         // when it's created.
-        Firebug.Console.openCollapsedGroup(arguments, null, "group", null, false, sourceLink);
+        Console.openCollapsedGroup(arguments, null, "group", null, false, sourceLink);
         return Console.getDefaultReturnValue();
     };
 
@@ -183,7 +185,7 @@ function createFirebugConsole(context, win)
 
     console.clear = function()
     {
-        Firebug.Console.clear(context);
+        Console.clear(context);
         return Console.getDefaultReturnValue();
     };
 
@@ -197,7 +199,7 @@ function createFirebugConsole(context, win)
         if (!this.timeCounters)
             this.timeCounters = {};
 
-        var key = "KEY"+name.toString();
+        var key = "KEY" + name.toString();
 
         if (!reset && this.timeCounters[key])
             return Console.getDefaultReturnValue();
@@ -214,7 +216,7 @@ function createFirebugConsole(context, win)
         if (!this.timeCounters)
             return Console.getDefaultReturnValue();
 
-        var key = "KEY"+name.toString();
+        var key = "KEY" + name.toString();
 
         var timeCounter = this.timeCounters[key];
         if (timeCounter)
@@ -306,8 +308,8 @@ function createFirebugConsole(context, win)
         if (!sourceLink)
             sourceLink = linkToSource ? getStackLink() : null;
 
-        var ignoreReturnValue = Firebug.Console.getDefaultReturnValue();
-        var rc = Firebug.Console.logFormatted(args, context, className, noThrottle, sourceLink);
+        var ignoreReturnValue = Console.getDefaultReturnValue();
+        var rc = Console.logFormatted(args, context, className, noThrottle, sourceLink);
         return rc ? rc : ignoreReturnValue;
     }
 
@@ -352,7 +354,7 @@ function createFirebugConsole(context, win)
                 errorObject.objects.push(args[i]);
         }
 
-        var row = Firebug.Console.log(errorObject, context, "errorMessage");
+        var row = Console.log(errorObject, context, "errorMessage");
         if (row)
             row.scrollIntoView();
 
