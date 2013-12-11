@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 7036: Firebug bugs when updating the DOM every 29 ms or less</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+            window.onload = function()
+            {
+                demo = document.getElementById("demo");
+                update();
+            };
+            var i = 0;
+            var demo;
+            function update()
+            {
+                i = (i + 1) % 1000;
+                demo.setAttribute("data-test", i);
+                setTimeout(update, 10);
+            }
+        </script>
+        <style>
+            #demo {
+                background-color: green;
+                border: 1px solid;
+                width: 200px;
+                height: 200px;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=7036">Issue 7036</a>: Firebug bugs when updating the DOM every 29 ms or less</h1>
+        </header>
+        <div>
+            <section id="content">
+                <p>The <code>data-test</code> attribute of this element is updated every 10 ms</p>
+                <div id="demo" data-test="0"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce (scenario 1)</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Select the HTML paneli (important in order to trigger context.throttle)</li>
+                    <li>Enable and switch to the Console panel</li>
+                    <li>Evaluate <code>1+1</code></li>
+                </ol>
+                <h3>Expected Result</h3>
+                <p>"2" should be logged as the result of the expression in the Console.</p>
+            </section>
+            <footer>
+                Florent Fayolle, florent.fayolle69@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>

@@ -406,24 +406,7 @@ var ClosureInspector =
             Trace.sysout("ClosureInspector; failed to inject " + fname, exc);
         }
 
-        var gotDebugger = false;
-        try
-        {
-            return DebuggerLib.withTemporaryDebugger(context, win, function()
-            {
-                gotDebugger = true;
-                return callback(newExpr);
-            });
-        }
-        catch (exc)
-        {
-            if (gotDebugger)
-                throw exc;
-
-            // Wasn't able to activate debugger. :(
-            // Rerun the command without debugger, and let it fail in a friendlier way.
-            return callback(newExpr);
-        }
+        return DebuggerLib.withTemporaryDebugger(context, win, () => callback(newExpr));
     }
 };
 
