@@ -209,6 +209,12 @@ panelTab[selected="true"] > panelTabMenu {
     margin-left: 3px;
 }
 
+#fbPanelBar1-panelTabs panelTab,
+#fbPanelBar2-panelTabs panelTab {
+    padding-top: 4px;
+    padding-bottom: 7px;
+}
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #fbPanelSplitter {
@@ -318,16 +324,6 @@ panelBarTabList > .fb-tabs-alltabs-button {
     margin: 0 !important;
 }
 
-#fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-up {
-    border-left: 1px solid ThreeDShadow !important;
-    /*border-top-left-radius: 2px !important;*/
-}
-
-#fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-down {
-    border-right: 1px solid ThreeDShadow !important;
-    /*border-top-right-radius: 2px !important;*/
-}
-
 #fbPanelBar1-tabBox > panelBarArrowscrollbox {
     margin-right: 4px;
 }
@@ -370,7 +366,7 @@ panelBarArrowscrollbox > .scrollbutton-down,
     width: 18px;
     margin: 3px 0px 4px;
     padding: 0px;
-    border: 1px solid rgb(160,160,160);
+    border: 1px solid rgb(170,188,207);
     /*-moz-border-top-colors: ThreeDShadow rgba(255,255,255,.3);
     -moz-border-right-colors: ThreeDShadow;
     -moz-border-left-colors: ThreeDShadow rgba(255,255,255,.3);
