@@ -721,30 +721,34 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
 /*************************************************************************************************/
 /* Toggle Side Panels */
 
-#fbToggleSidePanels {
+.fbToggleSidePanels {
     list-style-image: url(chrome://firebug/skin/collapseSidePanels.svg);
 }
 
-#fbToggleSidePanels.closed {
+.fbToggleSidePanels.closed {
     list-style-image: url(chrome://firebug/skin/expandSidePanels.svg);
 }
 
-#fbPanelPane:not([orient="vertical"]) #fbToggleSidePanels {
+#fbPanelPane:not([orient="vertical"]) .fbToggleSidePanels {
     margin-right: 2px;
 }
 
-#fbPanelPane[orient="vertical"] #fbToggleSidePanels {
+#fbPanelPane[orient="vertical"] .fbToggleSidePanels {
     list-style-image: url(chrome://firebug/skin/collapseSidePanelsVertical.svg);
 }
 
-#fbPanelPane[orient="vertical"] #fbToggleSidePanels.closed {
+#fbPanelPane[orient="vertical"] .fbToggleSidePanels.closed {
     list-style-image: url(chrome://firebug/skin/expandSidePanelsVertical.svg);
 }
 
-#fbToggleSidePanels:hover {
+.fbToggleSidePanels:hover {
     filter: url(resource://firebugui/filters.svg#darken);
 }
 
-#fbToggleSidePanels:active {
+.fbToggleSidePanels:active {
     filter: url(resource://firebugui/filters.svg#deepDarken);
+}
+
+#fbToggleSidePanelsBox2 {
+    padding-top: 1px;
 }

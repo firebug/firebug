@@ -14,6 +14,7 @@ define([
     "firebug/lib/persist",
     "firebug/lib/keywords",
     "firebug/lib/system",
+    "firebug/lib/options",
     "firebug/chrome/activablePanel",
     "firebug/chrome/menu",
     "firebug/chrome/rep",
@@ -35,9 +36,10 @@ define([
     "arch/compilationunit",
 ],
 function (Firebug, FBTrace, Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, Persist, Keywords,
-    System, ActivablePanel, Menu, Rep, StatusPath, Editor, ScriptView, StackFrame, SourceLink, SourceFile,
-    Breakpoint, BreakpointStore, BreakpointConditionEditor, ScriptPanelWarning, BreakNotification,
-    ScriptPanelLineUpdater, DebuggerLib, CommandLine, NetUtils, CompilationUnit) {
+    System, Options, ActivablePanel, Menu, Rep, StatusPath, Editor, ScriptView, StackFrame,
+    SourceLink, SourceFile, Breakpoint, BreakpointStore, BreakpointConditionEditor,
+    ScriptPanelWarning, BreakNotification, ScriptPanelLineUpdater, DebuggerLib, CommandLine,
+    NetUtils, CompilationUnit) {
 
 "use strict";
 
@@ -187,7 +189,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.showToolbarButtons("fbLocationList", active);
         this.showToolbarButtons("fbToolbar", active);
 
-        // Additional debugger panels are visible only, if debugger is active.
+        // Additional debugger panels are visible only, if debugger is active and only
+        // if they aren't explicitly hidden.
+        if (Options.get("scriptHideSidePanels"))
+            active = false;
+
         this.panelSplitter.collapsed = !active;
         this.sidePanelDeck.collapsed = !active;
 
