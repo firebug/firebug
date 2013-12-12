@@ -1,9 +1,9 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/chrome/rep",
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/domplate",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -13,11 +13,12 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/lib/persist",
+    "firebug/chrome/rep",
     "firebug/debugger/breakpoints/breakpointGroup",
     "firebug/dom/domBreakpoint",
 ],
-function(Rep, Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Css, Str, Arr, Persist,
-    BreakpointGroup, DOMBreakpoint) {
+function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Wrapper, Dom, Css, Str, Arr,
+    Persist, Rep, BreakpointGroup, DOMBreakpoint) {
 
 // ********************************************************************************************* //
 // Constants
@@ -38,7 +39,11 @@ function DOMBreakpointGroup()
     this.breakpoints = [];
 }
 
+/**
+ * @object
+ */
 DOMBreakpointGroup.prototype = Obj.extend(new BreakpointGroup(),
+/** @lends DOMBreakpointGroup */
 {
     name: "domBreakpoints",
     title: Locale.$STR("dom.label.DOM Breakpoints"),
@@ -210,7 +215,7 @@ var BreakpointRep = domplate(Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof Breakpoint;
+        return object instanceof DOMBreakpoint;
     }
 });
 

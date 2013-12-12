@@ -623,6 +623,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
     breakOnProperty: function(row)
     {
+        Trace.sysout("domBasePanel.breakOnProperty;");
+
         var member = row.domObject;
         if (!member)
             return;
