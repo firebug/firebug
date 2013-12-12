@@ -15,18 +15,15 @@ function runTest()
             var contentEl = win.document.getElementById("content");
 
             var panelStatus = FW.Firebug.chrome.window.document.getElementById("fbPanelStatus");
-            var panelNode = FBTest.getPanel("html").panelNode;
-            var textArea = panelNode.querySelector("textarea");
-
-            FBTest.focus(textArea);
+            var panel = FBTest.getPanel("html");
+            var editor = panel.localEditors.html;
+            var focusedElement = panel.panelNode.ownerDocument.activeElement;
 
             function replaceWith(str)
             {
-                FBTest.sendShortcut("a", {accelKey: true});
-                if (str === "")
-                    FBTest.synthesizeKey("VK_BACK_SPACE", null, win);
-                else
-                    FBTest.sendString(str, textArea);
+                // CodeMirror updates asynchronously when typing, which makes testing harder. Let's
+                // cheat and poke synchronous internals since that is already tested elsewhere.
+                editor.setValue(str);
                 FW.Firebug.Editor.update(true);
             }
 
@@ -55,7 +52,7 @@ function runTest()
             }
 
             var orig = '<b id="test2">&lt;&nbsp;&gt;  </b>';
-            FBTest.compare(orig, textArea.value, "The original value must be correct.");
+            FBTest.compare(orig, editor.getValue(), "The original value must be correct.");
             verifyPath("b#test2");
 
             var str = "<i></i><b></b><i></i>";
@@ -68,12 +65,12 @@ function runTest()
             clickPath(0, function()
             {
                 verifyPath("b");
-                FBTest.compare("<b></b>", textArea.value, "Only the element should be shown after clicking it in the element path.");
+                FBTest.compare("<b></b>", editor.getValue(), "Only the element should be shown after clicking it in the element path.");
 
                 clickPath(1, function()
                 {
                     verifyPath("b");
-                    FBTest.compare(strDiv, textArea.value, "The value must change to the div's contents.");
+                    FBTest.compare(strDiv, editor.getValue(), "The value must change to the div's contents.");
 
                     replaceWith("<b invalid=\"");
                     verifyPath("section#content");
@@ -98,7 +95,7 @@ function runTest()
                     var maxTime = Date.now() + 2000;
                     function testSel()
                     {
-                        var nodeBox = panelNode.querySelector(".nodeBox.selected");
+                        var nodeBox = panel.panelNode.querySelector(".nodeBox.selected");
                         var tc = nodeBox.textContent, wanted = "<strong></strong>";
                         if (tc !== wanted && Date.now() < maxTime)
                         {

@@ -10,12 +10,12 @@ function runTest()
         FBTest.selectElementInHtmlPanel("inspectMe", function(node)
         {
             FBTest.clickToolbarButton(null, "fbToggleHTMLEditing");
-            var panelNode = FBTest.getPanel("html").panelNode;
-            var textArea = panelNode.querySelector("textarea");
+
+            var panel = FBTest.getPanel("html");
+            var editor = panel.localEditors.html;
 
             var expected = "<div id=\"inspectMe\">Inspect Me!</div>";
-            FBTest.compare(expected, textArea.value,
-                "The markup must be displayed now");
+            FBTest.compare(expected, editor.getValue(), "The markup must be displayed now");
 
             FBTest.testDone("issue5058.DONE");
         });
