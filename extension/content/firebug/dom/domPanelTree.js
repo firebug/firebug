@@ -21,7 +21,7 @@ function(Firebug, FBTrace, Obj, Domplate, Events, Dom, Css, Locale, Events, Opti
 
 var {domplate, TABLE, TBODY, TR, TD, DIV, SPAN, TAG, FOR} = Domplate;
 
-var Trace = FBTrace.to("DBG_WATCH");
+var Trace = FBTrace.to("DBG_DOM");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
@@ -121,17 +121,14 @@ DomPanelTree.prototype = domplate(BaseTree,
         if (!row)
             return;
 
-        var panel = row.parentNode.parentNode.domPanel;
-        if (panel)
-        {
-            var scriptPanel = panel.context.getPanel("script", true);
+        var panel = Firebug.getElementPanel(row);
 
-            // set the breakpoint only if the script panel will respond.
-            if (!scriptPanel || !scriptPanel.isEnabled())
-                return;
+        // Set the breakpoint only if the script panel will respond.
+        var scriptPanel = panel.context.getPanel("script", true);
+        if (!scriptPanel || !scriptPanel.isEnabled())
+            return;
 
-            panel.breakOnProperty(row);
-        }
+        panel.breakOnProperty(row);
     }
 });
 
