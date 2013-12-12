@@ -20,23 +20,36 @@ var Trace = FBTrace.to("DBG_STATUSPATH");
 var statusCropSize = 20;
 
 // ********************************************************************************************* //
-// StatusPath
+// StatusPath Implementation
 
 /**
- * @object The object is responsible for 'Status path' maintenance (aka breadcrumbs) that
+ * @module The object is responsible for 'Status path' maintenance (aka breadcrumbs) that
  * is used to display path to the selected element in the {@HTMLPanel}, path to the
  * selected object in the {@DOMPanel} and call-stack in the {@ScriptPanel}.
  *
  * The path is displayed in panel-toolbar and the logic is based on {@Panel.getObjectPath}
  * method, so any panel can support it.
  *
- * The path can be updated through clear and update methods. A {@Panel} instance can specify
- * whether the update should be synchronous or asynchronous through: 'objectPathAsyncUpdate'
- * member.
+ * The path can be updated through clear and update methods. Further, {@Panel} instance can
+ * specify whether the update should be synchronous or asynchronous through:
+ * 'objectPathAsyncUpdate' member.
  */
-var StatusPath =
+var StatusPath = Obj.extend(Module,
 /** @lends StatusPath */
 {
+    dispatchName: "StatusPath",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Module
+
+    initialize: function()
+    {
+        Module.initialize.apply(this, arguments);
+
+        var panelStatus = Firebug.chrome.getElementById("fbPanelStatus");
+        panelStatus.lastPanelName = "";
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Public API
 
@@ -233,31 +246,11 @@ var StatusPath =
         else
             System.beep();
     },
-};
-
-// ********************************************************************************************* //
-// StatusPath Module
-
-/**
- * @module Responsible for handling 'omitObjectPathStack' option used in the {@CallstackPanel}
- * Options menu.
- */
-var StatusPathModule = Obj.extend(Module,
-/** @lends StatusPathModule */
-{
-    dispatchName: "StatusPathModule",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Options
 
-    initialize: function()
-    {
-        Module.initialize.apply(this, arguments);
-
-        var panelStatus = Firebug.chrome.getElementById("fbPanelStatus");
-        panelStatus.lastPanelName = "";
-    },
-
-    updateOption: function()
+    updateOption: function(name, value)
     {
         if (name == "omitObjectPathStack")
             this.obeyOmitObjectPathStack(value);
@@ -278,7 +271,7 @@ var StatusPathModule = Obj.extend(Module,
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(StatusPathModule);
+Firebug.registerModule(StatusPath);
 
 // xxxHonza: exposed for XUL (see firebugMenuOverlay.xul)
 Firebug.StatusPath = StatusPath;
