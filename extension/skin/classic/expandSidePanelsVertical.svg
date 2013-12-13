@@ -36,28 +36,6 @@
          offset="1" />
     </linearGradient>
     <linearGradient
-       id="linearGradient4956">
-      <stop
-         id="stop4958"
-         style="stop-color:#aabccf;stop-opacity:1"
-         offset="0" />
-      <stop
-         id="stop4960"
-         style="stop-color:#c5d2df;stop-opacity:1"
-         offset="1" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient4897">
-      <stop
-         id="stop4899"
-         style="stop-color:#000000;stop-opacity:0.15686275"
-         offset="0" />
-      <stop
-         id="stop4901"
-         style="stop-color:#000000;stop-opacity:0"
-         offset="1" />
-    </linearGradient>
-    <linearGradient
        x1="12.483504"
        y1="6.8575988"
        x2="8.593462"
@@ -76,12 +54,42 @@
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(0.53812794,0,0,0.74016921,3.2984939,3.8732585)" />
     <linearGradient
-       x1="14.616472"
-       y1="1049.0109"
-       x2="5.2393284"
-       y2="1039.6337"
-       id="linearGradient3795"
-       xlink:href="#linearGradient4897"
+       id="linearGradient4892">
+      <stop
+         id="stop4894"
+         style="stop-color:#ffffff;stop-opacity:0"
+         offset="0" />
+      <stop
+         id="stop4900"
+         style="stop-color:#ffffff;stop-opacity:0.07843138"
+         offset="0.2" />
+      <stop
+         id="stop4902"
+         style="stop-color:#ffffff;stop-opacity:0.70588237"
+         offset="0.80000001" />
+      <stop
+         id="stop4898"
+         style="stop-color:#ffffff;stop-opacity:0.78431374"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient4956-8">
+      <stop
+         id="stop4958-2"
+         style="stop-color:#aabccf;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop4960-4"
+         style="stop-color:#c5d2df;stop-opacity:1"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       x1="14.692383"
+       y1="1049.0869"
+       x2="5.2455778"
+       y2="1039.6401"
+       id="linearGradient3062"
+       xlink:href="#linearGradient4892"
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(0.91666667,0,0,0.91666667,-1.1666666,-949.33199)" />
     <linearGradient
@@ -89,8 +97,48 @@
        y1="1050.5092"
        x2="3.6404991"
        y2="1040.4919"
-       id="linearGradient3797"
-       xlink:href="#linearGradient4956"
+       id="linearGradient3064"
+       xlink:href="#linearGradient4956-8"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-1.9999996,-1036.3622)" />
+    <linearGradient
+       id="linearGradient4892-7">
+      <stop
+         id="stop4894-4"
+         style="stop-color:#ffffff;stop-opacity:0.19607843"
+         offset="0" />
+      <stop
+         id="stop4898-0"
+         style="stop-color:#ffffff;stop-opacity:0.78431374"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient4956-4">
+      <stop
+         id="stop4958-8"
+         style="stop-color:#aabccf;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop4960-8"
+         style="stop-color:#c5d2df;stop-opacity:1"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       x1="14.692383"
+       y1="1049.0869"
+       x2="5.2455778"
+       y2="1039.6401"
+       id="linearGradient3812"
+       xlink:href="#linearGradient4892-7"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.91666667,0,0,0.91666667,-1.1666666,-949.33199)" />
+    <linearGradient
+       x1="13.657742"
+       y1="1050.5092"
+       x2="3.6404991"
+       y2="1040.4919"
+       id="linearGradient3814"
+       xlink:href="#linearGradient4956-4"
        gradientUnits="userSpaceOnUse"
        gradientTransform="translate(-1.9999996,-1036.3622)" />
   </defs>
@@ -112,7 +160,7 @@
      x="2.5"
      y="2.5"
      id="rect4895"
-     style="fill:url(#linearGradient3795);fill-opacity:1;stroke:url(#linearGradient3797);stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+     style="fill:url(#linearGradient3812);fill-opacity:1;stroke:url(#linearGradient3814);stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
   <path
      d="m 8.0000001,6.2999998 -2.7000002,3.4000003 5.4000001,0 z"
      id="path4979"
