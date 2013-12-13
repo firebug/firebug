@@ -34,24 +34,21 @@
     display: none;
 }
 
-.toolbar-text-button,
-.toolbar-text-menubutton {
-    padding: 3px 6px;
+toolbarbutton {
+    padding: 2px 6px;
     color: #000000;
 }
 
 .toolbar-text-button[disabled="true"],
-.toolbar-text-menubutton[disabled="true"] {
+.toolbar-text-menubutton[disabled="true"],
+toolbarbutton[type="menu"][disabled="true"] {
     color: graytext;
 }
 
-.toolbar-text-button[checked="true"] {
-    padding: 3px 6px !important;
-}
-
-.toolbar-text-button > .toolbarbutton-icon,
-.toolbar-text-menubutton > .toolbarbutton-icon {
-    /*display: none;*/
+.toolbar-text-button > .toolbarbutton-icon:not([src]),
+.toolbar-text-menubutton > .toolbarbutton-icon:not([src]),
+toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
+    display: none;
 }
 
 .toolbar-text-menubutton:hover:active,

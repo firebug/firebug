@@ -604,6 +604,41 @@ textbox[type="fbSearchBox"] > panel {
 }
 
 /*************************************************************************************************/
+/* Buttons */
+toolbarbutton {
+    -moz-appearance: none;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    -moz-transition: all 0.1s ease-out;
+}
+
+toolbarbutton:hover {
+    border-color: rgba(0, 0, 0, 0.2);
+    background: transparent linear-gradient(to bottom, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2)) no-repeat;
+    box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.6) inset, 0 0 1px rgba(255, 255, 255, 0.6) inset, 0 0 2px rgba(0, 0, 0, 0.05);
+    -moz-transition: all 0.2s ease-out;
+}
+
+toolbarbutton:hover:active {
+    border-color: rgba(0, 0, 0, 0.3);
+    background: transparent linear-gradient(to bottom, rgba(0, 0, 0, 0.2), transparent) no-repeat;
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1) inset, 0 0 1px rgba(0, 0, 0, 0.1) inset, 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+toolbarbutton[checked="true"]:not([disabled="true"]) {
+    border-color: rgba(0, 0, 0, 0.3);
+    background: transparent linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent) no-repeat;
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1) inset, 0 0 1px rgba(0, 0, 0, 0.1) inset;
+}
+
+toolbarbutton > label,
+toolbarbutton > toolbarbutton {
+    margin: 0;
+    border: none;
+    padding: 0;
+}
+
+/*************************************************************************************************/
 /* Break On ... buttons */
 
 /* default is disabled */
