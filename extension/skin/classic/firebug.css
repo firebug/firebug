@@ -356,8 +356,8 @@ panelTab[selected="true"][disabled="true"] {
 }
 
 .fbsearch-options-buttons {
-    -moz-margin-start: 0;
     -moz-appearance: none;
+    margin: 0;
     border: 1px solid ThreeDShadow;
     border-radius: 0;
     padding: 1px 5px;

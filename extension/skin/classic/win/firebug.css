@@ -145,6 +145,10 @@ toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
     padding: 4px 0 6px 0;
 }
 
+#fbWindowButtons > toolbarbutton {
+    margin: 0;
+}
+
 /************************************************************************************************/
 
 #fbPanelBar1-tabBoxBackground,
