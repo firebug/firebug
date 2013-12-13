@@ -18,17 +18,6 @@
     background-image: url("chrome://firebug/skin/tabbar/tab-hover-bkgnd.png");
 }
 /* end overrides */
-
-#fbFirebugMenu {
-    margin-bottom: 1px;
-    opacity: 0.8;
-}
-
-#fbFirebugMenu:hover,
-#fbFirebugMenu[open="true"] {
-    opacity: 1.0;
-}
-
 #fbFirebugMenu > .toolbarbutton-text,
 #fbFirebugMenu > .toolbarbutton-menu-dropmarker {
     display: none;
@@ -286,21 +275,11 @@ panelTab[selected="true"] > panelTabMenu {
 
 .panelStatusLabel {
     cursor: pointer;
-    margin: 0;
-    padding: 0 4px;
     color: #000000;
 }
 
 .panelStatusLabel > .toolbarbutton-icon {
     margin: 0 !important;
-}
-
-.panelStatusLabel:hover {
-    color: blue;
-}
-
-.panelStatusLabel[selected="true"] {
-    font-weight: bold;
 }
 
 /************************************************************************************************/
