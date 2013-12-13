@@ -343,11 +343,3 @@ panelTab[aria-disabled='true'] {
 panelBarArrowscrollbox {
     -moz-binding: url("firefox/bindings.xml#panelBarArrowscrollbox");
 }
-
-panelBarTabList {
-    -moz-binding: url("firefox/bindings.xml#panelBarTabList");
-}
-
-.panelBarTabListMenuItem {
-    -moz-binding: url("firefox/bindings.xml#panelBarTabListMenuItem");
-}

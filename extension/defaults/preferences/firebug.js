@@ -15,7 +15,7 @@ pref("extensions.firebug.previousPlacement", 0);
 pref("extensions.firebug.showErrorCount", true);
 pref("extensions.firebug.viewPanelOrient", false);
 pref("extensions.firebug.allPagesActivation", "none");
-pref("extensions.firebug.hiddenPanels", "");
+pref("extensions.firebug.hiddenPanels2", "");
 pref("extensions.firebug.panelTabMinWidth", 50);
 pref("extensions.firebug.sourceLinkLabelWidth", 17);
 pref("extensions.firebug.currentVersion", "");

@@ -532,19 +532,6 @@ panelTab[selected="true"] > panelTabMenu {
     -moz-border-right-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15) !important;
 }
 
-.fb-tabs-alltabs-button > .toolbarbutton-text {
-    display: none;
-}
-
-.fb-tabs-alltabs-button {
-    margin-right: 0;
-    padding: 0 4px 0 3px !important;
-    border-left: 2px solid !important;
-    border-right: 2px solid !important;
-    -moz-border-left-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15) !important;
-    -moz-border-right-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15) !important;
-}
-
 /*************************************************************************************************/
 /* Panel Tabs */
 

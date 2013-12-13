@@ -3,45 +3,70 @@
 define([
     "firebug/firebug",
     "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/dom",
     "firebug/lib/xml",
     "firebug/lib/locale",
+    "firebug/lib/events",
+    "firebug/lib/options",
     "firebug/chrome/menu",
+    "firebug/chrome/module",
 ],
-function(Firebug, FBTrace, Dom, Xml, Locale, Menu) {
+function(Firebug, FBTrace, Obj, Dom, Xml, Locale, Events, Options, Menu, Module) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
 
+// Tracing
 var Trace = FBTrace.to("DBG_PANELSELECTOR");
+var TraceError = FBTrace.to("DBG_ERRORS");
+
+// The option has been renamed in Firebug 2.0 to force all panels to be displayed.
+// This is because the panel selector menu has been moved into Firebug menu and
+// some users could be confused by that change (not being able to get back hidden panels).
+// (see also issue 7046).
+var hiddenPanels = "hiddenPanels2";
 
 // ********************************************************************************************* //
 // Implementation
 
 /**
- * @object This object implements 'Panel Selector' feature that allows to show/hide individual
- * Firebug panels as well as selecting them. This feature used to be available on the main
- * Firebug toolbar and has been moved into Firebug menu in 2.0
- *
- * xxxHonza: There is some code related to the logic in binding.xml. It should be moved into
- * this module if possible.
+ * @module This object implements 'Panel Selector' feature that allows to show/hide individual
+ * Firebug panels. This feature used to be available on the main Firebug toolbar and has
+ * been moved into Firebug menu in 2.0
  */
-var PanelSelector =
+var PanelSelector = Obj.extend(Module,
 /** @lends PanelSelector */
 {
+    dispatchName: "PanelSelector",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Module
+
+    initialize: function()
+    {
+        Module.initialize.apply(this, arguments);
+
+        Firebug.registerUIListener(this);
+    },
+
+    shutdown: function()
+    {
+        Module.shutdown.apply(this, arguments);
+
+        Firebug.unregisterUIListener(this);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Firebug Menu
+
     onMenuShowing: function(popup)
     {
         var items = [];
         var panelBar = Firebug.chrome.getElementById("fbPanelBar1");
         var tab = panelBar.panelTabs.firstChild;
-
-        // Custom initialization of the menu-item element.
-        function initializeMenuItem(panelType, element)
-        {
-            element.panelType = panelType;
-        }
 
         // Create an menu-option-item for every existing panel tab.
         while (tab)
@@ -55,9 +80,7 @@ var PanelSelector =
                 tooltiptext: Firebug.getPanelTooltip(panelType),
                 type: "checkbox",
                 checked: Xml.isVisible(tab),
-                className: "panelBarTabListMenuItem",
                 command: this.onTogglePanel.bind(this, popup, panelName),
-                initialize: initializeMenuItem.bind(this, panelType)
             });
 
             tab = tab.nextSibling;
@@ -86,8 +109,6 @@ var PanelSelector =
         Dom.eraseNode(popup);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
     updateMenuItems: function(popup)
     {
         var visibleTabs = [];
@@ -112,27 +133,149 @@ var PanelSelector =
 
     onTogglePanel: function(popup, panelName, event)
     {
-        Trace.sysout("panelSelector.onTogglePanel; " + panelName, event);
+        Events.cancelEvent(event);
 
+        var menuItem = event.target;
         var panelBar = Firebug.chrome.getElementById("fbPanelBar1");
-        panelBar.selectPanel(panelName);
 
-        // Close the top (original) popup-menu after a panel is selected.
-        var topMenuPopup = Dom.getTopAncestorByTagName(popup, "menupopup");
-        topMenuPopup.hidePopup();
+        // The last visible panel can't be hidden.
+        if (menuItem.getAttribute("disabled") == "true")
+            return;
+
+        // Toggle panel visibility
+        menuItem.checked = !menuItem.checked;
+        this.togglePanel(panelName, !menuItem.checked);
+
+        Trace.sysout("panelSelector.onTogglePanel; " + panelName + ", visible now: " +
+            menuItem.checked, event);
+
+        // If there is only one visible panel now, make sure it's disabled.
+        // (the user can't hide all panels).
+        this.updateMenuItems(popup);
     },
 
     onShowAllPanels: function(event)
     {
-        Trace.sysout("panelSelector.onShowAllPanels;");
+        Events.cancelEvent(event);
+
+        Trace.sysout("panelSelector.onShowAllPanels;", event);
 
         var panelBar = Firebug.chrome.getElementById("fbPanelBar1");
-        panelBar.openAllPanels(event);
+
+        var tab = panelBar.panelTabs.firstChild;
+        while (tab)
+        {
+            if (!Xml.isVisible(tab))
+                Dom.collapse(tab, false);
+
+            tab = tab.nextSibling;
+        }
+
+        Options.set(hiddenPanels, "");
     },
-};
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Implementation
+
+    closePanel: function(panelName)
+    {
+        var panelBar = Firebug.chrome.getElementById("fbPanelBar1");
+
+        var tab = panelBar.getTab(panelName);
+        Dom.collapse(tab, true);
+
+        this.storeHiddenPanels();
+
+        if (panelBar.selectedTab != tab)
+            return;
+
+        // If the selected panel has been closed, select the first one that is visible.
+        tab = panelBar.panelTabs.firstChild;
+        while (tab)
+        {
+            if (FBL.isVisible(tab))
+            {
+                panelBar.selectTab(tab);
+                break;
+            }
+            tab = tab.nextSibling;
+        }
+    },
+
+    openPanel: function(panelName)
+    {
+        var panelBar = Firebug.chrome.getElementById("fbPanelBar1");
+
+        var tab = panelBar.getTab(panelName);
+        Dom.collapse(tab, false);
+
+        this.storeHiddenPanels();
+    },
+
+    togglePanel: function(panelName, forceOpen)
+    {
+        var panelBar = Firebug.chrome.getElementById("fbPanelBar1");
+
+        var tab = panelBar.getTab(panelName);
+        if (!tab)
+            return;
+
+        var open = Xml.isVisible(tab);
+        if (open && forceOpen)
+            return;
+
+        if (open)
+            this.closePanel(panelName);
+        else
+            this.openPanel(panelName);
+    },
+
+    storeHiddenPanels: function()
+    {
+        var panelBar = Firebug.chrome.getElementById("fbPanelBar1");
+
+        var closedPanels = [];
+        var tab = panelBar.panelTabs.firstChild;
+        while (tab)
+        {
+            if (!Xml.isVisible(tab))
+                closedPanels.push(tab.panelType.prototype.name);
+
+            tab = tab.nextSibling;
+        }
+
+        Options.set(hiddenPanels, closedPanels.join(" "));
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // UI Listener
+
+    /**
+     * Sent by the framework (bindings.xml) when panel tabs are updated.
+     */
+    updatePanels: function(panelTypes)
+    {
+        var panelBar = Firebug.chrome.getElementById("fbPanelBar1");
+
+        // Make sure hidden panels are collapsed.
+        var value = Options.get(hiddenPanels);
+        if (!value || !value.length)
+            return;
+
+        var closedPanels = value.split(" ");
+        for (var i = 0; i < closedPanels.length; i++)
+        {
+            var tab = panelBar.tabMap[closedPanels[i]];
+            if (tab)
+                Dom.collapse(tab, true);
+        }
+    }
+});
 
 // ********************************************************************************************* //
 // Registration
+
+Firebug.registerModule(PanelSelector);
 
 // Expose for browserOverlay.js
 Firebug.PanelSelector = PanelSelector;

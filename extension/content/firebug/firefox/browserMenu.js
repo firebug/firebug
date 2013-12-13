@@ -381,12 +381,12 @@ var BrowserMenu =
                 ])
             ]),
 
-            // Panel selector (see also 'firebug/chrome/panelSelector' module).
+            // Panel selector (see 'firebug/chrome/panelSelector' module for implementation).
             $menu(doc,
             {
                 id: "FirebugMenu_PanelSelector",
-                label: "firebug.panel_selector",
-                tooltiptext: "firebug.panel_selector.tip",
+                label: "firebug.panel_selector2",
+                tooltiptext: "firebug.panel_selector2.tip",
                 "class": "fbInternational"
             },
             [

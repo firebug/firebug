@@ -99,12 +99,7 @@
                                 command="cmd_firebug_toggleCommandPopup" class="fbInternational">
                             </toolbarbutton>
                         </hbox>
-
-                        <!-- Panel selector (list of all panels)
-                        <panelBarTabList id="panelBarTabList" tooltiptext="firebug.panel selector"
-                            class="fbInternational"/> -->
                     </hbox>
-
 
                     <!-- xxxHonza: ltr should come from &locale.dir; -->
                     <panelBarArrowscrollbox id="fbPanelBar1-Arrowscrollbox" orient="horizontal"
