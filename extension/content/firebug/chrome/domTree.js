@@ -38,9 +38,16 @@ function DomTree(provider)
 DomTree.prototype = domplate(
 /** @lends DomTree */
 {
+    sizerRowTag:
+        TR({role: "presentation"},
+            TD({width: "30%"}),
+            TD({width: "70%"})
+        ),
+
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
             TBODY(
+                TAG("$object|getSizerRowTag"),
                 FOR("member", "$object|memberIterator",
                     TAG("$member|getRowTag", {member: "$member"}))
             )
@@ -70,6 +77,11 @@ DomTree.prototype = domplate(
     getRowTag: function(member)
     {
         return this.rowTag;
+    },
+
+    getSizerRowTag: function(object)
+    {
+        return this.sizerRowTag;
     },
 
     hasChildren: function(member)
@@ -420,19 +432,22 @@ DomTree.prototype = domplate(
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Public
 
-    replace: function(parentNode, input)
+    replace: function(parentNode, input, noExpand)
     {
         Dom.clearNode(parentNode);
-        this.append(parentNode, input);
+        this.append(parentNode, input, noExpand);
     },
 
-    append: function(parentNode, input)
+    append: function(parentNode, input, noExpand)
     {
         this.parentNode = parentNode;
         this.input = input;
 
         this.element = this.tag.append(input, parentNode, this);
         this.element.repObject = this;
+
+        if (noExpand)
+            return;
 
         // Expand the first node (root) by default
         // Do not expand if the root is an array with more than one element.

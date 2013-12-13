@@ -73,6 +73,13 @@ DomBaseTree.prototype = domplate(BaseTree,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Domplate
 
+    sizerRowTag:
+        TR({role: "presentation"},
+            TD(),
+            TD({width: "30%"}),
+            TD({width: "70%"})
+        ),
+
     domRowTag:
         TR({"class": "memberRow $member.open $member.type\\Row",
             _domObject: "$member",
@@ -345,7 +352,7 @@ DomBaseTree.prototype = domplate(BaseTree,
     },
 
     // xxxHonza: we might want to have a render() method.
-    replace: function(parentNode, input)
+    replace: function(parentNode, input, noExpand)
     {
         // If any asynchronous processes are in progress (tree insertion or restoration),
         // they will be canceled. This is a big speedup when a tree is often refreshed

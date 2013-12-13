@@ -18,6 +18,12 @@
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.panelNode-watches td {
+    border-bottom: 1px solid #EFEFEF;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Frame-result value. */
 
 .memberRow.frameResultValueRow {
@@ -115,5 +121,5 @@
 
 /* Make sure the last row in the WatchPanel has a bottom border */
 .watchTable .memberRow:last-child > TD {
-    border-bottom: 1px solid #BEBEBE;
+    border-bottom: 1px solid #EFEFEF;
 }

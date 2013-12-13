@@ -46,17 +46,21 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 Firebug.ConsoleBase =
 /** @lends Firebug.ConsoleBase */
 {
-    log: function(object, context, className, rep, noThrottle, sourceLink)
+    log: function(object, context, className, rep, noThrottle, sourceLink, callback)
     {
         Events.dispatch(this.fbListeners, "log", [context, object, className, sourceLink]);
-        return this.logRow(appendObject, object, context, className, rep, sourceLink, noThrottle);
+
+        return this.logRow(appendObject, object, context, className, rep, sourceLink,
+            noThrottle, false, callback);
     },
 
-    logFormatted: function(objects, context, className, noThrottle, sourceLink)
+    logFormatted: function(objects, context, className, noThrottle, sourceLink, callback)
     {
-        Events.dispatch(this.fbListeners, "logFormatted", [context, objects, className, sourceLink]);
+        Events.dispatch(this.fbListeners, "logFormatted", [context, objects, className,
+            sourceLink]);
+
         return this.logRow(appendFormatted, objects, context, className, null, sourceLink,
-            noThrottle);
+            noThrottle, false, callback);
     },
 
     openGroup: function(objects, context, className, rep, noThrottle, sourceLink, noPush)
@@ -76,7 +80,8 @@ Firebug.ConsoleBase =
         return this.logRow(appendCloseGroup, null, context, null, null, null, noThrottle, true);
     },
 
-    logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)
+    logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle,
+        noRow, callback)
     {
         if (!context)
             context = Firebug.currentContext;
@@ -103,6 +108,11 @@ Firebug.ConsoleBase =
                 }
 
                 Events.dispatch(this.fbListeners, "onLogRowCreated", [panel, row, context]);
+
+                // Additional custom initialization of the log entry.
+                if (callback)
+                    callback(row);
+
                 return row;
             }
         }
@@ -114,7 +124,9 @@ Firebug.ConsoleBase =
                 return;
             }
 
-            var args = [appender, objects, context, className, rep, sourceLink, true, noRow];
+            var args = [appender, objects, context, className, rep, sourceLink, true,
+                noRow, callback];
+
             context.throttle(this.logRow, this, args);
         }
     },
@@ -413,7 +425,8 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)
+    logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle,
+        noRow, callback)
     {
         if (!context)
             context = Firebug.currentContext;
@@ -426,6 +439,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     /**
      * Returns the value that the console must ignore.
      *

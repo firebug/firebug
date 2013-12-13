@@ -44,9 +44,9 @@ var StatusPath = Obj.extend(Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Module
 
-    initialize: function()
+    initializeUI: function()
     {
-        Module.initialize.apply(this, arguments);
+        Module.initializeUI.apply(this, arguments);
 
         var panelStatus = Firebug.chrome.getElementById("fbPanelStatus");
         panelStatus.lastPanelName = "";

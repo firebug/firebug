@@ -16,11 +16,11 @@ define([
     "firebug/console/errorMessageObj",
     "firebug/console/commands/profiler",
     "firebug/chrome/tableRep",
-    "firebug/chrome/domTree",
+    "firebug/dom/domBaseTree",
 ],
 function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, StackTrace,
     Errors, Debug, Console, Options, DebuggerLib, ErrorMessageObj, Profiler,
-    TableRep, DomTree) {
+    TableRep, DomBaseTree) {
 
 // Note: since we are using .caller and .arguments for stack walking, we can not use strict mode.
 //"use strict";
@@ -84,7 +84,13 @@ function createFirebugConsole(context, win)
 
     console.dir = function dir(o)
     {
-        Console.log(o, context, "dir", DomTree.prototype);
+        Console.log(o, context, "dir", null, null, null, function(row)
+        {
+            var logContent = row.getElementsByClassName("logContent").item(0);
+            var tree = new DomBaseTree(context);
+            tree.replace(logContent, {object: o}, true);
+        });
+
         return Console.getDefaultReturnValue();
     };
 

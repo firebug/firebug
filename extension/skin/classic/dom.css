@@ -135,7 +135,8 @@
     background-color: #EFEFEF;
 }
 
-.memberRow td {
+.panelNode-dom .memberRow td,
+.panelNode-domSide .memberRow td {
     border-bottom: 1px solid #EFEFEF;
 }
 
