@@ -405,11 +405,11 @@
                                     </hbox>
 
                                     <!-- Toggle visibility of the side panels area -->
-                                    <vbox id="fbToggleSidePanelsBox" collapsed="false" align="end" flex="1">
+                                    <hbox id="fbToggleSidePanelsBox" collapsed="false" align="end">
                                         <toolbarbutton id="fbToggleSidePanels"
                                             class="fbToggleSidePanels toolbar-image-button fbInternational"
                                             tooltiptext="firebug.tip.Toggle_Side_Panels"/>
-                                    </vbox>
+                                    </hbox>
                                 </hbox>
                             </toolbar>
                         </toolbox>
@@ -449,11 +449,11 @@
                                     </panelBarArrowscrollbox>
 
                                     <!-- Toggle visibility of the side panels area -->
-                                    <vbox id="fbToggleSidePanelsBox2" collapsed="false" align="end" flex="1">
+                                    <hbox id="fbToggleSidePanelsBox2" collapsed="false" align="end">
                                         <toolbarbutton id="fbToggleSidePanels2"
                                             class="fbToggleSidePanels toolbar-image-button fbInternational"
                                             tooltiptext="firebug.tip.Toggle_Side_Panels"/>
-                                    </vbox>
+                                    </hbox>
                                 </hbox>
                             </stack>
                             <deck id="fbPanelBar2-deck" flex="1">
