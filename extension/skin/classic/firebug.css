@@ -86,6 +86,7 @@
     margin: 0;
     font-family: monospace;
     direction: ltr;
+    height: 27px;
 }
 
 #fbCommandToolbar {
