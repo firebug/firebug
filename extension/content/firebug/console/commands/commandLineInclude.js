@@ -32,6 +32,7 @@ const Cu = Components.utils;
 const removeConfirmation = "commandline.include.removeConfirmation";
 const prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
 const storeFilename = "includeAliases.json";
+var Trace = FBTrace.to("DBG_COMMANDLINE");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -380,8 +381,7 @@ var CommandLineInclude = Obj.extend(Module,
         // Let's log when the store could not be opened.
         if (!this.store)
         {
-            if (FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("CommandLineInclude.getStore; can't open or create the store");
+            Trace.sysout("CommandLineInclude.getStore; can't open or create the store");
         }
 
         return this.store;
@@ -489,6 +489,8 @@ var CommandLineInclude = Obj.extend(Module,
         var acceptedSchemes = ["http", "https"];
         var absoluteURL = context.browser.currentURI.resolve(url);
 
+        Trace.sysout("CommandLineInclude.evaluateRemoteScript; absoluteURL = " + absoluteURL);
+
         xhr.onload = function()
         {
             if (xhr.status !== 200)
@@ -504,7 +506,7 @@ var CommandLineInclude = Obj.extend(Module,
                 hasWarnings = true;
             }
 
-            // Do not print anything if  the inclusion succeeds.
+            // Do not print anything if the inclusion succeeds.
             var successFunctionEval = function() { };
             // Let's use the default function to handle errors.
             var errorFunctionEval = null;
@@ -514,11 +516,8 @@ var CommandLineInclude = Obj.extend(Module,
             //             (see Issue 6551)
             if (CommandLineInclude.isCSPDoc(context))
             {
-                if (FBTrace.DBG_COMMANDLINE)
-                {
-                    FBTrace.sysout("CommandLineInclude.evaluateRemoteScript; "+
-                        "document is using CSP. use evaluateInGlobal");
-                }
+                Trace.sysout("CommandLineInclude.evaluateRemoteScript; "+
+                    "document is using CSP. use evaluateInGlobal");
                 Firebug.CommandLine.evaluateInGlobal(codeToEval, context, undefined, undefined,
                     successFunctionEval, errorFunctionEval, undefined, {noCmdLineAPI: true});
             }

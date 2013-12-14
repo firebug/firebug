@@ -41,6 +41,7 @@ function(Firebug, FBTrace, Obj, Locale, Events, Url, Dom, System, Str, Persist, 
 var Cc = Components.classes;
 
 var commandPrefix = ">>> ";
+var Trace = FBTrace.to("DBG_COMMANDLINE");
 
 // ********************************************************************************************* //
 // Command Line
@@ -188,11 +189,24 @@ var CommandLine = Obj.extend(Module,
         return evaluateExpression.apply(null, args);
     },
 
+    /**
+     * Evaluate an expression in a webpage, inserting a temporary script in it.
+     *
+     * @param {string} expr The expression
+     * @param {object} context
+     * @param {Window} [targetWindow] The window in which we evaluate the expression
+     */
     evaluateInWebPage: function(expr, context, targetWindow)
     {
         var win = targetWindow || context.getCurrentGlobal();
 
-        var element = Dom.addScript(win.document, "_firebugInWebPage", expr);
+        Trace.sysout("CommandLine.evaluateInWebPage; expression = " + expr, expr);
+        // Dom.addScript checks whether an element with the given ID already exists and returns it
+        // when it is the case. But we might have to call evaluateInWebPage multiple times before
+        // the setTimeout() callback to remove the element is called. So we generate a unique ID.
+        var elementId = "_firebugInWebPage" + Math.random();
+
+        var element = Dom.addScript(win.document, elementId, expr);
         if (!element)
             return;
 
