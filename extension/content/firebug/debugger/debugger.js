@@ -8,13 +8,16 @@ define([
     "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/lib/options",
+    "firebug/chrome/firefox",
     "firebug/debugger/debuggerHalter",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/clients/clientCache",
     "firebug/remoting/debuggerClientModule",
 ],
-function(Firebug, FBTrace, Obj, Locale, Options, DebuggerHalter, DebuggerLib, ClientCache,
-    DebuggerClientModule) {
+function(Firebug, FBTrace, Obj, Locale, Options, Firefox, DebuggerHalter, DebuggerLib,
+    ClientCache, DebuggerClientModule) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -80,6 +83,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     shutdown: function()
     {
         Firebug.unregisterTracePrefix("debuggerTool.");
+        Firebug.unregisterTracePrefix("breakpointTool.");
 
         DebuggerClientModule.removeListener(this);
 
@@ -88,7 +92,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     initContext: function(context, persistedState)
     {
-        Trace.sysout("debuggerTool.initContext; context ID: " + context.getId());
+        Trace.sysout("debugger.initContext; context ID: " + context.getId());
 
         // If page reload happens the thread client remains the same so,
         // preserve also all existing breakpoint clients.
@@ -120,7 +124,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     onThreadAttached: function(context, reload)
     {
-        Trace.sysout("debuggerTool.onThreadAttached; reload: " + reload + ", context ID: " +
+        Trace.sysout("debugger.onThreadAttached; reload: " + reload + ", context ID: " +
             context.getId(), context);
 
         // Create grip cache
@@ -133,7 +137,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     onThreadDetached: function(context)
     {
-        Trace.sysout("debuggerTool.onThreadDetached; context ID: " + context.getId());
+        Trace.sysout("debugger.onThreadDetached; context ID: " + context.getId());
 
         context.getTool("debugger").detach();
         context.getTool("breakpoint").detach();
@@ -159,7 +163,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         DebuggerClientModule.addListener(this);
 
-        Trace.sysout("Debugger.activateDebugger;");
+        this.setStatus();
+
+        Trace.sysout("debugger.activateDebugger;");
     },
 
     deactivateDebugger: function()
@@ -171,7 +177,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         DebuggerClientModule.removeListener(this);
 
-        Trace.sysout("Debugger.deactivateDebugger;");
+        this.setStatus();
+
+        Trace.sysout("debugger.deactivateDebugger;");
     },
 
     onSuspendFirebug: function()
@@ -179,7 +187,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (!Firebug.Debugger.isAlwaysEnabled())
             return;
 
-        Trace.sysout("Debugger.onSuspendFirebug;");
+        Trace.sysout("debugger.onSuspendFirebug;");
 
         return false;
     },
@@ -189,7 +197,23 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (!Firebug.Debugger.isAlwaysEnabled())
             return;
 
-        Trace.sysout("Debugger.onResumeFirebug;");
+        Trace.sysout("debugger.onResumeFirebug;");
+    },
+
+    setStatus: function()
+    {
+        var status = Firefox.getElementById("firebugStatus");
+        if (status)
+        {
+            var enabled = this.isEnabled();
+            status.setAttribute("script", enabled ? "on" : "off");
+
+            Trace.sysout("debugger.setStatus; enabled: " + enabled);
+        }
+        else
+        {
+            TraceError.sysout("debugger.setStatus; ERROR no firebugStatus element");
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
