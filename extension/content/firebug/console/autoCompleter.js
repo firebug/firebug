@@ -2376,7 +2376,7 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, opt
             if (context.stopped && options.includeCurrentScope)
             {
                 var localVars = Firebug.Debugger.getCurrentFrameKeys(context);
-                out.completions = out.completions.concat(localVars);
+                out.completions = out.completions.concat(localVars, ["this"]);
             }
         }
 

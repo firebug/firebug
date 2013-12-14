@@ -437,12 +437,24 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         var ret = [];
         for (var scope of frame.scopes)
         {
-            if (!scope.properties)
+            // "this" is not a real scope.
+            if (scope.name === "this")
                 continue;
-            for (var prop of scope.properties)
+
+            // We can't synchronously read properties of objects on the scope chain,
+            // so always ignore them to avoid inconsistencies. They are pretty uncommon
+            // anyway (apart from the global object, which gets special treatment).
+            var type = scope.grip.type;
+            if (type === "object" || type === "with")
+                continue;
+
+            var props = scope.getProperties();
+            if (!props || !Array.isArray(props))
+                continue;
+
+            for (var prop of props)
                 ret.push(prop.name);
         }
-        ret.push("this");
         return ret;
     },
 
