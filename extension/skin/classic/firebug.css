@@ -595,7 +595,7 @@ toolbarbutton {
     border-radius: 2px;
 }
 
-toolbarbutton:hover:not([disabled="true"]):not([selected="true"]) {
+toolbarbutton:hover:not([disabled="true"]):not([selected="true"]):not([open="true"]) {
     border-color: rgba(0, 0, 0, 0.2);
     background: transparent linear-gradient(to bottom, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2)) no-repeat;
     box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.6) inset, 0 0 1px rgba(255, 255, 255, 0.6) inset, 0 0 2px rgba(0, 0, 0, 0.05);
@@ -607,8 +607,9 @@ toolbarbutton:hover:active {
     box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1) inset, 0 0 1px rgba(0, 0, 0, 0.1) inset, 0 0 2px rgba(0, 0, 0, 0.05);
 }
 
-toolbarbutton[checked="true"]:not([disabled="true"]),
-toolbarbutton[selected="true"] {
+toolbarbutton:-moz-any([checked="true"],
+                       [selected="true"],
+                       [open="true"]):not([disabled="true"]) {
     border-color: rgba(0, 0, 0, 0.3);
     background: transparent linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent) no-repeat;
     box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1) inset, 0 0 1px rgba(0, 0, 0, 0.1) inset;
