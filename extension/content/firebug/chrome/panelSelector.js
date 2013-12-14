@@ -193,7 +193,7 @@ var PanelSelector = Obj.extend(Module,
         tab = panelBar.panelTabs.firstChild;
         while (tab)
         {
-            if (FBL.isVisible(tab))
+            if (Xml.isVisible(tab))
             {
                 panelBar.selectTab(tab);
                 break;
