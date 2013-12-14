@@ -65,7 +65,7 @@ var PanelSelector = Obj.extend(Module,
     onMenuShowing: function(popup)
     {
         var items = [];
-        var panelBar = Firebug.chrome.getElementById("fbPanelBar1");
+        var panelBar = this.getPanelBar();
         var tab = panelBar.panelTabs.firstChild;
 
         // Create an menu-option-item for every existing panel tab.
@@ -136,7 +136,7 @@ var PanelSelector = Obj.extend(Module,
         Events.cancelEvent(event);
 
         var menuItem = event.target;
-        var panelBar = Firebug.chrome.getElementById("fbPanelBar1");
+        var panelBar = this.getPanelBar();
 
         // The last visible panel can't be hidden.
         if (menuItem.getAttribute("disabled") == "true")
@@ -160,7 +160,7 @@ var PanelSelector = Obj.extend(Module,
 
         Trace.sysout("panelSelector.onShowAllPanels;", event);
 
-        var panelBar = Firebug.chrome.getElementById("fbPanelBar1");
+        var panelBar = this.getPanelBar();
 
         var tab = panelBar.panelTabs.firstChild;
         while (tab)
@@ -179,7 +179,7 @@ var PanelSelector = Obj.extend(Module,
 
     closePanel: function(panelName)
     {
-        var panelBar = Firebug.chrome.getElementById("fbPanelBar1");
+        var panelBar = this.getPanelBar();
 
         var tab = panelBar.getTab(panelName);
         Dom.collapse(tab, true);
@@ -204,7 +204,7 @@ var PanelSelector = Obj.extend(Module,
 
     openPanel: function(panelName)
     {
-        var panelBar = Firebug.chrome.getElementById("fbPanelBar1");
+        var panelBar = this.getPanelBar();
 
         var tab = panelBar.getTab(panelName);
         Dom.collapse(tab, false);
@@ -214,7 +214,7 @@ var PanelSelector = Obj.extend(Module,
 
     togglePanel: function(panelName, forceOpen)
     {
-        var panelBar = Firebug.chrome.getElementById("fbPanelBar1");
+        var panelBar = this.getPanelBar();
 
         var tab = panelBar.getTab(panelName);
         if (!tab)
@@ -232,7 +232,7 @@ var PanelSelector = Obj.extend(Module,
 
     storeHiddenPanels: function()
     {
-        var panelBar = Firebug.chrome.getElementById("fbPanelBar1");
+        var panelBar = this.getPanelBar();
 
         var closedPanels = [];
         var tab = panelBar.panelTabs.firstChild;
@@ -255,7 +255,7 @@ var PanelSelector = Obj.extend(Module,
      */
     updatePanels: function(panelTypes)
     {
-        var panelBar = Firebug.chrome.getElementById("fbPanelBar1");
+        var panelBar = this.getPanelBar();
 
         // Make sure hidden panels are collapsed.
         var value = Options.get(hiddenPanels);
@@ -269,6 +269,14 @@ var PanelSelector = Obj.extend(Module,
             if (tab)
                 Dom.collapse(tab, true);
         }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Helpers
+
+    getPanelBar: function()
+    {
+        return Firebug.chrome.getElementById("fbPanelBar1");
     }
 });
 
