@@ -86,13 +86,13 @@
     margin: 0;
     font-family: monospace;
     direction: ltr;
-    height: 27px;
 }
 
 #fbCommandToolbar {
     padding-left: 27px;
     margin-top: 1px;
     border-bottom: 1px solid rgba(10, 31, 51, 0.35);
+    height: 27px;
 }
 
 #fbToggleCommandEditorBox {
