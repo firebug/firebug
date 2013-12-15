@@ -30,7 +30,7 @@ function runTest()
                 'ReferenceError: waitIDontExist is not defined' +
                 'return waitIDontExist("I will throw an exception!");');
 
-            tasks.push(checkExceptionProperties, watchPanel);
+            /*tasks.push(checkExceptionProperties, watchPanel);*/
             tasks.wrapAndPush(FBTest.clickContinueButton);
             tasks.run(function()
             {
