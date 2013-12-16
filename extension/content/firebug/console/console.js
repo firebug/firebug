@@ -14,6 +14,7 @@ define([
     "firebug/chrome/panelNotification",
     "firebug/chrome/activableModule",
     "firebug/chrome/searchBox",
+    "firebug/console/consoleBase",
     "firebug/console/commands/profiler",
     "firebug/console/consolePanel",
     "firebug/console/commandEditor",
@@ -22,14 +23,12 @@ define([
     "firebug/console/performanceTiming",
 ],
 function(Firebug, FBTrace, Obj, Events, Locale, Search, Xml, Options, Win, Firefox,
-    PanelNotification, ActivableModule) {
+    PanelNotification, ActivableModule, SearchBox, ConsoleBase) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
-
-var maxQueueRequests = 500;
 
 // Note: createDefaultReturnValueInstance() is a local helper (see below).
 var defaultReturnValue = createDefaultReturnValueInstance();
@@ -38,139 +37,12 @@ var Trace = FBTrace.to("DBG_CONSOLE");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
-// ConsoleBase Implementation
-
-/**
- * @object
- */
-Firebug.ConsoleBase =
-/** @lends Firebug.ConsoleBase */
-{
-    log: function(object, context, className, rep, noThrottle, sourceLink)
-    {
-        Events.dispatch(this.fbListeners, "log", [context, object, className, sourceLink]);
-        return this.logRow(appendObject, object, context, className, rep, sourceLink, noThrottle);
-    },
-
-    logFormatted: function(objects, context, className, noThrottle, sourceLink)
-    {
-        Events.dispatch(this.fbListeners, "logFormatted", [context, objects, className, sourceLink]);
-        return this.logRow(appendFormatted, objects, context, className, null, sourceLink,
-            noThrottle);
-    },
-
-    openGroup: function(objects, context, className, rep, noThrottle, sourceLink, noPush)
-    {
-        return this.logRow(appendOpenGroup, objects, context, className, rep, sourceLink,
-            noThrottle);
-    },
-
-    openCollapsedGroup: function(objects, context, className, rep, noThrottle, sourceLink, noPush)
-    {
-        return this.logRow(appendCollapsedGroup, objects, context, className, rep, sourceLink,
-            noThrottle);
-    },
-
-    closeGroup: function(context, noThrottle)
-    {
-        return this.logRow(appendCloseGroup, null, context, null, null, null, noThrottle, true);
-    },
-
-    logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)
-    {
-        if (!context)
-            context = Firebug.currentContext;
-
-        if (!context)
-            TraceError.sysout("console.logRow; has no context, skipping objects", objects);
-
-        if (!context)
-            return;
-
-        if (noThrottle || !context)
-        {
-            var panel = this.getPanel(context);
-            if (panel)
-            {
-                var row = panel.append(appender, objects, className, rep, sourceLink, noRow);
-                var container = panel.panelNode;
-
-                while (container.childNodes.length > maxQueueRequests + 1)
-                {
-                    container.removeChild(container.firstChild.nextSibling);
-                    panel.limit.config.totalCount++;
-                    PanelNotification.updateCounter(panel.limit);
-                }
-
-                Events.dispatch(this.fbListeners, "onLogRowCreated", [panel, row, context]);
-                return row;
-            }
-        }
-        else
-        {
-            if (!context.throttle)
-            {
-                TraceError.sysout("console.logRow; has not context.throttle!");
-                return;
-            }
-
-            var args = [appender, objects, context, className, rep, sourceLink, true, noRow];
-            context.throttle(this.logRow, this, args);
-        }
-    },
-
-    appendFormatted: function(args, row, context)
-    {
-        if (!context)
-            context = Firebug.currentContext;
-
-        var panel = this.getPanel(context);
-        panel.appendFormatted(args, row);
-    },
-
-    clear: function(context)
-    {
-        if (!context)
-            context = Firebug.currentContext;
-
-        if (context)
-        {
-            // There could be some logs waiting in the throttle queue, so
-            // clear asynchronously after the queue is flushed.
-            context.throttle(this.clearPanel, this, [context]);
-
-            // Also clear now
-            this.clearPanel(context);
-
-            // Let listeners react to console clearing
-            Events.dispatch(this.fbListeners, "onConsoleCleared", [context]);
-        }
-    },
-
-    clearPanel: function(context)
-    {
-        Firebug.Errors.clear(context);
-
-        var panel = this.getPanel(context, true);
-        if (panel)
-            panel.clear();
-    },
-
-    // Override to direct output to your panel
-    getPanel: function(context, noCreate)
-    {
-        if (context)
-            return context.getPanel("console", noCreate);
-    },
-};
-
-// ********************************************************************************************* //
 
 /**
  * @module Represents module for the Console panel. Responsible e.g. for handling
  * user actions related to Console panel filter.
  */
-var ActivableConsole = Obj.extend(ActivableModule, Firebug.ConsoleBase);
+var ActivableConsole = Obj.extend(ActivableModule, ConsoleBase);
 Firebug.Console = Obj.extend(ActivableConsole,
 /** @lends Firebug.Console */
 {
@@ -194,9 +66,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     initialize: function()
     {
-        // Initialize log limit.
-        this.updateMaxLimit();
-
         ActivableModule.initialize.apply(this, arguments);
 
         Firebug.connection.addListener(this);
@@ -289,18 +158,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
         Firebug.chrome.setGlobalAttribute("cmd_firebug_clearConsole", "disabled", !context);
 
         ActivableModule.showContext.apply(this, arguments);
-    },
-
-    updateOption: function(name, value)
-    {
-        if (name == "console.logLimit")
-            this.updateMaxLimit();
-    },
-
-    updateMaxLimit: function()
-    {
-        var value = Options.get("console.logLimit");
-        maxQueueRequests =  value ? value : maxQueueRequests;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -422,7 +279,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
             TraceError.sysout("Console.logRow; no context");
 
         if (this.isAlwaysEnabled())
-            return Firebug.ConsoleBase.logRow.apply(this, arguments);
+            return ConsoleBase.logRow.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -461,14 +318,6 @@ Firebug.ConsoleListener =
     {
     }
 };
-
-// ********************************************************************************************* //
-
-var appendObject = Firebug.ConsolePanel.prototype.appendObject;
-var appendFormatted = Firebug.ConsolePanel.prototype.appendFormatted;
-var appendOpenGroup = Firebug.ConsolePanel.prototype.appendOpenGroup;
-var appendCollapsedGroup = Firebug.ConsolePanel.prototype.appendCollapsedGroup;
-var appendCloseGroup = Firebug.ConsolePanel.prototype.appendCloseGroup;
 
 // ********************************************************************************************* //
 // Local Helpers
