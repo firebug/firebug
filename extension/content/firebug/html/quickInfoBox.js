@@ -2,8 +2,7 @@
 
 define([
     "firebug/firebug",
-    "firebug/chrome/module",
-    "firebug/chrome/firefox",
+    "firebug/lib/trace",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/dom",
@@ -11,8 +10,10 @@ define([
     "firebug/lib/domplate",
     "firebug/lib/object",
     "firebug/lib/css"
+    "firebug/chrome/module",
+    "firebug/chrome/firefox",
 ],
-function(Firebug, Module, Firefox, Locale, Events, Dom, Options, Domplate, Obj, Css) {
+function(Firebug, FBTrace, Locale, Events, Dom, Options, Domplate, Obj, Css, Module, Firefox) {
 
 "use strict"
 
@@ -30,6 +31,10 @@ var compAttribs = [
     "margin-top", "margin-right", "margin-bottom", "margin-left", "color",
     "backgroundColor", "fontFamily", "cssFloat", "display", "visibility"
 ];
+
+// Tracing
+var Trace = FBTrace.to("DBG_QUICKINFOBOX");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // Domplate
@@ -378,6 +383,12 @@ var QuickInfoBox = Obj.extend(Module,
 
     getContentFrame: function()
     {
+        if (!this.qiPanel)
+        {
+            TraceError.sysout("quickInfoBox.getContentFrame; ERROR no panel!");
+            return;
+        }
+
         return this.qiPanel.getElementsByClassName("fbQuickInfoPanelContent")[0];
     },
 

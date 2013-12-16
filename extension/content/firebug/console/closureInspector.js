@@ -381,27 +381,10 @@ var ClosureInspector =
         if (Trace.active)
         {
             Trace.sysout("ClosureInspector; transforming expression: `" +
-                    expr + "` -> `" + newExpr + "`");
+                expr + "` -> `" + newExpr + "`");
         }
 
-        var gotDebugger = false;
-        try
-        {
-            return DebuggerLib.withTemporaryDebugger(context, win, function()
-            {
-                gotDebugger = true;
-                return callback(newExpr);
-            });
-        }
-        catch (exc)
-        {
-            if (gotDebugger)
-                throw exc;
-
-            // Wasn't able to activate debugger. :(
-            // Rerun the command without debugger, and let it fail in a friendlier way.
-            return callback(newExpr);
-        }
+        return DebuggerLib.withTemporaryDebugger(context, win, () => callback(newExpr));
     },
 
     onExecuteClosureHelperCommand: function(context, args)
