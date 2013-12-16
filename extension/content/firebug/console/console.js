@@ -13,16 +13,11 @@ define([
     "firebug/chrome/firefox",
     "firebug/chrome/panelNotification",
     "firebug/chrome/activableModule",
-    "firebug/chrome/searchBox",
-    "firebug/console/commands/profiler",
     "firebug/console/consolePanel",
-    "firebug/console/commandEditor",
-    "firebug/console/functionMonitor",
-    "firebug/console/commands/eventMonitor",
-    "firebug/console/performanceTiming",
+    "firebug/remoting/debuggerClientModule",
 ],
 function(Firebug, FBTrace, Obj, Events, Locale, Search, Xml, Options, Win, Firefox,
-    PanelNotification, ActivableModule) {
+    PanelNotification, ActivableModule, ConsolePanel, DebuggerClientModule) {
 
 "use strict";
 
@@ -320,8 +315,8 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     onObserverChange: function(observer)
     {
-        if (!Firebug.getSuspended())  // then Firebug is in action
-            this.onResumeFirebug();   // and we need to test to see if we need to addObserver
+        if (!Firebug.getSuspended())
+            this.onResumeFirebug();
         else
             this.onSuspendFirebug();
     },
@@ -339,6 +334,8 @@ Firebug.Console = Obj.extend(ActivableConsole,
             // status bar are removed.
             this.clear();
         }
+
+        DebuggerClientModule.removeListener(this);
     },
 
     onResumeFirebug: function()
@@ -348,6 +345,8 @@ Firebug.Console = Obj.extend(ActivableConsole,
         var watchForErrors = Firebug.Console.isAlwaysEnabled() || Firebug.Console.hasObservers();
         if (Firebug.Errors.toggleWatchForErrors(watchForErrors))
             this.setStatus();
+
+        DebuggerClientModule.addListener(this);
     },
 
     onToggleFilter: function(event, context, filterType)
@@ -460,7 +459,26 @@ Firebug.Console = Obj.extend(ActivableConsole,
     isDefaultReturnValue: function(obj)
     {
         return obj === defaultReturnValue;
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // DebuggerClientModule
+
+    onThreadAttached: function(context, reload)
+    {
+        Trace.sysout("console.onThreadAttached; reload: " + reload + ", context ID: " +
+            context.getId(), context);
+
+        // Attach tools needed by this module.
+        context.getTool("source").attach(reload);
+    },
+
+    onThreadDetached: function(context)
+    {
+        Trace.sysout("source.onThreadDetached; context ID: " + context.getId());
+
+        context.getTool("source").detach();
+    },
 });
 
 // ********************************************************************************************* //

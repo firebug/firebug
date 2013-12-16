@@ -4,12 +4,11 @@ define([
     "firebug/firebug",
     "firebug/lib/trace",
     "firebug/lib/object",
-    "firebug/chrome/eventSource",
     "firebug/chrome/tool",
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/remoting/debuggerClientModule",
 ],
-function (Firebug, FBTrace, Obj, EventSource, Tool, BreakpointStore, DebuggerClientModule) {
+function (Firebug, FBTrace, Obj, Tool, BreakpointStore, DebuggerClientModule) {
 
 // ********************************************************************************************* //
 // Constants
@@ -35,7 +34,7 @@ function BreakpointTool(context)
  * server side (using RDP) and forwards results to all registered listeners, which are
  * usually panel objects.
  */
-BreakpointTool.prototype = Obj.extend(Tool,
+BreakpointTool.prototype = Obj.extend(new Tool(),
 /** @lends BreakpointTool */
 {
     dispatchName: "breakpointTool",
@@ -48,35 +47,25 @@ BreakpointTool.prototype = Obj.extend(Tool,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
-    attach: function(reload)
+    onAttach: function(reload)
     {
-        this.attached = true;
-
         Trace.sysout("breakpointTool.attach; context ID: " + this.context.getId());
 
         // Listen for 'newScript' event.
-        var tool = this.context.getTool("debugger");
-        tool.addListener(this);
+        this.context.getTool("source").addListener(this);
 
         // Listen for {@BreakpointStore} events to create/remove breakpoints
         // in the related backend (thread actor).
         BreakpointStore.addListener(this);
     },
 
-    detach: function()
+    onDetach: function()
     {
-        // If a context is destroyed before {@ThreadClient} is actually attached we don't
-        // have to do any clean up steps.
-        if (!this.attached)
-            return;
+        Trace.sysout("breakpointTool.detach; context ID: " + this.context.getId());
 
-        // Listen for 'newScript' event.
-        var tool = this.context.getTool("debugger");
-        tool.removeListener(this);
+        this.context.getTool("source").removeListener(this);
 
         BreakpointStore.removeListener(this);
-
-        Trace.sysout("breakpointTool.detach; context ID: " + this.context.getId());
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

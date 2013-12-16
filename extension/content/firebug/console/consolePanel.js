@@ -27,6 +27,8 @@ function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Search, Opti
     Xpcom, Menu, FirebugReps, SearchBox, PanelNotification, ActivablePanel, DebuggerLib,
     BreakpointStore, Profiler, ErrorMessageObj) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Resources
 

@@ -54,7 +54,8 @@ EventSource.prototype =
     removeListener: function(listener)
     {
         // if this.fbListeners is null, remove is being called with no add
-        Arr.remove(this.fbListeners, listener);
+        if (this.fbListeners)
+            Arr.remove(this.fbListeners, listener);
     },
 
     dispatch: function(eventName, args)

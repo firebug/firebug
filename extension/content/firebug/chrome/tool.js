@@ -18,6 +18,10 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // ********************************************************************************************* //
 // Implementation
 
+function Tool()
+{
+}
+
 /**
  * @object Base class for all tool objects. Every derived tool must define a constructor and
  * register with <code>Firebug.registerTool</code> method. An instance of the tool
@@ -26,9 +30,41 @@ var TraceError = FBTrace.to("DBG_ERRORS");
  * associated with tools. Tool objects can often serve as controllers, where the view is
  * {@Panel} and the document is {@TabContext}.
  */
-var Tool = Obj.extend(new EventSource(),
+Tool.prototype = Obj.extend(new EventSource(),
 /** @lends Tool */
 {
+    attached: false,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
+
+    attach: function(reload)
+    {
+        if (this.attached)
+            return;
+
+        this.attached = true;
+        this.onAttach(reload);
+    },
+
+    detach: function()
+    {
+        if (!this.attached)
+            return;
+
+        this.attached = true;
+        this.onDetach();
+    },
+
+    onAttach: function(reload)
+    {
+        // TODO: implement in derived objects.
+    },
+
+    onDetach: function(reload)
+    {
+        // TODO: implement in derived objects.
+    }
 });
 
 // ********************************************************************************************* //

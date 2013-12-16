@@ -6,18 +6,16 @@ define([
     "firebug/lib/object",
     "firebug/lib/array",
     "firebug/lib/options",
-    "firebug/chrome/eventSource",
     "firebug/chrome/tool",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/stack/stackTrace",
     "firebug/debugger/clients/clientCache",
-    "firebug/debugger/script/sourceFile",
-    "firebug/debugger/debuggerLib",
-    "firebug/remoting/debuggerClientModule",
     "arch/compilationunit",
 ],
-function (Firebug, FBTrace, Obj, Arr, Options, EventSource, Tool, StackFrame, StackTrace,
-    ClientCache, SourceFile, DebuggerLib, DebuggerClientModule, CompilationUnit) {
+function (Firebug, FBTrace, Obj, Arr, Options, Tool, StackFrame, StackTrace,
+    ClientCache, CompilationUnit) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -38,7 +36,7 @@ function DebuggerTool(context)
  * context. Reference to the current context is passed to the constructor. Life cycle
  * of a tool object is the same as for a panel, but tool doesn't have any UI.
  */
-DebuggerTool.prototype = Obj.extend(Tool,
+DebuggerTool.prototype = Obj.extend(new Tool(),
 /** @lends DebuggerTool */
 {
     dispatchName: "DebuggerTool",
@@ -56,15 +54,11 @@ DebuggerTool.prototype = Obj.extend(Tool,
      * @param {Boolean} reload Set to true if the current page has been just reloaded. In such
      * case we are still attached to the same {@ThreadClient} object.
      */
-    attach: function(reload)
+    onAttach: function(reload)
     {
         Trace.sysout("debuggerTool.attach; context ID: " + this.context.getId());
 
         this.attachListeners();
-
-        // Get scripts from the server. Source as fetched on demand (e.g. when
-        // displayed in the Script panel).
-        this.updateScriptFiles();
 
         // Initialize break on exception feature. This must be done only once when the thread
         // client is created not when page reload happens. Note that the same instance of the
@@ -75,7 +69,7 @@ DebuggerTool.prototype = Obj.extend(Tool,
             this.updateBreakOnErrors();
     },
 
-    detach: function()
+    onDetach: function()
     {
         Trace.sysout("debuggerTool.detach; context ID: " + this.context.getId());
 
@@ -110,10 +104,6 @@ DebuggerTool.prototype = Obj.extend(Tool,
 
     attachListeners: function()
     {
-        // Bail out if listeners are already attached.
-        if (this._onPause)
-            return;
-
         // This is the place where we bind all listeners to the current
         // context so, it's available inside the methods.
         this._onPause = this.paused.bind(this);
@@ -121,7 +111,6 @@ DebuggerTool.prototype = Obj.extend(Tool,
         this._onResumed = this.resumed.bind(this);
         this._onFramesAdded = this.framesadded.bind(this);
         this._onFramesCleared = this.framescleared.bind(this);
-        this._onNewSource = this.newSource.bind(this);
 
         // Add all listeners
         this.context.activeThread.addListener("paused", this._onPause);
@@ -131,16 +120,10 @@ DebuggerTool.prototype = Obj.extend(Tool,
         // These events are used to sync with ThreadClient's stack frame cache.
         this.context.activeThread.addListener("framesadded", this._onFramesAdded);
         this.context.activeThread.addListener("framescleared", this._onFramesCleared);
-
-        DebuggerClientModule.client.addListener("newSource", this._onNewSource);
     },
 
     detachListeners: function()
     {
-        // Bail out if listeners are already detached.
-        if (!this._onPause)
-            return;
-
         // Remove all listeners from the current ThreadClient
         this.context.activeThread.removeListener("paused", this._onPause);
         this.context.activeThread.removeListener("detached", this._onDetached);
@@ -148,86 +131,12 @@ DebuggerTool.prototype = Obj.extend(Tool,
         this.context.activeThread.removeListener("framesadded", this._onFramesAdded);
         this.context.activeThread.removeListener("framescleared", this._onFramesCleared);
 
-        DebuggerClientModule.client.removeListener("newSource", this._onNewSource);
-
         this._onPause = null;
         this._onDetached = null;
         this._onResumed = null;
         this._onFramesAdded = null;
         this._onFramesCleared = null;
         this._onNewSource = null;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Script Sources
-
-    updateScriptFiles: function()
-    {
-        Trace.sysout("debuggerTool.updateScriptFiles; context id: " + this.context.getId());
-
-        var self = this;
-        this.context.activeThread.getSources(function(response)
-        {
-            // The tool is already destroyed so, bail out.
-            if (!self._onPause)
-                return;
-
-            var sources = response.sources;
-            for (var i=0; i<sources.length; i++)
-                self.addScript(sources[i]);
-        });
-    },
-
-    newSource: function(type, response)
-    {
-        Trace.sysout("debuggerTool.newSource; context id: " + this.context.getId() +
-            ", script url: " + response.source.url, response);
-
-        // Ignore scripts coming from different threads.
-        // This is because 'newSource' listener is registered in 'DebuggerClient' not
-        // in 'ThreadClient'.
-        if (this.context.activeThread.actor != response.from)
-        {
-            Trace.sysout("debuggerTool.newSource; coming from different thread");
-            return;
-        }
-
-        this.addScript(response.source);
-    },
-
-    addScript: function(script)
-    {
-        // Ignore scripts generated from 'clientEvaluate' packets. These scripts are
-        // created e.g. as the user is evaluating expressions in the watch window.
-        if (DebuggerLib.isFrameLocationEval(script.url))
-        {
-            Trace.sysout("debuggerTool.addScript; A script ignored " + script.type);
-            return;
-        }
-
-        if (!this.context.sourceFileMap)
-        {
-            TraceError.sysout("debuggerTool.addScript; ERROR Source File Map is NULL", script);
-            return;
-        }
-
-        // xxxHonza: Ignore inner scripts for now
-        if (this.context.sourceFileMap[script.url])
-        {
-            Trace.sysout("debuggerTool.addScript; A script ignored: " + script.url, script);
-            return;
-        }
-
-        // Create a source file and append it into the context. This is the only
-        // place where an instance of {@SourceFile} is created.
-        var sourceFile = new SourceFile(this.context, script.actor, script.url,
-            script.isBlackBoxed);
-
-        this.context.addSourceFile(sourceFile);
-
-        // Notify listeners (e.g. the Script panel) to updated itself. It can happen
-        // that the Script panel has been empty until now and need to display a script.
-        this.dispatch("newSource", [sourceFile]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

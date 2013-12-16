@@ -17,6 +17,8 @@ define([
 function(Firebug, FBTrace, Obj, Arr, Events, Url, Css, Wrapper, Promise,
     CompilationUnit, Win, Plugin) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
@@ -28,6 +30,7 @@ var refreshDelay = 300;
 
 // Tracing support
 var TraceError = FBTrace.to("DBG_ERRORS");
+var Trace = FBTrace.to("DBG_TABCONTEXT");
 
 // ********************************************************************************************* //
 
@@ -119,6 +122,8 @@ TabContext.prototype =
         // Create an instance of required tool. There is one instance per context.
         tool = new toolType(this);
         this.toolMap[name] = tool;
+
+        Trace.sysout("tabContext.getTool; Created: " + name);
 
         return tool;
     },

@@ -49,7 +49,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         // Listen to the debugger-client, which represents the connection to the server.
         // The debugger-client object represents the source of all RDP events.
-
         if (Firebug.Debugger.isAlwaysEnabled())
             DebuggerClientModule.addListener(this);
 
@@ -120,7 +119,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Connection
+    // DebuggerClientModule
 
     onThreadAttached: function(context, reload)
     {
@@ -130,7 +129,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         // Create grip cache
         context.clientCache = new ClientCache(DebuggerClientModule.client, context);
 
-        // Attach tools
+        // Attach tools needed by this module.
+        context.getTool("source").attach(reload);
         context.getTool("debugger").attach(reload);
         context.getTool("breakpoint").attach(reload);
     },
@@ -139,6 +139,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         Trace.sysout("debugger.onThreadDetached; context ID: " + context.getId());
 
+        context.getTool("source").detach();
         context.getTool("debugger").detach();
         context.getTool("breakpoint").detach();
     },
