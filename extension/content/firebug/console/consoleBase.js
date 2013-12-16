@@ -6,9 +6,8 @@ define([
     "firebug/lib/events",
     "firebug/lib/options",
     "firebug/console/consolePanel",
-    "firebug/console/errors",
 ],
-function(Firebug, FBTrace, Events, Options, ConsolePanel, Errors) {
+function(Firebug, FBTrace, Events, Options, ConsolePanel) {
 
 "use strict";
 
@@ -137,7 +136,7 @@ var ConsoleBase =
 
     clearPanel: function(context)
     {
-        Errors.clear(context);
+        Firebug.Errors.clear(context);
 
         var panel = this.getPanel(context, true);
         if (panel)
@@ -155,8 +154,7 @@ var ConsoleBase =
 // ********************************************************************************************* //
 // Registration
 
-Deprecated.property(Firebug, "ConsoleBase", ConsoleBase, "Using Firebug.ConsoleBase is " +
-    "deprecated. Load 'firebug/console/consoleBase' module instead");
+Firebug.ConsoleBase = ConsoleBase;
 
 return ConsoleBase;
 
