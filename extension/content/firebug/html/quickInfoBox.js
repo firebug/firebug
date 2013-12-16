@@ -9,7 +9,7 @@ define([
     "firebug/lib/options",
     "firebug/lib/domplate",
     "firebug/lib/object",
-    "firebug/lib/css"
+    "firebug/lib/css",
     "firebug/chrome/module",
     "firebug/chrome/firefox",
 ],
