@@ -107,12 +107,12 @@ var CommandLineIncludeRep = domplate(TableRep,
         var store = CommandLineInclude.getStore();
         var keys = store.getKeys();
         var arrayToDisplay = [];
-        var returnValue = Firebug.Console.getDefaultReturnValue();
+        var returnValue = Console.getDefaultReturnValue();
 
         if (keys.length === 0)
         {
             var msg = Locale.$STR("commandline.include.noDefinedAlias");
-            Firebug.Console.log(msg, context, null, FirebugReps.Hint);
+            Console.log(msg, context, null, FirebugReps.Hint);
             return returnValue;
         }
 
@@ -394,7 +394,7 @@ var CommandLineInclude = Obj.extend(Module,
         var prefixedLocaleStr = (noAutoPrefix ? localeStr : "commandline.include." + localeStr);
         var msg = Locale.$STRF(prefixedLocaleStr, localeArgs);
         logArgs.unshift([msg]);
-        return Firebug.Console.logFormatted.apply(Firebug.Console, logArgs);
+        return Console.logFormatted.apply(Console, logArgs);
     },
 
     /**
@@ -409,7 +409,7 @@ var CommandLineInclude = Obj.extend(Module,
     {
         var reNotAlias = /[\.\/]/;
         var urlIsAlias = url !== null && !reNotAlias.test(url);
-        var returnValue = Firebug.Console.getDefaultReturnValue();
+        var returnValue = Console.getDefaultReturnValue();
 
         // checking arguments:
         if ((newAlias !== undefined && typeof newAlias !== "string") || newAlias === "")
@@ -603,7 +603,7 @@ var CommandLineInclude = Obj.extend(Module,
      * Hack; Should only be used inside CommandLineInclude.
      * Intercept the display of a warning if related to the use of isCSPDoc().
      *
-     * Event triggered by Firebug.Console.logRow().
+     * Event triggered by Console.logRow().
      */
     onLogRowCreated: function(panel, row, context)
     {
