@@ -106,6 +106,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.tool.addListener(this);
 
         this.context.getTool("breakpoint").addListener(this);
+        this.context.getTool("source").addListener(this);
 
         // Register as a listener for 'updateSidePanels' event. 
         Firebug.registerUIListener(this);
@@ -124,6 +125,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.tool.removeListener(this);
 
         this.context.getTool("breakpoint").removeListener(this);
+        this.context.getTool("source").removeListener(this);
 
         Firebug.unregisterUIListener(this);
 
@@ -470,10 +472,16 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // extends ActivablePanel
+    // ActivablePanel
 
+    /**
+     * Class method. It's called by the framework when an instance of this panel type
+     * is enabled or disabled.
+     */
     onActivationChanged: function(enable)
     {
+        Trace.sysout("scriptPanel.onActivationChanged; " + enable);
+
         // xxxHonza: needs to be revisited
         if (enable)
         {

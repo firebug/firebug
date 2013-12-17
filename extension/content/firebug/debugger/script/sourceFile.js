@@ -23,7 +23,7 @@ var Trace = FBTrace.to("DBG_SOURCEFILE");
 
 /**
  * SourceFile instance is created for every compilation unit (i.e. a script created
- * on the back end). The instance is created by {@DebuggerTool} every time a "newSource"
+ * on the back end). The instance is created by {@link SourceTool} every time a "newSource"
  * or the initial "sources" packet is received.
  */
 function SourceFile(context, actor, href, isBlackBoxed)

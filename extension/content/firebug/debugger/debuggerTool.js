@@ -136,7 +136,6 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
         this._onResumed = null;
         this._onFramesAdded = null;
         this._onFramesCleared = null;
-        this._onNewSource = null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -177,7 +176,8 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
             return;
         }
 
-        this.context.clientCache.clear();
+        if (this.context.clientCache)
+            this.context.clientCache.clear();
 
         // xxxHonza: this check should go somewhere else.
         // xxxHonza: this might be also done by removing/adding listeners.
@@ -279,7 +279,8 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
     {
         Trace.sysout("debuggerTool.detached; ", arguments);
 
-        this.context.clientCache.clear();
+        if (this.context.clientCache)
+            this.context.clientCache.clear();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
