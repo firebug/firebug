@@ -262,11 +262,13 @@
 
 /*************************************************************************************************/
 
+/* Top and bottom padding should be zero otherwise the total height
+of an error log is affected (higher than other logs). */
 .errorTitle {
-    margin-top: 0px;
+    margin-top: 0;
     margin-bottom: 1px;
-    padding-top: 2px;
-    padding-bottom: 2px;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .errorTrace {
