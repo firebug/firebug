@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 4934: Auto-completion should work even in the Watch panel</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../_common/testcase.css"
+        type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<script type="text/javascript">
+function onExecuteTest()
+{
+    var a = 100;
+    var b = "hello";
+    var c = false;
+
+    debugger;
+
+    console.log(a, b, c);
+}
+
+</script>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4934">Issue 4934</a>:
+        Auto-completion should work even in the Watch panel</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug, enable the Script panel, reload.</li>
+            <li>Click this button
+                <button id="executeTest" onclick="onExecuteTest()">Execute Test</button></li>
+            <li>The debugger should halt at line <code>17</code></li>
+            <li>Select the <b>Watch</b> side panel</li>
+            <li>Click on "New watch expression..."</li>
+            <li>Type 'argu' -&gt; it should auto-complete to 'arguments'.</li>
+            <li>Type 'arguments.cal' -&gt; it should auto-complete to 'arguments.callee'.</li>
+        </ol>
+    </section>
+    <footer>
+        Simon Lindholm, simon.lindholm10@gmail.com
+    </footer>
+</div>
+</body>
+</html>

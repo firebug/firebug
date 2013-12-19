@@ -1,13 +1,14 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/trace",
-    "firebug/lib/tool",
+    "firebug/lib/object",
+    "firebug/chrome/tool",
     "firebug/debugger/breakpoints/breakpointStore",
+    "firebug/remoting/debuggerClientModule",
 ],
-function (Obj, Firebug, FBTrace, Tool, BreakpointStore) {
+function (Firebug, FBTrace, Obj, Tool, BreakpointStore, DebuggerClientModule) {
 
 // ********************************************************************************************* //
 // Constants
@@ -32,32 +33,37 @@ function BreakpointTool(context)
  * {@BreakpointStore} (one instance per Firebug), performs async operation with the
  * server side (using RDP) and forwards results to all registered listeners, which are
  * usually panel objects.
- *
- * xxxHonza: It should be derived from Tool base class.
  */
-BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
+BreakpointTool.prototype = Obj.extend(new Tool(),
 /** @lends BreakpointTool */
 {
     dispatchName: "breakpointTool",
 
+    // xxxHonza: do we really need this? The underlying framework already has a queue
+    // for 'setBreakpoint' packets.
     queue: new Array(),
     setBreakpointInProgress: false,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
-    attach: function(reload)
+    onAttach: function(reload)
     {
         Trace.sysout("breakpointTool.attach; context ID: " + this.context.getId());
+
+        // Listen for 'newScript' event.
+        this.context.getTool("source").addListener(this);
 
         // Listen for {@BreakpointStore} events to create/remove breakpoints
         // in the related backend (thread actor).
         BreakpointStore.addListener(this);
     },
 
-    detach: function()
+    onDetach: function()
     {
         Trace.sysout("breakpointTool.detach; context ID: " + this.context.getId());
+
+        this.context.getTool("source").removeListener(this);
 
         BreakpointStore.removeListener(this);
     },
@@ -67,7 +73,7 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     onAddBreakpoint: function(bp)
     {
-        Trace.sysout("breakpointTool.onAddBreakpoint;", bp);
+        Trace.sysout("breakpointTool.onAddBreakpoint; (" + bp.lineNo + ")", bp);
 
         var self = this;
         this.setBreakpoint(bp.href, bp.lineNo, function(response, bpClient)
@@ -79,16 +85,19 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
             var currentLine = bpClient.location.line - 1;
             if (bp.lineNo != currentLine)
             {
+                // The breakpoint line is going to be corrected, let's check if there isn't
+                // an existing breakpoint at the new line (see issue: 6253). This must be
+                // done before the correction.
+                var dupBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
+
                 // bpClient deals with 1-based line numbers. Firebug uses 0-based
-                // line numbers (indexes)
+                // line numbers (indexes). Let's fix the line.
                 bp.params.originLineNo = bp.lineNo;
                 bp.lineNo = currentLine;
 
-                // The breakpoint line has been corrected, let's check if there isn't
-                // an existing breakpoint at the new line (see issue: 6253).
-                // If an existing breakpoint is found we need to remove the newly created one.
+                // If an existing breakpoint has been found we need to remove the newly
+                // created one to avoid duplicities (two breakpoints at the same line).
                 // Do not fire an event when removing, it's just client side thing.
-                var dupBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
                 if (dupBp)
                 {
                     BreakpointStore.removeBreakpointInternal(dupBp.href, dupBp.lineNo);
@@ -138,6 +147,53 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // DebuggerTool
+
+    newSource: function(sourceFile)
+    {
+        var url = sourceFile.getURL();
+        var bps = BreakpointStore.getBreakpoints(url);
+
+        // Filter out those breakpoints that have been already set on the backend
+        // (i.e. there is a corresponding client object already).
+        bps = bps.filter((bp) =>
+        {
+            return !this.getBreakpointClient(bp.href, bp.lineNo);
+        });
+
+        // Bail out if there is nothing to set.
+        if (!bps.length)
+            return;
+
+        // Filter out disabled breakpoints. These won't be set on the server side
+        // (unless the user enables them later).
+        // xxxHonza: we shouldn't create server-side breakpoints for normal disabled
+        // breakpoints, but not in case there are other breakpoints at the same line.
+        /*bps = bps.filter(function(bp, index, array)
+        {
+            return bp.isEnabled();
+        });*/
+
+        Trace.sysout("breakpointTool.newSource; Initialize server side breakpoints: (" +
+            bps.length + ") " + url, bps);
+
+        // Set breakpoints on the server side.
+        this.setBreakpoints(bps, function()
+        {
+            // Some breakpoints could have been auto-corrected so, save all now.
+            // xxxHonza: what about breakpoints in other contexts using the same URL?
+            // Should they be corrected too?
+
+            // xxxHonza: fix me
+            // If the thread is paused the callback is called too soon (before all
+            // breakpoints are set on the server and response packets received).
+            //BreakpointStore.save(url);
+
+            Trace.sysout("breakpointTool.newSource; breakpoints initialized", arguments);
+        });
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Breakpoint Backend API
 
     /**
@@ -163,7 +219,8 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
             return;
         }
 
-        Trace.sysout("breakpointTool.setBreakpoint; " + url + " (" + lineNumber + ")");
+        Trace.sysout("breakpointTool.setBreakpoint; " + url + " (" + lineNumber + ") " +
+            "thread state: " + thread.state);
 
         // Do not create two server side breakpoints at the same line.
         var bpClient = this.getBreakpointClient(url, lineNumber);
@@ -185,6 +242,8 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
                 url: url,
                 line: lineNumber + 1
             };
+
+            Trace.sysout("breakpointTool.doSetBreakpoint; (" + lineNumber + ")", location);
 
             // Send RDP packet to set a breakpoint on the server side. The callback will be
             // executed as soon as we receive a response.
@@ -212,6 +271,9 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
         this.setBreakpointInProgress = true;
 
         // Otherwise, force a pause in order to set the breakpoint.
+        // xxxHonza: this sometimes generates 'alreadyPaused' packet, fix me.
+        // Or maybe the interrupt call in setBreakpoints. You need a page with two
+        // loaded URLs with breakpoints
         thread.interrupt(function(response)
         {
             if (response.error)
@@ -268,7 +330,7 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
         // Check if the breakpoint-client object already exist. The line could
         // have been corrected on the server side and there can already be a breakpoint
         // on the new line.
-        if (!this.breakpointActorExists(bpClient))
+        if (bpClient.actor && !this.breakpointActorExists(bpClient))
             this.context.breakpointClients.push(bpClient);
 
         if (callback)
@@ -277,9 +339,22 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
         this.setBreakpointInProgress = false;
     },
 
-    // xxxHonza: execute the callback as soon as all breakpoints are set on the server side.
+    /**
+     * Creates breakpoint actors on the server side and {@BreakpointClient} objects
+     * on the client side. The client objects are stored within {@TabContext}.
+     *
+     * @param arr {Array} List of breakpoints to be created on the server side
+     * @param cb {Function} Optional callback that is executed as soon as all breakpoints
+     * are created on the server side and the current thread resumed again.
+     */
     setBreakpoints: function(arr, cb)
     {
+        var self = this;
+
+        // Bail out if there is nothing to set.
+        if (!arr.length)
+            return;
+
         var thread = this.context.activeThread;
         if (!thread)
         {
@@ -288,21 +363,31 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
             return;
         }
 
-        var self = this;
+        Trace.sysout("breakpointTool.setBreakpoints; " + arr.length +
+            ", thread state: " + thread.state, arr);
+
         var doSetBreakpoints = function _doSetBreakpoints(callback)
         {
             Trace.sysout("breakpointTool.doSetBreakpoints; ", arr);
 
-            // Iterate all breakpoints and set them step by step. The thread is
-            // paused at this point.
+            // Iterate all breakpoints in the given array and set them step by step.
+            // The thread is paused at this point. The following loop generates a set of
+            // 'setBreakpoint' packets that are put in an internal queue (in the underlying
+            // RDP framework) and handled step by step, i.e. the next 'setBreakpoint' packet
+            // is sent as soon as a response for the previous one is received.
             for (var i=0; i<arr.length; i++)
                 self.onAddBreakpoint(arr[i]);
+
+            if (callback)
+                callback();
         };
 
         // If the thread is currently paused, go to set all the breakpoints.
         if (thread.paused)
         {
-            doSetBreakpoints();
+            // xxxHonza: the callback should be called when the last breakpoint
+            // is set on the backend, fix me.
+            doSetBreakpoints(cb);
             return;
         }
 
@@ -317,7 +402,15 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
             }
 
             // When the thread is interrupted, we can set all the breakpoints.
-            doSetBreakpoints(thread.resume.bind(self));
+            doSetBreakpoints(function()
+            {
+                Trace.sysout("breakpointTool.doSetBreakpoints; done", arguments);
+
+                // At this point, all 'setBreakpoint' packets have been generated (the first
+                // on already sent) and they are waiting in a queue. The resume packet will
+                // be received as soon as the last response for 'setBreakpoint' is received.
+                self.context.getTool("debugger").resume(cb);
+            });
         });
     },
 
@@ -325,7 +418,7 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
     {
         if (!this.context.activeThread)
         {
-            TraceError.sysout("BreakpointTool.removeBreakpoint; Can't remove breakpoints.");
+            TraceError.sysout("breakpointTool.removeBreakpoint; Can't remove breakpoints.");
             return;
         }
 
@@ -348,7 +441,7 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
         }
         else
         {
-            TraceError.sysout("debuggerToo.removeBreakpoint; ERROR removing " +
+            TraceError.sysout("breakpointTool.removeBreakpoint; ERROR removing " +
                 "non existing breakpoint. " + url + ", " + lineNumber);
         }
     },

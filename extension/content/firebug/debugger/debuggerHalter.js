@@ -1,18 +1,20 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
+    "firebug/chrome/module",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/stack/stackTrace",
 ],
-function(Obj, Firebug, DebuggerLib, StackTrace) {
+function(Firebug, FBTrace, Obj, Module, DebuggerLib, StackTrace) {
 
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
 var Trace = FBTrace.to("DBG_DEBUGGERHALTER");
 var TraceError = FBTrace.to("DBG_ERRORS");
@@ -20,7 +22,7 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // ********************************************************************************************* //
 // DebuggerHalter Implementation
 
-var DebuggerHalter = Obj.extend(Firebug.Module,
+var DebuggerHalter = Obj.extend(Module,
 {
     dispatchName: "DebuggerHalter",
 
@@ -29,12 +31,12 @@ var DebuggerHalter = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
     },
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
     },
 
     initContext: function(context)

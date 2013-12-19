@@ -381,6 +381,23 @@ var BrowserMenu =
                 ])
             ]),
 
+            // Panel selector (see 'firebug/chrome/panelSelector' module for implementation).
+            $menu(doc,
+            {
+                id: "FirebugMenu_PanelSelector",
+                label: "firebug.panel_selector2",
+                tooltiptext: "firebug.panel_selector2.tip",
+                "class": "fbInternational"
+            },
+            [
+                $menupopup(doc,
+                {
+                    id: "FirebugMenu_PanelSelectorPopup",
+                    onpopupshowing: "return Firebug.browserOverlay.onPanelSelectorShowing(this);",
+                    onpopuphiding: "return Firebug.browserOverlay.onPanelSelectorHiding(this)"
+                })
+            ]),
+
             $menuseparator(doc, {id: "menu_firebug_miscActionsSeparator", collapsed: "true"}),
 
             $menuseparator(doc, {id: "menu_firebug_toolsSeparator", collapsed: "true"}),

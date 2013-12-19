@@ -1,12 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/array",
     "firebug/chrome/window",
 ],
-function(FBTrace, Obj, Arr, Win) {
+function(Module, FBTrace, Obj, Arr, Win) {
 
 // ********************************************************************************************* //
 // Constants
@@ -151,7 +152,7 @@ CSSPanelUpdater.prototype =
 /**
  * @module Helper Module object for observing {@Firebug.TabWatcher} events.
  */
-var CSSPanelUpdaterModule = Obj.extend(Firebug.Module,
+var CSSPanelUpdaterModule = Obj.extend(Module,
 /** @lends CSSPanelUpdater */
 {
     dispatchName: "CSSPanelUpdaterModule",

@@ -1,29 +1,38 @@
-#firebug-button .badge > .label {
+/* Make sure the error-badge is positioned relative to the FB button */
+#firebug-badged-button {
+    position: relative;
+}
+
+/* Position absolute. This will make the error-badge not move any adjacent elements
+   when it's content is updated */
+#nav-bar #firebug-error-badge {
+    margin: 0;
+    position: absolute;
+    left: -5px;
+    top: -5px;
+}
+
+#firebug-error-label {
     -moz-box-sizing: border-box;
-    visibility: hidden;
-    font-size: 9px;
-    padding: 0 3px;
-    line-height: 13px;
-    font-family: Arial, Helvetica, sans-serif;
+    background: #C13832 none;
+    border: none;
+    border-radius: 3px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
     color: #fff;
-    border-radius: 8px;
-    background-color: #d95b09;
-    border: 2px solid #fff;
-    box-shadow: none;
-    background-image: none;
+    font-family: inherit;
+    font-size: 8px;
+    line-height: 1;
+    padding: 1px 2px;
+    visibility: hidden;
+    white-space: nowrap;
 }
 
-/* Slightly different positions of the badge for individual toolbars */
-#nav-bar #firebug-button .badge {
-    margin: -5px -10px 0 -8px;
-}
-
-#fbContentSplitter{
+#fbContentSplitter {
     border-color: threedShadow !important;
     background-color: #FFFFFF;
 }
 
-#fbContentSplitter[dir=reverse]{
+#fbContentSplitter[dir=reverse] {
     transform: scale(-1, -1);
 }
 

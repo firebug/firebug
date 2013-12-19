@@ -6,12 +6,13 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/events",
+    "firebug/chrome/eventSource",
     "firebug/chrome/menu",
     "firebug/chrome/infotip",
     "firebug/chrome/firefox",
     "firebug/editor/sourceEditor",
 ],
-function(FBTrace, Obj, Dom, Css, Events, Menu, InfoTip, Firefox, SourceEditor) {
+function(FBTrace, Obj, Dom, Css, Events, EventSource, Menu, InfoTip, Firefox, SourceEditor) {
 
 "use strict";
 
@@ -35,15 +36,10 @@ function ScriptView()
 }
 
 /**
- * ScriptView wraps SourceEditor component that is built on top of Orion editor.
+ * ScriptView wraps SourceEditor component that is built on top of CodeMirror editor.
  * This object is responsible for displaying JS source code in the debugger panel.
- *
- * TODO:
- * 1) Since the {@ScriptView} is using Orion's private API, we should have some
- * tests (could be within the lib group) that are checking every new Orion version.
- *
  */
-ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
+ScriptView.prototype = Obj.extend(new EventSource(),
 /** @lends ScriptView */
 {
     dispatchName: "ScriptView",
@@ -71,6 +67,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.onMouseOutListener = this.onMouseOut.bind(this);
         this.onGutterClickListener = this.onGutterClick.bind(this);
         this.onMouseUpListener = this.onEditorMouseUp.bind(this);
+        this.onKeyDownListener = this.onKeyDown.bind(this);
         this.onViewportChangeListener = this.onViewportChange.bind(this);
 
         // Initialize source editor.
@@ -93,6 +90,8 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             this.onMouseMoveListener);
         this.editor.addEventListener(SourceEditor.Events.mouseOut,
             this.onMouseOutListener);
+        this.editor.addEventListener(SourceEditor.Events.keyDown,
+            this.onKeyDownListener);
 
         // Hook gutter clicks
         this.editor.addEventListener(SourceEditor.Events.gutterClick,
@@ -133,9 +132,13 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             this.onMouseMoveListener);
         this.editor.removeEventListener(SourceEditor.Events.mouseOut,
             this.onMouseOutListener);
+        this.editor.removeEventListener(SourceEditor.Events.keyDown,
+            this.onKeyDownListener);
         this.editor.removeEventListener(SourceEditor.Events.gutterClick,
             this.onGutterClickListener);
-        this.editor.removeEventListener(SourceEditor.Events.mouseOut,
+        this.editor.removeEventListener(SourceEditor.Events.mouseUp,
+            this.onMouseUpListener);
+        this.editor.removeEventListener(SourceEditor.Events.viewportChange,
             this.onViewportChangeListener);
 
         try
@@ -196,7 +199,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var commandDispatcher = browserWindow.document.commandDispatcher;
 
         var items = [];
-        this.dispatch("onContextMenu", [event, items]);
+        this.dispatch("onEditorContextMenu", [event, items]);
 
         for (var i=0; i<items.length; i++)
             Menu.createMenuItem(popup, items[i]);
@@ -212,6 +215,22 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     search: function(text, reverse)
     {
+        // Check if the search is for a line number.
+        var m = /^[^\\]?#(\d*)$/.exec(text);
+        if (m)
+        {
+            // Don't beep if only a # has been typed.
+            if (!m[1])
+                return true;
+
+            var lineNo = +m[1];
+            if (!isNaN(lineNo) && 0 < lineNo && lineNo <= this.editor.getLineCount())
+            {
+                this.scrollToLine(lineNo, {highlight: true});
+                return true;
+            }
+        }
+
         var curDoc = this.searchCurrentDoc(!Firebug.searchGlobal, text, reverse);
         if (!curDoc && Firebug.searchGlobal)
         {
@@ -273,6 +292,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             this.currentSearch = {text: text, start: 0};
         }
 
+        // xxxHonza: this.editor.find doesn't exist
         var offset = this.editor.find(text, options);
         Trace.sysout("search", {options: options, offset: offset});
 
@@ -296,7 +316,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var bps = [];
         this.dispatch("getBreakpoints", [bps]);
 
-        for (var i=0; i<bps.length; i++)
+        Trace.sysout("scriptView.initBreakpoints; " + bps.length, bps);
+
+        for (var i = 0; i < bps.length; i++)
         {
             var bp = bps[i];
             this.addBreakpoint(bp);
@@ -402,14 +424,27 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     updateBreakpoint: function(bp)
     {
+        var lineCount = this.editor.getLineCount();
+
+        if (bp.lineNo >= lineCount)
+        {
+            Trace.sysout("scriptView.updateBreakpoint; script not ready for a breakpoint.");
+            return;
+        }
+
         var bpMarker = this.editor.getGutterMarker(SourceEditor.Gutters.breakpoints,
             bp.lineNo);
 
         if (!bpMarker)
         {
-            TraceError.sysout("scriptView.updateBreakpoint; ERROR bpMarker is null!", bp);
+            TraceError.sysout("scriptView.updateBreakpoint; ERROR bpMarker is null! " +
+                "Line count: " + lineCount, bp);
             return;
         }
+
+        Trace.sysout("scriptView.updateBreakpoint; (line: " + bp.lineNo + ") disabled: " +
+            bp.disabled + ", condition: " + bp.condition + ", prev className: " +
+            bpMarker.className + ", line count: " + lineCount, bp);
 
         bpMarker.className = "breakpoint";
 
@@ -520,15 +555,22 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             else if (Events.isShiftClick(e))
                 this.dispatch("disableBreakpoint", [event.lineNo, e]);
             else
-                this.toggleBreakpoint(event.lineNo);
+                this.dispatch("toggleBreakpoint", [event.lineNo, e]);
         }
     },
 
-    onEditorMouseUp: function (event)
+    onEditorMouseUp: function(event)
     {
         Trace.sysout("scripView.onEditorMouseUp;", event);
 
         this.dispatch("onEditorMouseUp", [event]);
+    },
+
+    onKeyDown: function(event)
+    {
+        Trace.sysout("scripView.onKeyDown;", event);
+
+        this.dispatch("onEditorKeyDown", [event]);
     },
 
     onViewportChange: function(event)

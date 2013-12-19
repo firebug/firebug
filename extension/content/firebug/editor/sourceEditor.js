@@ -27,6 +27,7 @@ var Cu = Components.utils;
 // CodeMirror files. These scripts are dynamically included into panel.html
 // Note that panel.html runs in content scope with restricted (no chrome) privileges.
 var codeMirrorSrc = "chrome://firebug/content/editor/codemirror/codemirror.js";
+var showHintSrc = "chrome://firebug/content/editor/codemirror/addon/show-hint.js";
 var jsModeSrc = "chrome://firebug/content/editor/codemirror/mode/javascript.js";
 var htmlMixedModeSrc = "chrome://firebug/content/editor/codemirror/mode/htmlmixed.js";
 var xmlModeSrc = "chrome://firebug/content/editor/codemirror/mode/xml.js";
@@ -82,7 +83,9 @@ SourceEditor.DefaultConfig =
     fixedGutter: false,
 
     showCursorWhenSelecting: false,
-    undoDepth: 200
+    undoDepth: 200,
+
+    resetSelectionOnContextMenu: false,
 
     // xxxHonza: this is weird, when this props is set the editor is displayed twice.
     // There is one-line editor created at the bottom of the Script panel.
@@ -118,7 +121,8 @@ SourceEditor.Events =
     mouseMove: "mousemove",
     mouseOut: "mouseout",
     mouseOver: "mouseover",
-    mouseUp: "mouseup"
+    mouseUp: "mouseup",
+    keyDown: "keydown"
 };
 
 // ********************************************************************************************* //
@@ -132,7 +136,10 @@ SourceEditor.Events =
  * Note that CodeMirror instances are running within Firebug UI (panel.html) that has
  * restricted (content) privileges. All objects passed into CM APIs (such as rectangles,
  * coordinates, positions, etc.) must be properly exposed to the content. You should usually
- * utilize {@Wrapper.cloneIntoContentScope} method for this purpose.
+ * utilize {@SourceEditor.cloneIntoCMScope} method for this purpose.
+ *
+ * Use {@ScriptLoader} implemented at the bottom of this file if you want to use FBTrace
+ * API from within CodeMirror files. See {@SourceEditor.loadScripts} for more details.
  */
 SourceEditor.prototype =
 /** @lends SourceEditor */
@@ -142,31 +149,14 @@ SourceEditor.prototype =
 
     init: function(parentNode, config, callback)
     {
-        var doc = parentNode.ownerDocument;
         var onInit = this.onInit.bind(this, parentNode, config, callback);
 
-        // xxxHonza: Expose FBTrace into the panel.html (and codemirror.js), so
-        // debugging is easier. Should *not* be part of the distribution.
-        //var view = Wrapper.getContentView(doc.defaultView);
-        //view.FBTrace = ExposedFBTrace;
-
-        this.loadScripts(doc, onInit);
+        this.loadScripts(parentNode.ownerDocument, onInit);
     },
 
     onInit: function(parentNode, config, callback)
     {
         var doc = parentNode.ownerDocument;
-
-        // All properties must be read-only so, they can't be modified in the DOM panel.
-        function genPropDesc(value)
-        {
-            return {
-                enumerable: true,
-                configurable: true,
-                writable: true,
-                value: value
-            };
-        }
 
         // Unwrap Firebug content view (panel.html). This view is running in
         // content mode with no chrome privileges.
@@ -174,27 +164,15 @@ SourceEditor.prototype =
 
         Trace.sysout("sourceEditor.onInit; " + view.CodeMirror);
 
+        config = Obj.extend(SourceEditor.DefaultConfig, config);
+
         // The config object passed to the view must be content-accessible.
+        // CodeMirror writes to it, so make sure properties are writable (we
+        // cannot use plain cloneIntoContentScope).
         var newConfig = Cu.createObjectIn(view);
-
-        // Compute properties of the final newConfig object.
-        for (var prop in SourceEditor.DefaultConfig)
-        {
-            if (SourceEditor.DefaultConfig.hasOwnProperty(prop))
-            {
-                var value = prop in config ? config[prop] : SourceEditor.DefaultConfig[prop];
-                Object.defineProperty(newConfig, prop, genPropDesc(value));
-            }
-        }
-
         for (var prop in config)
-        {
-            if (!newConfig[prop] && config.hasOwnProperty(prop))
-            {
-                var value = config[prop];
-                Object.defineProperty(newConfig, prop, genPropDesc(value));
-            }
-        }
+            newConfig[prop] = Wrapper.cloneIntoContentScope(view, config[prop]);
+        Cu.makeObjectPropsNormal(newConfig);
 
         var self = this;
 
@@ -224,7 +202,7 @@ SourceEditor.prototype =
 
         Trace.sysout("sourceEditor.init; ", this.view);
 
-        // Execute callback function. It could be done asynchronously (e.g. for Orion)
+        // Execute callback function. It could be done asynchronously
         callback();
     },
 
@@ -247,14 +225,16 @@ SourceEditor.prototype =
 
         var loader = this;
 
-        //xxxHonza: Support for CM debugging. If <script> tags are inserted with
+        // Support for CM debugging. If <script> tags are inserted with
         // properly set 'src' attribute, stack traces produced by Firebug tracing
         // console are correct. But it's asynchronous causing the Script panel UI
-        // to blink so, we don't need it for production. In any case the following
-        // script loader object can be used for that.
-        //loader = new ScriptLoader(callback);
+        // to blink so, we don't need it for production. The following loader
+        // also injects FBTracei into panel.html, so it can be used within codemirror.js
+        // Just uncomment the following line:
+        //loader = new ScriptLoader(doc, callback);
 
         loader.addScript(doc, "cm", codeMirrorSrc);
+        loader.addScript(doc, "cm-showhint", showHintSrc);
         loader.addScript(doc, "cm-js", jsModeSrc);
         loader.addScript(doc, "cm-xml", xmlModeSrc);
         loader.addScript(doc, "cm-css", cssModeSrc);
@@ -437,8 +417,12 @@ SourceEditor.prototype =
         if (line != null)
             return this.getDocument().getLine(line).length;
 
-        // The newline characters shouldn't be counted.
-        return this.editorObject.getValue().replace(/\n/g, "").length;
+        return this.editorObject.getValue().length;
+    },
+
+    getLineCount: function()
+    {
+        return this.getDocument().lineCount();
     },
 
     getSelectedText: function()
@@ -483,29 +467,28 @@ SourceEditor.prototype =
 
         var charCount = 0;
 
-        // Since Codemirror only accepts the start/end lines and chars in the lines
-        // to set selection, It needs to go through the editor lines to find the
-        // location of the inputs.
+        // Since Codemirror only accepts the positions in (line, ch) format, we
+        // need to go through the editor lines and manually convert the positions.
         for (var i = 0; i < lineCount; i++)
         {
-            charCount += this.getCharCount(i);
-            if (startLine == -1 && charCount >= start)
+            charCount += this.getCharCount(i) + 1;
+            if (startLine == -1 && charCount > start)
             {
                 startLine = i;
-                startChar = start - (charCount - this.getCharCount(i));
+                startChar = start - (charCount - this.getCharCount(i) - 1);
             }
 
-            if (charCount >= end)
+            if (charCount > end)
             {
                 endLine = i;
-                endChar = end - (charCount - this.getCharCount(i));
+                endChar = end - (charCount - this.getCharCount(i) - 1);
                 break;
             }
         }
 
         this.editorObject.setSelection(
-            {line: startLine, ch: startChar},
-            {line: endLine, ch: endChar}
+            this.cloneIntoCMScope({line: startLine, ch: startChar}),
+            this.cloneIntoCMScope({line: endLine, ch: endChar})
         );
     },
 
@@ -517,14 +500,14 @@ SourceEditor.prototype =
         var endOffset = 0;
 
         // Count the chars of the lines before the
-        // end/start lines.
+        // end/start lines, including newlines.
         for (var i = 0; i < end.line; i++)
         {
             var lineCharCount = this.getCharCount(i);
             if (start.line > i)
-                startOffset += lineCharCount;
+                startOffset += lineCharCount + 1;
 
-            endOffset += lineCharCount;
+            endOffset += lineCharCount + 1;
         }
 
         // Add the number of chars between the first char
@@ -538,12 +521,84 @@ SourceEditor.prototype =
         };
     },
 
+    hasSelection: function()
+    {
+        return this.getDocument().somethingSelected();
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Document Management
+    // CodeMirror internals
 
     getDocument: function()
     {
         return this.editorObject.getDoc();
+    },
+
+    cloneIntoCMScope: function(obj)
+    {
+        return Wrapper.cloneIntoContentScope(this.view, obj);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Commands
+
+    getContextMenuItems: function()
+    {
+        var items = [];
+        items.push({label: "Cut", command: Obj.bind(this.onCommand, this, "cmd_cut")});
+        items.push({label: "Copy", command: Obj.bind(this.onCommand, this, "cmd_copy")});
+        items.push({label: "Paste", command: Obj.bind(this.onCommand, this, "cmd_paste")});
+        items.push({label: "Delete", command: Obj.bind(this.onCommand, this, "cmd_delete")});
+        items.push("-");
+        items.push({label: "SelectAll", command: Obj.bind(this.onCommand, this, "cmd_selectAll")});
+        return items;
+    },
+
+    onCommand: function(event, cmd)
+    {
+        Trace.sysout("sourceEditor.onCommand; " + cmd)
+
+        var map = {
+            "cmd_selectAll": "selectAll",
+            "cmd_undo": "undo",
+            "cmd_redo": "redo",
+            "cmd_delete": "delCharAfter",
+        };
+
+        if (map[cmd])
+            return this.editorObject.execCommand(map[cmd]);
+
+        // Default command dispatch.
+        Firebug.BaseEditor.onCommand(event, cmd);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    autoComplete: function(hintFunction)
+    {
+        var doc = this.view.ownerDocument;
+        var view = Wrapper.getContentView(doc.defaultView);
+        var clone = this.cloneIntoCMScope.bind(this);
+        var contentHintFunction = function()
+        {
+            var ret = hintFunction.apply(this, arguments);
+            if (!ret)
+                return;
+            return clone({
+                list: clone(ret.list.map(function(prop)
+                {
+                    return clone(prop);
+                })),
+                from: clone(ret.from),
+                to: clone(ret.to)
+            });
+        };
+        view.CodeMirror.showHint(this.editorObject, contentHintFunction);
+    },
+
+    tab: function()
+    {
+        this.editorObject.execCommand("defaultTab");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -572,21 +627,22 @@ SourceEditor.prototype =
 
     setDebugLocation: function(line)
     {
-        Trace.sysout("sourceEditor.setDebugLocation; line: " + line);
-
-        if (this.debugLocation == line)
-            return;
+        Trace.sysout("sourceEditor.setDebugLocation; line: " + line +
+            ", this.debugLocation: " + this.debugLocation);
 
         if (this.debugLocation != -1)
         {
             var handle = this.editorObject.getLineHandle(this.debugLocation);
-            this.editorObject.removeLineClass(handle, "wrap", WRAP_CLASS);
-            this.editorObject.removeLineClass(handle, "background", BACK_CLASS);
+            if (handle)
+            {
+                this.editorObject.removeLineClass(handle, "wrap", WRAP_CLASS);
+                this.editorObject.removeLineClass(handle, "background", BACK_CLASS);
 
-            // Remove debug location marker (we are reusing breakpoints gutter for it).
-            var marker = this.getGutterMarker(bpGutter, this.debugLocation);
-            if (marker && marker.className == "debugLocation")
-                this.removeGutterMarker(bpGutter, this.debugLocation);
+                // Remove debug location marker (we are reusing breakpoints gutter for it).
+                var marker = this.getGutterMarker(bpGutter, this.debugLocation);
+                if (marker && marker.className == "debugLocation")
+                    this.removeGutterMarker(bpGutter, this.debugLocation);
+            }
         }
 
         this.debugLocation = line;
@@ -594,18 +650,21 @@ SourceEditor.prototype =
         if (this.debugLocation != -1)
         {
             var handle = this.editorObject.getLineHandle(line);
-            this.editorObject.addLineClass(handle, "wrap", WRAP_CLASS);
-            this.editorObject.addLineClass(handle, "background", BACK_CLASS);
-
-            // Debug location marker is using breakpoints gutter and so, create the marker
-            // only if there is no breakpoint marker already. This 'gutter reuse' allows to
-            // place the debug location icon over a breakpoint icon and save some space.
-            var marker = this.getGutterMarker(bpGutter, line);
-            if (!marker)
+            if (handle)
             {
-                var marker = this.getGutterElement().ownerDocument.createElement("div");
-                marker.className = "debugLocation";
-                this.editorObject.setGutterMarker(line, bpGutter, marker);
+                this.editorObject.addLineClass(handle, "wrap", WRAP_CLASS);
+                this.editorObject.addLineClass(handle, "background", BACK_CLASS);
+
+                // Debug location marker is using breakpoints gutter and so, create the marker
+                // only if there is no breakpoint marker already. This 'gutter reuse' allows to
+                // place the debug location icon over a breakpoint icon and save some space.
+                var marker = this.getGutterMarker(bpGutter, line);
+                if (!marker)
+                {
+                    var marker = this.getGutterElement().ownerDocument.createElement("div");
+                    marker.className = "debugLocation";
+                    this.editorObject.setGutterMarker(line, bpGutter, marker);
+                }
             }
         }
     },
@@ -644,9 +703,7 @@ SourceEditor.prototype =
         line = line || 0;
         options = options || {};
 
-        // The pos object is passed into CodeMirror that is running within
-        // a content scope (restricted privileges, in panel.html).
-        var pos = Wrapper.cloneIntoContentScope(this.view, {line: line, ch: 0});
+        var pos = this.cloneIntoCMScope({line: line, ch: 0});
         var coords = this.editorObject.charCoords(pos, "local");
 
         // If direct scroll (pixel) position is specified use it.
@@ -688,14 +745,14 @@ SourceEditor.prototype =
     getTopIndex: function()
     {
         var scrollInfo = this.getScrollInfo();
-        scrollInfo = Wrapper.cloneIntoContentScope(this.view, scrollInfo);
+        scrollInfo = this.cloneIntoCMScope(scrollInfo);
         var coords = this.editorObject.coordsChar(scrollInfo, "local");
         return coords.line;
     },
 
     setTopIndex: function(line)
     {
-        var coords = Wrapper.cloneIntoContentScope(this.view, {line: line, ch: 0});
+        var coords = this.cloneIntoCMScope({line: line, ch: 0});
         this.editorObject.scrollTo(0, this.editor.charCoords(coords, "local").top);
     },
 
@@ -767,6 +824,10 @@ SourceEditor.prototype =
         if (handle)
             this.editorObject.removeLineClass(handle, "wrap", BP_WRAP_CLASS);
 
+        // Make sure the debug location marker is not removed together with the breakpoint.
+        if (this.debugLocation == lineNo)
+            this.setDebugLocation(lineNo);
+
         // dispatch event;
         if (this.bpChangingHandlers)
         {
@@ -829,16 +890,6 @@ SourceEditor.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    getLineFromEvent: function(e)
-    {
-        var pos = {
-            left: event.pageX,
-            top: event.pageY - 60 //xxxHonza: why the top is not zero but 60 in the event?
-        };
-
-        return this.editorObject.coordsChar(pos);
-    },
 
     getLineIndex: function(target)
     {
@@ -960,15 +1011,24 @@ var ExposedFBTrace =
 // ********************************************************************************************* //
 // Support for Debugging - Async script loader
 
-function ScriptLoader(callback)
+function ScriptLoader(doc, callback)
 {
     this.callback = callback;
 
     this.waiting = [];
     this.scripts = [];
+
+    // Expose FBTrace into the panel.html (and codemirror.js), so
+    // debugging is easier. Should *not* be part of the distribution.
+    var view = Wrapper.getContentView(doc.defaultView);
+    view.FBTrace = ExposedFBTrace;
 }
 
+/**
+ * Helper object for tracing from within the CM files.
+ */
 ScriptLoader.prototype =
+/** @lends SourceEditor */
 {
     addScript: function(doc, id, url)
     {

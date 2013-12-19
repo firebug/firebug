@@ -1,8 +1,9 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/domplate",
     "firebug/lib/events",
     "firebug/lib/dom",
@@ -10,16 +11,17 @@ define([
     "firebug/lib/array",
     "firebug/dom/domBaseTree",
     "firebug/lib/locale",
+    "firebug/debugger/clients/grip",
     "firebug/debugger/clients/scopeClient",
     "firebug/debugger/watch/watchExpression",
 ],
-function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, DomBaseTree, Locale, ScopeClient,
-    WatchExpression) {
-
-with (Domplate) {
+function(Firebug, FBTrace, Obj, Domplate, Events, Dom, Css, Arr, DomBaseTree, Locale,
+    Grip, ScopeClient, WatchExpression) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, TAG, DIV, TD, TR, TABLE, TBODY} = Domplate;
 
 var Trace = FBTrace.to("DBG_WATCH");
 var TraceError = FBTrace.to("DBG_ERRORS");
@@ -27,20 +29,24 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // ********************************************************************************************* //
 // DOM Tree Implementation
 
-function WatchTree(provider)
+function WatchTree(context, provider, memberProvider)
 {
-    this.provider = provider;
+    DomBaseTree.call(this, context, provider);
+
+    this.memberProvider = memberProvider;
 }
 
 /**
- * @domplate Represents a tree of properties/objects
+ * @domplate This tree widget extends {@DomBaseTree} and appends support for watch expressions.
+ * The tree is responsible for rendering content within the {@WatchPanel}.
  */
 var BaseTree = DomBaseTree.prototype;
 WatchTree.prototype = domplate(BaseTree,
+/** @lends WatchTree */
 {
     watchNewRowTag:
         TR({"class": "watchNewRow", level: 0},
-            TD({"class": "watchEditCell", colspan: 2},
+            TD({"class": "watchEditCell", colspan: 3},
                 DIV({"class": "watchEditBox a11yFocusNoTab", role: "button", tabindex: "0",
                     "aria-label": Locale.$STR("a11y.labels.press enter to add new watch expression")},
                         Locale.$STR("NewWatch")
@@ -49,7 +55,7 @@ WatchTree.prototype = domplate(BaseTree,
         ),
 
     tag:
-        TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
+        TABLE({"class": "domTable watchTable", cellpadding: 0, cellspacing: 0,
             _domPanel: "$domPanel", onclick: "$onClick", role: "tree"},
             TBODY({role: "presentation"},
                 TAG("$watchNewRow|getWatchNewRowTag"),
@@ -60,9 +66,9 @@ WatchTree.prototype = domplate(BaseTree,
 
     emptyTag:
         TR(
-            TD({colspan: 2})
+            TD({colspan: 3})
         ),
- 
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getWatchNewRowTag: function(show)
@@ -75,85 +81,55 @@ WatchTree.prototype = domplate(BaseTree,
     getType: function(object)
     {
         // xxxHonza: this must be done through a decorator that can be also reused
-        // in the DOM panel (applying types like: userFunction, dom Function, domClass, etc.)
-
-        if (object && Obj.isFunction(object.getType))
-        {
-            if (object.getType() == "function")
-                return "userFunction";
-        }
+        // in the DOM panel (applying types like: userFunction, DOM Function, domClass, etc.)
+        // Checking the object type must be done after checking object instance (see issue 6953).
 
         // Customize CSS style for a memberRow. The type creates additional class name
         // for the row: 'type' + Row. So, the following creates "scopesRow" class that
         // decorates Scope rows.
+        // Always use 'instanceof' when checking specific object properties. Even content
+        // object can appear here.
         if (object instanceof ScopeClient)
+        {
             return "scopes";
+        }
         else if (object instanceof WatchExpression)
+        {
             return "watch";
+        }
+        else if (object instanceof Grip)
+        {
+            if (object.getType() == "function")
+            {
+                return "userFunction";
+            }
+            else if (object.isFrameResultValue)
+            {
+                // Return a different class when the return value has already been emphasized.
+                if (!object.alreadyEmphasized)
+                    return "frameResultValue";
+                else
+                    return "frameResultValueEmphasized";
+            }
+        }
 
         return BaseTree.getType.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Events
 
-    onClick: function(event)
+    // xxxHonza: we might want to move this into {@DomBaseTree} to use the same logic
+    // within the DOM panel.
+    createMember: function(type, name, value, level, hasChildren)
     {
-        if (!Events.isLeftClick(event))
-            return;
+        var member = BaseTree.createMember.apply(this, arguments);
 
-        var row = Dom.getAncestorByClass(event.target, "memberRow");
-        var label = Dom.getAncestorByClass(event.target, "memberLabel");
-        var valueCell = row.getElementsByClassName("memberValueCell").item(0);
-        var target = row.lastChild.firstChild;
-        var isString = Css.hasClass(target, "objectBox-string");
-        var inValueCell = (event.target === valueCell || event.target === target);
+        // Disable editing for read only values.
+        if (value instanceof Grip)
+            member.readOnly = value.readOnly;
 
-        var repNode = Firebug.getRepNode(event.target);
-        var memberRow = Css.hasClass(repNode, "memberRow");
-
-        // Here, we are interested in the object associated with the value rep
-        // (not the rep object associated with the row itself)
-        var object = memberRow ? null : repNode.repObject;
-
-        // Row member object created by the tree widget.
-        var member = row.repObject;
-
-        if (label && Css.hasClass(row, "hasChildren") && !(isString && inValueCell))
-        {
-            // Basic row toggling is implemented in {@DomTree}
-            BaseTree.onClick.apply(this, arguments);
-        }
-        else
-        {
-            // 1) Click on functions navigates the user to the right source location
-            // 2) Double click inverts boolean values and opens inline editor for others.
-            if (typeof(object) == "function")
-            {
-                Firebug.chrome.select(object, "script");
-                Events.cancelEvent(event);
-            }
-            else if (Events.isDoubleClick(event))
-            {
-                // The entire logic is part of the parent panel.
-                var panel = Firebug.getElementPanel(row);
-                if (!panel)
-                    return;
-
-                // Only primitive types can be edited.
-                var value = panel.provider.getValue(member.value);
-                if (typeof(value) == "object")
-                    return;
-
-                if (typeof(value) == "boolean")
-                    panel.setPropertyValue(row, "" + !value);
-                else
-                    panel.editProperty(row);
-
-                Events.cancelEvent(event);
-            }
-        }
-    },
+        return member;
+    }
 });
 
 // ********************************************************************************************* //
@@ -162,5 +138,4 @@ WatchTree.prototype = domplate(BaseTree,
 return WatchTree;
 
 // ********************************************************************************************* //
-}});
-
+});

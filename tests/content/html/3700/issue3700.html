@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 3700: Add auto-completion for HTML attributes</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="https://code.google.com/p/fbug/issues/detail?id=3700">Issue 3700</a>:
+    Add auto-completion for HTML attributes</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug, switch to the HTML panel</li>
+            <li>Click the "&gt;" of the <code>body</code> element to add a new attribute</li>
+            <li>Verify that typing the following characters:<code>
+s, t, y, l, e, &lt;tab&gt;, o, v, :, h, i, ;, c, &lt;tab&gt;, r, &lt;tab&gt;</code>,<br>
+            setting the cursor before "c", and continuing to type:<code>
+c, &lt;tab&gt;, r, e, d, &lt;tab&gt;, s, &lt;tab&gt;, t, &lt;tab&gt;</code><br>
+            results in two attributes: style="overflow: hidden; color: red; color: red;" spellcheck="true"</li>
+            </ol>
+    </section>
+    <footer>Simon Lindholm, simon.lindholm10@gmail.com</footer>
+</div>
+</body>
+</html>

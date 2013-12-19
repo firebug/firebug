@@ -5,37 +5,41 @@
 
 /* Inspector button */
 #firebug-inspectorButton {
-    list-style-image: url(chrome://firebug/skin/inspect.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
+    list-style-image: url(chrome://firebug/skin/inspect.svg);
 }
 
 #firebug-inspectorButton:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
+    filter: url(resource://firebugui/filters.svg#darken);
+}
+
+#firebug-inspectorButton:active {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
 /* Firebug Start Button */
 #firebug-button {
     -moz-binding: url("chrome://firebug/content/firefox/start-button/startButton.xml#start-button");
-    list-style-image: url(chrome://firebug/skin/firebug16Disabled.png) !important;
+    list-style-image: url(chrome://firebug/skin/firebugSmall.svg) !important;
+    filter: url(resource://firebugui/filters.svg#grayscale);
 }
 
 #firebug-button[firebugActive="true"] {
-    list-style-image: url(chrome://firebug/skin/firebug16.png) !important;
+    filter: none;
 }
 
 /* Error badge (displays an error counter). The badge is only visible if error count
    should be displayed */
-#firebug-button .badge {
+#firebug-error-badge {
     display: none;
-}
-
-#firebug-button[showErrors="true"] .badge {
-    display: block;
-    -moz-box-sizing: border-box;
     margin: 0;
 }
 
-#firebug-button .badge > .label {
+#firebug-error-badge[showErrors="true"] {
+    display: block;
+    -moz-box-sizing: border-box;
+}
+
+#firebug-error-label {
     -moz-box-sizing: border-box;
     visibility: hidden;
     font-size: 10px;
@@ -61,7 +65,7 @@
                 0 0 3px rgba(153, 0, 0, 0.9);
 }
 
-#firebug-button[showErrors="true"]:not([errorCount="0"]) .badge .label {
+#firebug-error-badge[showErrors="true"] > #firebug-error-label:not([errorCount="0"]) {
     visibility: visible;
 }
 
@@ -69,24 +73,25 @@
 #addon-bar #firebug-button dropmarker {
     display: none;
 }
-#addon-bar #firebug-button .fb-toolbarbutton{
+
+#addon-bar #firebug-button .fb-toolbarbutton {
     padding: 0 3px!important;
 }
 
 /* Slightly different positions of the badge for individual toolbars */
-#nav-bar #firebug-button .badge {
+#nav-bar #firebug-error-badge {
     margin: 3px -10px 0 -8px;
 }
 
-#addon-bar #firebug-button .badge {
+#addon-bar #firebug-error-badge {
     margin-top: 1px;
 }
 
-#TabsToolbar #firebug-button .badge {
+#TabsToolbar #firebug-error-badge {
     margin-top: 4px;
 }
 
-#toolbar-menubar #firebug-button .badge {
+#toolbar-menubar #firebug-error-badge {
     margin-top: 4px;
 }
 
@@ -97,17 +102,22 @@
 /*************************************************************************************************/
 /* Firebug Menu & Firefox context menu */
 
-#menu_firebug, #appmenu_firebug, #menu_webDeveloper_firebug {
-    list-style-image: url(chrome://firebug/skin/firebug16.png);
+#menu_firebug,
+#appmenu_firebug,
+#menu_webDeveloper_firebug {
+    list-style-image: url(chrome://firebug/skin/firebugSmall.svg);
 }
 
 #menu_firebug_firebugInspect {
-    list-style-image: url(chrome://firebug/skin/inspect.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
+    list-style-image: url(chrome://firebug/skin/inspect.svg);
 }
 
 #menu_firebug_firebugInspect:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
+    filter: url(resource://firebugui/filters.svg#darken);
+}
+
+#menu_firebug_firebugInspect:active {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
 /*************************************************************************************************/
@@ -124,8 +134,10 @@
 /* Firebug Splitter */
 
 #fbContentSplitter{
-    border-color: threedShadow !important;
-    background-color: #FFFFFF;
+    border-color: none;
+    background-color: rgb(221,221,221);
+    /*background-color: rgb(210, 224, 237); Australis*/
+    border: none;
 }
 
 #fbContentSplitter[dir=reverse]{
@@ -133,19 +145,15 @@
 }
 
 #fbContentSplitter[orient=vertical] {
-    border-top: 1px solid !important;
-    border-bottom: none;
     min-height: 5px;
     max-height: 5px;
-    background-color: -moz-dialog;
+    /*background-color: -moz-dialog;*/
 }
 
 #fbContentSplitter[orient=horizontal] {
-    border-right: 1px solid !important;
-    border-left: none;
     min-width: 5px;
     max-width: 5px;
-    background-color: -moz-dialog;
+    /*background-color: -moz-dialog;*/
 }
 
 /*************************************************************************************************/

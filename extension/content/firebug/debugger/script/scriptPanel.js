@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -9,29 +11,35 @@ define([
     "firebug/lib/css",
     "firebug/lib/url",
     "firebug/lib/domplate",
-    "firebug/debugger/script/scriptView",
-    "arch/compilationunit",
+    "firebug/lib/persist",
+    "firebug/lib/keywords",
+    "firebug/lib/system",
+    "firebug/lib/options",
+    "firebug/chrome/activablePanel",
     "firebug/chrome/menu",
+    "firebug/chrome/rep",
+    "firebug/chrome/statusPath",
+    "firebug/editor/editor",
+    "firebug/debugger/script/scriptView",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/script/sourceLink",
     "firebug/debugger/script/sourceFile",
     "firebug/debugger/breakpoints/breakpoint",
     "firebug/debugger/breakpoints/breakpointStore",
-    "firebug/lib/persist",
     "firebug/debugger/breakpoints/breakpointConditionEditor",
-    "firebug/lib/keywords",
-    "firebug/lib/system",
-    "firebug/editor/editor",
     "firebug/debugger/script/scriptPanelWarning",
     "firebug/debugger/script/breakNotification",
-    "firebug/console/commandLine",
+    "firebug/debugger/script/scriptPanelLineUpdater",
     "firebug/debugger/debuggerLib",
+    "firebug/console/commandLine",
     "firebug/net/netUtils",
+    "arch/compilationunit",
 ],
-function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, CompilationUnit, Menu,
-    StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, Persist,
-    BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning,
-    BreakNotification, CommandLine, DebuggerLib, NetUtils) {
+function (Firebug, FBTrace, Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, Persist, Keywords,
+    System, Options, ActivablePanel, Menu, Rep, StatusPath, Editor, ScriptView, StackFrame,
+    SourceLink, SourceFile, Breakpoint, BreakpointStore, BreakpointConditionEditor,
+    ScriptPanelWarning, BreakNotification, ScriptPanelLineUpdater, DebuggerLib, CommandLine,
+    NetUtils, CompilationUnit) {
 
 "use strict";
 
@@ -51,7 +59,7 @@ var Trace = FBTrace.to("DBG_SCRIPTPANEL");
  * This panel is using JSD2 API for debugging.
  */
 function ScriptPanel() {}
-var BasePanel = Firebug.ActivablePanel;
+var BasePanel = ActivablePanel;
 ScriptPanel.prototype = Obj.extend(BasePanel,
 /** @lends ScriptPanel */
 {
@@ -62,9 +70,14 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     name: "script",
     searchable: true,
+    searchPlaceholder: "Use_hash_plus_number_to_go_to_line",
     breakable: true,
     enableA11y: true,
-    order: 45,
+    order: 40,
+
+    // {@StatusPath} UI component that displays call-stack in the toolbar will be
+    // updated asynchronously.
+    objectPathAsyncUpdate: true,
 
     // Will appear in detached Firebug Remote XUL window.
     remotable: true,
@@ -93,6 +106,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.tool.addListener(this);
 
         this.context.getTool("breakpoint").addListener(this);
+        this.context.getTool("source").addListener(this);
 
         // Register as a listener for 'updateSidePanels' event. 
         Firebug.registerUIListener(this);
@@ -111,6 +125,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.tool.removeListener(this);
 
         this.context.getTool("breakpoint").removeListener(this);
+        this.context.getTool("source").removeListener(this);
 
         Firebug.unregisterUIListener(this);
 
@@ -176,7 +191,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.showToolbarButtons("fbLocationList", active);
         this.showToolbarButtons("fbToolbar", active);
 
-        // Additional debugger panels are visible only, if debugger is active.
+        // Additional debugger panels are visible only, if debugger is active and only
+        // if they aren't explicitly hidden.
+        if (Options.get("scriptHideSidePanels"))
+            active = false;
+
         this.panelSplitter.collapsed = !active;
         this.sidePanelDeck.collapsed = !active;
 
@@ -202,8 +221,15 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
     },
 
+    loadWindow: function(context, win)
+    {
+        // If the Script panel displays a 'no script' warning, let's try to update it.
+        // The page has been just loaded and there might be some new scripts after all.
+        if (!this.location)
+            this.navigate(null);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Show Stack Frames
 
     updateSidePanels: function(panel)
     {
@@ -246,9 +272,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         this.removeDebugLocation();
 
-        // Clear the stack on the panel toolbar
-        var panelStatus = Firebug.chrome.getPanelStatusElements();
-        panelStatus.clear();
+        // Clear the stack on the panel toolbar, but only if the Script panel is
+        // the currently selected panel.
+        if (Firebug.chrome.getSelectedPanel() == this)
+            StatusPath.clear();
 
         this.updateInfoTip();
     },
@@ -375,16 +402,25 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         return this.context.getAllCompilationUnits();
     },
 
-    getDefaultLocation: function()
+    getDefaultCompilationUnit: function()
     {
         var compilationUnits = this.getLocationList();
-        if (!compilationUnits.length)
+        if (compilationUnits.length)
+            return compilationUnits[0];
+
+        return null;
+    },
+
+    getDefaultLocation: function()
+    {
+        var compilationUnit = this.getDefaultCompilationUnit()
+        if (!compilationUnit)
             return null;
 
         // Mark the default link as 'no highlight'. We don't want to highlight
         // the first line when a default file is automatically displayed in
         // the Script panel.
-        var sourceLink = new SourceLink(compilationUnits[0].getURL(), null, "js");
+        var sourceLink = new SourceLink(compilationUnit.getURL(), null, "js");
         sourceLink.options.highlight = false;
 
         return sourceLink;
@@ -436,10 +472,16 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // extends ActivablePanel
+    // ActivablePanel
 
+    /**
+     * Class method. It's called by the framework when an instance of this panel type
+     * is enabled or disabled.
+     */
     onActivationChanged: function(enable)
     {
+        Trace.sysout("scriptPanel.onActivationChanged; " + enable);
+
         // xxxHonza: needs to be revisited
         if (enable)
         {
@@ -456,12 +498,23 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     framesadded: function(stackTrace)
     {
+        Trace.sysout("scriptPanel.framesadded;", stackTrace);
+
         // Invoke breadcrumbs update.
         Firebug.chrome.syncStatusPath();
+
+        // Do not use: Firebug.chrome.select(this.context.currentFrame, "script");
+        // at this moment. Since it invokes updateSelection, showStackFrame and
+        // ends up with updating the scroll position, so the current debugging line
+        // is visible to the user. It's wrong in the case where the user just
+        // executed an expression on the command line, which also causes 'framesadded'
+        // to be received (through clearScopes). See also issue 7028.
     },
 
     framescleared: function()
     {
+        Trace.sysout("scriptPanel.framescleared;");
+
         Firebug.chrome.syncStatusPath();
     },
 
@@ -482,12 +535,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         var compilationUnit = this.context.getCompilationUnit(sourceLink.href);
         if (!compilationUnit)
-            compilationUnit = this.getDefaultLocation();
+            compilationUnit = this.getDefaultCompilationUnit();
 
         // Sources doesn't have to be fetched from the server yet. In such case there
         // are not compilation units and so, no default location. We need to just wait
         // since sources are coming asynchronously (the UI will auto update after
-        // newScript event).
+        // 'newSource' event).
         if (!compilationUnit)
             return;
 
@@ -509,7 +562,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // the underlying source view that picking the right highlighting mode
             // for the source text (see issue 6866).
             // 1) First get the source file
-            // 2) Get it's content type that should be set at this moment. If not set
+            // 2) Get its content type that should be set at this moment. If not set
             //     it's guessed according to the file extension.
             // 3) Get the type/category from the content type.
             var sourceFile = SourceFile.getSourceFileByUrl(self.context, sourceLink.href);
@@ -545,6 +598,18 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     search: function(text, reverse)
     {
         return this.scriptView.search(text, reverse);
+    },
+
+    getSearchOptionsMenuItems: function()
+    {
+        return [
+            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
+                "search.tip.Case_Sensitive"),
+            Firebug.Search.searchOptionMenu("search.Multiple_Files", "searchGlobal",
+                "search.tip.Multiple_Files"),
+            Firebug.Search.searchOptionMenu("search.Use_Regular_Expression",
+                "searchUseRegularExpression", "search.tip.Use_Regular_Expression")
+        ];
     },
 
     onNavigateToNextDocument: function(scanDoc, reverse)
@@ -625,6 +690,22 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             Editor.stopEditing(false);
     },
 
+    onEditorKeyDown: function(event)
+    {
+        if (event.keyCode === KeyEvent.DOM_VK_L && Events.isControl(event))
+        {
+            var searchBox = Firebug.chrome.$("fbSearchBox");
+            searchBox.focus();
+            searchBox.value = "#";
+            Events.cancelEvent(event);
+        }
+        if (event.keyCode === KeyEvent.DOM_VK_W && Events.isAlt(event))
+        {
+            this.addSelectionWatch();
+            Events.cancelEvent(event);
+        }
+    },
+
     initializeEditBreakpointCondition: function(lineNo)
     {
         Trace.sysout("scriptPanel.initializeEditBreakpointCondition; " + lineNo);
@@ -641,7 +722,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // Reference to the edited breakpoint.
             editor.breakpoint = bp;
 
-            // if there is alreay a bp, the line is executable, so we just need to
+            // If there is already a bp, the line is executable, so we just need to
             // open the editor.
             this.openBreakpointConditionEditor(lineNo, bp.condition);
             return;
@@ -761,8 +842,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("scriptPanel.onBreakpointAdded; origin line: " +
             bp.params.originLineNo, bp);
 
-        // Update the UI, remove the temporary(loading) bp icon.
-        if (bp.params.originLineNo)
+        // Update the UI, remove the temporary(loading) bp icon. Note that the
+        // original line can be zero.
+        if (typeof(bp.params.originLineNo) != "undefined")
             this.scriptView.removeBreakpoint({lineNo: bp.params.originLineNo});
         else
             this.scriptView.removeBreakpoint({lineNo: bp.lineNo});
@@ -793,6 +875,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // Remove breakpoint from the UI.
         this.scriptView.removeBreakpoint(bp);
+        if (this.scriptView.editor.debugLocation == bp.lineNo)
+            this.scriptView.setDebugLocation(bp.lineNo);
     },
 
     onBreakpointEnabled: function(context, bp, bpClient)
@@ -836,14 +920,17 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     updateOption: function(name, value)
     {
-        if (name == "breakOnExceptions")
-            this.tool.breakOnExceptions(value);
+        if (name == "breakOnExceptions" || name == "ignoreCaughtExceptions")
+            this.tool.updateBreakOnErrors();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Context Menu
 
-    onContextMenu: function(event, items)
+    /**
+     * The method handles 'onEditorContextMenu' fired by {@ScriptView}.
+     */
+    onEditorContextMenu: function(event, items)
     {
         var target = event.target;
         var menuItems = this.getContextMenuItems(null, target);
@@ -880,6 +967,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             {
                 label: "AddWatch",
                 tooltiptext: "watch.tip.Add_Watch",
+                acceltext: Locale.getFormattedKey(window, "alt", "W"),
                 command: Obj.bind(this.addSelectionWatch, this)
             });
         }
@@ -1025,8 +1113,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     supportsBreakOnNext: function()
     {
-        // xxxHonza: jsDebuggerOn is an artifact from JSD1. Do we need a replacement for JSD2?
-        return this.breakable/* && Firebug.jsDebuggerOn;*/
+        return this.breakable;
     },
 
     breakOnNext: function(enabled)
@@ -1196,11 +1283,14 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // Update Break on Next lightning
             //Firebug.Breakpoint.updatePanelTab(this, false);
 
-            // This is how the Watch panel is synchronized.
-            Firebug.chrome.select(this.context.currentFrame, "script", null, true);
-            Firebug.chrome.syncPanel("script");  // issue 3463 and 4213
+            // issue 3463 and 4213
+            Firebug.chrome.syncPanel("script");
             Firebug.chrome.focus();
-            //this.updateSelection(this.context.currentFrame);
+
+            // Make sure the debug location is updated (issue 7028)
+            Firebug.chrome.select(this.context.currentFrame, "script");
+
+            this.highlight(true);
 
             // Display break notification box.
             BreakNotification.show(this.context, this.panelNode, packet.why.type);
@@ -1222,18 +1312,15 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         {
             var chrome = Firebug.chrome;
 
-            /*if (this.selectedSourceBox && this.selectedSourceBox.breakCauseBox)
-            {
-                this.selectedSourceBox.breakCauseBox.hide();
-                delete this.selectedSourceBox.breakCauseBox;
-            }*/
-
+            this.selection = null;
             this.syncCommands(this.context);
             this.syncListeners(this.context);
             this.showNoStackFrame();
 
             // After main panel is completely updated
             chrome.syncSidePanels();
+
+            this.highlight(false);
 
             // Make sure the break notification box is hidden when debugger resumes.
             BreakNotification.hide(this.context);
@@ -1244,21 +1331,17 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
     },
 
-    newScript: function(sourceFile)
+    newSource: function(sourceFile)
     {
-        // This event can be missed since the newScript packet can be send
+        // This event can be missed since the newSource packet can be send
         // before the ScriptPanel is initialized and adds itself to the DebuggerTool
         // as a listener.
 
-        Trace.sysout("scriptPanel.newScript; " + sourceFile.href, sourceFile);
+        Trace.sysout("scriptPanel.newSource; " + sourceFile.href, sourceFile);
 
         // New script has been appended, update the default location if necessary.
         if (!this.location)
             this.navigate(null);
-
-        // Initialize existing breakpoints
-        //var bps = BreakpointStore.getBreakpoints(sourceFile.href);
-        //self.tool.setBreakpoints(bps, function(response){});
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1310,36 +1393,40 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         var self = this;
 
-        // If the evaluate fails, then we report an error and don't show the infotip
+        function success(result, context)
+        {
+            var rep = Firebug.getRep(result, context);
+            var tag = rep.shortTag ? rep.shortTag : rep.tag;
+
+            tag.replace({object: result}, infoTip);
+
+            // If the menu is never displayed, the contextMenuObject is not reset
+            // (back to null) and is reused at the next time the user opens the
+            // context menu, which is wrong.
+            // This line was appended when fixing:
+            // http://code.google.com/p/fbug/issues/detail?id=1700
+            // The object should be returned by getPopupObject(),
+            // that is called when the context menu is showing.
+            // The problem is, that the "onContextShowing" event doesn't have the
+            // rangeParent field set and so it isn't possible to get the
+            // expression under the cursor (see getExpressionAt).
+            //Firebug.chrome.contextMenuObject = result;
+
+            self.infoTipExpr = expr;
+        }
+
+        function failure(result, context)
+        {
+            // We are mostly not interested in this evaluation error. It just polutes
+            // the tracing console.
+            // Trace.sysout("scriptPanel.populateInfoTip; ERROR " + result, result);
+
+            self.infoTipExpr = "";
+        }
+
+        // If the evaluate fails, then we report an error and don't show the infotip.
         CommandLine.evaluate(expr, this.context, null, this.context.getCurrentGlobal(),
-            function success(result, context)
-            {
-                var rep = Firebug.getRep(result, context);
-                var tag = rep.shortTag ? rep.shortTag : rep.tag;
-
-                tag.replace({object: result}, infoTip);
-
-                // If the menu is never displayed, the contextMenuObject is not reset
-                // (back to null) and is reused at the next time the user opens the
-                // context menu, which is wrong.
-                // This line was appended when fixing:
-                // http://code.google.com/p/fbug/issues/detail?id=1700
-                // The object should be returned by getPopupObject(),
-                // that is called when the context menu is showing.
-                // The problem is, that the "onContextShowing" event doesn't have the
-                // rangeParent field set and so it isn't possible to get the
-                // expression under the cursor (see getExpressionAt).
-                //Firebug.chrome.contextMenuObject = result;
-
-                self.infoTipExpr = expr;
-            },
-            function failed(result, context)
-            {
-                Trace.sysout("scriptPanel.populateInfoTip; ERROR " + result, result);
-
-                self.infoTipExpr = "";
-            }
-        );
+            success, failure, {noStateChange: true});
 
         return (this.infoTipExpr == expr);
     },
@@ -1388,12 +1475,22 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         var currentLine = from;
         var editor = this.scriptView.editor.editorObject;
 
+        Trace.sysout("scriptPanel.markExecutableLines; from: " + from + ", to: " + to);
+
         // Iterate over all visible lines.
         editor.eachLine(from, to, function(handle)
         {
             currentLine++;
 
             // Bail out if the exe-flag for this line has been already computed.
+            // xxxHonza: don't bail out, some scripts could have been garbage collected,
+            // and we need to make sure the executable status is properly updated.
+            // See also issue 6948 (and included links to platform bugs).
+            // xxxHonza: issue 6948 isn't yet closed and this code might change
+            // as soon as the platform bugs are fixed.
+            // xxxHonza: See {@ScriptPanelLineUpdater} that is responsible for proper
+            // status update (in case of garbage collected scripts). Fast scrolling needs
+            // this optimization.
             if (typeof(handle.executableLine) != "undefined")
                 return;
 
@@ -1403,9 +1500,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 line: currentLine,
             });
 
-            // Mark the line as executable.
+            // Update line executable style.
             if (handle.executableLine)
                 editor.addLineClass(handle, "executable", "CodeMirror-executableLine");
+            else
+                editor.removeLineClass(handle, "executable", "CodeMirror-executableLine");
         });
     },
 });
@@ -1413,7 +1512,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 // ********************************************************************************************* //
 // Breakpoint InfoTip Template
 
-var BreakpointInfoTip = domplate(Firebug.Rep,
+var BreakpointInfoTip = domplate(Rep,
 {
     tag:
         DIV("$expr"),

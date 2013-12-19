@@ -4,7 +4,9 @@ define([
     "firebug/lib/events",
     "firebug/lib/trace"
 ],
-function factoryOptions(Events, FBTrace) {
+function (Events, FBTrace) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -24,7 +26,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
     // Global
     "defaultPanelName", "throttleMessages", "textSize", "showInfoTips",
     "commandEditor", "textWrapWidth", "framePosition", "showErrorCount",
-    "activateSameOrigin", "allPagesActivation", "hiddenPanels",
+    "activateSameOrigin", "allPagesActivation",
     "panelTabMinWidth", "sourceLinkLabelWidth", "currentVersion",
     "useDefaultLocale", "toolbarCustomizationDone",
     "showBreakNotification", "stringCropLength", "showFirstRunPage",

@@ -1,8 +1,9 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/domplate",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -12,18 +13,23 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/lib/persist",
+    "firebug/chrome/rep",
     "firebug/debugger/breakpoints/breakpointGroup",
+    "firebug/dom/domBreakpoint",
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Css, Str, Arr, Persist,
-    BreakpointGroup) {
-
-with (Domplate) {
+function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Wrapper, Dom, Css, Str, Arr,
+    Persist, Rep, BreakpointGroup, DOMBreakpoint) {
 
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var {domplate, TAG, DIV, SPAN, TR, P, A, INPUT} = Domplate;
+
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+
+var Trace = FBTrace.to("DBG_DOM");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // Breakpoint Group
@@ -33,25 +39,22 @@ function DOMBreakpointGroup()
     this.breakpoints = [];
 }
 
+/**
+ * @object
+ */
 DOMBreakpointGroup.prototype = Obj.extend(new BreakpointGroup(),
+/** @lends DOMBreakpointGroup */
 {
     name: "domBreakpoints",
     title: Locale.$STR("dom.label.DOM Breakpoints"),
 
-    addBreakpoint: function(object, propName, panel, row)
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    addBreakpoint: function(object, propName, context)
     {
-        var path = panel.getPropertyPath(row);
-        path.pop();
+        Trace.sysout("dom.addBreakpoint; " + propName, object);
 
-        // We don't want the last dot.
-        if (path.length > 0 && path[path.length-1] == ".")
-            path.pop();
-
-        var objectPath = path.join("");
-        if (FBTrace.DBG_DOM)
-            FBTrace.sysout("dom.addBreakpoint; " + objectPath, path);
-
-        var bp = new Breakpoint(object, propName, objectPath, panel.context);
+        var bp = new DOMBreakpoint(object, propName, context);
         if (bp.watchProperty());
             this.breakpoints.push(bp);
     },
@@ -70,10 +73,17 @@ DOMBreakpointGroup.prototype = Obj.extend(new BreakpointGroup(),
     {
         var object = args[0];
         var propName = args[1];
-        return bp.object == object && bp.propName == propName;
+
+        // Make sure to unwrap objects for comparison (see issue 6934).
+        var obj1 = Wrapper.unwrapObject(bp.object);
+        var obj2 = Wrapper.unwrapObject(object);
+
+        return obj1 == obj2 && bp.propName == propName;
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Persistence
+
     load: function(context)
     {
         var panelState = Persist.getPersistedState(context, "dom");
@@ -89,13 +99,11 @@ DOMBreakpointGroup.prototype = Obj.extend(new BreakpointGroup(),
                 bp.context = context;
                 bp.watchProperty();
 
-                if (FBTrace.DBG_DOM)
-                    FBTrace.sysout("dom.DOMBreakpointGroup.load; " + bp.objectPath, bp);
+                Trace.sysout("dom.DOMBreakpointGroup.load; " + bp.objectPath, bp);
             }
             catch (err)
             {
-                if (FBTrace.DBG_ERROR || FBTrace.DBG_DOM)
-                    FBTrace.sysout("dom.DOMBreakpointGroup.load; ERROR " + bp.objectPath, err);
+                TraceError.sysout("dom.DOMBreakpointGroup.load; ERROR " + bp.objectPath, err);
             }
         });
     },
@@ -114,80 +122,7 @@ DOMBreakpointGroup.prototype = Obj.extend(new BreakpointGroup(),
 
 // ********************************************************************************************* //
 
-function Breakpoint(object, propName, objectPath, context)
-{
-    this.context = context;
-    this.propName = propName;
-    this.objectPath = objectPath;
-    this.object = object;
-    this.checked = true;
-}
-
-Breakpoint.prototype =
-{
-    watchProperty: function()
-    {
-        if (FBTrace.DBG_DOM)
-            FBTrace.sysout("dom.watch; property: " + this.propName);
-
-        if (!this.object)
-            return;
-
-        try
-        {
-            var self = this;
-            this.object.watch(this.propName, function handler(prop, oldval, newval)
-            {
-                // XXXjjb Beware: in playing with this feature I hit too much recursion
-                // multiple times with console.log
-                // TODO Do something cute in the UI with the error bubble thing
-                if (self.checked)
-                {
-                    self.context.breakingCause = {
-                        title: Locale.$STR("dom.Break On Property"),
-                        message: Str.cropString(prop, 200),
-                        prevValue: oldval,
-                        newValue: newval
-                    };
-
-                    Firebug.Breakpoint.breakNow(self.context.getPanel("dom"));
-                }
-                return newval;
-            });
-        }
-        catch (exc)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("dom.watch; object FAILS " + exc, exc);
-            return false;
-        }
-
-        return true;
-    },
-
-    unwatchProperty: function()
-    {
-        if (FBTrace.DBG_DOM)
-            FBTrace.sysout("dom.unwatch; property: " + this.propName, this.object);
-
-        if (!this.object)
-            return;
-
-        try
-        {
-            this.object.unwatch(this.propName);
-        }
-        catch (exc)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("dom.unwatch; object FAILS " + exc, exc);
-        }
-    }
-};
-
-// ********************************************************************************************* //
-
-var BreakpointRep = domplate(Firebug.Rep,
+var BreakpointRep = domplate(Rep,
 {
     inspectable: false,
 
@@ -280,7 +215,7 @@ var BreakpointRep = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof Breakpoint;
+        return object instanceof DOMBreakpoint;
     }
 });
 
@@ -308,5 +243,4 @@ Firebug.registerRep(BreakpointRep);
 return DOMBreakpointGroup;
 
 // ********************************************************************************************* //
-}});
-
+});

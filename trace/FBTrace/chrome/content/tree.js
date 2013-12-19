@@ -151,6 +151,14 @@ var Tree = domplate(Reps.Rep,
             (valueType == "function" || (valueType == "object" && value != null)
             || (valueType == "string" && value.length > 50));
 
+        // Special case for Map() instance (from some reason instanceof Map doesn't work).
+        if (typeof (value.forEach) == "function")
+        {
+            value.forEach(function(value) {
+                hasChildren = true;
+            });
+        }
+
         return {
             name: name,
             value: value,

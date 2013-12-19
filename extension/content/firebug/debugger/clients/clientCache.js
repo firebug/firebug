@@ -15,6 +15,7 @@ function (FBTrace, Firebug, Obj, Promise, ObjectClient, ClientFactory) {
 
 var gripNull = new ObjectClient({type: "null"});
 var gripUndefined = new ObjectClient({type: "undefined"});
+var gripNaN = new ObjectClient({type: "NaN"});
 
 // ********************************************************************************************* //
 // ClientCache
@@ -48,35 +49,45 @@ ClientCache.prototype =
      *
      * The grip can be:
      * 1) Real grip that has its own actor (ID).
-     * 2) Primitive value e.g. a number, null, undefined, an empty string, boolean.
+     * 2) Wrapped primitive value for undefined, null, +/-Infinity, NaN and -0.
+     * 3) Unwrapped for any other primitive value e.g. a number, an empty string, boolean.
      */
     getObject: function(grip)
     {
-        // If the grip is actually a primitive value, which is evaluated to 'false'
-        // (can be number zero, boolean false, an empty string), return the value
-        // directly to keep the type.
-        if (!grip)
+        // Return if grip is null or undefined. Note that if grip represents null or undefined,
+        // it has to be wrapped in JSON in order to be a valid grip.
+        if (grip == null)
             return grip;
 
         // Null and undefined values has it's own type, so return predefined grip.
         // Or again, directly the passed value.
-        if (!grip.actor)
+        if (typeof grip === "object" && !grip.actor)
         {
             if (grip.type == "null")
                 return gripNull;
             else if (grip.type == "undefined")
                 return gripUndefined;
+            else if (grip.type == "NaN")
+                return gripNaN;
 
             // Can be a primitive value evaluated to 'true' (e.g. a string, boolean true, etc.).
             return grip;
         }
 
-        var object = this.clients[grip.actor];
-        if (object)
-            return object;
+        var object;
+
+        if (typeof grip === "object")
+        {
+            object = this.clients[grip.actor];
+            if (object)
+                return object;
+        }
 
         object = ClientFactory.createClientObject(grip, this);
-        this.clients[grip.actor] = object;
+
+        // We don't cache primitive grips.
+        if (typeof grip === "object")
+            this.clients[grip.actor] = object;
 
         return object;
     },

@@ -4,9 +4,10 @@ define([
     "firebug/firebug",
     "firebug/lib/trace",
     "firebug/debugger/script/sourceFile",
+    "firebug/debugger/script/sourceLink",
     "firebug/chrome/reps",
 ],
-function(Firebug, FBTrace, SourceFile, FirebugReps) {
+function(Firebug, FBTrace, SourceFile, SourceLink, FirebugReps) {
 
 "use strict"
 
@@ -66,6 +67,13 @@ ErrorMessageObj.prototype =
             if (callback)
                 callback(line);
         });
+    },
+
+    getSourceLink: function()
+    {
+        var ext = this.category == "css" ? "css" : "js";
+        return this.lineNo ? new SourceLink(this.href, this.lineNo, ext,
+            null, null, this.colNumber) : null;
     },
 
     resetSource: function()

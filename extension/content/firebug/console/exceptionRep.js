@@ -2,6 +2,7 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/rep",
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/domplate",
@@ -12,7 +13,7 @@ define([
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/stack/stackTrace",
 ],
-function(Firebug, FBTrace, Obj, Domplate, ErrorMessageObj, ErrorMessage, ErrorCopy,
+function(Firebug, Rep, FBTrace, Obj, Domplate, ErrorMessageObj, ErrorMessage, ErrorCopy,
     FirebugReps, StackFrame, StackTrace) {
 
 "use strict"
@@ -32,7 +33,7 @@ var {domplate, TAG} = Domplate;
  * @domplate This template represents exceptions that happen in the content and appear
  * within Firebug UI. It's registered as Firebug rep.
  */
-var Exception = domplate(Firebug.Rep,
+var Exception = domplate(Rep,
 /** @lends Exception */
 {
     tag:

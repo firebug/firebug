@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/firefox",
@@ -10,7 +11,7 @@ define([
     "firebug/lib/options",
     "firebug/firefox/browserOverlayLib",
 ],
-function(Obj, Firebug, Firefox, Locale, Events, Dom, Options, BrowserOverlayLib) {
+function(Module, Obj, Firebug, Firefox, Locale, Events, Dom, Options, BrowserOverlayLib) {
 
 "use strict";
 
@@ -32,14 +33,14 @@ var Ci = Components.interfaces;
  * such as panel activation and also indicates whether Firebug is activated/deactivated for
  * the current page (by changing its color).
  */
-Firebug.StartButton = Obj.extend(Firebug.Module,
+Firebug.StartButton = Obj.extend(Module,
 /** @lends Firebug.StartButton */
 {
     dispatchName: "startButton",
 
     initializeUI: function()
     {
-        Firebug.Module.initializeUI.apply(this, arguments);
+        Module.initializeUI.apply(this, arguments);
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("StartButton.initializeUI;");
@@ -127,24 +128,27 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
 
     showCount: function(errorCount)
     {
-        var firebugButton = Firefox.getElementById("firebug-button");
+        var errorBadge = Firefox.getElementById("firebug-error-badge");
         if (errorCount && Firebug.showErrorCount)
         {
-            if (firebugButton)
+            if (errorBadge)
             {
-                firebugButton.setAttribute("showErrors", "true");
-                firebugButton.setAttribute("errorCount", errorCount);
+                var errorLabel = Firefox.getElementById("firebug-error-label");
+                errorBadge.setAttribute("showErrors", "true");
+                errorLabel.setAttribute("value", errorCount);
+                errorLabel.setAttribute("tooltiptext", Locale.$STRP("plural.startbutton.tip.errors", [errorCount]))
             }
         }
         else
         {
-            if (firebugButton)
+            if (errorBadge)
             {
-                firebugButton.removeAttribute("showErrors");
+                errorBadge.removeAttribute("showErrors");
 
                 // Use '0', so the horizontal space for the number is still allocated.
                 // The button will cause re-layout if there are more than 9 errors.
-                firebugButton.setAttribute("errorCount", "0");
+                var errorLabel = Firefox.getElementById("firebug-error-label");
+                errorLabel.setAttribute("value", "0");
             }
         }
     },

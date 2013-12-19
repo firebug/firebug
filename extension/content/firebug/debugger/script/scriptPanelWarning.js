@@ -10,17 +10,20 @@ define([
     "firebug/lib/url",
     "firebug/lib/locale",
     "firebug/chrome/tabWatcher",
+    "firebug/chrome/rep",
     "firebug/chrome/reps",
     "firebug/chrome/window",
     "firebug/chrome/firefox",
 ],
-function(Firebug, FBTrace, Obj, Domplate, Options, Dom, Url, Locale, TabWatcher,
+function(Firebug, FBTrace, Obj, Domplate, Options, Dom, Url, Locale, TabWatcher, Rep,
     FirebugReps, Win, Firefox) {
 
-with (Domplate) {
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV, SPAN, TR, H1, P} = Domplate;
 
 var TraceError = FBTrace.to("DBG_ERRORS");
 var Trace = FBTrace.to("DBG_SCRIPTPANELWARNING");
@@ -29,9 +32,9 @@ var Trace = FBTrace.to("DBG_SCRIPTPANELWARNING");
 // Warning Template
 
 /**
- * @domplate Displays various warning messages within the Script panel.
+ * @domplate Renders various warning messages within the Script panel.
  */
-var WarningRep = domplate(Firebug.Rep,
+var WarningRep = domplate(Rep,
 /** @lends WarningRep */
 {
     tag:
@@ -139,6 +142,7 @@ var WarningRep = domplate(Firebug.Rep,
             pageTitle: Locale.$STR("script.warning.all_scripts_filtered"),
             suggestion: Locale.$STR("script.suggestion.all_scripts_filtered")
         };
+
         return this.tag.replace(args, parentNode, this);
     },
 
@@ -148,6 +152,7 @@ var WarningRep = domplate(Firebug.Rep,
             pageTitle: Locale.$STR("script.warning.no_javascript"),
             suggestion: Locale.$STR("script.suggestion.no_javascript2")
         };
+
         return this.tag.replace(args, parentNode, this);
     },
 
@@ -178,7 +183,17 @@ var WarningRep = domplate(Firebug.Rep,
         this.focusDebuggerTag.append({}, box, this);
 
         return box;
-    }
+    },
+
+    showLoading: function(parentNode)
+    {
+        var args = {
+            pageTitle: Locale.$STR("script.warning.loading"),
+            suggestion: Locale.$STR("script.suggestion.loading")
+        };
+
+        return this.tag.replace(args, parentNode, this);
+    },
 });
 
 // ********************************************************************************************* //
@@ -190,6 +205,8 @@ var ScriptPanelWarning =
     {
         if (!panel.activeWarningTag)
             return false;
+
+        Trace.sysout("scriptPanelWarning.updateLocation; " + panel.context.getName());
 
         panel.scriptView.destroy();
 
@@ -204,23 +221,18 @@ var ScriptPanelWarning =
 
     showWarning: function(panel)
     {
-        // xxxHonza: the following flags are probably obsolete
-        // context.jsDebuggerCalledUs
-        // Firebug.jsDebuggerOn
-
-        // Fill the panel node with a warning if needed
         var location = panel.getDefaultLocation();
         var jsEnabled = Options.getPref("javascript", "enabled");
         var activitySuspended = this.isActivitySuspended();
+        var loaded = panel.context.window.document.readyState == "complete";
 
         Trace.sysout("scriptPanelWarning.showWarning; " + panel.context.getName(), {
-            jsDebuggerOn: Firebug.jsDebuggerOn,
-            jsDebuggerCalledUs: panel.context.jsDebuggerCalledUs,
             jsEnabled: jsEnabled,
             location: location,
             activitySuspended: activitySuspended,
             stopped: panel.context.stopped,
-            allScriptsWereFiltered: panel.context.allScriptsWereFiltered
+            allScriptsWereFiltered: panel.context.allScriptsWereFiltered,
+            readyState: panel.context.window.document.readyState
         });
 
         var currentURI = Firefox.getCurrentURI();
@@ -233,27 +245,28 @@ var ScriptPanelWarning =
         }
         else if (!jsEnabled)
         {
+            // JavaScript is disabled.
             panel.activeWarningTag = WarningRep.showNotEnabled(panel.panelNode);
         }
         else if (currentURI && (Url.isSystemURL(currentURI.spec) ||
             currentURI.spec.match(Url.reChrome)))
         {
+            // System page (coming e.g. from chrome) is not supported.
             panel.activeWarningTag = WarningRep.showNoDebuggingForSystemSources(panel.panelNode);
         }
         else if (panel.context.allScriptsWereFiltered)
         {
+            // There are scripts on the page, but filtered out.
             panel.activeWarningTag = WarningRep.showFiltered(panel.panelNode);
         }
-        /*else if (location && !panel.context.jsDebuggerCalledUs)
+        else if (!loaded && !location)
         {
-            panel.activeWarningTag = WarningRep.showInactive(panel.panelNode);
+            // There are no scripts on the page, but the window is still loading, so wait.
+            panel.activeWarningTag = WarningRep.showLoading(panel.panelNode);
         }
-        else if (!Firebug.jsDebuggerOn)  // set asynchronously by jsd in FF 4.0
+        else if (!location)
         {
-            panel.activeWarningTag = WarningRep.showDebuggerInactive(panel.panelNode);
-        }*/
-        else if (!location) // they were not filtered, we just had none
-        {
+            // There are no scripts on the page.
             panel.activeWarningTag = WarningRep.showNoScript(panel.panelNode);
         }
         else
@@ -287,4 +300,4 @@ var ScriptPanelWarning =
 return ScriptPanelWarning;
 
 // ********************************************************************************************* //
-}});
+});

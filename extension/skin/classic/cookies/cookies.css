@@ -29,7 +29,7 @@
 .logRow-cookiesCleared,
 .logRow-cookiesRejected,
 .logRow-cookie:hover {
-    background-image: url(chrome://firebug/skin/cookies/cookie.png);
+    background-image: url(chrome://firebug/skin/cookies/cookie.svg);
     background-repeat: no-repeat;
     background-position: 3px 2px;
 }
@@ -122,11 +122,11 @@
 
 .cookieHeaderSorted > .cookieHeaderCellBox {
     border-right-color: #6B7C93;
-    background: url(chrome://firebug/skin/arrowDown.png) no-repeat calc(100% - 4px);    
+    background: url(chrome://firebug/skin/arrowDown.svg) no-repeat calc(100% - 4px);    
 }
 
 .cookieHeaderSorted.sortedAscending > .cookieHeaderCellBox {
-    background-image: url(chrome://firebug/skin/arrowUp.png);
+    background-image: url(chrome://firebug/skin/arrowUp.svg);
 }
 
 .cookieHeaderSorted:hover:active {
@@ -206,7 +206,7 @@
 }
 
 .cookieRow[breakpoint="true"] .cookieRowHeader {
-    background-image: url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/breakpoint.svg);
 }
 
 .cookieRow[breakpoint="true"][disabledBreakpoint="true"] .cookieRowHeader {
@@ -220,7 +220,7 @@
     left: 5px;
     width: 12px;
     height: 12px;
-    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
     opacity: 0.5;
 }
 
@@ -475,7 +475,7 @@
 /************************************************************************************************/
 
 .disabledPanelBox .descImage-cookies {
-    background-image: url(chrome://firebug/skin/cookies/activation-menu-cookies.png);
+    background-image: url(chrome://firebug/skin/cookies/activation-menu-cookies.svg);
 }
 
 /************************************************************************************************/

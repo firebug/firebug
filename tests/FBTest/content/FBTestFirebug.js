@@ -1590,7 +1590,7 @@ this.getSourceLineNode = function(lineNo, chrome)
  * breaks the JS execution on a breakpoint or due a <i>Break On Next<i> active feature.
  * @param {Object} chrome Current Firebug's chrome object (e.g. FW.Firebug.chrome)
  * @param {Number} lineNo Expected source line number where the break should happen.
- * @param {Object} breakpoint Set to true if breakpoint should be displayed in the UI.
+ * @param {boolean} breakpoint Set to true if breakpoint should be displayed in the UI.
  * @param {Object} callback Handeler that should be called when break happens.
  */
 this.waitForBreakInDebugger = function(chrome, lineNo, breakpoint, callback)
@@ -1655,7 +1655,8 @@ this.waitForBreakInDebugger = function(chrome, lineNo, breakpoint, callback)
             var panel = chrome.getSelectedPanel();
             FBTest.compare("script", panel.name, "The script panel should be selected");
 
-            var currentLineNo = parseInt(sourceRow.lineNumber.textContent, 10);
+            var currentLineElt = sourceRow.querySelector(".CodeMirror-linenumber");
+            var currentLineNo = parseInt(currentLineElt.textContent, 10);
             FBTest.compare(lineNo, currentLineNo, "The break must be on line " + lineNo + ".");
 
             callback(sourceRow);
@@ -2843,7 +2844,7 @@ this.TaskList.prototype =
         var args = Array.prototype.slice.call(arguments, 1);
         this.push(function(callback)
         {
-            func.apply(null, args);
+            func.apply(FBTest, args);
             callback();
         });
     },

@@ -1,12 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/firebug",
     "firebug/lib/object",
-    "firebug/firebug"
+    "firebug/chrome/module",
 ],
-function(Obj, Firebug) {
+function(Firebug, Obj, Module) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Trace Module
 
 /**
@@ -16,7 +17,7 @@ function(Obj, Firebug) {
  * Firebug.TraceModule.addListener - appends a tracing listener.
  * Firebug.TraceModule.removeListener - removes a tracing listener.
  */
-Firebug.TraceModule = Obj.extend(Firebug.Module,
+Firebug.TraceModule = Obj.extend(Module,
 {
     dispatchName: "traceModule",
 
@@ -31,7 +32,10 @@ Firebug.TraceModule = Obj.extend(Firebug.Module,
     }
 });
 
+// ********************************************************************************************* //
+// Registration
+
 return Firebug.TraceModule;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });

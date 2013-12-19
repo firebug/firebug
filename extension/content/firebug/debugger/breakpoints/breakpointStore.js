@@ -3,11 +3,12 @@
 define([
     "firebug/lib/trace",
     "firebug/firebug",
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/remoting/debuggerClientModule",
     "firebug/debugger/breakpoints/breakpoint",
 ],
-function(FBTrace, Firebug, Obj, DebuggerClientModule, Breakpoint) {
+function(FBTrace, Firebug, Module, Obj, DebuggerClientModule, Breakpoint) {
 
 // ********************************************************************************************* //
 // Constants
@@ -16,7 +17,9 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-Cu["import"]("resource://firebug/storageService.js");
+var storageScope = {}, StorageService;
+Cu.import("resource://firebug/storageService.js", storageScope);
+StorageService = storageScope.StorageService;
 
 var BP_NORMAL = 1;
 var BP_MONITOR = 2;
@@ -32,19 +35,18 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // Breakpoint Store
 
 /**
- * @Module BreakpointStore module is responsible for saving and loading breakpoints
- * on the client side.
+ * @Module BreakpointStore module is responsible for breakpoint persistence across Firefox
+ * sessions (restarts). This object implements saving and loading of breakpoint records from
+ * a JSON file.
  *
- * TODO:
- * 1) Methods should expect zero-based line numbers so, it's consistent across
- *    Firebug framework. The line numbers should be auto-converted into one-based
- *    when stored into breakpoints.json so, the file contains numbers expected
- *    by the user.
+ * This object is a singleton and every {@TabContext} needs to ensure that breakpoints are
+ * properly set on the current {@ThreadClient} (back end).
  */
-var BreakpointStore = Obj.extend(Firebug.Module,
+var BreakpointStore = Obj.extend(Module,
 /** @lends BreakpointStore */
 {
     dispatchName: "BreakpointStore",
+
     breakpoints: {},
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -62,7 +64,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         // Restore breakpoints from a file. This should be done only if it's necessary
         // (i.e. when the Debugger tool is actually activated.
@@ -74,69 +76,26 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
     initializeUI: function()
     {
-        Firebug.Module.initializeUI.apply(this, arguments);
-
-        // BreakpointStore object must be registered as a {@DebuggerClientModule} listener
-        // after {@DebuggerTool} otherwise breakpoint initialization doesn't work
-        // (it would be done before requesting scripts).
-        // This is why we do it here, in initializeUI.
-        // xxxHonza: is there any other way how to ensure that DebuggerTool listener
-        // is registered first?
-        DebuggerClientModule.addListener(this);
+        Module.initializeUI.apply(this, arguments);
     },
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
-
-        DebuggerClientModule.removeListener(this);
+        Module.shutdown.apply(this, arguments);
 
         this.storage = null;
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Options
+
     resetAllOptions: function()
     {
         // xxxHonza: remove also on the server side.
-        this.storage.clear();
+        // xxxsz: The storage needs to be cleared immediately, otherwise different storages
+        //   can get in conflict with each other (FBTest lib/storage/storageService.js fails)
+        this.storage.clear(true);
         this.breakpoints = {};
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // DebuggerClientModule Events
-
-    onThreadAttached: function(context, reload)
-    {
-        // Ignore page reloads.
-        if (reload)
-            return;
-
-        // Get all breakpoints
-        // xxxHonza: do we have to send all the breakpoints to the server?
-        // Could we optimize this somehow?
-        var bps = this.getBreakpoints();
-
-        // Filter out disabled breakpoints. These won't be set on the server side
-        // (unless the user enables them later).
-        // xxxHonza: we shouldn't create server-side breakpoints for normal disabled
-        // breakpoints, but not in case there are other breakpoints at the same line.
-        /*bps = bps.filter(function(bp, index, array)
-        {
-            return bp.isEnabled();
-        });*/
-
-        Trace.sysout("breakpointStore.onThreadAttached; Initialize server " +
-            "side breakpoints", bps);
-
-        // Set breakpoints on the server side. The initialization is done by the breakpoint
-        // store since the Script panel doesn't have to exist at this point. Also, other
-        // panels can also deal with breakpoints (BON) and so, a panel doesn't seem to be
-        // the right center place, where the perform the initialization.
-        var tool = context.getTool("breakpoint");
-        tool.setBreakpoints(bps, function()
-        {
-            // Some breakpoints could have been auto-corrected so, save all now.
-            self.save();
-        });
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -163,15 +122,18 @@ var BreakpointStore = Obj.extend(Firebug.Module,
                 return (element.type != BP_UNTIL);
             });
 
-            // Convert to Breakpoint object type
+            // Convert to Breakpoint object type. This also means that we don't modify
+            // directly the stored JSON object.
             bps = bps.map(function(bp)
             {
                 var breakpoint = new Breakpoint();
 
-                // Convert to line index (zero-based)
-                bp.lineNo = bp.lineNo - 1;
                 for (var p in bp)
                     breakpoint[p] = bp[p];
+
+                // Convert to line index (zero-based)
+                breakpoint.lineNo = breakpoint.lineNo - 1;
+
                 return breakpoint;
             });
 
@@ -205,6 +167,12 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
     save: function(url)
     {
+        if (!url)
+        {
+            TraceError.sysout("breakpointStore.save; ERROR no URL", this.storage);
+            return;
+        }
+
         var bps = this.getBreakpoints(url);
         if (!bps)
             return;
@@ -223,7 +191,9 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             for (var p in bp)
                 cleanBP[p] = bp[p];
 
-            // Convert line indexes (zero-based) to line numbers(one-based)
+            // Convert line indexes (zero-based) to line numbers(one-based). The underlying
+            // JSON file uses real line numbers, so it's understandable for the user
+            // (if looking into the file).
             cleanBP.lineNo = cleanBP.lineNo + 1;
 
             // Do not persist 'params' field. It's for transient data only.
@@ -232,7 +202,14 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             cleanBPs.push(cleanBP);
         }
 
-        this.storage.setItem(url, cleanBPs);
+        // Make sure to remove the item (i.e. URL) from the storage entirely.
+        // so there are no empty keys (URLs with no breakpoints). That would
+        // cause the breakpoints.json file to grow even if breakpoints are
+        // removed.
+        if (cleanBPs.length)
+            this.storage.setItem(url, cleanBPs);
+        else
+            this.storage.removeItem(url);
 
         Trace.sysout("breakpointStore.save;", this.storage);
     },
@@ -260,7 +237,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             var bp = new Breakpoint(url, lineNo, false, type);
             bp.condition = condition;
 
-            // We just need to find the actual location of bp.
+            // We just need to find the actual location of a breakpoint.
             this.dispatch("onAddBreakpoint", [bp]);
             return;
         }
@@ -272,7 +249,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         if (bp && (bp.type & type == bp.type))
             return bp;
 
-        // Either extend an existing breakpoint type (in case there are two different bps
+        // Either extend an existing breakpoint type (in case there are two different breakpoints
         // at the same line) else create a new breakpoint.
         // Every bit in the |type| property represents one type of a breakpoint. This way
         // the user can create different breakpoints at the same line.
@@ -327,7 +304,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             return null;
 
         var removedBp = null;
-        for (var i=0; i<bps.length; i++)
+        for (var i = 0; i < bps.length; i++)
         {
             var bp = bps[i];
             if (bp.lineNo != lineNo)
@@ -374,7 +351,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         if (!bps)
             return null;
 
-        for (var i=0; i<bps.length; i++)
+        for (var i = 0; i < bps.length; i++)
         {
             var bp = bps[i];
             if (bp.lineNo != lineNo)
@@ -393,7 +370,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         if (!bps)
             return false;
 
-        for (var i=0; i<bps.length; i++)
+        for (var i = 0; i < bps.length; i++)
         {
             var bp = bps[i];
             if (bp.lineNo == lineNo)
@@ -466,7 +443,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
         var bps = [];
         var urls = this.getBreakpointURLs();
-        for (var i=0; i<urls.length; i++)
+        for (var i = 0; i < urls.length; i++)
             bps.push.apply(bps, this.breakpoints[urls[i]] || []);
 
         return bps;
@@ -507,7 +484,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         {
             var bps = [];
             var urls = this.getBreakpointURLs();
-            for (var i=0; i<urls.length; i++)
+            for (var i = 0; i < urls.length; i++)
                 bps.push(this.enumerateBreakpoints(urls[i], cb));
 
             return bps;
@@ -531,7 +508,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         }
         else
         {
-            for (var url in breakpoints)
+            for (var url in this.breakpoints)
                 this.enumerateBreakpoints(url, callback);
         }
     },
@@ -553,7 +530,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         }
         else
         {
-            for (var url in breakpoints)
+            for (var url in this.breakpoints)
                 this.enumerateBreakpoints(url, callback);
         }
     }

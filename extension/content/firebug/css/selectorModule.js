@@ -2,17 +2,18 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/lib/dom",
     "firebug/lib/locale",
     "firebug/chrome/menu"
 ],
-function(Firebug, Obj, Dom, Locale, Menu) {
+function(Firebug, Module, Obj, Dom, Locale, Menu) {
 
 // ********************************************************************************************* //
 // Module implementation
 
-var CSSSelectorsModule = Obj.extend(Firebug.Module,
+var CSSSelectorsModule = Obj.extend(Module,
 {
     dispatchName: "CSSSelectorsModule",
 
@@ -31,7 +32,7 @@ var CSSSelectorsModule = Obj.extend(Firebug.Module,
 
     onContextMenu: function(items, object, target, context, panel, popup)
     {
-        if (panel.name != "stylesheet")
+        if (!panel || panel.name != "stylesheet")
             return;
 
         var cssRule = Dom.getAncestorByClass(target, "cssRule");

@@ -153,22 +153,22 @@
 }
 
 .logRow-info {
-    background-image: url(chrome://firebug/skin/info.png);
+    background-image: url(chrome://firebug/skin/info.svg);
 }
 
 .logRow-loading {
-    background-image: url(chrome://firebug/skin/loading.png);
+    background-image: url(chrome://firebug/skin/loading.svg);
 }
 
 .logRow-warn,
 .logRow-warningMessage {
-    background-image: url(chrome://firebug/skin/warning.png);
+    background-image: url(chrome://firebug/skin/warning.svg);
 }
 
 .logRow-error,
 .logRow-assert,
 .logRow-errorMessage {
-    background-image: url(chrome://firebug/skin/error.png);
+    background-image: url(chrome://firebug/skin/error.svg);
 }
 
 /*************************************************************************************************/
@@ -262,11 +262,13 @@
 
 /*************************************************************************************************/
 
+/* Top and bottom padding should be zero otherwise the total height
+of an error log is affected (higher than other logs). */
 .errorTitle {
-    margin-top: 0px;
+    margin-top: 0;
     margin-bottom: 1px;
-    padding-top: 2px;
-    padding-bottom: 2px;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .errorTrace {
@@ -280,7 +282,7 @@
 
 /* Used for a message explaining missing stack trace for an error log */
 .errorTrace .descriptionBox {
-    background-image: url(chrome://firebug/skin/info.png);
+    background-image: url(chrome://firebug/skin/info.svg);
     background-repeat: no-repeat;
     padding: 0 0 2px 20px;
 }
@@ -322,7 +324,7 @@
 .errorColCaret {
     width: 7px;
     height: 9px;
-    background: url(chrome://firebug/skin/errorColumnIndicator.png) no-repeat 100% 100%;
+    background: url(chrome://firebug/skin/errorColumnIndicator.svg) no-repeat 100% 100%;
     display: inline-block;
     vertical-align: top;
     margin-left: 1px;
@@ -335,7 +337,7 @@
     width: 12px;
     height: 12px;
     vertical-align: baseline;
-    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
     opacity: 0.1;
 }
 
@@ -373,7 +375,7 @@
 }
 
 .profilerRunning .logRow {
-    background: transparent url(chrome://firebug/skin/loading.png) no-repeat 2px 0 !important;
+    background: transparent url(chrome://firebug/skin/loading.svg) no-repeat 2px 0 !important;
     padding-left: 22px !important;
 }
 
@@ -467,11 +469,11 @@
 
 .headerSorted > .headerCellBox {
     border-right-color: #6B7C93;
-    background: url(chrome://firebug/skin/arrowDown.png) no-repeat calc(100% - 4px);
+    background: url(chrome://firebug/skin/arrowDown.svg) no-repeat calc(100% - 4px);
 }
 
 .headerSorted.sortedAscending > .headerCellBox {
-    background-image: url(chrome://firebug/skin/arrowUp.png);
+    background-image: url(chrome://firebug/skin/arrowUp.svg);
 }
 
 .headerSorted:hover:active {
@@ -717,9 +719,15 @@
 }
 
 /*************************************************************************************************/
+/* console.dir() */
 
 .logRow-dir {
     padding: 0;
+}
+
+/* Overwrite the default y value defined in panel.css */
+.logRow-dir .memberRow.hasChildren > .memberLabelCell > .memberLabel {
+    background-position: 2px 2px;
 }
 
 /*************************************************************************************************/
@@ -839,7 +847,7 @@
 }
 
 .logRow-spy.loading .spyHead .spyRow .spyIcon {
-    background-image: url(chrome://firebug/skin/loading.png);
+    background-image: url(chrome://firebug/skin/loading.svg);
 }
 
 .logRow-spy.loaded:not(.error) .spyHead .spyRow .spyIcon {
@@ -848,8 +856,9 @@
 }
 
 .logRow-spy.error .spyHead .spyRow .spyIcon {
-    background-image: url(chrome://firebug/skin/errorIcon-sm.png);
+    background-image: url(chrome://firebug/skin/error.svg);
     background-position: 2px 2px;
+    background-size: 13px;
 }
 
 .logRow-spy .spyHead .netInfoBody {
@@ -955,6 +964,7 @@
 
 .logRow-eventListenersDetails .eventListenersCaption:hover {
     text-decoration: underline;
+}
 
 /*************************************************************************************************/
 /* Description Box */

@@ -32,7 +32,7 @@ var Trace = FBTrace.to("DBG_SOURCEFILE");
  * @param {string} [source] The source if already provided
  *
  * SourceFile instance is created for every compilation unit (i.e. a script created
- * on the back end). The instance is created by {@DebuggerTool} every time a "newSource"
+ * on the back end). The instance is created by {@link SourceTool} every time a "newSource"
  * or the initial "sources" packet is received.
  */
 function SourceFile(context, actor, href, isBlackBoxed, source)
@@ -137,9 +137,17 @@ SourceFile.prototype =
 
         this.inProgress = true;
 
+        // Firebug needs to be attached to the thread client to get sources.
+        var threadClient = this.context.activeThread;
+        if (!threadClient)
+        {
+            Trace.sysout("sourceFile.loadScriptLines; ERROR no thread client " + this.href);
+            callback(null);
+            return;
+        }
+
         // This is the only place where source (the text) is loaded for specific URL.
-        // Note: this requires that an actor has been passed to the constructor.
-        var sourceClient = this.context.activeThread.source(this);
+        var sourceClient = threadClient.source(this);
         sourceClient.source(this.onSourceLoaded.bind(this));
     },
 
@@ -194,8 +202,20 @@ SourceFile.getSourceFileByUrl = function(context, url)
 
 SourceFile.findScriptForFunctionInContext = function(context, fn)
 {
-    var dbgGlobal = DebuggerLib.getDebuggeeGlobal(context);
+    var dbg = DebuggerLib.getDebuggerForContext(context);
+    var dbgGlobal = dbg.addDebuggee(context.getCurrentGlobal());
     var dbgFn = dbgGlobal.makeDebuggeeValue(fn);
+
+    if (!dbgFn || !dbgFn.script)
+    {
+        TraceError.sysout("sourceFile.findScriptForFunctionInContext; ERROR no script?", {
+            fn: fn,
+            dbgFn: dbgFn,
+        });
+
+        return null;
+    }
+
     return dbgFn.script;
 };
 

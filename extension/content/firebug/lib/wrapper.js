@@ -1,6 +1,10 @@
 /* See license.txt for terms of usage */
 
-define([], function() {
+define([
+],
+function() {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -40,71 +44,15 @@ Wrapper.isDeadWrapper = function(wrapper)
     return Cu.isDeadWrapper(wrapper);
 };
 
-Wrapper.unwrapIValue = function(object, viewChrome)
-{
-    var unwrapped = object.getWrappedValue();
-    if (viewChrome)
-        return unwrapped;
-
-    try
-    {
-        // XPCSafeJSObjectWrapper is not defined in Firefox 4.0
-        // this should be the only call to getWrappedValue in firebug
-        if (typeof(XPCSafeJSObjectWrapper) != "undefined")
-        {
-            return XPCSafeJSObjectWrapper(unwrapped);
-        }
-        else if (typeof(unwrapped) == "object")
-        {
-            var result = XPCNativeWrapper.unwrap(unwrapped);
-            if (result)
-                return result;
-        }
-    }
-    catch (exc)
-    {
-        if (FBTrace.DBG_ERRORS)
-        {
-            FBTrace.sysout("unwrapIValue FAILS for " + object + " cause: " + exc,
-                {exc: exc, object: object, unwrapped: unwrapped});
-        }
-    }
-
-    return unwrapped;
-};
-
-Wrapper.unwrapIValueObject = function(scope, viewChrome)
-{
-    var scopeVars = {};
-    var listValue = {value: null}, lengthValue = {value: 0};
-    scope.getProperties(listValue, lengthValue);
-
-    for (var i = 0; i < lengthValue.value; ++i)
-    {
-        var prop = listValue.value[i];
-        var name = Wrapper.unwrapIValue(prop.name);
-
-        if (prop.value.jsType === prop.value.TYPE_NULL) // null is an object (!)
-        {
-            scopeVars[name] = null;
-        }
-        else
-        {
-            if (!Wrapper.shouldIgnore(name))
-                scopeVars[name] = Wrapper.unwrapIValue(prop.value, viewChrome);
-        }
-    }
-
-    return scopeVars;
-};
-
 /**
  * Create a content-accessible view of a simple chrome object. All properties
  * are marked as non-writable, except if they have explicit getters/setters.
  */
 Wrapper.cloneIntoContentScope = function(global, obj)
 {
-    var newObj = Cu.createObjectIn(global);
+    if (!obj || typeof obj !== "object")
+        return obj;
+    var newObj = (Array.isArray(obj) ? Cu.createArrayIn(global) : Cu.createObjectIn(global));
     for (var prop in obj)
     {
         var desc = Object.getOwnPropertyDescriptor(obj, prop);
@@ -138,6 +86,7 @@ function isPrimitive(obj)
 }
 
 // ********************************************************************************************* //
+// Registration
 
 return Wrapper;
 

@@ -3,41 +3,45 @@
 /*global FBTrace:true, Components:true, define:true, KeyEvent:true */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
-    "firebug/chrome/reps",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/lib/dom",
-    "firebug/chrome/firefox",
-    "firebug/chrome/window",
     "firebug/lib/system",
     "firebug/lib/string",
     "firebug/lib/persist",
+    "firebug/lib/options",
+    "firebug/chrome/module",
+    "firebug/chrome/reps",
+    "firebug/chrome/firefox",
+    "firebug/chrome/window",
     "firebug/debugger/script/sourceLink",
+    "firebug/debugger/debuggerLib",
     "firebug/console/console",
     "firebug/console/commandLineExposed",
     "firebug/console/closureInspector",
     "firebug/console/commandLineAPI",
-    "firebug/debugger/debuggerLib",
     "firebug/console/autoCompleter",
     "firebug/console/commandHistory",
     "firebug/console/commands/commandLineHelp",
     "firebug/console/commands/commandLineInclude",
 ],
-function(Obj, Firebug, FirebugReps, Locale, Events, Url, Dom, Firefox, Win, System, Str,
-    Persist, SourceLink, Console, CommandLineExposed, ClosureInspector, CommandLineAPI,
-    DebuggerLib) {
+function(Firebug, FBTrace, Obj, Locale, Events, Url, Dom, System, Str, Persist, Options,
+    Module, FirebugReps, Firefox, Win, SourceLink, DebuggerLib, Console, CommandLineExposed,
+    ClosureInspector, CommandLineAPI) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
+var Cc = Components.classes;
 
-const commandPrefix = ">>> ";
+var commandPrefix = ">>> ";
+var Trace = FBTrace.to("DBG_COMMANDLINE");
 
 // ********************************************************************************************* //
 // Command Line
@@ -45,8 +49,8 @@ const commandPrefix = ">>> ";
 /**
  * @module
  */
-Firebug.CommandLine = Obj.extend(Firebug.Module,
-/** @lends Firebug.CommandLine */
+var CommandLine = Obj.extend(Module,
+/** @lends CommandLine */
 {
     dispatchName: "commandLine",
 
@@ -89,33 +93,37 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         {
             debuggerState = Firebug.Debugger.beginInternalOperation();
 
-            var newExpr = expr;
-            if (!options.noCmdLineAPI)
-                newExpr = ClosureInspector.extendLanguageSyntax(expr);
+            var evaluate = function(newExpr)
+            {
+                if (this.isSandbox(context))
+                {
+                    this.evaluateInSandbox(newExpr, context, thisValue, targetWindow,
+                        successConsoleFunction, exceptionFunction, expr);
+                }
+                else if (Firebug.Debugger.hasValidStack(context))
+                {
+                    this.evaluateInDebugFrame(newExpr, context, thisValue, targetWindow,
+                        successConsoleFunction, exceptionFunction, expr, options);
+                }
+                else
+                {
+                    this.evaluateInGlobal(newExpr, context, thisValue, targetWindow,
+                        successConsoleFunction, exceptionFunction, expr, options);
+                }
+            }.bind(this);
 
-            if (this.isSandbox(context))
-            {
-                this.evaluateInSandbox(newExpr, context, thisValue, targetWindow,
-                    successConsoleFunction, exceptionFunction, expr);
-            }
-            else if (Firebug.Debugger.hasValidStack(context))
-            {
-                this.evaluateInDebugFrame(newExpr, context, thisValue, targetWindow,
-                    successConsoleFunction, exceptionFunction, expr, options);
-            }
+            if (options.noCmdLineAPI)
+                evaluate(expr);
             else
-            {
-                this.evaluateInGlobal(newExpr, context, thisValue, targetWindow,
-                    successConsoleFunction, exceptionFunction, expr, options);
-            }
+                ClosureInspector.withExtendedLanguageSyntax(expr, targetWindow, context, evaluate);
 
             if (!options.noStateChange)
-                context.invalidatePanels("dom", "html");
+                context.invalidatePanels("dom", "html", "watches");
         }
         catch (exc)
         {
             // XXX jjb, I don't expect this to be taken, the try here is for the finally
-            if (FBTrace.DBG_ERRORS && FBTrace.DBG_COMMANDLINE)
+            if (FBTrace.DBG_ERRORS)
             {
                 FBTrace.sysout("commandLine.evaluate with context.stopped:" + context.stopped +
                     " EXCEPTION " + exc, exc);
@@ -181,11 +189,24 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         return evaluateExpression.apply(null, args);
     },
 
+    /**
+     * Evaluate an expression in a webpage, inserting a temporary script in it.
+     *
+     * @param {string} expr The expression
+     * @param {object} context
+     * @param {Window} [targetWindow] The window in which we evaluate the expression
+     */
     evaluateInWebPage: function(expr, context, targetWindow)
     {
         var win = targetWindow || context.getCurrentGlobal();
 
-        var element = Dom.addScript(win.document, "_firebugInWebPage", expr);
+        Trace.sysout("CommandLine.evaluateInWebPage; expression = " + expr, expr);
+        // Dom.addScript checks whether an element with the given ID already exists and returns it
+        // when it is the case. But we might have to call evaluateInWebPage multiple times before
+        // the setTimeout() callback to remove the element is called. So we generate a unique ID.
+        var elementId = "_firebugInWebPage" + Math.random();
+
+        var element = Dom.addScript(win.document, elementId, expr);
         if (!element)
             return;
 
@@ -437,7 +458,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     {
         var showCommandEditor = !!forceCommandEditor || !Firebug.commandEditor;
         if (showCommandEditor != Firebug.commandEditor)
-            Firebug.Options.set("commandEditor", showCommandEditor);
+            Options.set("commandEditor", showCommandEditor);
     },
 
     checkOverflow: function(context)
@@ -450,7 +471,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         {
             setTimeout(Obj.bindFixed(function()
             {
-                Firebug.Options.set("commandEditor", true);
+                Options.set("commandEditor", true);
 
                 // Switch to the Console panel, where the multiline command line
                 // is actually displayed. This should be improved see issue 5146
@@ -469,7 +490,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         this.setAutoCompleter();
         this.commandHistory = new Firebug.CommandHistory();
@@ -488,7 +509,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         var completionBox = this.getCompletionBox();
 
         var options = {
-            showCompletionPopup: Firebug.Options.get("commandLineShowCompleterPopup"),
+            showCompletionPopup: Options.get("commandLineShowCompleterPopup"),
             completionPopup: Firebug.chrome.$("fbCommandLineCompletionList"),
             popupMeasurer: Firebug.chrome.$("fbCommandLineMeasurer"),
             tabWarnings: true,
@@ -641,13 +662,13 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
                 if (!event.metaKey && !event.shiftKey)
                 {
-                    Firebug.CommandLine.enter(Firebug.currentContext);
+                    CommandLine.enter(Firebug.currentContext);
                     this.commandHistory.hide();
                     return true;
                 }
                 else if(!event.metaKey && event.shiftKey)
                 {
-                    Firebug.CommandLine.enterInspect(Firebug.currentContext);
+                    CommandLine.enterInspect(Firebug.currentContext);
                     this.commandHistory.hide();
                     return true;
                 }
@@ -665,7 +686,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
             case KeyEvent.DOM_VK_ESCAPE:
                 event.preventDefault();
-                if (Firebug.CommandLine.cancel(Firebug.currentContext))
+                if (CommandLine.cancel(Firebug.currentContext))
                     Events.cancelEvent(event);
                 this.commandHistory.hide();
                 return true;
@@ -695,7 +716,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     isInOtherPanel: function(context)
     {
         // Command line on other panels is never multiline.
-        var visible = Firebug.CommandLine.Popup.isVisible();
+        var visible = CommandLine.Popup.isVisible();
         return visible && context.panelName !== "console";
     },
 
@@ -759,7 +780,7 @@ function evaluateExpression(execContextType, expr, context, thisValue, targetWin
             if (FBTrace.DBG_COMMANDLINE)
             {
                 FBTrace.sysout("commandLine.evaluateExpression; the evaluation succeeded "+
-                    "and returned: "+ result, result);
+                    "and returned: ", result);
             }
 
             if (Console.isDefaultReturnValue(result))
@@ -817,9 +838,12 @@ function evaluateExpression(execContextType, expr, context, thisValue, targetWin
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(Firebug.CommandLine);
+Firebug.registerModule(CommandLine);
 
-return Firebug.CommandLine;
+// xxxHonza: backward compatibility.
+Firebug.CommandLine = CommandLine;
+
+return CommandLine;
 
 // ********************************************************************************************* //
 });

@@ -1,12 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/lib/xpcom",
     "firebug/lib/locale",
     "firebug/chrome/window",
 ],
-function(Obj, Xpcom, Locale, Win) {
+function(Module, Obj, Xpcom, Locale, Win) {
 
 // ********************************************************************************************* //
 // Constants
@@ -21,11 +22,11 @@ var app = Xpcom.CCSV("@mozilla.org/toolkit/app-startup;1", "nsIAppStartup");
 // ********************************************************************************************* //
 // Module
 
-var CookieLegacy = Obj.extend(Firebug.Module,
+var CookieLegacy = Obj.extend(Module,
 {
     initialize: function(prefDomain, prefNames)
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         setTimeout(Obj.bind(this.onAlert, this), 1000);
     },

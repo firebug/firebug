@@ -1,11 +1,9 @@
-CodeMirror.defineMode("css", function(config) {
-  return CodeMirror.getMode(config, "text/css");
-});
-
-CodeMirror.defineMode("css-base", function(config, parserConfig) {
+CodeMirror.defineMode("css", function(config, parserConfig) {
   "use strict";
 
-  var indentUnit = config.indentUnit,
+  if (!parserConfig.propertyKeywords) parserConfig = CodeMirror.resolveMode("text/css");
+
+  var indentUnit = config.indentUnit || config.tabSize || 2,
       hooks = parserConfig.hooks || {},
       atMediaTypes = parserConfig.atMediaTypes || {},
       atMediaFeatures = parserConfig.atMediaFeatures || {},
@@ -39,7 +37,7 @@ CodeMirror.defineMode("css-base", function(config, parserConfig) {
       stream.match(/^\s*\w*/);
       return ret("keyword", "important");
     }
-    else if (/\d/.test(ch)) {
+    else if (/\d/.test(ch) || ch == "." && stream.eat(/\d/)) {
       stream.eatWhile(/[\w.%]/);
       return ret("number", "unit");
     }
@@ -261,8 +259,13 @@ CodeMirror.defineMode("css-base", function(config, parserConfig) {
       }
       else if (type == "}") {
         if (context == "interpolation") style = "operator";
-        state.stack.pop();
-        if (context == "propertyValue") state.stack.pop();
+        // Pop off end of array until { is reached
+        while(state.stack.length){
+          var removed = state.stack.pop();
+          if(removed.indexOf("{") > -1 || removed == "block" || removed == "rule"){
+            break;
+          }
+        }
       }
       else if (type == "interpolation") state.stack.push("interpolation");
       else if (type == "@media") state.stack.push("@media");
@@ -277,15 +280,15 @@ CodeMirror.defineMode("css-base", function(config, parserConfig) {
           state.stack[state.stack.length-1] = "@mediaType";
           state.stack.push("@mediaType(");
         }
+        else state.stack.push("(");
       }
       else if (type == ")") {
-        if (context == "propertyValue" && state.stack[state.stack.length-2] == "@mediaType(") {
-          // In @mediaType( without closing ; after propertyValue
-          state.stack.pop();
-          state.stack.pop();
-        }
-        else if (context == "@mediaType(") {
-          state.stack.pop();
+        // Pop off end of array until ( is reached
+        while(state.stack.length){
+          var removed = state.stack.pop();
+          if(removed.indexOf("(") > -1){
+            break;
+          }
         }
       }
       else if (type == ":" && state.lastToken == "property") state.stack.push("propertyValue");
@@ -582,7 +585,7 @@ CodeMirror.defineMode("css-base", function(config, parserConfig) {
         return false;
       }
     },
-    name: "css-base"
+    name: "css"
   });
 
   CodeMirror.defineMIME("text/x-scss", {
@@ -593,12 +596,23 @@ CodeMirror.defineMode("css-base", function(config, parserConfig) {
     valueKeywords: valueKeywords,
     allowNested: true,
     hooks: {
+      ":": function(stream) {
+        if (stream.match(/\s*{/)) {
+          return [null, "{"];
+        }
+        return false;
+      },
       "$": function(stream) {
         stream.match(/^[\w-]+/);
         if (stream.peek() == ":") {
           return ["variable", "variable-definition"];
         }
         return ["variable", "variable"];
+      },
+      ",": function(stream, state) {
+        if (state.stack[state.stack.length - 1] == "propertyValue" && stream.match(/^ *\$/, false)) {
+          return ["operator", ";"];
+        }
       },
       "/": function(stream, state) {
         if (stream.eat("/")) {
@@ -620,6 +634,6 @@ CodeMirror.defineMode("css-base", function(config, parserConfig) {
         }
       }
     },
-    name: "css-base"
+    name: "css"
   });
 })();

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6855: Display the returned value or the exception thrown</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script>
+            window.onload = function()
+            {
+                document.getElementById("test_return").onclick = function()
+                {
+                    debugger;
+                    return 42;
+                }
+
+                document.getElementById("test_exception").onclick = function()
+                {
+                    debugger;
+                    return waitIDontExist("I will throw an exception!");
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6855">Issue 6855</a>: Display the returned value or the exception thrown</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the script panel</li>
+                    <li>Click on this button: <button id="test_return">Test Return</button><br/>
+                        &#x21b3; The breakpoint should be triggered</li>
+                    <li>Step over twice<br/>
+                        &#x21b3; The <code>&lt;return value&gt;</code> should be displayed and should be set to <code>42</code></li>
+                    <li>Double click on <code>42</code><br />
+                        &#x21b3; No editor should appear</li>
+                    <li>Right-click on <code>42</code><br />
+                        &#x21b3; No "Edit Property..." item should appear in the context menu</li>
+                    <li>Press F8 to resume</li>
+                    <li>Click on this button: <button id="test_exception">Test Exception</button><br/>
+                        &#x21b3; The breakpoint should be triggered</li>
+                    <li>Step over twice<br/>
+                        &#x21b3; The <code>&lt;exception&gt;</code> should be displayed and its message should be <q>ReferenceError: waitIDontExist is not defined</q></li>
+                    <!--<li>Expand the properties of the exception. You should see these properties:<br>
+                        <ul style="font-weight: bold;">
+                            <li>columnNumber</li>
+                            <li>fileName</li>
+                            <li>lineNumber</li>
+                            <li>stack</li>
+                        </ul>
+                    </li>-->
+                    <li>Press F8 to resume</li>
+                </ol>
+            </section>
+            <footer>
+                Florent Fayolle, florent.fayolle69@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>

@@ -3,215 +3,106 @@
 /*global FBTrace:true, XPCNativeWrapper:true, Window:true, define:true */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
-    "firebug/chrome/reps",
-    "firebug/lib/locale",
+    "firebug/lib/trace",
+    "firebug/lib/object",
+    "firebug/lib/array",
     "firebug/lib/events",
     "firebug/lib/wrapper",
-    "firebug/debugger/script/sourceLink",
-    "firebug/debugger/stack/stackFrame",
+    "firebug/lib/domplate",
     "firebug/lib/dom",
     "firebug/lib/css",
-    "firebug/lib/search",
     "firebug/lib/string",
-    "firebug/lib/array",
-    "firebug/lib/persist",
-    "firebug/console/closureInspector",
-    "firebug/dom/toggleBranch",
+    "firebug/lib/locale",
     "firebug/lib/system",
-    "firebug/chrome/menu",
-    "firebug/dom/domMemberProvider",
+    "firebug/dom/toggleBranch",
     "firebug/dom/domEditor",
     "firebug/dom/domReps",
-    "firebug/editor/editor",
-    "firebug/debugger/breakpoints/breakpointModule",
-    "firebug/chrome/searchBox",
     "firebug/dom/domModule",
-    "firebug/console/autoCompleter"
+    "firebug/chrome/menu",
+    "firebug/chrome/panel",
+    "firebug/chrome/searchBox",
+    "firebug/chrome/panelActivation",
+    "firebug/debugger/script/sourceLink",
+    "firebug/debugger/stack/stackFrame",
+    "firebug/debugger/debuggerLib",
+    "firebug/editor/editor",
+    "firebug/console/commandLine",
+    "firebug/console/autoCompleter",
+    "firebug/console/closureInspector",
 ],
-function(Obj, Firebug, FirebugReps, Locale, Events, Wrapper, SourceLink, StackFrame,
-    Dom, Css, Search, Str, Arr, Persist, ClosureInspector, ToggleBranch, System, Menu,
-    DOMMemberProvider, DOMEditor, DOMReps) {
+function(Firebug, FBTrace, Obj, Arr, Events, Wrapper, Domplate, Dom, Css, Str, Locale, System,
+    ToggleBranch, DOMEditor, DOMReps, DOMModule, Menu, Panel, SearchBox, PanelActivation,
+    SourceLink, StackFrame, DebuggerLib, Editor, CommandLine, JSAutoCompleter, ClosureInspector) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-const rxIdentifier = /^[$_A-Za-z][$_A-Za-z0-9]*$/;
+var {domplate, DIV, SPAN} = Domplate;
+
+var rxIdentifier = /^[$_A-Za-z][$_A-Za-z0-9]*$/;
+
+var Trace = FBTrace.to("DBG_DOM");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 
 /**
- * @panel Base class for panels displaying hierarchy of objects.
+ * @panel Base object for panels displaying hierarchy of DOM objects. This object is currently
+ * used as the super object for the following panels:
+ *
+ * {@DOMPanel} - the main DOM panel
+ * {@WatchPanel} - the Watch side panel within the Script panel.
+ * {@DOMSidePanel} - the DOM side panel within the HTML panel.
  */
 Firebug.DOMBasePanel = function()
 {
 }
 
-Firebug.DOMBasePanel.ToolboxPlate = DOMReps.ToolboxPlate;
-Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
-/** lends Firebug.DOMBasePanel */
+Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
+/** @lends Firebug.DOMBasePanel */
 {
+    // xxxHonza: Backward compatibility with extensions (Illumination, spy_eye)
+    // amfExplorer.js is using getRowProperty.
     tag: DOMReps.DirTablePlate.tableTag,
     dirTablePlate: DOMReps.DirTablePlate,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // extends Panel
+    // Domplate
+
+    readOnlyInfoTipTag:
+        DIV({"class": "readOnlyInfoTip"},
+            DIV({"class": "$desc.configurable"}, "configurable"),
+            DIV({"class": "$desc.enumerable"}, "enumerable"),
+            DIV({"class": "$desc.writable"}, "writable"),
+            DIV({"class": "$desc.set"}, "setter"),
+            DIV({"class": "$desc.get"}, "getter")
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
 
     initialize: function()
     {
-        this.objectPath = [];
-        this.propertyPath = [];
-        this.viewPath = [];
-        this.pathIndex = -1;
         this.toggles = new ToggleBranch.ToggleBranch();
 
-        Firebug.Panel.initialize.apply(this, arguments);
-    },
-
-    initializeNode: function(node)
-    {
-        Firebug.Panel.initializeNode.apply(this, arguments);
-    },
-
-    destroyNode: function()
-    {
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
     {
-        var view = this.viewPath[this.pathIndex];
-        if (view && this.panelNode.scrollTop)
-            view.scrollTop = this.panelNode.scrollTop;
-
-        if (this.pathIndex > -1)
-            state.pathIndex = this.pathIndex;
-        if (this.viewPath)
-            state.viewPath = this.viewPath;
-        if (this.propertyPath)
-            state.propertyPath = this.propertyPath;
-
-        if (this.propertyPath.length > 0 && !this.propertyPath[1])
-            state.firstSelection = Persist.persistObject(this.getPathObject(1), this.context);
-
-        if (FBTrace.DBG_DOM)
-            FBTrace.sysout("dom.destroy; state:", state);
-
-        Firebug.Panel.destroy.apply(this, arguments);
+        Panel.destroy.apply(this, arguments);
     },
 
-    show: function(state)
-    {
-        this.showToolbarButtons("fbStatusButtons", true);
-
-        if (!this.selection)
-        {
-            if (!state)
-            {
-                this.select(null);
-                return;
-            }
-            if (state.pathIndex > -1)
-                this.pathIndex = state.pathIndex;
-            if (state.viewPath)
-                this.viewPath = state.viewPath;
-            if (state.propertyPath)
-                this.propertyPath = state.propertyPath;
-
-            var defaultObject = this.getDefaultSelection();
-            var selectObject = defaultObject;
-
-            if (state.firstSelection)
-            {
-                var restored = state.firstSelection(this.context);
-                if (restored)
-                {
-                    selectObject = restored;
-                    this.objectPath = [defaultObject, restored];
-                }
-                else
-                    this.objectPath = [defaultObject];
-            }
-            else
-            {
-                this.objectPath = [defaultObject];
-            }
-
-            if (this.propertyPath.length > 1)
-            {
-                selectObject = this.resetPaths(selectObject);
-            }
-            else
-            {
-                // Sync with objectPath always containing a default object.
-                this.propertyPath.push(null);
-            }
-
-            var selection = (state.pathIndex < this.objectPath.length ?
-                this.getPathObject(state.pathIndex) :
-                this.getPathObject(this.objectPath.length-1));
-
-            if (FBTrace.DBG_DOM)
-                FBTrace.sysout("dom.show; selection:", selection);
-
-            this.select(selection);
-        }
-    },
-
-    resetPaths: function(selectObject)
-    {
-        for (var i = 1; i < this.propertyPath.length; ++i)
-        {
-            var name = this.propertyPath[i];
-            if (!name)
-                continue;
-
-            var object = selectObject;
-            try
-            {
-                selectObject = object[name];
-            }
-            catch (exc)
-            {
-                selectObject = null;
-            }
-
-            if (selectObject)
-            {
-                this.objectPath.push(new FirebugReps.PropertyObj(object, name));
-            }
-            else
-            {
-                // If we can't access a property, just stop
-                this.viewPath.splice(i);
-                this.propertyPath.splice(i);
-                this.objectPath.splice(i);
-                selectObject = this.getPathObject(this.objectPath.length-1);
-                break;
-            }
-        }
-    },
-
-    hide: function()
-    {
-        var view = this.viewPath[this.pathIndex];
-        if (view && this.panelNode.scrollTop)
-            view.scrollTop = this.panelNode.scrollTop;
-    },
-
-    getBreakOnNextTooltip: function(enabled)
-    {
-        return (enabled ? Locale.$STR("dom.disableBreakOnPropertyChange") :
-            Locale.$STR("dom.label.breakOnPropertyChange"));
-    },
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     supportsObject: function(object, type)
     {
         if (type == "number" || type == "string" || type == "boolean")
             return 0;
+
         if (object == null)
             return 1000;
         else if (object instanceof SourceLink)
@@ -227,119 +118,13 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
     updateSelection: function(object)
     {
-        if (FBTrace.DBG_DOM)
-            FBTrace.sysout("dom.updateSelection", object);
-
-        var previousIndex = this.pathIndex;
-        var previousView = (previousIndex === -1 ? null : this.viewPath[previousIndex]);
-
-        var newPath = this.pathToAppend;
-        delete this.pathToAppend;
-
-        var pathIndex = this.findPathIndex(object);
-        if (newPath || pathIndex === -1)
-        {
-            this.toggles = new ToggleBranch.ToggleBranch();
-
-            if (newPath)
-            {
-                // Remove everything after the point where we are inserting, so we
-                // essentially replace it with the new path
-                if (previousView)
-                {
-                    if (this.panelNode.scrollTop)
-                        previousView.scrollTop = this.panelNode.scrollTop;
-
-                    this.objectPath.splice(previousIndex+1);
-                    this.propertyPath.splice(previousIndex+1);
-                    this.viewPath.splice(previousIndex+1);
-                }
-
-                var value = this.getPathObject(previousIndex);
-                if (!value)
-                {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("dom.updateSelection no pathObject for " + previousIndex);
-                    return;
-                }
-
-                // XXX This is wrong with closures, but I haven't noticed anything
-                // break and I don't know how to fix, so let's just leave it...
-                for (var i = 0; i < newPath.length; ++i)
-                {
-                    var name = newPath[i];
-                    object = value;
-                    try
-                    {
-                        value = value[name];
-                    }
-                    catch(exc)
-                    {
-                        if (FBTrace.DBG_ERRORS)
-                        {
-                            FBTrace.sysout("dom.updateSelection FAILS at path_i=" + i +
-                                " for name:" + name);
-                        }
-                        return;
-                    }
-
-                    ++this.pathIndex;
-                    this.objectPath.push(new FirebugReps.PropertyObj(object, name));
-                    this.propertyPath.push(name);
-                    this.viewPath.push({toggles: this.toggles, scrollTop: 0});
-                }
-            }
-            else
-            {
-                this.toggles = new ToggleBranch.ToggleBranch();
-
-                var win = this.getDefaultSelection();
-                if (object === win)
-                {
-                    this.pathIndex = 0;
-                    this.objectPath = [win];
-                    this.propertyPath = [null];
-                    this.viewPath = [{toggles: this.toggles, scrollTop: 0}];
-                }
-                else
-                {
-                    this.pathIndex = 1;
-                    this.objectPath = [win, object];
-                    this.propertyPath = [null, null];
-                    this.viewPath = [
-                        {toggles: new ToggleBranch.ToggleBranch(), scrollTop: 0},
-                        {toggles: this.toggles, scrollTop: 0}
-                    ];
-                }
-            }
-
-            this.panelNode.scrollTop = 0;
-            this.rebuild(false);
-        }
-        else
-        {
-            this.pathIndex = pathIndex;
-
-            var view = this.viewPath[pathIndex];
-            this.toggles = view ? view.toggles : new ToggleBranch.ToggleBranch();
-
-            // Persist the current scroll location
-            if (previousView && this.panelNode.scrollTop)
-                previousView.scrollTop = this.panelNode.scrollTop;
-
-            this.rebuild(false, view ? view.scrollTop : 0);
-        }
-    },
-
-    getObjectPath: function(object)
-    {
-        return this.objectPath;
+        this.rebuild(false);
     },
 
     getDefaultSelection: function()
     {
         // Default to showing the top window.
-        return this.getObjectView(this.context.window);
+        return Wrapper.getContentView(this.context.window);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -348,6 +133,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     updateOption: function(name, value)
     {
         var options = new Set();
+
         options.add("showUserProps");
         options.add("showUserFuncs");
         options.add("showDOMProps");
@@ -360,6 +146,20 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
         if (options.has(name))
             this.rebuild(true);
+    },
+
+    getShowClosuresMenuItem: function()
+    {
+        var requireScriptPanel = DebuggerLib._closureInspectionRequiresDebugger();
+        var label = Locale.$STR("ShowClosures");
+        var tooltip = Locale.$STR("dom.option.tip.Show_Closures2");
+        if (requireScriptPanel)
+            tooltip = Locale.$STRF("script.Script_panel_must_be_enabled", [tooltip]);
+        var menuItem = Menu.optionMenu(label, "showClosures", tooltip);
+        menuItem.nol10n = true;
+        if (requireScriptPanel && !PanelActivation.isPanelEnabled(Firebug.getPanelType("script")))
+            menuItem.disabled = true;
+        return menuItem;
     },
 
     getOptionsMenuItems: function()
@@ -377,23 +177,24 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 "dom.option.tip.Show_DOM_Constants"),
             Menu.optionMenu("ShowInlineEventHandlers", "showInlineEventHandlers",
                 "ShowInlineEventHandlersTooltip"),
-            Menu.optionMenu("ShowClosures", "showClosures",
-                "dom.option.tip.Show_Closures"),
+            this.getShowClosuresMenuItem(),
             "-",
             Menu.optionMenu("ShowOwnProperties", "showOwnProperties",
                 "ShowOwnPropertiesTooltip"),
             Menu.optionMenu("ShowEnumerableProperties",
                 "showEnumerableProperties", "ShowEnumerablePropertiesTooltip"),
             "-",
-            {label: "Refresh", command: Obj.bindFixed(this.rebuild, this, true),
+            {label: "Refresh", command: Obj.bindFixed(this.refresh, this),
                 tooltiptext: "panel.tip.Refresh"}
         ];
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context Menu
+
     getContextMenuItems: function(object, target)
     {
-        if (FBTrace.DBG_DOM)
-            FBTrace.sysout("dom.getContextMenuItems;", object);
+        Trace.sysout("dom.getContextMenuItems;");
 
         var row = Dom.getAncestorByClass(target, "memberRow");
 
@@ -406,6 +207,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             var rowObject = member.object;
             var rowValue = member.value;
 
+            // xxxHonza: the watch panel should be responsible for the customization
             var isWatch = Css.hasClass(row, "watchRow");
             var isStackFrame = rowObject instanceof StackFrame;
             var label, tooltiptext;
@@ -465,8 +267,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 );
             }
 
-            if (isWatch ||
-                (member.deletable && !isStackFrame && !Dom.isDOMMember(rowObject, rowName)))
+            var isDomMemeber = Dom.isDOMMember(rowObject, rowName);
+
+            if (isWatch || (member.deletable && !isStackFrame && !isDomMemeber))
             {
                 items.push(
                     {
@@ -479,15 +282,18 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 );
             }
 
-            if (!Dom.isDOMMember(rowObject, rowName) && member && member.breakable)
+            if (!isDomMemeber && member && member.breakable)
             {
+                var bps = this.context.dom.breakpoints;
+                var hasBreakpoint = bps.findBreakpoint(rowObject, rowName);
+
                 items.push(
                     "-",
                     {
                         label: "dom.label.breakOnPropertyChange",
                         tooltiptext: "dom.tip.Break_On_Property_Change",
                         type: "checkbox",
-                        checked: this.context.dom.breakpoints.findBreakpoint(rowObject, rowName),
+                        checked: hasBreakpoint,
                         command: Obj.bindFixed(this.breakOnProperty, this, row)
                     }
                 );
@@ -499,7 +305,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             {
                 label: "Refresh",
                 tooltiptext: "panel.tip.Refresh",
-                command: Obj.bindFixed(this.rebuild, this, true)
+                command: Obj.bindFixed(this.refresh, this)
             }
         );
 
@@ -514,201 +320,46 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         return this.editor;
     },
 
+    normalizeSelection: function(object)
+    {
+        // Unwrap everything we show in the DOM panel - exposing chrome views
+        // of objects to the user doesn't make sense.
+        return this.getObjectView(object);
+    },
+
     getObjectView: function(object)
     {
-        if (!Firebug.viewChrome)
-        {
-            // Unwrap native, wrapped objects.
-            var contentView = Wrapper.getContentView(object);
-            if (contentView)
-                return contentView;
-        }
-        return object;
+        return Wrapper.unwrapObject(object);
     },
 
-    rebuild: function(update, scrollTop)
+    rebuild: function(update, scrollTop, toggles)
     {
+        Trace.sysout("domBasePanel.rebuild; scrollTop: " + scrollTop);
+
         Events.dispatch(this.fbListeners, "onBeforeDomUpdateSelection", [this]);
 
-        var members = this.getMembers(this.selection, 0);
-        this.expandMembers(members, this.toggles, 0, 0);
-        this.showMembers(members, update, scrollTop);
-    },
+        var input = {
+            object: this.selection,
+            domPanel: this,
+        };
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Members
+        this.tree.replace(this.panelNode, input);
 
-    /**
-     * @param object a user-level object wrapped in security blanket
-     * @param level for a.b.c, level is 2
-     */
-    getMembers: function(object, level)
-    {
-        if (!this.memberProvider)
-            this.memberProvider = new DOMMemberProvider(this.context);
-
-        return this.memberProvider.getMembers(object, level);
-    },
-
-    // For backward compatibility
-    addMember: function()
-    {
-        if (!this.memberProvider)
-            this.memberProvider = new DOMMemberProvider(this.context);
-
-        return this.memberProvider.addMember.apply(this.memberProvider, arguments);
-    },
-
-    // recursion starts with offset=0, level=0
-    expandMembers: function(members, toggles, offset, level)
-    {
-        var expanded = 0;
-        for (var i = offset; i < members.length; ++i)
+        // Restore presentation state if possible.
+        if (toggles)
         {
-            var member = members[i];
-            if (member.level < level)
-                break;
-
-            if (toggles.get(member.name))
+            this.tree.restoreState(toggles).then(() =>
             {
-                // member.level <= level && member.name in toggles.
-                member.open = "opened";
-
-                // Don't expand if the member doesn't have children any more.
-                if (!member.hasChildren)
-                    continue;
-
-                // sets newMembers.level to level+1
-                var newMembers = this.getMembers(member.value, level+1);
-
-                // Insert 'newMembers' into 'members'
-                Arr.arrayInsert(members, i+1, newMembers);
-
-                if (FBTrace.DBG_DOM)
-                {
-                    FBTrace.sysout("expandMembers member.name "+member.name+" member "+member);
-                    FBTrace.sysout("expandMembers toggles "+toggles, toggles);
-                    FBTrace.sysout("expandMembers toggles.get(member.name) " +
-                        toggles.get(member.name), toggles.get(member.name));
-                    FBTrace.sysout("dom.expandedMembers level: "+level+" member.level " +
-                        member.level, member);
-                }
-
-                var moreExpanded = newMembers.length +
-                    this.expandMembers(members, toggles.get(member.name), i+1, level+1);
-                i += moreExpanded;
-                expanded += moreExpanded;
-            }
+                // Scroll position must be set after the tree is completely restored
+                // (and so, the scroll offset exists).
+                if (scrollTop)
+                    this.panelNode.scrollTop = scrollTop;
+            });
         }
 
-        return expanded;
-    },
-
-    showMembers: function(members, update, scrollTop)
-    {
-        // If we are still in the midst of inserting rows, cancel all pending
-        // insertions here - this is a big speedup when stepping in the debugger
-        if (this.timeouts)
-        {
-            for (var i = 0; i < this.timeouts.length; ++i)
-                this.context.clearTimeout(this.timeouts[i]);
-            delete this.timeouts;
-        }
-
-        if (!members.length)
-            return this.showEmptyMembers();
-
-        var panelNode = this.panelNode;
-        var priorScrollTop = (scrollTop === undefined ? panelNode.scrollTop : scrollTop);
-
-        // If we are asked to "update" the current view, then build the new table
-        // offscreen and swap it in when it's done
-        var offscreen = update && panelNode.firstChild;
-        var dest = offscreen ? this.document : panelNode;
-
-        var table = this.tag.replace({domPanel: this, toggles: this.toggles}, dest);
-        var tbody = table.lastChild;
-        var rowTag = this.dirTablePlate.rowTag;
-
-        // Insert the first slice immediately
-        var setSize = members.length;
-        var slice = members.splice(0, DOMReps.insertSliceSize);
-        var result = rowTag.insertRows({members: slice}, tbody.lastChild);
-        var rowCount = 1;
-        var panel = this;
-
-        Events.dispatch(this.fbListeners, "onMemberRowSliceAdded",
-            [panel, result, rowCount, setSize]);
-
-        var timeouts = [];
-
-        var delay = 0;
-        while (members.length)
-        {
-            let slice = members.splice(0, DOMReps.insertSliceSize);
-            timeouts.push(this.context.setTimeout(function addMemberRowSlice()
-            {
-                result = rowTag.insertRows({members: slice}, tbody.lastChild);
-                rowCount += DOMReps.insertSliceSize;
-
-                Events.dispatch(Firebug.DOMModule.fbListeners, "onMemberRowSliceAdded",
-                    [panel, result, rowCount, setSize]);
-
-                if ((panelNode.scrollHeight+panelNode.offsetHeight) >= priorScrollTop)
-                    panelNode.scrollTop = priorScrollTop;
-
-            }, delay));
-
-            delay += DOMReps.insertInterval;
-        }
-
-        if (offscreen)
-        {
-            timeouts.push(this.context.setTimeout(function()
-            {
-                if (panelNode.firstChild)
-                    panelNode.replaceChild(table, panelNode.firstChild);
-                else
-                    panelNode.appendChild(table);
-
-                // Scroll back to where we were before
-                panelNode.scrollTop = priorScrollTop;
-            }, delay));
-        }
-        else
-        {
-            timeouts.push(this.context.setTimeout(function()
-            {
-                panelNode.scrollTop = (scrollTop === undefined ? 0 : scrollTop);
-            }, delay));
-        }
-        this.timeouts = timeouts;
-    },
-
-    showEmptyMembers: function()
-    {
-        FirebugReps.Warning.tag.replace({object: "NoMembersWarning"}, this.panelNode);
-    },
-
-    findPathIndex: function(object)
-    {
-        var pathIndex = -1;
-        for (var i = 0; i < this.objectPath.length; ++i)
-        {
-            if (this.getPathObject(i) === object)
-                return i;
-        }
-
-        return -1;
-    },
-
-    getPathObject: function(index)
-    {
-        var object = this.objectPath[index];
-        if (object instanceof FirebugReps.PropertyObj)
-            return object.getObject();
-        else
-            return object;
+        // Display no-members message.
+        if (this.tree.isEmpty())
+            FirebugReps.Warning.tag.replace({object: "NoMembersWarning"}, this.panelNode);
     },
 
     getRowObject: function(row)
@@ -719,8 +370,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
     getRealRowObject: function(row)
     {
-        var object = this.getRowObject(row);
-        return this.getObjectView(object);
+        return this.getRowObject(row);
     },
 
     getRowPropertyValue: function(row)
@@ -749,8 +399,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         }
         catch (err)
         {
-            if (FBTrace.DBG_DOM || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("dom.getObjectPropertyValue; EXCEPTION " + propName, object);
+            TraceError.sysout("dom.getObjectPropertyValue; EXCEPTION " + propName, object);
         }
     },
 
@@ -758,6 +407,10 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     {
         var member = row.domObject;
         var name = member.name + "";
+
+        // The name should be always set.
+        if (!name)
+            TraceError.sysout("domBasePanel.getRowPathName; ERROR missing tree-member name!");
 
         // Fake "(closure)" properties.
         if (member.ignoredPath)
@@ -782,7 +435,10 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     copyName: function(row)
     {
         var value = this.getRowPathName(row);
-        value = value[1]; //don't want the separator
+
+        // don't want the separator
+        value = value[1];
+
         System.copyToClipboard(value);
     },
 
@@ -801,7 +457,10 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         var path = [];
         for (var current = row; current ; current = getParentRow(current))
             path = this.getRowPathName(current).concat(path);
-        path.shift(); //don't want the first separator
+
+        // don't want the first separator
+        path.shift();
+
         return path;
     },
 
@@ -811,6 +470,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         System.copyToClipboard(value);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Property Edit/Delete/Set
+
     editProperty: function(row, editValue)
     {
         var member = row.domObject;
@@ -819,11 +481,11 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
         if (Css.hasClass(row, "watchNewRow"))
         {
-            Firebug.Editor.startEditing(row, "");
+            Editor.startEditing(row, "");
         }
         else if (Css.hasClass(row, "watchRow"))
         {
-            Firebug.Editor.startEditing(row, getRowName(row));
+            Editor.startEditing(row, getRowName(row));
         }
         else
         {
@@ -836,7 +498,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
                 var type = typeof propValue;
                 if (type === "undefined" || type === "number" || type === "boolean")
-                    editValue = "" + propValue;
+                    editValue = String(propValue);
                 else if (type === "string")
                     editValue = "\"" + Str.escapeJS(propValue) + "\"";
                 else if (propValue === null)
@@ -847,7 +509,11 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     editValue = "this." + getRowName(row); // XXX "this." doesn't actually work
             }
 
-            Firebug.Editor.startEditing(row, editValue);
+            var selectionData = null;
+            if (type === "string")
+                selectionData = {start: 1, end: editValue.length-1};
+
+            Editor.startEditing(row, editValue, null, selectionData);
         }
     },
 
@@ -860,7 +526,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         else
         {
             var member = row.domObject;
-            var object = this.getObjectView(member.object);
+            var object = member.object;
 
             if (member.deletable)
             {
@@ -879,62 +545,66 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         }
     },
 
-    setPropertyValue: function(row, value)  // value must be string
+    /**
+     * Used for changing value through DOM panel editor.
+     *
+     * @param {TableRow} the edited row
+     * @param {String} A new value, it must be a string.
+     */
+    setPropertyValue: function(row, value)
     {
         var member = row.domObject;
         var name = member.name;
 
-        if (FBTrace.DBG_DOM)
-        {
-            FBTrace.sysout("setPropertyValue: " + name + " set to " +
-                (typeof value === "string" ? "\"" + value + "\"" : "non-string!?!?"), row);
-        }
+        Trace.sysout("domBasePanel.setPropertyValue; " + name + " set to " +
+            (typeof value === "string" ? "\"" + value + "\"" : "non-string!?!?"), row);
 
         if (name === "this")
             return;
 
         var object = this.getRealRowObject(row);
+
+        function success(result, context)
+        {
+            Trace.sysout("domBasePanel.setPropertyValue; evaluate success object[" + name + "]" +
+                " set to type " + typeof result, result);
+
+            object[name] = result;
+        }
+
+        function failure(exc, context)
+        {
+            Trace.sysout("domBasePanel.setPropertyValue; evaluate FAILED " + exc, exc);
+
+            try
+            {
+                // If the value doesn't parse, then just store it as a string.
+                // Some users will not realize they're supposed to enter a JavaScript
+                // expression and just type literal text
+                object[name] = value;
+            }
+            catch (exc)
+            {
+            }
+        }
+
         if (object && !(object instanceof StackFrame) && !(typeof(object) === "function"))
         {
-            Firebug.CommandLine.evaluate(value, this.context, object, this.context.getCurrentGlobal(),
-                function success(result, context)
-                {
-                    if (FBTrace.DBG_DOM)
-                    {
-                        FBTrace.sysout("setPropertyValue evaluate success object[" + name + "]" +
-                            " set to type " + typeof result, result);
-                    }
-                    object[name] = result;
-                },
-                function failed(exc, context)
-                {
-                    try
-                    {
-                        if (FBTrace.DBG_DOM)
-                        {
-                            FBTrace.sysout("setPropertyValue evaluate FAILED", exc);
-                        }
-
-                        // If the value doesn't parse, then just store it as a string.
-                        // Some users will not realize they're supposed to enter a JavaScript
-                        // expression and just type literal text
-                        object[name] = value;
-                    }
-                    catch (exc) {}
-                }
-            );
+            CommandLine.evaluate(value, this.context, object, this.context.getCurrentGlobal(),
+                success, failure, {noStateChange: true});
         }
         else if (this.context.stopped)
         {
             try
             {
-                Firebug.CommandLine.evaluate(name + "=" + value, this.context);
+                CommandLine.evaluate(name + "=" + value, this.context, null,
+                    null, null, null, {noStateChange: true});
             }
             catch (exc)
             {
                 try
                 {
-                    // See catch block above...
+                    // See the comment in the failure function.
                     object[name] = value;
                 }
                 catch (exc)
@@ -942,28 +612,19 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     return;
                 }
             }
-
-            // Clear cached scope chain (it'll be regenerated the next time the getScopes
-            // is executed). This forces the watch window to update in case a closer scope
-            // variables have been changed during a debugging session.
-            if (object instanceof StackFrame)
-                object.clearScopes();
-
-            // xxxHonza: rebuilding the content (tree) is not enough if the user changes
-            // e.g. a local variable within the current scope (i.e. a binding or an argument).
-            // In such case we need to refetch the environment from the server to get
-            // updated values.
-            // It could be done through "clientEvaluate", which does resume-pause roundtrip.
-            // This is also the reason why object.clearScopes() has been used for JSD1
-            // (see above).
         }
 
-        this.rebuild(true);
+        this.refresh();
         this.markChange();
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // DOM Breakpoints
+
     breakOnProperty: function(row)
     {
+        Trace.sysout("domBasePanel.breakOnProperty;");
+
         var member = row.domObject;
         if (!member)
             return;
@@ -972,28 +633,73 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         if (!member.breakable)
             return;
 
+        // xxxHonza: this is specific to the Watch panel.
         var name = member.name;
         if (name === "this")
             return;
 
+        // Toggle breakpoint on the clicked row. {@DOMModule} will peform the action
+        // and also fire corresponding event that should be handled by specific
+        // panels to update the UI.
         var object = this.getRowObject(row);
-        object = this.getObjectView(object);
-        if (!object)
-            return;
+        if (object)
+            DOMModule.toggleBreakpoint(this.context, object, name);
+    },
 
-        // Create new or remove an existing breakpoint.
-        var breakpoints = this.context.dom.breakpoints;
-        var bp = breakpoints.findBreakpoint(object, name);
-        if (bp)
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Info Tips
+
+    showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
+    {
+        if (Dom.getAncestorByClass(target, "memberValueIcon"))
+            return this.populateReadOnlyInfoTip(infoTip, target);
+
+        // Do not show anything.
+        return false;
+    },
+
+    populateReadOnlyInfoTip: function(infoTip, target)
+    {
+        var member = Firebug.getRepObject(target);
+        if (!member.descriptor)
         {
-            row.removeAttribute("breakpoint");
-            breakpoints.removeBreakpoint(object, name);
+            // xxxHonza: this happens quite often why?
+            // FBTrace.sysout("no descriptor? " + member.name, member)
+            return false;
         }
-        else
-        {
-            breakpoints.addBreakpoint(object, name, this, row);
-            row.setAttribute("breakpoint", "true");
+
+        var input = {
+            configurable: member.descriptor.configurable ? "yes" : "no",
+            enumerable: member.descriptor.enumerable ? "yes" : "no",
+            writable: member.descriptor.writable ? "yes" : "no",
+            get: member.descriptor.get ? "yes" : "no",
+            set: member.descriptor.set ? "yes" : "no",
         }
+
+        this.readOnlyInfoTipTag.replace({desc: input}, infoTip);
+
+        return true;
+    },
+
+    populateBreakpointInfoTip: function(infoTip, target)
+    {
+        var lineNo = this.scriptView.getLineIndex(target);
+        var bp = BreakpointStore.findBreakpoint(this.getCurrentURL(), lineNo);
+        if (!bp)
+            return false;
+
+        var expr = bp.condition;
+        if (!expr)
+            return false;
+
+        if (expr == this.infoTipExpr)
+            return true;
+
+        BreakpointInfoTip.render(infoTip, expr);
+
+        this.infoTipExpr = expr;
+
+        return true;
     },
 });
 
@@ -1002,6 +708,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
 function getRowName(row)
 {
+    // xxxHonza: DomBaseTree.getRowName() should replace this function (it has the same logic)
+
     // XXX This can return not only property names but also just descriptive ones,
     // like "(closure)", and indeed the collapse remembering logic relies on that.
     var labelNode = row.getElementsByClassName("memberLabelCell").item(0);
@@ -1023,9 +731,10 @@ function getRowOwnerObject(row)
 
 function getParentRow(row)
 {
-    var level = "" + (parseInt(row.getAttribute("level"), 10) - 1);
+    var level = String(parseInt(row.getAttribute("level"), 10) - 1);
     if (level === "-1")
         return;
+
     for (row = row.previousSibling; row; row = row.previousSibling)
     {
         if (row.getAttribute("level") === level)
@@ -1033,34 +742,8 @@ function getParentRow(row)
     }
 }
 
-/**
- * Returns an array of parts that uniquely identifies a row (not always all JavaScript)
- */
-function getPath(row)
-{
-    var name = getRowName(row);
-    var path = [name];
-
-    var level = parseInt(row.getAttribute("level"), 10) - 1;
-    for (row = row.previousSibling; row && level >= 0; row = row.previousSibling)
-    {
-        if (parseInt(row.getAttribute("level"), 10) === level)
-        {
-            name = getRowName(row);
-            path.splice(0, 0, name);
-
-            --level;
-        }
-    }
-
-    return path;
-}
-
 // ********************************************************************************************* //
 // Registration
-
-// Expose so, it can be used by derived objects.
-Firebug.DOMBasePanel.getPath = getPath;
 
 return Firebug.DOMBasePanel;
 

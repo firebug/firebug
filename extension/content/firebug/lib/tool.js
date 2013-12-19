@@ -4,9 +4,12 @@ define([
 ],
 function() {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Tool Implementation
 
+// xxxHonza: obsolete and should be removed together with issue 6947: Remove BTI.
 function Tool(name)
 {
     this.toolName = name;

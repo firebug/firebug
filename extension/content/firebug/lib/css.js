@@ -31,31 +31,35 @@ var cssColorNames = null;
 var imageRules = null;
 var domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
 
+function buildKeywordMap(nodeType)
+{
+    if (cssKeywordMap[nodeType])
+        return;
+    cssKeywordMap[nodeType] = {};
+
+    for (var name in Css.cssInfo[nodeType])
+    {
+        var list = [];
+
+        var types = Css.cssInfo[nodeType][name];
+        for (var i = 0; i < types.length; ++i)
+        {
+            var keywords = Css.cssKeywords[types[i]];
+            if (keywords)
+                list.push.apply(list, keywords);
+            else
+                list.push(types[i]);
+        }
+
+        cssKeywordMap[nodeType][name] = list;
+    }
+}
+
 Css.getCSSKeywordsByProperty = function(nodeType, propName, avoid)
 {
-    if (!cssKeywordMap[nodeType])
-    {
-        cssKeywordMap[nodeType] = {};
-
-        for (var name in Css.cssInfo[nodeType])
-        {
-            var list = [];
-
-            var types = Css.cssInfo[nodeType][name];
-            for (var i = 0; i < types.length; ++i)
-            {
-                var keywords = Css.cssKeywords[types[i]];
-                if (keywords)
-                    list.push.apply(list, keywords);
-                else
-                    list.push(types[i]);
-            }
-
-            cssKeywordMap[nodeType][name] = list;
-        }
-    }
-
     propName = propName.toLowerCase();
+
+    buildKeywordMap(nodeType);
 
     if (avoid)
         return getCSSPropertyKeywordsExcludingCategories(nodeType, propName, avoid);
@@ -1131,7 +1135,7 @@ Css.cssInfo.html =
 
 Css.cssInfo.svg =
 {
-    "alignment-baseline": ["svgAlignmentBaseline"],
+    "alignment-baseline": ["alignmentBaseline"],
     "baseline-shift": ["baselineShift"],
     "clip": ["auto", "length"],
     "clip-path": ["url()", "none"],
@@ -2883,6 +2887,13 @@ Css.nonDeletableTags =
     "HTML": 1, "html": 1,
     "HEAD": 1, "head": 1,
     "BODY": 1, "body": 1
+};
+
+// lib/xml can't depend on lib/css, so inject the relevant function from here.
+Xml.getPresentationalSVGProperties = function()
+{
+    buildKeywordMap("svg");
+    return cssKeywordMap["svg"];
 };
 
 // ********************************************************************************************* //

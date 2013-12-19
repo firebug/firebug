@@ -28,6 +28,25 @@ var PropertyTree = domplate(Tree,
         try
         {
             var members = [];
+
+            // Special case for Map() instance (from some reason instanceof Map doesn't work).
+            if (typeof (object.forEach) == "function")
+            {
+                var self = this;
+                object.forEach(function(value, name)
+                {
+                    try
+                    {
+                        members.push(self.createMember("dom", name, value, level));
+                    }
+                    catch (e)
+                    {
+                    }
+                });
+
+                return members;
+            }
+
             for (var p in object)
             {
                 try

@@ -2,30 +2,35 @@
 
 /**
  * The 'context' in this file is always 'Firebug.currentContext'
+ *
+ * xxxHonza: firebug/firebug should be also included in this file, but as soon as
+ * the cycle dependency problem (chrome included in firebug) is solved.
  */
 define([
     "firebug/lib/object",
-    "firebug/chrome/firefox",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/system",
-    "firebug/chrome/menu",
-    "firebug/chrome/toolbar",
     "firebug/lib/url",
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/lib/events",
+    "firebug/lib/options",
     "firebug/chrome/window",
-    "firebug/lib/options"
+    "firebug/chrome/firefox",
+    "firebug/chrome/menu",
+    "firebug/chrome/toolbar",
+    "firebug/chrome/statusPath",
 ],
-function chromeFactory(Obj, Firefox, Dom, Css, System, Menu, Toolbar, Url, Locale, String,
-    Events, Win, Options) {
+function (Obj, Dom, Css, System, Url, Locale, String, Events, Options, Win, Firefox,
+    Menu, Toolbar, StatusPath) {
 
 // ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+
 const nsIWebNavigation = Ci.nsIWebNavigation;
 
 const wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
@@ -50,8 +55,6 @@ const firebugURLs =
     extensions: "https://getfirebug.com/wiki/index.php/Firebug_Extensions",
     issue5110: "http://code.google.com/p/fbug/issues/detail?id=5110"
 };
-
-const statusCropSize = 20;
 
 // ********************************************************************************************* //
 
@@ -348,9 +351,6 @@ var FirebugChrome =
         if (name == "textSize")
             this.applyTextSize(value);
 
-        if (name == "omitObjectPathStack")
-            this.obeyOmitObjectPathStack(value);
-
         if (name == "viewPanelOrient")
             this.updateOrient(value);
     },
@@ -598,35 +598,6 @@ var FirebugChrome =
         }
     },
 
-    getNextObject: function(reverse)
-    {
-        var panel = Firebug.currentContext.getPanel(Firebug.currentContext.panelName);
-        if (panel)
-        {
-            var panelStatus = this.getElementById("fbPanelStatus");
-            var item = panelStatus.getItemByObject(panel.selection);
-            if (item)
-            {
-                if (reverse)
-                    item = item.previousSibling ? item.previousSibling.previousSibling : null;
-                else
-                    item = item.nextSibling ? item.nextSibling.nextSibling : null;
-
-                if (item)
-                    return item.repObject;
-            }
-        }
-    },
-
-    gotoNextObject: function(reverse)
-    {
-        var nextObject = this.getNextObject(reverse);
-        if (nextObject)
-            this.select(nextObject);
-        else
-            System.beep();
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Panels
 
@@ -847,8 +818,7 @@ var FirebugChrome =
             FBTrace.sysout("chrome.syncPanel Firebug.currentContext=" +
                 (context ? context.getName() : "undefined"));
 
-        var panelStatus = this.getElementById("fbPanelStatus");
-        panelStatus.clear();
+        StatusPath.clear();
 
         if (context)
         {
@@ -981,93 +951,12 @@ var FirebugChrome =
 
     clearStatusPath: function()
     {
-        var panelStatus = this.getElementById("fbPanelStatus");
-        panelStatus.clear();
+        StatusPath.clear();
     },
 
     syncStatusPath: function()
     {
-        var panelStatus = this.getElementById("fbPanelStatus");
-        var panelStatusSeparator = this.getElementById("fbStatusSeparator");
-        var panel = panelBar1.selectedPanel;
-
-        if (!panel || (panel && !panel.selection))
-        {
-            panelStatus.clear();
-        }
-        else
-        {
-            var path = panel.getObjectPath(panel.selection);
-            if (!path || !path.length)
-            {
-                Dom.hide(panelStatusSeparator, true);
-                panelStatus.clear();
-            }
-            else
-            {
-                // Update the visibility of the separator. The separator
-                // is displayed only if there are some other buttons on the left side.
-                // Before showing the status separator let's see whether there are any other
-                // buttons on the left.
-                var hide = true;
-                var sibling = panelStatusSeparator.parentNode.previousSibling;
-                while (sibling)
-                {
-                    if (!Dom.isCollapsed(sibling))
-                    {
-                        hide = false;
-                        break;
-                    }
-                    sibling = sibling.previousSibling;
-                }
-                Dom.hide(panelStatusSeparator, hide);
-
-                if (panel.name != panelStatus.lastPanelName)
-                    panelStatus.clear();
-
-                panelStatus.lastPanelName = panel.name;
-
-                // If the object already exists in the list, just select it and keep the path.
-                var selection = panel.selection;
-                var existingItem = panelStatus.getItemByObject(panel.selection);
-                if (existingItem)
-                {
-                    // Update the labels of the status path elements, because it can be,
-                    // that the elements changed even when the selected element exists
-                    // inside the path (issue 4826)
-                    var statusItems = panelStatus.getItems();
-                    for (var i = 0; i < statusItems.length; ++i)
-                    {
-                        var object = Firebug.getRepObject(statusItems[i]);
-                        var rep = Firebug.getRep(object, Firebug.currentContext);
-                        var objectTitle = rep.getTitle(object, Firebug.currentContext);
-                        var title = String.cropMultipleLines(objectTitle, statusCropSize);
-
-                        statusItems[i].label = title;
-                    }
-                    panelStatus.selectItem(existingItem);
-                }
-                else
-                {
-                    panelStatus.clear();
-
-                    for (var i = 0; i < path.length; ++i)
-                    {
-                        var object = path[i];
-
-                        var rep = Firebug.getRep(object, Firebug.currentContext);
-                        var objectTitle = rep.getTitle(object, Firebug.currentContext);
-
-                        var title = String.cropMultipleLines(objectTitle, statusCropSize);
-                        panelStatus.addItem(title, object, rep, panel.statusSeparator);
-                    }
-
-                    panelStatus.selectObject(panel.selection);
-                    if (FBTrace.DBG_PANELS)
-                        FBTrace.sysout("syncStatusPath "+path.length+" items ", path);
-                }
-            }
-        }
+        StatusPath.update();
     },
 
     toggleOrient: function(preferredValue)
@@ -1155,7 +1044,7 @@ var FirebugChrome =
                 pos = this.framePosition || 'bottom';
         }
 
-        Firebug.Options.set("framePosition", pos);
+        Options.set("framePosition", pos);
         return Firebug.framePosition = pos;
     },
 
@@ -1318,7 +1207,7 @@ var FirebugChrome =
         if (!panelBar1)
             return;
 
-        var zoom = Firebug.Options.getZoomByTextSize(value);
+        var zoom = Options.getZoomByTextSize(value);
         var zoomString = (zoom * 100) + "%";
 
         // scale the aspect relative to 11pt Lucida Grande
@@ -1348,20 +1237,6 @@ var FirebugChrome =
         }
 
         Firebug.dispatchToPanels("onTextSizeChange", [zoom, fontSizeAdjust]);
-    },
-
-    obeyOmitObjectPathStack: function(value)
-    {
-        var panelStatus = this.getElementById("fbPanelStatus");
-        // The element does not exist immediately at start-up.
-        if (!panelStatus)
-            return;
-        Dom.hide(panelStatus, (value ? true : false));
-    },
-
-    getPanelStatusElements: function()
-    {
-        return this.getElementById("fbPanelStatus");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1459,12 +1334,7 @@ var FirebugChrome =
                 var option = child.getAttribute("option");
                 if (option)
                 {
-                    var checked = false;
-                    if (option == "profiling")
-                        checked = false;//xxxHonza; FBS doesn't exist now FBS.profiling;
-                    else
-                        checked = Firebug.Options.get(option);
-
+                    var checked = Options.get(option);
                     child.setAttribute("checked", checked);
                 }
             }
@@ -1476,7 +1346,7 @@ var FirebugChrome =
         var option = menuitem.getAttribute("option");
         var checked = menuitem.getAttribute("checked") == "true";
 
-        Firebug.Options.set(option, checked);
+        Options.set(option, checked);
     },
 
     onContextShowing: function(event)
@@ -1529,8 +1399,16 @@ var FirebugChrome =
 
         if (FBTrace.DBG_MENU)
         {
-            FBTrace.sysout("chrome.onContextShowing object:"+object+", rep: "+rep+
-                ", realObject: "+realObject+", realRep:"+realRep);
+            FBTrace.sysout("chrome.onContextShowing;", {
+                object: object,
+                rep: rep,
+                realObject: realObject,
+                realRep: realRep,
+                target: target,
+                chromeDoc: target.ownerDocument == document,
+                contextMenuObject: this.contextMenuObject,
+                panel: panel,
+            });
         }
 
         // 1. Add the custom menu items from the realRep
@@ -2017,7 +1895,7 @@ function onMouseScroll(event)
     if (Events.isControlAlt(event))
     {
         Events.cancelEvent(event);
-        Firebug.Options.changeTextSize(-event.detail);
+        Options.changeTextSize(-event.detail);
     }
 }
 
@@ -2035,8 +1913,10 @@ function onSelectedSidePanel(event)
     }
 
     if (FBTrace.DBG_PANELS)
-        FBTrace.sysout("chrome.onSelectedSidePanel name=" +
-            (sidePanel ? sidePanel.name : "undefined"));
+    {
+        var name = (sidePanel ? sidePanel.name : "undefined");
+        FBTrace.sysout("chrome.onSelectedSidePanel; name: " + name, sidePanel);
+    }
 
     var panel = panelBar1.selectedPanel;
     if (panel && sidePanel)
@@ -2106,7 +1986,7 @@ function onPanelMouseDown(event)
     else if (Events.isMiddleClick(event, true) && Events.isControlAlt(event))
     {
         Events.cancelEvent(event);
-        Firebug.Options.setTextSize(0);
+        Options.setTextSize(0);
     }
     else if (Events.isMiddleClick(event) && Firebug.getRepNode(event.target))
     {
@@ -2119,7 +1999,14 @@ function onPanelMouseUp(event)
 {
     if (Events.isLeftClick(event))
     {
-        var selection = event.target.ownerDocument.defaultView.getSelection();
+        var doc = event.target.ownerDocument;
+
+        // This happens e.g. if you click in a panel, move mouse out from the browser
+        // window and release the button.
+        if (!doc)
+            return;
+
+        var selection = doc.defaultView.getSelection();
         var target = selection.focusNode || event.target;
 
         if (Dom.getAncestorByClass(selection.focusNode, "editable") ===
@@ -2129,9 +2016,11 @@ function onPanelMouseUp(event)
             if (editable || Css.hasClass(event.target, "inlineExpander"))
             {
                 var selectionData;
-                var unselectedRange = event.target.ownerDocument.createRange();
+                var unselectedRange = doc.createRange();
                 var selectedRange = selection.getRangeAt(0);
-                unselectedRange.setStart(editable.firstElementChild || editable, 0);
+                var referenceElement = editable || event.target;
+                unselectedRange.setStart(referenceElement.firstElementChild ||
+                    referenceElement, 0);
                 unselectedRange.setEnd(selectedRange.startContainer, selectedRange.startOffset);
 
                 if (selectedRange.collapsed)
@@ -2140,7 +2029,7 @@ function onPanelMouseUp(event)
                         Math.abs(event.screenY - lastMouseDownPosition.y);
 
                     // If mouse has moved far enough, set selection at that point
-                    if (distance > 3)
+                    if (distance > 3 || Css.hasClass(event.target, "inlineExpander"))
                     {
                         selectionData =
                         {
@@ -2238,6 +2127,8 @@ return FirebugChrome;
 }; // end of var ChromeFactory object
 
 // ********************************************************************************************* //
+
+Firebug.ChromeFactory = ChromeFactory;
 
 return ChromeFactory;
 

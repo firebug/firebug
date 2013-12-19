@@ -12,16 +12,14 @@ function runTest()
             // Start markup editing.
             FBTest.clickToolbarButton(null, "fbToggleHTMLEditing");
 
-            var panelNode = FBTest.getPanel("html").panelNode;
-            var textArea = panelNode.querySelector("textarea");
-
-            FBTest.focus(textArea);
-
             // Select all (we want to override the existing markup)
-            FBTest.sendShortcut("a", {accelKey: true});
+            // The editor should have received focus already.
+            FBTest.sendShortcut("VK_A", {accelKey: true});
 
             // Type new text
-            FBTest.sendString("<i>3</i><i>4</i><i>5</i>", textArea);
+            var panelNode = FBTest.getPanel("html").panelNode;
+            var where = panelNode.ownerDocument.activeElement;
+            FBTest.sendString("<i>3</i><i>4</i><i>5</i>", where);
 
             FBTest.waitForHtmlMutation(null, "div", function()
             {

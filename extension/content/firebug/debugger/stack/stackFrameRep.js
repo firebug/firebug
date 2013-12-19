@@ -10,19 +10,20 @@ define([
     "firebug/firebug",
     "firebug/lib/domplate",
     "firebug/debugger/stack/stackFrame",
+    "firebug/chrome/rep",
     "firebug/chrome/reps",
     "firebug/debugger/script/sourceLink",
     "firebug/lib/css",
     "firebug/lib/options",
     "firebug/lib/dom",
 ],
-function(FBTrace, Obj, Arr, Url, Str, Locale, Firebug, Domplate, StackFrame, FirebugReps,
+function(FBTrace, Obj, Arr, Url, Str, Locale, Firebug, Domplate, StackFrame, Rep, FirebugReps,
     SourceLink, Css, Options, Dom) {
-
-with (Domplate) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, TAG, DIV, SPAN, TR, A} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -30,7 +31,7 @@ const Ci = Components.interfaces;
 // ********************************************************************************************* //
 // StackFrame Rep
 
-var StackFrameRep = domplate(Firebug.Rep,
+var StackFrameRep = domplate(Rep,
 {
     className: "stackFrame",
 
@@ -226,4 +227,4 @@ Firebug.registerRep(StackFrameRep);
 return StackFrameRep;
 
 // ********************************************************************************************* //
-}});
+});

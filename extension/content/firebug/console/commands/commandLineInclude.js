@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/chrome/reps",
     "firebug/lib/domplate",
     "firebug/lib/locale",
@@ -15,19 +16,22 @@ define([
     "firebug/lib/object",
     "firebug/chrome/tableRep",
     "firebug/editor/editor",
+    "firebug/editor/inlineEditor",
 ],
-function(FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, Menu, System, Xpcom,
-    Obj, TableRep) {
-with (Domplate) {
+function(Module, FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, Menu, System, Xpcom,
+    Obj, TableRep, Console, Editor, InlineEditor) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DomplateTag, SPAN, TR, P, LI, A, BUTTON} = Domplate;
 
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 const removeConfirmation = "commandline.include.removeConfirmation";
 const prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
 const storeFilename = "includeAliases.json";
+var Trace = FBTrace.to("DBG_COMMANDLINE");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -166,7 +170,7 @@ var CommandLineIncludeRep = domplate(TableRep,
     startEditing: function(target)
     {
         var editor = this.getEditor(target.ownerDocument);
-        Firebug.Editor.startEditing(target, target.dataset.aliasname, editor);
+        Editor.startEditing(target, target.dataset.aliasname, editor);
     },
 
     editAliasName: function(tr)
@@ -322,7 +326,7 @@ function CommandLineIncludeObject()
 
 // ********************************************************************************************* //
 
-var CommandLineInclude = Obj.extend(Firebug.Module,
+var CommandLineInclude = Obj.extend(Module,
 {
     onSuccess: function(newAlias, context, loadingMsgRow, xhr, hasWarnings)
     {
@@ -376,8 +380,7 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
         // Let's log when the store could not be opened.
         if (!this.store)
         {
-            if (FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("CommandLineInclude.getStore; can't open or create the store");
+            Trace.sysout("CommandLineInclude.getStore; can't open or create the store");
         }
 
         return this.store;
@@ -483,6 +486,8 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
         var acceptedSchemes = ["http", "https"];
         var absoluteURL = context.browser.currentURI.resolve(url);
 
+        Trace.sysout("CommandLineInclude.evaluateRemoteScript; absoluteURL = " + absoluteURL);
+
         xhr.onload = function()
         {
             if (xhr.status !== 200)
@@ -498,7 +503,7 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
                 hasWarnings = true;
             }
 
-            // Do not print anything if  the inclusion succeeds.
+            // Do not print anything if the inclusion succeeds.
             var successFunctionEval = function() { };
             // Let's use the default function to handle errors.
             var errorFunctionEval = null;
@@ -571,10 +576,10 @@ function onCommand(context, args)
 
 function IncludeEditor(doc)
 {
-    Firebug.InlineEditor.call(this, doc);
+    InlineEditor.call(this, doc);
 }
 
-IncludeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+IncludeEditor.prototype = domplate(InlineEditor.prototype,
 {
     endEditing: function(target, value, cancel)
     {
@@ -640,4 +645,4 @@ Firebug.registerModule(CommandLineInclude);
 return CommandLineInclude;
 
 // ********************************************************************************************* //
-}});
+});

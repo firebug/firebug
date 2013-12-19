@@ -72,6 +72,10 @@
     border-spacing: 0;
 }
 
+.panelNode-computed {
+    padding-top: 5px;
+}
+
 .computedStylesGroup > .computedStyleTable {
     display: none;
 }
@@ -168,17 +172,17 @@
     top: 0;
 }
 
-.cssProp.editGroup:hover > .cssPropIndent {
-    background: transparent url(chrome://firebug/skin/disable.png) no-repeat 2px 1px;
-    filter: none;
+.cssProp:-moz-any(.editGroup:hover,
+                  .disabledStyle) > .cssPropIndent {
+    background: transparent url(chrome://firebug/skin/disable.svg) no-repeat 2px 1px;
 }
 
 .cssProp.editGroup > span:first-child {
     cursor: pointer;
 }
 
-.cssProp.disabledStyle > .cssPropIndent {
-    background: transparent url(chrome://firebug/skin/disableInactive.png) no-repeat 2px 1px;
+.cssProp.disabledStyle:not(:hover) > .cssPropIndent {
+    filter: url(resource://firebugui/filters.svg#grayscale);
 }
 
 .cssProp.disabledStyle {
@@ -220,10 +224,10 @@
 .infoTipColorBox {
     background-color: #C8C8C8;
     background-image:
-        linear-gradient(45deg, #A0A0A0 25%, transparent 25%),
-        linear-gradient(135deg, #A0A0A0 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #A0A0A0 75%),
-        linear-gradient(135deg, transparent 75%, #A0A0A0 75%);
+        linear-gradient(45deg, #A0A0A0 25%, rgba(160, 160, 160, 0) 25%),
+        linear-gradient(135deg, #A0A0A0 25%, rgba(160, 160, 160, 0) 25%),
+        linear-gradient(45deg, rgba(160, 160, 160, 0) 75%, #A0A0A0 75%),
+        linear-gradient(135deg, rgba(160, 160, 160, 0) 75%, #A0A0A0 75%);
     background-size: 16px 16px;
     background-position:0 0, 8px 0, 8px -8px, 0px 8px;
 }

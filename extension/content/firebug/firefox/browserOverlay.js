@@ -52,7 +52,7 @@ function BrowserOverlay(win)
 
 BrowserOverlay.prototype =
 {
-    // When Firebug is disabled or unistalled this elements must be removed from
+    // When Firebug is disabled or uninstalled this elements must be removed from
     // chrome UI (XUL).
     nodesToRemove: [],
 
@@ -373,6 +373,27 @@ BrowserOverlay.prototype =
     setPosition: function(newPosition)
     {
         // todo
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Firebug PanelSelector Menu
+
+    onPanelSelectorShowing: function(popup)
+    {
+        var self = this;
+        this.startFirebug(function()
+        {
+            self.win.Firebug.PanelSelector.onMenuShowing(popup);
+        });
+    },
+
+    onPanelSelectorHiding: function(popup)
+    {
+        var self = this;
+        this.startFirebug(function()
+        {
+            self.win.Firebug.PanelSelector.onMenuHiding(popup);
+        });
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

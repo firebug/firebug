@@ -3,6 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
+    "firebug/chrome/rep",
     "firebug/lib/domplate",
     "firebug/chrome/reps",
     "firebug/lib/locale",
@@ -12,7 +13,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/options",
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Str, Options) {
+function(Obj, Firebug, Rep, Domplate, FirebugReps, Locale, Events, Css, Dom, Str, Options) {
 
 "use strict";
 
@@ -41,7 +42,7 @@ function BreakNotification(cause)
     this.cause = cause;
 }
 
-BreakNotification.prototype = domplate(Firebug.Rep,
+BreakNotification.prototype = domplate(Rep,
 /** @lends BreakNotification */
 {
     tag:
@@ -52,7 +53,7 @@ BreakNotification.prototype = domplate(Firebug.Rep,
                     TR(
                         TD({"class": "imageCol"},
                             IMG({"class": "notificationImage",
-                                src: "chrome://firebug/skin/breakpoint.png"})
+                                src: "chrome://firebug/skin/breakpoint.svg"})
                         ),
                         TD({"class": "descCol"},
                             SPAN({"class": "notificationDesc"}, "$cause|getDescription"),

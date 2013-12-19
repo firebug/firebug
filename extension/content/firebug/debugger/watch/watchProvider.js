@@ -3,6 +3,8 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/object",
+    "firebug/lib/locale",
+    "firebug/lib/wrapper",
     "firebug/debugger/clients/clientProvider",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/clients/scopeClient",
@@ -10,8 +12,8 @@ define([
     "firebug/debugger/debuggerLib",
     "firebug/debugger/watch/watchExpression",
 ],
-function (FBTrace, Obj, ClientProvider, StackFrame, ScopeClient, DOMMemberProvider,
-    DebuggerLib, WatchExpression) {
+function (FBTrace, Obj, Locale, Wrapper, ClientProvider, StackFrame, ScopeClient,
+    DOMMemberProvider, DebuggerLib, WatchExpression) {
 
 "use strict";
 
@@ -89,15 +91,15 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
     hasChildren: function(object)
     {
-        // If the base provider says, the object has children, let's go with it.
-        if (BaseProvider.hasChildren.apply(this, arguments))
-            return true;
+        if (object instanceof WatchExpression)
+            return this.memberProvider.hasChildren(object.value);
 
-        // ... otherwise we need to try to get the local object (breaking RDP)
-        // and check if it has any JS members.
-        object = this.getLocalObject(object);
-        if (object)
-            return Obj.hasProperties(object);
+        // If we have a local JS object, use the member provider for that.
+        var localObject = this.getLocalObject(object);
+        if (localObject)
+            return this.memberProvider.hasChildren(localObject);
+
+        return BaseProvider.hasChildren.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -112,10 +114,18 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
         var cache = stackFrame.context.clientCache;
 
+        // If frame-return value is available display it in the Watch panel too.
+        // (together with the scope chain).
+        var clientObject = this.getFrameResultClientObject(stackFrame, cache);
+        if (clientObject)
+            stackFrame.scopes.push(clientObject);
+
         // Append 'this' as the first scope. This is not a real 'scope',
-        // but useful for debugging.
+        // but useful for debugging. The scope can't be edited in the Watch panel,
+        // so set to read only.
         var thisScope = cache.getObject(stackFrame.nativeFrame["this"]);
         thisScope.name = "this";
+        thisScope.readOnly = true;
         stackFrame.scopes.push(thisScope);
 
         // Now iterate all parent scopes. This represents the chain of scopes
@@ -123,6 +133,8 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
         var scope = stackFrame.nativeFrame.environment;
         while (scope)
         {
+            // xxxHonza: All instances of the ScopeClient should be probably
+            // created by {@ClientFactory}.
             stackFrame.scopes.push(new ScopeClient(scope, cache));
             scope = scope.parent;
         }
@@ -132,8 +144,14 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
     getTopScope: function(stackFrame)
     {
+        // Return the first real scope object.
         var scopes = this.getScopes(stackFrame);
-        return (scopes.length > 1) ? scopes[1] : null;
+        for (var i = 0; i < scopes.length; i++)
+        {
+            var scope = scopes[i];
+            if (scope instanceof ScopeClient)
+                return scope;
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -154,25 +172,12 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
         // If the object is a grip, let's try to get the local JS object (breaks RDP)
         // and return its JS properties.
-        object = this.getLocalObject(object);
-        if (object)
-            return this.memberProvider.getMembers(object, level);
+        var localObject = this.getLocalObject(object);
+        if (localObject)
+            return this.memberProvider.getMembers(localObject, level);
 
-        return null;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // ID Provider
-
-    getId: function(object)
-    {
-        var label = this.getLabel(object);
-        if (label)
-            return label;
-
-        if (typeof(object.getActor) == "function")
-            return object.getActor();
-
+        // return null to symbolize that the member provider method getMember
+        // failed, and the provider method getChildren must be used instead.
         return null;
     },
 
@@ -187,27 +192,45 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
      */
     getLocalObject: function(object)
     {
-        var actor;
-
         if (object instanceof ScopeClient)
         {
             if (object.grip.object)
-                actor = object.grip.object.actor;
-        }
-        else if (typeof(object.getActor) == "function")
-        {
-            actor = object.getActor();
-        }
-        else
-        {
-            // The object is already the underlying JS object.
-            return object;
+            {
+                var actor = object.grip.object.actor;
+                if (!actor)
+                    return null;
+
+                return DebuggerLib.getObject(this.panel.context, actor);
+            }
         }
 
-        if (!actor)
-            return null;
+        return BaseProvider.getLocalObject.apply(this, arguments);
+    },
 
-        return DebuggerLib.getObject(this.panel.context, actor);
+    /**
+     * Adds the frame result (<exception> or <return value>) if it exists to the scopes
+     * listed in the watch panel (even if it is not a scope).
+     *
+     * @param {object} stackFrame
+     * @param {object} cache
+     */
+    getFrameResultClientObject: function(stackFrame, cache)
+    {
+        var frameResultObj = DebuggerLib.getFrameResultObject(stackFrame.context);
+        if (!frameResultObj || !frameResultObj.type)
+            return;
+
+        // Create and initialize fake 'scope' client object that displays the frame-result value
+        // within other scopes in the Watch panel.
+        var clientObject = cache.getObject(frameResultObj.value);
+        clientObject.name = Locale.$STR("watch.frameResultType." + frameResultObj.type);
+        clientObject.isFrameResultValue = true;
+        clientObject.readOnly = true;
+
+        Trace.sysout("watchProvider.appendFrameResultValueInScope; frameResultScope",
+            clientObject);
+
+        return clientObject;
     },
 });
 
@@ -223,14 +246,15 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 WatchProvider.DefaultWatchPanelInput = function(panel)
 /** @lends WatchProvider.DefaultWatchPanelInput */
 {
-    this.panel = panel
+    this.panel = panel;
 }
 
 WatchProvider.DefaultWatchPanelInput.prototype.getChildren = function()
 {
     var children = [];
     children.push.apply(children, this.panel.watches);
-    children.push(this.panel.context.getCurrentGlobal());
+    var global = this.panel.context.getCurrentGlobal();
+    children.push(Wrapper.getContentView(global));
     return children;
 }
 

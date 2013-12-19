@@ -1,0 +1,125 @@
+/* See license.txt for terms of usage */
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Watch Panel */
+
+.scopesRow {
+    padding: 2px 18px;
+    background-color: LightYellow;
+    color: #666666;
+}
+
+.scopesRow td {
+    /*border-top: 1px solid #BEBEBE;*/
+}
+
+.scopesLabel {
+    background-color: transparent;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.panelNode-watches td {
+    border-bottom: 1px solid #EFEFEF;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Frame-result value. */
+
+.memberRow.frameResultValueRow {
+    animation: emphasizeFrameResultValue 2s ease;
+}
+
+.memberRow.frameResultValueRow, 
+.memberRow.frameResultValueEmphasizedRow {
+    background-color: beige ;
+}
+
+.memberRow.frameResultValueRow .memberLabel,
+.memberRow.frameResultValueEmphasizedRow .memberLabel {
+    font-weight: bold;
+}
+
+/* A simple animation to emphasize the row with frame-result value */
+@keyframes emphasizeFrameResultValue {
+    0%, 50% {
+        background-color: #C4F4FF;
+    }
+    100% {
+        background-color: inherit;
+    }
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.watchEditCell {
+    padding: 2px 18px;
+    background-color: LightYellow;
+    border-bottom: 1px solid #BEBEBE;
+    color: #666666;
+    line-height: 14px;
+    cursor: text;
+}
+
+.editor-watchNewRow,
+.editor-memberRow {
+    font-family: monospace !important;
+}
+
+.editor-memberRow {
+    padding: 1px 0 !important;
+}
+
+.editor-watchRow {
+    padding-bottom: 0 !important;
+}
+
+.watchRow > .memberLabelCell {
+    font-family: monospace;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+.watchRow > .memberLabelCell > .memberLabel {
+    background-color: transparent;
+}
+
+.watchRow > .memberValueCell {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.watchRow > .memberLabelCell,
+.watchRow > .memberValueCell,
+.watchRow > .memberValueIcon {
+    background-color: #F5F5F5;
+    border-bottom: 1px solid #BEBEBE;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.watchToolbox {
+    z-index: 2147483647;
+    position: absolute;
+    right: 0;
+    padding: 1px 2px;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.watchTable .objectBox-errorMessage {
+    padding: 0 0 0 18px;
+    background: url(chrome://firebug/skin/error.svg) no-repeat 0 0/13px;
+    color: red;
+}
+
+.watchTable .objectBox-errorMessage .errorTitle {
+    display: inline;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* Make sure the last row in the WatchPanel has a bottom border */
+.watchTable .memberRow:last-child > TD {
+    border-bottom: 1px solid #EFEFEF;
+}

@@ -32,9 +32,9 @@ var BrowserToolbar =
             label: "firebug.Inspect",
             tooltiptext: "firebug.InspectElement",
             observes: "cmd_firebug_toggleInspecting",
+            firebugRootNode: true,
             // Needed for the 'Customize Toolbar' dialog
-            style: "list-style-image: url(chrome://firebug/skin/inspect.png); " +
-                "-moz-image-region: rect(0, 16px, 16px, 0);"
+            style: "list-style-image: url(chrome://firebug/skin/inspect.svg);"
         });
 
         // Start Button Tooltip. As soon as Firebug is fully loaded, the tooltip content will be
@@ -56,18 +56,37 @@ var BrowserToolbar =
             ])
         ]);
 
-        // TODO: why contextmenu doesn't work without cloning
-        $toolbarButton(doc, "firebug-button", {
-            label: "firebug.Firebug",
-            tooltip: "firebug-buttonTooltip",
-            type: "menu-button",
-            command: "cmd_firebug_toggleFirebug",
-            contextmenu: "fbStatusContextMenu",
-            observes: "firebugStatus",
-            // Needed for the 'Customize Toolbar' dialog
-            style: "list-style-image: url(chrome://firebug/skin/firebug16.png); " +
-                "-moz-image-region: rect(0, 16px, 16px, 0);"
-        }, [$(doc, "fbStatusContextMenu").cloneNode(true)]);
+        $toolbarItem(doc, "firebug-badged-button", {
+                title: "firebug.Firebug",
+                firebugRootNode: true
+            },
+            [
+                $el(doc, "stack",{
+                        id: "firebug-error-badge",
+                        onclick: "Firebug.toggleBar(true, 'console');"
+                    },
+                    [
+                        $el(doc, "label", {
+                            id: "firebug-error-label",
+                            value: 0
+                        })
+                    ]
+                ),
+                // TODO: why contextmenu doesn't work without cloning
+                $el(doc, "toolbarbutton", {
+                    id: "firebug-button",
+                    class: "toolbarbutton-1",
+                    label: "firebug.Firebug",
+                    tooltip: "firebug-buttonTooltip",
+                    type: "menu-button",
+                    command: "cmd_firebug_toggleFirebug",
+                    contextmenu: "fbStatusContextMenu",
+                    observes: "firebugStatus",
+                    // Needed for the 'Customize Toolbar' dialog
+                    style: "list-style-image: url(chrome://firebug/skin/firebugSmall.svg);"
+                }, [$(doc, "fbStatusContextMenu").cloneNode(true)])
+            ]
+        );
     },
 
     customizeToolbar: function(doc)
@@ -76,15 +95,15 @@ var BrowserToolbar =
         // The button is appended only once - if the user removes it, it isn't appended again.
         // TODO: merge into $toolbarButton?
         // toolbarpalette check is for seamonkey, where it is in the document
-        if ((!$(doc, "firebug-button") ||
-            $(doc, "firebug-button").parentNode.tagName == "toolbarpalette")
+        if ((!$(doc, "firebug-badged-button") ||
+            $(doc, "firebug-badged-button").parentNode.tagName == "toolbarpalette")
             && !Options.get("toolbarCustomizationDone"))
         {
             Options.set("toolbarCustomizationDone", true);
 
             // Get the current navigation bar button set (a string of button IDs) and append
             // ID of the Firebug start button into it.
-            var startButtonId = "firebug-button";
+            var startButtonId = "firebug-badged-button";
             var navBarId = "nav-bar";
             var navBar = $(doc, navBarId);
             var currentSet = navBar.currentSet;

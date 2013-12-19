@@ -8,6 +8,7 @@
     font-family: monospace;
     font-size: 11px;
     line-height: 1.2;
+    cursor: text;
 }
 
 .cm-s-firebug .linehighlighting {
@@ -40,10 +41,6 @@
     height: 100%;
     padding-bottom: 30px;
     z-index: 3;
-}
-.cm-s-firebug .CodeMirror-linenumber {
-    padding-left: 8px !important;
-    padding-right: 20px !important;
 }
 
 /*************************************************************************************************/
@@ -79,6 +76,7 @@
 .cm-s-firebug .CodeMirror-gutter {
     padding-right:4px;
     width:.5em;
+    cursor: default;
 }
 
 .cm-s-firebug .CodeMirror-gutter-elt {
@@ -89,19 +87,19 @@
 /* Breakpoints */
 
 .cm-s-firebug .breakpoint {
-    background-image: url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/breakpoint.svg);
     background-repeat: no-repeat;
     padding: 7px;
 }
 
 .cm-s-firebug .breakpointLoading {
-    background-image: url(chrome://firebug/skin/loading.png);
+    background-image: url(chrome://firebug/skin/loading.svg);
     background-repeat: no-repeat;
     padding: 7px;
 }
 
 .cm-s-firebug .breakpoint.condition {
-    background-image: url(chrome://firebug/skin/breakpointCondition.png), url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/breakpointCondition.svg), url(chrome://firebug/skin/breakpoint.svg);
     background-position: center;
     padding: 6px;
 }
@@ -114,7 +112,7 @@
 /* Debug Location */
 
 .cm-s-firebug .CodeMirror-debugLocation .CodeMirror-gutter-elt .debugLocation {
-    background-image: url(chrome://firebug/skin/executionPointer.png);
+    background-image: url(chrome://firebug/skin/executionPointer.svg);
     background-position: 2px 0;
     color: #000000;
     background-repeat: no-repeat;
@@ -122,13 +120,13 @@
 }
 
 .cm-s-firebug .CodeMirror-debugLocation .CodeMirror-gutter-elt .breakpoint {
-    background-image: url(chrome://firebug/skin/executionPointer.png), url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/executionPointer.svg), url(chrome://firebug/skin/breakpoint.svg);
     background-position: 2px 0, 0 0;
 }
 
 .cm-s-firebug .CodeMirror-debugLocation {
     outline: 1px solid #D9D9B6;
-    background-color: lightgoldenrodyellow;
+    background-color: rgb(255,255,224);
 }
 
 /*************************************************************************************************/

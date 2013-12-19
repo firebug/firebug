@@ -74,6 +74,17 @@ Dom.getAncestorByTagName = function(node, tagName)
     return null;
 };
 
+Dom.getTopAncestorByTagName = function(node, tagName)
+{
+    var topNode = node;
+    for (var parent = node; parent; parent = parent.parentNode)
+    {
+        if (parent.localName && parent.tagName.toLowerCase() == tagName)
+            topNode = parent;
+    }
+    return topNode;
+};
+
 /* @Deprecated  Use native Firefox: node.getElementsByClassName(names).item(0) */
 Dom.getElementByClass = function(node, className)  // className, className, ...
 {
@@ -157,6 +168,18 @@ Dom.getNonFrameBody = function(elt)
     var body = Dom.getBody(elt.ownerDocument);
     return (body.localName && body.localName.toUpperCase() === "FRAMESET") ? null : body;
 }
+
+/**
+ * @return {@Boolean} true if the given element is currently attached to the document.
+ */
+Dom.isAttached = function(element)
+{
+    var doc = element.ownerDocument;
+    if (!doc)
+        return false;
+
+    return doc.contains(element);
+};
 
 // ********************************************************************************************* //
 // DOM Modification
@@ -866,7 +889,7 @@ Dom.getDOMMembers = function(object)
 
     if (object instanceof Window)
         { return domMemberCache.Window; }
-    else if (object instanceof Document || object instanceof XMLDocument)
+    else if (object instanceof Document)
         { return domMemberCache.Document; }
     else if (object instanceof Location)
         { return domMemberCache.Location; }
@@ -908,6 +931,8 @@ Dom.getDOMMembers = function(object)
         { return domMemberCache.Node; }
     else if (object instanceof Event || object instanceof Dom.EventCopy)
         { return domMemberCache.Event; }
+    else if (Array.isArray(object))
+        { return domMemberCache.Array; }
 
     return null;
 };
@@ -1704,6 +1729,7 @@ domMemberMap.Window =
 
     "speechSynthesis",
     "requestAnimationFrame",
+    "cancelAnimationFrame",
 ];
 
 domMemberMap.Location =
@@ -2462,6 +2488,11 @@ domMemberMap.Event =
     "stopPropagation"
 ];
 
+domMemberMap.Array = Object.getOwnPropertyNames(Array.prototype).filter(function(name)
+{
+    return name !== "length";
+});
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Dom.domConstantMap =
@@ -2760,6 +2791,16 @@ Dom.domInlineEventHandlersMap =
     "onmozpointerlockchange": 1,
     "onmozpointerlockerror": 1,
     "onuserproximity": 1,
+    "ongotpointercapture": 1,
+    "onlostpointercapture": 1,
+    "onpointercancel": 1,
+    "onpointerdown": 1,
+    "onpointerenter": 1,
+    "onpointerleave": 1,
+    "onpointermove": 1,
+    "onpointerout": 1,
+    "onpointerover": 1,
+    "onpointerup": 1,
     "onwheel": 1
 };
 

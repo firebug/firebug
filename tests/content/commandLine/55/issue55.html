@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <title>Issue 55: Auto-completion for Command Editor</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+      <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+      <script>
+var myobj = {prop1: 1, prop2: 2};
+      </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="https://code.google.com/p/fbug/issues/detail?id=55">Issue 55</a>: Auto-completion for Command Editor</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug.</li>
+                    <li>Enable and switch to the the <em>Console</em> panel.</li>
+                    <li>Type: <code>
+function fun(anArgument1) { function fun2(anArgument2) {
+} anArg
+</code> into the Command Editor.</li>
+                    <li>Press tab -&gt; it should auto-complete to "anArgument1".</li>
+                    <li>Clear the editor, and type <code>myobj.prop</code> and press tab
+                    -&gt; an auto-completion popup should be displayed.</li>
+                    <li>Press down arrow and then tab -&gt; it should auto-complete to "prop2".</li>
+                    <li>Clear the editor, type <code>document.getelementbyi</code> and put focus after "get".</li>
+                    <li>Press tab -&gt; it should auto-complete to "getElementById".</li>
+                    <li>Clear the editor, type <code>document.gete</code> and put focus at the beginning of line.</li>
+                    <li>Press tab -&gt; a tab should be entered.</li>
+                    <li>Clear the editor, type <code>document.get</code> and select the last character.</li>
+                    <li>Press tab -&gt; the line should be indented with no change to the selection.</li>
+                </ol>
+            </section>
+            <footer>
+                Simon Lindholm, simon.lindholm10@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>

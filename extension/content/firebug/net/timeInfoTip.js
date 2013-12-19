@@ -2,17 +2,19 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/rep",
     "firebug/lib/domplate",
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/net/netUtils",
     "firebug/lib/dom",
 ],
-function(Firebug, Domplate, Locale, Str, NetUtils, Dom) {
-with (Domplate) {
+function(Firebug, Rep, Domplate, Locale, Str, NetUtils, Dom) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, DIV, SPAN, TD, TR, TABLE, TBODY, P, A} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -25,7 +27,7 @@ const Cr = Components.results;
  * @domplate This template is used to render an info tip with detailed timing for network
  * requests. The info tip is used on the Net panel.
  */
-var TimeInfoTip = domplate(Firebug.Rep,
+var TimeInfoTip = domplate(Rep,
 {
     startTimeTag:
         TABLE({"class": "timeInfoTip"},
@@ -257,4 +259,4 @@ function calculatePos(time, elapsed)
 return TimeInfoTip;
 
 // ********************************************************************************************* //
-}});
+});

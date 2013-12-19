@@ -1,6 +1,123 @@
+/* xxxHonza: This should be removed, fix me: issue 471 */
 @import "chrome://firebug/skin/win/firebug.css";
 
 /* Add some basic padding to the completion popup (missing on Linux). */
 .userTypedText {
     margin-left: 1px;
 }
+
+#fbToolbox {
+    -moz-appearance: none;
+    background-color: rgb(240, 240, 240);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    border-bottom: 1px solid #A0A0A0;
+}
+
+#fbPanelBar1 toolbarbutton {
+    color: #000000;
+    font-size: 12.5px;
+}
+
+#fbCommandEditorHistoryButton[disabled="true"] {
+    color: graytext;
+}
+
+#fbPanelSplitter > #fbPanelSplitterBox,
+#fbPanelBar2-tabBox {
+    height: 32px;
+}
+
+#fbCommandArrow {
+    font-size: 12px;
+}
+
+#fbCommandBox {
+    height: 21px;
+}
+
+.fbCommandLine {
+    padding-bottom: 2px;
+}
+
+#fbToggleCommandEditorBox {
+    margin-bottom: 1px;
+}
+
+#fbCommandToolbar {
+    height: 31px;
+}
+
+panelTab {
+    font-size: 12px;
+}
+
+.fbsearch-splitter {
+    margin-right: 2px;
+}
+
+/*************************************************************************************************/
+/* Override Australis Styles coming from Win theme xxxHonza: fix me issue 471 */
+
+panelTab[selected="true"] {
+    border: 1px solid #A0A0A0;
+    border-bottom: 1px solid rgb(253, 253, 253);
+    background-color: rgb(253, 253, 253);
+    color: inherit;
+}
+
+panelTab:not([selected="true"]):hover {
+    border: 1px solid #C8C8C8;
+    border-bottom: 1px solid transparent;
+    backround-color: transparent;
+}
+
+#fbPanelBar1-panelTabs panelTab,
+#fbPanelBar2-panelTabs panelTab {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+#fbPanelBar1-tabBoxBackground,
+#fbPanelBar2-tabBoxBackground {
+    border-bottom: 1px solid #A0A0A0;
+}
+
+#fbPanelBar1-tabBoxBackground {
+    background-color: rgb(240, 240, 240);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.2));
+}
+
+#fbPanelBar2-tabBoxBackground {
+    background-color: rgb(240, 240, 240);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    border-bottom: 1px solid #A0A0A0;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#fbCommandToolbar {
+    background-color: rgb(240, 240, 240);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    border-bottom: 1px solid #A0A0A0;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#fbPanelSplitter > #fbPanelSplitterBox {
+    background-color: rgb(240, 240, 240);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    border-bottom: 1px solid #A0A0A0;
+}
+
+/*************************************************************************************************/
+/* Search Box */
+
+.fbsearch-textbox {
+    border: 1px solid #96969D;
+}
+
+.fbsearch-options-buttons {
+    border: 1px solid ThreeDShadow;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

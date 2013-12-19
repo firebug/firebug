@@ -1,17 +1,21 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/events",
-    "firebug/chrome/menu",
     "firebug/lib/dom",
     "firebug/lib/locale",
     "firebug/lib/css",
     "firebug/lib/options",
+    "firebug/chrome/module",
+    "firebug/chrome/menu",
+    "firebug/console/autoCompleter",
     "firebug/editor/sourceEditor",
 ],
-function(Obj, Firebug, Events, Menu, Dom, Locale, Css, Options, SourceEditor) {
+function(Firebug, FBTrace, Obj, Events, Dom, Locale, Css, Options, Module, Menu, AutoCompleter,
+    SourceEditor) {
 
 "use strict";
 
@@ -24,7 +28,7 @@ var TEXT_CHANGED = SourceEditor.Events.textChange;
 // ********************************************************************************************* //
 // Command Editor
 
-Firebug.CommandEditor = Obj.extend(Firebug.Module,
+Firebug.CommandEditor = Obj.extend(Module,
 {
     dispatchName: "commandEditor",
 
@@ -32,35 +36,27 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         if (this.editor)
             return;
-
-        // The current implementation of the SourceEditor (based on Orion) doesn't
-        // support zooming. So, the TextEditor (based on textarea) can be used
-        // by setting extensions.firebug.enableOrion pref to false.
-        // See issue 5678
-        // xxxFashid:This(Support zooming) should be tested with Codemirror.
-        /*if (typeof(SourceEditor) != "undefined" && Options.get("enableOrion"))
-            this.editor = new SourceEditor();
-        else
-            this.editor = new TextEditor();*/
 
         this.editor = new SourceEditor();
 
         var config =
         {
             mode: "javascript",
-            lineNumbers: false,
+            lineNumbers: true,
             readOnly: false,
-            gutters: []
+            gutters: [],
         };
 
         // Custom shortcuts for source editor
         config.extraKeys = {
             "Ctrl-Enter": this.onExecute.bind(this),
-            "Esc": this.onEscape.bind(this)
+            "Esc": this.onEscape.bind(this),
+            "Ctrl-Space": this.autoComplete.bind(this, true),
+            "Tab": this.onTab.bind(this)
         };
 
         function browserLoaded(event)
@@ -129,6 +125,23 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         return true;
     },
 
+    autoComplete: function(allowGlobal)
+    {
+        var context = Firebug.currentContext;
+        var out = {};
+        var hintFunction = AutoCompleter.codeMirrorAutoComplete
+            .bind(null, context, allowGlobal, out);
+        this.editor.autoComplete(hintFunction);
+        return out.attemptedCompletion;
+    },
+
+    onTab: function()
+    {
+        if (!this.editor.hasSelection() && this.autoComplete(false))
+            return;
+        this.editor.tab();
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Other Events
 
@@ -147,28 +160,18 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
     onContextMenu: function(event)
     {
+        Events.cancelEvent(event);
+
         var popup = document.getElementById("fbCommandEditorPopup");
         Dom.eraseNode(popup);
 
-        var items = Firebug.CommandEditor.getContextMenuItems();
+        var items = Firebug.CommandEditor.editor.getContextMenuItems();
         Menu.createMenuItems(popup, items);
 
         if (!popup.childNodes.length)
             return;
 
         popup.openPopupAtScreen(event.screenX, event.screenY, true);
-    },
-
-    getContextMenuItems: function()
-    {
-        var items = [];
-        items.push({label: Locale.$STR("Cut"), commandID: "cmd_cut"});
-        items.push({label: Locale.$STR("Copy"), commandID: "cmd_copy"});
-        items.push({label: Locale.$STR("Paste"), commandID: "cmd_paste"});
-        items.push({label: Locale.$STR("Delete"), commandID: "cmd_delete"});
-        items.push("-");
-        items.push({label: Locale.$STR("SelectAll"), commandID: "cmd_selectAll"});
-        return items;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -204,6 +207,12 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
     {
         if (this.editor)
             this.editor.setSelection(start, end);
+    },
+
+    getSelection: function()
+    {
+        if (this.editor)
+            return this.editor.getSelection();
     },
 
     select: function()
@@ -257,9 +266,9 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (!this.editor)
             return;
 
-        // The source editor doesn't have to be initialized at this point.
         if (this.editor instanceof SourceEditor)
         {
+            // The source editor doesn't have to be initialized at this point.
             if (!this.editor.isInitialized())
             {
                 if (FBTrace.DBG_ERRORS)
@@ -276,6 +285,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         }
         else
         {
+            // support for TextEditor, not used at the moment
             this.editor.textBox.style.fontSizeAdjust = adjust;
         }
     }
@@ -298,8 +308,8 @@ Firebug.CommandEditor.__defineSetter__("value", function(val)
 // Text Editor
 
 /**
- * A simple <textbox> element is used in environments where the Orion SourceEditor is not
- * available (such as SeaMonkey)
+ * A text editor based on a simple <textbox> element. Not currently used.
+ * TODO get rid of this if CodeMirror works well enough.
  */
 function TextEditor() {}
 TextEditor.prototype =
@@ -360,7 +370,7 @@ TextEditor.prototype =
         return this.textBox.value;
     },
 
-    setSelection: function(start, end)
+    setSelectionRange: function(start, end)
     {
         this.textBox.setSelectionRange(start, end);
     },

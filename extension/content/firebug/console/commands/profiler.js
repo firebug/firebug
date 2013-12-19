@@ -1,26 +1,29 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
-    "firebug/lib/trace",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/domplate",
-    "firebug/chrome/reps",
     "firebug/lib/locale",
-    "firebug/lib/wrapper",
     "firebug/lib/url",
-    "firebug/debugger/stack/stackFrame",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/string",
+    "firebug/chrome/reps",
+    "firebug/chrome/module",
+    "firebug/chrome/rep",
+    "firebug/debugger/stack/stackFrame",
     "firebug/console/profilerEngine",
 ],
-function(Obj, FBTrace, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url, StackFrame, Events,
-    Css, Dom, Str, ProfilerEngine) {
+function(Firebug, FBTrace, Obj, Domplate, Locale, Url, Events, Css, Dom, Str,
+    FirebugReps, Module, Rep, StackFrame, ProfilerEngine) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, TAG, DIV, SPAN, TD, TR, TH, TABLE, THEAD, TBODY, P, UL, LI, A} = Domplate;
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
@@ -32,11 +35,20 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // ********************************************************************************************* //
 // Profiler
 
-var Profiler = Obj.extend(Firebug.Module,
+/**
+ * @module
+ */
+var Profiler = Obj.extend(Module,
+/** @lends Profiler */
 {
     dispatchName: "profiler",
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     profilerEnabled: false,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
 
     initialize: function()
     {
@@ -58,8 +70,8 @@ var Profiler = Obj.extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
-        if (FBTrace.DBG_PROFILER)
-            FBTrace.sysout("Profiler.showPanel");
+        Trace.sysout("Profiler.showPanel;");
+
         this.setEnabled();
     },
 
@@ -121,13 +133,13 @@ var Profiler = Obj.extend(Firebug.Module,
 
     startProfiling: function(context, title)
     {
+        if (context.profiling)
+            return;
+
         context.profiling = new ProfilerEngine(context);
         context.profiling.startProfiling();
 
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleProfiling", "checked", "true");
-
-        if (context.profiling)
-            return;
 
         var originalTitle = title;
         var isCustomMessage = !!title;
@@ -231,12 +243,12 @@ var Profiler = Obj.extend(Firebug.Module,
             }
         }});
 
-        for (var i = 0; i < calls.length; ++i)
+        for (var i = 0; i < calls.length; i++)
             calls[i].percent = Math.round((calls[i].totalOwnTime/totalTime) * 100 * 100) / 100;
 
         calls.sort(function(a, b)
         {
-           return a.totalOwnTime < b.totalOwnTime ? 1 : -1;
+            return a.totalOwnTime < b.totalOwnTime ? 1 : -1;
         });
 
         totalTime = Math.round(totalTime * 1000) / 1000;
@@ -265,7 +277,7 @@ var Profiler = Obj.extend(Firebug.Module,
             var tag = Profiler.ProfileCall.tag;
             var insert = tag.insertRows;
 
-            for (var i = 0; i < calls.length; ++i)
+            for (var i = 0; i < calls.length; i++)
             {
                 calls[i].index = i;
                 context.throttle(insert, tag, [{object: calls[i]}, tHeader]);
@@ -293,6 +305,7 @@ var Profiler = Obj.extend(Firebug.Module,
             Firebug.Console.logFormatted([msg], context, "warn");
             return;
         }
+
         Firebug.Profiler.startProfiling(context, title);
     },
 
@@ -306,7 +319,6 @@ var Profiler = Obj.extend(Firebug.Module,
 // ********************************************************************************************* //
 // Domplate Templates
 
-with (Domplate) {
 Profiler.ProfileTable = domplate(
 {
     tag:
@@ -379,7 +391,7 @@ Profiler.ProfileTable = domplate(
 
         var colIndex = 0;
         for (header = header.previousSibling; header; header = header.previousSibling)
-            ++colIndex;
+            colIndex++;
 
         this.sort(table, colIndex, numerical);
     },
@@ -394,7 +406,7 @@ Profiler.ProfileTable = domplate(
 
             header.sorted = -1;
 
-            for (var i = 0; i < values.length; ++i)
+            for (var i = 0; i < values.length; i++)
                 tbody.appendChild(values[i].row);
         },
 
@@ -406,7 +418,7 @@ Profiler.ProfileTable = domplate(
 
           header.sorted = 1;
 
-          for (var i = values.length-1; i >= 0; --i)
+          for (var i = values.length-1; i >= 0; i--)
               tbody.appendChild(values[i].row);
         };
 
@@ -435,31 +447,23 @@ Profiler.ProfileTable = domplate(
         if (numerical)
         {
             if (!header.sorted || header.sorted == -1)
-            {
                 sortDescending();
-            }
             else
-            {
                 sortAscending();
-            }
         }
         else
         {
             if (!header.sorted || header.sorted == -1)
-            {
                 sortAscending();
-            }
             else
-            {
                 sortDescending();
-            }
         }
     }
 });
 
 // ********************************************************************************************* //
 
-Profiler.ProfileCaption = domplate(Firebug.Rep,
+Profiler.ProfileCaption = domplate(Rep,
 {
     tag:
         SPAN({"class": "profileTitle", "role": "status"},
@@ -475,8 +479,12 @@ Profiler.ProfileCaption = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-Profiler.ProfileCall = domplate(Firebug.Rep,
+Profiler.ProfileCall = domplate(Rep,
 {
+    className: "profile",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     tag:
         TR({"class": "focusRow profileRow subFocusRow", "role": "row"},
             TD({"class": "profileCell", "role": "presentation"},
@@ -518,8 +526,6 @@ Profiler.ProfileCall = domplate(Firebug.Rep,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    className: "profile",
-
     supportsObject: function(object, type)
     {
         return object instanceof ProfileCall;
@@ -540,19 +546,24 @@ Profiler.ProfileCall = domplate(Firebug.Rep,
         }
         catch (exc)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("profiler.getTooltip FAILS ", exc);
+            TraceError.sysout("profiler.getTooltip; EXCEPTION " + exc, exc);
         }
     },
 
     getContextMenuItems: function(call, target, context)
     {
+        // XXX This code used to grab a dummy function object off the JSD1 script,
+        // and use it to generate a function-specific context menu. This is both
+        // broken (you can get Firefox crashes from calling the function) and
+        // impossible in a JSD2 world. We need some code for generating context
+        // menus from Debugger.Script's here.
+
+        /*
         var fn = Wrapper.unwrapIValue(call.script.functionObject);
         return FirebugReps.Func.getContextMenuItems(fn, call.script, context);
+        */
     }
 });
-
-} // END Domplate
 
 // ********************************************************************************************* //
 

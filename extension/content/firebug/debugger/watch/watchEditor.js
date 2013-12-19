@@ -1,14 +1,12 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
-    "firebug/firebug",
     "firebug/lib/domplate",
     "firebug/lib/events",
     "firebug/lib/dom",
-    "firebug/lib/css",
+    "firebug/console/inlineJSEditor",
 ],
-function(Obj, Firebug, Domplate, Events, Dom, Css) {
+function(Domplate, Events, Dom, JSEditor) {
 
 "use strict";
 
@@ -18,7 +16,7 @@ function(Obj, Firebug, Domplate, Events, Dom, Css) {
 var {domplate, DIV, INPUT} = Domplate;
 
 // ********************************************************************************************* //
-// Local Helpers
+// Watch Editor
 
 function WatchEditor(doc)
 {
@@ -33,7 +31,7 @@ function WatchEditor(doc)
     this.setupCompleter(completionBox, options);
 }
 
-WatchEditor.prototype = domplate(Firebug.JSEditor.prototype,
+WatchEditor.prototype = domplate(JSEditor.prototype,
 {
     tag:
         DIV({style: "position: absolute;"},
@@ -56,7 +54,7 @@ WatchEditor.prototype = domplate(Firebug.JSEditor.prototype,
 
         if (!row)
             this.panel.addWatch(value);
-        else if (Css.hasClass(row, "watchRow"))
+        else if (row.classList.contains("watchRow"))
             this.panel.setWatchValue(row, value);
         else
             this.panel.setPropertyValue(row, value);

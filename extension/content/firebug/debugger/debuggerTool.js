@@ -1,23 +1,21 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/array",
-    "firebug/lib/tool",
-    "arch/compilationunit",
+    "firebug/lib/options",
+    "firebug/chrome/tool",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/stack/stackTrace",
-    "firebug/remoting/debuggerClientModule",
     "firebug/debugger/clients/clientCache",
-    "firebug/debugger/script/sourceFile",
-    "firebug/lib/options",
-    "firebug/debugger/debuggerLib",
-    "firebug/debugger/breakpoints/breakpointStore",
+    "arch/compilationunit",
 ],
-function (Obj, Firebug, FBTrace, Arr, Tool, CompilationUnit, StackFrame, StackTrace,
-    DebuggerClientModule, ClientCache, SourceFile, Options, DebuggerLib, BreakpointStore) {
+function (Firebug, FBTrace, Obj, Arr, Options, Tool, StackFrame, StackTrace,
+    ClientCache, CompilationUnit) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -37,10 +35,8 @@ function DebuggerTool(context)
  * @object DebuggerTool object is automatically instantiated by the framework for each
  * context. Reference to the current context is passed to the constructor. Life cycle
  * of a tool object is the same as for a panel, but tool doesn't have any UI.
- *
- * xxxHonza: It should be derived from Tool base class.
  */
-DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
+DebuggerTool.prototype = Obj.extend(new Tool(),
 /** @lends DebuggerTool */
 {
     dispatchName: "DebuggerTool",
@@ -48,15 +44,21 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
-    attach: function(reload)
+    /**
+     * Executed by the framework when Firebug is attached to the {@ThreadClient}. The event
+     * is dispatched by {@DebuggerClientTab}. Note that the debugger is paused at this
+     * moment but {@TabContext.stopped} is not set (and of course there is no current frame).
+     * {@DebuggerClientTab} is responsible for resuming the debugger after the 'onThreadAttached'
+     * event is handled by all listeners.
+     *
+     * @param {Boolean} reload Set to true if the current page has been just reloaded. In such
+     * case we are still attached to the same {@ThreadClient} object.
+     */
+    onAttach: function(reload)
     {
         Trace.sysout("debuggerTool.attach; context ID: " + this.context.getId());
 
         this.attachListeners();
-
-        // Get scripts from the server. Source as fetched on demand (e.g. when
-        // displayed in the Script panel).
-        this.updateScriptFiles();
 
         // Initialize break on exception feature. This must be done only once when the thread
         // client is created not when page reload happens. Note that the same instance of the
@@ -64,10 +66,10 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         // Since ThreadClient.pauseOnException is calling interrupt+resume if the thread
         // is not paused.
         if (!reload)
-            this.breakOnExceptions(Options.get("breakOnExceptions"));
+            this.updateBreakOnErrors();
     },
 
-    detach: function()
+    onDetach: function()
     {
         Trace.sysout("debuggerTool.detach; context ID: " + this.context.getId());
 
@@ -102,10 +104,6 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     attachListeners: function()
     {
-        // Bail out if listeners are already attached.
-        if (this._onPause)
-            return;
-
         // This is the place where we bind all listeners to the current
         // context so, it's available inside the methods.
         this._onPause = this.paused.bind(this);
@@ -113,7 +111,6 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         this._onResumed = this.resumed.bind(this);
         this._onFramesAdded = this.framesadded.bind(this);
         this._onFramesCleared = this.framescleared.bind(this);
-        this._onNewScript = this.newScript.bind(this);
 
         // Add all listeners
         this.context.activeThread.addListener("paused", this._onPause);
@@ -123,16 +120,10 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         // These events are used to sync with ThreadClient's stack frame cache.
         this.context.activeThread.addListener("framesadded", this._onFramesAdded);
         this.context.activeThread.addListener("framescleared", this._onFramesCleared);
-
-        DebuggerClientModule.client.addListener("newSource", this._onNewScript);
     },
 
     detachListeners: function()
     {
-        // Bail out if listeners are already detached.
-        if (!this._onPause)
-            return;
-
         // Remove all listeners from the current ThreadClient
         this.context.activeThread.removeListener("paused", this._onPause);
         this.context.activeThread.removeListener("detached", this._onDetached);
@@ -140,92 +131,11 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         this.context.activeThread.removeListener("framesadded", this._onFramesAdded);
         this.context.activeThread.removeListener("framescleared", this._onFramesCleared);
 
-        DebuggerClientModule.client.removeListener("newSource", this._onNewScript);
-
         this._onPause = null;
         this._onDetached = null;
         this._onResumed = null;
         this._onFramesAdded = null;
         this._onFramesCleared = null;
-        this._onNewScript = null;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Script Sources
-
-    updateScriptFiles: function()
-    {
-        Trace.sysout("debuggerTool.updateScriptFiles; context id: " + this.context.getId());
-
-        var self = this;
-        this.context.activeThread.getSources(function(response)
-        {
-            // The tool is already destroyed so, bail out.
-            if (!self._onPause)
-                return;
-
-            var sources = response.sources;
-            for (var i=0; i<sources.length; i++)
-                self.addScript(sources[i]);
-        });
-    },
-
-    newScript: function(type, response)
-    {
-        Trace.sysout("debuggerTool.newScript; context id: " + this.context.getId() +
-            ", script url: " + response.source.url, response);
-
-        // Ignore scripts coming from different threads.
-        // This is because 'newScript' listener is registered in 'DebuggerClient' not
-        // in 'ThreadClient'.
-        if (this.context.activeThread.actor != response.from)
-        {
-            Trace.sysout("debuggerTool.newScript; coming from different thread");
-            return;
-        }
-
-        this.addScript(response.source);
-    },
-
-    addScript: function(script)
-    {
-        // Ignore scripts generated from 'clientEvaluate' packets. These scripts are
-        // created e.g. as the user is evaluating expressions in the watch window.
-        if (DebuggerLib.isFrameLocationEval(script.url))
-        {
-            Trace.sysout("debuggerTool.addScript; A script ignored " + script.type);
-            return;
-        }
-
-        if (!this.context.sourceFileMap)
-        {
-            TraceError.sysout("debuggerTool.addScript; ERROR Source File Map is NULL", script);
-            return;
-        }
-
-        // xxxHonza: Ignore inner scripts for now
-        if (this.context.sourceFileMap[script.url])
-        {
-            Trace.sysout("debuggerTool.addScript; A script ignored: " + script.url, script);
-            return;
-        }
-
-        // Create a source file and append it into the context. This is the only
-        // place where an instance of {@SourceFile} is created.
-        var sourceFile = new SourceFile(this.context, script.actor, script.url,
-            script.isBlackBoxed);
-
-        this.context.addSourceFile(sourceFile);
-
-        // xxxHonza: workaround for issue 6870, should be removed
-        // as soon as the platform is fixed.
-        var bps = BreakpointStore.getBreakpoints(sourceFile.href);
-        var tool = this.context.getTool("breakpoint");
-        tool.setBreakpoints(bps);
-
-        // Notify listeners (e.g. the Script panel) to updated itself. It can happen
-        // that the Script panel has been empty until now and need to display a script.
-        this.dispatch("newScript", [sourceFile]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -238,6 +148,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         Trace.sysout("debuggerTool.paused; " + type + ", " + where.url +
             " (" + where.line + "), context ID: " + this.context.getId(), packet);
 
+        // We ignore cases when the debugger is paused because breakpoints need to be set.
         var ignoreTypes = {
             "interrupted": 1,
         };
@@ -255,17 +166,18 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
         if (ignoreTypes[type])
         {
-            FBTrace.sysout("debuggerTool.paused; Type ignored " + type, packet);
+            Trace.sysout("debuggerTool.paused; Type ignored " + type, packet);
             return;
         }
-
-        this.context.clientCache.clear();
 
         if (!packet.frame)
         {
-            FBTrace.sysout("debuggerTool.paused; ERROR no frame!", packet);
+            TraceError.sysout("debuggerTool.paused; ERROR no frame, type: " + type, packet);
             return;
         }
+
+        if (this.context.clientCache)
+            this.context.clientCache.clear();
 
         // xxxHonza: this check should go somewhere else.
         // xxxHonza: this might be also done by removing/adding listeners.
@@ -290,6 +202,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         var frame = StackFrame.buildStackFrame(packet.frame, this.context);
         this.context.stoppedFrame = frame;
         this.context.currentFrame = frame;
+        this.context.currentPacket = packet;
         this.context.stopped = true;
         this.context.currentPauseActor = packet.actor;
 
@@ -314,7 +227,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
         // Asynchronously initializes ThreadClient's stack frame cache. If you want to
         // sync with the cache handle 'framesadded' and 'framescleared' events.
-        // This is done after we know that the debugger is going to pause now.
+        // This is done after we know that the debugger is paused.
         this.context.activeThread.fillFrames(50);
 
         // Panels are created when first used by the user, but in this case we need to break
@@ -340,7 +253,15 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     resumed: function()
     {
-        Trace.sysout("debuggerTool.resumed; ", arguments);
+        Trace.sysout("debuggerTool.resumed; currently stopped: " +
+            this.context.stopped, arguments);
+
+        // When Firebug is attached to the {@ThreadClient} object the debugger is paused.
+        // As soon as all initialization steps are done {@DebuggerClientTab} resumes the
+        // debugger. In such case the {@TabContext} object isn't stopped and there is no
+        // current frame, so we just ignore the event here.
+        if (!this.context.stopped)
+            return;
 
         if (this.context.clientCache)
             this.context.clientCache.clear();
@@ -349,6 +270,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         this.context.stoppedFrame = null;
         this.context.currentFrame = null;
         this.context.currentTrace = null;
+        this.context.currentPacket = null;
 
         this.dispatch("onStopDebugging", [this.context]);
     },
@@ -357,7 +279,8 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
     {
         Trace.sysout("debuggerTool.detached; ", arguments);
 
-        this.context.clientCache.clear();
+        if (this.context.clientCache)
+            this.context.clientCache.clear();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -368,9 +291,20 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         // Get frames from ThreadClient's stack-frame cache and build stack trace object,
         // which is stored in the context.
         var frames = this.context.activeThread.cachedFrames;
+
         Trace.sysout("debuggerTool.framesadded; frames: ", frames);
 
-        this.context.currentTrace = StackTrace.buildStackTrace(this.context, frames);
+        var trace = StackTrace.buildStackTrace(this.context, frames);
+        this.context.currentTrace = trace;
+
+        // Might be already set from within paused() method. It's only null if the current
+        // frames have been refreshed through cleanScopes();
+        if (!this.context.currentFrame)
+        {
+            var frame = trace.getTopFrame();
+            this.context.stoppedFrame = frame;
+            this.context.currentFrame = frame;
+        }
 
         // Now notify all listeners, for example the {@CallstackPanel} panel to sync the UI.
         this.dispatch("framesadded", [this.context.currentTrace]);
@@ -378,11 +312,24 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     framescleared: function()
     {
-        Trace.sysout("debuggerTool.framescleared; ", arguments);
+        Trace.sysout("debuggerTool.framescleared;", arguments);
 
         this.context.currentTrace = null;
+        this.context.stoppedFrame = null;
+        this.context.currentFrame = null;
 
         this.dispatch("framescleared");
+    },
+
+    cleanScopes: function()
+    {
+        Trace.sysout("debuggerTool.cleanScopes;");
+
+        if (this.context.activeThread)
+        {
+            this.context.activeThread._clearFrames();
+            this.context.activeThread.fillFrames(50);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -464,7 +411,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
         // xxxHonza: can this happen?
         if (this.context.evalCallback)
-            FBTrace.sysout("debuggerTool.eval; ERROR unhandled case!");
+            TraceError.sysout("debuggerTool.eval; ERROR unhandled case!");
 
         // Will be executed when 'clientEvaluated' packet is received, see paused() method.
         if (callback)
@@ -524,15 +471,20 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Break On Exceptions
 
-    breakOnExceptions: function(pause)
+    updateBreakOnErrors: function()
     {
+        // Either 'breakOnExceptions' option can be set (from within the Script panel options
+        // menu) or 'break on next' (BON) can be activated (on the Console panel).
+        var pause = Options.get("breakOnExceptions") || this.context.breakOnErrors;
         var ignore = Options.get("ignoreCaughtExceptions");
 
-        Trace.sysout("debuggerTool.breakOnExceptions; " + pause + ", " + ignore);
+        Trace.sysout("debuggerTool.updateBreakOnErrors; break on errors: " + pause +
+            ", ignore: " + ignore + ", thread paused: " + this.context.activeThread.paused +
+            ", context stopped: " + this.context.stopped);
 
         return this.context.activeThread.pauseOnExceptions(pause, ignore, function(response)
         {
-            Trace.sysout("debuggerTool.breakOnExceptions; response received: ", response);
+            Trace.sysout("debuggerTool.updateBreakOnErrors; response received:", response);
         });
     },
 });

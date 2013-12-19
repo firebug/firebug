@@ -53,7 +53,7 @@ RDP.ThreadStateTypes = {
  * by the client.
  */
 RDP.UnsolicitedNotifications = {
-  "newScript": "newScript",
+  "newSource": "newSource",
   "tabDetached": "tabDetached",
   "tabNavigated": "tabNavigated"
 };

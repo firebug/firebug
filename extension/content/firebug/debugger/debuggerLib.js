@@ -1,12 +1,12 @@
 /* See license.txt for terms of usage */
-/*jshint esnext:true, es5:true, curly:false*/
-/*global FBTrace:true, Components:true, define:true */
+/*global define:1, Components:1*/
 
 define([
     "firebug/lib/trace",
     "firebug/lib/wrapper",
+    "firebug/lib/xpcom",
 ],
-function(FBTrace, Wrapper) {
+function(FBTrace, Wrapper, Xpcom) {
 
 "use strict";
 
@@ -14,6 +14,10 @@ function(FBTrace, Wrapper) {
 // Constants
 
 var Cu = Components.utils;
+
+var comparator = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
+var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+var pre27 = (comparator.compare(appInfo.version, "27.0*") < 0);
 
 // Debuggees
 var dbgGlobalWeakMap = new WeakMap();
@@ -30,13 +34,12 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // as RDP is supported the entire DebuggerLib module should be used only on the server side.
 
 /**
- * Unwraps the value of a debuggee object.
+ * Unwraps the value of a debuggee object. Primitive values are also allowed
+ * and are let through unharmed.
  *
- * @param obj {Debugger.Object} The debuggee object to unwrap
- * @param global {Window} The unwrapped global (window)
- * @param dbgGlobal {Debugger.Object} The debuggee global object
+ * @param obj {Debugger.Object} The debuggee object to unwrap, or a primitive
  *
- * @return {object} the unwrapped object
+ * @return {object} the unwrapped object, or the same primitive
  */
 DebuggerLib.unwrapDebuggeeValue = function(obj)
 {
@@ -50,8 +53,8 @@ DebuggerLib.unwrapDebuggeeValue = function(obj)
 /**
  * Gets or creates the debuggee global for the given global object
  *
- * @param {Window} global The global object
  * @param {*} context The Firebug context
+ * @param {Window} global The global object
  *
  * @return {Debuggee Window} The debuggee global
  */
@@ -70,14 +73,55 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
         // As a workaround, we unwrap the global object.
         // TODO see what cause that behavior, why, and if there are no other add-ons in that case.
         var contentView = Wrapper.getContentView(global);
-        dbgGlobal = dbg.addDebuggee(contentView);
-        dbg.removeDebuggee(contentView);
+        if (dbg.makeGlobalObjectReference)
+        {
+            dbgGlobal = dbg.makeGlobalObjectReference(contentView);
+        }
+        else
+        {
+            dbgGlobal = dbg.addDebuggee(contentView);
+            dbg.removeDebuggee(contentView);
+        }
         dbgGlobalWeakMap.set(global.document, dbgGlobal);
 
         if (FBTrace.DBG_DEBUGGER)
             FBTrace.sysout("new debuggee global instance created", dbgGlobal);
     }
     return dbgGlobal;
+};
+
+// temporary version-dependent check, should be removed when minVersion = 27
+DebuggerLib._closureInspectionRequiresDebugger = function()
+{
+    return !pre27;
+};
+
+/**
+ * Runs a callback with a debugger for a global temporarily enabled.
+ *
+ * Currently this throws an exception unless the Script panel is enabled, because
+ * otherwise debug GCs kill us.
+ */
+DebuggerLib.withTemporaryDebugger = function(context, global, callback)
+{
+    // Pre Fx27, cheat and pass a disabled debugger, because closure inspection
+    // works with disabled debuggers, and that's all we need this API for.
+    if (!DebuggerLib._closureInspectionRequiresDebugger())
+        return callback(DebuggerLib.getDebuggeeGlobal(context, global));
+
+    var dbg = getInactiveDebuggerForContext(context);
+    if (dbg.hasDebuggee(global))
+        return callback(DebuggerLib.getDebuggeeGlobal(context, global));
+
+    var dbgGlobal = dbg.addDebuggee(global);
+    try
+    {
+        return callback(dbgGlobal);
+    }
+    finally
+    {
+        dbg.removeDebuggee(dbgGlobal);
+    }
 };
 
 /**
@@ -93,7 +137,7 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
 DebuggerLib.isFrameLocationEval = function(frameFilename)
 {
     return frameFilename === "debugger eval code" || frameFilename === "self-hosted";
-}
+};
 
 // ********************************************************************************************* //
 // Local Access (hack for easier transition to JSD2/RDP)
@@ -188,7 +232,7 @@ function onFrames(aRequest)
     var count = aRequest.count;
 
     // Find the starting frame...
-    var frame = this._youngestFrame;
+    var frame = this.youngestFrame;
     var i = 0;
     while (frame && (i < start))
     {
@@ -279,6 +323,51 @@ DebuggerLib.isExecutableLine = function(context, location)
 
     return false;
 }
+
+// ********************************************************************************************* //
+// Scopes (+ this + frame result value)
+
+/**
+ * If the debugger is stopped and has reached a return / yield statement or an exception,
+ * return the Frame Result type and value of it. Otherwise, return null.
+ *
+ * The object returned has this form: {type: <type>, value: <frame result value>}
+ *
+ * If the debugger has reached a return statement, <type> is "return".
+ * If an exception has been raised, <type> is "exception".
+ *
+ * @param {object} context
+ *
+ * @return {object}
+ */
+DebuggerLib.getFrameResultObject = function(context)
+{
+    if (!context.stopped || !context.currentPacket || !context.currentPacket.why)
+        return null;
+
+    var frameFinished = context.currentPacket.why.frameFinished;
+    if (!frameFinished)
+        return null;
+
+    var type = null;
+    var value = null;
+
+    if ("return" in frameFinished)
+    {
+        type = "return";
+        value = frameFinished.return;
+    }
+    else if ("throw" in frameFinished)
+    {
+        type = "exception";
+        value = frameFinished.throw;
+    }
+
+    return {
+        type: type,
+        value: value,
+    };
+};
 
 // ********************************************************************************************* //
 // Debugger

@@ -18,41 +18,26 @@
     background-image: url("chrome://firebug/skin/tabbar/tab-hover-bkgnd.png");
 }
 /* end overrides */
-
-#fbFirebugMenu {
-    margin-bottom: 1px;
-    opacity: 0.8;
-}
-
-
-#fbFirebugMenu:hover,
-#fbFirebugMenu[open="true"] {
-    opacity: 1.0;
-}
-
 #fbFirebugMenu > .toolbarbutton-text,
 #fbFirebugMenu > .toolbarbutton-menu-dropmarker {
     display: none;
 }
 
-.toolbar-text-button,
-.toolbar-text-menubutton {
-    padding: 3px 6px;
+toolbarbutton {
+    padding: 2px 6px;
     color: #000000;
 }
 
 .toolbar-text-button[disabled="true"],
-.toolbar-text-menubutton[disabled="true"] {
+.toolbar-text-menubutton[disabled="true"],
+toolbarbutton[type="menu"][disabled="true"] {
     color: graytext;
 }
 
-.toolbar-text-button[checked="true"] {
-    padding: 3px 6px !important;
-}
-
-.toolbar-text-button > .toolbarbutton-icon,
-.toolbar-text-menubutton > .toolbarbutton-icon {
-    /*display: none;*/
+.toolbar-text-button > .toolbarbutton-icon:not([src]),
+.toolbar-text-menubutton > .toolbarbutton-icon:not([src]),
+toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
+    display: none;
 }
 
 .toolbar-text-menubutton:hover:active,
@@ -86,86 +71,50 @@
 }
 
 #fbMinimizeButton {
-    list-style-image: url(chrome://firebug/skin/win/minimize.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
-}
-
-#fbMinimizeButton:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
-}
-
-#fbMinimizeButton:hover:active {
-    -moz-image-region: rect(32px, 16px, 48px, 0);
+    list-style-image: url(chrome://firebug/skin/win/minimize.svg);
 }
 
 #fbDetachButton {
-    list-style-image: url(chrome://firebug/skin/win/detach.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
-}
-
-#fbDetachButton:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
-}
-
-#fbDetachButton:hover:active {
-    -moz-image-region: rect(32px, 16px, 48px, 0);
+    list-style-image: url(chrome://firebug/skin/win/detach.svg);
 }
 
 #fbCloseButton {
-    list-style-image: url(chrome://firebug/skin/win/deactivate.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
-}
-
-#fbCloseButton:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
-}
-
-#fbCloseButton:hover:active {
-    -moz-image-region: rect(32px, 16px, 48px, 0);
+    list-style-image: url(chrome://firebug/skin/win/deactivate.svg);
 }
 
 #fbCommandLineHistoryButton {
-    list-style-image: url(chrome://firebug/skin/win/commandHistory.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
-}
-
-#fbCommandLineHistoryButton:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
-}
-
-#fbCommandLineHistoryButton:active,
-#fbCommandLineHistoryButton[checked="true"] {
-    -moz-image-region: rect(32px, 16px, 48px, 0);
-}
-
-#fbCommandLineHistoryButton[disabled] {
-    -moz-image-region: rect(48px, 16px, 64px, 0);
+    list-style-image: url(chrome://firebug/skin/win/commandHistory.svg);
 }
 
 #fbToggleCommandLine {
-    list-style-image: url(chrome://firebug/skin/win/up.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
-}
-
-#fbToggleCommandLine:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
-}
-
-#fbToggleCommandLine:active {
-    -moz-image-region: rect(32px, 16px, 48px, 0);
+    list-style-image: url(chrome://firebug/skin/win/up.svg);
 }
 
 #fbToggleCommandEditor {
-    list-style-image: url(chrome://firebug/skin/win/down.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
+    list-style-image: url(chrome://firebug/skin/win/down.svg);
 }
 
-#fbToggleCommandEditor:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
+:-moz-any(#fbMinimizeButton,
+          #fbDetachButton,
+          #fbCloseButton,
+          #fbCommandLineHistoryButton,
+          #fbToggleCommandLine,
+          #fbToggleCommandEditor):hover {
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
-#fbToggleCommandEditor:active {
-    -moz-image-region: rect(32px, 16px, 48px, 0);
+:-moz-any(#fbMinimizeButton,
+          #fbDetachButton,
+          #fbCloseButton,
+          #fbCommandLineHistoryButton,
+          #fbToggleCommandLine,
+          #fbToggleCommandEditor):active,
+#fbCommandLineHistoryButton[checked="true"] {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
+}
+
+#fbCommandLineHistoryButton[disabled] {
+    filter: url(resource://firebugui/filters.svg#grayscale);
 }
 
 /************************************************************************************************/
@@ -179,29 +128,47 @@
 }
 
 #fbCommandToolbar {
-    border-top: 1px solid threedshadow;
+    border-bottom: 1px solid rgb(170, 188, 207);
+    background-color: rgb(219, 234, 249);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.2));
 }
 
-#fbToolbar {
-    padding-bottom: 1px;
-    border-bottom: none;
+#fbToolbox {
+    border-bottom: 1px solid rgb(170, 188, 207);
+    background-color: rgb(219, 234, 249);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.2));
 }
 
 /* Set proper height of window buttons (close, min, detach) */
 #fbWindowButtons.innerToolbar {
     margin-right: 4px;
-    padding: 5px 0 6px 0;
+    padding: 4px 0 6px 0;
+}
+
+#fbWindowButtons > toolbarbutton {
+    margin: 0;
+}
+
+/************************************************************************************************/
+
+#fbPanelBar1-tabBoxBackground,
+#fbPanelBar2-tabBoxBackground {
+    border-bottom: 1px solid rgb(170, 188, 207);
+}
+
+#fbPanelBar1-tabBoxBackground {
+    background-color: rgb(219, 234, 249);
+    background-image: linear-gradient(rgba(253, 253, 253, 0.2), transparent);
+}
+
+#fbPanelBar2-tabBoxBackground {
+    background-color: rgb(219, 234, 249);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.2));
 }
 
 /************************************************************************************************/
 
 .panelTabBox {
-    background: linear-gradient(
-        to top,
-        rgba(0, 0, 0, 0.25) 1px,
-        rgba(0, 0, 0, 0.15) 1px,
-        rgba(0, 0, 0, 0));
-    border-bottom: 1px solid threedshadow;
     padding: 0;
     overflow: hidden;
 }
@@ -210,39 +177,14 @@
     -moz-box-align: end;
 }
 
-panelTab {
-    margin: 1px 0 0 0;
-    border: 1px solid transparent;
-    border-bottom: none;
-    border-radius: 4px 4px 0 0;
-    padding: 4px 7px;
-    font-size: 11px;
-    font-weight: bold;
-    color: #565656;
-    direction: ltr;
-}
-
 panelTab[selected="true"] {
-    border: 1px solid #A0A0A0;
-    border-bottom: none;
-    background: linear-gradient(
-        to bottom,
-        rgba(255, 255, 255, 0.7),
-        rgba(255, 255, 255, 0.9) 40%,
-        rgba(255, 255, 255, 0.4) 40%,
-        rgba(255, 255, 255, 0.6)) no-repeat 0 0;
-    color: inherit;
+    border: 1px solid rgb(170, 188, 207);
+    background-color: rgb(247, 251, 254);
+    border-bottom: 1px solid rgb(247, 251, 254);
 }
 
 panelTab:not([selected="true"]):hover {
-    border: 1px solid #C8C8C8;
-    border-bottom: none;
-    background: linear-gradient(
-        to bottom,
-        rgba(255, 255, 255, 0.2),
-        rgba(255, 255, 255, 0.4) 40%,
-        rgba(255, 255, 255, 0) 40%,
-        rgba(255, 255, 255, 0.1)) no-repeat 0 0;
+    border: 1px solid rgb(170, 188, 207);
 }
 
 .panelTab-text {
@@ -255,6 +197,39 @@ panelTab:not([selected="true"]):hover {
 
 panelTab[selected="true"] > panelTabMenu {
     margin-left: 3px;
+}
+
+#fbPanelBar1-panelTabs panelTab,
+#fbPanelBar2-panelTabs panelTab {
+    padding-top: 5px;
+    padding-bottom: 6px;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#fbPanelSplitter {
+    background-color: rgb(231, 241, 251) !important;
+}
+
+#fbPanelSplitter > #fbPanelSplitterBox {
+    background-color: rgb(219, 234, 249);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.2));
+    border-bottom: 1px solid rgb(170, 188, 207);
+}
+
+#fbCommandPopupSplitter {
+    background-color: rgb(231, 241, 251) !important;
+}
+
+/*************************************************************************************************/
+/* Search Box */
+
+.fbsearch-textbox {
+    border: 1px solid rgb(170, 188, 207);
+}
+
+.fbsearch-options-buttons {
+    border: 1px solid rgb(170, 188, 207);
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -304,21 +279,11 @@ panelTab[selected="true"] > panelTabMenu {
 
 .panelStatusLabel {
     cursor: pointer;
-    margin: 0;
-    padding: 0 4px;
     color: #000000;
 }
 
 .panelStatusLabel > .toolbarbutton-icon {
     margin: 0 !important;
-}
-
-.panelStatusLabel:hover {
-    color: blue;
-}
-
-.panelStatusLabel[selected="true"] {
-    font-weight: bold;
 }
 
 /************************************************************************************************/
@@ -334,21 +299,8 @@ panelTab[selected="true"] > panelTabMenu {
 /* Scrollable TabBar + TabList */
 
 panelBarArrowscrollbox > .scrollbutton-up,
-panelBarArrowscrollbox > .scrollbutton-down,
-panelBarTabList > .fb-tabs-alltabs-button {
+panelBarArrowscrollbox > .scrollbutton-down {
     margin: 0 !important;
-}
-
-#fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-up
-{
-    border-left: 1px solid ThreeDShadow !important;
-    border-top-left-radius: 2px !important;
-}
-
-#fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-down
-{
-    border-right: 1px solid ThreeDShadow !important;
-    border-top-right-radius: 2px !important;
 }
 
 #fbPanelBar1-tabBox > panelBarArrowscrollbox {
@@ -356,8 +308,7 @@ panelBarTabList > .fb-tabs-alltabs-button {
 }
 
 #fbPanelBar2-tabBox > panelBarArrowscrollbox > .scrollbutton-up,
-#fbPanelBar2-tabBox > panelBarArrowscrollbox > .scrollbutton-down,
-#fbPanelBar2-tabBox > panelBarTabList > .fb-tabs-alltabs-button {
+#fbPanelBar2-tabBox > panelBarArrowscrollbox > .scrollbutton-down {
     border-top: none !important;
     border-radius: 0px !important;
 }
@@ -368,49 +319,31 @@ panelBarTabList > .fb-tabs-alltabs-button {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-.fb-tabs-alltabs-button {
-    /*list-style-image: url("chrome://firebug/skin/tabbar/alltabs-box-bkgnd-icon.png");*/
-    -moz-border-start: 2px solid;
-    -moz-border-left-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15);
-    -moz-border-right-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15);
-    margin: 0;
-    padding-left: 0;
-    padding-right: 0;
-
-    border-right: 1px solid ThreeDShadow !important;
-    border-top-right-radius: 2px !important;
-}
-
-.fb-tabs-alltabs-button > .toolbarbutton-text {
-    display: none;
-}
 
 /* Tab scrollbox arrow and all-tabs buttons */
 panelBarArrowscrollbox > .scrollbutton-up,
-panelBarArrowscrollbox > .scrollbutton-down,
-.fb-tabs-alltabs-button {
+panelBarArrowscrollbox > .scrollbutton-down {
     -moz-appearance: none;
     width: 18px;
     margin: 3px 0px 4px;
     padding: 0px;
-    border: 2px solid;
-    border-right-width: 1px;
-    border-bottom: none;
-    -moz-border-top-colors: ThreeDShadow rgba(255,255,255,.3);
+    border: 1px solid rgb(170,188,207);
+    /*-moz-border-top-colors: ThreeDShadow rgba(255,255,255,.3);
     -moz-border-right-colors: ThreeDShadow;
     -moz-border-left-colors: ThreeDShadow rgba(255,255,255,.3);
-    background: url("chrome://firebug/skin/tabbar/tab-bkgnd.png") repeat-x;
+    background: url("chrome://firebug/skin/tabbar/tab-bkgnd.png") repeat-x;*/
+    border-bottom: none;
+    border-top: none;
 }
 
 panelBarArrowscrollbox > .scrollbutton-up:not([disabled="true"]):hover,
-panelBarArrowscrollbox > .scrollbutton-down:not([disabled="true"]):hover,
-.fb-tabs-alltabs-button:hover {
+panelBarArrowscrollbox > .scrollbutton-down:not([disabled="true"]):hover {
     border-top-width: 1px;
     padding-top: 1px;
-    -moz-border-top-colors: ThreeDShadow;
+    /*-moz-border-top-colors: ThreeDShadow;
     -moz-border-right-colors: ThreeDShadow;
     -moz-border-left-colors: ThreeDShadow transparent;
-    background-image: url("chrome://firebug/skin/tabbar/tab-hover-bkgnd.png");
+    background-image: url("chrome://firebug/skin/tabbar/tab-hover-bkgnd.png");*/
 }
 
 panelBarArrowscrollbox > .scrollbutton-up[disabled="true"],
@@ -420,34 +353,24 @@ panelBarArrowscrollbox > .scrollbutton-down[disabled="true"] {
 
 panelBarArrowscrollbox > .scrollbutton-up {
     border-left-style: none;
-    border-top-right-radius: 2px;
+    /*border-top-right-radius: 2px;*/
 }
 
 panelBarArrowscrollbox > .scrollbutton-up:-moz-locale-dir(rtl) {
     border-left-style: solid;
     border-right-style: none;
-    border-top-left-radius: 2px;
-    border-top-right-radius: 0px;
+    /*border-top-left-radius: 2px;
+    border-top-right-radius: 0px;*/
 }
 
-panelBarArrowscrollbox > .scrollbutton-down,
-.fb-tabs-alltabs-button {
+panelBarArrowscrollbox > .scrollbutton-down {
     border-right-style: none;
-    border-top-left-radius: 2px;
+    /*border-top-left-radius: 2px;*/
 }
 
 panelBarArrowscrollbox > .scrollbutton-down:-moz-locale-dir(rtl) {
     border-left-style: none;
     border-right-style: solid;
-    border-top-left-radius: 0px;
-    border-top-right-radius: 2px;
-}
-
-.fb-tabs-alltabs-button > .toolbarbutton-text,
-.fb-tabs-alltabs-button > .toolbarbutton-icon {
-    display: none;
-}
-
-.fb-tabs-alltabs-button > .toolbarbutton-menu-dropmarker {
-    margin: 2px 1px 2px 0px;
+    /*border-top-left-radius: 0px;
+    border-top-right-radius: 2px;*/
 }

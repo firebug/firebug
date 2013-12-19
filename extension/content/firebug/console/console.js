@@ -1,161 +1,44 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
-    "firebug/chrome/firefox",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/events",
     "firebug/lib/locale",
-    "firebug/chrome/window",
     "firebug/lib/search",
     "firebug/lib/xml",
     "firebug/lib/options",
+    "firebug/chrome/window",
+    "firebug/chrome/firefox",
     "firebug/chrome/panelNotification",
-    "firebug/console/commands/profiler",
-    "firebug/chrome/searchBox",
+    "firebug/chrome/activableModule",
     "firebug/console/consolePanel",
-    "firebug/console/commandEditor",
-    "firebug/console/functionMonitor",
-    "firebug/console/commands/eventMonitor",
-    "firebug/console/performanceTiming",
+    "firebug/console/consoleBase",
+    "firebug/remoting/debuggerClientModule",
 ],
-function(Obj, Firebug, Firefox, Events, Locale, Win, Search, Xml, Options, PanelNotification) {
+function(Firebug, FBTrace, Obj, Events, Locale, Search, Xml, Options, Win, Firefox,
+    PanelNotification, ActivableModule, ConsolePanel, ConsoleBase, DebuggerClientModule) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-var maxQueueRequests = 500;
-
 // Note: createDefaultReturnValueInstance() is a local helper (see below).
 var defaultReturnValue = createDefaultReturnValueInstance();
 
-// ********************************************************************************************* //
-
-Firebug.ConsoleBase =
-{
-    log: function(object, context, className, rep, noThrottle, sourceLink)
-    {
-        Events.dispatch(this.fbListeners,"log",[context, object, className, sourceLink]);
-        return this.logRow(appendObject, object, context, className, rep, sourceLink, noThrottle);
-    },
-
-    logFormatted: function(objects, context, className, noThrottle, sourceLink)
-    {
-        Events.dispatch(this.fbListeners,"logFormatted",[context, objects, className, sourceLink]);
-        return this.logRow(appendFormatted, objects, context, className, null, sourceLink,
-            noThrottle);
-    },
-
-    openGroup: function(objects, context, className, rep, noThrottle, sourceLink, noPush)
-    {
-        return this.logRow(appendOpenGroup, objects, context, className, rep, sourceLink,
-            noThrottle);
-    },
-
-    openCollapsedGroup: function(objects, context, className, rep, noThrottle, sourceLink, noPush)
-    {
-        return this.logRow(appendCollapsedGroup, objects, context, className, rep, sourceLink,
-            noThrottle);
-    },
-
-    closeGroup: function(context, noThrottle)
-    {
-        return this.logRow(appendCloseGroup, null, context, null, null, null, noThrottle, true);
-    },
-
-    logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)
-    {
-        if (!context)
-            context = Firebug.currentContext;
-
-        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CONSOLE && !context)
-            FBTrace.sysout("Console.logRow has no context, skipping objects", objects);
-
-        if (!context)
-            return;
-
-        if (noThrottle || !context)
-        {
-            var panel = this.getPanel(context);
-            if (panel)
-            {
-                var row = panel.append(appender, objects, className, rep, sourceLink, noRow);
-                var container = panel.panelNode;
-
-                while (container.childNodes.length > maxQueueRequests + 1)
-                {
-                    container.removeChild(container.firstChild.nextSibling);
-                    panel.limit.config.totalCount++;
-                    PanelNotification.updateCounter(panel.limit);
-                }
-                Events.dispatch(this.fbListeners, "onLogRowCreated", [panel, row]);
-                return row;
-            }
-        }
-        else
-        {
-            if (!context.throttle)
-            {
-                FBTrace.sysout("console.logRow has not context.throttle! ");
-                return;
-            }
-            var args = [appender, objects, context, className, rep, sourceLink, true, noRow];
-            context.throttle(this.logRow, this, args);
-        }
-    },
-
-    appendFormatted: function(args, row, context)
-    {
-        if (!context)
-            context = Firebug.currentContext;
-
-        var panel = this.getPanel(context);
-        panel.appendFormatted(args, row);
-    },
-
-    clear: function(context)
-    {
-        if (!context)
-            context = Firebug.currentContext;
-
-        if (context)
-        {
-            // There could be some logs waiting in the throttle queue, so
-            // clear asynchronously after the queue is flushed.
-            context.throttle(this.clearPanel, this, [context]);
-
-            // Also clear now
-            this.clearPanel(context);
-
-            // Let listeners react to console clearing
-            Events.dispatch(this.fbListeners, "onConsoleCleared", [context]);
-        }
-    },
-
-    clearPanel: function(context)
-    {
-        Firebug.Errors.clear(context);
-
-        var panel = this.getPanel(context, true);
-        if (panel)
-            panel.clear();
-    },
-
-    // Override to direct output to your panel
-    getPanel: function(context, noCreate)
-    {
-        if (context)
-            return context.getPanel("console", noCreate);
-    },
-};
+var Trace = FBTrace.to("DBG_CONSOLE");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
+// Console Implementation
 
 /**
  * @module Represents module for the Console panel. Responsible e.g. for handling
  * user actions related to Console panel filter.
  */
-var ActivableConsole = Obj.extend(Firebug.ActivableModule, Firebug.ConsoleBase);
+var ActivableConsole = Obj.extend(ActivableModule, ConsoleBase);
 Firebug.Console = Obj.extend(ActivableConsole,
 /** @lends Firebug.Console */
 {
@@ -179,12 +62,10 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     initialize: function()
     {
-        // Initialize log limit.
-        this.updateMaxLimit();
-
-        Firebug.ActivableModule.initialize.apply(this, arguments);
+        ActivableModule.initialize.apply(this, arguments);
 
         Firebug.connection.addListener(this);
+        DebuggerClientModule.addListener(this);
     },
 
     initializeUI: function()
@@ -207,16 +88,17 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     shutdown: function()
     {
+        ActivableModule.shutdown.apply(this, arguments);
+
         Firebug.connection.removeListener(this);
-        Firebug.ActivableModule.shutdown.apply(this, arguments);
+        DebuggerClientModule.removeListener(this);
     },
 
     initContext: function(context, persistedState)
     {
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("Console.initContext");
+        Trace.sysout("console.initContext;");
 
-        Firebug.ActivableModule.initContext.apply(this, arguments);
+        ActivableModule.initContext.apply(this, arguments);
 
         this.attachConsoleToWindows(context);
     },
@@ -274,55 +156,48 @@ Firebug.Console = Obj.extend(ActivableConsole,
     {
         Firebug.chrome.setGlobalAttribute("cmd_firebug_clearConsole", "disabled", !context);
 
-        Firebug.ActivableModule.showContext.apply(this, arguments);
-    },
-
-    updateOption: function(name, value)
-    {
-        if (name == "console.logLimit")
-            this.updateMaxLimit();
-    },
-
-    updateMaxLimit: function()
-    {
-        var value = Options.get("console.logLimit");
-        maxQueueRequests =  value ? value : maxQueueRequests;
+        ActivableModule.showContext.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // extend ActivableModule
+    // ActivableModule
 
     onObserverChange: function(observer)
     {
-        if (!Firebug.getSuspended())  // then Firebug is in action
-            this.onResumeFirebug();   // and we need to test to see if we need to addObserver
+        if (!Firebug.getSuspended())
+            this.onResumeFirebug();
         else
             this.onSuspendFirebug();
     },
 
     onSuspendFirebug: function()
     {
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.onSuspendFirebug isAlwaysEnabled:" +
-                Firebug.Console.isAlwaysEnabled());
+        Trace.sysout("console.onSuspendFirebug; isAlwaysEnabled: " +
+            Firebug.Console.isAlwaysEnabled());
 
         if (Firebug.Errors.toggleWatchForErrors(false))
         {
             this.setStatus();
+
             // Make sure possible errors coming from the page and displayed in the Firefox
             // status bar are removed.
             this.clear();
         }
+
+        // TODO: at some point we want to detach WebConsoleActor since the Console panel
+        // is disabled now. This should be done for all contexts.
     },
 
     onResumeFirebug: function()
     {
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.onResumeFirebug\n");
+        Trace.sysout("console.onResumeFirebug;");
 
         var watchForErrors = Firebug.Console.isAlwaysEnabled() || Firebug.Console.hasObservers();
         if (Firebug.Errors.toggleWatchForErrors(watchForErrors))
             this.setStatus();
+
+        // TODO: at some point we want to attach WebConsoleActor since the Console panel
+        // is enabled now. This should be done for all contexts.
     },
 
     onToggleFilter: function(event, context, filterType)
@@ -371,6 +246,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
         {
             filterTypes.add(element);
         });
+
         var doc = chrome.window.document;
         var buttons = doc.getElementsByClassName("fbConsoleFilter");
 
@@ -393,26 +269,27 @@ Firebug.Console = Obj.extend(ActivableConsole,
         }
         else
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("console.setStatus ERROR no firebugStatus element");
+            TraceError.sysout("console.setStatus; ERROR no firebugStatus element");
         }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)
+    logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle,
+        noRow, callback)
     {
         if (!context)
             context = Firebug.currentContext;
 
-        if (FBTrace.DBG_WINDOWS && !context)
-            FBTrace.sysout("Console.logRow: no context \n");
+        if (!context)
+            TraceError.sysout("Console.logRow; no context");
 
         if (this.isAlwaysEnabled())
-            return Firebug.ConsoleBase.logRow.apply(this, arguments);
+            return ConsoleBase.logRow.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     /**
      * Returns the value that the console must ignore.
      *
@@ -433,7 +310,25 @@ Firebug.Console = Obj.extend(ActivableConsole,
     isDefaultReturnValue: function(obj)
     {
         return obj === defaultReturnValue;
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // DebuggerClientModule
+
+    onTabAttached: function(context, reload)
+    {
+        Trace.sysout("console.onTabAttached; reload: " + reload + ", context ID: " +
+            context.getId(), context);
+
+        // TODO: at some point we want to attach the WebConsoleActor here
+    },
+
+    onTabDetached: function(context)
+    {
+        Trace.sysout("source.onTabDetached; context ID: " + context.getId());
+
+        // TODO: at some point we want to detach the WebConsoleActor here
+    },
 });
 
 // ********************************************************************************************* //
@@ -450,22 +345,17 @@ Firebug.ConsoleListener =
 };
 
 // ********************************************************************************************* //
-
-var appendObject = Firebug.ConsolePanel.prototype.appendObject;
-var appendFormatted = Firebug.ConsolePanel.prototype.appendFormatted;
-var appendOpenGroup = Firebug.ConsolePanel.prototype.appendOpenGroup;
-var appendCollapsedGroup = Firebug.ConsolePanel.prototype.appendCollapsedGroup;
-var appendCloseGroup = Firebug.ConsolePanel.prototype.appendCloseGroup;
-
-// ********************************************************************************************* //
 // Local Helpers
 
 function createDefaultReturnValueInstance()
 {
-    var proto = {
-        __exposedProps__: {
+    var proto =
+    {
+        __exposedProps__:
+        {
             "toString": "rw"
         },
+
         toString: function()
         {
             return undefined;

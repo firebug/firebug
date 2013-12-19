@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/activableModule",
+    "firebug/chrome/rep",
     "firebug/lib/xpcom",
     "firebug/lib/object",
     "firebug/lib/locale",
@@ -35,15 +37,15 @@ define([
     "firebug/lib/url",
     "firebug/cookies/legacy",
 ],
-function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr,
-    BaseObserver, MenuUtils, CookieReps, CookieUtils, Cookier, Breakpoints, CookieObserver,
-    CookieClipboard, TabWatcher, HttpObserver, System, Cookie, CookiePermissions, EditCookie,
-    TraceListener, TraceModule, Firefox, BreakpointGroup, Win, Url) {
-
-with (Domplate) {
+function(ActivableModule, Rep, Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http,
+    Css, Events, Arr, BaseObserver, MenuUtils, CookieReps, CookieUtils, Cookier, Breakpoints,
+    CookieObserver, CookieClipboard, TabWatcher, HttpObserver, System, Cookie, CookiePermissions,
+    EditCookie, TraceListener, TraceModule, Firefox, BreakpointGroup, Win, Url) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV, SPAN, TR, P, UL, A, BUTTON} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -88,7 +90,7 @@ Firebug.registerStylesheet("chrome://firebug/skin/cookies/cookies.css");
  * to control activity of Firebug panels in order to avoid (performance) expensive
  * features.
  */
-Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
+Firebug.CookieModule = Obj.extend(ActivableModule,
 /** @lends Firebug.CookieModule */
 {
     contexts: contexts,
@@ -115,7 +117,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         this.panelName = panelName;
         this.description = Locale.$STR("cookies.modulemanager.description");
 
-        Firebug.ActivableModule.initialize.apply(this, arguments);
+        ActivableModule.initialize.apply(this, arguments);
 
         var permTooltip = Firebug.chrome.$("fcPermTooltip");
         permTooltip.fcEnabled = true;
@@ -149,7 +151,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             var image = document.createElement("image");
             image.setAttribute("id", "fbBreakOnImageCookies");
             image.setAttribute("class", "fbBreakOnImage");
-            image.setAttribute("src", "chrome://firebug/skin/cookies/breakOnCookie.png");
+            image.setAttribute("src", "chrome://firebug/skin/cookies/breakOnCookie.svg");
             bonStack.appendChild(image);
         }
 
@@ -158,7 +160,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
     initializeUI: function()
     {
-        Firebug.ActivableModule.initializeUI.apply(this, arguments);
+        ActivableModule.initializeUI.apply(this, arguments);
 
         // Append the styleesheet to a new console popup panel introduced in Firebug 1.6
         this.addStyleSheet(null);
@@ -208,7 +210,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             FBTrace.sysout("cookies.cookieModule.registerObservers;");
     },
 
-    unregisterObservers: function(context)
+    unregisterObservers: function()
     {
         if (!this.observersRegistered)
         {
@@ -325,10 +327,10 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
         // The base class must be called after the context for Cookies panel is
         // properly initialized. The panel can be created inside this function
-        // (within Firebug.ActivableModule.enablePanel), which can result in
+        // (within ActivableModule.enablePanel), which can result in
         // calling CookiePanel.initialize method. This method directly calls
         // CookiePanel.refresh, which needs the context.cookies object ready.
-        Firebug.ActivableModule.initContext.apply(this, arguments);
+        ActivableModule.initContext.apply(this, arguments);
 
         // Unregister all observers if the panel is disabled.
         if (!this.isEnabled(context))
@@ -337,7 +339,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
     destroyContext: function(context)
     {
-        Firebug.ActivableModule.destroyContext.apply(this, arguments);
+        ActivableModule.destroyContext.apply(this, arguments);
 
         if (!context.cookies)
         {
@@ -561,7 +563,17 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
      */
     isEnabled: function(context)
     {
-        return Firebug.ActivableModule.isEnabled.apply(this, arguments);
+        return ActivableModule.isEnabled.apply(this, arguments);
+    },
+
+    hasContexts: function()
+    {
+        var ret = false;
+        TabWatcher.iterateContexts(function()
+        {
+            ret = true;
+        });
+        return ret;
     },
 
     /**
@@ -570,19 +582,17 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
      */
     onObserverChange: function(observer)
     {
-        if (this.hasObservers())
-            TabWatcher.iterateContexts(Firebug.CookieModule.registerObservers);
+        if (this.hasObservers() && this.hasContexts())
+            this.registerObservers();
         else
-            TabWatcher.iterateContexts(Firebug.CookieModule.unregisterObservers);
+            this.unregisterObservers();
 
         this.setStatus();
     },
 
     onSuspendFirebug: function()
     {
-        TabWatcher.iterateContexts(Firebug.CookieModule.unregisterObservers);
-
-        this.setStatus();
+        this.onObserverChange();
 
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.onSuspendFirebug");
@@ -590,10 +600,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
     onResumeFirebug: function(context)
     {
-        if (Firebug.CookieModule.isAlwaysEnabled())
-            TabWatcher.iterateContexts(Firebug.CookieModule.registerObservers);
-
-        this.setStatus();
+        this.onObserverChange();
 
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.onResumeFirebug");
@@ -640,7 +647,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             return Locale.$STRF("cookies.HostEnable", [host]);
         }
 
-        return Firebug.ActivableModule.getMenuLabel.apply(this, arguments);
+        return ActivableModule.getMenuLabel.apply(this, arguments);
     },
 
     // xxxHonza: This method is overriden just to provide translated strings from
@@ -1160,7 +1167,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
  * @domplate Represents domplate template for cookie body that is displayed if
  * a cookie entry in the cookie list is expanded.
  */
-Firebug.CookieModule.NetInfoBody = domplate(Firebug.Rep,
+Firebug.CookieModule.NetInfoBody = domplate(Rep,
 /** @lends Firebug.CookieModule.NetInfoBody */
 {
     tag:
@@ -1437,4 +1444,4 @@ Firebug.registerActivableModule(Firebug.CookieModule);
 return Firebug.CookieModule;
 
 // ********************************************************************************************* //
-}});
+});

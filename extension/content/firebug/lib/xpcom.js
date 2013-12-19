@@ -1,6 +1,10 @@
 /* See license.txt for terms of usage */
 
-define([], function() {
+define([
+],
+function() {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -78,6 +82,7 @@ Xpcom.QI = function(obj, iface)
 };
 
 // ********************************************************************************************* //
+// Registration
 
 return Xpcom;
 

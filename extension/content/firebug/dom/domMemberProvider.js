@@ -4,19 +4,25 @@
 
 define([
     "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/array",
     "firebug/lib/wrapper",
     "firebug/lib/dom",
-    "firebug/lib/trace",
     "firebug/lib/locale",
     "firebug/console/closureInspector",
+    "firebug/chrome/panelActivation",
     "firebug/chrome/reps",
+    "firebug/debugger/debuggerLib",
 ],
-function(Firebug, Obj, Arr, Wrapper, Dom, FBTrace, Locale, ClosureInspector, FirebugReps) {
+function(Firebug, FBTrace, Obj, Arr, Wrapper, Dom, Locale, ClosureInspector, PanelActivation,
+    FirebugReps, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
+
+var Trace = FBTrace.to("DBG_DOM");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // DOM Member Provider
@@ -57,21 +63,20 @@ DOMMemberProvider.prototype =
                 object = Arr.cloneArray(object);
 
             var properties;
-            var contentView = this.getObjectView(object);
             try
             {
                 // Make sure not to touch the prototype chain of the magic scope objects.
                 var ownOnly = Firebug.showOwnProperties || isScope;
                 var enumerableOnly = Firebug.showEnumerableProperties;
 
-                properties = this.getObjectProperties(contentView, enumerableOnly, ownOnly);
+                properties = this.getObjectProperties(object, enumerableOnly, ownOnly);
                 properties = Arr.sortUnique(properties);
 
                 var addOwn = function(prop)
                 {
-                    // Apparently, Object.prototype.hasOwnProperty.call(contentView, p) lies
-                    // when 'contentView' is content and 'Object' is chrome... Bug 658909?
-                    if (Object.getOwnPropertyDescriptor(contentView, prop) &&
+                    // Apparently, Object.prototype.hasOwnProperty.call(object, p) lies
+                    // when 'object' is content and 'Object' is chrome... Bug 658909?
+                    if (Object.getOwnPropertyDescriptor(object, prop) &&
                         properties.indexOf(prop) === -1)
                     {
                         properties.push(prop);
@@ -83,8 +88,8 @@ DOMMemberProvider.prototype =
 
                 // __proto__ never shows in enumerations, so add it here. We currently
                 // we don't want it when only showing own properties.
-                if (contentView.__proto__ && Obj.hasProperties(contentView.__proto__) &&
-                    properties.indexOf("__proto__") === -1 && !Firebug.showOwnProperties)
+                if (object.__proto__ && Obj.hasProperties(object.__proto__) &&
+                    properties.indexOf("__proto__") === -1 && !ownOnly)
                 {
                     properties.push("__proto__");
                 }
@@ -118,7 +123,7 @@ DOMMemberProvider.prototype =
 
                 try
                 {
-                    val = contentView[name];
+                    val = object[name];
                 }
                 catch (exc)
                 {
@@ -173,7 +178,8 @@ DOMMemberProvider.prototype =
                     {
                         add("dom", domConstants);
                     }
-                    else if (Dom.isInlineEventHandler(name))
+                    else if (val === null && object instanceof EventTarget &&
+                        Dom.isInlineEventHandler(name))
                     {
                         add("user", domHandlers);
                     }
@@ -184,7 +190,8 @@ DOMMemberProvider.prototype =
                 }
             }
 
-            if (isScope || (typeof object === "function" && Firebug.showClosures && this.context))
+            if (this.shouldShowClosures() &&
+                (isScope || (typeof object === "function" && this.context)))
             {
                 this.maybeAddClosureMember(object, "proto", proto, level, isScope);
             }
@@ -282,52 +289,83 @@ DOMMemberProvider.prototype =
         }
     },
 
+    shouldShowClosures: function()
+    {
+        if (!Firebug.showClosures)
+            return false;
+        var requireScriptPanel = DebuggerLib._closureInspectionRequiresDebugger();
+        if (requireScriptPanel && !PanelActivation.isPanelEnabled(Firebug.getPanelType("script")))
+            return false;
+        return true;
+    },
+
+    hasChildren: function(value)
+    {
+        if (!value || (typeof value !== "object" && typeof value !== "function"))
+            return false;
+
+        if (value instanceof FirebugReps.ErrorCopy)
+            return false;
+
+        var enumerableOnly = Firebug.showEnumerableProperties;
+        var ownOnly = Firebug.showOwnProperties;
+        if (Obj.hasProperties(value, !enumerableOnly, ownOnly))
+            return true;
+
+        // Special case for "arguments", which is not enumerable by for...in statement
+        // and so, Obj.hasProperties always returns false.
+        // XXX(simon): This doesn't seem to be required any more (Fx28).
+        if (isArguments(value) && value.length > 0)
+            return true;
+
+        if (typeof value === "function")
+        {
+            // Special case for functions with a prototype that has values.
+            try
+            {
+                var proto = value.prototype;
+                if (proto && Obj.hasProperties(proto, !enumerableOnly, ownOnly))
+                    return true;
+            }
+            catch (exc) {}
+        }
+
+        // Special case for closure inspection.
+        if (typeof value === "function" && this.shouldShowClosures() && this.context)
+        {
+            try
+            {
+                var ret = false;
+                var win = this.context.getCurrentGlobal();
+                ClosureInspector.withEnvironmentForObject(win, value, this.context, function(env)
+                {
+                    ret = true;
+                });
+
+                if (ret)
+                    return ret;
+            }
+            catch (e) {}
+        }
+
+        return false;
+    },
+
     addMemberInternal: function(object, type, props, name, value, level, parentIsScope)
     {
         // Do this first in case a call to instanceof (= QI, for XPCOM things) reveals contents.
         var rep = Firebug.getRep(value);
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
 
-        var hasProperties = Obj.hasProperties(value, !Firebug.showEnumerableProperties,
-            Firebug.showOwnProperties);
-
-        var valueType = typeof value;
-        var hasChildren = hasProperties && !(value instanceof FirebugReps.ErrorCopy) &&
-            ((valueType === "function") ||
-             (valueType === "object" && value !== null));
-
-        // Special case for closure inspection.
-        if (!hasChildren && valueType === "function" && Firebug.showClosures && this.context)
-        {
-            try
-            {
-                var win = this.context.getCurrentGlobal();
-                ClosureInspector.getEnvironmentForObject(win, value, this.context);
-                hasChildren = true;
-            }
-            catch (e) {}
-        }
-
-        // Special case for "arguments", which is not enumerable by for...in statement
-        // and so, Obj.hasProperties always returns false.
-        hasChildren = hasChildren || (!!value && isArguments(value));
-
-        if (valueType === "function" && !hasChildren)
-        {
-            try
-            {
-                // Special case for functions with a prototype that has values
-                var proto = value.prototype;
-                if (proto)
-                {
-                    hasChildren = Obj.hasProperties(proto, !Firebug.showEnumerableProperties,
-                        Firebug.showOwnProperties);
-                }
-            }
-            catch (exc) {}
-        }
+        var hasChildren = this.hasChildren(value);
 
         var descriptor = getPropertyDescriptor(object, name);
+        if (!descriptor)
+        {
+            // xxxHonza: temporary tracing.
+            TraceError.sysout("domMemberProvider.addMemberInternal; ERROR no descriptor for" +
+                name, object);
+        }
 
         var member = {
             object: object,
@@ -341,6 +379,7 @@ DOMMemberProvider.prototype =
             hasChildren: hasChildren,
             tag: tag,
             prefix: "",
+            descriptor: descriptor,
             readOnly: (descriptor && !descriptor.writable && !descriptor.set),
             // XXX should probably move the tests from getContextMenuItems here
             deletable: (!parentIsScope && !(descriptor && !descriptor.configurable))
@@ -355,6 +394,7 @@ DOMMemberProvider.prototype =
 
             var breakpoints = this.context.dom.breakpoints;
             var bp = breakpoints.findBreakpoint(object, name);
+
             if (bp)
             {
                 member.breakpoint = true;
@@ -367,13 +407,12 @@ DOMMemberProvider.prototype =
 
         // Set prefix for user defined properties. This prefix help the user to distinguish
         // among simple properties and those defined using getter and/or (only a) setter.
-        // XXX This should be rewritten to use 'descriptor', and I believe the unwrapping
-        // test is wrong (see issue 5377).
-        var o = this.getObjectView(object);
-        if (o && !Dom.isDOMMember(object, name) && (XPCNativeWrapper.unwrap(object) !== object))
+        // XXX This should be rewritten to use 'descriptor', and the unwrapping test is
+        // always false! See issue 5377.
+        if (object && !Dom.isDOMMember(object, name) && (XPCNativeWrapper.unwrap(object) !== object))
         {
-            var getter = (o.__lookupGetter__) ? o.__lookupGetter__(name) : null;
-            var setter = (o.__lookupSetter__) ? o.__lookupSetter__(name) : null;
+            var getter = (object.__lookupGetter__) ? object.__lookupGetter__(name) : null;
+            var setter = (object.__lookupSetter__) ? object.__lookupSetter__(name) : null;
 
             // both, getter and setter
             if (getter && setter)
@@ -466,21 +505,6 @@ DOMMemberProvider.prototype =
         inheritedProps.push.apply(inheritedProps, props);
         return inheritedProps;
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Wrappers
-
-    getObjectView: function(object)
-    {
-        if (!Firebug.viewChrome)
-        {
-            // Unwrap native, wrapped objects.
-            var contentView = Wrapper.getContentView(object);
-            if (contentView)
-                return contentView;
-        }
-        return object;
-    },
 }
 
 // ********************************************************************************************* //
@@ -488,15 +512,7 @@ DOMMemberProvider.prototype =
 
 function isArguments(obj)
 {
-    try
-    {
-        return isFinite(obj.length) && obj.length > 0 && typeof obj.callee === "function";
-    }
-    catch (exc)
-    {
-    }
-
-    return false;
+    return Object.prototype.toString.call(obj) === "[object Arguments]";
 }
 
 function isClassFunction(fn)

@@ -1,33 +1,43 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/domplate",
-    "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/search",
-    "firebug/chrome/menu",
     "firebug/lib/options",
     "firebug/lib/wrapper",
     "firebug/lib/xpcom",
-    "firebug/console/errorMessageObj",
+    "firebug/chrome/menu",
+    "firebug/chrome/reps",
+    "firebug/chrome/searchBox",
     "firebug/chrome/panelNotification",
+    "firebug/chrome/activablePanel",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/console/commands/profiler",
-    "firebug/chrome/searchBox",
+    "firebug/console/errorMessageObj",
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
-    Wrapper, Xpcom, ErrorMessageObj, PanelNotification, DebuggerLib, BreakpointStore) {
+function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Search, Options, Wrapper,
+    Xpcom, Menu, FirebugReps, SearchBox, PanelNotification, ActivablePanel, DebuggerLib,
+    BreakpointStore, Profiler, ErrorMessageObj) {
 
-with (Domplate) {
+"use strict";
+
+// ********************************************************************************************* //
+// Resources
+
+// Firebug wiki: https://getfirebug.com/wiki/index.php/Console_Panel
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV, SPAN, TD, TR, TABLE, TBODY, P, A} = Domplate;
 
 var reAllowedCss = /^(-moz-)?(background|border|color|font|line|margin|padding|text)/;
 
@@ -59,10 +69,20 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // ********************************************************************************************* //
 // ConsolePanel Implementation
 
-Firebug.ConsolePanel = function () {};
-
-Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
+/**
+ * @panel This object represents the Console panel.
+ */
+function ConsolePanel()
 {
+}
+
+ConsolePanel.prototype = Obj.extend(ActivablePanel,
+/** @lends ConsolePanel */
+{
+    dispatchName: "ConsolePanel",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     template: domplate(
     {
         logRowTag:
@@ -107,7 +127,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     initialize: function()
     {
-        Firebug.ActivablePanel.initialize.apply(this, arguments);  // loads persisted content
+        // Loads persisted content.
+        ActivablePanel.initialize.apply(this, arguments);
 
         this.filterMatchSet = [];
 
@@ -125,6 +146,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         // Listen for set filters, so the panel is properly updated when needed
         Firebug.Console.addListener(this);
+
+        Firebug.registerUIListener(this);
     },
 
     destroy: function(state)
@@ -152,12 +175,14 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         Firebug.Console.removeListener(this);
 
-        Firebug.ActivablePanel.destroy.apply(this, arguments);  // must be called last
+        Firebug.unregisterUIListener(this);
+
+        ActivablePanel.destroy.apply(this, arguments);  // must be called last
     },
 
     initializeNode: function()
     {
-        Firebug.ActivablePanel.initializeNode.apply(this, arguments);
+        ActivablePanel.initializeNode.apply(this, arguments);
 
         this.onScroller = Obj.bind(this.onScroll, this);
         Events.addEventListener(this.panelNode, "scroll", this.onScroller, true);
@@ -169,7 +194,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     destroyNode: function()
     {
-        Firebug.ActivablePanel.destroyNode.apply(this, arguments);
+        ActivablePanel.destroyNode.apply(this, arguments);
 
         if (this.onScroller)
             Events.removeEventListener(this.panelNode, "scroll", this.onScroller, true);
@@ -1115,6 +1140,11 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (!exc)
             return false;
 
+        // If 'break on exceptions' is set don't resume the debugger, the user wants
+        // to break and see where it happens.
+        if (Options.get("breakOnExceptions"))
+            return false;
+
         if (BreakpointStore.isBreakpointDisabled(exc.fileName, exc.lineNumber - 1))
         {
             Trace.sysout("consolePanel.shouldResumeDebugger; Do not break, disabled BP found.");
@@ -1124,7 +1154,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (!context.breakingCause)
         {
             // This is to avoid repeated break-on-error in every frame when an error happens.
-            Trace.sysout("context.breakingCause; No braking cause resume debugger");
+            Trace.sysout("context.breakingCause; No breaking cause, resume debugger");
             return true;
         }
 
@@ -1147,7 +1177,24 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         // Set the flag on the server.
         var tool = this.context.getTool("debugger");
-        tool.breakOnExceptions(breaking);
+        tool.updateBreakOnErrors();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // UI Listener
+
+    updateSidePanels: function(panel)
+    {
+        if (!panel || panel.name != "console")
+            return;
+
+        // Custom update of the side panel box visibility.
+        // The logic in {@FirebugChrome.syncSidePanels} hides the side box (fbPanelBar2)
+        // if there is no selected panel. But in case of the Console (main) panel the
+        // fbPanelBar2.selectedSide panel is null even if the {@CommandEditor} is active.
+        // This is because {@CommandEditor} is not implemented as an instance of {@Firebug.Panel}
+        // So, make sure to display it now.
+        this.showCommandLine(true);
     },
 });
 
@@ -1206,9 +1253,12 @@ function parseFormat(format)
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerPanel(Firebug.ConsolePanel);
+Firebug.registerPanel(ConsolePanel);
 
-return Firebug.ConsolePanel;
+// xxxHonza: backward compatibility
+Firebug.ConsolePanel = ConsolePanel;
+
+return ConsolePanel;
 
 // ********************************************************************************************* //
-}});
+});

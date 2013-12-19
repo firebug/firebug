@@ -527,7 +527,7 @@ Events.addEventListener = function(parent, eventId, listener, capturing)
 
         frames.shift();
 
-        var pid = (parent.location ? parent.location + "" : typeof parent);
+        var pid = (parent && parent.location ? String(parent.location) : typeof parent);
 
         listeners.push({
             parentId: pid,

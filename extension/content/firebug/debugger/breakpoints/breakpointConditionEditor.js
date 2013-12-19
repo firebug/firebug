@@ -1,15 +1,12 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
-    "firebug/firebug",
     "firebug/lib/domplate",
     "firebug/lib/locale",
-    "firebug/lib/css",
     "firebug/lib/dom",
-    "firebug/lib/string",
+    "firebug/console/inlineJSEditor",
 ],
-function(Obj, Firebug, Domplate, Locale, Css, Dom, Str) {
+function(Domplate, Locale, Dom, JSEditor) {
 
 "use strict";
 
@@ -26,7 +23,7 @@ function ConditionEditor(doc)
     this.initialize(doc);
 }
 
-ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
+ConditionEditor.prototype = domplate(JSEditor.prototype,
 {
     tag:
         DIV({"class": "conditionEditor"},
@@ -64,7 +61,7 @@ ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
 
         this.input.value = value;
 
-        setTimeout(Obj.bindFixed(function()
+        setTimeout(function()
         {
             var offset = Dom.getClientOffset(sourceLine);
 
@@ -74,11 +71,11 @@ ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
             if (y < panel.scrollTop)
             {
                 y = offset.y;
-                Css.setClass(this.box, "upsideDown");
+                this.box.classList.add("upsideDown");
             }
             else
             {
-                Css.removeClass(this.box, "upsideDown");
+                this.box.classList.remove("upsideDown");
             }
 
             this.box.style.top = (y - panel.scrollTop) + "px";
@@ -86,7 +83,7 @@ ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
 
             this.input.focus();
             this.input.select();
-        }, this));
+        }.bind(this));
     },
 
     hide: function()

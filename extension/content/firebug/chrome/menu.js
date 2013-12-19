@@ -23,7 +23,7 @@ Menu.createMenu = function(popup, item)
 {
     if (typeof item == "string")
     {
-        return Deprecated.deprecated("The function's header changed to "+
+        return Deprecated.method("The function's header changed to " +
             "createMenu(popup, item)",
             Menu.createMenu, [popup, {label: item}])();
     }
@@ -149,6 +149,10 @@ Menu.setItemIntoElement = function(element, item)
     if (item.checked)
         element.setAttribute("checked", "true");
 
+    // Allows to perform additional custom initialization of the menu-item.
+    if (item.initialize)
+        item.initialize(element);
+
     return element;
 };
 
@@ -169,16 +173,13 @@ Menu.createMenuSeparator = function(popup, item, before)
 {
     if (item instanceof Node)
     {
-        return Deprecated.deprecated("The function's header changed to "+
+        return Deprecated.method("The function's header changed to "+
             "createMenuSeparator(popup, item, before)",
             Menu.createMenuSeparator, [popup, null, before])();
     }
 
     if (!popup.firstChild)
         return;
-
-    if (FBTrace.DBG_MENU)
-        FBTrace.sysout("createMenuSeparator", {popup: popup, item: item, before: before});
 
     var menuItem = popup.ownerDocument.createElement("menuseparator");
     if (typeof item == "object" && item.id)
@@ -194,7 +195,7 @@ Menu.createMenuSeparator = function(popup, item, before)
 
 /**
  * Create an option menu item definition. This method is usually used in methods like:
- * {@link Firebug.Panel.getOptionsMenuItems} or {@link Firebug.Panel.getContextMenuItems}.
+ * {@link Panel.getOptionsMenuItems} or {@link Panel.getContextMenuItems}.
  *
  * @param {String} label Name of the string from *.properties file.
  * @param {String} option Name of the associated option.

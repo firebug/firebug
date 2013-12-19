@@ -3,17 +3,18 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/module",
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/lib/wrapper",
-    "firebug/lib/xpcom",
     "firebug/lib/events",
     "firebug/lib/domplate",
     "firebug/console/console",
     "firebug/chrome/tableRep",
 ],
-function(Firebug, FBTrace, Obj, Locale, Wrapper, Xpcom, Events, Domplate, Console, TableRep) {
+function(Firebug, Module, FBTrace, Obj, Locale, Wrapper, Events, Domplate, Console,
+    TableRep) {
 
 "use strict";
 
@@ -27,7 +28,7 @@ function(Firebug, FBTrace, Obj, Locale, Wrapper, Xpcom, Events, Domplate, Consol
 // ********************************************************************************************* //
 // Constants
 
-var {domplate, SPAN, TAG, DIV} = Domplate;
+var {domplate, SPAN, TAG} = Domplate;
 
 var TraceError = FBTrace.to("DBG_ERRORS");
 
@@ -52,22 +53,22 @@ var parents = "Parents";
  * > getEventListeners(target);             // pretty print log is created.
  * > getEventListeners(target).click[0];    // pretty print log is not created.
  */
-var GetEventListenersModule = Obj.extend(Firebug.Module,
+var GetEventListenersModule = Obj.extend(Module,
 /** @lends GetEventListenersModule */
 {
     dispatchName: "getEventListenersModule",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    initialize: function(prefDomain, prefNames)
+    initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
         Console.addListener(this);
     },
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
         Console.removeListener(this);
     },
 
@@ -121,18 +122,18 @@ function onExecuteCommand(context, args)
         var result = {};
 
         // Get event listeners and construct the result log-object.
-        var listeners = getEventListeners(context, target, !noParents);
-        var map = getListenerMap(context, listeners.targetListeners);
+        var listeners = getEventListeners(target, !noParents);
+        var map = getListenerMap(listeners.targetListeners);
         if (map)
             result = map;
 
         // parentListeners array is empty in case of noParents == true.
-        map = getListenerMap(context, listeners.parentListeners);
+        map = getListenerMap(listeners.parentListeners);
         if (map)
             result[parents] = map;
 
         // Append also mutation observers into the result (if there are any).
-        var observers = getMutationObservers(context, target, !noParents);
+        var observers = getMutationObservers(target, !noParents);
         if (observers.targetObservers && observers.targetObservers.length > 0)
             result[mutationObservers] = observers.targetObservers;
 
@@ -149,7 +150,20 @@ function onExecuteCommand(context, args)
         // Make sure the result structure with listeners and observers is properly
         // cloned into the content scope.
         var global = context.getCurrentGlobal();
-        var objects = Wrapper.cloneIntoContentScope(global, result);
+        var recursiveClone = function(obj)
+        {
+            var res;
+            if (Array.isArray(obj))
+                res = [];
+            else if (obj instanceof Object && Object.getPrototypeOf(obj) === Object.prototype)
+                res = {};
+            else
+                return obj;
+            for (var prop in obj)
+                res[prop] = recursiveClone(obj[prop]);
+            return Wrapper.cloneIntoContentScope(global, res);
+        };
+        var object = recursiveClone(result);
 
         if (!context.getEventListenersCache)
             context.getEventListenersCache = new WeakMap();
@@ -161,17 +175,17 @@ function onExecuteCommand(context, args)
         // later (within 'log' event handler) to figure out whether additional
         // pretty-printed logs should be appended in to the Console.
         // See {@GetEventListenersModule} above.
-        context.getEventListenersCache.set(objects, {
+        context.getEventListenersCache.set(Wrapper.wrapObject(object), {
             target: target,
             listeners: listeners,
             observers: observers
         });
 
-        return objects;
+        return object;
     }
     catch (exc)
     {
-        TraceError.sysout("getEventListeners FAILS to create content view " + exc, exc);
+        TraceError.sysout("getEventListeners FAILS " + exc, exc);
     }
 
     return undefined;
@@ -188,7 +202,7 @@ function onExecuteCommand(context, args)
  * @param target {Object} The event target for which listeners should be returned.
  * @param includeParents {Boolean} True if parent listeners should also be returned.
  */
-function getEventListeners(context, target, includeParents)
+function getEventListeners(target, includeParents)
 {
     var targetListeners;
     var parentListeners = [];
@@ -268,7 +282,7 @@ function getEventListeners(context, target, includeParents)
     return {
         targetListeners: targetListeners,
         parentListeners: parentListeners
-    }
+    };
 }
 
 /**
@@ -276,35 +290,27 @@ function getEventListeners(context, target, includeParents)
  * into the Console panel. Note that this result log can be further inspected by the user
  * within the DOM panel.
  */
-function getListenerMap(context, listeners)
+function getListenerMap(listeners)
 {
     if (!listeners || !listeners.length)
         return undefined;
 
-    try
+    var map = {};
+
+    for (var i = 0; i < listeners.length; i++)
     {
-        var map = {};
-        var global = context.getCurrentGlobal();
+        var li = listeners[i];
+        if (!map[li.type])
+            map[li.type] = [];
 
-        for (var i = 0; i < listeners.length; i++)
-        {
-            var li = listeners[i];
-            if (!map[li.type])
-                map[li.type] = [];
-
-            map[li.type].push(Wrapper.cloneIntoContentScope(global, {
-                listener: li.func,
-                useCapture: li.capturing,
-                target: li.target,
-            }));
-        }
-
-        return map;
+        map[li.type].push({
+            listener: li.func,
+            useCapture: li.capturing,
+            target: li.target,
+        });
     }
-    catch (exc)
-    {
-        TraceError.sysout("getEventListeners FAILS to create content view " + exc, exc);
-    }
+
+    return map;
 }
 
 // ********************************************************************************************* //
@@ -315,10 +321,8 @@ function getListenerMap(context, listeners)
  * registered for parent elements (if required). Observers registered for parent elements
  * must have 'subtree' flag set to 'true' to be included in the result list.
  */
-function getMutationObservers(context, target, includeParents)
+function getMutationObservers(target, includeParents)
 {
-    var global = context.getCurrentGlobal();
-
     var targetObservers;
     var parentObservers = [];
 
@@ -328,7 +332,7 @@ function getMutationObservers(context, target, includeParents)
     while (element)
     {
         var parent = targetObservers;
-        var result = getMutationObserversForTarget(context, element, parent);
+        var result = getMutationObserversForTarget(element, parent);
 
         if (!parent)
             targetObservers = result;
@@ -345,16 +349,15 @@ function getMutationObservers(context, target, includeParents)
     return {
         targetObservers: targetObservers,
         parentObservers: parentObservers
-    }
+    };
 }
 
 /**
  * Get list of observers registered for specific target.
  */
-function getMutationObserversForTarget(context, target, parent)
+function getMutationObserversForTarget(target, parent)
 {
     var result = [];
-    var global = context.getCurrentGlobal();
 
     // getBoundMutationObservers() API has been introduced in Firefox 23
     // Also |window| that can be passed as an event target doeesn't implement
@@ -379,7 +382,7 @@ function getMutationObserversForTarget(context, target, parent)
                 continue;
 
             // OK, insert the observer into the result array.
-            result.push(Wrapper.cloneIntoContentScope(global, {
+            result.push({
                 attributeOldValue: info.attributeOldValue,
                 attributes: info.attributes,
                 characterData: info.characterData,
@@ -388,7 +391,7 @@ function getMutationObserversForTarget(context, target, parent)
                 subtree: info.subtree,
                 observedNode: info.observedNode,
                 mutationCallback: observer.mutationCallback,
-            }));
+            });
         }
     }
 
@@ -418,7 +421,7 @@ function consoleLog(context, target, listenersObj, observersObj)
     {
         // Group for event listeners list
         input.title = Locale.$STR("eventListeners.group_title");
-        var row = Console.openCollapsedGroup(input, context, "eventListenersDetails",
+        Console.openCollapsedGroup(input, context, "eventListenersDetails",
             GroupCaption, true, null, true);
 
         TableRep.log(listeners, ["type", "capturing", "allowsUntrusted", "func", "target"], context);
@@ -435,7 +438,7 @@ function consoleLog(context, target, listenersObj, observersObj)
     {
         // Group for mutation observers list
         input.title = Locale.$STR("mutationObservers.group_title");
-        row = Console.openCollapsedGroup(input, context, "eventListenersDetails",
+        Console.openCollapsedGroup(input, context, "eventListenersDetails",
             GroupCaption, true, null, true);
 
         TableRep.log(observers, ["attributeOldValue", "attributes", "characterData",

@@ -119,7 +119,7 @@ for (var p in Keywords)
 for (var p in Firefox)
     FBL[p] = Firefox[p];
 
-FBL.deprecated = Deprecated.deprecated;
+FBL.deprecated = Deprecated.method;
 FBL.SourceLink = SourceLink;
 
 // deprecated

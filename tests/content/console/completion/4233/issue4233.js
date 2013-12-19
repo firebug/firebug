@@ -84,13 +84,15 @@ function runTest()
                 ["date().g", true],
                 ["make1().c", true],
                 ["make1().chain().c", true],
-                ["make2().c", true],
-                ["make2().chain().c", true],
                 ["getterSeemingEval('window').i", true],
                 ["getterSeemingEval('[window]')[0].i", true],
                 ["id(eval('window')).i", false],
                 ["String.prototype.ch", true],
                 ["new Date().g", true],
+
+                // Disabled until the closure inspector works without perf penalty (see issue 6842)
+                // ["make2().c", true],
+                // ["make2().chain().c", true],
 
                 ["anArray.0", false],
                 ["anArray[\"0", true],
@@ -99,6 +101,10 @@ function runTest()
 
                 ["largeArray.leng", true],
                 ["largeArray.j", true],
+
+                ["// + d", false],
+                [" /* / + d", false],
+                ["/**/d", true],
 
                 // currently not handled
                 ["(window).i", false],

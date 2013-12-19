@@ -2,50 +2,45 @@
 
 define([
     "firebug/lib/trace",
-    "firebug/debugger/rdp",
+    "firebug/lib/object",
     "firebug/lib/promise",
     "firebug/lib/array",
     "firebug/lib/wrapper",
+    "firebug/debugger/rdp",
     "firebug/debugger/debuggerLib",
+    "firebug/debugger/clients/grip",
 ],
-function (FBTrace, RDP, Promise, Arr, Wrapper, DebuggerLib) {
+function (FBTrace, Obj, Promise, Arr, Wrapper, RDP, DebuggerLib, Grip) {
 
 // ********************************************************************************************* //
 // Object Grip
 
 function ObjectClient(grip, cache)
 {
-    this.grip = grip;
+    Grip.call(this, grip);
+
     this.cache = cache;
     this.properties = null;
+    this.error = null;
 }
 
-ObjectClient.prototype =
+ObjectClient.prototype = Obj.descend(Grip.prototype,
 {
-    getActor: function()
-    {
-        return this.grip.actor;
-    },
-
-    getType: function()
-    {
-        if (!this.grip)
-            return "";
-
-        if (this.grip.prototype)
-            return this.grip.prototype["class"];
-
-        return this.grip["class"];
-    },
-
     getValue: function()
     {
+        // If the grip is a raw and standalone value (number, boolean, or string)
+        // return direcly this grip as the value.
+        if (typeof this.grip !== "object")
+            return this.grip;
+
         switch (this.grip.type)
         {
             case "null":
                 return null;
             case "undefined":
                 return;
+            case "NaN":
+                return NaN;
         }
 
         // Break RDP and get the remote object directly
@@ -72,7 +67,7 @@ ObjectClient.prototype =
 
         // If the value isn't an object, but a primitive there are no children.
         if (this.grip.type != "object")
-            result = false;;
+            result = false;
 
         // It could happen that some loaded objects dosn't have any properties
         // (even if at least prototype should be always there). In this case
@@ -141,12 +136,28 @@ ObjectClient.prototype =
             {
                 if (response.error)
                 {
+                    // This should rarely happen. It's rather an indication that the UI isn't
+                    // properly refreshed and the client is trying to get an actor that doesn't
+                    // exist on the server side anymore.
+
                     FBTrace.sysout("objectGrip.getPrototypeAndProperties; ERROR " +
-                        response.error + ": " + response.message, response);
-                    return [];
+                        response.error + ": " + response.message, {
+                            response: response,
+                            object: self,
+                    });
+
+                    // Set an error flag and empty list of properties to avoid infinite recursion
+                    // (endless/asynchronous trying to get the properties from the server side).
+                    // The UI is responsible for checking the flag and displaying proper message.
+                    self.error = response;
+                    self.properties = [];
+                }
+                else
+                {
+                    // Parse returned properties.
+                    self.properties = self.parseProperties(response.ownProperties);
                 }
 
-                self.properties = self.parseProperties(response.ownProperties);
                 return self.properties;
             },
             function onError(response)
@@ -171,7 +182,7 @@ ObjectClient.prototype =
             result.push(this.createProperty(name, props[name], this.cache));
         return result;
     },
-}
+});
 
 // ********************************************************************************************* //
 // ProxyGrip
@@ -206,7 +217,7 @@ ObjectClient.Property = function(name, desc, cache)
     this.cache = cache;
 }
 
-ObjectClient.Property.prototype =
+ObjectClient.Property.prototype = Obj.descend(Grip.prototype,
 {
     getActor: function()
     {
@@ -216,19 +227,10 @@ ObjectClient.Property.prototype =
 
     hasChildren: function()
     {
-        var result = false;
-
         if (this.value instanceof ObjectClient)
-        {
-            result = this.value.hasProperties();
-        }
-        else
-        {
-            var valueType = typeof(this.value);
-            result = (valueType === "string" && this.value.length > Firebug.stringCropLength);
-        }
+            return this.value.hasProperties();
 
-        return result;
+        return (typeof this.value === "string" && this.value.length > Firebug.stringCropLength);
     },
 
     getChildren: function()
@@ -252,9 +254,9 @@ ObjectClient.Property.prototype =
         if (this.value instanceof ObjectClient)
             return this.value.getType();
 
-        return typeof(this.value);
+        return typeof this.value;
     }
-}
+});
 
 // ********************************************************************************************* //
 // Registration

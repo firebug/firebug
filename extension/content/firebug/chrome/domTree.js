@@ -1,17 +1,26 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/domplate",
     "firebug/lib/events",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/array",
-    "firebug/lib/trace",
 ],
-function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, FBTrace) {
-with (Domplate) {
+function(Firebug, FBTrace, Obj, Domplate, Events, Dom, Css, Arr) {
+
+"use strict";
+
+// ********************************************************************************************* //
+// Constants
+
+var {domplate, TR, TD, TABLE, TBODY, FOR, TAG, SPAN} = Domplate;
+
+var Trace = FBTrace.to("DBG_DOMTREE");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // DOM Tree Implementation
@@ -22,7 +31,7 @@ function DomTree(provider)
 }
 
 /**
- * @domplate This object represents UI DomTree widget based on Domplate. You can use
+ * @domplate This object represents generic DomTree widget based on Domplate. You can use
  * data provider to populate the tree with custom data. Or just pass a JS object as
  * an input.
  */
@@ -38,6 +47,7 @@ DomTree.prototype = domplate(
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
             TBODY(
+                TAG("$object|getSizerRowTag"),
                 FOR("member", "$object|memberIterator",
                     TAG("$member|getRowTag", {member: "$member"}))
             )
@@ -45,8 +55,10 @@ DomTree.prototype = domplate(
 
     rowTag:
         TR({"class": "memberRow $member.open $member.type\\Row",
-            $hasChildren: "$member|hasChildren", _domObject: "$member",
-            _repObject: "$member", level: "$member.level"},
+            _domObject: "$member",
+            _repObject: "$member",
+            $hasChildren: "$member|hasChildren",
+            level: "$member.level"},
             TD({"class": "memberLabelCell", style: "padding-left: $member|getIndent\\px"},
                 SPAN({"class": "memberLabel $member.type\\Label"}, "$member|getLabel")
             ),
@@ -61,6 +73,16 @@ DomTree.prototype = domplate(
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Domplate Accessors
+
+    getRowTag: function(member)
+    {
+        return this.rowTag;
+    },
+
+    getSizerRowTag: function(object)
+    {
+        return this.sizerRowTag;
+    },
 
     hasChildren: function(member)
     {
@@ -108,16 +130,6 @@ DomTree.prototype = domplate(
         var value = this.getValue(member);
         var rep = Firebug.getRep(value);
         return rep.shortTag ? rep.shortTag : rep.tag;
-    },
-
-    getRowTag: function(member)
-    {
-        return this.rowTag;
-    },
-
-    getSizerRowTag: function()
-    {
-        return this.sizerRowTag;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -177,6 +189,9 @@ DomTree.prototype = domplate(
             // Get children object for the next level.
             var members = this.getMembers(member.value, level + 1);
 
+            Trace.sysout("DomTree.toggleRow; level: " + level + ", members: " +
+                (members ? members.length : "null"), members);
+
             // Insert rows if they are immediately available. Otherwise set a spinner
             // and wait for the update.
             if (members && members.length)
@@ -232,8 +247,17 @@ DomTree.prototype = domplate(
                 var child = children[i];
                 var hasChildren = this.provider.hasChildren(child);
                 var type = this.getType(child);
-                var name = this.getLabel(child);
 
+                // We can't use DomTree.getLabel() at this moment since it expects a member
+                // object as the argument. But the member doesn't exist yet (it's going to
+                // be created at the next row). So, derived objects should not override
+                // getLabel() method, but rather provide custom provider.
+                var name = this.provider.getLabel(child);
+
+                // Create a member object that represents row-value descriptor. Every row in the
+                // tree is associated (via repObject) with an instance of this meta structure.
+                // You might want to override this method in derived tree objects to provide
+                // custom meta-data.
                 var member = this.createMember(type, name, child, level, hasChildren);
                 member.provider = this.provider;
 
@@ -268,8 +292,7 @@ DomTree.prototype = domplate(
         }
         catch (e)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("domTree.fetchChildren; EXCEPTION " + e, e);
+            TraceError.sysout("domTree.fetchChildren; EXCEPTION " + e, e);
 
             return children;
         }
@@ -282,6 +305,8 @@ DomTree.prototype = domplate(
 
     getType: function(object)
     {
+        // xxxHonza: A type provider (or a decorator) should be used here.
+        // (see also a comment in {@WatchTree.getType} 
         return "dom";
     },
 
@@ -322,10 +347,6 @@ DomTree.prototype = domplate(
 
     getObjectProperties: function(obj, callback)
     {
-        // Check custom object property iterator first.
-        if (this.objectPropIterator)
-            return this.objectPropIterator.getObjectProperties(obj, callback);
-
         for (var p in obj)
         {
             try
@@ -334,8 +355,7 @@ DomTree.prototype = domplate(
             }
             catch (e)
             {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("domTree.getObjectProperties; EXCEPTION " + e, e);
+                TraceError.sysout("domTree.getObjectProperties; EXCEPTION " + e, e);
             }
         }
     },
@@ -362,6 +382,22 @@ DomTree.prototype = domplate(
         return null;
     },
 
+    getMemberRow: function(member)
+    {
+        if (!this.element)
+            return;
+
+        var rows = Dom.getElementsByClass(this.element, "memberRow");
+        for (var i=0; i<rows.length; i++)
+        {
+            var row = rows[i];
+            if (member == row.repObject)
+                return row;
+        }
+
+        return null;
+    },
+
     resolvePromise: function(promise, object)
     {
         var result;
@@ -375,11 +411,7 @@ DomTree.prototype = domplate(
         var self = this;
         var promise = promise.then(function onThen(value)
         {
-            if (FBTrace.DBG_DOMTREE)
-            {
-                FBTrace.sysout("domTree.onThen; sync: " + sync,
-                    {value: value, object: object});
-            }
+            Trace.sysout("domTree.onThen; sync: " + sync, {value: value, object: object});
 
             if (sync)
                 result = value;
@@ -389,7 +421,7 @@ DomTree.prototype = domplate(
         },
         function onError(err)
         {
-            FBTrace.sysout("domTree.onResolvePromise; ERROR " + err, err);
+            TraceError.sysout("domTree.onResolvePromise; ERROR " + err, err);
         });
 
         sync = false;
@@ -400,19 +432,22 @@ DomTree.prototype = domplate(
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Public
 
-    replace: function(parentNode, input)
+    replace: function(parentNode, input, noExpand)
     {
         Dom.clearNode(parentNode);
-        this.append(parentNode, input);
+        this.append(parentNode, input, noExpand);
     },
 
-    append: function(parentNode, input)
+    append: function(parentNode, input, noExpand)
     {
         this.parentNode = parentNode;
         this.input = input;
 
         this.element = this.tag.append(input, parentNode, this);
         this.element.repObject = this;
+
+        if (noExpand)
+            return;
 
         // Expand the first node (root) by default
         // Do not expand if the root is an array with more than one element.
@@ -424,13 +459,19 @@ DomTree.prototype = domplate(
             this.toggleRow(firstRow);
     },
 
+    expandMember: function(member)
+    {
+        var row = this.getMemberRow(member);
+        if (row)
+            return this.toggleRow(row, true);
+    },
+
     expandObject: function(object)
     {
         var row = this.getRow(object);
         if (!row)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("domTree.expandObject; ERROR no such object", object);
+            TraceError.sysout("domTree.expandObject; ERROR no such object", object);
             return;
         }
 
@@ -452,15 +493,12 @@ DomTree.prototype = domplate(
         }
         catch (e)
         {
-            FBTrace.sysout("domTree.updateObject; EXCEPTION " + e, e);
+            TraceError.sysout("domTree.updateObject; EXCEPTION " + e, e);
         }
     },
 
     doUpdateObject: function(object)
     {
-        if (FBTrace.DBG_DOMTREE)
-            FBTrace.sysout("domTree.updateObject;", object);
-
         var row = this.getRow(object);
 
         // The input.object itself (the root) doesn't have a row.
@@ -475,7 +513,7 @@ DomTree.prototype = domplate(
         // Root will always bail out.
         if (!row)
         {
-            FBTrace.sysout("domTree.updateObject; This object can't be updated", object);
+            Trace.sysout("domTree.updateObject; This object can't be updated", object);
             return;
         }
 
@@ -488,6 +526,12 @@ DomTree.prototype = domplate(
         var expanded = Css.hasClass(row, "opened");
         if (expanded)
             this.toggleRow(row);
+
+        Trace.sysout("domTree.updateObject;", {
+            object: object,
+            member: member,
+            row: row,
+        });
 
         // Generate new row with new value.
         var rowTag = this.getRowTag();
@@ -506,6 +550,15 @@ DomTree.prototype = domplate(
             else
                 this.collapseObject(object);
         }
+    },
+
+    isEmpty: function()
+    {
+        if (!this.element)
+            return true;
+
+        var rows = this.element.querySelectorAll(".memberRow");
+        return !rows.length;
     }
 });
 
@@ -517,6 +570,7 @@ function isPromise(object)
     return object && typeof(object.then) == "function";
 }
 
+// xxxHonza: this is a hack, fix me.
 // Expose for {@DomBaseTree}
 DomTree.isPromise = isPromise;
 
@@ -526,5 +580,5 @@ DomTree.isPromise = isPromise;
 return DomTree;
 
 // ********************************************************************************************* //
-}});
+});
 

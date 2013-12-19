@@ -3,11 +3,13 @@
 define([
     "firebug/firebug",
     "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/chrome/window",
     "firebug/chrome/tabWatcher",
+    "firebug/chrome/eventSource",
     "firebug/debugger/debuggerLib",
 ],
-function(Firebug, FBTrace, Win, TabWatcher, DebuggerLib) {
+function(Firebug, FBTrace, Obj, Win, TabWatcher, EventSource, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -20,12 +22,17 @@ var getWinLocation = Win.safeGetWindowLocation;
 // ********************************************************************************************* //
 // DebuggerClientTab
 
-function DebuggerClientTab(browser, client, listener)
+/**
+ * @param {Object} browser Reference to the browser instance associated with the tab
+ * we wrap in this object.
+ * @param {DebuggerClient} Reference to the {@link DebuggerClient} object representing
+ * the connection to the backend.
+ */
+function DebuggerClientTab(browser, client)
 {
     this.browser = browser;
     this.window = browser.contentWindow;
     this.client = client;
-    this.listener = listener;
 }
 
 /**
@@ -43,7 +50,7 @@ function DebuggerClientTab(browser, client, listener)
  * Instances of this object are maintained by {@debuggerClientTab} in a weak map
  * where key is the (tab) browser.
  */
-DebuggerClientTab.prototype =
+DebuggerClientTab.prototype = Obj.extend(new EventSource(),
 /** @lends DebuggerClientTab */
 {
     dispatchName: "DebuggerClientTab",
@@ -51,46 +58,54 @@ DebuggerClientTab.prototype =
     tabClient: null,
     activeThread: null,
     threadActor: null,
+    tabAttached: false,
+    threadAttached: false,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Public API
 
     /**
-     * Attach to the current thread happens in three steps (round-trips with the server)
+     * Attach to the current tab happens in two steps (round-trips to the server).
      * Step I. get list of all available tabs
      * Step II. attach to the current tab.
-     * Step III. attach to the current thread.
-     * 
-     * Note that attach is initiated when 'onResumeFirebug' event is fired (Firebug UI opened).
      */
     attach: function(callback)
     {
         Trace.sysout("debuggerClientTab.attach; " + getWinLocation(this.window));
 
-        this.attachCallback = callback;
+        // If set to true the attach process already started. If this.tabClient is
+        // set, the process has been also finished.
+        if (this.tabAttached)
+            return;
 
-        // Step I. get list of all available tabs.
-        // Other steps happens asynchronously.
+        this.attachCallback = callback;
+        this.tabAttached = true;
+
+        // Step I. get list of all available tabs (happens asynchronously).
         this.client.listTabs(this.onListTabs.bind(this));
     },
 
     detach: function(callback)
     {
-        this.detachCallback = callback;
+        Trace.sysout("debuggerClientTab.detach; " + getWinLocation(this.window));
 
-        this.detachThread();
+        if (!this.tabAttached)
+            return;
+
+        this.detachCallback = callback;
+        this.tabAttached = false;
+
+        this.detachTab();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Attach Helpers
+    // Attach TabActor
 
     onListTabs: function(response)
     {
         // If the tab object has been detached in just after 'listTabs' has been send
         // Just ignore rest of the attach sequence.
-        // xxxHonza: similar thing should be probably done in onTabAttached + detach the
-        // tab immediately.
-        if (this.detached)
+        if (!this.tabAttached)
             return;
 
         // The response contains list of all tab and global actors registered
@@ -99,6 +114,7 @@ DebuggerClientTab.prototype =
         // See also getActorId method.
         this.listTabsResponse = response;
 
+        // Attach to the currently selected tab.
         var tabGrip = response.tabs[response.selected];
         this.attachTab(tabGrip.actor);
     },
@@ -122,10 +138,10 @@ DebuggerClientTab.prototype =
     {
         Trace.sysout("debuggerClientTab.onTabAttached; " + getWinLocation(this.window));
 
-        if (this.detached)
+        if (!this.tabAttached)
         {
-            // xxxHonza: we should detach the tab now.
             TraceError.sysout("ERROR: tab already detached!");
+            return;
         }
 
         if (!tabClient)
@@ -137,78 +153,12 @@ DebuggerClientTab.prototype =
         this.threadActor = response.threadActor;
         this.tabClient = tabClient;
 
-        this.attachThread(response.threadActor);
-    },
-
-    attachThread: function(threadActor)
-    {
-        Trace.sysout("debuggerClientTab.attachThread; " + getWinLocation(this.window));
-
-        // State diagnostics and tracing
-        var actor = DebuggerLib.getThreadActor(this.browser);
-        Trace.sysout("debuggerClientTab.attachThread; state: " +
-            (actor ? actor._state : "no tab actor"));
-
-        // Step III. attach to the current thread actor.
-        this.client.attachThread(threadActor, this.onThreadAttached.bind(this));
-    },
-
-    onThreadAttached: function(response, threadClient)
-    {
-        Trace.sysout("debuggerClientTab.onThreadAttached; " + getWinLocation(this.window));
-
-        if (this.detached)
-        {
-            // xxxHonza: we should detach the thread now.
-            TraceError.sysout("ERROR: tab already detached!");
-        }
-
-        if (!threadClient)
-        {
-            var threadActor = DebuggerLib.getThreadActor(this.browser);
-            TraceError.sysout("ERROR " + response.error + " (" + threadActor._state +
-                ")", response);
-            return;
-        }
-
-        this.activeThread = threadClient;
-
-        // Update existing context. Note that the context that caused the attach
-        // can be already destroyed (e.g. if page refresh happened soon after load).
-        var context = TabWatcher.getContextByWindow(this.window);
-        if (context)
-            context.activeThread = this.activeThread;
-
         // Execute attach callback if any is provided.
-        this.executeCallback(this.attachCallback, [threadClient]);
+        this.executeCallback(this.attachCallback, [tabClient, this.threadActor]);
         this.attachCallback = null
 
-        // Dispatch event to all listeners.
-        this.dispatch("onThreadAttached");
-
-        threadClient.resume();
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Detach Helpers
-
-    detachThread: function()
-    {
-        Trace.sysout("debuggerClientTab.detachThread;" + this.activeThread);
-
-        if (this.activeThread)
-            this.activeThread.detach(this.onThreadDetached.bind(this));
-
-        this.detached = true;
-    },
-
-    onThreadDetached: function(response)
-    {
-        Trace.sysout("debuggerClientTab.onThreadDetached;", response);
-
-        this.activeThread = null;
-
-        this.detachTab();
+        var context = TabWatcher.getContextByWindow(this.window);
+        this.dispatch("onTabAttached", [context]);
     },
 
     detachTab: function()
@@ -223,20 +173,123 @@ DebuggerClientTab.prototype =
         Trace.sysout("debuggerClientTab.onTabDetached;", response);
 
         // Execute detach callback if provided.
-        this.executeCallback(this.detachCallback, []);
+        this.executeCallback(this.detachCallback);
         this.detachCallback = null;
+
+        var context = TabWatcher.getContextByWindow(this.window);
+        this.dispatch("onTabDetached", [context]);
+
+        this.tabClient = null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Events
+    // Attach ThreadActor
 
-    dispatch: function(eventName)
+    attachThread: function()
     {
+        Trace.sysout("debuggerClientTab.attachThread; " + getWinLocation(this.window));
+
+        if (this.threadAttached)
+        {
+            TraceError.sysout("debuggerClientTab.attachThread; ERROR already attached");
+            return;
+        }
+
+        if (!this.threadActor)
+        {
+            TraceError.sysout("debuggerClientTab.attachThread; ERROR no thread actor");
+            return;
+        }
+
+        // State diagnostics and tracing
+        if (Trace.active)
+        {
+            var actor = DebuggerLib.getThreadActor(this.browser);
+            Trace.sysout("debuggerClientTab.attachThread; state: " +
+                (actor ? actor._state : "no tab actor"));
+        }
+
+        this.threadAttached = true;
+
+        this.client.attachThread(this.threadActor, this.onThreadAttached.bind(this));
+    },
+
+    onThreadAttached: function(response, threadClient)
+    {
+        Trace.sysout("debuggerClientTab.onThreadAttached; " + getWinLocation(this.window),
+            response);
+
+        if (!this.threadAttached)
+        {
+            TraceError.sysout("debuggerClientTab.onThreadAttached; ERROR: detached");
+            return;
+        }
+
+        if (!threadClient)
+        {
+            var threadActor = DebuggerLib.getThreadActor(this.browser);
+            TraceError.sysout("ERROR " + response.error + " (" + threadActor._state +
+                ")", response);
+            return;
+        }
+
+        if (response.type != "paused")
+        {
+            TraceError.sysout("debuggerClientTab.onThreadAttached; ERROR wrong type: " +
+                response.type);
+            return;
+        }
+
+        this.activeThread = threadClient;
+
+        // Update existing context. Note that the context that caused the attach
+        // can be already destroyed (e.g. if page refresh happened soon after load)
+        // and new one created. This isn't a problem since the threadActor is created
+        // for the tab and shares its life time. So, every context created within this
+        // tab will use the same tabActor anyway.
         var context = TabWatcher.getContextByWindow(this.window);
-        if (!context)
+        if (context)
+            context.activeThread = threadClient;
+
+        // Dispatch event to all listeners.
+        this.dispatch("onThreadAttached", [context]);
+
+        // The 'onThreadAttached' event has been handled by all listeners, and so all
+        // 'debugger-attached' related steps are done. We can resume the debugger now.
+        threadClient.resume();
+    },
+
+    detachThread: function()
+    {
+        Trace.sysout("debuggerClientTab.detachThread; " + this.activeThread);
+
+        if (!this.threadAttached)
             return;
 
-        this.listener.dispatch(eventName, [context]);
+        this.threadAttached = false;
+
+        if (this.activeThread)
+            this.activeThread.detach(this.onThreadDetached.bind(this));
+    },
+
+    onThreadDetached: function(response)
+    {
+        Trace.sysout("debuggerClientTab.onThreadDetached;", response);
+
+        var context = TabWatcher.getContextByWindow(this.window);
+
+        this.dispatch("onThreadDetached", [context]);
+
+        // xxxHonza: this is a hack. ThreadActor doesn't reset the state to "detached"
+        // after detach, but to "exited". See ThreadActor.disconnect();
+        // TODO: waiting for a bugzilla report.
+        var threadActor = DebuggerLib.getThreadActor(context.browser);
+        threadActor._state = "detached";
+
+        if (context)
+            context.activeThread = null;
+
+        this.activeThread = null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -245,6 +298,8 @@ DebuggerClientTab.prototype =
     {
         if (!callback)
             return;
+
+        args = args || [];
 
         try
         {
@@ -255,7 +310,7 @@ DebuggerClientTab.prototype =
             TraceError.sysout("debuggerClientTab.executeCallback; EXCEPTION" + e, e);
         }
     }
-};
+});
 
 // ********************************************************************************************* //
 // Registration

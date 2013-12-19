@@ -27,10 +27,10 @@ function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Ur
     SourceLink, Dom, Css, Xpath, Str, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu,
     LoadHandler) {
 
-with (Domplate) {
-
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, TAG, DIV, SPAN, TR, H1, P, UL, A} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -350,7 +350,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             // Helper array for all shorthand properties for the current property.
             prop.computed = {};
 
-            // Get all shorthand propertis.
+            // Get all shorthand properties.
             var dummyStyle = dummyElement.style;
 
             // xxxHonza: Not sure why this happens.
@@ -972,4 +972,4 @@ Firebug.registerPanel(CSSStylePanel);
 return CSSStylePanel;
 
 // ********************************************************************************************* //
-}});
+});

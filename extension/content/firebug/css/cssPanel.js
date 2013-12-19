@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
+/*global define:1, Components:1*/
 
 define([
+    "firebug/chrome/panel",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -15,35 +17,37 @@ define([
     "firebug/lib/search",
     "firebug/lib/string",
     "firebug/lib/array",
-    "firebug/lib/fonts",
     "firebug/lib/xml",
     "firebug/lib/persist",
     "firebug/lib/system",
     "firebug/chrome/menu",
     "firebug/lib/options",
+    "firebug/css/autoCompleter",
     "firebug/css/cssModule",
     "firebug/css/cssReps",
     "firebug/css/selectorEditor",
     "firebug/lib/trace",
     "firebug/css/cssPanelUpdater",
     "firebug/lib/wrapper",
-    "firebug/editor/sourceEditor",
+    "firebug/editor/baseEditor",
     "firebug/editor/editor",
-    "firebug/editor/editorSelector",
+    "firebug/editor/inlineEditor",
+    "firebug/editor/sourceEditor",
     "firebug/chrome/searchBox",
     "firebug/css/cssPanelMutationObserver",
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom, Win,
-    Search, Str, Arr, Fonts, Xml, Persist, System, Menu, Options, CSSModule, CSSInfoTip,
-    SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper, SourceEditor) {
-
-with (Domplate) {
+function(Panel, Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom,
+    Win, Search, Str, Arr, Xml, Persist, System, Menu, Options, CSSAutoCompleter, CSSModule,
+    CSSInfoTip, SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper, BaseEditor, Editor,
+    InlineEditor, SourceEditor, SearchBox) {
 
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var {domplate, FOR, TAG, DIV, SPAN, A, TEXTAREA} = Domplate;
+
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -357,7 +361,7 @@ Firebug.CSSStyleRuleTag = CSSStyleRuleTag;
  * See more: https://getfirebug.com/wiki/index.php/CSS_Panel
  */
 Firebug.CSSStyleSheetPanel = function() {};
-Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
+Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 /** @lends Firebug.CSSStyleSheetPanel */
 {
     name: "stylesheet",
@@ -391,7 +395,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         this.onMouseUp = Obj.bind(this.onMouseUp, this);
         this.onClick = Obj.bind(this.onClick, this);
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
 
         // Create an updater for asynchronous update (watching embedded iframe loads).
         var callback = this.updateDefaultLocation.bind(this);
@@ -409,7 +413,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         if (this.updater)
             this.updater.destroy();
 
-        Firebug.Panel.destroy.apply(this, arguments);
+        Panel.destroy.apply(this, arguments);
     },
 
     initializeNode: function(oldPanelNode)
@@ -418,7 +422,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         Events.addEventListener(this.panelNode, "mouseup", this.onMouseUp, false);
         Events.addEventListener(this.panelNode, "click", this.onClick, false);
 
-        Firebug.Panel.initializeNode.apply(this, arguments);
+        Panel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
@@ -427,7 +431,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         Events.removeEventListener(this.panelNode, "mouseup", this.onMouseUp, false);
         Events.removeEventListener(this.panelNode, "click", this.onClick, false);
 
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Panel.destroyNode.apply(this, arguments);
     },
 
     show: function(state)
@@ -573,7 +577,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             : this.location;
 
         this.stylesheetEditor.styleSheet = this.location;
-        Firebug.Editor.startEditing(this.panelNode, css, this.stylesheetEditor);
+        Editor.startEditing(this.panelNode, css, this.stylesheetEditor);
 
         this.stylesheetEditor.editor.scrollTo(this.panelNode.scrollLeft, this.panelNode.scrollTop);
     },
@@ -617,7 +621,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         }
         else
         {
-            Firebug.Editor.stopEditing();
+            Editor.stopEditing();
         }
     },
 
@@ -1037,7 +1041,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             styleRuleBox = styleRuleBox.getElementsByClassName("insertInto")[0];
         }
 
-        Firebug.Editor.insertRowForObject(styleRuleBox);
+        Editor.insertRowForObject(styleRuleBox);
     },
 
     addRelatedRule: function()
@@ -1065,7 +1069,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             ruleBox = this.template.newRuleTag.append({}, container);
 
         var before = ruleBox.getElementsByClassName("insertBefore")[0];
-        Firebug.Editor.insertRow(before, "before");
+        Editor.insertRow(before, "before");
 
         // Auto-fill the selector field with something reasonable, like
         // ".some-class" or "#table td".
@@ -1104,19 +1108,19 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
         this.ruleEditor.setValue(autofill);
         this.ruleEditor.input.select();
-        Firebug.Editor.update(true);
+        Editor.update(true);
     },
 
     editMediaQuery: function(target)
     {
         var row = Dom.getAncestorByClass(target, "cssRule");
         var mediaQueryBox = Dom.getChildByClass(row, "cssMediaQuery");
-        Firebug.Editor.startEditing(mediaQueryBox);
+        Editor.startEditing(mediaQueryBox);
     },
 
     insertPropertyRow: function(row)
     {
-        Firebug.Editor.insertRowForObject(row);
+        Editor.insertRowForObject(row);
     },
 
     insertRule: function(row)
@@ -1131,18 +1135,18 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 this.template.tag.replace({rules: []}, this.panelNode);
 
             location = Dom.getChildByClass(this.panelNode, "cssSheet");
-            Firebug.Editor.insertRowForObject(location);
+            Editor.insertRowForObject(location);
         }
         else
         {
-            Firebug.Editor.insertRow(location, "before");
+            Editor.insertRow(location, "before");
         }
     },
 
     editPropertyRow: function(row)
     {
         var propValueBox = Dom.getChildByClass(row, "cssPropValue");
-        Firebug.Editor.startEditing(propValueBox);
+        Editor.startEditing(propValueBox);
     },
 
     deletePropertyRow: function(row)
@@ -1444,7 +1448,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
     getOptionsMenuItems: function()
     {
-        items = [
+        var items = [
              Menu.optionMenu("Expand_Shorthand_Properties", "expandShorthandProps",
              "css.option.tip.Expand_Shorthand_Properties")
         ];
@@ -1469,7 +1473,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
         if (target.nodeName == "TEXTAREA")
         {
-            items = Firebug.BaseEditor.getContextMenuItems();
+            items = BaseEditor.getContextMenuItems();
             items.push(
                 "-",
                 {
@@ -1558,7 +1562,10 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             }
         }
 
-        if (!Url.isSystemStyleSheet(this.selection))
+        // Make sure this item always get appended for the Style panel (name == "css");
+        // it acts as a placeholder and gets replaced by other menu items.
+        // This is a bit of a hack.
+        if (this.name == "css" || !Url.isSystemStyleSheet(this.selection))
         {
             items.push(
                 "-",
@@ -1891,7 +1898,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
     searchOtherDocs: function(text, reverse)
     {
-        var scanRE = Firebug.Search.getTestingRegex(text);
+        var scanRE = SearchBox.getTestingRegex(text);
         function scanDoc(styleSheet) {
             // we don't care about reverse here as we are just looking for existence,
             // if we do have a result we will handle the reverse logic on display
@@ -1930,14 +1937,14 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         if (this.currentSearch && text == this.currentSearch.text)
         {
             row = this.currentSearch.findNext(wrapSearch, false, reverse,
-                Firebug.Search.isCaseSensitive(text));
+                SearchBox.isCaseSensitive(text));
         }
         else
         {
             if (this.editing)
             {
                 this.currentSearch = new Search.TextSearch(this.stylesheetEditor.box);
-                row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
+                row = this.currentSearch.find(text, reverse, SearchBox.isCaseSensitive(text));
 
                 if (row)
                 {
@@ -1957,12 +1964,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             }
             else
             {
-                function findRow(node) {
+                var findRow = function(node) {
                     return node.nodeType == Node.ELEMENT_NODE ? node : node.parentNode;
-                }
+                };
 
                 this.currentSearch = new Search.TextSearch(this.panelNode, findRow);
-                row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
+                row = this.currentSearch.find(text, reverse, SearchBox.isCaseSensitive(text));
             }
         }
 
@@ -1992,11 +1999,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     getSearchOptionsMenuItems: function()
     {
         return [
-            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
+            SearchBox.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
                 "search.tip.Case_Sensitive"),
-            Firebug.Search.searchOptionMenu("search.Multiple_Files", "searchGlobal",
+            SearchBox.searchOptionMenu("search.Multiple_Files", "searchGlobal",
                 "search.tip.Multiple_Files"),
-            Firebug.Search.searchOptionMenu("search.Use_Regular_Expression",
+            SearchBox.searchOptionMenu("search.Use_Regular_Expression",
                 "searchUseRegularExpression", "search.tip.Use_Regular_Expression")
         ];
     },
@@ -2087,7 +2094,7 @@ function CSSEditor(doc)
     this.initializeInline(doc);
 }
 
-CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+CSSEditor.prototype = domplate(InlineEditor.prototype,
 {
     insertNewRow: function(target, insertWhere)
     {
@@ -2386,11 +2393,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         var propRow = Dom.getAncestorByClass(this.target, "cssProp");
         var propName = Dom.getChildByClass(propRow, "cssPropName").textContent.toLowerCase();
-
-        if (propName == "font" || propName == "font-family")
-            return CSSModule.parseCSSFontFamilyValue(value, offset, propName);
-        else
-            return CSSModule.parseCSSValue(value, offset);
+        return CSSAutoCompleter.getPropertyRange(propName, value, offset);
     },
 
     getAutoCompleteList: function(preExpr, expr, postExpr, range, cycle, context, out)
@@ -2406,23 +2409,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         else if (Css.hasClass(this.target, "cssPropName"))
         {
             var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
-            var ret = Css.getCSSPropertyNames(nodeType);
-
-            if (!cycle && expr)
-            {
-                // Make some good default suggestions.
-                var list = ["color", "clear", "display", "float", "overflow"];
-                for (var i = 0; i < list.length; ++i)
-                {
-                    if (Str.hasPrefix(list[i], expr) && ret.indexOf(list[i]) !== -1)
-                    {
-                        out.suggestion = list[i];
-                        break;
-                    }
-                }
-            }
-
-            return ret;
+            return CSSAutoCompleter.autoCompletePropertyName(nodeType, expr, cycle, out);
         }
         else if (Dom.getAncestorByClass(this.target, "cssDocumentRule") &&
                 !Css.hasClass(this.target, "cssPropValue"))
@@ -2441,122 +2428,12 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else
         {
-            if (expr.charAt(0) === "!")
-                return ["!important"];
-
             var row = Dom.getAncestorByClass(this.target, "cssProp");
             var propName = Dom.getChildByClass(row, "cssPropName").textContent;
             var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
 
-            var keywords;
-            if (range.type === "url")
-            {
-                // We can't complete urls yet.
-                return [];
-            }
-            else if (range.type === "fontFamily")
-            {
-                keywords = Css.cssKeywords["fontFamily"].slice();
-                if (this.panel && this.panel.context)
-                {
-                    // Add the fonts used in this context (they might be inaccessible
-                    // for this element, but probably aren't).
-                    var fonts = Fonts.getFontsUsedInContext(this.panel.context), ar = [];
-                    for (var i = 0; i < fonts.length; i++)
-                        ar.push(fonts[i].CSSFamilyName);
-                    keywords = Arr.sortUnique(keywords.concat(ar));
-                }
-
-                var q = expr.charAt(0), isQuoted = (q === '"' || q === "'");
-                if (!isQuoted)
-                {
-                    // Default to ' quotes, unless " occurs somewhere.
-                    q = (/"/.test(preExpr + postExpr) ? '"' : "'");
-                }
-
-                // Don't complete '.
-                if (expr.length <= 1 && isQuoted)
-                    return [];
-
-                // When completing, quote fonts if the input is quoted; when
-                // cycling, quote them instead in the way the user seems to
-                // expect to have them quoted.
-                var reSimple = /^[a-z][a-z0-9-]*$/i;
-                var isComplex = !reSimple.test(expr.replace(/^['"]?|['"]?$/g, ""));
-                var quote = function(str)
-                {
-                    if (!cycle || isComplex !== isQuoted)
-                        return (isQuoted ? q + str + q : str);
-                    else
-                        return (reSimple.test(str) ? str : q + str + q);
-                };
-
-                keywords = keywords.slice();
-                for (var i = 0; i < keywords.length; ++i)
-                {
-                    // Treat values starting with capital letters as font names
-                    // that can be quoted.
-                    var k = keywords[i];
-                    if (k.charAt(0).toLowerCase() !== k.charAt(0))
-                        keywords[i] = quote(k);
-                }
-            }
-            else
-            {
-                var lowerProp = propName.toLowerCase(), avoid;
-                if (["background", "border", "font"].indexOf(lowerProp) !== -1)
-                {
-                    if (cycle)
-                    {
-                        // Cycle only within the same category, if possible.
-                        var cat = Css.getCSSShorthandCategory(nodeType, lowerProp, expr);
-                        if (cat)
-                            return (cat in Css.cssKeywords ? Css.cssKeywords[cat] : [cat]);
-                    }
-                    else
-                    {
-                        // Avoid repeated properties. We assume the values to be solely
-                        // space-separated tokens, within a comma-separated part (like
-                        // for CSS3 multiple backgrounds). This is absolutely wrong, but
-                        // good enough in practice because non-tokens for which it fails
-                        // likely aren't in any category.
-                        // "background-position" and "background-repeat" values can occur
-                        // twice, so they are special-cased.
-                        avoid = [];
-                        var preTokens = preExpr.split(",").reverse()[0].split(" ");
-                        var postTokens = postExpr.split(",")[0].split(" ");
-                        var tokens = preTokens.concat(postTokens);
-                        for (var i = 0; i < tokens.length; ++i)
-                        {
-                            var cat = Css.getCSSShorthandCategory(nodeType, lowerProp, tokens[i]);
-                            if (cat && cat !== "position" && cat !== "bgRepeat")
-                                avoid.push(cat);
-                        }
-                    }
-                }
-                keywords = Css.getCSSKeywordsByProperty(nodeType, propName, avoid);
-            }
-
-            // Add the magic inherit property, if it's sufficiently alone.
-            // XXX Firefox 19 also has "initial"
-            if (!preExpr)
-                keywords = keywords.concat(["inherit"]);
-
-            if (!cycle)
-            {
-                // Make some good default suggestions.
-                var list = ["white", "black", "solid", "outset", "repeat"];
-                for (var i = 0; i < list.length; ++i)
-                {
-                    if (Str.hasPrefix(list[i], expr) && keywords.indexOf(list[i]) !== -1)
-                    {
-                        out.suggestion = list[i];
-                        break;
-                    }
-                }
-            }
-
-            return SelectorEditor.stripCompletedParens(keywords, postExpr);
+            return CSSAutoCompleter.autoCompletePropertyValue(nodeType, propName,
+                preExpr, expr, postExpr, range, cycle, context, out);
         }
     },
 
@@ -2565,16 +2442,9 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (!Css.hasClass(this.target, "cssPropValue"))
             return null;
 
-        // For non-multi-valued properties, fail (pre-completions don't make sense,
-        // and it's less risky).
         var row = Dom.getAncestorByClass(this.target, "cssProp");
         var propName = Dom.getChildByClass(row, "cssPropName").textContent;
-        if (!Css.multiValuedProperties.hasOwnProperty(propName))
-            return null;
-
-        if (range.type === "fontFamily")
-            return ",";
-        return " ";
+        return CSSAutoCompleter.getValuePropSeparator(propName, range);
     },
 
     autoCompleteAdjustSelection: function(value, offset)
@@ -2667,7 +2537,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 }
             }
 
-            return Firebug.InlineEditor.prototype.doIncrementValue
+            return InlineEditor.prototype.doIncrementValue
                 .call(this, value, amt, offset, offsetEnd, info);
         }
 
@@ -2789,6 +2659,28 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
             return CSSStyleRuleTag.tag.insertAfter({rule: emptyRule}, target);
     },
 
+    beginEditing: function()
+    {
+        if (this.panel.name === "stylesheet" && this.panel.location)
+        {
+            this.doc = Css.getDocumentForStyleSheet(this.panel.location);
+        }
+        else if (this.panel.name === "css" && this.panel.selection)
+        {
+            this.doc = this.panel.selection.ownerDocument;
+        }
+        else
+        {
+            this.doc = this.panel.context.window.document;
+        }
+    },
+
+    endEditing: function()
+    {
+        this.doc = null;
+        return true;
+    },
+
     saveEdit: function(target, value, previousValue)
     {
         var context = this.panel.context;
@@ -2815,10 +2707,9 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
                 return;
 
             var cssRules = styleSheet.cssRules;
-            for (ruleIndex=0; ruleIndex<cssRules.length && searchRule!=cssRules[ruleIndex];
-                ruleIndex++)
-            {
-            }
+            ruleIndex = 0;
+            while (ruleIndex < cssRules.length && searchRule != cssRules[ruleIndex])
+                ruleIndex++;
 
             if (rule)
                 oldRule = searchRule;
@@ -2843,7 +2734,7 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
                 if (this.panel.name !== "css")
                     return;
 
-                var doc = this.panel.selection.ownerDocument.defaultView.document;
+                var doc = this.panel.selection.ownerDocument;
                 styleSheet = CSSModule.getDefaultStyleSheet(doc);
             }
 
@@ -2986,7 +2877,7 @@ function StyleSheetEditor(doc)
     this.editor.init(this.box, config, this.onEditorInitialize.bind(this));
 }
 
-StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
+StyleSheetEditor.prototype = domplate(BaseEditor,
 {
     multiLine: true,
 
@@ -3065,7 +2956,7 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
 
     onEditorTextChange: function()
     {
-        Firebug.Editor.update();
+        Editor.update();
     },
 
     scrollToLine: function(line, offset)
@@ -3187,15 +3078,14 @@ function getOriginalStyleSheetCSS(sheet, context)
 
 function getStyleSheetCSS(sheet, context)
 {
-    function beautify(css, indent)
+    function beautify(css, indentSize)
     {
-        var indent='\n'+Array(indent+1).join(' ');
-        var i=css.indexOf('{');
-        var match=css.substr(i+1).match(/(?:[^;\(]*(?:\([^\)]*?\))?[^;\(]*)*;?/g);
+        var indent = "\n" + Array(indentSize + 1).join(" ");
+        var i = css.indexOf("{");
+        var match = css.substr(i + 1).match(/(?:[^;\(]*(?:\([^\)]*?\))?[^;\(]*)*;?/g);
         match.pop();
         match.pop();
-        return css.substring(0, i+1) + indent
-                + match.sort().join(indent) + '\n}';
+        return css.substring(0, i + 1) + indent + match.sort().join(indent) + "\n}";
     }
 
     var cssRules = sheet.cssRules, css=[];
@@ -3208,7 +3098,7 @@ function getStyleSheetCSS(sheet, context)
             css.push(rule.cssText);
     }
 
-    return Css.rgbToHex(css.join('\n\n')) + '\n';
+    return Css.rgbToHex(css.join("\n\n")) + "\n";
 }
 
 function scrollSelectionIntoView(panel)
@@ -3235,4 +3125,4 @@ Firebug.registerPanel(Firebug.CSSStyleSheetPanel);
 return Firebug.CSSStyleSheetPanel;
 
 // ********************************************************************************************* //
-}});
+});
