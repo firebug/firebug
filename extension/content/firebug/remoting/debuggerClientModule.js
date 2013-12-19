@@ -9,9 +9,9 @@ define([
     "firebug/chrome/tabWatcher",
     "firebug/chrome/firefox",
     "firebug/chrome/window",
-    "firebug/remoting/debuggerClientTab",
+    "firebug/remoting/tabClient",
 ],
-function(Firebug, FBTrace, Obj, Options, Events, TabWatcher, Firefox, Win, DebuggerClientTab) {
+function(Firebug, FBTrace, Obj, Options, Events, TabWatcher, Firefox, Win, TabClient) {
 
 // ********************************************************************************************* //
 // Constants
@@ -22,8 +22,11 @@ var Trace = FBTrace.to("DBG_DEBUGGERCLIENTMODULE");
 var TraceConn = FBTrace.to("DBG_CONNECTION");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
-Cu["import"]("resource://gre/modules/devtools/dbg-client.jsm");
-Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
+var dbgClientScope = {};
+var dbgServerScope = {};
+
+Cu["import"]("resource://gre/modules/devtools/dbg-client.jsm", dbgClientScope);
+Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm", dbgServerScope);
 
 // ********************************************************************************************* //
 // Module Implementation
@@ -149,7 +152,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
         // Debugger client represents the connection to the server side
         // and so it's global.
-        Firebug.debuggerClient = this.client = new DebuggerClient(this.transport);
+        Firebug.debuggerClient = this.client = new dbgClientScope.DebuggerClient(this.transport);
 
         // Hook packet transport to allow tracing.
         if (FBTrace.DBG_CONNECTION)
@@ -219,8 +222,8 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         if (this.tabMap.has(browser))
             return this.getTabClient(browser);
 
-        // There is one instance of {@link DebuggerClientTab} per Firefox tab.
-        var tab = new DebuggerClientTab(browser, this.client);
+        // There is one instance of {@link TabClient} per Firefox tab.
+        var tab = new TabClient(browser, this.client);
         tab.addListener(this);
 
         this.tabMap.set(browser, tab);
@@ -371,7 +374,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // DebuggerClientTab
+    // TabClient Handlers
 
     onTabAttached: function(context)
     {
@@ -394,7 +397,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Event Source
+    // EventSource
 
     dispatch: function(eventName, args)
     {
