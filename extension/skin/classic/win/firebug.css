@@ -18,40 +18,26 @@
     background-image: url("chrome://firebug/skin/tabbar/tab-hover-bkgnd.png");
 }
 /* end overrides */
-
-#fbFirebugMenu {
-    margin-bottom: 1px;
-    opacity: 0.8;
-}
-
-#fbFirebugMenu:hover,
-#fbFirebugMenu[open="true"] {
-    opacity: 1.0;
-}
-
 #fbFirebugMenu > .toolbarbutton-text,
 #fbFirebugMenu > .toolbarbutton-menu-dropmarker {
     display: none;
 }
 
-.toolbar-text-button,
-.toolbar-text-menubutton {
-    padding: 3px 6px;
+toolbarbutton {
+    padding: 2px 6px;
     color: #000000;
 }
 
 .toolbar-text-button[disabled="true"],
-.toolbar-text-menubutton[disabled="true"] {
+.toolbar-text-menubutton[disabled="true"],
+toolbarbutton[type="menu"][disabled="true"] {
     color: graytext;
 }
 
-.toolbar-text-button[checked="true"] {
-    padding: 3px 6px !important;
-}
-
-.toolbar-text-button > .toolbarbutton-icon,
-.toolbar-text-menubutton > .toolbarbutton-icon {
-    /*display: none;*/
+.toolbar-text-button > .toolbarbutton-icon:not([src]),
+.toolbar-text-menubutton > .toolbarbutton-icon:not([src]),
+toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
+    display: none;
 }
 
 .toolbar-text-menubutton:hover:active,
@@ -157,6 +143,10 @@
 #fbWindowButtons.innerToolbar {
     margin-right: 4px;
     padding: 4px 0 6px 0;
+}
+
+#fbWindowButtons > toolbarbutton {
+    margin: 0;
 }
 
 /************************************************************************************************/
@@ -289,21 +279,11 @@ panelTab[selected="true"] > panelTabMenu {
 
 .panelStatusLabel {
     cursor: pointer;
-    margin: 0;
-    padding: 0 4px;
     color: #000000;
 }
 
 .panelStatusLabel > .toolbarbutton-icon {
     margin: 0 !important;
-}
-
-.panelStatusLabel:hover {
-    color: blue;
-}
-
-.panelStatusLabel[selected="true"] {
-    font-weight: bold;
 }
 
 /************************************************************************************************/
