@@ -47,12 +47,12 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
     /**
      * Executed by the framework when Firebug is attached to the {@link ThreadClient}. The event
      * is dispatched by {@link TabClient}. Note that the debugger is paused at this
-     * moment but {@TabContext.stopped} is not set (and of course there is no current frame).
+     * moment but {@link TabContext#stopped} is not set (and of course there is no current frame).
      * {@link TabClient} is responsible for resuming the debugger after the 'onThreadAttached'
      * event is handled by all listeners.
      *
      * @param {Boolean} reload Set to true if the current page has been just reloaded. In such
-     * case we are still attached to the same {@ThreadClient} object.
+     * case we are still attached to the same {@link ThreadClient} object.
      */
     onAttach: function(reload)
     {

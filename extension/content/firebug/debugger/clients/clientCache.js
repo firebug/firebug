@@ -44,7 +44,7 @@ ClientCache.prototype =
     },
 
     /**
-     * Return a client object (i.e. instance of {@ObjectClient}) according to the
+     * Return a client object (i.e. instance of {@link ObjectClient}) according to the
      * grip (handle) passed into the function.
      *
      * The grip can be:

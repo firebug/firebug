@@ -171,7 +171,7 @@ DebuggerLib.getObject = function(context, actorId)
     }
     catch (e)
     {
-        TraceError.sysout("debuggerClientModule.getObject; EXCEPTION " + e, e);
+        TraceError.sysout("debuggerClient.getObject; EXCEPTION " + e, e);
     }
 }
 
@@ -191,7 +191,7 @@ DebuggerLib.getThreadActor = function(browser)
     }
     catch (e)
     {
-        TraceError.sysout("debuggerClientModule.getObject; EXCEPTION " + e, e);
+        TraceError.sysout("debuggerClient.getObject; EXCEPTION " + e, e);
     }
 }
 

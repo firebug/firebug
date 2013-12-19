@@ -15,10 +15,10 @@ define([
     "firebug/chrome/activableModule",
     "firebug/console/consolePanel",
     "firebug/console/consoleBase",
-    "firebug/remoting/debuggerClientModule",
+    "firebug/remoting/debuggerClient",
 ],
 function(Firebug, FBTrace, Obj, Events, Locale, Search, Xml, Options, Win, Firefox,
-    PanelNotification, ActivableModule, ConsolePanel, ConsoleBase, DebuggerClientModule) {
+    PanelNotification, ActivableModule, ConsolePanel, ConsoleBase, DebuggerClient) {
 
 "use strict";
 
@@ -65,7 +65,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
         ActivableModule.initialize.apply(this, arguments);
 
         Firebug.connection.addListener(this);
-        DebuggerClientModule.addListener(this);
+        DebuggerClient.addListener(this);
     },
 
     initializeUI: function()
@@ -91,7 +91,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
         ActivableModule.shutdown.apply(this, arguments);
 
         Firebug.connection.removeListener(this);
-        DebuggerClientModule.removeListener(this);
+        DebuggerClient.removeListener(this);
     },
 
     initContext: function(context, persistedState)
@@ -313,7 +313,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // DebuggerClientModule
+    // DebuggerClient
 
     onTabAttached: function(context, reload)
     {

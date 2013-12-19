@@ -54,7 +54,7 @@ ObjectClient.prototype = Obj.descend(Grip.prototype,
         // Basic grip data packet contains also list of some properties so, it's
         // possible to display some useful info about the object without additional
         // request. Let's use these properties for the value label.
-        // See also {@ObjectClient}
+        // See also {@link ObjectClient}
         if (this.grip.ownProperties)
             return this.grip.ownProperties;
 

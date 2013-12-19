@@ -150,7 +150,7 @@ SourceFile.prototype =
         // Convert all line delimiters to the unix style. The source editor
         // (in the Script panel) also uses unix style and so we can compare
         // if specific text is already set in the editor.
-        // See {@ScriptView.showSource}
+        // See {@link ScriptView.showSource}
         var source = response.source.replace(/\r\n/gm, "\n");
 
         this.loaded = true;

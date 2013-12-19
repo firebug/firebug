@@ -71,8 +71,8 @@ function WatchPanel()
  * allows variable inspection during debugging. It's possible to inspect existing
  * variables in the scope-chain as well as evaluating user expressions.
  *
- * The content of this panel is synchronized with the {@ScriptPanel} through
- * {@FirebugChrome.select} method. This panel is using the current {@StackFrame}
+ * The content of this panel is synchronized with the {@link ScriptPanel} through
+ * {@link FirebugChrome#select} method. This panel is using the current {@link StackFrame}
  * as the selection when debugger is paused.
  *
  * The panel displays properties of the current scope (usually a window or an iframe)
@@ -211,13 +211,13 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     {
         Trace.sysout("WatchPanel.updateSelection", object);
 
-        // Do not synchronize the content of the {@WatchPanel} with
+        // Do not synchronize the content of the {@link WatchPanel} with
         // selection changes (e.g. in the Script panel). Clicking on any object
         // anywhere in the UI should not affect its content.
 
         // Content of the Watch panel is synchronized/updated through debugging
         // events such as 'onStartDebugging' and 'onStopDebugging' sent by
-        // {@DebuggerTool} object.
+        // {@link DebuggerTool} object.
     },
 
     doUpdateSelection: function(frame)
@@ -316,7 +316,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
                 // as the scroll offset reaches the scrollTop. This would improve the UX
                 // since the scroll could happen synchronously in most cases and the UI
                 // wouldn't blink. This would have to be done as part of the restoration
-                // process within {@DomBaseTree}.
+                // process within {@link DomBaseTree}.
                 if (this.defaultScrollTop)
                     this.panelNode.scrollTop = this.defaultScrollTop;
 
@@ -525,14 +525,14 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     evalWatchesLocally: function()
     {
         // Executed if evaluation fails. The error message is displayed instead
-        // of the result value using {@Exception} template.
+        // of the result value using {@link Exception} template.
         function onFailure(watch, result)
         {
             watch.value = new ErrorCopy(result + "");
         }
 
         // Executed if evaluation succeeds. The result value is set to related
-        // {@WatchExpression} instance.
+        // {@link WatchExpression} instance.
         function onSuccess(watch, value)
         {
             watch.value = value;
@@ -543,7 +543,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             //this.tree.updateObject(watch);
         }
 
-        // Iterate over all user expressions and evaluate them using {@CommandLine} API
+        // Iterate over all user expressions and evaluate them using {@link CommandLine} API
         // Future implementation should used RDP and perhaps built-in WebConsoleActor, see:
         // https://developer.mozilla.org/en-US/docs/Tools/Web_Console/remoting
         // However, the built-in actor doesn't support .% syntax.
@@ -588,8 +588,8 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     {
         Trace.sysout("watchPanel.framesadded;", stackTrace);
 
-        // When a variable within the scope chain is edited the {@WatchPanel.refresh} method
-        // calls {@DebuggerTool.cleanScopes} to get fresh scopes including the new value.
+        // When a variable within the scope chain is edited the {@link WatchPanel.refresh} method
+        // calls {@link DebuggerTool.cleanScopes} to get fresh scopes including the new value.
         // So, when we get new frames from the backend we need to refresh the content.
         // Of course, save the presentation state before refresh.
         this.tree.saveState(this.toggles);
@@ -729,7 +729,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     /**
      * getPopupObject is executed when Firebug's context menu is showing.
      * The purpose of the method is returning clicked object, which is used for inspect actions.
-     * See {@FirebugChrome.onContextShowing} for more details.
+     * See {@link FirebugChrome.onContextShowing} for more details.
      */
     getPopupObject: function(target)
     {
@@ -800,7 +800,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             return;
         }
 
-        // Use basic editing logic implemented in {@DomBasePanel}.
+        // Use basic editing logic implemented in {@link DomBasePanel}.
         BasePanel.editProperty.apply(this, arguments);
     },
 

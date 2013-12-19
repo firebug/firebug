@@ -19,8 +19,8 @@ function WatchExpression(expr)
 }
 
 /**
- * @object Represents user watch expression created within the {@WatchPanel} side panel.
- * Evaluation of the expression is done automatically by the {@WatchPanel} object.
+ * @object Represents user watch expression created within the {@link WatchPanel} side panel.
+ * Evaluation of the expression is done automatically by the {@link WatchPanel} object.
  */
 WatchExpression.prototype = Obj.descend(ObjectClient.Property.prototype,
 /** @lends WatchExpression */

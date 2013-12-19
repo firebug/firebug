@@ -131,8 +131,8 @@ function threadBreakpoints(context, args)
 
         // xxxHonza: Clone all breakpoints before logging. There is an exception
         // when the DOM panel (used after clicking on the logged object)
-        // is trying to display instances of {@Breakpoint} using
-        // {@Firebug.Breakpoint.BreakpointRep}
+        // is trying to display instances of {@link Breakpoint} using
+        // {@link BreakpointRep}
         var result = {};
         BreakpointStore.enumerateBreakpoints(null, function(bp)
         {

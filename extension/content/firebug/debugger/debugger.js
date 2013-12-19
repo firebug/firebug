@@ -13,10 +13,10 @@ define([
     "firebug/debugger/debuggerHalter",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/clients/clientCache",
-    "firebug/remoting/debuggerClientModule",
+    "firebug/remoting/debuggerClient",
 ],
 function(Firebug, FBTrace, Obj, Locale, Options, Firefox, TabWatcher, DebuggerHalter,
-    DebuggerLib, ClientCache, DebuggerClientModule) {
+    DebuggerLib, ClientCache, DebuggerClient) {
 
 "use strict";
 
@@ -48,10 +48,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         Firebug.registerTracePrefix("debuggerTool.", "DBG_DEBUGGERTOOL", false);
         Firebug.registerTracePrefix("breakpointTool.", "DBG_BREAKPOINTTOOL", false);
 
-        // Listen to the debugger-client, which represents the connection to the server.
-        // The debugger-client object sends various events about attaching/detaching
+        // Listen to the main client, which represents the connection to the server.
+        // The main client object sends various events about attaching/detaching
         // progress to the backend.
-        DebuggerClientModule.addListener(this);
+        DebuggerClient.addListener(this);
 
         // Hook XUL stepping buttons.
         var chrome = Firebug.chrome;
@@ -85,7 +85,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         Firebug.unregisterTracePrefix("debuggerTool.");
         Firebug.unregisterTracePrefix("breakpointTool.");
 
-        DebuggerClientModule.removeListener(this);
+        DebuggerClient.removeListener(this);
 
         Firebug.ActivableModule.shutdown.apply(this, arguments);
     },
@@ -96,7 +96,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         // If page reload happens the thread client remains the same so,
         // preserve also all existing breakpoint clients.
-        // See also {@DebuggerClientModule.initConext}
+        // See also {@link DebuggerClient#initConext}
         if (persistedState)
         {
             context.breakpointClients = persistedState.breakpointClients;
@@ -120,7 +120,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // DebuggerClientModule
+    // DebuggerClient
 
     onTabAttached: function(context, reload)
     {
@@ -141,7 +141,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (reload)
             return;
 
-        var tab = DebuggerClientModule.getTabClient(context.browser);
+        var tab = DebuggerClient.getTabClient(context.browser);
         if (tab)
             tab.attachThread();
     },
@@ -150,7 +150,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         Trace.sysout("debugger.onTabDetached; context ID: " + context.getId());
 
-        var tab = DebuggerClientModule.getTabClient(context.browser);
+        var tab = DebuggerClient.getTabClient(context.browser);
         if (tab)
             tab.detachThread();
     },
@@ -161,7 +161,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             context.getId(), context);
 
         // Create grip cache
-        context.clientCache = new ClientCache(DebuggerClientModule.client, context);
+        context.clientCache = new ClientCache(DebuggerClient.client, context);
 
         // Debugger has been attached to the remote thread actor, so attach also tools
         // needed by this module.
@@ -204,7 +204,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         // rather dispatch a message to an object that is created for every context?
         TabWatcher.iterateContexts(function(context)
         {
-            var tab = DebuggerClientModule.getTabClient(context.browser);
+            var tab = DebuggerClient.getTabClient(context.browser);
             if (tab)
                 tab.attachThread();
         });
@@ -224,7 +224,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         // xxxHonza: again, it's a bit hacky to explicitly iterate all contexts.
         TabWatcher.iterateContexts(function(context)
         {
-            var tab = DebuggerClientModule.getTabClient(context.browser);
+            var tab = DebuggerClient.getTabClient(context.browser);
             if (tab)
                 tab.detachThread();
         });

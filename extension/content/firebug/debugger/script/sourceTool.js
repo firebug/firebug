@@ -7,9 +7,9 @@ define([
     "firebug/chrome/tool",
     "firebug/debugger/script/sourceFile",
     "firebug/debugger/debuggerLib",
-    "firebug/remoting/debuggerClientModule",
+    "firebug/remoting/debuggerClient",
 ],
-function (Firebug, FBTrace, Obj, Tool, SourceFile, DebuggerLib, DebuggerClientModule) {
+function (Firebug, FBTrace, Obj, Tool, SourceFile, DebuggerLib, DebuggerClient) {
 
 // ********************************************************************************************* //
 // Constants
@@ -27,9 +27,9 @@ function SourceTool(context)
 
 /**
  * @object This tool object is responsible for logic related to sources. It requests sources
- * from the server as well as transforms incoming packets into {@SourceFile} instances that
- * are stored inside the current {@TabContext}. Any module can consequently use these sources.
- * For example, the {@ScriptPanel} is displaying it and the {@ConsolePanel} displays source
+ * from the server as well as transforms incoming packets into {@link SourceFile} instances that
+ * are stored inside the current {@link TabContext}. Any module can consequently use these sources.
+ * For example, the {@link ScriptPanel} is displaying it and the {@link ConsolePanel} displays source
  * lines for logged errors.
  */
 SourceTool.prototype = Obj.extend(new Tool(),
@@ -44,7 +44,8 @@ SourceTool.prototype = Obj.extend(new Tool(),
     {
         Trace.sysout("sourceTool.attach; context ID: " + this.context.getId());
 
-        DebuggerClientModule.addListener(this);
+        // Listen for 'newScript' events.
+        DebuggerClient.addListener(this);
 
         // Get scripts from the server. Source as fetched on demand (e.g. when
         // displayed in the Script panel).
@@ -59,7 +60,7 @@ SourceTool.prototype = Obj.extend(new Tool(),
         // from the back end after the thread actor is connected again.
         this.context.clearSources();
 
-        DebuggerClientModule.removeListener(this);
+        DebuggerClient.removeListener(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -106,7 +107,7 @@ SourceTool.prototype = Obj.extend(new Tool(),
         }
 
         // Create a source file and append it into the context. This is the only
-        // place where an instance of {@SourceFile} is created.
+        // place where an instance of {@link SourceFile} is created.
         var sourceFile = new SourceFile(this.context, script.actor, script.url,
             script.isBlackBoxed);
 
@@ -118,7 +119,7 @@ SourceTool.prototype = Obj.extend(new Tool(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // DebuggerClientModule Handlers
+    // DebuggerClient Handlers
 
     newSource: function(type, response)
     {

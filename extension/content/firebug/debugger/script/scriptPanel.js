@@ -75,7 +75,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     enableA11y: true,
     order: 40,
 
-    // {@StatusPath} UI component that displays call-stack in the toolbar will be
+    // {@link StatusPath} UI component that displays call-stack in the toolbar will be
     // updated asynchronously.
     objectPathAsyncUpdate: true,
 
@@ -928,7 +928,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // Context Menu
 
     /**
-     * The method handles 'onEditorContextMenu' fired by {@ScriptView}.
+     * The method handles 'onEditorContextMenu' fired by {@link ScriptView}.
      */
     onEditorContextMenu: function(event, items)
     {
@@ -1488,7 +1488,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // See also issue 6948 (and included links to platform bugs).
             // xxxHonza: issue 6948 isn't yet closed and this code might change
             // as soon as the platform bugs are fixed.
-            // xxxHonza: See {@ScriptPanelLineUpdater} that is responsible for proper
+            // xxxHonza: See {@link ScriptPanelLineUpdater} that is responsible for proper
             // status update (in case of garbage collected scripts). Fast scrolling needs
             // this optimization.
             if (typeof(handle.executableLine) != "undefined")
