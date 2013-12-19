@@ -23,8 +23,6 @@ var Trace = FBTrace.to("DBG_SOURCETOOL");
 function SourceTool(context)
 {
     this.context = context;
-
-    this._onNewSource = this.newSource.bind(this);
 }
 
 /**
@@ -46,7 +44,7 @@ SourceTool.prototype = Obj.extend(new Tool(),
     {
         Trace.sysout("sourceTool.attach; context ID: " + this.context.getId());
 
-        DebuggerClientModule.client.addListener("newSource", this._onNewSource);
+        DebuggerClientModule.addListener(this);
 
         // Get scripts from the server. Source as fetched on demand (e.g. when
         // displayed in the Script panel).
@@ -57,7 +55,11 @@ SourceTool.prototype = Obj.extend(new Tool(),
     {
         Trace.sysout("sourceTool.detach; context ID: " + this.context.getId());
 
-        DebuggerClientModule.client.removeListener("newSource", this._onNewSource);
+        // Clear all fetched source info. All script sources must be fetched
+        // from the back end after the thread actor is connected again.
+        this.context.clearSources();
+
+        DebuggerClientModule.removeListener(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -78,23 +80,6 @@ SourceTool.prototype = Obj.extend(new Tool(),
             for (var i = 0; i < sources.length; i++)
                 self.addScript(sources[i]);
         });
-    },
-
-    newSource: function(type, response)
-    {
-        Trace.sysout("sourceTool.newSource; context id: " + this.context.getId() +
-            ", script url: " + response.source.url, response);
-
-        // Ignore scripts coming from different threads.
-        // This is because 'newSource' listener is registered in 'DebuggerClient' not
-        // in 'ThreadClient'.
-        if (this.context.activeThread.actor != response.from)
-        {
-            Trace.sysout("sourceTool.newSource; coming from different thread");
-            return;
-        }
-
-        this.addScript(response.source);
     },
 
     addScript: function(script)
@@ -130,6 +115,26 @@ SourceTool.prototype = Obj.extend(new Tool(),
         // Notify listeners (e.g. the Script panel) to updated itself. It can happen
         // that the Script panel has been empty until now and need to display a script.
         this.dispatch("newSource", [sourceFile]);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // DebuggerClientModule Handlers
+
+    newSource: function(type, response)
+    {
+        Trace.sysout("sourceTool.newSource; context id: " + this.context.getId() +
+            ", script url: " + response.source.url, response);
+
+        // Ignore scripts coming from different threads.
+        // This is because 'newSource' listener is registered in 'DebuggerClient' not
+        // in 'ThreadClient'.
+        if (this.context.activeThread.actor != response.from)
+        {
+            Trace.sysout("sourceTool.newSource; coming from different thread");
+            return;
+        }
+
+        this.addScript(response.source);
     },
 });
 

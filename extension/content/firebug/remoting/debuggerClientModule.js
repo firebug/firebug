@@ -75,6 +75,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
         this.onTabNavigated = Obj.bind(this.onTabNavigated, this);
         this.onTabDetached = Obj.bind(this.onTabDetached, this);
+        this.onNewSource = Obj.bind(this.onNewSource, this);
 
         // Connect the server in 'initializeUI' so, listeners from other modules can
         // be registered before in 'initialize'.
@@ -156,6 +157,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
         this.client.addListener("tabNavigated", this.onTabNavigated);
         this.client.addListener("tabDetached", this.onTabDetached);
+        this.client.addListener("newSource", this.onNewSource);
 
         // Connect to the server.
         this.client.connect(this.onConnect);
@@ -168,6 +170,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
         this.client.removeListener("tabNavigated", this.onTabNavigated);
         this.client.removeListener("tabDetached", this.onTabDetached);
+        this.client.removeListener("newSource", this.onNewSource);
 
         // Disconnect from the server.
         this.client.close(this.onDisconnect);
@@ -282,6 +285,11 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
             ", context: " + context, packet);
 
         // xxxHonza: should we manually detach the tab now?
+    },
+
+    onNewSource: function(type, response)
+    {
+        this.dispatch("newSource", arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

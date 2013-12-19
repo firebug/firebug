@@ -282,7 +282,7 @@ DebuggerClientTab.prototype = Obj.extend(new EventSource(),
 
         // xxxHonza: this is a hack. ThreadActor doesn't reset the state to "detached"
         // after detach, but to "exited". See ThreadActor.disconnect();
-        // TODO: waiting for a bugzilla report.
+        // See: https://bugzilla.mozilla.org/show_bug.cgi?id=933212
         var threadActor = DebuggerLib.getThreadActor(context.browser);
         threadActor._state = "detached";
 

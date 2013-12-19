@@ -94,19 +94,6 @@ TabContext.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Browser Tools Interface BrowserContext
-
-    getCompilationUnit: function(url)
-    {
-        return this.compilationUnits[url];
-    },
-
-    getAllCompilationUnits: function()
-    {
-        return Arr.values(this.compilationUnits);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Tools (proxies)
 
     getTool: function(name)
@@ -177,6 +164,9 @@ TabContext.prototype =
         return this.window;
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Source Files
+
     addSourceFile: function(sourceFile)
     {
         if (!this.sourceFileMap)
@@ -243,6 +233,26 @@ TabContext.prototype =
     getSourceFileByTag: function(tag)
     {
         return this.sourceFileByTag[tag];
+    },
+
+    clearSources: function()
+    {
+        this.sourceFileByTag = {};
+        this.sourceFileMap = {};
+        this.compilationUnits = {};
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Browser Tools Interface BrowserContext
+
+    getCompilationUnit: function(url)
+    {
+        return this.compilationUnits[url];
+    },
+
+    getAllCompilationUnits: function()
+    {
+        return Arr.values(this.compilationUnits);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

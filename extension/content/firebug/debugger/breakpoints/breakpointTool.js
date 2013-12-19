@@ -65,6 +65,10 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
 
         this.context.getTool("source").removeListener(this);
 
+        // Thread has been detached, so clean up also all breakpoint clients. They
+        // need to be re-created as soon as the thread actor is attached again.
+        this.context.breakpointClients = [];
+
         BreakpointStore.removeListener(this);
     },
 
@@ -147,7 +151,7 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // DebuggerTool
+    // SourceTool
 
     newSource: function(sourceFile)
     {
@@ -163,7 +167,10 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
 
         // Bail out if there is nothing to set.
         if (!bps.length)
+        {
+            Trace.sysout("breakpointTool.newSource; No breakpoints to set");
             return;
+        }
 
         // Filter out disabled breakpoints. These won't be set on the server side
         // (unless the user enables them later).
