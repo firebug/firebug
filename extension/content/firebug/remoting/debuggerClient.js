@@ -194,7 +194,7 @@ var DebuggerClient = Obj.extend(Firebug.Module,
         // Firebug has been opened for the current tab so, attach to the back-end tab actor.
         // If Firebug is not yet connected, the tab will be attached in 'onConnect' handler.
         if (this.connected)
-            this.attachClientTab(browser);
+            this.attachTab(browser);
     },
 
     onSuspendFirebug: function()
@@ -206,13 +206,13 @@ var DebuggerClient = Obj.extend(Firebug.Module,
 
         // Firebug has been closed for the current tab, so explicitly detach
         // the tab and thread actor and destroy the tab instance.
-        this.detachClientTab(browser);
+        this.detachTab(browser);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Tabs
 
-    attachClientTab: function(browser)
+    attachTab: function(browser)
     {
         // Of course, we can attach only if Firebug is connected to the backend.
         if (!this.connected)
@@ -231,13 +231,13 @@ var DebuggerClient = Obj.extend(Firebug.Module,
         // Attach to the tab actor.
         tab.attach(function(threadClient)
         {
-            Trace.sysout("debuggerClient.attachClientTab; Callback: tab attached");
+            Trace.sysout("debuggerClient.attachTab; Callback: tab attached");
         });
 
         return tab;
     },
 
-    detachClientTab: function(browser)
+    detachTab: function(browser)
     {
         var tab = this.getTabClient(browser);
         if (!tab)
@@ -245,7 +245,7 @@ var DebuggerClient = Obj.extend(Firebug.Module,
 
         tab.detach(function()
         {
-            Trace.sysout("debuggerClient.detachClientTab; Callback: tab detached");
+            Trace.sysout("debuggerClient.detachTab; Callback: tab detached");
         });
 
         this.tabMap.delete(browser);
@@ -265,7 +265,7 @@ var DebuggerClient = Obj.extend(Firebug.Module,
         var self = this;
         TabWatcher.iterateContexts(function(context)
         {
-            self.attachClientTab(context.browser);
+            self.attachTab(context.browser);
         });
     },
 
@@ -331,7 +331,7 @@ var DebuggerClient = Obj.extend(Firebug.Module,
         }
         else
         {
-            this.attachClientTab(context.browser);
+            this.attachTab(context.browser);
         }
     },
 
