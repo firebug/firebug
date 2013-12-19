@@ -119,8 +119,17 @@ SourceFile.prototype =
 
         this.inProgress = true;
 
+        // Firebug needs to be attached to the thread client to get sources.
+        var threadClient = this.context.activeThread;
+        if (!threadClient)
+        {
+            Trace.sysout("sourceFile.loadScriptLines; ERROR no thread client " + this.href);
+            callback(null);
+            return;
+        }
+
         // This is the only place where source (the text) is loaded for specific URL.
-        var sourceClient = this.context.activeThread.source(this);
+        var sourceClient = threadClient.source(this);
         sourceClient.source(this.onSourceLoaded.bind(this));
     },
 

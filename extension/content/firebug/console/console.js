@@ -65,6 +65,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
         ActivableModule.initialize.apply(this, arguments);
 
         Firebug.connection.addListener(this);
+        DebuggerClientModule.addListener(this);
     },
 
     initializeUI: function()
@@ -87,8 +88,10 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     shutdown: function()
     {
-        Firebug.connection.removeListener(this);
         ActivableModule.shutdown.apply(this, arguments);
+
+        Firebug.connection.removeListener(this);
+        DebuggerClientModule.removeListener(this);
     },
 
     initContext: function(context, persistedState)
@@ -157,7 +160,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // extend ActivableModule
+    // ActivableModule
 
     onObserverChange: function(observer)
     {
@@ -181,7 +184,8 @@ Firebug.Console = Obj.extend(ActivableConsole,
             this.clear();
         }
 
-        DebuggerClientModule.removeListener(this);
+        // TODO: at some point we want to detach WebConsoleActor since the Console panel
+        // is disabled now. This should be done for all contexts.
     },
 
     onResumeFirebug: function()
@@ -192,7 +196,8 @@ Firebug.Console = Obj.extend(ActivableConsole,
         if (Firebug.Errors.toggleWatchForErrors(watchForErrors))
             this.setStatus();
 
-        DebuggerClientModule.addListener(this);
+        // TODO: at some point we want to attach WebConsoleActor since the Console panel
+        // is enabled now. This should be done for all contexts.
     },
 
     onToggleFilter: function(event, context, filterType)
@@ -310,20 +315,19 @@ Firebug.Console = Obj.extend(ActivableConsole,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // DebuggerClientModule
 
-    onThreadAttached: function(context, reload)
+    onTabAttached: function(context, reload)
     {
-        Trace.sysout("console.onThreadAttached; reload: " + reload + ", context ID: " +
+        Trace.sysout("console.onTabAttached; reload: " + reload + ", context ID: " +
             context.getId(), context);
 
-        // Attach tools needed by this module.
-        context.getTool("source").attach(reload);
+        // TODO: at some point we want to attach the WebConsoleActor here
     },
 
-    onThreadDetached: function(context)
+    onTabDetached: function(context)
     {
-        Trace.sysout("source.onThreadDetached; context ID: " + context.getId());
+        Trace.sysout("source.onTabDetached; context ID: " + context.getId());
 
-        context.getTool("source").detach();
+        // TODO: at some point we want to detach the WebConsoleActor here
     },
 });
 

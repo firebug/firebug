@@ -52,7 +52,7 @@ Tool.prototype = Obj.extend(new EventSource(),
         if (!this.attached)
             return;
 
-        this.attached = true;
+        this.attached = false;
         this.onDetach();
     },
 

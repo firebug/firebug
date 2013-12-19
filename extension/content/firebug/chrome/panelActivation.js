@@ -215,11 +215,13 @@ Firebug.PanelActivation = Obj.extend(Module,
         {
             // Iterate all contexts and destroy all instances of the specified panel.
             var self = this;
-            Firebug.connection.eachContext(function(context) {
+            Firebug.connection.eachContext(function(context)
+            {
                 context.destroyPanel(panelType, context.persistedState);
             });
         }
 
+        // xxxHonza: does this really need to be a class method call?
         panelType.prototype.onActivationChanged(enable);
 
         this.dispatch("activationChanged", [panelType, enable]);

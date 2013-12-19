@@ -9,13 +9,14 @@ define([
     "firebug/lib/locale",
     "firebug/lib/options",
     "firebug/chrome/firefox",
+    "firebug/chrome/tabWatcher",
     "firebug/debugger/debuggerHalter",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/clients/clientCache",
     "firebug/remoting/debuggerClientModule",
 ],
-function(Firebug, FBTrace, Obj, Locale, Options, Firefox, DebuggerHalter, DebuggerLib,
-    ClientCache, DebuggerClientModule) {
+function(Firebug, FBTrace, Obj, Locale, Options, Firefox, TabWatcher, DebuggerHalter,
+    DebuggerLib, ClientCache, DebuggerClientModule) {
 
 "use strict";
 
@@ -48,9 +49,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         Firebug.registerTracePrefix("breakpointTool.", "DBG_BREAKPOINTTOOL", false);
 
         // Listen to the debugger-client, which represents the connection to the server.
-        // The debugger-client object represents the source of all RDP events.
-        if (Firebug.Debugger.isAlwaysEnabled())
-            DebuggerClientModule.addListener(this);
+        // The debugger-client object sends various events about attaching/detaching
+        // progress to the backend.
+        DebuggerClientModule.addListener(this);
 
         // Hook XUL stepping buttons.
         var chrome = Firebug.chrome;
@@ -121,6 +122,39 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // DebuggerClientModule
 
+    onTabAttached: function(context, reload)
+    {
+        var enabled = Firebug.Debugger.isAlwaysEnabled();
+
+        Trace.sysout("debugger.onTabAttached; reload: " + reload + ", context ID: " +
+            context.getId() + ", enabled: " + enabled, context);
+
+        // Do not attach the threadClient if the Script panel is disabled. Attaching to the
+        // thread client enables Debugger() for the current page, which consequently disables
+        // JIT compilation.
+        if (!Firebug.Debugger.isAlwaysEnabled())
+            return;
+
+        // The thread doesn't have to be attached again if the page/tab has
+        // been just reloaded. The life time of the threadActor is the same
+        // as the life time of the tab.
+        if (reload)
+            return;
+
+        var tab = DebuggerClientModule.getTabClient(context.browser);
+        if (tab)
+            tab.attachThread();
+    },
+
+    onTabDetached: function(context)
+    {
+        Trace.sysout("debugger.onTabDetached; context ID: " + context.getId());
+
+        var tab = DebuggerClientModule.getTabClient(context.browser);
+        if (tab)
+            tab.detachThread();
+    },
+
     onThreadAttached: function(context, reload)
     {
         Trace.sysout("debugger.onThreadAttached; reload: " + reload + ", context ID: " +
@@ -129,7 +163,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         // Create grip cache
         context.clientCache = new ClientCache(DebuggerClientModule.client, context);
 
-        // Attach tools needed by this module.
+        // Debugger has been attached to the remote thread actor, so attach also tools
+        // needed by this module.
         context.getTool("source").attach(reload);
         context.getTool("debugger").attach(reload);
         context.getTool("breakpoint").attach(reload);
@@ -162,11 +197,19 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         this.activated = true;
 
-        DebuggerClientModule.addListener(this);
+        Trace.sysout("debugger.activateDebugger;");
+
+        // Iterate all contexts and make sure they are all attached to the current thread.
+        // xxxHonza: it's always a bit hacky to explicitly iterate all contexts. Could we
+        // rather dispatch a message to an object that is created for every context?
+        TabWatcher.iterateContexts(function(context)
+        {
+            var tab = DebuggerClientModule.getTabClient(context.browser);
+            if (tab)
+                tab.attachThread();
+        });
 
         this.setStatus();
-
-        Trace.sysout("debugger.activateDebugger;");
     },
 
     deactivateDebugger: function()
@@ -176,11 +219,17 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         this.activated = false;
 
-        DebuggerClientModule.removeListener(this);
+        Trace.sysout("debugger.deactivateDebugger;");
+
+        // xxxHonza: again, it's a bit hacky to explicitly iterate all contexts.
+        TabWatcher.iterateContexts(function(context)
+        {
+            var tab = DebuggerClientModule.getTabClient(context.browser);
+            if (tab)
+                tab.detachThread();
+        });
 
         this.setStatus();
-
-        Trace.sysout("debugger.deactivateDebugger;");
     },
 
     onSuspendFirebug: function()
