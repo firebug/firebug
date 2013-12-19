@@ -29,7 +29,7 @@ ObjectClient.prototype = Obj.descend(Grip.prototype,
     getValue: function()
     {
         // If the grip is a raw and standalone value (number, boolean, or string)
-        // return direcly this grip as the value.
+        // return directly this grip as the value.
         if (typeof this.grip !== "object")
             return this.grip;
 

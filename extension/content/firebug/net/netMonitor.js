@@ -682,7 +682,7 @@ function unmonitorContext(context)
 
     updateStartButton(false);
 
-    // And finaly destroy the net panel sub context.
+    // And finally destroy the net panel sub context.
     delete context.netProgress;
 }
 
@@ -718,7 +718,7 @@ function createNetProgress(context)
 // TabCache Listener
 
 /**
- * TabCache listner implementation. Net panel uses this listner to remember all
+ * TabCache listener implementation. Net panel uses this listener to remember all
  * responses stored into the cache. There can be more requests to the same URL that
  * returns different responses. The Net panels must remember all of them (tab cache
  * remembers only the last one)

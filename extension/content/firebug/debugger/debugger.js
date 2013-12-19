@@ -208,7 +208,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 tab.attachThread();
         });
 
-        this.setStatus();
+        this.setStatus(true);
     },
 
     deactivateDebugger: function()
@@ -228,7 +228,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 tab.detachThread();
         });
 
-        this.setStatus();
+        this.setStatus(false);
     },
 
     onSuspendFirebug: function()
@@ -237,6 +237,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             return;
 
         Trace.sysout("debugger.onSuspendFirebug;");
+
+        this.setStatus(false);
 
         return false;
     },
@@ -247,14 +249,16 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             return;
 
         Trace.sysout("debugger.onResumeFirebug;");
+
+        this.setStatus(true);
     },
 
-    setStatus: function()
+    setStatus: function(enable)
     {
         var status = Firefox.getElementById("firebugStatus");
         if (status)
         {
-            var enabled = this.isEnabled();
+            var enabled = this.isEnabled() && enable;
             status.setAttribute("script", enabled ? "on" : "off");
 
             Trace.sysout("debugger.setStatus; enabled: " + enabled);
