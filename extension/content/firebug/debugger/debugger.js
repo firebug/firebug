@@ -122,12 +122,11 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // DebuggerClient
 
-    onTabAttached: function(context, reload)
+    onTabAttached: function(browser, reload)
     {
         var enabled = Firebug.Debugger.isAlwaysEnabled();
 
-        Trace.sysout("debugger.onTabAttached; reload: " + reload + ", context ID: " +
-            context.getId() + ", enabled: " + enabled, context);
+        Trace.sysout("debugger.onTabAttached; reload: " + reload);
 
         // Do not attach the threadClient if the Script panel is disabled. Attaching to the
         // thread client enables Debugger() for the current page, which consequently disables
@@ -141,16 +140,16 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (reload)
             return;
 
-        var tab = DebuggerClient.getTabClient(context.browser);
+        var tab = DebuggerClient.getTabClient(browser);
         if (tab)
             tab.attachThread();
     },
 
-    onTabDetached: function(context)
+    onTabDetached: function(browser)
     {
-        Trace.sysout("debugger.onTabDetached; context ID: " + context.getId());
+        Trace.sysout("debugger.onTabDetached;");
 
-        var tab = DebuggerClient.getTabClient(context.browser);
+        var tab = DebuggerClient.getTabClient(browser);
         if (tab)
             tab.detachThread();
     },

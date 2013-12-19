@@ -235,7 +235,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
         // firing 'onStartDebugging' event.
         this.context.getPanel("script");
 
-        // Notify listeners. E.g. the {@ScriptPanel} panel needs to update its UI.
+        // Notify listeners. E.g. the {@link ScriptPanel} panel needs to update its UI.
         this.dispatch("onStartDebugging", [this.context, event, packet]);
 
         // Execute registered 'clientEvaluated' callback.
@@ -306,7 +306,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
             this.context.currentFrame = frame;
         }
 
-        // Now notify all listeners, for example the {@CallstackPanel} panel to sync the UI.
+        // Now notify all listeners, for example the {@link CallstackPanel} panel to sync the UI.
         this.dispatch("framesadded", [this.context.currentTrace]);
     },
 

@@ -7,9 +7,10 @@ define([
     "firebug/chrome/window",
     "firebug/chrome/tabWatcher",
     "firebug/chrome/eventSource",
+    "firebug/chrome/firefox",
     "firebug/debugger/debuggerLib",
 ],
-function(Firebug, FBTrace, Obj, Win, TabWatcher, EventSource, DebuggerLib) {
+function(Firebug, FBTrace, Obj, Win, TabWatcher, EventSource, Firefox, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -157,8 +158,8 @@ TabClient.prototype = Obj.extend(new EventSource(),
         this.executeCallback(this.attachCallback, [tabClient, this.threadActor]);
         this.attachCallback = null
 
-        var context = TabWatcher.getContextByWindow(this.window);
-        this.dispatch("onTabAttached", [context]);
+        var browser = Firefox.getBrowserForWindow(this.window);
+        this.dispatch("onTabAttached", [browser]);
     },
 
     detachTab: function()
@@ -176,8 +177,8 @@ TabClient.prototype = Obj.extend(new EventSource(),
         this.executeCallback(this.detachCallback);
         this.detachCallback = null;
 
-        var context = TabWatcher.getContextByWindow(this.window);
-        this.dispatch("onTabDetached", [context]);
+        var browser = Firefox.getBrowserForWindow(this.window);
+        this.dispatch("onTabDetached", [browser]);
 
         this.tabClient = null;
     },

@@ -315,17 +315,16 @@ Firebug.Console = Obj.extend(ActivableConsole,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // DebuggerClient
 
-    onTabAttached: function(context, reload)
+    onTabAttached: function(browser, reload)
     {
-        Trace.sysout("console.onTabAttached; reload: " + reload + ", context ID: " +
-            context.getId(), context);
+        Trace.sysout("console.onTabAttached; reload: " + reload);
 
         // TODO: at some point we want to attach the WebConsoleActor here
     },
 
-    onTabDetached: function(context)
+    onTabDetached: function(browser)
     {
-        Trace.sysout("source.onTabDetached; context ID: " + context.getId());
+        Trace.sysout("source.onTabDetached; ");
 
         // TODO: at some point we want to detach the WebConsoleActor here
     },
