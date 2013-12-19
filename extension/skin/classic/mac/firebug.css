@@ -19,7 +19,7 @@
 #fbCommandLineCompletion,
 #fbCommandLineMeasurer,
 .fbCommandLineCompletions {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 /* Add some more padding to the completion popup */
@@ -250,14 +250,14 @@
 /* Quick Info Box */
 
 #fbQuickInfoPanel {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 /************************************************************************************************/
 /* Command History panel */
 
 #fbCommandHistory {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 /********************************************************************************************/
@@ -553,5 +553,5 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 /************************************************************************************************/
 
 #fbMigrationOk {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }

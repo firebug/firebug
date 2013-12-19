@@ -59,7 +59,7 @@ body {
 
 .infoTip,
 .fullPanelEditor {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 /************************************************************************************************/
@@ -86,5 +86,5 @@ body {
 .arrayLeftBracket,
 .arrayRightBracket,
 .arrayComma {
-      font-family: Monaco, monospace;
+      font-family: monospace;
 }
