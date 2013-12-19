@@ -109,6 +109,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(ActivablePanel,
 
         // Listen for set filters, so the panel is properly updated when needed
         Firebug.Console.addListener(this);
+
+        if (Firebug.Console.isEnabled())
+            Firebug.Console.attachConsoleToWindows(this.context);
     },
 
     destroy: function(state)
