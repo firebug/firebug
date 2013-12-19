@@ -765,7 +765,7 @@
                         if (itemObject == object)
                             return item;
                         // For items implementing equals() (such as StackFrame)
-                        if (itemObject.equals && itemObject.equals(object))
+                        if (itemObject && itemObject.equals && itemObject.equals(object))
                             return item;
                     }
                 }
