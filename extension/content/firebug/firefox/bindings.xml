@@ -764,8 +764,10 @@
                             Firebug.currentContext);
                         if (itemObject == object)
                             return item;
-                        // For items implementing equals() (such as StackFrame)
-                        if (itemObject && itemObject.equals && itemObject.equals(object))
+                        // For items implementing equals() (such as StackFrame).
+                        // Also make sure we get an object from chrome.
+                        if (XPCNativeWrapper(itemObject) === itemObject && itemObject &&
+                            itemObject.equals && itemObject.equals(object))
                             return item;
                     }
                 }
