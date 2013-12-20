@@ -89,15 +89,23 @@ var Profiler = Obj.extend(Module,
 
     setEnabled: function(context)
     {
-        // The profiler is available only if:
-        // 1) The Console panel is enabled
-        // 2) The Script panel is enabled
-        // 3) The thread actor is attached
-        var console = context.isPanelEnabled("console");
-        var script = context.isPanelEnabled("script");
-        var enabled = console && script && context.activeThread;
+        if (context)
+        {
+            // The profiler is available only if:
+            // 1) The Console panel is enabled
+            // 2) The Script panel is enabled
+            // 3) The thread actor is attached
+            var console = context.isPanelEnabled("console");
+            var script = context.isPanelEnabled("script");
+            var enabled = console && script && context.activeThread;
 
-        this.profilerEnabled = console && script && context.activeThread;
+            this.profilerEnabled = console && script && context.activeThread;
+        }
+        else
+        {
+            // If there is no current context, just disable the profiler.
+            this.profilerEnabled = false;
+        }
 
         if (!this.profilerEnabled && this.isProfiling())
             this.stopProfiling(context);
