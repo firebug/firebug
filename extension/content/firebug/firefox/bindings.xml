@@ -288,8 +288,6 @@
                     if (Firebug.DisabledPanelBox)
                         Firebug.DisabledPanelBox.show(this.browser, panelName);
                 }
-
-                this.updateToolbarVisibility();
             ]]></body>
         </method>
 
@@ -310,37 +308,6 @@
                 // Also hide disabled panel content if any
                 if (Firebug.DisabledPanelBox)
                     Firebug.DisabledPanelBox.hide(this.browser);
-            ]]></body>
-        </method>
-
-        <method name="updateToolbarVisibility">
-            <body><![CDATA[
-                var noButtons = true;
-                var toolbarInner = Firebug.chrome.$("fbToolbarInner");
-                var box = toolbarInner.firstChild;
-                while (box)
-                {
-                    var tagName = box.tagName.toLowerCase();
-                    var collapsed = box.getAttribute("collapsed");
-                    if (collapsed != "true")
-                    {
-                        if (tagName == "panelstatus" && !box.firstChild)
-                        {
-                            box = box.nextSibling;
-                            continue;
-                        }
-
-                        noButtons = false;
-                        break;
-                    }
-
-                    box = box.nextSibling;
-                }
-
-                var toolbar = Firebug.chrome.$("fbToolbar");
-                FBL.collapse(toolbar, noButtons);
-                var toolbox = Firebug.chrome.$("fbToolbox");
-                FBL.collapse(toolbox, noButtons);
             ]]></body>
         </method>
     </implementation>
