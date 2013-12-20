@@ -341,7 +341,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
 
     resume: function(callback, limit)
     {
-        Trace.sysout("debuggerTool.resume; limit: " + limit);
+        Trace.sysout("debuggerTool.resume; limit: " + (limit ? limit.type: "no type"), limit);
 
         // xxxHonza: do not use _doResume. Use stepping methods instead.
         return this.context.activeThread._doResume(limit, callback);
