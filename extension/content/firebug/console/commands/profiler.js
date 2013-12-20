@@ -41,6 +41,9 @@ var TraceError = FBTrace.to("DBG_ERRORS");
  * @module The module implements profiling feature. Its implementation is based on
  * {@link ProfilerEngine} that uses JSD2 Debugger API too hook function calls.
  * The Script panel must be enabled in order to use the Profiler.
+ *
+ * xxxHonza: some logic related to profiling is in ConsolePanel and ConsoleExposed modules.
+ * It should be moved here, so the entire profiler implementation is embedded in one module.
  */
 var Profiler = Obj.extend(Module,
 /** @lends Profiler */
