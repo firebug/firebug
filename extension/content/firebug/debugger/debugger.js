@@ -10,13 +10,14 @@ define([
     "firebug/lib/options",
     "firebug/chrome/firefox",
     "firebug/chrome/tabWatcher",
+    "firebug/chrome/activableModule",
     "firebug/debugger/debuggerHalter",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/clients/clientCache",
     "firebug/remoting/debuggerClient",
 ],
-function(Firebug, FBTrace, Obj, Locale, Options, Firefox, TabWatcher, DebuggerHalter,
-    DebuggerLib, ClientCache, DebuggerClient) {
+function(Firebug, FBTrace, Obj, Locale, Options, Firefox, TabWatcher, ActivableModule,
+    DebuggerHalter, DebuggerLib, ClientCache, DebuggerClient) {
 
 "use strict";
 
@@ -32,7 +33,7 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 /**
  * @module
  */
-Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
+Firebug.Debugger = Obj.extend(ActivableModule,
 /** @lends Firebug.Debugger */
 {
     dispatchName: "Debugger",
@@ -42,7 +43,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     initialize: function()
     {
-        Firebug.ActivableModule.initialize.apply(this, arguments);
+        ActivableModule.initialize.apply(this, arguments);
 
         // xxxHonza: scoped logging should automate this (see firebug/lib/trace module).
         Firebug.registerTracePrefix("debuggerTool.", "DBG_DEBUGGERTOOL", false);
@@ -87,7 +88,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         DebuggerClient.removeListener(this);
 
-        Firebug.ActivableModule.shutdown.apply(this, arguments);
+        ActivableModule.shutdown.apply(this, arguments);
     },
 
     initContext: function(context, persistedState)
@@ -179,7 +180,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // extends ActivableModule
+    // ActivableModule
 
     onObserverChange: function(observer)
     {
