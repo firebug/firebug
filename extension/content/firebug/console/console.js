@@ -15,10 +15,10 @@ define([
     "firebug/chrome/activableModule",
     "firebug/console/consolePanel",
     "firebug/console/consoleBase",
-    "firebug/remoting/debuggerClientModule",
+    "firebug/remoting/debuggerClient",
 ],
 function(Firebug, FBTrace, Obj, Events, Locale, Search, Xml, Options, Win, Firefox,
-    PanelNotification, ActivableModule, ConsolePanel, ConsoleBase, DebuggerClientModule) {
+    PanelNotification, ActivableModule, ConsolePanel, ConsoleBase, DebuggerClient) {
 
 "use strict";
 
@@ -65,7 +65,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
         ActivableModule.initialize.apply(this, arguments);
 
         Firebug.connection.addListener(this);
-        DebuggerClientModule.addListener(this);
+        DebuggerClient.addListener(this);
     },
 
     initializeUI: function()
@@ -91,7 +91,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
         ActivableModule.shutdown.apply(this, arguments);
 
         Firebug.connection.removeListener(this);
-        DebuggerClientModule.removeListener(this);
+        DebuggerClient.removeListener(this);
     },
 
     initContext: function(context, persistedState)
@@ -313,19 +313,18 @@ Firebug.Console = Obj.extend(ActivableConsole,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // DebuggerClientModule
+    // DebuggerClient
 
-    onTabAttached: function(context, reload)
+    onTabAttached: function(browser, reload)
     {
-        Trace.sysout("console.onTabAttached; reload: " + reload + ", context ID: " +
-            context.getId(), context);
+        Trace.sysout("console.onTabAttached; reload: " + reload);
 
         // TODO: at some point we want to attach the WebConsoleActor here
     },
 
-    onTabDetached: function(context)
+    onTabDetached: function(browser)
     {
-        Trace.sysout("source.onTabDetached; context ID: " + context.getId());
+        Trace.sysout("source.onTabDetached; ");
 
         // TODO: at some point we want to detach the WebConsoleActor here
     },

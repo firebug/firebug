@@ -45,14 +45,14 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
     // Initialization
 
     /**
-     * Executed by the framework when Firebug is attached to the {@ThreadClient}. The event
-     * is dispatched by {@DebuggerClientTab}. Note that the debugger is paused at this
-     * moment but {@TabContext.stopped} is not set (and of course there is no current frame).
-     * {@DebuggerClientTab} is responsible for resuming the debugger after the 'onThreadAttached'
+     * Executed by the framework when Firebug is attached to the {@link ThreadClient}. The event
+     * is dispatched by {@link TabClient}. Note that the debugger is paused at this
+     * moment but {@link TabContext#stopped} is not set (and of course there is no current frame).
+     * {@link TabClient} is responsible for resuming the debugger after the 'onThreadAttached'
      * event is handled by all listeners.
      *
      * @param {Boolean} reload Set to true if the current page has been just reloaded. In such
-     * case we are still attached to the same {@ThreadClient} object.
+     * case we are still attached to the same {@link ThreadClient} object.
      */
     onAttach: function(reload)
     {
@@ -235,7 +235,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
         // firing 'onStartDebugging' event.
         this.context.getPanel("script");
 
-        // Notify listeners. E.g. the {@ScriptPanel} panel needs to update its UI.
+        // Notify listeners. E.g. the {@link ScriptPanel} panel needs to update its UI.
         this.dispatch("onStartDebugging", [this.context, event, packet]);
 
         // Execute registered 'clientEvaluated' callback.
@@ -256,9 +256,9 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
         Trace.sysout("debuggerTool.resumed; currently stopped: " +
             this.context.stopped, arguments);
 
-        // When Firebug is attached to the {@ThreadClient} object the debugger is paused.
-        // As soon as all initialization steps are done {@DebuggerClientTab} resumes the
-        // debugger. In such case the {@TabContext} object isn't stopped and there is no
+        // When Firebug is attached to the {@link ThreadClient} object the debugger is paused.
+        // As soon as all initialization steps are done {@link TabClient} resumes the
+        // debugger. In such case the {@link TabContext} object isn't stopped and there is no
         // current frame, so we just ignore the event here.
         if (!this.context.stopped)
             return;
@@ -306,7 +306,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
             this.context.currentFrame = frame;
         }
 
-        // Now notify all listeners, for example the {@CallstackPanel} panel to sync the UI.
+        // Now notify all listeners, for example the {@link CallstackPanel} panel to sync the UI.
         this.dispatch("framesadded", [this.context.currentTrace]);
     },
 
@@ -341,7 +341,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
 
     resume: function(callback, limit)
     {
-        Trace.sysout("debuggerTool.resume; limit: " + limit);
+        Trace.sysout("debuggerTool.resume; limit: " + (limit ? limit.type: "no type"), limit);
 
         // xxxHonza: do not use _doResume. Use stepping methods instead.
         return this.context.activeThread._doResume(limit, callback);

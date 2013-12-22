@@ -6,9 +6,9 @@ define([
     "firebug/lib/object",
     "firebug/chrome/tool",
     "firebug/debugger/breakpoints/breakpointStore",
-    "firebug/remoting/debuggerClientModule",
+    "firebug/remoting/debuggerClient",
 ],
-function (Firebug, FBTrace, Obj, Tool, BreakpointStore, DebuggerClientModule) {
+function (Firebug, FBTrace, Obj, Tool, BreakpointStore, DebuggerClient) {
 
 // ********************************************************************************************* //
 // Constants
@@ -29,8 +29,8 @@ function BreakpointTool(context)
  * context. The object represents a proxy to the backend and all communication related
  * to breakpoints should be done through it.
  *
- * {@BreakpointTool} (one instance per context) is also handling events coming from
- * {@BreakpointStore} (one instance per Firebug), performs async operation with the
+ * {@link BreakpointTool} (one instance per context) is also handling events coming from
+ * {@link BreakpointStore} (one instance per Firebug), performs async operation with the
  * server side (using RDP) and forwards results to all registered listeners, which are
  * usually panel objects.
  */
@@ -51,10 +51,10 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
     {
         Trace.sysout("breakpointTool.attach; context ID: " + this.context.getId());
 
-        // Listen for 'newScript' event.
+        // Listen for 'newScript' events.
         this.context.getTool("source").addListener(this);
 
-        // Listen for {@BreakpointStore} events to create/remove breakpoints
+        // Listen for {@link BreakpointStore} events to create/remove breakpoints
         // in the related backend (thread actor).
         BreakpointStore.addListener(this);
     },
@@ -64,6 +64,10 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         Trace.sysout("breakpointTool.detach; context ID: " + this.context.getId());
 
         this.context.getTool("source").removeListener(this);
+
+        // Thread has been detached, so clean up also all breakpoint clients. They
+        // need to be re-created as soon as the thread actor is attached again.
+        this.context.breakpointClients = [];
 
         BreakpointStore.removeListener(this);
     },
@@ -147,7 +151,7 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // DebuggerTool
+    // SourceTool
 
     newSource: function(sourceFile)
     {
@@ -163,7 +167,10 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
 
         // Bail out if there is nothing to set.
         if (!bps.length)
+        {
+            Trace.sysout("breakpointTool.newSource; No breakpoints to set");
             return;
+        }
 
         // Filter out disabled breakpoints. These won't be set on the server side
         // (unless the user enables them later).
@@ -340,8 +347,8 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
     },
 
     /**
-     * Creates breakpoint actors on the server side and {@BreakpointClient} objects
-     * on the client side. The client objects are stored within {@TabContext}.
+     * Creates breakpoint actors on the server side and {@link BreakpointClient} objects
+     * on the client side. The client objects are stored within {@link TabContext}.
      *
      * @param arr {Array} List of breakpoints to be created on the server side
      * @param cb {Function} Optional callback that is executed as soon as all breakpoints

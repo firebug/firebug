@@ -22,12 +22,16 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // ********************************************************************************************* //
 // DebuggerHalter Implementation
 
+/**
+ * @module
+ */
 var DebuggerHalter = Obj.extend(Module,
+/** @lends DebuggerHalter */
 {
     dispatchName: "DebuggerHalter",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Module
+    // Initialization
 
     initialize: function()
     {
@@ -97,6 +101,8 @@ var DebuggerHalter = Obj.extend(Module,
             if (callback)
                 callback();
 
+            Trace.sysout("debuggerHalter.shouldResumeDebugger; resume debugger");
+
             // null means resume completely.
             context.resumeLimit = null;
             return true;
@@ -106,6 +112,8 @@ var DebuggerHalter = Obj.extend(Module,
         // unwind all frames that don't come from the page content.
         if (DebuggerLib.isFrameLocationEval(where.url))
         {
+            Trace.sysout("debuggerHalter.shouldResumeDebugger; resume debugger");
+
             context.resumeLimit = {type: "step"};
             return true;
         }

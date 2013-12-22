@@ -41,7 +41,7 @@ var TraceError = FBTrace.to("DBG_ERRORS");
  * Panel selection is an instance of StackFrame object.
  *
  * The content of this panel is synchronized with ThreadClient's stack frame cache using
- * 'framesadded' and 'framescleared' events. These events are re-sent from {@DebuggerTool},
+ * 'framesadded' and 'framescleared' events. These events are re-sent from {@link DebuggerTool},
  * which is registered ThreadClient's listener. 
  */
 function CallstackPanel() {}

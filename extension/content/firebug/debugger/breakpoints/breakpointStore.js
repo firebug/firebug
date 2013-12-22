@@ -5,10 +5,10 @@ define([
     "firebug/firebug",
     "firebug/chrome/module",
     "firebug/lib/object",
-    "firebug/remoting/debuggerClientModule",
+    "firebug/remoting/debuggerClient",
     "firebug/debugger/breakpoints/breakpoint",
 ],
-function(FBTrace, Firebug, Module, Obj, DebuggerClientModule, Breakpoint) {
+function(FBTrace, Firebug, Module, Obj, DebuggerClient, Breakpoint) {
 
 // ********************************************************************************************* //
 // Constants
@@ -39,8 +39,8 @@ var TraceError = FBTrace.to("DBG_ERRORS");
  * sessions (restarts). This object implements saving and loading of breakpoint records from
  * a JSON file.
  *
- * This object is a singleton and every {@TabContext} needs to ensure that breakpoints are
- * properly set on the current {@ThreadClient} (back end).
+ * This object is a singleton and every {@link TabContext} needs to ensure that breakpoints are
+ * properly set on the current {@link ThreadClient} (back end).
  */
 var BreakpointStore = Obj.extend(Module,
 /** @lends BreakpointStore */
@@ -292,7 +292,7 @@ var BreakpointStore = Obj.extend(Module,
         return removedBp;
     },
 
-    // Removes a breakpoint silently (doesn't fire an event). Used by {@BreakpointTool}.
+    // Removes a breakpoint silently (doesn't fire an event). Used by {link @BreakpointTool}.
     removeBreakpointInternal: function(url, lineNo, type)
     {
         type = type || BP_NORMAL;

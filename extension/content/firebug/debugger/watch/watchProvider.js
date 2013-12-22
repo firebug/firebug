@@ -76,7 +76,7 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
     getLabel: function(object)
     {
-        // If the debugger is resumed the {@WatchPanel} displays list of user expressions
+        // If the debugger is resumed the {@link WatchPanel} displays list of user expressions
         // and the current global scope, top level window or an iframe set using cd().
         // The window is labeled as 'window'. It could be a bit better to use 'this' but,
         // the expanded state would be remembered and used even for the case when the 
@@ -134,7 +134,7 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
         while (scope)
         {
             // xxxHonza: All instances of the ScopeClient should be probably
-            // created by {@ClientFactory}.
+            // created by {@link ClientFactory}.
             stackFrame.scopes.push(new ScopeClient(scope, cache));
             scope = scope.parent;
         }

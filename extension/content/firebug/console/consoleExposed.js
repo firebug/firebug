@@ -143,6 +143,7 @@ function createFirebugConsole(context, win)
         return Console.getDefaultReturnValue();
     };
 
+    // xxxHonza: could we move the profiler methods into "firebug/console/commands/profiler"?
     console.profile = function(title)
     {
         Profiler.commandLineProfileStart(context, title);

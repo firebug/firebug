@@ -12,13 +12,13 @@ var DebuggerController =
 
     addListener: function(listener)
     {
-        FW.Firebug.DebuggerClientModule.addListener(listener);
+        FW.Firebug.DebuggerClient.addListener(listener);
         this.listeners.push(listener);
     },
 
     removeListener: function(listener)
     {
-        FW.Firebug.DebuggerClientModule.removeListener(listener);
+        FW.Firebug.DebuggerClient.removeListener(listener);
         FW.FBL.remove(this.listeners, listener);
     },
 

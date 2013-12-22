@@ -3,7 +3,7 @@
 define([
     "firebug/lib/trace",
     "firebug/debugger/clients/objectClient",
-    "firebug/debugger/debuggerTool", //xxxHonza: So, it's the DebuggerClientModule first listener
+    "firebug/debugger/debuggerTool", //xxxHonza: So, it's the DebuggerClient first listener
     "firebug/debugger/breakpoints/breakpointTool",
     "firebug/debugger/debugger",
     "firebug/debugger/script/scriptPanel",
@@ -21,7 +21,7 @@ define([
     "firebug/debugger/clients/clientCache",
     "firebug/debugger/clients/functionClient",
     "firebug/debugger/commands",
-    "firebug/remoting/debuggerClientModule",
+    "firebug/remoting/debuggerClient",
     "firebug/debugger/clients/remoteNodeListRep",
     "firebug/debugger/breakpoints/debuggerKeyword",
 ],

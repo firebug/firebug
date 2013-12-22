@@ -15,6 +15,7 @@ define([
     "firebug/lib/xpcom",
     "firebug/lib/object",
     "firebug/chrome/tableRep",
+    "firebug/console/console",
     "firebug/editor/editor",
     "firebug/editor/inlineEditor",
 ],

@@ -20,12 +20,11 @@ define([
     "firebug/chrome/activablePanel",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/breakpoints/breakpointStore",
-    "firebug/console/commands/profiler",
     "firebug/console/errorMessageObj",
 ],
 function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Search, Options, Wrapper,
     Xpcom, Menu, FirebugReps, SearchBox, PanelNotification, ActivablePanel, DebuggerLib,
-    BreakpointStore, Profiler, ErrorMessageObj) {
+    BreakpointStore, ErrorMessageObj) {
 
 "use strict";
 
@@ -159,6 +158,7 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
         if (state)
             state.wasScrolledToBottom = this.wasScrolledToBottom;
 
+        // xxxHonza: could we move this into "firebug/console/commands/profiler" module?
         // If we are profiling and reloading, save the profileRow for the new context
         if (this.context.profileRow && this.context.profileRow.ownerDocument)
         {
@@ -249,7 +249,9 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
             FBTrace.sysout("console.show; wasScrolledToBottom: " +
                 this.wasScrolledToBottom + ", " + this.context.getName());
 
-        if (state && state.profileRow) // then we reloaded while profiling
+        // xxxHonza: could we move this into "firebug/console/commands/profiler" module?
+        // then we reloaded while profiling
+        if (state && state.profileRow)
         {
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("console.show; state.profileRow:", state.profileRow);

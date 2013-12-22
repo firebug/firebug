@@ -33,12 +33,22 @@ var BP_BREAKONCHILDCHANGE = 2;
 var BP_BREAKONREMOVE = 3;
 var BP_BREAKONTEXT = 4;
 
+var TraceError = FBTrace.to("DBG_ERRORS");
+var Trace = FBTrace.to("DBG_HTMLMODULE");
+
 // ********************************************************************************************* //
 // HTMLModule
 
+/**
+ * @module
+ */
 var HTMLModule = Obj.extend(Module,
+/** @lends HTMLModule */
 {
     dispatchName: "htmlModule",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
 
     initialize: function(prefDomain, prefNames)
     {
@@ -51,6 +61,8 @@ var HTMLModule = Obj.extend(Module,
         Module.shutdown.apply(this, arguments);
         Firebug.connection.removeListener(this.DebuggerListener);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     initContext: function(context, persistedState)
     {
@@ -125,6 +137,7 @@ HTMLModule.MutationBreakpoints =
     breakWithCause: function(event, context, type)
     {
         var changeLabel = HTMLModule.BreakpointRep.getChangeLabel({type: type});
+
         context.breakingCause = {
             title: Locale.$STR("html.Break On Mutate"),
             message: changeLabel,
@@ -137,7 +150,10 @@ HTMLModule.MutationBreakpoints =
             attrChange: event.attrChange,
         };
 
+        Trace.sysout("htmlModule.breakWithCause;", context.breakingCause);
+
         Firebug.Breakpoint.breakNow(context.getPanel("html", true));
+
         return true;
     },
 
@@ -151,8 +167,10 @@ HTMLModule.MutationBreakpoints =
 
         var breakpoints = context.mutationBreakpoints;
         var self = this;
-        breakpoints.enumerateBreakpoints(function(bp) {
-            if (bp.checked && bp.node == event.target && bp.type == BP_BREAKONATTRCHANGE) {
+        breakpoints.enumerateBreakpoints(function(bp)
+        {
+            if (bp.checked && bp.node == event.target && bp.type == BP_BREAKONATTRCHANGE)
+            {
                 self.breakWithCause(event, context, BP_BREAKONATTRCHANGE);
                 return true;
             }
@@ -182,8 +200,10 @@ HTMLModule.MutationBreakpoints =
         var self = this;
         if (removal)
         {
-            breaked = breakpoints.enumerateBreakpoints(function(bp) {
-                if (bp.checked && bp.node == node && bp.type == BP_BREAKONREMOVE) {
+            breaked = breakpoints.enumerateBreakpoints(function(bp)
+            {
+                if (bp.checked && bp.node == node && bp.type == BP_BREAKONREMOVE)
+                {
                     self.breakWithCause(event, context, BP_BREAKONREMOVE);
                     return true;
                 }
@@ -279,8 +299,7 @@ HTMLModule.MutationBreakpoints =
     onModifyBreakpoint: function(context, node, type)
     {
         var xpath = Xpath.getElementXPath(node);
-        if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.onModifyBreakpoint " + xpath);
+        Trace.sysout("html.onModifyBreakpoint " + xpath);
 
         var breakpoints = context.mutationBreakpoints;
         var bp = breakpoints.findBreakpoint(node, type);

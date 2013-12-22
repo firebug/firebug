@@ -7,20 +7,21 @@ define([
     "firebug/chrome/window",
     "firebug/chrome/tabWatcher",
     "firebug/chrome/eventSource",
+    "firebug/chrome/firefox",
     "firebug/debugger/debuggerLib",
 ],
-function(Firebug, FBTrace, Obj, Win, TabWatcher, EventSource, DebuggerLib) {
+function(Firebug, FBTrace, Obj, Win, TabWatcher, EventSource, Firefox, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
 
-var Trace = FBTrace.to("DBG_DEBUGGERCLIENTTAB");
+var Trace = FBTrace.to("DBG_TABCLIENT");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
 var getWinLocation = Win.safeGetWindowLocation;
 
 // ********************************************************************************************* //
-// DebuggerClientTab
+// TabClient Implementation
 
 /**
  * @param {Object} browser Reference to the browser instance associated with the tab
@@ -28,7 +29,7 @@ var getWinLocation = Win.safeGetWindowLocation;
  * @param {DebuggerClient} Reference to the {@link DebuggerClient} object representing
  * the connection to the backend.
  */
-function DebuggerClientTab(browser, client)
+function TabClient(browser, client)
 {
     this.browser = browser;
     this.window = browser.contentWindow;
@@ -41,19 +42,19 @@ function DebuggerClientTab(browser, client)
  * object is to asynchronously attach to the thread actor and store threadClient reference
  * to the context associated with the tab.
  *
- * Events are dispatched to {@debuggerClientTab} object, which is consequently dispatching
+ * Events are dispatched to {@link TabClient} object, which is consequently dispatching
  * them to other listeners.
  *
  * Note that both tab-actor and thread-actor live as long as the tab exists
  * and refresh of the tab doesn't cause new actors to be created.
  *
- * Instances of this object are maintained by {@debuggerClientTab} in a weak map
+ * Instances of this object are maintained by {@link TabClient} in a weak map
  * where key is the (tab) browser.
  */
-DebuggerClientTab.prototype = Obj.extend(new EventSource(),
-/** @lends DebuggerClientTab */
+TabClient.prototype = Obj.extend(new EventSource(),
+/** @lends TabClient */
 {
-    dispatchName: "DebuggerClientTab",
+    dispatchName: "TabClient",
 
     tabClient: null,
     activeThread: null,
@@ -71,7 +72,7 @@ DebuggerClientTab.prototype = Obj.extend(new EventSource(),
      */
     attach: function(callback)
     {
-        Trace.sysout("debuggerClientTab.attach; " + getWinLocation(this.window));
+        Trace.sysout("tabClient.attach; " + getWinLocation(this.window));
 
         // If set to true the attach process already started. If this.tabClient is
         // set, the process has been also finished.
@@ -87,7 +88,7 @@ DebuggerClientTab.prototype = Obj.extend(new EventSource(),
 
     detach: function(callback)
     {
-        Trace.sysout("debuggerClientTab.detach; " + getWinLocation(this.window));
+        Trace.sysout("tabClient.detach; " + getWinLocation(this.window));
 
         if (!this.tabAttached)
             return;
@@ -121,11 +122,11 @@ DebuggerClientTab.prototype = Obj.extend(new EventSource(),
 
     attachTab: function(tabActor)
     {
-        Trace.sysout("debuggerClientTab.attachTab; " + getWinLocation(this.window));
+        Trace.sysout("tabClient.attachTab; " + getWinLocation(this.window));
 
         if (this.threadActor || this.tabClient)
         {
-            TraceError.sysout("debuggerClientTab.attachTab; ERROR already attached?" +
+            TraceError.sysout("tabClient.attachTab; ERROR already attached?" +
                 getWinLocation(this.window));
             return;
         }
@@ -136,7 +137,7 @@ DebuggerClientTab.prototype = Obj.extend(new EventSource(),
 
     onTabAttached: function(response, tabClient)
     {
-        Trace.sysout("debuggerClientTab.onTabAttached; " + getWinLocation(this.window));
+        Trace.sysout("tabClient.onTabAttached; " + getWinLocation(this.window));
 
         if (!this.tabAttached)
         {
@@ -157,27 +158,27 @@ DebuggerClientTab.prototype = Obj.extend(new EventSource(),
         this.executeCallback(this.attachCallback, [tabClient, this.threadActor]);
         this.attachCallback = null
 
-        var context = TabWatcher.getContextByWindow(this.window);
-        this.dispatch("onTabAttached", [context]);
+        var browser = Firefox.getBrowserForWindow(this.window);
+        this.dispatch("onTabAttached", [browser]);
     },
 
     detachTab: function()
     {
-        Trace.sysout("debuggerClientTab.detachTab;");
+        Trace.sysout("tabClient.detachTab;");
 
         this.tabClient.detach(this.onTabDetached.bind(this));
     },
 
     onTabDetached: function(response)
     {
-        Trace.sysout("debuggerClientTab.onTabDetached;", response);
+        Trace.sysout("tabClient.onTabDetached;", response);
 
         // Execute detach callback if provided.
         this.executeCallback(this.detachCallback);
         this.detachCallback = null;
 
-        var context = TabWatcher.getContextByWindow(this.window);
-        this.dispatch("onTabDetached", [context]);
+        var browser = Firefox.getBrowserForWindow(this.window);
+        this.dispatch("onTabDetached", [browser]);
 
         this.tabClient = null;
     },
@@ -187,17 +188,17 @@ DebuggerClientTab.prototype = Obj.extend(new EventSource(),
 
     attachThread: function()
     {
-        Trace.sysout("debuggerClientTab.attachThread; " + getWinLocation(this.window));
+        Trace.sysout("tabClient.attachThread; " + getWinLocation(this.window));
 
         if (this.threadAttached)
         {
-            TraceError.sysout("debuggerClientTab.attachThread; ERROR already attached");
+            TraceError.sysout("tabClient.attachThread; ERROR already attached");
             return;
         }
 
         if (!this.threadActor)
         {
-            TraceError.sysout("debuggerClientTab.attachThread; ERROR no thread actor");
+            TraceError.sysout("tabClient.attachThread; ERROR no thread actor");
             return;
         }
 
@@ -205,7 +206,7 @@ DebuggerClientTab.prototype = Obj.extend(new EventSource(),
         if (Trace.active)
         {
             var actor = DebuggerLib.getThreadActor(this.browser);
-            Trace.sysout("debuggerClientTab.attachThread; state: " +
+            Trace.sysout("tabClient.attachThread; state: " +
                 (actor ? actor._state : "no tab actor"));
         }
 
@@ -216,12 +217,12 @@ DebuggerClientTab.prototype = Obj.extend(new EventSource(),
 
     onThreadAttached: function(response, threadClient)
     {
-        Trace.sysout("debuggerClientTab.onThreadAttached; " + getWinLocation(this.window),
+        Trace.sysout("tabClient.onThreadAttached; " + getWinLocation(this.window),
             response);
 
         if (!this.threadAttached)
         {
-            TraceError.sysout("debuggerClientTab.onThreadAttached; ERROR: detached");
+            TraceError.sysout("tabClient.onThreadAttached; ERROR: detached");
             return;
         }
 
@@ -235,7 +236,7 @@ DebuggerClientTab.prototype = Obj.extend(new EventSource(),
 
         if (response.type != "paused")
         {
-            TraceError.sysout("debuggerClientTab.onThreadAttached; ERROR wrong type: " +
+            TraceError.sysout("tabClient.onThreadAttached; ERROR wrong type: " +
                 response.type);
             return;
         }
@@ -261,7 +262,7 @@ DebuggerClientTab.prototype = Obj.extend(new EventSource(),
 
     detachThread: function()
     {
-        Trace.sysout("debuggerClientTab.detachThread; " + this.activeThread);
+        Trace.sysout("tabClient.detachThread; " + this.activeThread);
 
         if (!this.threadAttached)
             return;
@@ -274,7 +275,7 @@ DebuggerClientTab.prototype = Obj.extend(new EventSource(),
 
     onThreadDetached: function(response)
     {
-        Trace.sysout("debuggerClientTab.onThreadDetached;", response);
+        Trace.sysout("tabClient.onThreadDetached;", response);
 
         var context = TabWatcher.getContextByWindow(this.window);
 
@@ -282,7 +283,7 @@ DebuggerClientTab.prototype = Obj.extend(new EventSource(),
 
         // xxxHonza: this is a hack. ThreadActor doesn't reset the state to "detached"
         // after detach, but to "exited". See ThreadActor.disconnect();
-        // TODO: waiting for a bugzilla report.
+        // See: https://bugzilla.mozilla.org/show_bug.cgi?id=933212
         var threadActor = DebuggerLib.getThreadActor(context.browser);
         threadActor._state = "detached";
 
@@ -307,7 +308,7 @@ DebuggerClientTab.prototype = Obj.extend(new EventSource(),
         }
         catch (e)
         {
-            TraceError.sysout("debuggerClientTab.executeCallback; EXCEPTION" + e, e);
+            TraceError.sysout("tabClient.executeCallback; EXCEPTION" + e, e);
         }
     }
 });
@@ -315,7 +316,7 @@ DebuggerClientTab.prototype = Obj.extend(new EventSource(),
 // ********************************************************************************************* //
 // Registration
 
-return DebuggerClientTab;
+return TabClient;
 
 // ********************************************************************************************* //
 });

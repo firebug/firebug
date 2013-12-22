@@ -9,21 +9,24 @@ define([
     "firebug/chrome/tabWatcher",
     "firebug/chrome/firefox",
     "firebug/chrome/window",
-    "firebug/remoting/debuggerClientTab",
+    "firebug/remoting/tabClient",
 ],
-function(Firebug, FBTrace, Obj, Options, Events, TabWatcher, Firefox, Win, DebuggerClientTab) {
+function(Firebug, FBTrace, Obj, Options, Events, TabWatcher, Firefox, Win, TabClient) {
 
 // ********************************************************************************************* //
 // Constants
 
 var Cu = Components.utils;
 
-var Trace = FBTrace.to("DBG_DEBUGGERCLIENTMODULE");
+var Trace = FBTrace.to("DBG_DEBUGGERCLIENT");
 var TraceConn = FBTrace.to("DBG_CONNECTION");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
-Cu["import"]("resource://gre/modules/devtools/dbg-client.jsm");
-Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
+var dbgClientScope = {};
+var dbgServerScope = {};
+
+Cu["import"]("resource://gre/modules/devtools/dbg-client.jsm", dbgClientScope);
+Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm", dbgServerScope);
 
 // ********************************************************************************************* //
 // Module Implementation
@@ -46,10 +49,10 @@ Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
  * More specialized client tools (see e.g. {@link DebuggerTool}) should register listeners
  * to this object and handle all events accordingly.
  *
- * DebuggerClientModule.addListener(listener);
+ * DebuggerClient.addListener(listener);
  */
-var DebuggerClientModule = Obj.extend(Firebug.Module,
-/** @lends DebuggerClientModule */
+var DebuggerClient = Obj.extend(Firebug.Module,
+/** @lends DebuggerClient */
 {
     isRemoteDebugger: false,
     client: null,
@@ -63,7 +66,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
-        Firebug.registerTracePrefix("debuggerClientModule.", "DBG_DEBUGGERCLIENTMODULE", false);
+        Firebug.registerTracePrefix("debuggerClient.", "DBG_DEBUGGERCLIENT", false);
     },
 
     initializeUI: function()
@@ -73,8 +76,9 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         this.onConnect = Obj.bind(this.onConnect, this);
         this.onDisconnect = Obj.bind(this.onDisconnect, this);
 
-        this.onTabNavigated = Obj.bind(this.onTabNavigated, this);
-        this.onTabDetached = Obj.bind(this.onTabDetached, this);
+        this.tabNavigated = Obj.bind(this.tabNavigated, this);
+        this.tabDetached = Obj.bind(this.tabDetached, this);
+        this.newSource = Obj.bind(this.newSource, this);
 
         // Connect the server in 'initializeUI' so, listeners from other modules can
         // be registered before in 'initialize'.
@@ -85,7 +89,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
     {
         Firebug.Module.shutdown.apply(this, arguments);
 
-        Firebug.unregisterTracePrefix("debuggerClientModule.");
+        Firebug.unregisterTracePrefix("debuggerClient.");
 
         this.disconnect();
     },
@@ -94,7 +98,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     connect: function()
     {
-        Trace.sysout("debuggerClientModule.connect;");
+        Trace.sysout("debuggerClient.connect;");
 
         // Initialize the server to allow connections through pipe transport.
         if (!this.isRemoteDebugger)
@@ -108,7 +112,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
             {
                 // If the built-in debugger has been opened browser actors
                 // can be already added.
-                TraceError.sysout("debuggerClientModule.connect; EXCEPTION " + e, e);
+                TraceError.sysout("debuggerClient.connect; EXCEPTION " + e, e);
             }
         }
 
@@ -123,7 +127,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     loadActors: function(callback)
     {
-        Trace.sysout("debuggerClientModule.loadActors;", arguments);
+        Trace.sysout("debuggerClient.loadActors;", arguments);
 
         // Actors must be loaded at the time when basic browser actors are already available.
         // (i.e. addBrowserActors executed). Firebug actors can derive (or modify) existing
@@ -144,18 +148,19 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     onActorsLoaded: function()
     {
-        Trace.sysout("debuggerClientModule.onActorsLoaded;");
+        Trace.sysout("debuggerClient.onActorsLoaded;");
 
         // Debugger client represents the connection to the server side
         // and so it's global.
-        Firebug.debuggerClient = this.client = new DebuggerClient(this.transport);
+        Firebug.debuggerClient = this.client = new dbgClientScope.DebuggerClient(this.transport);
 
         // Hook packet transport to allow tracing.
         if (FBTrace.DBG_CONNECTION)
             this.hookPacketTransport(this.transport);
 
-        this.client.addListener("tabNavigated", this.onTabNavigated);
-        this.client.addListener("tabDetached", this.onTabDetached);
+        this.client.addListener("tabNavigated", this.tabNavigated);
+        this.client.addListener("tabDetached", this.tabDetached);
+        this.client.addListener("newSource", this.newSource);
 
         // Connect to the server.
         this.client.connect(this.onConnect);
@@ -166,8 +171,9 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         if (!this.client)
             return;
 
-        this.client.removeListener("tabNavigated", this.onTabNavigated);
-        this.client.removeListener("tabDetached", this.onTabDetached);
+        this.client.removeListener("tabNavigated", this.tabNavigated);
+        this.client.removeListener("tabDetached", this.tabDetached);
+        this.client.removeListener("newSource", this.newSource);
 
         // Disconnect from the server.
         this.client.close(this.onDisconnect);
@@ -182,31 +188,31 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
     {
         var browser = Firefox.getCurrentBrowser();
 
-        Trace.sysout("debuggerClientModule.onResumeFirebug; connected: " +
+        Trace.sysout("debuggerClient.onResumeFirebug; connected: " +
             this.connected + ", " + Win.safeGetWindowLocation(browser.contentWindow));
 
         // Firebug has been opened for the current tab so, attach to the back-end tab actor.
         // If Firebug is not yet connected, the tab will be attached in 'onConnect' handler.
         if (this.connected)
-            this.attachClientTab(browser);
+            this.attachTab(browser);
     },
 
     onSuspendFirebug: function()
     {
         var browser = Firefox.getCurrentBrowser();
 
-        Trace.sysout("debuggerClientModule.onSuspendFirebug; " +
+        Trace.sysout("debuggerClient.onSuspendFirebug; " +
             Win.safeGetWindowLocation(browser.contentWindow));
 
         // Firebug has been closed for the current tab, so explicitly detach
         // the tab and thread actor and destroy the tab instance.
-        this.detachClientTab(browser);
+        this.detachTab(browser);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Tabs
 
-    attachClientTab: function(browser)
+    attachTab: function(browser)
     {
         // Of course, we can attach only if Firebug is connected to the backend.
         if (!this.connected)
@@ -216,8 +222,8 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         if (this.tabMap.has(browser))
             return this.getTabClient(browser);
 
-        // There is one instance of {@link DebuggerClientTab} per Firefox tab.
-        var tab = new DebuggerClientTab(browser, this.client);
+        // There is one instance of {@link TabClient} per Firefox tab.
+        var tab = new TabClient(browser, this.client);
         tab.addListener(this);
 
         this.tabMap.set(browser, tab);
@@ -225,13 +231,13 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         // Attach to the tab actor.
         tab.attach(function(threadClient)
         {
-            Trace.sysout("debuggerClientModule.attachClientTab; Callback: tab attached");
+            Trace.sysout("debuggerClient.attachTab; Callback: tab attached");
         });
 
         return tab;
     },
 
-    detachClientTab: function(browser)
+    detachTab: function(browser)
     {
         var tab = this.getTabClient(browser);
         if (!tab)
@@ -239,7 +245,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
         tab.detach(function()
         {
-            Trace.sysout("debuggerClientModule.detachClientTab; Callback: tab detached");
+            Trace.sysout("debuggerClient.detachTab; Callback: tab detached");
         });
 
         this.tabMap.delete(browser);
@@ -259,7 +265,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         var self = this;
         TabWatcher.iterateContexts(function(context)
         {
-            self.attachClientTab(context.browser);
+            self.attachTab(context.browser);
         });
     },
 
@@ -268,20 +274,25 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         this.dispatch("onDisconnect", [this.client]);
     },
 
-    onTabNavigated: function(type, packet)
+    tabNavigated: function(type, packet)
     {
         var context = TabWatcher.getContextByTabActor(packet.from);
-        Trace.sysout("debuggerClientModule.onTabNavigated; to: " + packet.url +
+        Trace.sysout("debuggerClient.onTabNavigated; to: " + packet.url +
             ", context: " + context, packet);
     },
 
-    onTabDetached: function(type, packet)
+    tabDetached: function(type, packet)
     {
         var context = TabWatcher.getContextByTabActor(packet.from);
-        Trace.sysout("debuggerClientModule.onTabDetached; from: " + packet.from +
+        Trace.sysout("debuggerClient.onTabDetached; from: " + packet.from +
             ", context: " + context, packet);
 
         // xxxHonza: should we manually detach the tab now?
+    },
+
+    newSource: function(type, response)
+    {
+        this.dispatch("newSource", arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -291,7 +302,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
     {
         var tab = this.getTabClient(context.browser);
 
-        Trace.sysout("debuggerClientModule.initContext; " + context.getName() +
+        Trace.sysout("debuggerClient.initContext; " + context.getName() +
             " ID: " + context.getId() + ", tab: " + tab + ", connected: " +
             this.connected, persistedState);
 
@@ -320,13 +331,13 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         }
         else
         {
-            this.attachClientTab(context.browser);
+            this.attachTab(context.browser);
         }
     },
 
     destroyContext: function(context, persistedState)
     {
-        Trace.sysout("debuggerClientModule.destroyContext; " + context.getName() +
+        Trace.sysout("debuggerClient.destroyContext; " + context.getName() +
             " ID: " + context.getId());
 
         this.dispatch("onThreadDetached", [context]);
@@ -363,16 +374,16 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // DebuggerClientTab
+    // TabClient Handlers
 
-    onTabAttached: function(context)
+    onTabAttached: function(browser)
     {
-        this.dispatch("onTabAttached", [context, false]);
+        this.dispatch("onTabAttached", [browser, false]);
     },
 
-    onTabDetached: function(context)
+    onTabDetached: function(browser)
     {
-        this.dispatch("onTabDetached", [context]);
+        this.dispatch("onTabDetached", [browser]);
     },
 
     onThreadAttached: function(context)
@@ -386,11 +397,11 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Event Source
+    // EventSource
 
     dispatch: function(eventName, args)
     {
-        Trace.sysout("debuggerClientModule.dispatch; " + eventName, args);
+        Trace.sysout("debuggerClient.dispatch; " + eventName, args);
 
         Firebug.Module.dispatch.apply(this, arguments);
     },
@@ -435,12 +446,12 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(DebuggerClientModule);
+Firebug.registerModule(DebuggerClient);
 
 // For FBTest
-Firebug.DebuggerClientModule = DebuggerClientModule;
+Firebug.DebuggerClient = DebuggerClient;
 
-return DebuggerClientModule;
+return DebuggerClient;
 
 // ********************************************************************************************* //
 });

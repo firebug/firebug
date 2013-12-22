@@ -20,7 +20,7 @@ var Trace = FBTrace.to("DBG_BREAKPOINTS");
 
 /**
  * @module This module implements logic related to debugger; keyword support. The logic
- * is based on events sent by {@DebuggerTool} object.
+ * is based on events sent by {@link DebuggerTool} object.
  *
  * Breaking on JavaScript debugger; keyword can be prevented by creating disabled breakpoint
  * at the same line and URL.

@@ -15,19 +15,21 @@ define([
     "firebug/chrome/module",
     "firebug/chrome/rep",
     "firebug/debugger/stack/stackFrame",
+    "firebug/debugger/script/sourceFile",
     "firebug/console/profilerEngine",
+    "firebug/console/console",
+    "firebug/remoting/debuggerClient",
 ],
 function(Firebug, FBTrace, Obj, Domplate, Locale, Url, Events, Css, Dom, Str,
-    FirebugReps, Module, Rep, StackFrame, ProfilerEngine) {
+    FirebugReps, Module, Rep, StackFrame, SourceFile, ProfilerEngine, Console,
+    DebuggerClient) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
 
 var {domplate, TAG, DIV, SPAN, TD, TR, TH, TABLE, THEAD, TBODY, P, UL, LI, A} = Domplate;
-
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cu = Components.utils;
 
 var Trace = FBTrace.to("DBG_PROFILER");
 var TraceError = FBTrace.to("DBG_ERRORS");
@@ -36,14 +38,17 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // Profiler
 
 /**
- * @module
+ * @module The module implements profiling feature. Its implementation is based on
+ * {@link ProfilerEngine} that uses JSD2 Debugger API too hook function calls.
+ * The Script panel must be enabled in order to use the Profiler.
+ *
+ * xxxHonza: some logic related to profiling is in ConsolePanel and ConsoleExposed modules.
+ * It should be moved here, so the entire profiler implementation is embedded in one module.
  */
 var Profiler = Obj.extend(Module,
 /** @lends Profiler */
 {
     dispatchName: "profiler",
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     profilerEnabled: false,
 
@@ -52,57 +57,73 @@ var Profiler = Obj.extend(Module,
 
     initialize: function()
     {
+        Module.initialize.apply(this, arguments);
+
         Firebug.connection.addListener(this);
+        DebuggerClient.addListener(this);
     },
 
     shutdown: function()
     {
-        Firebug.connection.removeListener(this);
-    },
+        Module.shutdown.apply(this, arguments);
 
-    showContext: function(browser, context)
-    {
-        this.setEnabled();
+        Firebug.connection.removeListener(this);
+        DebuggerClient.removeListener(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Activation
+
+    showContext: function(browser, context)
+    {
+        this.setEnabled(context);
+    },
 
     showPanel: function(browser, panel)
     {
-        Trace.sysout("Profiler.showPanel;");
+        Trace.sysout("Profiler.showPanel; panel: " + (panel ? panel.name : "null"));
 
-        this.setEnabled();
+        // The panel is null if disabled. But, if the Console panel is disabled we don't
+        // have to update the button.
+        if (!panel)
+            return;
+
+        this.setEnabled(panel.context);
     },
 
-    setEnabled: function()
+    setEnabled: function(context)
     {
-        // xxxHonza: using global context is a hack
-        if (!Firebug.currentContext)
-            return false;
+        if (context)
+        {
+            // The profiler is available only if:
+            // 1) The Console panel is enabled
+            // 2) The Script panel is enabled
+            // 3) The thread actor is attached
+            var console = context.isPanelEnabled("console");
+            var script = context.isPanelEnabled("script");
+            var enabled = console && script && context.activeThread;
 
-        // TODO this should be a panel listener operation.
+            this.profilerEnabled = console && script && context.activeThread;
+        }
+        else
+        {
+            // If there is no current context, just disable the profiler.
+            this.profilerEnabled = false;
+        }
 
-        // The profiler is available only if the Console is enabled
-        var consolePanel = Firebug.currentContext.getPanel("console", true);
-        var disabled = (consolePanel && !consolePanel.isEnabled());
-
-        this.profilerEnabled = !disabled;
-
-        if (disabled && this.isProfiling())
+        if (!this.profilerEnabled && this.isProfiling())
             this.stopProfiling(context);
 
         // Attributes must be modified on the <command> element. All toolbar buttons
         // and menuitems are hooked up to the command.
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleProfiling", "disabled",
-            disabled ? "true" : "false");
+            this.profilerEnabled ? "false" : "true");
 
         // Update the button's tooltip.
         var tooltipText = Locale.$STR("ProfileButton.Tooltip");
 
-        // xxxHonza: localization (make sure the string exists).
-        if (disabled)
-            tooltipText = Locale.$STRF("script.Console_panel_must_be_enabled", [tooltipText]);
+        // If the Script panel needs to be enabled modify the tooltip to inform the user.
+        if (!this.profilerEnabled)
+            tooltipText = Locale.$STRF("script.Script_panel_must_be_enabled", [tooltipText]);
 
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleProfiling",
             "tooltiptext", tooltipText);
@@ -116,9 +137,22 @@ var Profiler = Obj.extend(Module,
             this.stopProfiling(context, true);
     },
 
-    onDebuggerEnabled: function()
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // DebuggerClient Events
+
+    onThreadAttached: function(context, reload)
     {
-        this.setEnabled();
+        Trace.sysout("profiler.onThreadAttached; reload: " + reload);
+
+        this.setEnabled(context);
+    },
+
+    onThreadDetached: function(context)
+    {
+        Trace.sysout("profiler.onThreadDetached;");
+
+        if (this.isProfiling())
+            this.stopProfiling(context, true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -151,7 +185,7 @@ var Profiler = Obj.extend(Module,
         context.profileRow.originalTitle = originalTitle;
 
         Events.dispatch(this.fbListeners, "startProfiling", [context, originalTitle]);
-        Firebug.Console.addListener(this);
+        Console.addListener(this);
     },
 
     stopProfiling: function(context, cancelReport)
@@ -173,7 +207,7 @@ var Profiler = Obj.extend(Module,
         else
             this.logProfileReport(context, cancelReport);
 
-        Firebug.Console.removeListener(this);
+        Console.removeListener(this);
 
         // stopProfiling event fired within logProfileReport
         delete context.profiling;
@@ -194,12 +228,12 @@ var Profiler = Obj.extend(Module,
             title: title
         };
 
-        var row = Firebug.Console.openGroup(objects, context, "profile",
+        var row = Console.openGroup(objects, context, "profile",
             Profiler.ProfileCaption, true, null, true);
 
         Css.setClass(row, "profilerRunning");
 
-        Firebug.Console.closeGroup(context, true);
+        Console.closeGroup(context, true);
 
         return row;
     },
@@ -226,7 +260,7 @@ var Profiler = Obj.extend(Module,
                 var fileName = Url.getFileName(script.url);
                 if (!Firebug.filterSystemURLs || !Url.isSystemURL(fileName))
                 {
-                    var sourceLink = Firebug.SourceFile.toSourceLink(script, context);
+                    var sourceLink = SourceFile.toSourceLink(script, context);
                     if (sourceLink && sourceLink.href in sourceFileMap)
                     {
                         var call = new ProfileCall(script, context, script.funcName,
@@ -256,6 +290,7 @@ var Profiler = Obj.extend(Module,
         var groupRow = context.profileRow && context.profileRow.ownerDocument
             ? context.profileRow
             : this.logProfileRow(context, "");
+
         delete context.profileRow;
 
         Css.removeClass(groupRow, "profilerRunning");
@@ -302,11 +337,11 @@ var Profiler = Obj.extend(Module,
         if (!this.profilerEnabled)
         {
             var msg = Locale.$STR("ProfilerRequiresTheScriptPanel");
-            Firebug.Console.logFormatted([msg], context, "warn");
+            Console.logFormatted([msg], context, "warn");
             return;
         }
 
-        Firebug.Profiler.startProfiling(context, title);
+        Profiler.startProfiling(context, title);
     },
 
     commandLineProfileEnd: function(context)
@@ -588,13 +623,13 @@ function profile(context, args)
 {
     var title = args[0];
     Profiler.commandLineProfileStart(context, title);
-    return Firebug.Console.getDefaultReturnValue();
+    return Console.getDefaultReturnValue();
 };
 
 function profileEnd(context)
 {
     Profiler.commandLineProfileEnd(context);
-    return Firebug.Console.getDefaultReturnValue();
+    return Console.getDefaultReturnValue();
 };
 
 // ********************************************************************************************* //

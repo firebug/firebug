@@ -187,7 +187,7 @@ StackFrame.getStackSourceLink = function()
 }
 
 /**
- * Converts from RDP stack frame packet to {@StackFrame}
+ * Converts from RDP stack frame packet to {@link StackFrame}
  */
 StackFrame.buildStackFrame = function(frame, context)
 {

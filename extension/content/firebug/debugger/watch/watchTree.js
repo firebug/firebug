@@ -37,8 +37,8 @@ function WatchTree(context, provider, memberProvider)
 }
 
 /**
- * @domplate This tree widget extends {@DomBaseTree} and appends support for watch expressions.
- * The tree is responsible for rendering content within the {@WatchPanel}.
+ * @domplate This tree widget extends {@link DomBaseTree} and appends support for watch expressions.
+ * The tree is responsible for rendering content within the {@link WatchPanel}.
  */
 var BaseTree = DomBaseTree.prototype;
 WatchTree.prototype = domplate(BaseTree,
@@ -118,7 +118,7 @@ WatchTree.prototype = domplate(BaseTree,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    // xxxHonza: we might want to move this into {@DomBaseTree} to use the same logic
+    // xxxHonza: we might want to move this into {@link DomBaseTree} to use the same logic
     // within the DOM panel.
     createMember: function(type, name, value, level, hasChildren)
     {
