@@ -25,13 +25,6 @@
 
 toolbarbutton {
     padding: 2px 6px;
-    color: #000000;
-}
-
-.toolbar-text-button[disabled="true"],
-.toolbar-text-menubutton[disabled="true"],
-toolbarbutton[type="menu"][disabled="true"] {
-    color: graytext;
 }
 
 .toolbar-text-button > .toolbarbutton-icon:not([src]),
@@ -60,10 +53,6 @@ toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
 
 .toolbarbutton-iconic > .toolbarbutton-icon {
     padding: 0;
-}
-
-#fbDebuggerButtons {
-    margin-top: 1px;
 }
 
 #fbSearchButtons {

@@ -145,6 +145,8 @@ panelStatus {
 
 #fbLocationList {
     -moz-binding: url("firefox/bindings.xml#panelFileList");
+    /* Evaluated scripts can take a lot of horizontal space on the toolbar, so this is the limit */
+    max-width: 250px;
 }
 
 .fbLocationListFilter {
@@ -272,38 +274,12 @@ panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
     padding-right: 5px;
 }
 
-#fbLocationList {
-    height: 20px;
-}
-
 #fbLocationList.noTabStop > menupopup > arrowscrollbox > scrollbox,
 #fbCommandHistory > arrowscrollbox > scrollbox {
     overflow-y: auto;
 }
 
-/* Evaluated scripts can take a lot of horizontal space on the toolbar, so this is the limit */
-#fbLocationList {
-    max-width: 250px;
-}
-
 #fbLocationList .toolbarbutton-text {
-    color: #000000;
-}
-
-/*************************************************************************************************/
-/* CSS Buttons */
-
-#fbScriptFilterMenu .toolbarbutton-text {
-    color: #000000;
-}
-
-/*************************************************************************************************/
-/* Script Buttons */
-
-#fbToggleCSSEditing .toolbarbutton-text {
-    padding-top: 1px;
-    padding-left: 2px;
-    padding-right: 2px;
     color: #000000;
 }
 

@@ -463,7 +463,7 @@
 
                         <!-- Command Editor -->
                         <vbox id="fbCommandEditorBox">
-                            <hbox id="fbCommandToolbar">
+                            <hbox id="fbCommandToolbar" align="center">
                                 <toolbarbutton id="fbCmdLineRunButton" label="firebug.Run"
                                     class="toolbar-text-button fbInternational"
                                     tooltiptext="firebug.Run_the_entered_command"

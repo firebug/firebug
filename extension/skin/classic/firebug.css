@@ -59,7 +59,7 @@
 
 #fbCommandToolbar {
     padding-left: 27px;
-    margin-top: 1px;
+    padding: 1px 0;
     border-bottom: 1px solid rgba(10, 31, 51, 0.35);
     height: 27px;
 }
@@ -140,6 +140,7 @@
 
 #fbToolbarInner {
     overflow: hidden;
+    padding: 1px 0;
     height: 27px;
 }
 
@@ -189,9 +190,6 @@
     height: 26px;
     margin: 1px 3px 1px 0;
     padding: 0px;
-    /* The default styling does not always keep button size content or image
-       position constant, e.g. when [checked="true"].  These numbers were
-       chosen to keep them constant against the default winstripe styling. */
     padding-top: 4px;
     padding-bottom: 2px;
     -moz-padding-start: 4px;
@@ -202,16 +200,11 @@
     margin-right: 0;
 }
 
-#fbBreakOnNextButton {
-    padding-right: 2px;
-    padding-left: 2px;
-        /* The default styling does not always keep button size contant or image
-       position constant, e.g. when [checked="true"].  These numbers were
-       chosen to keep them constant against the default winstripe styling. */
-    padding-top: 4px;
-    padding-bottom: 2px;
-    -moz-padding-start: 4px;
-    -moz-padding-end: 2px;
+#fbBreakOnNextButton,
+.toolbar-image-button {
+    width: 25px;
+    height: 25px;
+    padding: 3px;
 }
 
 /*************************************************************************************************/
@@ -593,6 +586,7 @@ toolbarbutton {
     margin-right: 1px;
     border: 1px solid transparent;
     border-radius: 2px;
+    color: #000000;
 }
 
 toolbarbutton:hover:not([disabled="true"]) {
@@ -605,14 +599,43 @@ toolbarbutton:-moz-any([checked="true"],
                        [selected="true"],
                        [open="true"]):not([disabled="true"]) {
     border-color: rgba(0, 0, 0, 0.3);
-    background: transparent linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent) no-repeat;
     box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1) inset, 0 0 1px rgba(0, 0, 0, 0.1) inset;
 }
 
-toolbarbutton:hover:active {
+toolbarbutton:-moz-any([checked="true"],
+                       [selected="true"],
+                       [open="true"]):not([disabled="true"]):not([type=menu-button]) {
+    background: transparent linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent) no-repeat;
+}
+
+toolbarbutton:hover:active:not([disabled="true"]) {
     border-color: rgba(0, 0, 0, 0.3);
-    background: transparent linear-gradient(to bottom, rgba(0, 0, 0, 0.2), transparent) no-repeat;
     box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1) inset, 0 0 1px rgba(0, 0, 0, 0.1) inset, 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+toolbarbutton:hover:active:not([disabled="true"]):not([type=menu-button]) {
+    background: transparent linear-gradient(to bottom, rgba(0, 0, 0, 0.2), transparent) no-repeat;
+}
+
+toolbarbutton[type="menu-button"] {
+    padding: 0!important;
+}
+
+toolbarbutton[type=menu-button] > .toolbarbutton-menubutton-button {
+  -moz-appearance: none;
+  border-radius: 0;
+  padding: 2px 6px;
+  -moz-border-end: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+toolbarbutton[type=menu-button]:hover > .toolbarbutton-menubutton-button {
+  -moz-border-end: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+toolbarbutton[type=menu-button][open="true"]:not([disabled="true"]) > .toolbarbutton-menubutton-dropmarker {
+    border-color: rgba(0, 0, 0, 0.3);
+    background: transparent linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent) no-repeat;
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1) inset, 0 0 1px rgba(0, 0, 0, 0.1) inset;
 }
 
 toolbarbutton > label,
@@ -620,6 +643,15 @@ toolbarbutton > toolbarbutton {
     margin: 0;
     border: none;
     padding: 0;
+}
+
+toolbarbutton[type="menu"],
+toolbarbutton[type="menu"] > toolbarbutton {
+    padding-right: 0;
+}
+
+toolbarbutton[disabled="true"] {
+    color: graytext;
 }
 
 /*************************************************************************************************/
