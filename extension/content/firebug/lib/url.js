@@ -123,7 +123,12 @@ Url.splitEvalExprURL = function(url)
 
 Url.generateUrlForEvalExpr = function(counter)
 {
-    return Url.baseEvalExprURL + "/" + "expression #" + counter;
+    return Url.baseEvalExprURL + "/expression #" + counter;
+};
+
+Url.isUrlForEvalExpr = function(url)
+{
+    return url.startsWith(Url.baseEvalExprURL);
 };
 
 const reSplitFile = /(.*?):\/{2,3}([^\/]*)(.*?)([^\/]*?)($|\?.*)/;

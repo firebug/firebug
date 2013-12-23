@@ -23,26 +23,31 @@ var Trace = FBTrace.to("DBG_SOURCEFILE");
 
 /**
  * SourceFile one for every compilation unit.
+ * A SourceFile instance is created for every compilation unit (i.e. a script created
+ * on the back end). The instance is created by {@link SourceTool} every time a "newSource"
+ * or the initial "sources" packet is received.
  *
  * @param {Context} context
  * @param {Actor} actor The Actor treating the source (note: can be omitted if the `source`
  *                      parameter is passed).
  * @param {string} href The link to the source
- * @param {boolean} isBlackBoxed
- * @param {string} [source] The source if already provided
+ * @param {object} [options] The options with the following properties:
+ *   - {boolean} [isBlackBoxed] (default=false)
+ *   - {boolean} [deferVisibleInList] If true, only add in the source location list when opening it 
+ *                          (default=false)
+ *   - {string} [source] The source if already provided
  *
- * SourceFile instance is created for every compilation unit (i.e. a script created
- * on the back end). The instance is created by {@link SourceTool} every time a "newSource"
- * or the initial "sources" packet is received.
  */
-function SourceFile(context, actor, href, isBlackBoxed, source)
+function SourceFile(context, actor, href, options)
 {
     this.context = context;
     this.actor = actor;
     this.href = href;
 
     // xxxHonza: this field should be utilized by issue 4885.
-    this.isBlackBoxed = isBlackBoxed;
+    this.isBlackBoxed = options.isBlackBoxed;
+
+    this.deferVisibleInList = options.deferVisibleInList;
 
     // The content type is set when 'source' packet is received (see onSourceLoaded).
     this.contentType = null;
@@ -51,8 +56,8 @@ function SourceFile(context, actor, href, isBlackBoxed, source)
     this.compilation_unit_type = "remote-script";
     this.callbacks = [];
 
-    if (source)
-        this.setSource(source, "application/javascript");
+    if (options.source)
+        this.setSource(options.source, "application/javascript");
 }
 
 SourceFile.prototype =

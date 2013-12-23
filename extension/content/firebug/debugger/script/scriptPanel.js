@@ -900,6 +900,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             this.scriptView.updateBreakpoint(bp);
     },
 
+    onObjectSelected: function(script, panel)
+    {
+        // Force the selected script to be displayed in the source location list.
+        panel.context.makeSourceVisibleInList(script.href);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Options
 

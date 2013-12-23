@@ -193,6 +193,7 @@ TabContext.prototype =
 
          var compilationUnit = new CompilationUnit(url, this);
          compilationUnit.kind = kind;
+         compilationUnit.deferVisibleInList = sourceFile.deferVisibleInList;
          this.compilationUnits[url] = compilationUnit;
 
         //Firebug.connection.dispatch("onCompilationUnit", [this, url, kind]);
@@ -207,6 +208,19 @@ TabContext.prototype =
         }
 
         compilationUnit.sourceFile = sourceFile;
+    },
+
+    makeSourceVisibleInList: function(url)
+    {
+        Trace.sysout("TabContext.makeSourceVisibleInList; url = " + url);
+        if (this.compilationUnits[url])
+        {
+            // If the visibility in the source location list was deferred, add it now
+            // (see getAllCompilationUnits())
+            this.compilationUnits[url].deferVisibleInList = false;
+            return true;
+        }
+        return false;
     },
 
     removeSourceFile: function(sourceFile)
@@ -252,7 +266,7 @@ TabContext.prototype =
 
     getAllCompilationUnits: function()
     {
-        return Arr.values(this.compilationUnits);
+        return Arr.values(this.compilationUnits).filter((x) => (x.deferVisibleInList !== true));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

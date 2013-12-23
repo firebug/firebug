@@ -4,12 +4,13 @@ define([
     "firebug/firebug",
     "firebug/lib/trace",
     "firebug/lib/object",
+    "firebug/lib/url",
     "firebug/chrome/tool",
     "firebug/debugger/script/sourceFile",
     "firebug/debugger/debuggerLib",
     "firebug/remoting/debuggerClient",
 ],
-function (Firebug, FBTrace, Obj, Tool, SourceFile, DebuggerLib, DebuggerClient) {
+function (Firebug, FBTrace, Obj, Url, Tool, SourceFile, DebuggerLib, DebuggerClient) {
 
 // ********************************************************************************************* //
 // Constants
@@ -93,6 +94,10 @@ SourceTool.prototype = Obj.extend(new Tool(),
             return;
         }
 
+        // Ignore evaluated expressions: these are added in commandLineExposed.js
+        if (Url.isUrlForEvalExpr(script.url))
+            return;
+
         if (!this.context.sourceFileMap)
         {
             TraceError.sysout("sourceTool.addScript; ERROR Source File Map is NULL", script);
@@ -109,7 +114,7 @@ SourceTool.prototype = Obj.extend(new Tool(),
         // Create a source file and append it into the context. This is the only
         // place where an instance of {@link SourceFile} is created.
         var sourceFile = new SourceFile(this.context, script.actor, script.url,
-            script.isBlackBoxed);
+            {isBlackBoxed: script.isBlackBoxed});
 
         this.context.addSourceFile(sourceFile);
 

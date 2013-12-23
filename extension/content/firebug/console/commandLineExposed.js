@@ -18,8 +18,20 @@ function(Obj, Wrapper, Locale, Url, DebuggerLib, SourceFile, CommandLineAPI) {
 // ********************************************************************************************* //
 // Constants
 
+var Cc = Components.classes;
+
 var Trace = FBTrace.to("DBG_COMMANDLINE");
 var TraceError = FBTrace.to("DBG_ERRORS");
+
+// See https://bugzilla.mozilla.org/show_bug.cgi?id=950853#c1
+try
+{
+    Cc["@mozilla.org/jsreflect;1"].createInstance()();
+}
+catch (ex)
+{
+    TraceError.log("Can't fetch the Parser API: " + ex, ex);
+}
 
 // ********************************************************************************************* //
 // Command Line APIs
@@ -384,8 +396,10 @@ function getUrlForEval(context, expr)
 
 function addSourceFileForExpr(context, expr, href)
 {
-    // xxxFlorent: What will actor (second argument) be used for? Will it be required?
-    var sourceFile = new SourceFile(context, null, href, false, expr);
+    var options = {};
+    options.deferVisibleInList = !doesExprContainFunction(expr);
+    options.source = expr;
+    var sourceFile = new SourceFile(context, null, href, options);
     context.addSourceFile(sourceFile);
 }
 
@@ -573,6 +587,35 @@ function getCommandLineBindings(context, win, dbgGlobal, contentView)
     removeConflictingNames(commandLine, context, contentView);
 
     return commandLine;
+}
+
+function doesExprContainFunction(expression)
+{
+    try
+    {
+        var specialStatements = [
+            "arrowExpression", // var func = () => {};
+            "functionDeclaration", // function func() { }
+            "functionExpression", // function members: "var func = function(){}";
+                                  // or "var o = {get func(){} }"
+            "debuggerStatement" // debugger;
+        ];
+
+        var builder = {};
+
+        for (var specialStatement of specialStatements)
+            builder[specialStatement] = function() { throw StopIteration; };
+
+        Reflect.parse(expression, { builder: builder });
+    }
+    catch (e)
+    {
+        if (e === StopIteration)
+            return true;
+        Trace.sysout("CommandLine.doesExprContainFunction; invalid expression: " +
+            expression, e);
+    }
+    return false;
 }
 
 // ********************************************************************************************* //
