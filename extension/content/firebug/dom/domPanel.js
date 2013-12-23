@@ -151,14 +151,15 @@ DOMPanel.prototype = Obj.extend(BasePanel,
 
     initializeNode: function(oldPanelNode)
     {
-        Events.addEventListener(this.panelNode, "click", this.onClick, false);
+        // Add this as a capturing listener to get ahead of the rep-based click handler.
+        Events.addEventListener(this.panelNode, "click", this.onClick, true);
 
         BasePanel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
     {
-        Events.removeEventListener(this.panelNode, "click", this.onClick, false);
+        Events.removeEventListener(this.panelNode, "click", this.onClick, true);
 
         BasePanel.destroyNode.apply(this, arguments);
     },
@@ -403,13 +404,11 @@ DOMPanel.prototype = Obj.extend(BasePanel,
 
     findPathIndex: function(object)
     {
-        var pathIndex = -1;
         for (var i = 0; i < this.objectPath.length; ++i)
         {
             if (this.getPathObject(i) === object)
                 return i;
         }
-
         return -1;
     },
 
@@ -471,10 +470,10 @@ DOMPanel.prototype = Obj.extend(BasePanel,
 
         // If the object is inside an array, look up its index
         var valueBox = row.lastChild.firstChild;
-        if (Css.hasClass(valueBox, "objectBox-array"))
+        if (target !== valueBox && Css.hasClass(valueBox, "objectBox-array"))
         {
             var arrayIndex = FirebugReps.Arr.getItemIndex(target);
-            this.pathToAppend.push(arrayIndex);
+            this.pathToAppend.push(String(arrayIndex));
         }
 
         // Make sure we get a fresh status path for the object, since otherwise
