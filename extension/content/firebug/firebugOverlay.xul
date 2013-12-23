@@ -400,7 +400,7 @@
                                     </hbox>
 
                                     <!-- Toggle visibility of the side panels area -->
-                                    <hbox id="fbToggleSidePanelsBox" collapsed="false" align="end">
+                                    <hbox id="fbToggleSidePanelsBox" collapsed="false">
                                         <toolbarbutton id="fbToggleSidePanels"
                                             class="fbToggleSidePanels toolbar-image-button fbInternational"
                                             tooltiptext="firebug.tip.Toggle_Side_Panels"/>
@@ -442,13 +442,13 @@
                                             class="panelTabs fbInternational" role="tablist"
                                             aria-label="a11y.labels.firebug_side_panels" />
                                     </panelBarArrowscrollbox>
+                                </hbox>
 
-                                    <!-- Toggle visibility of the side panels area -->
-                                    <hbox id="fbToggleSidePanelsBox2" collapsed="false" align="end">
-                                        <toolbarbutton id="fbToggleSidePanels2"
-                                            class="fbToggleSidePanels toolbar-image-button fbInternational"
-                                            tooltiptext="firebug.tip.Toggle_Side_Panels"/>
-                                    </hbox>
+                                <!-- Toggle visibility of the side panels area -->
+                                <hbox id="fbToggleSidePanelsBox2" collapsed="false">
+                                    <toolbarbutton id="fbToggleSidePanels2"
+                                        class="fbToggleSidePanels toolbar-image-button fbInternational"
+                                        tooltiptext="firebug.tip.Toggle_Side_Panels"/>
                                 </hbox>
                             </stack>
                             <deck id="fbPanelBar2-deck" flex="1">

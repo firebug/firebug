@@ -769,6 +769,7 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
 
 .fbToggleSidePanels {
     list-style-image: url(chrome://firebug/skin/collapseSidePanels.svg);
+    -moz-box-align: end;
 }
 
 .fbToggleSidePanels.closed {
@@ -796,6 +797,13 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
     padding: 3px;
 }
 
+#fbToggleSidePanelsBox,
 #fbToggleSidePanelsBox2 {
-    padding-top: 1px;
+    -moz-box-flex: 1;
+    -moz-box-align: end;
+    -moz-box-pack: end;
+}
+
+#fbToggleSidePanelsBox2 {
+    padding-bottom: 2px;
 }
