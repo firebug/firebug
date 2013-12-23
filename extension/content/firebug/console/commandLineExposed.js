@@ -362,7 +362,7 @@ function correctStackTrace(splitStack)
     var filename = Components.stack.filename;
     // remove the frames over the evaluated expression
     for (var i = 0; i < splitStack.length-1 &&
-        splitStack[i+1].indexOf(evaluate.name + "@" + filename, 0) === -1 ; i++);
+        splitStack[i+1].indexOf(evaluate.name + "@" + filename, 0) === -1; i++);
 
     if (i >= splitStack.length)
         return false;

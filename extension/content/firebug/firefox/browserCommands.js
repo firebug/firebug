@@ -72,7 +72,7 @@ var BrowserCommands =
     {
         var keyset = $(doc, "mainKeyset");
 
-        for (var i=0; i<shortcuts.length ; i++)
+        for (var i=0; i<shortcuts.length; i++)
         {
             var id = shortcuts[i];
             var shortcut = Options.get("key.shortcut." + id);

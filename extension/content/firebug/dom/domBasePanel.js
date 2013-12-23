@@ -455,7 +455,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
     getPropertyPath: function(row)
     {
         var path = [];
-        for (var current = row; current ; current = getParentRow(current))
+        for (var current = row; current; current = getParentRow(current))
             path = this.getRowPathName(current).concat(path);
 
         // don't want the first separator

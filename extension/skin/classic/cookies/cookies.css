@@ -65,7 +65,7 @@
     text-decoration: none;
 }
 
-.logRow-cookiesCleared > DIV {
+.logRow-cookiesCleared > div {
     padding: 1px 0 2px 0 !important;
 }
 
@@ -122,7 +122,7 @@
 
 .cookieHeaderSorted > .cookieHeaderCellBox {
     border-right-color: #6B7C93;
-    background: url(chrome://firebug/skin/arrowDown.svg) no-repeat calc(100% - 4px);    
+    background: url(chrome://firebug/skin/arrowDown.svg) no-repeat calc(100% - 4px);
 }
 
 .cookieHeaderSorted.sortedAscending > .cookieHeaderCellBox {
@@ -139,7 +139,7 @@
 /*
  * Every row is for one column, the first selector hides column in the header
  * (e.g. id=colName) and the second selector in all rows (e.g. class=cookieNameCol)
- * 
+ *
  * If a column is hidden, it's presented in a 'hiddenCols' attribute of the .cookieTable
  * element. Value of the attribute is a whitespace separated list of columns IDs.
  */
@@ -272,7 +272,7 @@
 .cookieCol {
     padding: 0;
     vertical-align: top;
-    border-bottom: 1px solid #EFEFEF;  
+    border-bottom: 1px solid #EFEFEF;
     white-space: nowrap;
 }
 
@@ -334,10 +334,10 @@
     display: -moz-box;
 }
 
-/* This style is to avoid warning: XUL box for div element contained 
- an inline span child, forcing all its children to be wrapped in a block, 
+/* This style is to avoid warning: XUL box for div element contained
+ an inline span child, forcing all its children to be wrapped in a block,
  which is caused by the previous style.
- 
+
  Related to following message:
  nsIScriptError: XUL box for div element contained an inline #text child,
  forcing all its children to be wrapped in a block. [JavaScript Warning:

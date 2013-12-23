@@ -30,9 +30,9 @@
     animation: emphasizeFrameResultValue 2s ease;
 }
 
-.memberRow.frameResultValueRow, 
+.memberRow.frameResultValueRow,
 .memberRow.frameResultValueEmphasizedRow {
-    background-color: beige ;
+    background-color: beige;
 }
 
 .memberRow.frameResultValueRow .memberLabel,

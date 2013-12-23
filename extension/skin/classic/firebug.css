@@ -618,7 +618,7 @@ toolbarbutton:hover:active:not([disabled="true"]):not([type=menu-button]) {
 }
 
 toolbarbutton[type="menu-button"] {
-    padding: 0!important;
+    padding: 0 !important;
 }
 
 toolbarbutton[type=menu-button] > .toolbarbutton-menubutton-button {

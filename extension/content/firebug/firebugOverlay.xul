@@ -442,7 +442,7 @@
                                             class="panelTabs fbInternational" role="tablist"
                                             aria-label="a11y.labels.firebug_side_panels" />
                                     </panelBarArrowscrollbox>
-    
+
                                     <!-- Toggle visibility of the side panels area -->
                                     <hbox id="fbToggleSidePanelsBox2" collapsed="false">
                                         <toolbarbutton id="fbToggleSidePanels2"

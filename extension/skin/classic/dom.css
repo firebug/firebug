@@ -41,7 +41,7 @@
     background-size: 10px 10px;
 }
 
-.memberValueIcon.readOnly > DIV {
+.memberValueIcon.readOnly > div {
     width: 15px;
 }
 
@@ -58,11 +58,11 @@
     font-size: 12px;
 }
 
-.readOnlyInfoTip > DIV {
-    padding: 0 2px 0 2px; 
+.readOnlyInfoTip > div {
+    padding: 0 2px 0 2px;
 }
 
-.readOnlyInfoTip > DIV.no {
+.readOnlyInfoTip > div.no {
     text-decoration: line-through;
 }
 

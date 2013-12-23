@@ -534,7 +534,7 @@ of an error log is affected (higher than other logs). */
     color: gray;
 }
 
-.logRow-help .logGroupBody > DIV > .logContent {
+.logRow-help .logGroupBody > div > .logContent {
     padding: 0;
 }
 
@@ -943,7 +943,7 @@ of an error log is affected (higher than other logs). */
 
 .tableCommandLineInclude td:last-child {
     width: 75%;
-    padding-right: 0 !important; 
+    padding-right: 0 !important;
 }
 
 /************************************************************************************************/
