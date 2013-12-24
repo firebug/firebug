@@ -586,7 +586,7 @@ toolbarbutton {
     margin-right: 1px;
     border: 1px solid transparent;
     border-radius: 2px;
-    color: #000000;
+    color: #141414;
 }
 
 toolbarbutton:hover:not([disabled="true"]) {
