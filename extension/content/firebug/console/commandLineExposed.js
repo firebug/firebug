@@ -593,18 +593,25 @@ function doesExprContainFunction(expression)
 {
     try
     {
-        var specialStatements = [
-            "arrowExpression", // var func = () => {};
-            "functionDeclaration", // function func() { }
-            "functionExpression", // function members: "var func = function(){}";
-                                  // or "var o = {get func(){} }"
-            "debuggerStatement" // debugger;
-        ];
+        function throwStopIteration()
+        {
+            throw StopIteration;
+        }
 
         var builder = {};
 
-        for (var specialStatement of specialStatements)
-            builder[specialStatement] = function() { throw StopIteration; };
+        // var func = () => {};
+        builder.arrowExpression = throwStopIteration;
+
+        // function func() { }
+        builder.functionDeclaration = throwStopIteration;
+
+        // function members: "var func = function(){}";
+        // or "var o = {get getter(){} }"
+        builder.functionExpression = throwStopIteration;
+
+        // debugger;
+        builder.debuggerStatement = throwStopIteration;
 
         Reflect.parse(expression, { builder: builder });
     }
