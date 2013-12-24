@@ -201,6 +201,15 @@
         stretch;
 }
 
+/*************************************************************************************************/
+/* Notification */
+
+.notificationClose {
+    width: 13px;
+    height: 13px;
+    background-image: url(chrome://firebug/skin/mac/close.svg);
+}
+
 /************************************************************************************************/
 
 .breakpointBlockHead {
