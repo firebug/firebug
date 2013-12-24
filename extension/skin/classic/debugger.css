@@ -290,7 +290,7 @@
 }
 
 .notificationClose {
-    background: url(chrome://firebug-os/skin/close.svg) no-repeat scroll 0 0 transparent;
+    background: url(chrome://firebug/skin/win/close.svg) no-repeat scroll 0 0 transparent;
     width: 16px;
     height: 16px;
     border: none;
