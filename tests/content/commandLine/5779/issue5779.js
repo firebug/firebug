@@ -11,7 +11,7 @@ function runTest()
 
             tasks.push(FBTest.executeCommandAndVerify,
                 "$('div');",
-                "<div class=\"test\">",
+                "<div\u00A0class=\"test\">",
                 "a", "objectLink-element");
 
             tasks.push(FBTest.executeCommandAndVerify,
@@ -21,7 +21,7 @@ function runTest()
 
             tasks.push(FBTest.executeCommandAndVerify,
                 "$('div', document.getElementById('root'));",
-                "<div class=\"rootdiv1\">",
+                "<div\u00A0class=\"rootdiv1\">",
                 "a", "objectLink-element");
 
             tasks.push(FBTest.executeCommandAndVerify,
