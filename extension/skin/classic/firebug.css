@@ -134,7 +134,7 @@
 
 #fbToolbar {
     -moz-appearance: none;
-    padding-left: 4px;
+    padding: 0 0 0 4px;
     border: none;
 }
 
@@ -149,17 +149,7 @@
     height: 28px;
 }
 
-#fbPanelBar1-panelTabs {
-    padding-left: 0;
-}
-
-#fbPanelBar1-panelTabs panelTab {
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
-
 #fbPanelBar2-panelTabs {
-    padding-top: 0;
     padding-left: 5px;
 }
 
@@ -214,7 +204,7 @@ panelTab {
     margin: 1px 0 0 0;
     border: 1px solid transparent;
     border-radius: 4px 4px 0 0;
-    padding: 4px 7px;
+    padding: 5px 7px 3px 7px;
     font-size: 11px;
     font-weight: bold;
     color: #565656;

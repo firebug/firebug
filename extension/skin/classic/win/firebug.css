@@ -177,7 +177,7 @@ panelTab:not([selected="true"]):hover {
 }
 
 .panelTab-text {
-    margin: 0;
+    margin: auto 0;
 }
 
 .panelTab-text[disabled="true"] {
@@ -186,12 +186,6 @@ panelTab:not([selected="true"]):hover {
 
 panelTab[selected="true"] > panelTabMenu {
     margin-left: 3px;
-}
-
-#fbPanelBar1-panelTabs panelTab,
-#fbPanelBar2-panelTabs panelTab {
-    padding-top: 5px;
-    padding-bottom: 6px;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
