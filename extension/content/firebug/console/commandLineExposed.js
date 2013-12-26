@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 /*jshint esnext:true, curly:false, evil:true, forin:false*/
-/*global Firebug:true, FBTrace:true, Components:true, define:true */
+/*global Firebug:true, FBTrace:true, Components:true, define:true, StopIteration:true,
+         Reflect:true */
 
 define([
     "firebug/lib/object",
@@ -311,7 +312,7 @@ function evaluate(subject, evalMethod, dbgGlobal, context, win, expr, origExpr, 
     var result;
     var contentView = Wrapper.getContentView(win);
     var resObj;
-    var evalMethodOptions = {}
+    var evalMethodOptions = {};
     var evalMethodArgs = [expr, evalMethodOptions];
     var url;
 
@@ -326,7 +327,7 @@ function evaluate(subject, evalMethod, dbgGlobal, context, win, expr, origExpr, 
     if (options.exprInScriptPanel)
     {
         url = options.urlForExpr || getUrlForEval(context, expr);
-        evalMethodOptions["url"] = url;
+        evalMethodOptions.url = url;
         Trace.sysout("CommandLineExposed.evaluate; options.url: "+url);
         // Add the source file before running the expression for issue 5432.
         // To make "break on all error" work, the source file should exist before the evaluation.

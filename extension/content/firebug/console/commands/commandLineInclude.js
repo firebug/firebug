@@ -1,4 +1,6 @@
 /* See license.txt for terms of usage */
+/*jshint forin:false, noempty:false, esnext:true, curly:false */
+/*global FBTrace:true, Components:true, define:true, Firebug:true  */
 
 define([
     "firebug/chrome/module",
@@ -10,7 +12,6 @@ define([
     "firebug/lib/css",
     "firebug/lib/string",
     "firebug/lib/options",
-    "firebug/chrome/menu",
     "firebug/lib/system",
     "firebug/lib/xpcom",
     "firebug/lib/object",
@@ -19,13 +20,13 @@ define([
     "firebug/editor/editor",
     "firebug/editor/inlineEditor",
 ],
-function(Module, FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, Menu, System, Xpcom,
+function(Module, FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, System, Xpcom,
     Obj, TableRep, Console, Editor, InlineEditor) {
 
 // ********************************************************************************************* //
 // Constants
 
-var {domplate, DomplateTag, SPAN, TR, P, LI, A, BUTTON} = Domplate;
+var {domplate, DomplateTag, SPAN, A} = Domplate;
 
 const Ci = Components.interfaces;
 const Cu = Components.utils;
@@ -108,12 +109,12 @@ var CommandLineIncludeRep = domplate(TableRep,
         var store = CommandLineInclude.getStore();
         var keys = store.getKeys();
         var arrayToDisplay = [];
-        var returnValue = Firebug.Console.getDefaultReturnValue();
+        var returnValue = Console.getDefaultReturnValue();
 
         if (keys.length === 0)
         {
             var msg = Locale.$STR("commandline.include.noDefinedAlias");
-            Firebug.Console.log(msg, context, null, FirebugReps.Hint);
+            Console.log(msg, context, null, FirebugReps.Hint);
             return returnValue;
         }
 
@@ -191,10 +192,11 @@ var CommandLineIncludeRep = domplate(TableRep,
         var spWin = ScratchpadManager.openScratchpad();
         var scriptContent = null;
         var editor = null;
+        // spInstance is defined for spWin.onload and spWin.onerror.
+        var spInstance = spWin.Scratchpad;
 
         spWin.onload = function()
         {
-            var spInstance = spWin.Scratchpad;
             //intro = spInstance.strings.GetStringFromName("scratchpadIntro");
             spInstance.addObserver(
             {
@@ -252,7 +254,6 @@ var CommandLineIncludeRep = domplate(TableRep,
 
         var url = tr.querySelector("a.url").href;
         var aliasName = tr.querySelector(".aliasName").dataset.aliasname;
-        var context = Firebug.currentContext;
         var items = [
             {
                 label: "CopyLocation",
@@ -392,7 +393,7 @@ var CommandLineInclude = Obj.extend(Module,
         var prefixedLocaleStr = (noAutoPrefix ? localeStr : "commandline.include." + localeStr);
         var msg = Locale.$STRF(prefixedLocaleStr, localeArgs);
         logArgs.unshift([msg]);
-        return Firebug.Console.logFormatted.apply(Firebug.Console, logArgs);
+        return Console.logFormatted.apply(Console, logArgs);
     },
 
     /**
@@ -407,7 +408,7 @@ var CommandLineInclude = Obj.extend(Module,
     {
         var reNotAlias = /[\.\/]/;
         var urlIsAlias = url !== null && !reNotAlias.test(url);
-        var returnValue = Firebug.Console.getDefaultReturnValue();
+        var returnValue = Console.getDefaultReturnValue();
 
         // checking arguments:
         if ((newAlias !== undefined && typeof newAlias !== "string") || newAlias === "")
@@ -628,7 +629,7 @@ function isValidJS(codeToCheck)
         else
             throw ex;
     }
-};
+}
 
 // ********************************************************************************************* //
 // Registration
