@@ -593,10 +593,10 @@ function doesExprContainFunction(expression)
 {
     try
     {
-        function throwStopIteration()
+        var throwStopIteration = function()
         {
             throw StopIteration;
-        }
+        };
 
         var builder = {};
 
