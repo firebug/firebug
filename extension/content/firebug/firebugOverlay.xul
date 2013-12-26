@@ -142,7 +142,7 @@
                             <toolbar id="fbToolbar" align="center" role="toolbar">
 
                                 <hbox id="fbToolbarInner" class="innerToolbar"
-                                    insertbefore="fbDetachButton" flex="1" align="center">
+                                    insertbefore="fbDetachButton">
 
                                     <!-- Break On Next -->
                                     <hbox id="fbBonButtons" collapsed="true" class="noTabStop">

@@ -21,8 +21,13 @@
     color: graytext;
 }
 
+#fbToolbarInner {
+    height: 31px;
+}
+
 #fbPanelSplitter > #fbPanelSplitterBox,
-#fbPanelBar2-tabBox {
+#fbPanelBar2-tabBox,
+#fbCommandToolbar {
     height: 32px;
 }
 
@@ -40,10 +45,6 @@
 
 #fbToggleCommandEditorBox {
     margin-bottom: 1px;
-}
-
-#fbCommandToolbar {
-    height: 31px;
 }
 
 panelTab {

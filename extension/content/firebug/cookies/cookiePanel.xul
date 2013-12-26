@@ -24,7 +24,7 @@
 
     <!-- Firebug toolbar -->
     <toolbar id="fbToolbar" align="center">
-        <hbox id="fbToolbarInner" insertbefore="fbDetachButton" flex="1" align="center">
+        <hbox id="fbToolbarInner" insertbefore="fbDetachButton">
 
             <!-- Console toolbar -->
             <hbox id="fbConsoleButtons">

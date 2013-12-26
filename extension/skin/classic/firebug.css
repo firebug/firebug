@@ -139,14 +139,17 @@
 }
 
 #fbToolbarInner {
+    -moz-box-flex: 1;
+    -moz-box-align: center;
     overflow: hidden;
     padding: 1px 0;
     height: 27px;
 }
 
-#fbPanelBar1-tabBox,
-#fbPanelBar2-tabBox {
+.panelTabBox {
     height: 28px;
+    padding: 0;
+    overflow: hidden;
 }
 
 #fbPanelBar2-panelTabs {
@@ -759,7 +762,6 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
 
 .fbToggleSidePanels {
     list-style-image: url(chrome://firebug/skin/collapseSidePanels.svg);
-    -moz-box-align: end;
 }
 
 .fbToggleSidePanels.closed {
@@ -790,10 +792,10 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
 #fbToggleSidePanelsBox,
 #fbToggleSidePanelsBox2 {
     -moz-box-flex: 1;
-    -moz-box-align: end;
     -moz-box-pack: end;
 }
 
 #fbToggleSidePanelsBox2 {
+    -moz-box-align: center;
     padding-bottom: 2px;
 }

@@ -157,11 +157,6 @@ toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
 
 /************************************************************************************************/
 
-.panelTabBox {
-    padding: 0;
-    overflow: hidden;
-}
-
 .panelTabs {
     -moz-box-align: end;
 }
