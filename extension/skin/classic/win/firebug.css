@@ -38,10 +38,6 @@ toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
     padding: 4px 5px 2px 7px;
 }
 
-#fbToolbox .toolbarbutton-menu-dropmarker {
-    margin-left: 3px;
-}
-
 /************************************************************************************************/
 
 .toolbarbutton-iconic {
