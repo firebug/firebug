@@ -685,6 +685,7 @@
 .objectRightBrace,
 .arrayLeftBracket,
 .arrayRightBracket {
+    cursor: pointer;
     font-weight: bold;
 }
 
