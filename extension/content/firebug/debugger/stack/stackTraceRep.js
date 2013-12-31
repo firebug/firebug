@@ -25,8 +25,10 @@ const Ci = Components.interfaces;
 
 var StackTraceRep = domplate(Firebug.Rep,
 {
+    inspectable: false,
+
     tag:
-        DIV({role : "group", "aria-label" : Locale.$STR("aria.labels.stack trace")},
+        DIV({role: "group", "aria-label": Locale.$STR("aria.labels.stack_trace")},
             FOR("frame", "$object.frames|frameIterator",
                 TAG(StackFrameRep.tag, {object: "$frame"})
             )

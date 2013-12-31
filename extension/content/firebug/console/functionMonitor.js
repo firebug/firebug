@@ -189,6 +189,7 @@ function FunctionLog(frame, stackTrace)
 var FunctionMonitorRep = domplate(Rep,
 {
     className: "functionCall",
+    inspectable: false,
 
     // xxxHonza: StackFrameRep duplication
     tag:

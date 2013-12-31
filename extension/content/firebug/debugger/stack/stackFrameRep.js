@@ -33,6 +33,7 @@ const Ci = Components.interfaces;
 var StackFrameRep = domplate(Rep,
 {
     className: "stackFrame",
+    inspectable: false,
 
     tag:
         Rep.OBJECTBLOCK({$hasTwisty: "$object|hasArguments", _repObject: "$object",

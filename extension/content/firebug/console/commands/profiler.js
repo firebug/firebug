@@ -510,6 +510,7 @@ Profiler.ProfileCaption = domplate(Rep,
 Profiler.ProfileCall = domplate(Rep,
 {
     className: "profile",
+    inspectable: false,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
