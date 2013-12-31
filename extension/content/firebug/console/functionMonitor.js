@@ -35,7 +35,7 @@ var {domplate, A, SPAN, FOR, TAG, DIV} = Domplate;
 // Function Monitor
 
 /**
- * @module The modules implements 'debug', 'undebug', 'monitor' and 'unmonitor' commands.
+ * @module The module implements the 'debug', 'undebug', 'monitor' and 'unmonitor' commands.
  */
 var FunctionMonitor = Obj.extend(Module,
 /** @lends FunctionMonitor */
@@ -100,7 +100,7 @@ var FunctionMonitor = Obj.extend(Module,
             var script = SourceFile.findScriptForFunctionInContext(context, fn);
             if (script)
             {
-                this.monitorScript(context, fn, script, mode);
+                this.monitorScript(context, script, mode);
             }
             else
             {
@@ -122,14 +122,14 @@ var FunctionMonitor = Obj.extend(Module,
         {
             var script = SourceFile.findScriptForFunctionInContext(context, fn);
             if (script)
-                this.unmonitorScript(context, fn, script, mode);
+                this.unmonitorScript(context, script, mode);
         }
     },
 
-    monitorScript: function(context, fn, script, mode)
+    monitorScript: function(context, script, mode)
     {
         Trace.sysout("functionMonitor.monitorScript; " + script.url + ", " +
-            script.startLine, fn);
+            script.startLine);
 
         var location = {line: script.startLine, url: script.url};
 
@@ -138,13 +138,13 @@ var FunctionMonitor = Obj.extend(Module,
         location = DebuggerLib.getNextExecutableLine(context, location);
 
         var type = this.getBreakpointType(mode);
-        BreakpointStore.addBreakpoint(location.url, location.line - 1, type);
+        BreakpointStore.addBreakpoint(location.url, location.line - 1, null, type);
     },
 
-    unmonitorScript: function(context, fn, script, mode)
+    unmonitorScript: function(context, script, mode)
     {
         Trace.sysout("functionMonitor.unmonitorScript; " + script.url + ", " +
-            script.startLine, fn);
+            script.startLine);
 
         var location = {line: script.startLine, url: script.url};
         location = DebuggerLib.getNextExecutableLine(context, location);
@@ -155,13 +155,17 @@ var FunctionMonitor = Obj.extend(Module,
 
     getBreakpointType: function(mode)
     {
-        return (mode == "monitor") ? BreakpointStore.BP_MONITOR : BreakpointStore.BP_NORMAL;
+        return (mode === "monitor" ? BreakpointStore.BP_MONITOR : BreakpointStore.BP_NORMAL);
     },
 
-    isMonitored: function(url, lineNo)
+    isScriptMonitored: function(context, script)
     {
-        var bp = lineNo != -1 ? BreakpointStore.findBreakpoint(url, lineNo) : null;
-        return bp && bp.type & BreakpointStore.BP_MONITOR;
+        var location = {line: script.startLine, url: script.url};
+        location = DebuggerLib.getNextExecutableLine(context, location);
+        if (!location)
+            return false;
+        var type = BreakpointStore.BP_MONITOR;
+        return BreakpointStore.findBreakpoint(location.url, location.line - 1, type) != null;
     },
 
     clearMonitorBreakpoint: function(url, line)
@@ -291,6 +295,12 @@ var FunctionMonitorRep = domplate(Rep,
 
 // ********************************************************************************************* //
 // CommandLine Support
+
+// XXX Move the validation in {,un}monitorFunction into the command line functions -
+// internal functions shouldn't print to the console. E.g. currently "monitor(1)" prints
+// (i) Firebug.Debugger.monitorFunction requires a function 1
+// (i) Monitor created for (null).
+// which is wrong in so many ways...
 
 function debug(context, args)
 {

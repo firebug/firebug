@@ -587,16 +587,7 @@ Profiler.ProfileCall = domplate(Rep,
 
     getContextMenuItems: function(call, target, context)
     {
-        // XXX This code used to grab a dummy function object off the JSD1 script,
-        // and use it to generate a function-specific context menu. This is both
-        // broken (you can get Firefox crashes from calling the function) and
-        // impossible in a JSD2 world. We need some code for generating context
-        // menus from Debugger.Script's here.
-
-        /*
-        var fn = Wrapper.unwrapIValue(call.script.functionObject);
-        return FirebugReps.Func.getContextMenuItems(fn, call.script, context);
-        */
+        return FirebugReps.Func.getScriptContextMenuItems(context, call.script, call.funcName);
     }
 });
 

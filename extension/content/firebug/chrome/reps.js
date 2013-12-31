@@ -26,6 +26,7 @@ define([
     "firebug/lib/xml",
     "firebug/dom/toggleBranch",
     "firebug/console/closureInspector",
+    "firebug/console/functionMonitor",
     "firebug/chrome/menu",
     "arch/compilationunit",
     "firebug/net/netUtils",
@@ -35,7 +36,7 @@ define([
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, SourceFile, StackFrame, StackTrace, Css, Dom, Win, System,
-    Xpath, Str, Xml, ToggleBranch, ClosureInspector, Menu, CompilationUnit,
+    Xpath, Str, Xml, ToggleBranch, ClosureInspector, FunctionMonitor, Menu, CompilationUnit,
     NetUtils, PanelActivation, Rep, Inspector) {
 
 // ********************************************************************************************* //
@@ -251,12 +252,12 @@ FirebugReps.Func = domplate(Rep,
             System.copyToClipboard(fn.toSource());
     },
 
-    monitor: function(fn, monitored)
+    monitor: function(context, script, monitored)
     {
         if (monitored)
-            Firebug.Debugger.unmonitorFunction(fn,  "monitor");
+            FunctionMonitor.unmonitorScript(context, script, "monitor");
         else
-            Firebug.Debugger.monitorFunction(fn, "monitor");
+            FunctionMonitor.monitorScript(context, script, "monitor");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -297,40 +298,44 @@ FirebugReps.Func = domplate(Rep,
         return name + "()";
     },
 
-    getContextMenuItems: function(fn, target, context, script)
+    getContextMenuItems: function(fn, target, context)
     {
-        if (!script)
-            script = SourceFile.findScriptForFunctionInContext(context, fn);
-        if (!script)
-            return;
+        var ret = [];
 
-        //var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(context, script);
-        var monitored = false; // xxxHonza: FBS doesn't exist scriptInfo ? FBS.fbs.isMonitored(scriptInfo.sourceFile.href,
-            //scriptInfo.lineNo) : false;
+        var script = SourceFile.findScriptForFunctionInContext(context, fn);
+        if (script)
+        {
+            // XXX This should really use Debugger.Object.displayName.
+            var name = fn.name || "anonymous";
+            ret = ret.concat(this.getScriptContextMenuItems(context, script, name), ["-"]);
+        }
+
+        ret.push({
+            label: "CopySource",
+            tooltiptext: "dom.tip.Copy_Source",
+            command: Obj.bindFixed(this.copySource, this, fn)
+        });
+        return ret;
+    },
+
+    getScriptContextMenuItems: function(context, script, name)
+    {
+        var monitored = FunctionMonitor.isScriptMonitored(context, script);
 
         var self = this;
-        var name = script ? StackFrame.getFunctionName(script, context) : fn.name;
-        return [
+        return [{
+            label: Locale.$STRF("ShowCallsInConsole", [name]),
+            tooltiptext: Locale.$STRF("dom.tip.Log_Calls_To_Function", [name]),
+            nol10n: true,
+            type: "checkbox",
+            checked: monitored,
+            command: function()
             {
-                label: Locale.$STRF("ShowCallsInConsole", [name]),
-                tooltiptext: Locale.$STRF("dom.tip.Log_Calls_To_Function", [name]),
-                nol10n: true,
-                type: "checkbox",
-                checked: monitored,
-                command: function()
-                {
-                    var checked = this.hasAttribute("checked");
-                    self.monitor(fn, !checked);
-                }
-            },
-            "-",
-            {
-                label: "CopySource",
-                tooltiptext: "dom.tip.Copy_Source",
-                command: Obj.bindFixed(this.copySource, this, fn)
+                var checked = this.hasAttribute("checked");
+                self.monitor(context, script, !checked);
             }
-        ];
-    }
+        }];
+    },
 });
 
 // ********************************************************************************************* //
