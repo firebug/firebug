@@ -246,34 +246,27 @@ var Profiler = Obj.extend(Module,
 
         var sourceFileMap = context.sourceFileMap;
 
-        // Commenting out, it generates too much output in the tracing console.
-        //if (FBTrace.DBG_PROFILER)
-        //{
-        //    for (var url in sourceFileMap)
-        //        FBTrace.sysout("logProfileReport: " + sourceFileMap[url]);
-        //}
-
         context.profiling.enumerateScripts({enumerateScript: function(script)
         {
-            if (script.callCount)
+            if (!script.callCount)
+                return;
+
+            var fileName = Url.getFileName(script.url);
+            if (Firebug.filterSystemURLs && Url.isSystemURL(fileName))
+                return;
+
+            var sourceLink = SourceFile.getSourceLinkForScript(script, context);
+            if (sourceLink && sourceLink.href in sourceFileMap)
             {
-                var fileName = Url.getFileName(script.url);
-                if (!Firebug.filterSystemURLs || !Url.isSystemURL(fileName))
-                {
-                    var sourceLink = SourceFile.toSourceLink(script, context);
-                    if (sourceLink && sourceLink.href in sourceFileMap)
-                    {
-                        var call = new ProfileCall(script, context, script.funcName,
-                            script.callCount, script.totalExecutionTime,
-                            script.totalOwnExecutionTime, script.minExecutionTime,
-                            script.maxExecutionTime, sourceLink);
+                var call = new ProfileCall(script, context, script.funcName,
+                    script.callCount, script.totalExecutionTime,
+                    script.totalOwnExecutionTime, script.minExecutionTime,
+                    script.maxExecutionTime, sourceLink);
 
-                        calls.push(call);
+                calls.push(call);
 
-                        totalCalls += script.callCount;
-                        totalTime += script.totalOwnExecutionTime;
-                    }
-                }
+                totalCalls += script.callCount;
+                totalTime += script.totalOwnExecutionTime;
             }
         }});
 

@@ -198,17 +198,14 @@ SourceFile.findScriptForFunctionInContext = function(context, fn)
 SourceFile.findSourceForFunction = function(fn, context)
 {
     var script = SourceFile.findScriptForFunctionInContext(context, fn);
-    return script ? SourceFile.toSourceLink(script, context) : null;
+    return script ? SourceFile.getSourceLinkForScript(script, context) : null;
 };
 
-SourceFile.toSourceLink = function(script, context)
+SourceFile.getSourceLinkForScript = function(script, context)
 {
     var sourceLink = new SourceLink(script.url, script.startLine, "js");
     return sourceLink;
 };
-
-//xxxHonza: Back compatibility, do we need this?
-SourceFile.getSourceLinkForScript = SourceFile.toSourceLink;
 
 // ********************************************************************************************* //
 
