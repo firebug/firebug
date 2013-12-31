@@ -129,37 +129,29 @@ var FunctionMonitor = Obj.extend(Module,
 
     monitorScript: function(context, fn, script, mode)
     {
-        var script = SourceFile.findScriptForFunctionInContext(context, fn);
-        if (script)
-        {
-            Trace.sysout("functionMonitor.monitorScript; " + script.url + ", " +
-                script.startLine, fn);
+        Trace.sysout("functionMonitor.monitorScript; " + script.url + ", " +
+            script.startLine, fn);
 
-            var location = {line: script.startLine, url: script.url};
+        var location = {line: script.startLine, url: script.url};
 
-            // If the first line of the script contains no code, slide down to
-            // the nextline that has runnable code.
-            location = DebuggerLib.getNextExecutableLine(context, location);
+        // If the first line of the script contains no code, slide down to
+        // the next line that has runnable code.
+        location = DebuggerLib.getNextExecutableLine(context, location);
 
-            var type = this.getBreakpointType(mode);
-            BreakpointStore.addBreakpoint(location.url, location.line - 1, type);
-        }
+        var type = this.getBreakpointType(mode);
+        BreakpointStore.addBreakpoint(location.url, location.line - 1, type);
     },
 
     unmonitorScript: function(context, fn, script, mode)
     {
-        var script = SourceFile.findScriptForFunctionInContext(context, fn);
-        if (script)
-        {
-            Trace.sysout("functionMonitor.unmonitorScript; " + script.url + ", " +
-                script.startLine, fn);
+        Trace.sysout("functionMonitor.unmonitorScript; " + script.url + ", " +
+            script.startLine, fn);
 
-            var location = {line: script.startLine, url: script.url};
-            location = DebuggerLib.getNextExecutableLine(context, location);
+        var location = {line: script.startLine, url: script.url};
+        location = DebuggerLib.getNextExecutableLine(context, location);
 
-            var type = this.getBreakpointType(mode);
-            BreakpointStore.removeBreakpoint(location.url, location.line - 1, type);
-        }
+        var type = this.getBreakpointType(mode);
+        BreakpointStore.removeBreakpoint(location.url, location.line - 1, type);
     },
 
     getBreakpointType: function(mode)

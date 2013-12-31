@@ -101,9 +101,10 @@ var ErrorStackTraceObserver = Obj.extend(Firebug.Module,
         /*dbg.uncaughtExceptionHook = function(e)
         {
             Trace.sysout("errorStackTraceObserver.uncaughtExceptionHook " + e, e);
-        };
+        };*/
 
-        dbg.onError = function(frame, report)
+        // Mentioned in docs but unimplemented.
+        /*dbg.onError = function(frame, report)
         {
             Trace.sysout("errorStackTraceObserver.onError ", arguments);
         };

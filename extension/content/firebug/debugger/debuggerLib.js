@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
-/*global define:1, Components:1*/
+/*global define:1, Window:1, Components:1*/
 
 define([
     "firebug/lib/trace",
@@ -18,6 +18,9 @@ var Cu = Components.utils;
 var comparator = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
 var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
 var pre27 = (comparator.compare(appInfo.version, "27.0*") < 0);
+
+var global = Cu.getGlobalForObject({});
+Cu.import("resource://gre/modules/jsdebugger.jsm", {}).addDebuggerToGlobal(global);
 
 // Debuggees
 var dbgGlobalWeakMap = new WeakMap();
@@ -51,7 +54,11 @@ DebuggerLib.unwrapDebuggeeValue = function(obj)
 };
 
 /**
- * Gets or creates the debuggee global for the given global object
+ * Gets or creates the debuggee global for the given global object,
+ * or the context's current global if none specified. The debugger
+ * object comes from the context's inactive debugger, which means in
+ * practice that it only supports a limited number of operations,
+ * most notably that of evaluating code in the global.
  *
  * @param {*} context The Firebug context
  * @param {Window} global The global object
@@ -173,7 +180,7 @@ DebuggerLib.getObject = function(context, actorId)
     {
         TraceError.sysout("debuggerClient.getObject; EXCEPTION " + e, e);
     }
-}
+};
 
 DebuggerLib.getThreadActor = function(browser)
 {
@@ -193,7 +200,7 @@ DebuggerLib.getThreadActor = function(browser)
     {
         TraceError.sysout("debuggerClient.getObject; EXCEPTION " + e, e);
     }
-}
+};
 
 /**
  * Returns the debuggee global associated with the passed frame.
@@ -205,7 +212,7 @@ DebuggerLib.getThreadActor = function(browser)
 DebuggerLib.getDebuggeeGlobalForFrame = function(frame)
 {
     return frame.actor.threadActor.globalDebugObject;
-}
+};
 
 // ********************************************************************************************* //
 // Stack Frames
@@ -214,7 +221,7 @@ DebuggerLib.getCurrentFrames = function(context)
 {
     var threadActor = this.getThreadActor(context.browser);
     return onFrames.call(threadActor, {});
-}
+};
 
 // xxxHonza: hack, the original method, returns a promise now.
 // TODO: refactor
@@ -243,7 +250,6 @@ function onFrames(aRequest)
     // Return request.count frames, or all remaining
     // frames if count is not defined.
     var frames = [];
-    var promises = [];
     for (; frame && (!count || i < (start + count)); i++, frame=frame.older)
     {
         var form = this._createFrameActor(frame).form();
@@ -262,10 +268,10 @@ DebuggerLib.getNextExecutableLine = function(context, aLocation)
     var threadClient = this.getThreadActor(context.browser);
 
     var scripts = threadClient.dbg.findScripts(aLocation);
-    if (scripts.length == 0)
+    if (!scripts.length)
         return;
 
-    for (var i=0; i<scripts.length; i++)
+    for (var i = 0; i < scripts.length; i++)
     {
         var script = scripts[i];
         var offsets = script.getLineOffsets(aLocation.line);
@@ -273,13 +279,13 @@ DebuggerLib.getNextExecutableLine = function(context, aLocation)
             return aLocation;
     }
 
-    var scripts = threadClient.dbg.findScripts({
+    scripts = threadClient.dbg.findScripts({
         url: aLocation.url,
         line: aLocation.line,
         innermost: true
     });
 
-    for (var i=0; i<scripts.length; i++)
+    for (var i = 0; i < scripts.length; i++)
     {
         var script = scripts[i];
         var offsets = script.getAllOffsets();
@@ -295,7 +301,7 @@ DebuggerLib.getNextExecutableLine = function(context, aLocation)
             }
         }
     }
-}
+};
 
 DebuggerLib.isExecutableLine = function(context, location)
 {
@@ -310,10 +316,7 @@ DebuggerLib.isExecutableLine = function(context, location)
     };
 
     var scripts = threadClient.dbg.findScripts(query);
-    if (scripts.length == 0)
-        return false;
-
-    for (var i=0; i<scripts.length; i++)
+    for (var i = 0; i < scripts.length; i++)
     {
         var script = scripts[i];
         var offsets = script.getLineOffsets(location.line);
@@ -322,7 +325,7 @@ DebuggerLib.isExecutableLine = function(context, location)
     }
 
     return false;
-}
+};
 
 // ********************************************************************************************* //
 // Scopes (+ this + frame result value)
@@ -374,7 +377,7 @@ DebuggerLib.getFrameResultObject = function(context)
 
 DebuggerLib.breakNow = function(context)
 {
-    // getDebugeeGlobal uses the current global (i.e. stopped frame, current iframe or
+    // getDebuggeeGlobal uses the current global (i.e. stopped frame, current iframe or
     // top level window associated with the context object).
     // There can be cases (e.g. BON XHR) where the current window is an iframe, but
     // the event the debugger breaks on - comes from top level window (or vice versa).
@@ -382,20 +385,32 @@ DebuggerLib.breakNow = function(context)
     // argument of the getDebuggeeGlobal() and pass explicit global object.
     var dbgGlobal = this.getDebuggeeGlobal(context);
     return dbgGlobal.evalInGlobal("debugger");
-}
+};
+
+DebuggerLib.makeDebugger = function()
+{
+    return new global.Debugger();
+};
 
 // xxxHonza: shell we merge with getInactiveDebuggerForContext?
 DebuggerLib.getDebuggerForContext = function(context)
 {
     try
     {
-        var jsDebugger = {};
-        Cu.import("resource://gre/modules/jsdebugger.jsm", jsDebugger);
+        var addNewDebuggee = function(dbg, win, dbgGlobal)
+        {
+            // We are only interested in iframes...
+            var global = DebuggerLib.unwrapDebuggeeValue(dbgGlobal);
+            if (!(global instanceof Window))
+                return;
 
-        var global = Cu.getGlobalForObject({});
-        jsDebugger.addDebuggerToGlobal(global);
+            // ... and only iframes coming from the same top level window.
+            var root = Wrapper.unwrapObject(global.top);
+            if (root == win)
+                dbg.addDebuggee(global);
+        };
 
-        var dbg = new global.Debugger();
+        var dbg = DebuggerLib.makeDebugger();
 
         var win = Wrapper.unwrapObject(context.window);
         dbg.addDebuggee(win);
@@ -412,7 +427,7 @@ DebuggerLib.getDebuggerForContext = function(context)
             // xxxHonza: use timeout to avoid crash, see:
             // https://bugzilla.mozilla.org/show_bug.cgi?id=885301
             setTimeout(addNewDebuggee.bind(this, dbg, win, global));
-        }
+        };
 
         return dbg;
     }
@@ -421,19 +436,6 @@ DebuggerLib.getDebuggerForContext = function(context)
         TraceError.sysout("DebuggerLib.getDebuggerForContext; EXCEPTION " + err, err);
     }
 };
-
-function addNewDebuggee(dbg, win, global)
-{
-    // We are only interested in iframes...
-    global = DebuggerLib.unwrapDebuggeeValue(global);
-    if (!(global instanceof Window))
-        return;
-
-    // ... and only iframes coming from the same top level window.
-    var root = Wrapper.unwrapObject(global.top);
-    if (root == win)
-        dbg.addDebuggee(global);
-}
 
 // ********************************************************************************************* //
 // Local helpers
@@ -447,28 +449,10 @@ function addNewDebuggee(dbg, win, global)
  */
 var getInactiveDebuggerForContext = function(context)
 {
-    var DebuggerClass;
-    var scope = {};
-
     if (context.inactiveDebugger)
         return context.inactiveDebugger;
 
-    try
-    {
-        Cu.import("resource://gre/modules/jsdebugger.jsm", scope);
-        scope.addDebuggerToGlobal(window);
-        DebuggerClass = window.Debugger;
-    }
-    catch (exc)
-    {
-        TraceError.sysout("DebuggerLib.getInactiveDebuggerForContext; Debugger not found", exc);
-    }
-
-    // If the Debugger Class was not found, make this function no-op.
-    if (!DebuggerClass)
-        getInactiveDebuggerForContext = function() {};
-
-    var dbg = new DebuggerClass();
+    var dbg = DebuggerLib.makeDebugger();
     dbg.enabled = false;
     context.inactiveDebugger = dbg;
     return dbg;
