@@ -389,9 +389,6 @@ DebuggerLib.getDebuggerForContext = function(context)
 {
     try
     {
-        if (context.debugger)
-            return context.debugger;
-
         var jsDebugger = {};
         Cu.import("resource://gre/modules/jsdebugger.jsm", jsDebugger);
 
@@ -416,8 +413,6 @@ DebuggerLib.getDebuggerForContext = function(context)
             // https://bugzilla.mozilla.org/show_bug.cgi?id=885301
             setTimeout(addNewDebuggee.bind(this, dbg, win, global));
         }
-
-        context.debugger = dbg;
 
         return dbg;
     }
