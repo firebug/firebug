@@ -9,10 +9,11 @@ define([
     "firebug/lib/locale",
     "firebug/lib/dom",
     "firebug/lib/domplate",
+    "firebug/chrome/rep",
     "firebug/chrome/reps",
     "firebug/chrome/menu",
 ],
-function(Module, Obj, Firebug, FBTrace, Events, Locale, Dom, Domplate, FirebugReps, Menu) {
+function(Module, Obj, Firebug, FBTrace, Events, Locale, Dom, Domplate, Rep, FirebugReps, Menu) {
 
 "use strict";
 
@@ -370,7 +371,7 @@ var EventLogRep = domplate(FirebugReps.Event,
 
     copyEventTag:
         SPAN(
-            FirebugReps.OBJECTLINK("$object|summarizeEvent"),
+            Rep.OBJECTLINK("$object|summarizeEvent"),
             SPAN("&nbsp;"),
             SPAN("&#187;"),
             SPAN("&nbsp;"),

@@ -523,7 +523,7 @@ Profiler.ProfileCall = domplate(Rep,
     tag:
         TR({"class": "focusRow profileRow subFocusRow", "role": "row"},
             TD({"class": "profileCell", "role": "presentation"},
-                FirebugReps.OBJECTLINK("$object|getCallName")
+                Rep.OBJECTLINK("$object|getCallName")
             ),
             TD({"class": "a11yFocus profileCell", "role": "gridcell"}, "$object.callCount"),
             TD({"class": "a11yFocus profileCell", "role": "gridcell"}, "$object.percent%"),

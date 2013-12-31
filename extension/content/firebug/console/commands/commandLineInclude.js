@@ -2,6 +2,7 @@
 
 define([
     "firebug/chrome/module",
+    "firebug/chrome/rep",
     "firebug/chrome/reps",
     "firebug/lib/domplate",
     "firebug/lib/locale",
@@ -19,8 +20,8 @@ define([
     "firebug/editor/editor",
     "firebug/editor/inlineEditor",
 ],
-function(Module, FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, Menu, System, Xpcom,
-    Obj, TableRep, Console, Editor, InlineEditor) {
+function(Module, Rep, FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, Menu, System,
+    Xpcom, Obj, TableRep, Console, Editor, InlineEditor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -65,7 +66,7 @@ var CommandLineIncludeRep = domplate(TableRep,
     tableClassName: "tableCommandLineInclude dataTable",
 
     tag:
-        FirebugReps.OBJECTBOX({_repObject: "$object"},
+        Rep.OBJECTBOX({_repObject: "$object"},
             TableRep.tag
         ),
 

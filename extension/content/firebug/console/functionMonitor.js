@@ -1,26 +1,25 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/lib/trace",
+    "firebug/lib/css",
+    "firebug/lib/dom",
+    "firebug/lib/domplate",
+    "firebug/lib/events",
+    "firebug/lib/locale",
+    "firebug/lib/object",
+    "firebug/lib/url",
     "firebug/chrome/module",
     "firebug/chrome/rep",
-    "firebug/lib/trace",
-    "firebug/lib/object",
-    "firebug/lib/domplate",
-    "firebug/chrome/reps",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/stack/stackFrameRep",
     "firebug/debugger/script/sourceFile",
-    "firebug/lib/events",
-    "firebug/lib/css",
-    "firebug/lib/dom",
-    "firebug/lib/url",
-    "firebug/lib/locale",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/debugger/stack/stackTrace",
 ],
-function(Module, Rep, FBTrace, Obj, Domplate, Reps, StackFrame, StackFrameRep, SourceFile, Events,
-    Css, Dom, Url, Locale, DebuggerLib, BreakpointStore, StackTrace) {
+function(FBTrace, Css, Dom, Domplate, Events, Locale, Obj, Url, Module, Rep, StackFrame,
+    StackFrameRep, SourceFile, DebuggerLib, BreakpointStore, StackTrace) {
 
 "use strict";
 
@@ -189,7 +188,7 @@ var FunctionMonitorRep = domplate(Rep,
 
     // xxxHonza: StackFrameRep duplication
     tag:
-        Reps.OBJECTBLOCK({$hasTwisty: "$object|hasStackTrace", _repObject: "$object",
+        Rep.OBJECTBLOCK({$hasTwisty: "$object|hasStackTrace", _repObject: "$object",
             onclick: "$onToggleStackTrace"},
             A({"class": "objectLink functionCallTitle a11yFocus", _repObject: "$object"},
                 "$object|getCallName"

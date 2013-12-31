@@ -52,20 +52,12 @@ var FirebugReps = window.FirebugReps = {};
 // ********************************************************************************************* //
 // Common Tags
 
-var OBJECTBOX = FirebugReps.OBJECTBOX =
-    SPAN({"class": "objectBox objectBox-$className", role: "presentation"});
+var OBJECTBOX = FirebugReps.OBJECTBOX = Rep.OBJECTBOX;
+var OBJECTBLOCK = FirebugReps.OBJECTBLOCK = Rep.OBJECTBLOCK;
+var OBJECTLINK = FirebugReps.OBJECTLINK = Rep.OBJECTLINK;
 
 var PREOBJECTBOX =
     PRE({"class": "objectBox inline objectBox-$className", role: "presentation"});
-
-var OBJECTBLOCK = FirebugReps.OBJECTBLOCK =
-    DIV({"class": "objectBox objectBox-$className focusRow subLogRow", role: "listitem"});
-
-var OBJECTLINK = FirebugReps.OBJECTLINK =
-    A({
-        "class": "objectLink objectLink-$className a11yFocus",
-        _repObject: "$object"
-    });
 
 // ********************************************************************************************* //
 

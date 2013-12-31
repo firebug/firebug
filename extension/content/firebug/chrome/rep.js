@@ -15,6 +15,8 @@ function(Firebug, FBTrace, Locale, Str, Domplate, Inspector) {
 // ********************************************************************************************* //
 // Constants
 
+var {domplate, A, DIV, SPAN} = Domplate;
+
 var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
@@ -153,6 +155,19 @@ var Rep = Domplate.domplate(
     {
         return n == 1 ? "" : "s";
     }
+});
+
+// ********************************************************************************************* //
+// Common tags
+
+Rep.OBJECTBOX = SPAN({"class": "objectBox objectBox-$className", role: "presentation"});
+
+Rep.OBJECTBLOCK =
+    DIV({"class": "objectBox objectBox-$className focusRow subLogRow", role: "listitem"});
+
+Rep.OBJECTLINK = A({
+    "class": "objectLink objectLink-$className a11yFocus",
+    _repObject: "$object"
 });
 
 // ********************************************************************************************* //

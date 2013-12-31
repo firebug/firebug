@@ -55,7 +55,7 @@ var ErrorMessage = domplate(Rep,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     tag:
-        FirebugReps.OBJECTBOX({
+        Rep.OBJECTBOX({
             $hasTwisty: "$object|hasStackTrace",
             $hasBreakSwitch: "$object|hasBreakSwitch",
             $breakForError: "$object|hasErrorBreak",
