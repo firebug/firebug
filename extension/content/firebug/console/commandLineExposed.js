@@ -65,7 +65,7 @@ function createFirebugCommandLine(context, win, dbgGlobal)
     }
 
     // The debuggee global.
-    dbgGlobal = dbgGlobal || DebuggerLib.getDebuggeeGlobal(context, win);
+    dbgGlobal = dbgGlobal || DebuggerLib.getInactiveDebuggeeGlobal(context, win);
 
     var commandLine = dbgGlobal.cachedCommandLine;
     if (commandLine)
@@ -233,7 +233,7 @@ function unregisterCommand(name)
  */
 function evaluateInGlobal(context, win, expr, origExpr, onSuccess, onError, options)
 {
-    var dbgGlobal = DebuggerLib.getDebuggeeGlobal(context, win);
+    var dbgGlobal = DebuggerLib.getInactiveDebuggeeGlobal(context, win);
     var evalMethod = options.noCmdLineAPI ?
                      dbgGlobal.evalInGlobal :
                      dbgGlobal.evalInGlobalWithBindings;

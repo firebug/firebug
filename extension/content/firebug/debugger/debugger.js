@@ -443,7 +443,7 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         {
             var result;
 
-            var dbgGlobal = DebuggerLib.getDebuggeeGlobal(context);
+            var dbgGlobal = DebuggerLib.getInactiveDebuggeeGlobal(context);
             scope = dbgGlobal.makeDebuggeeValue(scope);
 
             if (scope)

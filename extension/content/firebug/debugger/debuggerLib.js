@@ -54,18 +54,16 @@ DebuggerLib.unwrapDebuggeeValue = function(obj)
 };
 
 /**
- * Gets or creates the debuggee global for the given global object,
- * or the context's current global if none specified. The debugger
- * object comes from the context's inactive debugger, which means in
- * practice that it only supports a limited number of operations,
- * most notably that of evaluating code in the global.
+ * Gets or creates the debuggee value of the given global object (the
+ * context's current global if none specified), within the inactive debugger.
+ * This is mostly useful for evaluating code in that global.
  *
  * @param {*} context The Firebug context
  * @param {Window} global The global object
  *
- * @return {Debuggee Window} The debuggee global
+ * @return {Debugger.Object} The debuggee global
  */
-DebuggerLib.getDebuggeeGlobal = function(context, global)
+DebuggerLib.getInactiveDebuggeeGlobal = function(context, global)
 {
     global = global || context.getCurrentGlobal();
 
@@ -114,11 +112,11 @@ DebuggerLib.withTemporaryDebugger = function(context, global, callback)
     // Pre Fx27, cheat and pass a disabled debugger, because closure inspection
     // works with disabled debuggers, and that's all we need this API for.
     if (!DebuggerLib._closureInspectionRequiresDebugger())
-        return callback(DebuggerLib.getDebuggeeGlobal(context, global));
+        return callback(DebuggerLib.getInactiveDebuggeeGlobal(context, global));
 
     var dbg = getInactiveDebuggerForContext(context);
     if (dbg.hasDebuggee(global))
-        return callback(DebuggerLib.getDebuggeeGlobal(context, global));
+        return callback(DebuggerLib.getInactiveDebuggeeGlobal(context, global));
 
     var dbgGlobal = dbg.addDebuggee(global);
     try
@@ -377,13 +375,13 @@ DebuggerLib.getFrameResultObject = function(context)
 
 DebuggerLib.breakNow = function(context)
 {
-    // getDebuggeeGlobal uses the current global (i.e. stopped frame, current iframe or
-    // top level window associated with the context object).
+    // getInactiveDebuggeeGlobal uses the current global (i.e. stopped frame, current
+    // iframe or top level window associated with the context object).
     // There can be cases (e.g. BON XHR) where the current window is an iframe, but
     // the event the debugger breaks on - comes from top level window (or vice versa).
     // For now there are not known problems, but we might want to use the second
-    // argument of the getDebuggeeGlobal() and pass explicit global object.
-    var dbgGlobal = this.getDebuggeeGlobal(context);
+    // argument of the getInactiveDebuggeeGlobal() and pass explicit global object.
+    var dbgGlobal = this.getInactiveDebuggeeGlobal(context);
     return dbgGlobal.evalInGlobal("debugger");
 };
 
