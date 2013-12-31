@@ -224,12 +224,20 @@ FirebugReps.Func = domplate(Rep,
     summarizeFunction: function(fn)
     {
         var fnText = Str.safeToString(fn);
-        var namedFn = /^function ([^(]+\([^)]*\))/.exec(fnText);
-        var anonFn = /^function \(/.test(fnText);
-        var displayName = fn.displayName;
-
-        var result = namedFn ? namedFn[1] : (displayName ? displayName + "()" :
-            (anonFn ? "function()" : fnText));
+        var regularFn = /^function\s*([^(]*)(\([^)]*\))/.exec(fnText);
+        var result;
+        if (regularFn)
+        {
+            // XXX use Debugger.Object.displayName here?
+            var name = regularFn[1] || fn.displayName || "function";
+            var args = regularFn[2];
+            result = name + args;
+        }
+        else
+        {
+            // Arrow functions show the full source.
+            result = fnText;
+        }
 
         //xxxHonza: should we use an existing pref?
         return Str.cropString(result, 100);
