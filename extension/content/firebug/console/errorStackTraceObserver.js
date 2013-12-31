@@ -85,7 +85,14 @@ var ErrorStackTraceObserver = Obj.extend(Firebug.Module,
     {
         Trace.sysout("errorStackTraceObserver.startObserving; " + context.getName());
 
-        var dbg = DebuggerLib.getDebuggerForContext(context);
+        if (context.errorStackTraceDbg)
+        {
+            TraceError.sysout("errorStackTraceObserver.startObserving; " +
+                "stack trace debugger already exists!");
+            return;
+        }
+
+        var dbg = DebuggerLib.makeDebuggerForContext(context);
         context.errorStackTraceDbg = dbg;
 
         dbg.onEnterFrame = this.onEnterFrame.bind(this, context);
@@ -124,11 +131,8 @@ var ErrorStackTraceObserver = Obj.extend(Firebug.Module,
 
         try
         {
-            context.errorStackTraceDbg.onEnterFrame = undefined;
-            //context.errorStackTraceDbg.onExceptionUnwind = undefined;
-            //context.errorStackTraceDbg.uncaughtExceptionHook = null;
-            //context.errorStackTraceDbg.onError = null;
-            //context.errorStackTraceDbg.onThrow = null;
+            context.errorStackTraceDbg.destroy();
+            context.errorStackTraceDbg = null;
         }
         catch (err)
         {

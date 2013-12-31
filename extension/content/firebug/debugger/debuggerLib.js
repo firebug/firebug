@@ -201,15 +201,24 @@ DebuggerLib.getThreadActor = function(browser)
 };
 
 /**
- * Returns the debuggee global associated with the passed frame.
+ * Returns the debugger's Debugger.Object associated with a frame within the
+ * passed context. If no frame is specified, the context's current global is used.
  *
- * @param {Debugger.Frame} frame
+ * @param {*} context
+ * @param {Window} global
  *
- * @return {Debugger.Object} The debuggee global
+ * @return {Debugger.Object} The debuggee global, or null if the context has
+ * no debugger.
  */
-DebuggerLib.getDebuggeeGlobalForFrame = function(frame)
+DebuggerLib.getDebuggerDebuggeeGlobalForContext = function(context, global)
 {
-    return frame.actor.threadActor.globalDebugObject;
+    var threadActor = DebuggerLib.getThreadActor(context.browser);
+    if (!threadActor || !threadActor.globalDebugObject)
+        return null;
+
+    var dbgGlobal = threadActor.globalDebugObject;
+    global = global || context.getCurrentGlobal();
+    return dbgGlobal.makeDebuggeeValue(global).unwrap().global;
 };
 
 // ********************************************************************************************* //
@@ -390,8 +399,7 @@ DebuggerLib.makeDebugger = function()
     return new global.Debugger();
 };
 
-// xxxHonza: shell we merge with getInactiveDebuggerForContext?
-DebuggerLib.getDebuggerForContext = function(context)
+DebuggerLib.makeDebuggerForContext = function(context)
 {
     try
     {
@@ -427,11 +435,21 @@ DebuggerLib.getDebuggerForContext = function(context)
             setTimeout(addNewDebuggee.bind(this, dbg, win, global));
         };
 
+        if (!context.debuggers)
+            context.debuggers = [];
+        context.debuggers.push(dbg);
+        dbg.destroy = function()
+        {
+            dbg.enabled = false;
+            var ind = context.debuggers.indexOf(dbg);
+            context.debuggers.splice(ind, 1);
+        };
+
         return dbg;
     }
     catch (err)
     {
-        TraceError.sysout("DebuggerLib.getDebuggerForContext; EXCEPTION " + err, err);
+        TraceError.sysout("DebuggerLib.makeDebuggerForContext; EXCEPTION " + err, err);
     }
 };
 

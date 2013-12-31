@@ -49,8 +49,8 @@ ProfilerEngine.prototype =
         this.startTime = null;
         this.endTime = null;
 
-        // Get debugger for the current context (top level window and all iframes).
-        this.dbg = DebuggerLib.getDebuggerForContext(this.context);
+        // Get a debugger for the current context (top level window and all iframes).
+        this.dbg = DebuggerLib.makeDebuggerForContext(this.context);
 
         // Hook function calls.
         this.dbg.onEnterFrame = this.onEnterFrame.bind(this);
@@ -58,8 +58,8 @@ ProfilerEngine.prototype =
 
     stopProfiling: function()
     {
-        // Remove debugger hook.
-        this.dbg.onEnterFrame = undefined;
+        this.dbg.destroy();
+        this.dbg = null;
 
         Trace.sysout("profilerEngine.stopProfiling;", this.scripts);
 
