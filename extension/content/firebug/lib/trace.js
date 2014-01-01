@@ -1,6 +1,10 @@
 /* See license.txt for terms of usage */
 
-define([], function() {
+define([
+],
+function() {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -42,9 +46,18 @@ function TraceWrapper(tracer, option)
         var method = TraceAPI[i];
         this[method] = createMethodWrapper(method);
     }
+
+    /**
+     * Use to check whether scoped tracer is on/off.
+     */
+    this.__defineGetter__("active", function()
+    {
+        return tracer[option];
+    });
 }
 
 // ********************************************************************************************* //
+// Scoped Logging
 
 var tracer = fbTraceScope.FBTrace;
 
@@ -69,6 +82,9 @@ tracer.to = function(option)
 
     return new TraceWrapper(this, option);
 };
+
+// ********************************************************************************************* //
+// Registration
 
 return tracer;
 

@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/panel",
+    "firebug/chrome/rep",
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/domplate",
@@ -11,19 +13,23 @@ define([
     "firebug/lib/events",
     "firebug/lib/persist",
     "firebug/css/selectorModule",
-    "firebug/css/selectorEditor"
+    "firebug/css/selectorEditor",
+    "firebug/editor/editor",
 ],
-function(FBTrace, Obj, Domplate, Locale, Win, Dom, Css, Events, Persist, CSSSelectorsModule,
-    SelectorEditor) {
+function(Panel, Rep, FBTrace, Obj, Domplate, Locale, Win, Dom, Css, Events, Persist,
+    CSSSelectorsModule, SelectorEditor, Editor) {
 
-with (Domplate) {
+// ********************************************************************************************* //
+// Constants
+
+var {domplate, FOR, TAG, DIV, SPAN, TD, TR, TABLE, TBODY, H1, P, A, BR, INPUT} = Domplate;
 
 // ********************************************************************************************* //
 // CSS Computed panel (HTML side panel)
 
 function CSSSelectorsPanel() {}
 
-CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
+CSSSelectorsPanel.prototype = Obj.extend(Panel,
 {
     template: domplate(
     {
@@ -77,7 +83,7 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         {
             var target = event.currentTarget;
             var panel = Firebug.getElementPanel(target);
-            Firebug.Editor.startEditing(target, "");
+            Editor.startEditing(target, "");
         }
     }),
 
@@ -175,7 +181,7 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         this.onClick = Obj.bind(this.onClick, this);
         this.onMutationObserve = this.onMutationObserve.bind(this);
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
@@ -186,19 +192,19 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         state.groups = this.groups;
         Persist.persistObjects(this, state);
 
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Panel.destroyNode.apply(this, arguments);
     },
 
     initializeNode: function(oldPanelNode)
     {
-        Firebug.Panel.initializeNode.apply(this, arguments);
+        Panel.initializeNode.apply(this, arguments);
 
         Events.addEventListener(this.panelNode, "click", this.onClick, false);
     },
 
     destroyNode: function()
     {
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Panel.destroyNode.apply(this, arguments);
 
         Events.removeEventListener(this.panelNode, "click", this.onClick, false);
     },
@@ -388,7 +394,7 @@ function CSSSelectorsPanelEditor(doc)
     this.box = this.tag.replace({}, doc, this);
     this.input = this.box;
 
-    Firebug.InlineEditor.prototype.initialize.call(this);
+    SelectorEditor.prototype.initialize.call(this);
     this.tabNavigation = false;
     this.fixedWidth = true;
 }
@@ -433,7 +439,7 @@ CSSSelectorsPanelEditor.prototype = domplate(SelectorEditor.prototype,
 
 // ********************************************************************************************* //
 
-var WarningTemplate = domplate(Firebug.Rep,
+var WarningTemplate = domplate(Rep,
 {
     noSelectionTag:
         DIV({"class": "selectorWarning noSelection"},
@@ -461,4 +467,4 @@ Firebug.registerPanel(CSSSelectorsPanel);
 return CSSSelectorsPanel;
 
 // ********************************************************************************************* //
-}});
+});

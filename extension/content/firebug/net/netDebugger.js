@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/rep",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -12,10 +13,12 @@ define([
     "firebug/lib/array",
     "firebug/net/netUtils",
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Url, Css, Dom, Arr, NetUtils) {
+function(Rep, Obj, Firebug, Domplate, Locale, Events, Url, Css, Dom, Arr, NetUtils) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV, SPAN, TR, P, A, INPUT} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -137,8 +140,7 @@ Breakpoint.prototype =
 // ********************************************************************************************* //
 // Breakpoint UI
 
-with (Domplate) {
-var BreakpointRep = domplate(Firebug.Rep,
+var BreakpointRep = domplate(Rep,
 {
     inspectable: false,
 
@@ -240,7 +242,6 @@ var BreakpointRep = domplate(Firebug.Rep,
         return object instanceof Breakpoint;
     }
 });
-};
 
 // ********************************************************************************************* //
 // Registration

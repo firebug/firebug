@@ -22,6 +22,9 @@
     pointer-events: none !important;
     white-space: normal !important;
 }
+style.firebugResetStyles {
+    display: none !important;
+}
 
 .firebugBlockBackgroundColor {
     background-color: transparent !important;

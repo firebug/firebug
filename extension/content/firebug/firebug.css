@@ -115,7 +115,7 @@ textbox#fbCommandEditor {
 }
 
 textbox[type="fbSearchBox"] {
-    -moz-binding: url("firefox/bindings.xml#searchBox");
+    -moz-binding: url("firefox/searchBox.xml#searchBox");
 }
 textbox[type="fbSearchBox"] .panelFocusBound {
     -moz-user-focus: normal;

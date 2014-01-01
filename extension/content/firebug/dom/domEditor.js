@@ -9,7 +9,13 @@ define([
     "firebug/console/autoCompleter",    // Firebug.JSEditor
 ],
 function(Firebug, Domplate, Events, Dom, Css) {
-with (Domplate) {
+
+"use strict";
+
+// ********************************************************************************************* //
+// Constants
+
+var {domplate, DIV, INPUT} = Domplate;
 
 // ********************************************************************************************* //
 // DOM Inline Editor
@@ -65,4 +71,4 @@ DOMEditor.prototype = domplate(Firebug.JSEditor.prototype,
 return DOMEditor;
 
 // ********************************************************************************************* //
-}});
+});

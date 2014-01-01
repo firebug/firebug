@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/css",
@@ -10,7 +11,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/options"
 ],
-function(Obj, Firebug, Css, Search, System, Str, Locale, Options) {
+function(Module, Obj, Firebug, Css, Search, System, Str, Locale, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -29,7 +30,7 @@ const searchDelay = 150;
  * available for panels that have <code>searchable<code> property set to true (set to
  * false by default).
  */
-Firebug.Search = Obj.extend(Firebug.Module,
+Firebug.Search = Obj.extend(Module,
 {
     dispatchName: "search",
 
@@ -143,6 +144,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
         if (immediate)
         {
             var found = panel.search(value, reverse);
+            panel.searchText = value;
             if (!found && value)
                this.onNotFound();
 
@@ -157,8 +159,6 @@ Firebug.Search = Obj.extend(Firebug.Module,
                 Css.removeClass(panelNode, "searching");
             }
 
-            panel.searchText = value;
-
             return found;
         }
         else
@@ -168,8 +168,15 @@ Firebug.Search = Obj.extend(Firebug.Module,
             panelNode.searchTimeout = setTimeout(function()
             {
                 var found = panel.search(value, reverse);
+                panel.searchText = value;
                 if (!found && value)
-                    Firebug.Search.onNotFound(value);
+                {
+                    var shouldIgnore = panel.shouldIgnoreIntermediateSearchFailure;
+                    if (shouldIgnore && shouldIgnore.call(panel, value))
+                        found = true;
+                    else
+                        sBox.onNotFound();
+                }
 
                 if (value)
                 {
@@ -182,7 +189,6 @@ Firebug.Search = Obj.extend(Firebug.Module,
                     Css.removeClass(panelNode, "searching");
                 }
 
-                panel.searchText = value;
                 searchBox.status = (found ? "found" : "notfound");
                 sBox.setPlaceholder();
 
@@ -282,9 +288,16 @@ Firebug.Search = Obj.extend(Firebug.Module,
             return;
 
         var searchBox = Firebug.chrome.$("fbSearchBox");
-        var panelType = Firebug.getPanelType(panel.name);
-        var title = Firebug.getPanelTitle(panelType);
-        searchBox.placeholder = Locale.$STRF("search.Placeholder", [title]);
+        if (panel.searchPlaceholder)
+        {
+            searchBox.placeholder = Locale.$STR(panel.searchPlaceholder);
+        }
+        else
+        {
+            var panelType = Firebug.getPanelType(panel.name);
+            var title = Firebug.getPanelTitle(panelType);
+            searchBox.placeholder = Locale.$STRF("search.Placeholder", [title]);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

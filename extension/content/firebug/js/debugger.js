@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/activableModule",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/firefox",
@@ -19,10 +20,11 @@ define([
     "firebug/trace/debug",
     "firebug/js/fbs",
     "firebug/lib/events",
+    "firebug/debugger/debuggerLib",
     "firebug/console/errors",
 ],
-function(Obj, Firebug, Firefox, CompilationUnit, Xpcom, FirebugReps, Locale,
-    Wrapper, Url, SourceLink, StackFrame, Css, Win, Str, Arr, Debug, FBS, Events) {
+function(ActivableModule, Obj, Firebug, Firefox, CompilationUnit, Xpcom, FirebugReps, Locale,
+    Wrapper, Url, SourceLink, StackFrame, Css, Win, Str, Arr, Debug, FBS, Events, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -66,7 +68,7 @@ var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebugge
 
 // ************************************************************************************************
 
-Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
+Firebug.Debugger = Obj.extend(ActivableModule,
 {
     dispatchName: "debugger",
     fbs: FBS, // access to firebug-service in chromebug under browser.xul.Dom.Firebug.Debugger.fbs
@@ -122,9 +124,18 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         });
     },
 
+    _temporaryRunWithJSD2Debugger: function(context, callback)
+    {
+        return DebuggerLib.withTemporaryDebugger(context, context.getCurrentGlobal(), callback);
+    },
+
     _temporaryTransformSyntax: function(expr, win, context)
     {
-        return Firebug.ClosureInspector.extendLanguageSyntax(expr, win, context);
+        return Firebug.ClosureInspector.withExtendedLanguageSyntax(expr, win, context,
+            function(newExpr)
+        {
+            return newExpr;
+        });
     },
 
     /**
@@ -2359,14 +2370,14 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         this.onFunctionCall = Obj.bind(this.onFunctionCall, this);
 
-        Firebug.ActivableModule.initialize.apply(this, arguments);
+        ActivableModule.initialize.apply(this, arguments);
     },
 
     shutdown: function()
     {
         //Firebug.connection.unregisterTool(this.asTool);
 
-        Firebug.ActivableModule.destroy.apply(this, arguments);
+        ActivableModule.destroy.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -2416,7 +2427,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     initializeUI: function()
     {
-        Firebug.ActivableModule.initializeUI.apply(this, arguments);
+        ActivableModule.initializeUI.apply(this, arguments);
         this.obeyPrefs();
         this.filterButton = Firebug.chrome.$("fbScriptFilterMenu");  // TODO move to script.js
         this.filterMenuUpdate();
@@ -2440,7 +2451,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         context.jsDebuggerCalledUs = false;
 
-        Firebug.ActivableModule.initContext.apply(this, arguments);
+        ActivableModule.initContext.apply(this, arguments);
     },
 
     showContext: function(browser, context)
@@ -2548,7 +2559,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     destroyContext: function(context, persistedState)
     {
-        Firebug.ActivableModule.destroyContext.apply(this, arguments);
+        ActivableModule.destroyContext.apply(this, arguments);
 
         if (context.stopped)
         {
@@ -2679,8 +2690,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (!Firebug.Debugger.isAlwaysEnabled())
             return;
 
+        // xxxHonza: do not pause the debugger (see issue 6086).
+
         // can be called multiple times.
-        var paused = FBS.pause(this.debuggerName);
+        //var paused = FBS.pause(this.debuggerName);
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +
@@ -2690,8 +2703,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         // Firebug is activated on another tab.
         // The start-button should somehow reflect that JSD can be still active (even if
         // Firebug is suspended for the current tab).
-        if (!paused)  // then we failed to suspend, undo
-            return true;
+        //if (!paused)  // then we failed to suspend, undo
+        //    return true;
 
         return false;
     },
@@ -2701,7 +2714,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (!Firebug.Debugger.isAlwaysEnabled())
             return;
 
-        var unpaused = FBS.unPause();
+        //var unpaused = FBS.unPause();
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +

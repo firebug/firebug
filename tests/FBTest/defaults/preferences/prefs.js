@@ -36,4 +36,4 @@ pref("extensions.firebug.key.shortcut.openTestConsole", "shift t");
 // Due to "Mixed Content Blocking" feature introduced in Firefox 23 the
 // database XHR must use https (since perch on getfirebug.com uses https).
 pref("extensions.fbtest.databaseURL", "https://firebug.iriscouch.com/");  // Must end with slash
-pref("extensions.fbtest.databaseName", "firebug2");                       // Must *not* end with slash
+pref("extensions.fbtest.databaseName", "firebug4");                       // Must *not* end with slash

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6058: Add auto-completion for selectors for elements in iframes</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        iframe {
+            margin-bottom: 5px;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6058">Issue 6058</a>: Add auto-completion for selectors for elements in iframes</h1>
+        </header>
+        <div>
+            <section id="content">
+                <iframe src="frame.html" width="100" height="40"></iframe>
+                <div id="world">World!<div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>Inside the <em>Selectors</em> side panel click the <em>Try a selector...</em> field</li>
+                    <li>
+                        Verify the following auto-completions:
+                        <ul>
+                            <li>".he" <span class="ok">&rArr; ".hello"</span></li>
+                            <li>"#wo" <span class="ok">&rArr; "#world"</span></li>
+                        </ul>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Auto-completion should work like when editing selectors, and should include results from all frames.</li>
+                </ul>
+            </section>
+            <footer>Simon Lindholm, simon.lindholm10@gmail.com</footer>
+        </div>
+    </body>
+</html>

@@ -2,16 +2,18 @@
 
 define([
     "firebug/firebug",
-    "firebug/chrome/firefox",
+    "firebug/lib/trace",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/dom",
     "firebug/lib/options",
     "firebug/lib/domplate",
     "firebug/lib/object",
-    "firebug/lib/css"
+    "firebug/lib/css",
+    "firebug/chrome/module",
+    "firebug/chrome/firefox",
 ],
-function(Firebug, Firefox, Locale, Events, Dom, Options, Domplate, Obj, Css) {
+function(Firebug, FBTrace, Locale, Events, Dom, Options, Domplate, Obj, Css, Module, Firefox) {
 
 "use strict"
 
@@ -29,6 +31,10 @@ var compAttribs = [
     "margin-top", "margin-right", "margin-bottom", "margin-left", "color",
     "backgroundColor", "fontFamily", "cssFloat", "display", "visibility"
 ];
+
+// Tracing
+var Trace = FBTrace.to("DBG_QUICKINFOBOX");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // Domplate
@@ -69,7 +75,7 @@ var rowTag =
  * Displays the most important DOM properties and computed CSS styles for the currently
  * inspected element. It can be freely positioned at the monitor via drag & drop.
  */
-var QuickInfoBox = Obj.extend(Firebug.Module,
+var QuickInfoBox = Obj.extend(Module,
 /** @lends QuickInfoBox */
 {
     boxEnabled: undefined,
@@ -84,7 +90,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         this.qiPanel = Firebug.chrome.$("fbQuickInfoPanel");
 
@@ -105,7 +111,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
 
         var frame = this.getContentFrame();
         Events.removeEventListener(frame, "load", this.onContentLoadedListener, true);
@@ -377,6 +383,12 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
 
     getContentFrame: function()
     {
+        if (!this.qiPanel)
+        {
+            TraceError.sysout("quickInfoBox.getContentFrame; ERROR no panel!");
+            return;
+        }
+
         return this.qiPanel.getElementsByClassName("fbQuickInfoPanelContent")[0];
     },
 

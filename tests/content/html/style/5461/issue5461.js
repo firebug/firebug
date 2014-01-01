@@ -15,28 +15,33 @@ function runTest()
             FBTest.sendShortcut("a", {accelKey: true});
 
             // Reset clipboard content
-            FBTest.clearClipboard();
-            var expected = new RegExp("#element\\s+\\{[\\r\\n]{1,2}"+
-                "\\s+background:\\s+-moz-linear-gradient\\(135deg, #788CFF, #B4C8FF\\) repeat "+
-                "scroll 0 0 #8C8CFF;[\\r\\n]{1,2}"+
-                "\\s+height:\\s+100px;[\\r\\n]{1,2}"+
-                "\\s+width:\\s+100px;[\\r\\n]{1,2}"+
-                "\\}[\\r\\n]{1,2}"+
-                "\\*\\s+\{[\\r\\n]{1,2}"+
-                "\\s+position: relative;[\\r\\n]{1,2}"+
-                "\\}[\\r\\n]{1,2}"+
-                "body\\s+\\\{[\\r\\n]{1,2}"+
-                "\\s+font-family:\\s+\\\"Trebuchet MS\\\",Helvetica,sans-serif;[\\r\\n]{1,2}"+
-                "\\s+font-size:\\s+0.9em;[\\r\\n]{1,2}"+
-                "\\}");
-            FBTest.waitForClipboard(expected, function(cssDecl)
+            FBTest.setClipboardText("issue5461");
+            FBTest.waitForClipboard("issue5461", function()
             {
-                FBTest.compare(expected, cssDecl,
-                    "CSS declaration must be properly copied into the clipboard");
-                FBTest.testDone("issue5461.DONE");
+                var expected = new RegExp("#element\\s+\\{[\\r\\n]{1,2}"+
+                    "\\s+background:\\s+-moz-linear-gradient\\(135deg, #788CFF, #B4C8FF\\) repeat "+
+                    "scroll 0 0 #8C8CFF;[\\r\\n]{1,2}"+
+                    "\\s+height:\\s+100px;[\\r\\n]{1,2}"+
+                    "\\s+width:\\s+100px;[\\r\\n]{1,2}"+
+                    "\\}[\\r\\n]{1,2}"+
+                    "\\*\\s+\{[\\r\\n]{1,2}"+
+                    "\\s+position: relative;[\\r\\n]{1,2}"+
+                    "\\}[\\r\\n]{1,2}"+
+                    "body\\s+\\\{[\\r\\n]{1,2}"+
+                    "\\s+font-family:\\s+\\\"Trebuchet MS\\\",Helvetica,sans-serif;[\\r\\n]{1,2}"+
+                    "\\s+font-size:\\s+0.9em;[\\r\\n]{1,2}"+
+                    "\\}");
+
+                FBTest.waitForClipboard(expected, function(cssDecl)
+                {
+                    FBTest.compare(expected, cssDecl,
+                        "CSS declaration must be properly copied into the clipboard");
+                    FBTest.testDone("issue5461.DONE");
+                });
+
+                FBTest.sendShortcut("c", {accelKey: true});
             });
 
-            FBTest.sendShortcut("c", {accelKey: true});
         });
     });
 }

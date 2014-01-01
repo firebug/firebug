@@ -11,9 +11,12 @@ define([
     "firebug/lib/trace",
     "firebug/lib/locale",
     "firebug/console/closureInspector",
+    "firebug/chrome/panelActivation",
     "firebug/chrome/reps",
+    "firebug/debugger/debuggerLib",
 ],
-function(Firebug, Obj, Arr, Wrapper, Dom, FBTrace, Locale, ClosureInspector, FirebugReps) {
+function(Firebug, Obj, Arr, Wrapper, Dom, FBTrace, Locale, ClosureInspector, PanelActivation,
+    FirebugReps, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -84,7 +87,7 @@ DOMMemberProvider.prototype =
                 // __proto__ never shows in enumerations, so add it here. We currently
                 // we don't want it when only showing own properties.
                 if (contentView.__proto__ && Obj.hasProperties(contentView.__proto__) &&
-                    properties.indexOf("__proto__") === -1 && !Firebug.showOwnProperties)
+                    properties.indexOf("__proto__") === -1 && !ownOnly)
                 {
                     properties.push("__proto__");
                 }
@@ -173,7 +176,8 @@ DOMMemberProvider.prototype =
                     {
                         add("dom", domConstants);
                     }
-                    else if (Dom.isInlineEventHandler(name))
+                    else if (val === null && object instanceof EventTarget &&
+                        Dom.isInlineEventHandler(name))
                     {
                         add("user", domHandlers);
                     }
@@ -184,7 +188,8 @@ DOMMemberProvider.prototype =
                 }
             }
 
-            if (isScope || (typeof object === "function" && Firebug.showClosures && this.context))
+            if (this.shouldShowClosures() &&
+                (isScope || (typeof object === "function" && this.context)))
             {
                 this.maybeAddClosureMember(object, "proto", proto, level, isScope);
             }
@@ -282,6 +287,16 @@ DOMMemberProvider.prototype =
         }
     },
 
+    shouldShowClosures: function()
+    {
+        if (!Firebug.showClosures)
+            return false;
+        var requireScriptPanel = DebuggerLib._closureInspectionRequiresDebugger();
+        if (requireScriptPanel && !PanelActivation.isPanelEnabled(Firebug.getPanelType("script")))
+            return false;
+        return true;
+    },
+
     addMemberInternal: function(object, type, props, name, value, level, parentIsScope)
     {
         // Do this first in case a call to instanceof (= QI, for XPCOM things) reveals contents.
@@ -297,20 +312,22 @@ DOMMemberProvider.prototype =
              (valueType === "object" && value !== null));
 
         // Special case for closure inspection.
-        if (!hasChildren && valueType === "function" && Firebug.showClosures && this.context)
+        if (!hasChildren && valueType === "function" && this.shouldShowClosures() && this.context)
         {
             try
             {
                 var win = this.context.getCurrentGlobal();
-                ClosureInspector.getEnvironmentForObject(win, value, this.context);
-                hasChildren = true;
+                ClosureInspector.withEnvironmentForObject(win, value, this.context, function(env)
+                {
+                    hasChildren = true;
+                });
             }
             catch (e) {}
         }
 
         // Special case for "arguments", which is not enumerable by for...in statement
         // and so, Obj.hasProperties always returns false.
-        hasChildren = hasChildren || (!!value && isArguments(value));
+        hasChildren = hasChildren || (!!value && isArguments(value) && value.length > 0);
 
         if (valueType === "function" && !hasChildren)
         {
@@ -488,15 +505,7 @@ DOMMemberProvider.prototype =
 
 function isArguments(obj)
 {
-    try
-    {
-        return isFinite(obj.length) && obj.length > 0 && typeof obj.callee === "function";
-    }
-    catch (exc)
-    {
-    }
-
-    return false;
+    return Object.prototype.toString.call(obj) === "[object Arguments]";
 }
 
 function isClassFunction(fn)

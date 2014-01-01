@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/rep",
     "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/lib/string",
@@ -10,14 +11,16 @@ define([
     "firebug/lib/events",
     "firebug/cookies/cookieUtils"
 ],
-function(Obj, Locale, Str, Domplate, Dom, Css, Events, CookieUtils) {
+function(Rep, Obj, Locale, Str, Domplate, Dom, Css, Events, CookieUtils) {
 
-with (Domplate) {
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-const panelName = "cookies";
+var panelName = "cookies";
+
+var {domplate, DIV, INPUT, SPAN} = Domplate;
 
 // ********************************************************************************************* //
 // Implementation
@@ -184,7 +187,7 @@ var Breakpoints =
 // ********************************************************************************************* //
 // Cookie Breakpoints
 
-Breakpoints.BreakpointTemplate = Domplate.domplate(Firebug.Rep,
+Breakpoints.BreakpointTemplate = Domplate.domplate(Rep,
 {
     inspectable: false,
 
@@ -404,4 +407,4 @@ Firebug.registerRep(Breakpoints.BreakpointTemplate);
 return Breakpoints;
 
 // ********************************************************************************************* //
-}});
+});

@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -12,15 +13,19 @@ define([
     "firebug/lib/string",
     "firebug/lib/json",
     "firebug/dom/toggleBranch",
-    "firebug/lib/array",
     "firebug/lib/system",
     "firebug/dom/domPanel",
     "firebug/chrome/reps"
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Http, Str, Json,
-    ToggleBranch, Arr, System) {
+function(Module, Obj, Firebug, Domplate, Locale, Events, Css, Dom, Http, Str, Json,
+    ToggleBranch, System) {
+
+"use strict";
 
 // ********************************************************************************************* //
+// Constants
+
+var {domplate, SPAN, DIV} = Domplate;
 
 // List of JSON content types.
 var contentTypes =
@@ -40,7 +45,7 @@ var contentTypes =
 // ********************************************************************************************* //
 // Model implementation
 
-Firebug.JSONViewerModel = Obj.extend(Firebug.Module,
+Firebug.JSONViewerModel = Obj.extend(Module,
 {
     dispatchName: "jsonViewer",
     contentTypes: contentTypes,
@@ -168,7 +173,6 @@ Firebug.JSONViewerModel = Obj.extend(Firebug.Module,
 
 // ********************************************************************************************* //
 
-with (Domplate) {
 Firebug.JSONViewerModel.Preview = domplate(
 {
     bodyTag:
@@ -217,13 +221,12 @@ Firebug.JSONViewerModel.Preview = domplate(
             body.jsonTree = new JSONTreePlate();
 
         var input = {file: file, sorted: Firebug.sortJsonPreview};
-        parentNode = this.bodyTag.replace(input, body, this);
+        var parentNode = this.bodyTag.replace(input, body, this);
         parentNode = parentNode.getElementsByClassName("jsonPreviewBody").item(0);
 
         body.jsonTree.render(file.jsonObject, parentNode, context);
     }
 });
-};
 
 // ********************************************************************************************* //
 
@@ -274,7 +277,7 @@ JSONTreePlate.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         function sortName(a, b) { return a.name > b.name ? 1 : -1; }
 
         // Sort only if it isn't an array (issue 4382).
-        if (Firebug.sortJsonPreview && !Arr.isArray(object, this.context.window))
+        if (Firebug.sortJsonPreview && !Array.isArray(object, this.context.window))
             members.sort(sortName);
 
         return members;

@@ -1,6 +1,10 @@
 /* See license.txt for terms of usage */
 
-define([], function() {
+define([
+],
+function() {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -104,7 +108,9 @@ Wrapper.unwrapIValueObject = function(scope, viewChrome)
  */
 Wrapper.cloneIntoContentScope = function(global, obj)
 {
-    var newObj = Cu.createObjectIn(global);
+    if (!obj || typeof obj !== "object")
+        return obj;
+    var newObj = (Array.isArray(obj) ? Cu.createArrayIn(global) : Cu.createObjectIn(global));
     for (var prop in obj)
     {
         var desc = Object.getOwnPropertyDescriptor(obj, prop);
@@ -123,21 +129,9 @@ Wrapper.cloneIntoContentScope = function(global, obj)
 
 Wrapper.ignoreVars =
 {
-    // We are forced to ignore Java-related variables, because
-    // trying to access them causes browser freeze
-    "sun": 1,
-    "Packages": 1,
-    "JavaArray": 1,
-    "JavaMember": 1,
-    "JavaObject": 1,
-    "JavaClass": 1,
-    "JavaPackage": 1,
-
     // internal firebug things XXXjjb todo we should privatize these
     "_firebug": 1,
-    "_firebugUnwrappedDebuggerObject": 1,
     "__fb_scopedVars": 1,
-    "_FirebugCommandLine": 1,
 };
 
 Wrapper.shouldIgnore = function(name)
@@ -151,6 +145,7 @@ function isPrimitive(obj)
 }
 
 // ********************************************************************************************* //
+// Registration
 
 return Wrapper;
 

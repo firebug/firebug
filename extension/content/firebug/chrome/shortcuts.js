@@ -1,12 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/firefox",
     "firebug/firefox/customizeShortcuts",
 ],
-function(Obj, Firebug, Firefox, CustomizeShortcuts) {
+function(Module, Obj, Firebug, Firefox, CustomizeShortcuts) {
 
 // ********************************************************************************************* //
 // Constants
@@ -20,7 +21,7 @@ var KeyEvent = window.KeyEvent;
 /**
  * ShortcutsModel object implements keyboard shortcuts logic.
  */
-Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
+Firebug.ShortcutsModel = Obj.extend(Module,
 {
     dispatchName: "shortcuts",
 

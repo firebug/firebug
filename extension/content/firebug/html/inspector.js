@@ -1,24 +1,25 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
-    "firebug/chrome/firefox",
-    "firebug/chrome/reps",
-    "firebug/lib/locale",
+    "firebug/lib/trace",
+    "firebug/chrome/module",
+    "firebug/lib/object",
     "firebug/lib/events",
     "firebug/lib/wrapper",
     "firebug/lib/array",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/xml",
-    "firebug/chrome/window",
     "firebug/lib/system",
+    "firebug/chrome/window",
     "firebug/html/highlighterCache",
     "firebug/html/quickInfoBox",
 ],
-function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Arr, Css, Dom, Xml,
-    Win, System, HighlighterCache, QuickInfoBox) {
+function(Firebug, FBTrace, Module, Obj, Events, Wrapper, Arr, Css, Dom, Xml, System, Win,
+    HighlighterCache, QuickInfoBox) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -39,7 +40,7 @@ var frameHighlighter = null;
 /**
  * @module Implements Firebug Inspector logic.
  */
-Firebug.Inspector = Obj.extend(Firebug.Module,
+Firebug.Inspector = Obj.extend(Module,
 {
     dispatchName: "inspector",
     inspecting: false,
@@ -143,7 +144,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
             }
 
             this.clearAllHighlights();
-            usingColorArray = Arr.isArray(colorObj);
+            usingColorArray = Array.isArray(colorObj);
 
             if (context && context.window && context.window.document)
             {
@@ -682,7 +683,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
      */
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         this.onInspectingResizeWindow = Obj.bind(this.onInspectingResizeWindow, this);
         this.onInspectingScroll = Obj.bind(this.onInspectingScroll, this);
@@ -705,7 +706,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
 
         var panelBar1 = Firebug.chrome.$("fbPanelBar1");
         Events.removeEventListener(panelBar1, "selectPanel", this.onPanelChanged, false);
@@ -1390,6 +1391,19 @@ BoxModelHighlighter.prototype =
 
     getNodes: function(context, isMulti)
     {
+        function create(className, name)
+        {
+            var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
+            hideElementFromInspection(div);
+
+            if (className !== CustomizableBox)
+                div.className = className + name;
+            else
+                div.className = className;
+
+            return div;
+        }
+
         if (context.window)
         {
             var doc = context.window.document;
@@ -1411,20 +1425,7 @@ BoxModelHighlighter.prototype =
             var CustomizableBox = "firebugResetStyles firebugLayoutBox";
             var Line = "firebugResetStyles firebugBlockBackgroundColor firebugLayoutLine firebugLayoutLine";
 
-            function create(className, name)
-            {
-                var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                hideElementFromInspection(div);
-
-                if (className !== CustomizableBox)
-                    div.className = className + name;
-                else
-                    div.className = className;
-
-                return div;
-            }
-
-            nodes =
+            var nodes =
             {
                 parent: create(Box, "Parent"),
                 rulerH: create(Ruler, "H"),
@@ -1494,6 +1495,7 @@ function attachStyles(context, doc)
     else
     {
         style = Css.createStyleSheet(doc, highlightCssUrl);
+        style.classList.add("firebugResetStyles");
         highlightStyleCache.set(doc, style);
     }
 

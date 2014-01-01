@@ -1,18 +1,24 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/firebug",
+    "firebug/chrome/rep",
     "firebug/lib/trace",
     "firebug/lib/domplate",
     "firebug/lib/locale",
-    "firebug/chrome/reps",
     "firebug/lib/dom",
     "firebug/lib/css",
-    "firebug/lib/object",
     "firebug/lib/array",
+    "firebug/chrome/reps",
 ],
-function(FBTrace, Domplate, Locale, FirebugReps, Dom, Css, Obj, Arr) {
+function(Firebug, Rep, FBTrace, Domplate, Locale, Dom, Css, Arr, FirebugReps) {
 
 "use strict";
+
+// ********************************************************************************************* //
+// Resources
+
+// http://www.softwareishard.com/blog/firebug/tabular-logs-in-firebug/
 
 // ********************************************************************************************* //
 // Constants
@@ -21,13 +27,25 @@ var {domplate, DIV, TABLE, THEAD, TR, FOR, TH, TBODY, TD, TAG} = Domplate;
 
 // Tracing
 var Trace = FBTrace.to("DBG_TABLEREP");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 
-FirebugReps.Table = domplate(Firebug.Rep,
+/**
+ * @domplate The template is used to generate tabular UI for generic data/objects. Tables are
+ * typically logged into the Console panel through console.table() API, but the UI can be
+ * used within other panels too. Various complex as well as simple generic objects and arrays
+ * are supported.
+ */
+var TableRep = domplate(Rep,
+/** @lends TableRep */
 {
     className: "table",
     tableClassName: "dataTable",
+    groupable: false,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Domplate
 
     tag:
         DIV({"class": "dataTableSizer", "tabindex": "-1" },
@@ -109,6 +127,9 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
             cols.push(value);
         }
+
+        Trace.sysout("tableRep.getColumns", {cols: cols, row: row});
+
         return cols;
     },
 
@@ -117,13 +138,36 @@ FirebugReps.Table = domplate(Firebug.Rep,
         if (typeof(obj) != "object")
             return [obj];
 
-        Trace.sysout("FirebugReps.Table.getProps", obj);
+        Trace.sysout("tableRep.getProps", obj);
 
-        if (Arr.isArray(obj))
+        var tabularData = this.isTabularData(obj);
+
+        if (Array.isArray(obj) && !tabularData)
+        {
+            // An array with no child objects (i.e. not tabular data),
+            // use two columns (name, value)
+            return getArrayProps(obj);
+        }
+        else if (Array.isArray(obj))
+        {
+            // Array with inner objects (i.e. tabular data), columns are
+            // generated according to props in the first object (i.e. first row).
             return Arr.cloneArray(obj);
+        }
         else if (obj instanceof window.Storage)
-            return cloneStorage(obj);
+        {
+            // Special case for Storage. It uses different way to iterate over all items.
+            // Logged as generic array (two columns: name value)
+            return getStorageProps(obj);
+        }
+        else if (!tabularData)
+        {
+            // Generic object, use two columns (prop names, prop values) to display it.
+            return getObjectProps(obj);
+        }
 
+        // Typically map of objects (or object with object properties, i.e. tabular data),
+        // columns generated according to the first property object (aka first row). 
         var arr = [];
         for (var p in obj)
         {
@@ -164,6 +208,10 @@ FirebugReps.Table = domplate(Firebug.Rep,
         {
             var cell = row.childNodes[colIndex];
             var value = numerical ? parseFloat(cell.textContent) : cell.textContent;
+
+            // Use the original textContent if the parsing failed.
+            value = value || cell.textContent;
+
             values.push({row: row, value: value});
         }
 
@@ -173,7 +221,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
         var headerSorted = Dom.getChildByClass(headerRow, "headerSorted");
         Css.removeClass(headerSorted, "headerSorted");
         if (headerSorted)
-            headerSorted.removeAttribute('aria-sort');
+            headerSorted.removeAttribute("aria-sort");
 
         var header = headerRow.childNodes[colIndex];
         Css.setClass(header, "headerSorted");
@@ -186,7 +234,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
             header.sorted = -1;
 
-            for (var i = 0; i < values.length; ++i)
+            for (var i = 0; i < values.length; i++)
                 tbody.appendChild(values[i].row);
         }
         else
@@ -197,7 +245,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
             header.sorted = 1;
 
-            for (var i = values.length-1; i >= 0; --i)
+            for (var i = values.length-1; i >= 0; i--)
                 tbody.appendChild(values[i].row);
         }
     },
@@ -237,8 +285,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
         }
         catch (err)
         {
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("consoleInjector.table; EXCEPTION " + err, err);
+            TraceError.sysout("consoleInjector.table; EXCEPTION " + err, err);
         }
         finally
         {
@@ -264,14 +311,31 @@ FirebugReps.Table = domplate(Firebug.Rep,
             });
         }
 
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector.table; columns", columns);
-
         // Generate header info from the data dynamically.
         if (!columns.length)
             columns = this.getHeaderColumns(data);
 
+        Trace.sysout("tableRep.computeColumns; columns:", columns);
+
         return columns;
+    },
+
+    getFirstRow: function(data)
+    {
+        // Get the first row in the object.
+        var firstRow = null;
+        for (var p in data)
+            return data[p];
+    },
+
+    isTabularData: function(data)
+    {
+        var firstRow = this.getFirstRow(data);
+
+        // If the first property of given object is *not* an object we don't probably
+        // deal with a table structured data. In this case we assume that it's a generic
+        // object and the table will have two columns: object-properties and object-values.
+        return (typeof(firstRow) == "object");
     },
 
     /**
@@ -280,16 +344,19 @@ FirebugReps.Table = domplate(Firebug.Rep,
      */
     getHeaderColumns: function(data)
     {
-        // Get the first row in the object.
-        var firstRow = null;
-        for (var p in data)
-        {
-            firstRow = data[p];
-            break;
-        }
+        var firstRow = this.getFirstRow(data);
 
+        // Generic objects (with no tabular structure) are displayed as two column table:
+        // property names and property values. 
         if (typeof(firstRow) != "object")
-            return [{label: Locale.$STR("firebug.reps.table.ObjectProperties")}];
+        {
+            Trace.sysout("tableRep.getHeaderColumns; Create columns for generic object");
+
+            return [
+                {label: Locale.$STR("firebug.reps.table.ObjectProperties"), property: "name"},
+                {label: Locale.$STR("firebug.reps.table.ObjectValues"), property: "value"}
+            ];
+        }
 
         // Put together a column property, label and type (type for default sorting logic).
         var header = [];
@@ -336,33 +403,51 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
         return true;
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    groupable: false
 });
 
 // ********************************************************************************************* //
-// Helpers
+// Get Properties Helpers
 
-// xxxHonza: almost copy of FirebugReps.Storage.propIterator.
-// Shell we introduce Arr.cloneStorage()?
-function cloneStorage(storage)
+function Property(name, value)
 {
-    var obj = [];
+    this.name = name;
+    this.value = value;
+}
+
+function getStorageProps(storage)
+{
+    var result = [];
     for (var i = 0, len = storage.length; i < len; i++)
     {
         var name = storage.key(i);
-        obj.push(storage.getItem(name));
+        result.push(new Property(name, storage.getItem(name)));
     }
+    return result;
+}
 
-    return obj;
+function getArrayProps(arr)
+{
+    var result = [];
+    for (var i = 0; i < arr.length; i++)
+        result.push(new Property(i, arr[i]));
+    return result;
+}
+
+function getObjectProps(obj)
+{
+    var result = [];
+    for (var p in obj)
+        result.push(new Property(p, obj[p]));
+    return result;
 }
 
 // ********************************************************************************************* //
 // Registration
 
-return FirebugReps.Table;
+// Backward compatibility.
+FirebugReps.Table = TableRep;
+
+return TableRep;
 
 // ********************************************************************************************* //
 });

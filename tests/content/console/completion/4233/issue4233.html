@@ -59,8 +59,6 @@ that completions appear for:</li>
     <li><code style="color:green">date().g</code></li>
     <li><code style="color:green">make1().c</code></li>
     <li><code style="color:green">make1().chain().c</code></li>
-    <li><code style="color:green">make2().c</code></li>
-    <li><code style="color:green">make2().chain().c</code></li>
     <li><code style="color:green">getterSeemingEval('window').i</code></li>
     <li><code style="color:green">getterSeemingEval('[window]')[0].i</code></li>
     <li><code style="color:green">String.prototype.ch</code></li>
@@ -69,6 +67,7 @@ that completions appear for:</li>
     <li><code style="color:green">objWithNumericProps.0</code></li>
     <li><code style="color:green">largeArray.leng</code></li>
     <li><code style="color:green">largeArray.j</code></li>
+    <li><code style="color:green">/**/d</code></li>
 </ul>
 
 and don't appear for:
@@ -98,6 +97,8 @@ and don't appear for:
     <li><code style="color:green">htmlCollection.0</code></li>
     <li><code style="color:green">(window).i</code></li>
     <li><code style="color:green">q='';q.s</code></li>
+    <li><code style="color:green">// + d</code></li>
+    <li><code style="color:green">&nbsp;/* / + d</code></li>
 </ul>
 
 </ol>

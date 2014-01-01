@@ -1,25 +1,26 @@
 /* See license.txt for terms of usage */
-
-/*jshint esnext:true, es5:true, curly:false*/
-/*global FBTrace:true, Components:true, define:true */
-
+/*global define:1, Components:1*/
 
 define([
+    "firebug/lib/trace",
     "firebug/lib/wrapper",
+    "firebug/lib/xpcom",
 ],
-function(Wrapper) {
+function(FBTrace, Wrapper, Xpcom) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-// Debugees
-var dglobalWeakMap = new WeakMap();
+var comparator = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
+var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+var pre27 = (comparator.compare(appInfo.version, "27.0*") < 0);
+
+// Debuggees
+var dbgGlobalWeakMap = new WeakMap();
 
 // Module object
 var DebuggerLib = {};
@@ -28,39 +29,27 @@ var DebuggerLib = {};
 // Implementation
 
 /**
- * Unwraps the value of a debuggee object.
+ * Unwraps the value of a debuggee object. Primitive values are also allowed
+ * and are let through unharmed.
  *
- * @param obj {Debugger.Object} The debuggee object to unwrap
- * @param global {Window} The unwrapped global (window)
- * @param dglobal {Debugger.Object} The debuggee global object
+ * @param obj {Debugger.Object} The debuggee object to unwrap, or a primitive
  *
- * @return {object} the unwrapped object
+ * @return {object} the unwrapped object, or the same primitive
  */
-DebuggerLib.unwrapDebuggeeValue = function(obj, global, dglobal)
+DebuggerLib.unwrapDebuggeeValue = function(obj)
 {
     // If not a debuggee object, return it immediately.
     if (typeof obj !== "object" || obj === null)
         return obj;
 
-    if (obj.unsafeDereference)
-        return Wrapper.unwrapObject(obj.unsafeDereference());
-
-    // Define a new property to get the debuggee value.
-    dglobal.defineProperty("_firebugUnwrappedDebuggerObject", {
-        value: obj,
-        writable: true,
-        configurable: true
-    });
-
-    // Get the debuggee value using the property through the unwrapped global object.
-    return global._firebugUnwrappedDebuggerObject;
+    return Wrapper.unwrapObject(obj.unsafeDereference());
 };
 
 /**
  * Gets or creates the debuggee global for the given global object
  *
- * @param {Window} global The global object
  * @param {*} context The Firebug context
+ * @param {Window} global The global object
  *
  * @return {Debuggee Window} The debuggee global
  */
@@ -68,8 +57,8 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
 {
     global = global || context.getCurrentGlobal();
 
-    var dglobal = dglobalWeakMap.get(global.document);
-    if (!dglobal)
+    var dbgGlobal = dbgGlobalWeakMap.get(global.document);
+    if (!dbgGlobal)
     {
         var dbg = getInactiveDebuggerForContext(context);
         if (!dbg)
@@ -79,14 +68,55 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
         //   As a workaround, we unwrap the global object.
         //   TODO see what cause that behaviour, why, and if there are no other addons in that case.
         var contentView = Wrapper.getContentView(global);
-        dglobal = dbg.addDebuggee(contentView);
-        dbg.removeDebuggee(contentView);
-        dglobalWeakMap.set(global.document, dglobal);
+        if (dbg.makeGlobalObjectReference)
+        {
+            dbgGlobal = dbg.makeGlobalObjectReference(contentView);
+        }
+        else
+        {
+            dbgGlobal = dbg.addDebuggee(contentView);
+            dbg.removeDebuggee(contentView);
+        }
+        dbgGlobalWeakMap.set(global.document, dbgGlobal);
 
         if (FBTrace.DBG_DEBUGGER)
-            FBTrace.sysout("new debuggee global instance created", dglobal);
+            FBTrace.sysout("new debuggee global instance created", dbgGlobal);
     }
-    return dglobal;
+    return dbgGlobal;
+};
+
+// temporary version-dependent check, should be removed when minVersion = 27
+DebuggerLib._closureInspectionRequiresDebugger = function()
+{
+    return !pre27;
+};
+
+/**
+ * Runs a callback with a debugger for a global temporarily enabled.
+ *
+ * Currently this throws an exception unless the Script panel is enabled, because
+ * otherwise debug GCs kill us.
+ */
+DebuggerLib.withTemporaryDebugger = function(context, global, callback)
+{
+    // Pre Fx27, cheat and pass a disabled debugger, because closure inspection
+    // works with disabled debuggers, and that's all we need this API for.
+    if (!DebuggerLib._closureInspectionRequiresDebugger())
+        return callback(DebuggerLib.getDebuggeeGlobal(context, global));
+
+    var dbg = getInactiveDebuggerForContext(context);
+    if (dbg.hasDebuggee(global))
+        return callback(DebuggerLib.getDebuggeeGlobal(context, global));
+
+    var dbgGlobal = dbg.addDebuggee(global);
+    try
+    {
+        return callback(dbgGlobal);
+    }
+    finally
+    {
+        dbg.removeDebuggee(dbgGlobal);
+    }
 };
 
 /**
@@ -102,7 +132,7 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
 DebuggerLib.isFrameLocationEval = function(frameFilename)
 {
     return frameFilename === "debugger eval code" || frameFilename === "self-hosted";
-}
+};
 
 // ********************************************************************************************* //
 // Local helpers

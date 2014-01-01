@@ -48,6 +48,9 @@ var BrowserOverlayLib =
         if (attributes.label)
             attributes.label = Locale.$STR(attributes.label);
 
+        if (attributes.title)
+            attributes.title = Locale.$STR(attributes.title);
+
         if (attributes.tooltiptext)
             attributes.tooltiptext = Locale.$STR(attributes.tooltiptext);
 
@@ -179,7 +182,6 @@ var BrowserOverlayLib =
     $toolbarButton: function(doc, id, attrs, children, defaultPos)
     {
         attrs["class"] = "toolbarbutton-1";
-        attrs.firebugRootNode = true;
         attrs.id = id;
 
         // in seamonkey gNavToolbox is null onload
@@ -188,6 +190,32 @@ var BrowserOverlayLib =
 
         var selector = "[currentset^='" + id + ",'],[currentset*='," + id +
             ",'],[currentset$='," + id + "']";
+
+        var toolbar = doc.querySelector(selector);
+        if (!toolbar)
+            return; // todo defaultPos
+
+        var currentset = toolbar.getAttribute("currentset").split(",");
+        var i = currentset.indexOf(id) + 1;
+
+        var len = currentset.length;
+        var beforeEl = null;
+        while (i < len && !(beforeEl = this.$(doc, currentset[i])))
+            i++;
+
+        return toolbar.insertItem(id, beforeEl);
+    },
+
+    $toolbarItem: function(doc, id, attrs, children, defaultPos)
+    {
+        attrs.id = id;
+
+        // in seamonkey gNavToolbox is null onload
+        this.$el(doc, "toolbaritem", attrs, children,
+            (doc.defaultView.gNavToolbox || this.$(doc, "navigator-toolbox")).palette);
+
+        var selector = "[currentset^='" + id + ",'],[currentset*='," + id +
+        ",'],[currentset$='," + id + "']";
 
         var toolbar = doc.querySelector(selector);
         if (!toolbar)

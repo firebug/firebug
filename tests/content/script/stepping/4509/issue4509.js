@@ -12,7 +12,10 @@ function runTest()
         var tasks = new FBTest.TaskList();
         tasks.push(testViaContextMenu);
         tasks.push(testViaCtrlClick);
-        tasks.push(testViaMiddleClick);
+
+        // xxxHonza: sending middle click event breaks the test-harness.
+        // All the following test from script/watch group fails 
+        //tasks.push(testViaMiddleClick);
 
         tasks.run(function()
         {
@@ -29,13 +32,15 @@ function testViaContextMenu(callback)
         var sourceRow = row.nextSibling.nextSibling.
             getElementsByClassName("sourceRowText").item(0);
 
-        FBTest.executeContextMenuCommand(sourceRow, {id: "contextMenuRunUntil"}, function()
+        // Register break-listener before executing the context menu
+        // command. The callback for executeContextMenuCommand is called
+        // asynchronously and we could miss the break.
+        FBTest.waitForBreakInDebugger(null, 12, false, function(row)
         {
-            FBTest.waitForBreakInDebugger(null, 12, false, function(row)
-            {
-                verifyResults(row, callback);
-            });
+            verifyResults(row, callback);
         });
+
+        FBTest.executeContextMenuCommand(sourceRow, {id: "contextMenuRunUntil"});
     });
 
     FBTest.reload();

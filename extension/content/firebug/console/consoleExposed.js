@@ -12,9 +12,10 @@ define([
     "firebug/console/console",
     "firebug/lib/options",
     "firebug/debugger/debuggerLib",
+    "firebug/chrome/tableRep",
 ],
 function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, Errors, Debug, Console, Options,
-    DebuggerLib) {
+    DebuggerLib, TableRep) {
 
 // Note: since we are using .caller and .arguments for stack walking, we can not use strict mode.
 //"use strict";
@@ -244,7 +245,7 @@ function createFirebugConsole(context, win)
 
     console.table = function(data, columns)
     {
-        FirebugReps.Table.log(data, columns, context);
+        TableRep.log(data, columns, context);
         return Console.getDefaultReturnValue();
     };
 
@@ -398,7 +399,7 @@ function createFirebugConsole(context, win)
         var sourceLink = StackFrame.getFrameSourceLink(getComponentsStackDump());
         // xxxFlorent: should be reverted if we integrate 
         // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
-        if (DebuggerLib.isFrameLocationEval(sourceLink.href))
+        if (sourceLink && DebuggerLib.isFrameLocationEval(sourceLink.href))
             return null;
         return sourceLink;
     }
@@ -428,7 +429,7 @@ function createFirebugConsole(context, win)
                 continue;
 
             // command line
-            var fn = frames[i].getFunctionName() + "";
+            var fn = String(frames[i].getFunctionName());
             if (fn && (fn.indexOf("_firebugEvalEvent") != -1))
                 continue;
 
@@ -476,7 +477,8 @@ function createFirebugConsole(context, win)
                         else
                         {
                             var argValues = Array.prototype.slice.call(func.arguments);
-                            var argNames = StackFrame.guessFunctionArgNamesFromSource(func + "");
+                            var argNames =
+                                StackFrame.guessFunctionArgNamesFromSource(String(func));
                             if (argNames && argNames.length === func.length)
                             {
                                 for (var i = 0; i < func.length; i++)

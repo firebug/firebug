@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -17,10 +18,13 @@ define([
     "firebug/net/netUtils",
     "firebug/lib/options"
 ],
-function(Obj, Firebug, Domplate, Locale, Xpcom, Events, Win, Css, Dom, Str, Fonts, Url, Http,
-    NetUtils, Options) {
+function(Module, Obj, Firebug, Domplate, Locale, Xpcom, Events, Win, Css, Dom, Str, Fonts, Url,
+    Http, NetUtils, Options) {
 
 // ********************************************************************************************* //
+// Constants
+
+var {domplate, FOR, TAG, DIV, SPAN, TD, TR, TABLE, TBODY, P, UL, LI, PRE, A, STYLE} = Domplate;
 
 // List of font content types
 var contentTypes =
@@ -39,7 +43,7 @@ var contentTypes =
 // ********************************************************************************************* //
 // Model implementation
 
-Firebug.FontViewerModel = Obj.extend(Firebug.Module,
+Firebug.FontViewerModel = Obj.extend(Module,
 {
     dispatchName: "fontViewer",
     contentTypes: contentTypes,
@@ -157,7 +161,6 @@ Firebug.FontViewerModel = Obj.extend(Firebug.Module,
 
 // ********************************************************************************************* //
 
-with (Domplate) {
 Firebug.FontViewerModel.Preview = domplate(
 {
     bodyTag:
@@ -693,7 +696,6 @@ Firebug.FontViewerModel.Preview = domplate(
             this.insertMetaDataFormatted(body, fontObject.metadata);
     }
 });
-};
 
 // ********************************************************************************************* //
 // Registration

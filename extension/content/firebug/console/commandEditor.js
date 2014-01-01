@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/events",
@@ -9,8 +10,11 @@ define([
     "firebug/lib/locale",
     "firebug/lib/css",
     "firebug/lib/options",
+    "firebug/lib/system",
 ],
-function(Obj, Firebug, Events, Menu, Dom, Locale, Css, Options) {
+function(Module, Obj, Firebug, Events, Menu, Dom, Locale, Css, Options, System) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -21,25 +25,22 @@ var MODE_JAVASCRIPT = "js";
 var CONTEXT_MENU = "";
 var TEXT_CHANGED = "";
 
-try
-{
-    // Introduced in Firefox 8
-    Cu["import"]("resource:///modules/source-editor.jsm");
+// URL of source-editor.jsm changed in Firefox 27 (introduced in Firefox 8).
+var sourceEditorScope = System.importModule([
+    "resource:///modules/devtools/sourceeditor/source-editor.jsm",
+    "resource:///modules/source-editor.jsm"]);
 
-    MODE_JAVASCRIPT = SourceEditor.MODES.JAVASCRIPT;
-    CONTEXT_MENU = SourceEditor.EVENTS.CONTEXT_MENU;
-    TEXT_CHANGED = SourceEditor.EVENTS.TEXT_CHANGED;
-}
-catch (err)
+if (typeof(sourceEditorScope.SourceEditor) != "undefined")
 {
-    if (FBTrace.DBG_ERRORS)
-        FBTrace.sysout("commandEditor: EXCEPTION source-editors is not available!");
+    MODE_JAVASCRIPT = sourceEditorScope.SourceEditor.MODES.JAVASCRIPT;
+    CONTEXT_MENU = sourceEditorScope.SourceEditor.EVENTS.CONTEXT_MENU;
+    TEXT_CHANGED = sourceEditorScope.SourceEditor.EVENTS.TEXT_CHANGED;
 }
 
 // ********************************************************************************************* //
 // Command Editor
 
-Firebug.CommandEditor = Obj.extend(Firebug.Module,
+Firebug.CommandEditor = Obj.extend(Module,
 {
     dispatchName: "commandEditor",
 
@@ -47,7 +48,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         if (this.editor)
             return;
@@ -56,8 +57,8 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         // support zooming. So, the TextEditor (based on textarea) can be used
         // by setting extensions.firebug.enableOrion pref to false.
         // See issue 5678
-        if (typeof(SourceEditor) != "undefined" && Options.get("enableOrion"))
-            this.editor = new SourceEditor();
+        if (typeof(sourceEditorScope.SourceEditor) != "undefined" && Options.get("enableOrion"))
+            this.editor = new sourceEditorScope.SourceEditor();
         else
             this.editor = new TextEditor();
 
@@ -265,7 +266,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (!this.editor || !this.editor._view)
             return;
 
-        if (typeof(SourceEditor) != "undefined")
+        if (typeof(sourceEditorScope.SourceEditor) != "undefined")
         {
             // See issue 5488
             // var doc = this.editor._view._frame.contentDocument;

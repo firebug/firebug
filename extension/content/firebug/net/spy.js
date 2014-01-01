@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
+    "firebug/chrome/rep",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -26,12 +28,14 @@ define([
     "firebug/net/netPanel",
     "firebug/console/errors"
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
-    Http, Css, Dom, Win, System, Str, Url, Arr, Debug, NetHttpActivityObserver, NetUtils,
-    TraceListener, TraceModule, Wrapper, Options) {
+function(Module, Rep, Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver,
+    StackFrame, Http, Css, Dom, Win, System, Str, Url, Arr, Debug, NetHttpActivityObserver,
+    NetUtils, TraceListener, TraceModule, Wrapper, Options) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, TAG, DIV, SPAN, TD, TR, TABLE, TBODY, P, A} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -60,7 +64,7 @@ var Trace = FBTrace.to("DBG_SPY");
  * The module is responsible for attaching/detaching a HTTP Observers when Firebug is
  * activated/deactivated for a site.
  */
-Firebug.Spy = Obj.extend(Firebug.Module,
+Firebug.Spy = Obj.extend(Module,
 /** @lends Firebug.Spy */
 {
     dispatchName: "spy",
@@ -70,12 +74,12 @@ Firebug.Spy = Obj.extend(Firebug.Module,
         this.traceListener = new TraceListener("spy.", "DBG_SPY", true);
         TraceModule.addListener(this.traceListener);
 
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
     },
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
 
         TraceModule.removeListener(this.traceListener);
     },
@@ -547,7 +551,7 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
         {
             // Use the trace condition here to avoid additional code execution (Url.getFileName)
             // when the tracing is switched off
-            if (FBTrace.DBG_SPY)
+            if (Trace.active)
             {
                 var name = Url.getFileName(spy.request.URI.asciiSpec);
                 var origName = Url.getFileName(spy.request.originalURI.asciiSpec);
@@ -567,7 +571,7 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
     var name = request.URI.asciiSpec;
     var origName = request.originalURI.asciiSpec;
 
-    if (FBTrace.DBG_SPY)
+    if (Trace.active)
     {
         var redirect = isRedirect(request);
         Trace.sysout("spy.getSpyForXHR; NEW spy object (" +
@@ -729,7 +733,7 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
 
 function onHTTPSpyReadyStateChange(spy, event)
 {
-    if (FBTrace.DBG_SPY)
+    if (Trace.active)
     {
         var name = Url.getFileName(spy.request.URI.asciiSpec);
         var origName = Url.getFileName(spy.request.originalURI.asciiSpec);
@@ -750,7 +754,7 @@ function onHTTPSpyReadyStateChange(spy, event)
     // See issue 5049
     if (spy.xhrRequest.readyState == 1)
     {
-        if (FBTrace.DBG_SPY)
+        if (Trace.active)
         {
             Trace.sysout("spy.onHTTPSpyReadyStateChange; ready state == 1, XHR probably being " +
                 "reused, detach" + Http.safeGetRequestName(spy.request) + ", " +
@@ -847,7 +851,7 @@ function callPageHandler(spy, event, originalHandler)
 
 function onHTTPSpyLoad(spy)
 {
-    if (FBTrace.DBG_SPY)
+    if (Trace.active)
     {
         Trace.sysout("spy.onHTTPSpyLoad: " + Http.safeGetRequestName(spy.request) + ", " +
             Url.getFileName(spy.href) + ", state: " + spy.xhrRequest.readyState);
@@ -920,8 +924,7 @@ function onHTTPSpyAbort(spy)
  * @domplate Represents a template for XHRs logged in the Console panel. The body of the
  * log (displayed when expanded) is rendered using {@link Firebug.NetMonitor.NetInfoBody}.
  */
-with (Domplate) {
-Firebug.Spy.XHR = domplate(Firebug.Rep,
+Firebug.Spy.XHR = domplate(Rep,
 /** @lends Firebug.Spy.XHR */
 {
     tag:
@@ -1158,7 +1161,6 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         return items;
     }
 });
-};
 
 // ********************************************************************************************* //
 
@@ -1223,7 +1225,7 @@ function updateHttpSpyInfo(spy, updateInfoBody)
         return;
 
     if (!spy.params)
-        spy.params = Url.parseURLParams(spy.href + "");
+        spy.params = Url.parseURLParams(String(spy.href));
 
     if (!spy.requestHeaders)
         spy.requestHeaders = getRequestHeaders(spy);

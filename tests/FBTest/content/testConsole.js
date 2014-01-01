@@ -111,7 +111,7 @@ FBTestApp.TestConsole =
     {
         try
         {
-            // xxxHonza: initialization would deserve to be done throug a dispatched event.
+            // xxxHonza: initialization would deserve to be done through a dispatched event.
             FBTestApp.TestWindowLoader.initialize();
 
             // Display the current version.
@@ -259,10 +259,31 @@ FBTestApp.TestConsole =
     updateTestCount: function(groups)
     {
         var count = 0;
+        var disabledTests = 0;
         for (var i=0; groups && i<groups.length; i++)
-            count += groups[i].tests.length;
+        {
+            var group = groups[i];
+            for (var j=0; j<group.tests.length; j++)
+            {
+                var test = group.tests[j];
+                if (test.disabled)
+                    disabledTests++;
+                else
+                    count++;
+            }
+        }
 
         Firebug.chrome.$("testCount").value = count;
+
+        if (disabledTests > 0)
+        {
+            Firebug.chrome.$("disabledTestCount").value = "(" +
+                Locale.$STR("fbtest.DisabledTests") + ": " + disabledTests + ")";
+        }
+        else
+        {
+            Firebug.chrome.$("disabledTestCount").value = "";
+        }
     },
 
     setAndLoadTestList: function()
@@ -278,7 +299,7 @@ FBTestApp.TestConsole =
         this.appendToHistory("", this.testCasePath, this.driverBaseURI);
 
         // xxxHonza: this is a workaround, the test-case server isn't stored into the
-        // preferences in shutdown when the Firefox is restared by "Restart Firefox"
+        // preferences in shutdown when the Firefox is restarted by "Restart Firefox"
         // button in the FBTrace console.
         Firebug.setPref(FBTestApp.prefDomain, "defaultTestCaseServer", this.testCasePath);
 

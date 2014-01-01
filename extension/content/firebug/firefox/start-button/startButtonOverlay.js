@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/firefox",
@@ -10,13 +11,15 @@ define([
     "firebug/lib/options",
     "firebug/firefox/browserOverlayLib",
 ],
-function(Obj, Firebug, Firefox, Locale, Events, Dom, Options, BrowserOverlayLib) {
+function(Module, Obj, Firebug, Firefox, Locale, Events, Dom, Options, BrowserOverlayLib) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
 // ********************************************************************************************* //
 // Module Implementation
@@ -30,14 +33,14 @@ const Ci = Components.interfaces;
  * such as panel activation and also indicates whether Firebug is activated/deactivated for
  * the current page (by changing its color).
  */
-Firebug.StartButton = Obj.extend(Firebug.Module,
+Firebug.StartButton = Obj.extend(Module,
 /** @lends Firebug.StartButton */
 {
     dispatchName: "startButton",
 
     initializeUI: function()
     {
-        Firebug.Module.initializeUI.apply(this, arguments);
+        Module.initializeUI.apply(this, arguments);
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("StartButton.initializeUI;");
@@ -63,63 +66,60 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
 
         Dom.eraseNode(tooltip);
 
-        with (BrowserOverlayLib)
+        tooltip.appendChild(BrowserOverlayLib.$label(doc, {
+            "class": "version",
+            value: Locale.$STR("Firebug") + " " + Firebug.getVersion()
+        }));
+
+        var status = BrowserOverlayLib.$el(doc, "hbox");
+        tooltip.appendChild(status);
+
+        var suspended = Firebug.getSuspended();
+        status.appendChild(BrowserOverlayLib.$label(doc, {
+            "class": "status",
+            value: suspended ? Locale.$STR("startbutton.tip.deactivated") :
+                Locale.$STRP("plural.Total_Firebugs2", [Firebug.TabWatcher.contexts.length])
+        }));
+
+        if (suspended)
+            return;
+
+        status.appendChild(BrowserOverlayLib.$label(doc, {
+            "class": "placement",
+            value: "(" + Locale.$STR(Firebug.getPlacement()) + ")"
+        }));
+
+        if (Firebug.allPagesActivation == "on")
         {
-            tooltip.appendChild($label(doc, {
-                "class": "version",
-                value: "Firebug " + Firebug.getVersion()
+            tooltip.appendChild(BrowserOverlayLib.$label(doc, {
+                "class": "alwaysOn",
+                value: Locale.$STR("enablement.on") + " " +
+                    Locale.$STR("enablement.for_all_pages")
+            }));
+        }
+
+        // Panel enablement status info
+        tooltip.appendChild(BrowserOverlayLib.$label(doc, {
+            "class": "enablement",
+            value: Locale.$STR("enablement.Panel_activation_status")
+        }));
+
+        var statuses = this.getEnablementStatus();
+        for (var i=0; i<statuses.length; i++)
+        {
+            var status = statuses[i];
+            var parent = BrowserOverlayLib.$el(doc, "hbox");
+            tooltip.appendChild(parent);
+
+            parent.appendChild(BrowserOverlayLib.$label(doc, {
+                "class": "panelName " + status.status,
+                value: status.name + ":"
             }));
 
-            var status = $el(doc, "hbox");
-            tooltip.appendChild(status);
-
-            var suspended = Firebug.getSuspended();
-            status.appendChild($label(doc, {
-                "class": "status",
-                value: suspended ? Locale.$STR("startbutton.tip.deactivated") :
-                    Locale.$STRP("plural.Total_Firebugs2", [Firebug.TabWatcher.contexts.length])
+            parent.appendChild(BrowserOverlayLib.$label(doc, {
+                "class": "panelStatus " + status.status,
+                value: status.statusLabel
             }));
-
-            if (suspended)
-                return;
-
-            status.appendChild($label(doc, {
-                "class": "placement",
-                value: "(" + Locale.$STR(Firebug.getPlacement()) + ")"
-            }));
-
-            if (Firebug.allPagesActivation == "on")
-            {
-                tooltip.appendChild($label(doc, {
-                    "class": "alwaysOn",
-                    value: Locale.$STR("enablement.on") + " " +
-                        Locale.$STR("enablement.for_all_pages")
-                }));
-            }
-
-            // Panel enablement status info
-            tooltip.appendChild($label(doc, {
-                "class": "enablement",
-                value: Locale.$STR("enablement.Panel_activation_status")
-            }));
-
-            var statuses = this.getEnablementStatus();
-            for (var i=0; i<statuses.length; i++)
-            {
-                var status = statuses[i];
-                var parent = $el(doc, "hbox");
-                tooltip.appendChild(parent);
-
-                parent.appendChild($label(doc, {
-                    "class": "panelName " + status.status,
-                    value: status.name + ":"
-                }));
-
-                parent.appendChild($label(doc, {
-                    "class": "panelStatus " + status.status,
-                    value: status.statusLabel
-                }));
-            }
         }
     },
 
@@ -128,24 +128,27 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
 
     showCount: function(errorCount)
     {
-        var firebugButton = Firefox.getElementById("firebug-button");
+        var errorBadge = Firefox.getElementById("firebug-error-badge");
         if (errorCount && Firebug.showErrorCount)
         {
-            if (firebugButton)
+            if (errorBadge)
             {
-                firebugButton.setAttribute("showErrors", "true");
-                firebugButton.setAttribute("errorCount", errorCount);
+                var errorLabel = Firefox.getElementById("firebug-error-label");
+                errorBadge.setAttribute("showErrors", "true");
+                errorLabel.setAttribute("value", errorCount);
+                errorLabel.setAttribute("tooltiptext", Locale.$STRP("plural.startbutton.tip.errors", [errorCount]))
             }
         }
         else
         {
-            if (firebugButton)
+            if (errorBadge)
             {
-                firebugButton.removeAttribute("showErrors");
+                errorBadge.removeAttribute("showErrors");
 
                 // Use '0', so the horizontal space for the number is still allocated.
                 // The button will cause re-layout if there are more than 9 errors.
-                firebugButton.setAttribute("errorCount", "0");
+                var errorLabel = Firefox.getElementById("firebug-error-label");
+                errorLabel.setAttribute("value", "0");
             }
         }
     },

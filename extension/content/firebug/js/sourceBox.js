@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/activablePanel",
+    "firebug/chrome/measureBox",
     "firebug/lib/object",
     "firebug/firebug",
     "arch/compilationunit",
@@ -10,7 +12,8 @@ define([
     "firebug/lib/dom",
     "firebug/lib/string",
 ],
-function(Obj, Firebug, CompilationUnit, Events, SourceLink, Css, Dom, Str) {
+function(ActivablePanel, MeasureBox, Obj, Firebug, CompilationUnit, Events, SourceLink, Css, Dom,
+    Str) {
 
 // ********************************************************************************************* //
 
@@ -103,7 +106,7 @@ Firebug.SourceBoxDecorator.prototype =
  */
 Firebug.SourceBoxPanel = function() {};
 
-var SourceBoxPanelBase = Obj.extend(Firebug.MeasureBox, Firebug.ActivablePanel);
+var SourceBoxPanelBase = Obj.extend(MeasureBox, ActivablePanel);
 Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
 /** @lends Firebug.SourceBoxPanel */
 {
@@ -113,7 +116,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
         this.sourceBoxes = {};
         this.decorator = this.getDecorator();
 
-        Firebug.ActivablePanel.initialize.apply(this, arguments);
+        ActivablePanel.initialize.apply(this, arguments);
     },
 
     initializeNode: function(panelNode)
@@ -122,7 +125,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
         Events.addEventListener(this.resizeEventTarget, "resize", this.onResize, true);
         this.attachToCache();
 
-        Firebug.ActivablePanel.initializeNode.apply(this, arguments);
+        ActivablePanel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
@@ -140,7 +143,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
 
         this.detachFromCache();
 
-        Firebug.ActivablePanel.destroyNode.apply(this, arguments);
+        ActivablePanel.destroyNode.apply(this, arguments);
     },
 
     attachToCache: function()
@@ -246,7 +249,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
     disablePanel: function(module)
     {
         this.sourceBoxes = {};  // clear so we start fresh if enabled
-        Firebug.ActivablePanel.disablePanel.apply(this, arguments);
+        ActivablePanel.disablePanel.apply(this, arguments);
     },
 
     getSourceLinesFrom: function(selection)

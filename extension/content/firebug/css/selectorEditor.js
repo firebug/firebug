@@ -2,14 +2,17 @@
 
 define([
     "firebug/firebug",
-    "firebug/lib/domplate",
-    "firebug/lib/locale",
-    "firebug/lib/css",
-    "firebug/lib/string",
     "firebug/lib/array",
+    "firebug/lib/css",
+    "firebug/lib/domplate",
+    "firebug/lib/string",
+    "firebug/chrome/window",
+    "firebug/editor/inlineEditor",
+    "firebug/css/autoCompleter",
 ],
-function(Firebug, Domplate, Locale, Css, Str, Arr) {
-with (Domplate) {
+function(Firebug, Arr, Css, Domplate, Str, Win, InlineEditor, CSSAutoCompleter) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -21,8 +24,11 @@ const reSelectorChar = /[-_0-9a-zA-Z]/;
 
 function SelectorEditor() {}
 
-SelectorEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+SelectorEditor.prototype = Domplate.domplate(InlineEditor.prototype,
 {
+    // 'null' means every document in the context.
+    doc: null,
+
     getAutoCompleteRange: function(value, offset)
     {
         // Find the word part of an identifier.
@@ -61,6 +67,9 @@ SelectorEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 return [];
         }
 
+        var preSelector = preExpr.split(",").reverse()[0].trimLeft();
+        var hasCombinator = (preSelector && " >+~".indexOf(preSelector.slice(-1)) !== -1);
+
         var includeTagNames = true;
         var includeIds = true;
         var includeClasses = true;
@@ -86,8 +95,8 @@ SelectorEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             includeTagNames = false;
 
         var ret = [];
-
-        if (includeTagNames || includeIds || includeClasses)
+        var hasAnyElements = false;
+        var traverseDom = function(doc)
         {
             // Traverse the DOM to get the used ids/classes/tag names that
             // are relevant as continuations.
@@ -95,23 +104,13 @@ SelectorEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             // actually used hides annoying things like 'b'/'i' when they
             // are not used, and works in other contexts than HTML.)
             // This isn't actually that bad, performance-wise.
-            var doc = context.window.document, els;
-            if (preExpr && " >+~".indexOf(preExpr.slice(-1)) === -1)
-            {
-                try
-                {
-                    var preSelector = preExpr.split(",").reverse()[0];
-                    els = doc.querySelectorAll(preSelector);
-                }
-                catch (exc)
-                {
-                    if (FBTrace.DBG_CSS)
-                        FBTrace.sysout("Invalid previous selector part \"" + preSelector + "\"", exc);
-                }
-            }
-            if (!els)
+            var els = null;
+            if (preSelector)
+                els = doc.querySelectorAll(preSelector + (hasCombinator ? "*" : ""));
+            else
                 els = doc.getElementsByTagName("*");
             els = [].slice.call(els);
+            hasAnyElements = hasAnyElements || (els.length > 0);
 
             if (includeTagNames)
             {
@@ -131,7 +130,6 @@ SelectorEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     if (e.id)
                         ids.push(e.id);
                 });
-                ids = Arr.sortUnique(ids);
                 ret.push.apply(ret, ids.map(function(cl)
                 {
                     return "#" + cl;
@@ -150,15 +148,35 @@ SelectorEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                         classes.push.apply(classes, e.classList);
                     }
                 });
-                classes = Arr.sortUnique(classes);
                 ret.push.apply(ret, classes.map(function(cl)
                 {
                     return "." + cl;
                 }));
             }
+        };
+
+        try
+        {
+            if (this.doc)
+            {
+                traverseDom(this.doc);
+            }
+            else
+            {
+                Win.iterateWindows(context.window, function(win)
+                {
+                    traverseDom(win.document);
+                });
+            }
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_CSS)
+                FBTrace.sysout("Invalid previous selector part \"" + preSelector + "\"", exc);
+            return [];
         }
 
-        if (includePseudoClasses)
+        if (includePseudoClasses && hasAnyElements)
         {
             // Add the pseudo-class-looking :before, :after.
             ret.push(
@@ -166,10 +184,10 @@ SelectorEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 ":before"
             );
 
-            ret.push.apply(ret, SelectorEditor.stripCompletedParens(Css.pseudoClasses, postExpr));
+            ret.push.apply(ret, CSSAutoCompleter.stripCompletedParens(Css.pseudoClasses, postExpr));
         }
 
-        if (includePseudoElements)
+        if (includePseudoElements && hasAnyElements)
         {
             ret.push.apply(ret, Css.pseudoElements);
         }
@@ -207,7 +225,7 @@ SelectorEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (ret.indexOf(":hover") !== -1)
             out.suggestion = ":hover";
 
-        return ret.sort();
+        return Arr.sortUnique(ret);
     },
 
     getAutoCompletePropSeparator: function(range, expr, prefixOf)
@@ -226,27 +244,10 @@ SelectorEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 });
 
 
-// Transform completions so that they don't add additional parentheses when
-// ones already exist.
-SelectorEditor.stripCompletedParens = function(list, postExpr)
-{
-    var c = postExpr.charAt(0), rem = 0;
-    if (c === "(")
-        rem = 2;
-    else if (c === ")")
-        rem = 1;
-    else
-        return list;
-    return list.map(function(cl)
-    {
-        return (cl.slice(-2) === "()" ? cl.slice(0, -rem) : cl);
-    });
-};
-
 // ********************************************************************************************* //
 // Registration
 
 return SelectorEditor;
 
 // ********************************************************************************************* //
-}});
+});

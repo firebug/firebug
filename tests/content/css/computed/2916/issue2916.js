@@ -50,7 +50,7 @@ function runTest()
                     {
                         checkMatchedSelector(
                         {
-                            text: new RegExp("#content > div\\\s*Arial,​sans-serif\\\s*" +
+                            text: new RegExp("#content > div\\\s*Arial,\u200bsans-serif\\\s*" +
                                 "issue2916\\\.html\\\s+\\\(.*?8\\\)"),
                             type: "cssBestMatch"
                         }, matchedSelectors[0], "First");
@@ -63,7 +63,7 @@ function runTest()
                         checkMatchedSelector(
                         {
                             text: new RegExp("body\\\s*\\\"Trebuchet MS\\\"," +
-                                "​Helvetica,​sans-serif\\\s*testcase\\\.css\\\s+\\\(.*?19\\\)"),
+                                "\u200bHelvetica,\u200bsans-serif\\\s*testcase\\\.css\\\s+\\\(.*?19\\\)"),
                             type: "cssParentMatch"
                         }, matchedSelectors[2], "Third");
                     }

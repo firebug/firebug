@@ -1237,6 +1237,8 @@ var fbs =
 
         bp.condition = condition;
         delete bp.transformedCondition;
+        delete bp.transformedConditionDebuggr;
+        delete bp.transformedConditionContext;
 
         dispatch(debuggers, "onToggleBreakpoint", [sourceFile.href, lineNo, true, bp]);
 
@@ -3313,6 +3315,8 @@ var fbs =
         {
             bp.condition = props.condition;
             delete bp.transformedCondition;
+            delete bp.transformedConditionDebuggr;
+            delete bp.transformedConditionContext;
             bp.onTrue = props.onTrue;
             bp.hitCount = props.hitCount;
             if (bp.condition || bp.hitCount > 0)
@@ -4391,11 +4395,25 @@ function testBreakpoint(frame, bp)
 
                     cond = debuggr._temporaryTransformSyntax(cond, frameScopeRoot, context);
                     bp.transformedCondition = cond;
+                    bp.transformedConditionDebuggr = debuggr;
+                    bp.transformedConditionContext = context;
                 }
             }
         }
 
-        if (frame.eval(cond, "", 1, result))
+        var evaluate = function()
+        {
+            if (cond === bp.condition)
+                return frame.eval(cond, "", 1, result);
+            var debuggr = bp.transformedConditionDebuggr;
+            var context = bp.transformedConditionContext;
+            return debuggr._temporaryRunWithJSD2Debugger(context, function()
+            {
+                return frame.eval(cond, "", 1, result);
+            });
+        };
+
+        if (evaluate())
         {
             if (bp.onTrue)
             {

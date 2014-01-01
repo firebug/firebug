@@ -1,6 +1,9 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
+    "firebug/chrome/panel",
+    "firebug/chrome/rep",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -19,18 +22,18 @@ define([
     "firebug/editor/editor",
     "firebug/console/autoCompleter"
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink,
+function(Module, Panel, Rep, Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink,
     StackFrame, Css, Dom, Str, Arr, Persist, Menu, FBS) {
 
 // ********************************************************************************************* //
 // Constants
 
-const animationDuration = 0.8;
+var animationDuration = 0.8;
 
 // ********************************************************************************************* //
 // Breakpoints
 
-Firebug.Breakpoint = Obj.extend(Firebug.Module,
+Firebug.Breakpoint = Obj.extend(Module,
 {
     dispatchName: "breakpoints",
 
@@ -49,8 +52,10 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         var breakable = Firebug.chrome.getGlobalAttribute("cmd_firebug_toggleBreakOn", "breakable");
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("breakpoint.toggleBreakOnNext; currentBreakable "+breakable+
+        {
+            FBTrace.sysout("breakpoint.toggleBreakOnNext; currentBreakable " + breakable +
                 " in " + panel.context.getName());
+        }
 
         // Toggle button's state.
         breakable = (breakable == "true" ? "false" : "true");
@@ -61,11 +66,7 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         var enabled = (breakable == "true" ? false : true);
         panel.breakOnNext(enabled);
 
-        // Make sure the correct tooltip (coming from the current panel) is used.
-        this.updateBreakOnNextTooltips(panel);
-
-        // Light up the tab whenever break on next is selected
-        this.updatePanelTab(panel, enabled);
+        this.updatePanelState(panel);
 
         return enabled;
     },
@@ -83,7 +84,8 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
 
     updatePanelState: function(panel)
     {
-        if (!panel)  // there is no selectedPanel?
+        // there is no selectedPanel?
+        if (!panel)
             return;
 
         var breakButton = Firebug.chrome.$("fbBreakOnNextButton");
@@ -176,6 +178,10 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         // which means already active (throbbing).
         var breakable = armed ? "false" : "true";
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleBreakOn", "breakable", breakable);
+
+        // Set the button as 'checked', so it has visual border (see issue 6567).
+        var checked = armed ? "true" : "false";
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleBreakOn", "checked", checked);
     },
 
     updatePanelTab: function(panel, armed)
@@ -259,7 +265,7 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
 // ********************************************************************************************* //
 
 with (Domplate) {
-Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
+Firebug.Breakpoint.BreakpointListRep = domplate(Rep,
 {
     tag:
         DIV({role : "list"},
@@ -322,7 +328,7 @@ Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
+Firebug.Breakpoint.BreakpointRep = domplate(Rep,
 {
     tag:
         DIV({"class": "breakpointRow focusRow", $disabled: "$bp|isDisabled", role: "option",
@@ -470,7 +476,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
 Firebug.Breakpoint.BreakpointsPanel = function() {};
 
-Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
+Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Panel,
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
@@ -485,14 +491,14 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
     {
         this.groupOpened = [];
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
     {
         state.groupOpened = this.groupOpened;
 
-        Firebug.Panel.destroy.apply(this, arguments);
+        Panel.destroy.apply(this, arguments);
     },
 
     show: function(state)
@@ -1067,7 +1073,7 @@ Firebug.Breakpoint.BreakNotification = function(doc, cause)
     this.cause = cause;
 };
 
-Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
+Firebug.Breakpoint.BreakNotification.prototype = domplate(Rep,
 /** @lends Firebug.ScriptPanel.Notification */
 {
     tag:

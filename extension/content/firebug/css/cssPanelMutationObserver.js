@@ -2,10 +2,11 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/module",
     "firebug/lib/trace",
     "firebug/lib/object",
 ],
-function(Firebug, FBTrace, Obj) {
+function(Firebug, Module, FBTrace, Obj) {
 
 "use strict"
 
@@ -30,7 +31,7 @@ var Ci = Components.interfaces;
  *
  * See issue 6582 for more details.
  */
-var CSSPanelMutationObserver = Obj.extend(Firebug.Module,
+var CSSPanelMutationObserver = Obj.extend(Module,
 /** @lends CSSPanelMutationObserver */
 {
     dispatchName: "CSSPanelMutationObserver",
@@ -40,7 +41,7 @@ var CSSPanelMutationObserver = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         // Register UI listeners, so we can get events about when the CSS panel
         // is visible and hidden.
@@ -49,7 +50,7 @@ var CSSPanelMutationObserver = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
         Firebug.unregisterUIListener(this);
     },
 

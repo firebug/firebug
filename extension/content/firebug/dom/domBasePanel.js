@@ -24,15 +24,18 @@ define([
     "firebug/dom/domMemberProvider",
     "firebug/dom/domEditor",
     "firebug/dom/domReps",
+    "firebug/chrome/panel",
+    "firebug/chrome/panelActivation",
+    "firebug/debugger/debuggerLib",
     "firebug/editor/editor",
     "firebug/js/breakpoint",
     "firebug/chrome/searchBox",
     "firebug/dom/domModule",
-    "firebug/console/autoCompleter"
+    "firebug/console/autoCompleter",
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Wrapper, SourceLink, StackFrame,
     Dom, Css, Search, Str, Arr, Persist, ClosureInspector, ToggleBranch, System, Menu,
-    DOMMemberProvider, DOMEditor, DOMReps) {
+    DOMMemberProvider, DOMEditor, DOMReps, Panel, PanelActivation, DebuggerLib) {
 
 "use strict";
 
@@ -51,7 +54,7 @@ Firebug.DOMBasePanel = function()
 }
 
 Firebug.DOMBasePanel.ToolboxPlate = DOMReps.ToolboxPlate;
-Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
+Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 /** lends Firebug.DOMBasePanel */
 {
     tag: DOMReps.DirTablePlate.tableTag,
@@ -68,17 +71,17 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         this.pathIndex = -1;
         this.toggles = new ToggleBranch.ToggleBranch();
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
     },
 
     initializeNode: function(node)
     {
-        Firebug.Panel.initializeNode.apply(this, arguments);
+        Panel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
     {
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Panel.destroyNode.apply(this, arguments);
     },
 
     destroy: function(state)
@@ -100,7 +103,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         if (FBTrace.DBG_DOM)
             FBTrace.sysout("dom.destroy; state:", state);
 
-        Firebug.Panel.destroy.apply(this, arguments);
+        Panel.destroy.apply(this, arguments);
     },
 
     show: function(state)
@@ -362,6 +365,20 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             this.rebuild(true);
     },
 
+    getShowClosuresMenuItem: function()
+    {
+        var requireScriptPanel = DebuggerLib._closureInspectionRequiresDebugger();
+        var label = Locale.$STR("ShowClosures");
+        var tooltip = Locale.$STR("dom.option.tip.Show_Closures2");
+        if (requireScriptPanel)
+            tooltip = Locale.$STRF("script.Script_panel_must_be_enabled", [tooltip]);
+        var menuItem = Menu.optionMenu(label, "showClosures", tooltip);
+        menuItem.nol10n = true;
+        if (requireScriptPanel && !PanelActivation.isPanelEnabled(Firebug.getPanelType("script")))
+            menuItem.disabled = true;
+        return menuItem;
+    },
+
     getOptionsMenuItems: function()
     {
         return [
@@ -377,8 +394,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 "dom.option.tip.Show_DOM_Constants"),
             Menu.optionMenu("ShowInlineEventHandlers", "showInlineEventHandlers",
                 "ShowInlineEventHandlersTooltip"),
-            Menu.optionMenu("ShowClosures", "showClosures",
-                "dom.option.tip.Show_Closures"),
+            this.getShowClosuresMenuItem(),
             "-",
             Menu.optionMenu("ShowOwnProperties", "showOwnProperties",
                 "ShowOwnPropertiesTooltip"),
@@ -833,7 +849,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
                 var type = typeof propValue;
                 if (type === "undefined" || type === "number" || type === "boolean")
-                    editValue = "" + propValue;
+                    editValue = String(propValue);
                 else if (type === "string")
                     editValue = "\"" + Str.escapeJS(propValue) + "\"";
                 else if (propValue === null)
@@ -844,7 +860,11 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     editValue = "this." + getRowName(row); // XXX "this." doesn't actually work
             }
 
-            Firebug.Editor.startEditing(row, editValue);
+            var selectionData = null;
+            if (type === "string")
+                selectionData = {start: 1, end: editValue.length-1};
+
+            Firebug.Editor.startEditing(row, editValue, null, selectionData);
         }
     },
 
@@ -1012,7 +1032,7 @@ function getRowOwnerObject(row)
 
 function getParentRow(row)
 {
-    var level = "" + (parseInt(row.getAttribute("level"), 10) - 1);
+    var level = String(parseInt(row.getAttribute("level"), 10) - 1);
     if (level === "-1")
         return;
     for (row = row.previousSibling; row; row = row.previousSibling)

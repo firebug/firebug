@@ -2,10 +2,11 @@
 
 define([
     "firebug/lib/object",
-    "firebug/firebug",
     "firebug/lib/events",
 ],
-function(Obj, Firebug, Events) {
+function(Obj, Events) {
+
+"use strict";
 
 // ********************************************************************************************* //
 
@@ -208,7 +209,7 @@ var DragDrop = {};
 DragDrop.Tracker = Tracker;
 
 // ********************************************************************************************* //
-// Registration in Firebug namespace
+// Registration
 
 return DragDrop;
 
