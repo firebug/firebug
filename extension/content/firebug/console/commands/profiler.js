@@ -426,7 +426,7 @@ Profiler.ProfileTable = domplate(
 
     sort: function(table, colIndex, numerical)
     {
-        sortAscending = function()
+        var sortAscending = function()
         {
             Css.removeClass(header, "sortedDescending");
             Css.setClass(header, "sortedAscending");
@@ -436,9 +436,9 @@ Profiler.ProfileTable = domplate(
 
             for (var i = 0; i < values.length; i++)
                 tbody.appendChild(values[i].row);
-        },
+        };
 
-        sortDescending = function()
+        var sortDescending = function()
         {
           Css.removeClass(header, "sortedAscending");
           Css.setClass(header, "sortedDescending");
