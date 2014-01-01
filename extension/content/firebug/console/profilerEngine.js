@@ -58,7 +58,7 @@ ProfilerEngine.prototype =
 
     stopProfiling: function()
     {
-        this.dbg.destroy();
+        DebuggerLib.destroyDebuggerForContext(this.context, this.dbg);
         this.dbg = null;
 
         Trace.sysout("profilerEngine.stopProfiling;", this.scripts);

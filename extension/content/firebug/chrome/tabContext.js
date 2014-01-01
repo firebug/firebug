@@ -13,9 +13,10 @@ define([
     "arch/compilationunit",
     "firebug/chrome/window",
     "firebug/chrome/plugin",
+    "firebug/debugger/debuggerLib",
 ],
 function(Firebug, FBTrace, Obj, Arr, Events, Url, Css, Wrapper, Promise,
-    CompilationUnit, Win, Plugin) {
+    CompilationUnit, Win, Plugin, DebuggerLib) {
 
 "use strict";
 
@@ -304,12 +305,12 @@ TabContext.prototype =
         // All debuggers created for this context must be destroyed (this really ought to be done
         // by the code that created them, but we leak memory and worsen performance permanently
         // if they forget, so we do this as a safety measure).
-        if (this.debuggers)
+        if (this.debuggers && this.debuggers.length > 0)
         {
-            for (var dbg of this.debuggers)
+            for (var dbg of this.debuggers.slice())
             {
                 TraceError.sysout("tabContext.destroy; failed to destroy debugger", dbg);
-                dbg.destroy();
+                DebuggerLib.destroyDebuggerForContext(this, dbg);
             }
         }
 

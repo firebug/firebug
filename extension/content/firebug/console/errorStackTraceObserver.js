@@ -131,7 +131,7 @@ var ErrorStackTraceObserver = Obj.extend(Firebug.Module,
 
         try
         {
-            context.errorStackTraceDbg.destroy();
+            DebuggerLib.destroyDebuggerForContext(context, context.errorStackTraceDbg);
             context.errorStackTraceDbg = null;
         }
         catch (err)

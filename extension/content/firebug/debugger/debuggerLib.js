@@ -438,12 +438,6 @@ DebuggerLib.makeDebuggerForContext = function(context)
         if (!context.debuggers)
             context.debuggers = [];
         context.debuggers.push(dbg);
-        dbg.destroy = function()
-        {
-            dbg.enabled = false;
-            var ind = context.debuggers.indexOf(dbg);
-            context.debuggers.splice(ind, 1);
-        };
 
         return dbg;
     }
@@ -451,6 +445,14 @@ DebuggerLib.makeDebuggerForContext = function(context)
     {
         TraceError.sysout("DebuggerLib.makeDebuggerForContext; EXCEPTION " + err, err);
     }
+};
+
+DebuggerLib.destroyDebuggerForContext = function(context, dbg)
+{
+    dbg.enabled = false;
+    var ind = context.debuggers.indexOf(dbg);
+    if (ind !== -1)
+        context.debuggers.splice(ind, 1);
 };
 
 // ********************************************************************************************* //
