@@ -116,8 +116,25 @@ panelTab:not([selected="true"]):hover {
     border: 1px solid #96969D;
 }
 
-.fbsearch-options-buttons {
-    border: 1px solid ThreeDShadow;
+.fbsearch-options-buttons,
+.fbsearch-options-buttons:hover:not([disabled="true"]) {
+    border: 1px solid #96969D;
+    border-left-width: 0;
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*************************************************************************************************/
+/* Buttons */
+
+toolbarbutton[type=menu-button] > .toolbarbutton-menubutton-button {
+  padding: 6px;
+}
+
+toolbarbutton:-moz-any([selected="true"],
+                       [open="true"]):not([disabled="true"]) {
+    background: transparent linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent) no-repeat;
+}
+
+toolbarbutton[type=menu-button][open="true"]:not([disabled="true"]) > .toolbarbutton-menubutton-dropmarker {
+    border-color: transparent;
+    box-shadow: none;
+}
