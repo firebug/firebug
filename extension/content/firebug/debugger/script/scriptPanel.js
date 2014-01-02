@@ -875,7 +875,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // Remove breakpoint from the UI.
         this.scriptView.removeBreakpoint(bp);
-        if (this.scriptView.editor.debugLocation == bp.lineNo)
+        if (this.scriptView.editor && this.scriptView.editor.debugLocation == bp.lineNo)
             this.scriptView.setDebugLocation(bp.lineNo);
     },
 
