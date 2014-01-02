@@ -255,9 +255,9 @@ code {
     position: relative;
     padding: 2px 4px;
     margin: 0 0 4px 0;
-    border-top: 1px solid #CCCCCC;
-    border-bottom: 1px solid #CCCCCC;
-    background: #FFFFFF linear-gradient(to top, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1) 60%, rgba(0, 0, 0, 0.05) 60%, transparent) repeat-x;
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    background: #FAFAFA linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent) repeat-x;
     font-size: inherit;
 }
 
