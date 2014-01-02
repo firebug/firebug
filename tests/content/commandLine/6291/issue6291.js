@@ -14,15 +14,15 @@ function runTest()
 
             // 3
             tasks.push(logProgress, "Testing the nsIXPCException's with alert()");
-            var alertCommand = "alert({toString: function(){ throw 1; }})";
+            var atobCommand = "atob('b');";
             var expected = {
-                sourceCode: alertCommand,
+                sourceCode: atobCommand,
                 scriptName: "/* " + FW.FBL.$STR("commandline.errorSourceHeader").substr(0, 3) +
-                    "... 1; }})",
+                    "...b('b');",
                 lineNo: 2
             };
-            tasks.push(FBTest.executeCommandAndVerify, alertCommand,
-                "Error: Could not convert JavaScript argument arg 0 [nsIDOMWindow.alert]", "span",
+            tasks.push(FBTest.executeCommandAndVerify, atobCommand,
+                "Error: String contains an invalid character", "span",
                 "errorMessage", false);
             tasks.push(testError, expected);
 
@@ -37,7 +37,7 @@ function runTest()
             tasks.push(logProgress, "Testing the calls of the console API through the webpage");
             tasks.push(click, win.document.getElementById("logSomeText"));
             tasks.push(testLogMessageFromPage, panelNode, "some text via the webpage",
-                FW.FBL.$STRF("Line", ["issue6291.html", 20]));
+                FW.FBL.$STRF("Line", ["issue6291.html", 10]));
 
             // 6.
             tasks.push(logProgress, "Testing the evaluation of |debugger;|");
