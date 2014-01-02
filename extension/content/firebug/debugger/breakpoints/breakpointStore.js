@@ -246,7 +246,7 @@ var BreakpointStore = Obj.extend(Module,
 
         // Bail out if exactly the same breakpoint already exists. This is not an error
         // since the store is shared across all contexts.
-        if (bp && (bp.type & type == bp.type))
+        if (bp && (bp.type & type) == type)
             return bp;
 
         // Either extend an existing breakpoint type (in case there are two different breakpoints
