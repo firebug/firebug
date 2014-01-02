@@ -1,19 +1,17 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/chrome/module",
-    "firebug/chrome/rep",
-    "firebug/lib/object",
     "firebug/firebug",
-    "firebug/chrome/firefox",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/lib/domplate",
-    "firebug/lib/xpcom",
-    "firebug/lib/url",
     "firebug/lib/dom",
     "firebug/lib/options",
+    "firebug/chrome/module",
+    "firebug/chrome/rep",
 ],
-function(Module, Rep, Obj, Firebug, Firefox, Locale, Domplate, Xpcom, Url, Dom, Options) {
+function(Firebug, FBTrace, Obj, Locale, Domplate, Dom, Options, Module, Rep) {
 
 "use strict";
 
@@ -23,10 +21,13 @@ function(Module, Rep, Obj, Firebug, Firefox, Locale, Domplate, Xpcom, Url, Dom, 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-var prefs = Xpcom.CCSV("@mozilla.org/preferences-service;1", "nsIPrefBranch");
-var prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
+var prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
+var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPromptService);
 
 var {domplate, DIV, H1, SPAN, P, A} = Domplate;
+
+var Trace = FBTrace.to("DBG_ACTIVATION");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // Panel Activation Implementation
@@ -43,6 +44,7 @@ Firebug.PanelActivation = Obj.extend(Module,
     dispatchName: "panelActivation",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
 
     initialize: function()
     {
@@ -67,14 +69,15 @@ Firebug.PanelActivation = Obj.extend(Module,
         Firebug.connection.removeListener(this);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     showPanel: function(browser, panel)
     {
-        if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("PanelActivation.showPanel; " + (panel ? panel.name : "null panel"));
+        Trace.sysout("panelActivation.showPanel; " + (panel ? panel.name : "null panel"));
 
-        // Panel toolbar is not displayed for disabled panels.
-        var chrome = Firebug.chrome;
-        Dom.collapse(chrome.$("fbToolbar"), !panel);
+        // Panel toolbar is not displayed for disabled panels. Also make sure to collapse
+        // the 'fbToolbox', so there is no line below the panel tab.
+        Dom.collapse(Firebug.chrome.$("fbToolbox"), !panel);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -204,8 +207,7 @@ Firebug.PanelActivation = Obj.extend(Module,
         }
         catch (e)
         {
-            if (FBTrace.DBG_ACTIVATION || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("PanelActivation.observe; EXCEPTION " + e, e);
+            TraceError.sysout("panelActivation.observe; EXCEPTION " + e, e);
         }
     },
 
@@ -273,9 +275,8 @@ Firebug.PanelActivation = Obj.extend(Module,
 
     toggleAll: function(state)
     {
-        if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Firebug.toggleAll("+state+") with allPagesActivation: " +
-                Firebug.allPagesActivation);
+        Trace.sysout("panelActivation.toggleAll; state: " + state + " with allPagesActivation: " +
+            Firebug.allPagesActivation);
 
         if (state == "on")
         {
@@ -354,9 +355,9 @@ Firebug.DisabledPanelBox = domplate(Rep,
         }
         else
         {
-            if (FBTrace.DBG_ERRORS)
+            if (TraceError.active)
             {
-                FBTrace.sysout("panelActivation.onEnable; panel is not activable: " +
+                TraceError.sysout("panelActivation.onEnable; panel is not activable: " +
                     Firebug.getPanelTitle(panelType));
             }
         }
