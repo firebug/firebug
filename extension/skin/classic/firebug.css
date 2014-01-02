@@ -801,5 +801,5 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
 
 #fbToggleSidePanelsBox2 {
     -moz-box-align: center;
-    padding-bottom: 2px;
+    padding-bottom: 1px;
 }
