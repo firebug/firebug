@@ -29,6 +29,8 @@ function(Obj, Firebug, Firefox, CompilationUnit, Xpcom, FirebugReps, Locale,
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const Cu = Components.utils;
+
 const jsdIScript = Ci.jsdIScript;
 const jsdIStackFrame = Ci.jsdIStackFrame;
 const jsdIExecutionHook = Ci.jsdIExecutionHook;
@@ -576,8 +578,13 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     freeze: function(context)
     {
         var executionContext = context.stoppedFrame.executionContext;
-        try {
-            executionContext.scriptsEnabled = false;
+        try
+        {
+            // xxxHonza: executionContext.scriptsEnabled doesn't work anymore
+            // See also: https://bugzilla.mozilla.org/show_bug.cgi?id=953344
+            // executionContext.scriptsEnabled = false;
+            Cu.blockScriptForGlobal(context.window);
+
             this.suppressEventHandling(context);
             context.isFrozen = true;
 
@@ -620,8 +627,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
                 FBTrace.sysout("debugger.freeze try to disable scripts "+
                     (context.eventSuppressor?"and events":"but not events")+" in "+
-                    context.getName()+" executionContext.tag "+executionContext.tag+
-                    ".scriptsEnabled: "+executionContext.scriptsEnabled);
+                    context.getName()+" executionContext.tag "+executionContext.tag);
             }
         }
         catch (exc)
@@ -645,13 +651,14 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     thaw: function(context)
     {
-        try {
+        try
+        {
             if (context.isFrozen)
                 delete context.isFrozen;
             else
                 return; // bail, we did not freeze this context
 
-                var executionContext = context.stoppedFrame.executionContext;
+            var executionContext = context.stoppedFrame.executionContext;
             if (executionContext.isValid)
             {
                 this.unsuppressEventHandling(context);
@@ -672,7 +679,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                     }
                 }
 
-                executionContext.scriptsEnabled = true;
+                // xxxHonza: executionContext.scriptsEnabled doesn't work anymore
+                // See also: https://bugzilla.mozilla.org/show_bug.cgi?id=953344
+                // executionContext.scriptsEnabled = true;
+                Cu.unblockScriptForGlobal(context.window);
             }
             else
             {
@@ -684,8 +694,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             if (FBTrace.DBG_UI_LOOP)
                 FBTrace.sysout("debugger.thaw try to enable scripts " +
                     (context.eventSuppressor?"with events suppressed":"events enabled")+
-                    " in "+context.getName()+" executionContext.tag "+executionContext.tag+
-                    ".scriptsEnabled: "+executionContext.scriptsEnabled);
+                    " in "+context.getName()+" executionContext.tag "+executionContext.tag);
         }
         catch (exc)
         {
