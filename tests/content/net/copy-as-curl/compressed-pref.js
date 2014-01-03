@@ -2,7 +2,7 @@ function runTest()
 {
     FBTest.sysout("compressed-pref.START");
 
-    var EXPECTED_RESULT = "curl '" + basePath + "net/copy-as-curl/compressed-pref.html?param=value' -H 'Host: " + FW.FBL.makeURI(basePath).host + "' -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:22.0) Gecko/20100101 Firefox/22.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept-Encoding: gzip, deflate' -H 'DNT: 1' -H 'Referer: " + basePath + "net/copy-as-curl/compressed-pref.html' -H 'Connection: keep-alive'";
+    var EXPECTED_RESULT = "curl '" + basePath + "net/copy-as-curl/compressed-pref.html?param=value' -H 'Host: " + FW.FBL.makeURI(basePath).host + "' -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:22.0) Gecko/20100101 Firefox/22.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept-Encoding: gzip, deflate' -H 'Referer: " + basePath + "net/copy-as-curl/compressed-pref.html' -H 'Connection: keep-alive'";
 
     var originalPrefValue = FBTest.getPref("net.curlAddCompressedArgument");
 
@@ -66,8 +66,15 @@ function executeAndVerify(expectedResult, commandId, netRow, callback)
                 return str.replace(/(-H 'User-Agent: ).+?(')/i, "$1" + replaceWithStr + "$2");
             }
 
-            // Verify data in the clipboard
-            FBTest.compare(expectedResult, replaceUserAgentHeader(clipboardText), "Proper data must be in the clipboard.");
+            // Make sure the optional DNT header is not in the actual result (see issue 7068).
+            function removeDNTHeader(str)
+            {
+                return str.replace(/(-H 'DNT: 1')\s/i, "");
+            }
+
+            var actualResult = replaceUserAgentHeader(removeDNTHeader(clipboardText));
+
+            FBTest.compare(expectedResult, actualResult, "Proper data must be in the clipboard.");
 
             callback();
         });
