@@ -656,7 +656,10 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         {
             context.eventSuppressor = context.window.getInterface(Ci.nsIDOMWindowUtils);
             if (context.eventSuppressor)
+            {
                 context.eventSuppressor.suppressEventHandling(true);
+                context.eventSuppressor.suspendTimeouts();
+            }
         }
     },
 
@@ -719,6 +722,8 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         if (context.eventSuppressor)
         {
             context.eventSuppressor.suppressEventHandling(false);
+            context.eventSuppressor.resumeTimeouts();
+
             delete context.eventSuppressor;
         }
     },
