@@ -157,6 +157,12 @@ toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
     -moz-box-align: end;
 }
 
+/* Make sure panel-tab labels are centered within the toolbar */
+@media (-moz-os-version:windows-vista) {
+panelTab {
+    padding: 5px 7px;
+}}
+
 panelTab[selected="true"] {
     border: 1px solid rgb(170, 188, 207);
     background-color: rgb(247, 251, 254);
