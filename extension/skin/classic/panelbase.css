@@ -253,11 +253,10 @@ code {
 
 .groupHeader {
     position: relative;
-    padding: 2px 4px;
+    border-bottom: none;
     margin: 0 0 4px 0;
-    border-top: 1px solid rgba(0, 0, 0, 0.2);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-    background: #FAFAFA linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent) repeat-x;
+    padding: 2px 4px;
+    background: #F0F0F0 linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent) repeat-x;
     font-size: inherit;
 }
 
