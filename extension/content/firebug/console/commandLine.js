@@ -42,6 +42,7 @@ var Cc = Components.classes;
 
 var commandPrefix = ">>> ";
 var Trace = FBTrace.to("DBG_COMMANDLINE");
+var TraceError = FBTrace.to("DBG_ERROR");
 
 // ********************************************************************************************* //
 // Command Line
@@ -812,14 +813,12 @@ function evaluateExpression(execContextType, expr, context, thisValue, targetWin
 
     if (execContextType === "frame")
     {
-        // xxxFlorent: TODO factorize this code with Firebug.Debugger.evaluate
-        var currentFrame = context.currentFrame;
-        if (!currentFrame)
+        var frame = DebuggerLib.getCurrentFrame(context);
+        if (!frame)
+        {
+            TraceError.sysout("CommandLine.evaluate; frame not found");
             return;
-
-        var threadActor = DebuggerLib.getThreadActor(context.browser);
-        var frameActor = currentFrame.getActor();
-        var frame = threadActor._requestFrame(frameActor);
+        }
 
         CommandLineExposed.evaluateInFrame(frame, context, win, expr, origExpr,
             onSuccess, onError, options);

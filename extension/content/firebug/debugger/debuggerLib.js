@@ -222,6 +222,20 @@ DebuggerLib.getDebuggerDebuggeeGlobalForContext = function(context, global)
 };
 
 // ********************************************************************************************* //
+// Frames
+
+DebuggerLib.getCurrentFrame = function(context)
+{
+    var currentFrame = context.currentFrame;
+    if (!currentFrame)
+        return null;
+
+    var threadActor = DebuggerLib.getThreadActor(context.browser);
+    var frameActor = currentFrame.getActor();
+    return threadActor._requestFrame(frameActor);
+};
+
+// ********************************************************************************************* //
 // Stack Frames
 
 DebuggerLib.getCurrentFrames = function(context)
