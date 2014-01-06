@@ -109,7 +109,7 @@ CSSComputedPanel.prototype = Obj.extend(Panel,
                             TD({"class": "selectorName", role: "presentation"},
                                 "$selector.selector.text"),
                             TD({"class": "propValue", role: "presentation"},
-                                SPAN({"class": "stylePropValue"}, "$selector.value|formatValue")),
+                                SPAN({"class": "stylePropValue"}, "$selector|getAuthoredValue|formatValue")),
                             TD({"class": "styleSourceLink", role: "presentation"},
                                 TAG(FirebugReps.SourceLink.tag, {object: "$selector|getSourceLink"})
                             )
@@ -149,6 +149,16 @@ CSSComputedPanel.prototype = Obj.extend(Panel,
                 rule, instance) : null;
 
             return sourceLink;
+        },
+
+        getAuthoredValue: function(selector)
+        {
+            if (Options.get("colorDisplay") !== "authored")
+                return selector.value;
+
+            var style = selector.selector.cssRule.domRule.style;
+            return style.getAuthoredPropertyValue ?
+                style.getAuthoredPropertyValue(selector.property) : selector.value;
         },
 
         formatValue: function(value)
@@ -623,7 +633,12 @@ CSSComputedPanel.prototype = Obj.extend(Panel,
             var propInfo = Firebug.getRepObject(target);
 
             var prop = propInfo.property;
-            var value = formatColor(propInfo.value);
+
+            var style = propInfo.selector ? propInfo.selector.cssRule.domRule.style : null;
+            var value = (Options.get("colorDisplay") === "authored" && style &&
+                    style.getAuthoredPropertyValue) ?
+                style.getAuthoredPropertyValue(propInfo.property) : formatColor(propInfo.value);
+
             var cssValue;
 
             if (prop == "font" || prop == "font-family")

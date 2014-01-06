@@ -886,9 +886,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 if(!m)
                     continue;
 
+                var value = (Options.get("colorDisplay") == "authored") && style.getAuthoredPropertyValue ?
+                        style.getAuthoredPropertyValue(m[1]) : m[2];
+
                 //var name = m[1], value = m[2], important = !!m[3];
                 if (m[2])
-                    this.addProperty(m[1], m[2], !!m[3], false, inheritMode, props);
+                    this.addProperty(m[1], value, !!m[3], false, inheritMode, props);
             }
         }
 
@@ -1688,8 +1691,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
             var propName = propNameNode.textContent.toLowerCase();
             var priority = styleRule.style.getPropertyPriority(propName);
-            var text = styleRule.style.getPropertyValue(propName) +
-                (priority ? " !" + priority : "");
+            var value = (Options.get("colorDisplay") === "authored" &&
+                    styleRule.style.getAuthoredPropertyValue) ?
+                styleRule.style.getAuthoredPropertyValue(propName) :
+                    styleRule.style.getPropertyValue(propName);
+            var text = value + (priority ? " !" + priority : "");
 
             if (text != "")
             {
