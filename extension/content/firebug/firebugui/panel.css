@@ -4,6 +4,7 @@
 @import "chrome://firebug/skin/breakpoint.css";
 @import "chrome://firebug/skin/console.css";
 @import "chrome://firebug/skin/net.css";
+@import "chrome://firebug-os/skin/net.css";
 @import "chrome://firebug/skin/jsonViewer.css";
 @import "chrome://firebug/skin/fontViewer.css";
 @import "chrome://firebug/skin/html.css";

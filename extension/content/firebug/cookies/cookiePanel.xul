@@ -2,6 +2,7 @@
 <!-- See license.txt for terms of usage -->
 
 <?xml-stylesheet href="chrome://firebug/skin/cookies/cookies.css"?>
+<?xml-stylesheet href="chrome://firebug-os/skin/cookies.css"?>
 <?xml-stylesheet href="chrome://firebug/content/cookies/cookies.css"?>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
