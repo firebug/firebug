@@ -22,7 +22,7 @@ function(Obj, Firebug, Rep, Domplate, FirebugReps, Locale, Events, Css, Dom, Str
 
 var {domplate, DIV, TABLE, TBODY, TR, TD, IMG, SPAN, BUTTON, TAG} = Domplate;
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_BREAKNOTIFICATION");
 
 // ********************************************************************************************* //

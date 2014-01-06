@@ -16,7 +16,7 @@ function(Firebug, FBTrace, Obj, Win, TabWatcher, EventSource, Firefox, DebuggerL
 // Constants
 
 var Trace = FBTrace.to("DBG_TABCLIENT");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 var getWinLocation = Win.safeGetWindowLocation;
 

@@ -24,7 +24,7 @@ function(Firebug, FBTrace, Domplate, Dom, Css, Str, Promise, Events, Options, Do
 var {domplate, TR, TD, DIV, SPAN, TAG} = Domplate;
 
 var Trace = FBTrace.to("DBG_DOMBASETREE");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // Asynchronous tree population is good for UI (avoids UI freezing), but causes flickering.
 // Note that the first slice of data is inserted synchronously, so the tree population can be

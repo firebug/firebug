@@ -21,7 +21,7 @@ function(Firebug, FBTrace, Obj, DOMBasePanel, DomPanelTree, DomProvider, DOMMemb
 // Constants
 
 var Trace = FBTrace.to("DBG_DOM");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // DOM Side Panel Implementation

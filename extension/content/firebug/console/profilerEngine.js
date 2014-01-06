@@ -17,7 +17,7 @@ var Ci = Components.interfaces;
 var Cu = Components.utils;
 
 var Trace = FBTrace.to("DBG_PROFILER");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Profiler engine based on JSD2 API

@@ -15,7 +15,7 @@ function (FBTrace, Obj, ClientProvider, DOMMemberProvider, DebuggerLib) {
 // Constants
 
 var Trace = FBTrace.to("DBG_DOM");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Watch Panel Provider

@@ -9,7 +9,7 @@ function(FBTrace) {
 // ********************************************************************************************* //
 // Constants
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // ToggleBranch Implementation

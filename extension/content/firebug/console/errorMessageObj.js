@@ -17,7 +17,7 @@ function(Firebug, FBTrace, SourceFile, SourceLink, FirebugReps) {
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_ERRORLOG");
 
 // ********************************************************************************************* //

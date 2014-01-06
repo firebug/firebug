@@ -21,7 +21,7 @@ function(Firebug, FBTrace, Domplate, Dom, Locale, Events, Menu, BaseEditor, Edit
 
 var {domplate, DIV} = Domplate;
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // HTMLEditor

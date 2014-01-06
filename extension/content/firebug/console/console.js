@@ -29,7 +29,7 @@ function(Firebug, FBTrace, Obj, Events, Locale, Search, Xml, Options, Win, Firef
 var defaultReturnValue = createDefaultReturnValueInstance();
 
 var Trace = FBTrace.to("DBG_CONSOLE");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Console Implementation

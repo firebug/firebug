@@ -16,7 +16,7 @@ function(Firebug, FBTrace, Events, Options, Deprecated, ConsolePanel) {
 // Constants
 
 var Trace = FBTrace.to("DBG_CONSOLE");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 var appendObject = ConsolePanel.prototype.appendObject;
 var appendFormatted = ConsolePanel.prototype.appendFormatted;

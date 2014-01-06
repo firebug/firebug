@@ -15,7 +15,7 @@ function(FBTrace, Str, Events, SourceLink, DebuggerLib) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_SOURCEFILE");
 
 // ********************************************************************************************* //

@@ -17,7 +17,7 @@ function(Obj, Wrapper, Locale, DebuggerLib, CommandLineAPI) {
 // Constants
 
 var Trace = FBTrace.to("DBG_COMMANDLINE");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Command Line APIs

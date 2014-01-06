@@ -13,7 +13,7 @@ function(Firebug, FBTrace, Obj, EventSource) {
 // ********************************************************************************************* //
 // Constants
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Implementation

@@ -37,7 +37,7 @@ function(Firebug, FBTrace, Obj, Arr, Events, Dom, Css, Search, Domplate, Locale,
 // Constants
 
 var Trace = FBTrace.to("DBG_DOMPANEL");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // DOM Panel

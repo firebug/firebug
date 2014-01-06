@@ -14,7 +14,7 @@ function(Firebug, FBTrace, Locale, Str, Wrapper, BreakpointModule) {
 // Constants
 
 var Trace = FBTrace.to("DBG_DOM");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // DOM Breakpoint

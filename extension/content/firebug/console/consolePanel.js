@@ -63,7 +63,7 @@ const logTypes =
 };
 
 var Trace = FBTrace.to("DBG_CONSOLE");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // ConsolePanel Implementation

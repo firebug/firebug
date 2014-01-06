@@ -27,7 +27,7 @@ var {domplate, DIV, TABLE, THEAD, TR, FOR, TH, TBODY, TD, TAG} = Domplate;
 
 // Tracing
 var Trace = FBTrace.to("DBG_TABLEREP");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 

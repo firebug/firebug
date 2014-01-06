@@ -29,7 +29,7 @@ var BP_ERROR = 16;
 var BP_TRACE = 32; // BP used to initiate traceCalls
 
 var Trace = FBTrace.to("DBG_BREAKPOINTSTORE");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Breakpoint Store

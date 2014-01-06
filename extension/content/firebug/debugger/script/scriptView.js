@@ -24,7 +24,7 @@ var Ci = Components.interfaces;
 var Cu = Components.utils;
 
 var Trace = FBTrace.to("DBG_SCRIPTVIEW");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Source View

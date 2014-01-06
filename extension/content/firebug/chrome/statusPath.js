@@ -16,7 +16,7 @@ function(Firebug, FBTrace, Obj, Dom, String, System, Module) {
 // ********************************************************************************************* //
 // Constants
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_STATUSPATH");
 
 var statusCropSize = 20;

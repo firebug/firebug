@@ -28,7 +28,7 @@ var dbgGlobalWeakMap = new WeakMap();
 // Module object
 var DebuggerLib = {};
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Implementation

@@ -35,7 +35,7 @@ var cssModeSrc = "chrome://firebug/content/editor/codemirror/mode/css.js";
 
 // Tracing helpers
 var Trace = FBTrace.to("DBG_SOURCEEDITOR");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // Debug location style classes
 var WRAP_CLASS = "CodeMirror-debugLocation";

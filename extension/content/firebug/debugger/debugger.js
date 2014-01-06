@@ -25,7 +25,7 @@ function(Firebug, FBTrace, Obj, Locale, Options, Firefox, TabWatcher, ActivableM
 // Constants
 
 var Trace = FBTrace.to("DBG_DEBUGGER");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Implementation

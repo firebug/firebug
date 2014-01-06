@@ -42,7 +42,7 @@ var Cc = Components.classes;
 
 var commandPrefix = ">>> ";
 var Trace = FBTrace.to("DBG_COMMANDLINE");
-var TraceError = FBTrace.to("DBG_ERROR");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Command Line

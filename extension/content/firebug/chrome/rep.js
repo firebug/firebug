@@ -17,7 +17,7 @@ function(Firebug, FBTrace, Locale, Str, Domplate, Inspector) {
 
 var {domplate, A, DIV, SPAN} = Domplate;
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Implementation

@@ -29,7 +29,7 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 var Trace = FBTrace.to("DBG_DOM");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Breakpoint Group

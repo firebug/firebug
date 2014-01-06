@@ -17,7 +17,7 @@ const Cu = Components.utils;
 
 Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Command Implementation
