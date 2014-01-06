@@ -582,8 +582,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         {
             // xxxHonza: executionContext.scriptsEnabled doesn't work anymore
             // See also: https://bugzilla.mozilla.org/show_bug.cgi?id=953344
-            // executionContext.scriptsEnabled = false;
-            Cu.blockScriptForGlobal(context.window);
+            if (typeof(Cu.blockScriptForGlobal) == "function")
+                Cu.blockScriptForGlobal(context.window);
+            else
+                executionContext.scriptsEnabled = false;
 
             this.suppressEventHandling(context);
             context.isFrozen = true;
@@ -681,8 +683,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
                 // xxxHonza: executionContext.scriptsEnabled doesn't work anymore
                 // See also: https://bugzilla.mozilla.org/show_bug.cgi?id=953344
-                // executionContext.scriptsEnabled = true;
-                Cu.unblockScriptForGlobal(context.window);
+                if (typeof(Cu.unblockScriptForGlobal) == "function")
+                    Cu.unblockScriptForGlobal(context.window);
+                else
+                    executionContext.scriptsEnabled = true;
             }
             else
             {
