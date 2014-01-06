@@ -102,6 +102,10 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
         // Just use for..in loop.
         if (!nonEnumProps && !ownPropsOnly)
         {
+            // Work around https://bugzilla.mozilla.org/show_bug.cgi?id=945377
+            if (Object.prototype.toString.call(ob) === "[object Generator]")
+                ob = Object.getPrototypeOf(ob);
+
             for (var name in ob)
                 return true;
             return false;

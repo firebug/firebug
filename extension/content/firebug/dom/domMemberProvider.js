@@ -11,9 +11,12 @@ define([
     "firebug/lib/trace",
     "firebug/lib/locale",
     "firebug/console/closureInspector",
+    "firebug/chrome/panelActivation",
     "firebug/chrome/reps",
+    "firebug/debugger/debuggerLib",
 ],
-function(Firebug, Obj, Arr, Wrapper, Dom, FBTrace, Locale, ClosureInspector, FirebugReps) {
+function(Firebug, Obj, Arr, Wrapper, Dom, FBTrace, Locale, ClosureInspector, PanelActivation,
+    FirebugReps, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -84,7 +87,7 @@ DOMMemberProvider.prototype =
                 // __proto__ never shows in enumerations, so add it here. We currently
                 // we don't want it when only showing own properties.
                 if (contentView.__proto__ && Obj.hasProperties(contentView.__proto__) &&
-                    properties.indexOf("__proto__") === -1 && !Firebug.showOwnProperties)
+                    properties.indexOf("__proto__") === -1 && !ownOnly)
                 {
                     properties.push("__proto__");
                 }
@@ -184,7 +187,8 @@ DOMMemberProvider.prototype =
                 }
             }
 
-            if (isScope || (typeof object === "function" && Firebug.showClosures && this.context))
+            if (this.shouldShowClosures() &&
+                (isScope || (typeof object === "function" && this.context)))
             {
                 this.maybeAddClosureMember(object, "proto", proto, level, isScope);
             }
@@ -282,6 +286,16 @@ DOMMemberProvider.prototype =
         }
     },
 
+    shouldShowClosures: function()
+    {
+        if (!Firebug.showClosures)
+            return false;
+        var requireScriptPanel = DebuggerLib._closureInspectionRequiresDebugger();
+        if (requireScriptPanel && !PanelActivation.isPanelEnabled(Firebug.getPanelType("script")))
+            return false;
+        return true;
+    },
+
     addMemberInternal: function(object, type, props, name, value, level, parentIsScope)
     {
         // Do this first in case a call to instanceof (= QI, for XPCOM things) reveals contents.
@@ -297,13 +311,15 @@ DOMMemberProvider.prototype =
              (valueType === "object" && value !== null));
 
         // Special case for closure inspection.
-        if (!hasChildren && valueType === "function" && Firebug.showClosures && this.context)
+        if (!hasChildren && valueType === "function" && this.shouldShowClosures() && this.context)
         {
             try
             {
                 var win = this.context.getCurrentGlobal();
-                ClosureInspector.getEnvironmentForObject(win, value, this.context);
-                hasChildren = true;
+                ClosureInspector.withEnvironmentForObject(win, value, this.context, function(env)
+                {
+                    hasChildren = true;
+                });
             }
             catch (e) {}
         }

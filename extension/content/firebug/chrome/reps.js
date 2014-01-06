@@ -422,7 +422,11 @@ FirebugReps.Obj = domplate(Firebug.Rep,
         {
             return (t == "boolean" || t == "number" || (t == "string" && value) ||
                 (t == "object" && value && value.toString));
-        };
+        }
+
+        // Work around https://bugzilla.mozilla.org/show_bug.cgi?id=945377
+        if (Object.prototype.toString.call(object) === "[object Generator]")
+            object = Object.getPrototypeOf(object);
 
         // Object members with non-empty values are preferred since it gives the
         // user a better overview of the object.
@@ -2984,17 +2988,14 @@ FirebugReps.ClosureScope = domplate(Firebug.Rep,
 
     getTitle: function(object)
     {
-        var scope = ClosureInspector.getScopeFromWrapper(object);
-        var type = scope.type, title;
+        var type = ClosureInspector.getScopeTypeFromWrapper(object);
         if (type === "declarative")
-            title = Locale.$STR("firebug.reps.declarativeScope");
-        else if (type === "object")
-            title = Locale.$STR("firebug.reps.objectScope");
-        else if (type === "with")
-            title = Locale.$STR("firebug.reps.withScope");
-        else
-            title = "<unknown scope \"" + type + "\">"; // shouldn't happen
-        return title;
+            return Locale.$STR("firebug.reps.declarativeScope");
+        if (type === "object")
+            return Locale.$STR("firebug.reps.objectScope");
+        if (type === "with")
+            return Locale.$STR("firebug.reps.withScope");
+        return "<unknown scope \"" + type + "\">"; // shouldn't happen
     },
 
     supportsObject: function(object, type)

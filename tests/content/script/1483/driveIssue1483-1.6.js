@@ -9,6 +9,10 @@ function runTest()
         FBTest.openFirebug();
         FBTest.clearCache();
 
+        // xxxFlorent: Remove this when Firebug 2.0 is out.
+        // Don't display the "Slow JSD" warning message.
+        FBTest.setPref("showSlowJSDMessage2", false);
+
         // Enable the Console and Script panel
         FBTest.enableConsolePanel();
         FBTest.enableScriptPanel(function ()

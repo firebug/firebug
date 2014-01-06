@@ -82,25 +82,30 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         {
             debuggerState = Firebug.Debugger.beginInternalOperation();
 
-            var newExpr = expr;
-            if (!options.noCmdLineAPI)
-                newExpr = ClosureInspector.extendLanguageSyntax(expr, targetWindow, context);
+            var self = this;
+            var evaluate = function(newExpr)
+            {
+                if (this.isSandbox(context))
+                {
+                    this.evaluateInSandbox(newExpr, context, thisValue, targetWindow,
+                        successConsoleFunction, exceptionFunction, expr);
+                }
+                else if (Firebug.Debugger.hasValidStack(context))
+                {
+                    this.evaluateInDebugFrame(newExpr, context, thisValue, targetWindow,
+                        successConsoleFunction, exceptionFunction, expr);
+                }
+                else
+                {
+                    this.evaluateInGlobal(newExpr, context, thisValue, targetWindow,
+                        successConsoleFunction, exceptionFunction, expr, options);
+                }
+            }.bind(this);
 
-            if (this.isSandbox(context))
-            {
-                this.evaluateInSandbox(newExpr, context, thisValue, targetWindow,
-                    successConsoleFunction, exceptionFunction, expr);
-            }
-            else if (Firebug.Debugger.hasValidStack(context))
-            {
-                this.evaluateInDebugFrame(newExpr, context, thisValue, targetWindow,
-                    successConsoleFunction, exceptionFunction, expr);
-            }
+            if (options.noCmdLineAPI)
+                evaluate(expr);
             else
-            {
-                this.evaluateInGlobal(newExpr, context, thisValue, targetWindow,
-                    successConsoleFunction, exceptionFunction, expr, options);
-            }
+                ClosureInspector.withExtendedLanguageSyntax(expr, targetWindow, context, evaluate);
 
             if (!options.noStateChange)
                 context.invalidatePanels("dom", "html");
@@ -108,7 +113,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         catch (exc)
         {
             // XXX jjb, I don't expect this to be taken, the try here is for the finally
-            if (FBTrace.DBG_ERRORS && FBTrace.DBG_COMMANDLINE)
+            if (FBTrace.DBG_ERRORS)
             {
                 FBTrace.sysout("commandLine.evaluate with context.stopped:" + context.stopped +
                     " EXCEPTION " + exc, exc);
@@ -159,7 +164,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                 if (FBTrace.DBG_COMMANDLINE)
                 {
                     FBTrace.sysout("commandLine.evaluateInGlobal; the evaluation succeeded "+
-                        "and returned: "+ result, result);
+                        "and returned: ", result);
                 }
 
                 if (Console.isDefaultReturnValue(result))

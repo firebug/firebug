@@ -66,8 +66,15 @@ function executeAndVerify(expectedResult, commandId, netRow, callback)
                 return str.replace(/(-H 'User-Agent: ).+?(')/i, "$1" + replaceWithStr + "$2");
             }
 
-            // Verify data in the clipboard
-            FBTest.compare(expectedResult, replaceUserAgentHeader(clipboardText), "Proper data must be in the clipboard.");
+            // Make sure the optional DNT header is not in the actual result (see issue 7068).
+            function removeDNTHeader(str)
+            {
+                return str.replace(/(-H 'DNT: 1')\s/i, "");
+            }
+
+            var actualResult = replaceUserAgentHeader(removeDNTHeader(clipboardText));
+
+            FBTest.compare(expectedResult, actualResult, "Proper data must be in the clipboard.");
 
             callback();
         });

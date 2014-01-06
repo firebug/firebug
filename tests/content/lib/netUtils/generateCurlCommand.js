@@ -36,6 +36,7 @@ function runTest()
 function submitAndVerify(taskCallback, method, expectedResult, win, whatToExpectText)
 {
     FBTest.progress("Test XHR " + method + " request");
+
     FBTest.selectPanel("net").clear();
 
     function replaceUserAgentHeader(str)
@@ -44,11 +45,19 @@ function submitAndVerify(taskCallback, method, expectedResult, win, whatToExpect
         return str.replace(/(-H 'User-Agent: ).+?(')/i, "$1" + replaceWithStr + "$2");
     }
 
+    // Make sure the optional DNT header is not in the actual result (see issue 7068).
+    function removeDoNotTrackHeader(str)
+    {
+        return str.replace(/(-H 'DNT: 1')\s/i, "");
+    }
+
     onRequestDisplayed(function(netRow)
     {
         var file = FW.Firebug.getRepObject(netRow);
-        var generatedCommand = FW.Firebug.NetMonitor.Utils.generateCurlCommand(file);
-        FBTest.compare(replaceUserAgentHeader(generatedCommand), expectedResult, whatToExpectText);
+        var generatedCurlCommand = FW.Firebug.NetMonitor.Utils.generateCurlCommand(file);
+        var actualResult = replaceUserAgentHeader(removeDoNotTrackHeader(generatedCurlCommand));
+
+        FBTest.compare(actualResult, expectedResult, whatToExpectText);
 
         taskCallback();
     });

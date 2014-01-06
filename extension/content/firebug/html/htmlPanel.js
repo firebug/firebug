@@ -2405,11 +2405,14 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (!element)
             return;
 
-        // XXXstr unescape value
-        target.textContent = value;
-
         if (Css.hasClass(target, "nodeName"))
         {
+            // For HTML elements, make the attribute name into lower case to match
+            // what it gets normalized to by the browser - otherwise we will be
+            // fooled into thinking that an extra attribute has appeared (issue 6996).
+            if (Xml.isElementHTML(element))
+                value = value.toLowerCase();
+
             if (value != previousValue)
                 element.removeAttribute(previousValue);
 
@@ -2428,6 +2431,8 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var attrName = Dom.getPreviousByClass(target, "nodeName").textContent;
             element.setAttribute(attrName, value);
         }
+
+        target.textContent = value;
 
         var panel = Firebug.getElementPanel(target);
         Events.dispatch(Firebug.uiListeners, "onObjectChanged", [element, panel]);
