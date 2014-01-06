@@ -106,7 +106,7 @@
 .logRow-loading,
 .logRow-errorMessage {
     background-repeat: no-repeat;
-    background-position: 4px 2px;
+    background-position: 4px center;
 }
 
 .logRow-info > div > .logContent,
@@ -337,7 +337,7 @@ of an error log is affected (higher than other logs). */
     width: 12px;
     height: 12px;
     vertical-align: baseline;
-    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat center center;
     opacity: 0.1;
 }
 
@@ -346,7 +346,7 @@ of an error log is affected (higher than other logs). */
 }
 
 .hasBreakSwitch .errorBreak {
-    display: inline-block;
+    display: block;
 }
 
 .breakForError .errorBreak {
