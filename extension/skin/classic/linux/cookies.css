@@ -1,0 +1,12 @@
+/* See license.txt for terms of usage */
+
+/************************************************************************************************/
+/* Header for cookie list */
+
+.cookieHeaderCell {
+    background-color: #E6E6E6;
+}
+
+.cookieHeaderSorted {
+    background-color: #FAC8AF;
+}

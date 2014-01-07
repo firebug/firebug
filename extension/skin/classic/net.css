@@ -38,11 +38,11 @@
     padding: 0 !important;
     font-weight: bold;
     background: linear-gradient(to bottom,
-            transparent,
-            rgba(0, 0, 0, 0.1)),
+            rgba(255, 255, 255, 0.05),
+            rgba(0, 0, 0, 0.05)),
         radial-gradient(1px 60% at right,
             rgba(0, 0, 0, 0.8) 0%,
-            transparent 80%) repeat-x #B9BEC8;
+            transparent 80%) repeat-x #C8D2DC;
     color: #000000;
     white-space: nowrap;
 }
@@ -56,7 +56,7 @@
 }
 
 .netHeaderSorted {
-    background-color: #96AACD;
+    background-color: #AAC3DC;
 }
 
 .netHeaderSorted > .netHeaderCellBox {
@@ -69,8 +69,8 @@
 
 .netHeaderCell:hover:active {
     background-image: linear-gradient(to bottom,
-            rgba(0, 0, 0, 0.2),
-            rgba(0, 0, 0, 0.1)),
+            rgba(0, 0, 0, 0.1),
+            transparent),
         radial-gradient(1px 60% at right,
             rgba(0, 0, 0, 0.8) 0%,
             transparent 80%);
@@ -485,7 +485,7 @@
 }
 
 .netSummaryRow {
-    background: #B9BEC8;
+    background: #C8D2DC;
     font-weight: bold;
 }
 

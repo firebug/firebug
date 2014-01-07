@@ -1,0 +1,20 @@
+/* See license.txt for terms of usage */
+
+
+/*************************************************************************************************/
+/* Header for request list */
+
+.netHeaderCell {
+    background-color: #E6E6E6;
+}
+
+.netHeaderSorted {
+    background-color: #FAC8AF;
+}
+
+/*************************************************************************************************/
+/* Summary */
+
+.netSummaryRow {
+    background-color: #E6E6E6;
+}
