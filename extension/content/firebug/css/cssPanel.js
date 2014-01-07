@@ -862,7 +862,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         var m;
         var props = [];
 
-        if (Firebug.expandShorthandProps)
+        if (Options.get("expandShorthandProps"))
         {
             var count = style.length-1;
             var index = style.length;
@@ -870,8 +870,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             while (index--)
             {
                 var propName = style.item(count - index);
-                this.addProperty(propName, style.getPropertyValue(propName),
-                    !!style.getPropertyPriority(propName), false, inheritMode, props);
+                var value = getPropertyValue(style, propName);
+                this.addProperty(propName, value, !!style.getPropertyPriority(propName), false,
+                    inheritMode, props);
             }
         }
         else
@@ -886,12 +887,14 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 if(!m)
                     continue;
 
-                var value = (Options.get("colorDisplay") == "authored") && style.getAuthoredPropertyValue ?
-                        style.getAuthoredPropertyValue(m[1]) : m[2];
-
-                //var name = m[1], value = m[2], important = !!m[3];
                 if (m[2])
-                    this.addProperty(m[1], value, !!m[3], false, inheritMode, props);
+                {
+                    var name = m[1];
+                    var value = getPropertyValue(style, name);
+                    var important = !!m[3];
+
+                    this.addProperty(name, value, important, false, inheritMode, props);
+                }
             }
         }
 
@@ -3032,6 +3035,12 @@ function parsePriority(value)
     var propValue = m ? m[1] : "";
     var priority = m && m[2] ? "important" : "";
     return {value: propValue, priority: priority};
+}
+
+function getPropertyValue(style, propName)
+{
+    return (Options.get("colorDisplay") === "authored" && style.getAuthoredPropertyValue) ?
+        style.getAuthoredPropertyValue(propName) : style.getPropertyValue(propName);
 }
 
 function formatColor(color)
