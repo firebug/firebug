@@ -30,7 +30,6 @@ function(Obj, Firebug, Firefox, CompilationUnit, Xpcom, FirebugReps, Locale,
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-const Cu = Components.utils;
 
 const jsdIScript = Ci.jsdIScript;
 const jsdIStackFrame = Ci.jsdIStackFrame;
@@ -592,10 +591,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         {
             // xxxHonza: executionContext.scriptsEnabled doesn't work anymore
             // See also: https://bugzilla.mozilla.org/show_bug.cgi?id=953344
-            if (typeof(Cu.blockScriptForGlobal) == "function")
-                Cu.blockScriptForGlobal(context.window);
-            else
-                executionContext.scriptsEnabled = false;
+            // executionContext.scriptsEnabled = false;
+            this.setJavascriptEnabled(context.window, false);
 
             this.suppressEventHandling(context);
             context.isFrozen = true;
@@ -693,10 +690,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
                 // xxxHonza: executionContext.scriptsEnabled doesn't work anymore
                 // See also: https://bugzilla.mozilla.org/show_bug.cgi?id=953344
-                if (typeof(Cu.unblockScriptForGlobal) == "function")
-                    Cu.unblockScriptForGlobal(context.window);
-                else
-                    executionContext.scriptsEnabled = true;
+                // executionContext.scriptsEnabled = true;
+                this.setJavascriptEnabled(context.window, true);
             }
             else
             {
@@ -715,6 +710,12 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             if (FBTrace.DBG_UI_LOOP)
                 FBTrace.sysout("debugger.stop, scriptsEnabled = true exception:", exc);
         }
+    },
+
+    setJavascriptEnabled: function(win, allow)
+    {
+        var docShell = win.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDocShell);
+        docShell.allowJavascript = allow;
     },
 
     unsuppressEventHandling: function(context)
