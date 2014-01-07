@@ -2,16 +2,15 @@
 
 define([
     "firebug/firebug",
-    "firebug/chrome/rep",
     "firebug/lib/trace",
     "firebug/lib/domplate",
     "firebug/lib/locale",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/array",
-    "firebug/chrome/reps",
+    "firebug/chrome/rep",
 ],
-function(Firebug, Rep, FBTrace, Domplate, Locale, Dom, Css, Arr, FirebugReps) {
+function(Firebug, FBTrace, Domplate, Locale, Dom, Css, Arr, Rep) {
 
 "use strict";
 
@@ -443,9 +442,6 @@ function getObjectProps(obj)
 
 // ********************************************************************************************* //
 // Registration
-
-// Backward compatibility.
-FirebugReps.Table = TableRep;
 
 return TableRep;
 

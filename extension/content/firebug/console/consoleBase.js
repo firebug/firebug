@@ -6,9 +6,8 @@ define([
     "firebug/lib/events",
     "firebug/lib/options",
     "firebug/lib/deprecated",
-    "firebug/console/consolePanel",
 ],
-function(Firebug, FBTrace, Events, Options, Deprecated, ConsolePanel) {
+function(Firebug, FBTrace, Events, Options, Deprecated) {
 
 "use strict";
 
@@ -17,12 +16,6 @@ function(Firebug, FBTrace, Events, Options, Deprecated, ConsolePanel) {
 
 var Trace = FBTrace.to("DBG_CONSOLE");
 var TraceError = FBTrace.toError();
-
-var appendObject = ConsolePanel.prototype.appendObject;
-var appendFormatted = ConsolePanel.prototype.appendFormatted;
-var appendOpenGroup = ConsolePanel.prototype.appendOpenGroup;
-var appendCollapsedGroup = ConsolePanel.prototype.appendCollapsedGroup;
-var appendCloseGroup = ConsolePanel.prototype.appendCloseGroup;
 
 // ********************************************************************************************* //
 // ConsoleBase Implementation
@@ -37,6 +30,10 @@ var ConsoleBase =
     {
         Events.dispatch(this.fbListeners, "log", [context, object, className, sourceLink]);
 
+        // xxxHonza: find better way how to delegate the function call to the console panel.
+        // There should not be explicit usage of 'Firebug.ConsolePanel' (in theory, the panel
+        // doesn't have to exist). See also other methods in this module.
+        var appendObject = Firebug.ConsolePanel.prototype.appendObject;
         return this.logRow(appendObject, object, context, className, rep, sourceLink,
             noThrottle, false, callback);
     },
@@ -46,24 +43,28 @@ var ConsoleBase =
         Events.dispatch(this.fbListeners, "logFormatted", [context, objects, className,
             sourceLink]);
 
+        var appendFormatted = Firebug.ConsolePanel.prototype.appendFormatted;
         return this.logRow(appendFormatted, objects, context, className, null, sourceLink,
             noThrottle, false, callback);
     },
 
     openGroup: function(objects, context, className, rep, noThrottle, sourceLink, noPush)
     {
+        var appendOpenGroup = Firebug.ConsolePanel.prototype.appendOpenGroup;
         return this.logRow(appendOpenGroup, objects, context, className, rep, sourceLink,
             noThrottle);
     },
 
     openCollapsedGroup: function(objects, context, className, rep, noThrottle, sourceLink, noPush)
     {
+        var appendCollapsedGroup = Firebug.ConsolePanel.prototype.appendCollapsedGroup;
         return this.logRow(appendCollapsedGroup, objects, context, className, rep, sourceLink,
             noThrottle);
     },
 
     closeGroup: function(context, noThrottle)
     {
+        var appendCloseGroup = Firebug.ConsolePanel.prototype.appendCloseGroup;
         return this.logRow(appendCloseGroup, null, context, null, null, null, noThrottle, true);
     },
 

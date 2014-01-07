@@ -19,10 +19,11 @@ define([
     "firebug/debugger/debuggerLib",
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/debugger/stack/stackTrace",
+    "firebug/console/console",
 ],
 function(Firebug, FBTrace, Obj, Css, Dom, Domplate, Events, Locale, Url, Module, Rep,
     PanelActivation, StackFrame, StackFrameRep, SourceFile, DebuggerLib, BreakpointStore,
-    StackTrace) {
+    StackTrace, Console) {
 
 "use strict";
 
@@ -95,7 +96,7 @@ var FunctionMonitor = Obj.extend(Module,
 
         Trace.sysout("functionMonitor.onMonitorScript; stackTrace:", stackTrace);
 
-        Firebug.Console.log(new FunctionLog(frame, stackTrace), context);
+        Console.log(new FunctionLog(frame, stackTrace), context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -304,14 +305,14 @@ function makeMonitorCall(context, fn, mode, add, successKey, failureKey)
     if (typeof fn !== "function")
     {
         var msg = Locale.$STRF("functionMonitor.api_call_requires_a_function", [apiName]);
-        Firebug.Console.logFormatted([msg], context, "error");
+        Console.logFormatted([msg], context, "error");
         return;
     }
 
     if (!PanelActivation.isPanelEnabled("script"))
     {
         var msg = Locale.$STRF("functionMonitor.script_panel_must_be_enabled", [apiName]);
-        Firebug.Console.logFormatted([msg], context, "error");
+        Console.logFormatted([msg], context, "error");
         return;
     }
 
@@ -319,7 +320,7 @@ function makeMonitorCall(context, fn, mode, add, successKey, failureKey)
     if (!script)
     {
         var msg = Locale.$STR("functionMonitor.unable_to_locate_source");
-        Firebug.Console.logFormatted([msg], context, "error");
+        Console.logFormatted([msg], context, "error");
         return;
     }
 
@@ -335,33 +336,33 @@ function makeMonitorCall(context, fn, mode, add, successKey, failureKey)
         success = true;
     var msg = Locale.$STR(success ? successKey : failureKey);
     var logType = (success || !add ? "info" : "error");
-    Firebug.Console.logFormatted([msg], context, logType);
+    Console.logFormatted([msg], context, logType);
 }
 
 function debug(context, args)
 {
     makeMonitorCall(context, args[0], "debug", true, "functionMonitor.Breakpoint_created", null);
-    return Firebug.Console.getDefaultReturnValue();
+    return Console.getDefaultReturnValue();
 }
 
 function undebug(context, args)
 {
     makeMonitorCall(context, args[0], "debug", false, "functionMonitor.Breakpoint_removed",
         "functionMonitor.No_breakpoint_to_remove");
-    return Firebug.Console.getDefaultReturnValue();
+    return Console.getDefaultReturnValue();
 }
 
 function monitor(context, args)
 {
     makeMonitorCall(context, args[0], "monitor", true, "functionMonitor.Monitor_created", null);
-    return Firebug.Console.getDefaultReturnValue();
+    return Console.getDefaultReturnValue();
 }
 
 function unmonitor(context, args)
 {
     makeMonitorCall(context, args[0], "monitor", false, "functionMonitor.Monitor_removed",
         "functionMonitor.No_monitor_to_remove");
-    return Firebug.Console.getDefaultReturnValue();
+    return Console.getDefaultReturnValue();
 }
 
 // ********************************************************************************************* //
