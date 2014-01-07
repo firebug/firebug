@@ -1,13 +1,14 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/firebug",
     "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/domplate",
     "firebug/lib/events",
     "firebug/lib/locale",
-    "firebug/lib/object",
     "firebug/lib/url",
     "firebug/chrome/module",
     "firebug/chrome/rep",
@@ -19,8 +20,9 @@ define([
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/debugger/stack/stackTrace",
 ],
-function(FBTrace, Css, Dom, Domplate, Events, Locale, Obj, Url, Module, Rep, PanelActivation,
-    StackFrame, StackFrameRep, SourceFile, DebuggerLib, BreakpointStore, StackTrace) {
+function(Firebug, FBTrace, Obj, Css, Dom, Domplate, Events, Locale, Url, Module, Rep,
+    PanelActivation, StackFrame, StackFrameRep, SourceFile, DebuggerLib, BreakpointStore,
+    StackTrace) {
 
 "use strict";
 
@@ -36,7 +38,12 @@ var {domplate, A, SPAN, FOR, TAG, DIV} = Domplate;
 // Function Monitor
 
 /**
- * @module The module implements the 'debug', 'undebug', 'monitor' and 'unmonitor' commands.
+ * @module The module implements the following commands:
+ * 
+ * 'debug' Adds a breakpoint on the first line of a function.
+ * 'undebug' Removes the breakpoint on the first line of a function.
+ * 'monitor' Turns on logging for all calls to a function.
+ * 'unmonitor' Turns off logging for all calls to a function.
  */
 var FunctionMonitor = Obj.extend(Module,
 /** @lends FunctionMonitor */
@@ -186,7 +193,7 @@ var FunctionMonitorRep = domplate(Rep,
 
     // xxxHonza: StackFrameRep duplication
     tag:
-        Rep.OBJECTBLOCK({$hasTwisty: "$object|hasStackTrace", _repObject: "$object",
+        Rep.tags.OBJECTBLOCK({$hasTwisty: "$object|hasStackTrace", _repObject: "$object",
             onclick: "$onToggleStackTrace"},
             A({"class": "objectLink functionCallTitle a11yFocus", _repObject: "$object"},
                 "$object|getCallName"

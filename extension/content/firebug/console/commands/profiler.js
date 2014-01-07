@@ -517,7 +517,7 @@ Profiler.ProfileCall = domplate(Rep,
     tag:
         TR({"class": "focusRow profileRow subFocusRow", "role": "row"},
             TD({"class": "profileCell", "role": "presentation"},
-                Rep.OBJECTLINK("$object|getCallName")
+                Rep.tags.OBJECTLINK("$object|getCallName")
             ),
             TD({"class": "a11yFocus profileCell", "role": "gridcell"}, "$object.callCount"),
             TD({"class": "a11yFocus profileCell", "role": "gridcell"}, "$object.percent%"),

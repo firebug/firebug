@@ -44,8 +44,7 @@ function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, W
 
 var {domplate, FOR, TAG, DIV, SPAN, TR, P, UL, LI, PRE, A} = Domplate;
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Ci = Components.interfaces;
 
 // xxxHonza: the only global should be Firebug object.
 var FirebugReps = window.FirebugReps = {};
@@ -53,9 +52,9 @@ var FirebugReps = window.FirebugReps = {};
 // ********************************************************************************************* //
 // Common Tags
 
-var OBJECTBOX = FirebugReps.OBJECTBOX = Rep.OBJECTBOX;
-var OBJECTBLOCK = FirebugReps.OBJECTBLOCK = Rep.OBJECTBLOCK;
-var OBJECTLINK = FirebugReps.OBJECTLINK = Rep.OBJECTLINK;
+var OBJECTBOX = FirebugReps.OBJECTBOX = Rep.tags.OBJECTBOX;
+var OBJECTBLOCK = FirebugReps.OBJECTBLOCK = Rep.tags.OBJECTBLOCK;
+var OBJECTLINK = FirebugReps.OBJECTLINK = Rep.tags.OBJECTLINK;
 
 var PREOBJECTBOX =
     PRE({"class": "objectBox inline objectBox-$className", role: "presentation"});

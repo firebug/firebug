@@ -55,7 +55,7 @@ var ErrorMessage = domplate(Rep,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     tag:
-        Rep.OBJECTBOX({
+        Rep.tags.OBJECTBOX({
             $hasTwisty: "$object|hasStackTrace",
             $hasBreakSwitch: "$object|hasBreakSwitch",
             $breakForError: "$object|hasErrorBreak",
