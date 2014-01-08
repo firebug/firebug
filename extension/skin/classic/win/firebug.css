@@ -257,15 +257,6 @@ panelTab[selected="true"] > panelTabMenu {
     color: graytext;
 }
 
-.panelStatusLabel {
-    cursor: pointer;
-    color: #000000;
-}
-
-.panelStatusLabel > .toolbarbutton-icon {
-    margin: 0 !important;
-}
-
 /************************************************************************************************/
 /* Location list */
 
