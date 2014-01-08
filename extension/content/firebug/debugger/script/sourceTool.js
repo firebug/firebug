@@ -20,12 +20,14 @@ function (Firebug, FBTrace, Obj, Str, Tool, SourceFile, StackFrame, DebuggerLib,
 /**
  * This module is responsible for handling events that indicate script creation and
  * populate {@link TabContext} with proper object.
- * 
+ *
  * The module should be also responsible for handling dynamically evaluated scripts,
  * which is not fully supported by platform (JSD2, RDP).
- * 
- * See also: Bug 911721 - Get type & originator for Debugger.Script object
- * 
+ *
+ * Related platform reports:
+ * Bug 911721 - Get type & originator for Debugger.Script object
+ * Bug 332176 - eval still uses call site line number as offset for eval'ed code in the year 2013
+ *
  * Suggestions for the platform:
  * 1) Missing script type (bug 911721)
  * 2) Wrong URL for dynamic scripts
@@ -189,11 +191,11 @@ DynamicSourceCollector.prototype =
 {
     attach: function()
     {
-        var threadActor = DebuggerLib.getThreadActor(this.context.browser);
+        var dbg = DebuggerLib.getThreadDebugger(this.context);
 
         // Monkey patch the current debugger.
-        this.originalOnNewScript = threadActor.dbg.onNewScript;
-        threadActor.dbg.onNewScript = this.onNewScript.bind(this);
+        this.originalOnNewScript = dbg.onNewScript;
+        dbg.onNewScript = this.onNewScript.bind(this);
     },
 
     detach: function()
@@ -201,8 +203,8 @@ DynamicSourceCollector.prototype =
         if (!this.originalOnNewScript)
             return;
 
-        var threadActor = DebuggerLib.getThreadActor(this.context.browser);
-        threadActor.dbg.onNewScript = this.originalOnNewScript;
+        var dbg = DebuggerLib.getThreadDebugger(this.context);
+        dbg.onNewScript = this.originalOnNewScript;
 
         this.originalOnNewScript = null;
     },
@@ -224,7 +226,7 @@ DynamicSourceCollector.prototype =
         }
 
         var threadActor = DebuggerLib.getThreadActor(this.context.browser);
-        this.originalOnNewScript.apply(threadActor, arguments);
+        this.originalOnNewScript.apply(threadActor.dbg, arguments);
 
         sysoutScript("sourceTool.onNewScript; " + script.lineCount, script);
     },
@@ -284,6 +286,7 @@ function buildStackFrame(frame, context)
     if (threadActor.state != "paused")
         TraceError.sysout("stackFrame.buildStackFrame; ERROR wrong thread actor state!");
 
+    //xxxHonza: rename: nativeFrame -> framePacket and jsdFrame -> nativeFrame
     stackFrame.jsdFrame = threadActor.youngestFrame;
     var sourceFile = getSourceFileByScript(context, stackFrame.jsdFrame.script);
     if (sourceFile)
@@ -292,6 +295,7 @@ function buildStackFrame(frame, context)
         stackFrame.sourceFile = sourceFile;
 
         // Fix the starting line (subtract the parent offset).
+        // See also: https://bugzilla.mozilla.org/show_bug.cgi?id=332176
         stackFrame.line = frame.where.line - sourceFile.startLine + 1;
 
         // Use proper (dynamically generated) URL. Dynamic scripts use the same

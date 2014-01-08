@@ -208,6 +208,12 @@ DebuggerLib.getThreadActor = function(browser)
     }
 };
 
+DebuggerLib.getThreadDebugger = function(context)
+{
+    var threadActor = this.getThreadActor(context.browser);
+    return threadActor.dbg;
+};
+
 /**
  * Returns the debugger's Debugger.Object associated with a frame within the
  * passed context. If no frame is specified, the context's current global is used.
