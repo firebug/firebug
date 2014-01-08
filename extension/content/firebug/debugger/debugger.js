@@ -48,6 +48,7 @@ Firebug.Debugger = Obj.extend(ActivableModule,
 
         // xxxHonza: scoped logging should automate this (see firebug/lib/trace module).
         Firebug.registerTracePrefix("debuggerTool.", "DBG_DEBUGGERTOOL", false);
+        Firebug.registerTracePrefix("sourceTool.", "DBG_SOURCETOOL", false);
         Firebug.registerTracePrefix("breakpointTool.", "DBG_BREAKPOINTTOOL", false);
         Firebug.registerTracePrefix("sourceTool.", "DBG_SOURCETOOL", false);
 
@@ -512,6 +513,13 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         }
 
         var ret = [];
+
+        if (!frame.scopes)
+        {
+            TraceError.sysout("debugger.getCurrentFrameKyes; ERROR no scopes?");
+            return ret;
+        }
+
         for (var scope of frame.scopes)
         {
             // "this" is not a real scope.
