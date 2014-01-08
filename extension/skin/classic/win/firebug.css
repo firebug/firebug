@@ -143,7 +143,7 @@ toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
 
 #fbPanelBar1-tabBoxBackground {
     background-color: rgb(219, 234, 249);
-    background-image: linear-gradient(rgba(253, 253, 253, 0.2), transparent);
+    background-image: linear-gradient(rgba(253, 253, 253, 0.2), rgba(253, 253, 253, 0));
 }
 
 #fbPanelBar2-tabBoxBackground {
