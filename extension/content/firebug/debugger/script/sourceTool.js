@@ -225,8 +225,8 @@ DynamicSourceCollector.prototype =
             break;
         }
 
-        var threadActor = DebuggerLib.getThreadActor(this.context.browser);
-        this.originalOnNewScript.apply(threadActor.dbg, arguments);
+        var dbg = DebuggerLib.getThreadDebugger(this.context);
+        this.originalOnNewScript.apply(dbg, arguments);
 
         sysoutScript("sourceTool.onNewScript; " + script.lineCount, script);
     },
@@ -310,8 +310,9 @@ function buildStackFrame(frame, context)
 StackFrame.buildStackFrame = buildStackFrame;
 
 // ********************************************************************************************* //
-// Helpers
+// Tracing Helpers
 
+// xxxHonza: refactor or remove these tracing helpers
 function sysoutScript(msg, script)
 {
     FBTrace.sysout(msg, convertScriptObject(script));
@@ -349,6 +350,10 @@ function convertScriptObject(script)
     };
 }
 
+// ********************************************************************************************* //
+// Script Helpers
+
+// xxxHonza: optimize the source lookup (there can be a lot of scripts).
 function getSourceFileByScript(context, script)
 {
     for (var url in context.sourceFileMap)
