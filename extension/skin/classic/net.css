@@ -37,7 +37,7 @@
     border-bottom: 1px solid rgba(0, 0, 0, 0.2);
     padding: 0 !important;
     font-weight: bold;
-    background: linear-gradient(to bottom,
+    background: linear-gradient(
             rgba(255, 255, 255, 0.05),
             rgba(0, 0, 0, 0.05)),
         radial-gradient(1px 60% at right,
@@ -68,7 +68,7 @@
 }
 
 .netHeaderCell:hover:active {
-    background-image: linear-gradient(to bottom,
+    background-image: linear-gradient(
             rgba(0, 0, 0, 0.1),
             transparent),
         radial-gradient(1px 60% at right,
@@ -331,7 +331,7 @@
     left: 0;
     top: 1px;
     bottom: 1px;
-    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
 }
 
 .netBlockingBar {
@@ -417,7 +417,7 @@
  */
 .fromCache .netReceivingBar,
 .fromCache.netReceivingBar {
-    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1));
 }
 
 .netSummaryRow .netTimeLabel,
@@ -531,7 +531,7 @@
 
 .netInfoCol {
     border-top: 1px solid #EEEEEE;
-    background: #FFFFFF linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent 33px) repeat-x;
+    background: #FFFFFF linear-gradient(rgba(0, 0, 0, 0.1), transparent 33px) repeat-x;
 }
 
 .netInfoBody {
