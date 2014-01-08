@@ -100,10 +100,10 @@ StackFrame.prototype = Obj.descend(Grip.prototype,
         this.frameIndex = frameIndex;
     },
 
+    // xxxHonza: not used, should be refactored or removed.
     getCallingFrame: function()
     {
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("getCallingFrame "+this, this);
+        Trace.sysout("stackFrame.getCallingFrame; " + this, this);
 
         if (!this.callingFrame && this.nativeFrame && this.nativeFrame.isValid)
         {
@@ -112,6 +112,7 @@ StackFrame.prototype = Obj.descend(Grip.prototype,
                 this.callingFrame = StackFrame.getStackFrame(nativeCallingFrame, this.context,
                     this.newestFrame);
         }
+
         return this.callingFrame;
     },
 
@@ -127,8 +128,7 @@ StackFrame.prototype = Obj.descend(Grip.prototype,
 
     destroy: function()
     {
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("StackFrame destroyed:"+this.uid+"\n");
+        Trace.sysout("stackFrame.destroy; " + this.uid);
 
         this.script = null;
         this.nativeFrame = null;
@@ -204,7 +204,8 @@ StackFrame.buildStackFrame = function(frame, context)
     var args = [];
     var bindings = frame.environment.bindings;
     var arguments = bindings ? bindings.arguments : [];
-    for (var i=0; i<arguments.length; i++)
+
+    for (var i = 0; i < arguments.length; i++)
     {
         var arg = arguments[i];
         args.push({
@@ -264,9 +265,8 @@ StackFrame.guessFunctionNameFromLines = function(url, lineNo, sourceFile)
             }
             else
             {
-                if (FBTrace.DBG_FUNCTION_NAMES)
-                    FBTrace.sysout("lib.guessFunctionName re failed for lineNo-i="+lineNo+
-                        "-"+i+" line="+line+"\n");
+                Trace.sysout("stackFrame.guessFunctionNameFromLines; re failed for lineNo-i=" +
+                    lineNo + "-" + i + " line=" + line);
             }
 
             m = reFunctionArgNames.exec(line);

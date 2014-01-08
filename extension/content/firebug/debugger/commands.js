@@ -172,7 +172,12 @@ function getSource(context, args)
 
         var actor = args[0];
         if (!actor)
+        {
+            var threadActor = DebuggerLib.getThreadActor(context.browser);
+            if (threadActor)
+                Firebug.Console.log(threadActor);
             return "No actor specified";
+        }
 
         // xxxHonza: SourceFile object should be utilized here
         var sourceClient = context.activeThread.source({actor: actor});
