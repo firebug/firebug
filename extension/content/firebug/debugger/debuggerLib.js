@@ -221,6 +221,20 @@ DebuggerLib.getDebuggerDebuggeeGlobalForContext = function(context, global)
     return dbgGlobal.makeDebuggeeValue(global).unwrap().global;
 };
 
+DebuggerLib.getDebuggerDebuggeeGlobalForFrame = function(frame)
+{
+    if (frame.type === "frame")
+        return frame.callee.global;
+
+    // Even though |frame.this| returns a debuggee window, it is not the Debuggee global instance.
+    // So rather return |frame.this.global|.
+    if (frame.type === "global")
+        return frame.this.global;
+
+    // Type is either "debugger" or "eval".
+    return frame.environment.find("window").object;
+};
+
 // ********************************************************************************************* //
 // Frames
 
