@@ -63,11 +63,6 @@ var CommandLineIncludeRep = domplate(TableRep,
 {
     tableClassName: "tableCommandLineInclude dataTable",
 
-    tag:
-        FirebugReps.OBJECTBOX({_repObject: "$object"},
-            TableRep.tag
-        ),
-
     inspectable: false,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -84,19 +79,19 @@ var CommandLineIncludeRep = domplate(TableRep,
     getUrlTag: function(href, aliasName)
     {
         var urlTag =
-            SPAN({style: "height:100%"},
+            SPAN({style: "height: 100%"},
                 A({"href": href, "target": "_blank", "class": "url"},
                     Str.cropString(href, 100)
-                ),
-                SPAN({"class": "commands"}
+                )
+                /*,
                 // xxxFlorent: temporarily disabled, see:
                 //    http://code.google.com/p/fbug/issues/detail?id=5878#c27
-                /*,
+                SPAN({"class": "commands"},
                 SPAN({
                     "class":"closeButton",
                     onclick: this.deleteAlias.bind(this, aliasName),
-                })*/
-                )
+                })
+                )*/
             );
 
         return urlTag;
@@ -137,7 +132,11 @@ var CommandLineIncludeRep = domplate(TableRep,
         ];
 
         var input = new CommandLineIncludeObject();
-        this.log(arrayToDisplay, columns, context, input);
+        var row = this.log(arrayToDisplay, columns, context, input);
+
+        // Add rep object for the context menu options
+        row.repObject = input;
+
         return returnValue;
     },
 
@@ -246,7 +245,8 @@ var CommandLineIncludeRep = domplate(TableRep,
     getContextMenuItems: function(object, target, context)
     {
         var tr = Dom.getAncestorByTagName(target, "tr");
-        if (!tr)
+        var link = tr && tr.querySelector("a.url");
+        if (!link)
             return [];
 
         var url = tr.querySelector("a.url").href;

@@ -82,14 +82,16 @@ function checkTableContent(callback, expectedAliasName, checkFunction)
     var config = {tagName: "div", classes: "logRow", counter: 2};
     FBTest.waitForDisplayedElement("console", config, function(element)
     {
-        var table = element.querySelector(".tableCommandLineInclude");
+        var table = element.getElementsByClassName("tableCommandLineInclude")[0];
         var aliasNameCell = table && table.querySelector("*[data-aliasname='myscript']");
         if (!table || !aliasNameCell)
+        {
             checkFunction(table, null, null);
+        }
         else
         {
             var row = FW.FBL.getAncestorByTagName(aliasNameCell, "tr");
-            var aliasValueCell = row.querySelector(".url");
+            var aliasValueCell = row.getElementsByClassName("url")[0];
             checkFunction(table, row, aliasNameCell.dataset.aliasname, aliasValueCell.href);
         }
         callback();
