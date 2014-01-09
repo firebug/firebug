@@ -594,14 +594,14 @@ toolbarbutton:hover:not([disabled="true"]) {
 
 toolbarbutton:-moz-any([checked="true"],
                        [selected="true"],
-                       [open="true"]):not([disabled="true"]) {
+                       [open="true"]):not(.panelStatusLabel):not([disabled="true"]) {
     border-color: rgba(0, 0, 0, 0.3);
     box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1) inset, 0 0 1px rgba(0, 0, 0, 0.1) inset;
 }
 
 toolbarbutton:-moz-any([checked="true"],
                        [selected="true"],
-                       [open="true"]):not([disabled="true"]):not([type=menu-button]) {
+                       [open="true"]):not(.panelStatusLabel):not([disabled="true"]):not([type=menu-button]) {
     background: transparent linear-gradient(rgba(0, 0, 0, 0.1), transparent) no-repeat;
 }
 
@@ -649,6 +649,14 @@ toolbarbutton[type="menu"] > toolbarbutton {
 
 toolbarbutton[disabled="true"] {
     color: graytext;
+}
+
+.panelStatusLabel[selected="true"] {
+    font-weight: bold;
+}
+
+.panelStatusLabel > .toolbarbutton-icon {
+    margin: 0;
 }
 
 /*************************************************************************************************/
