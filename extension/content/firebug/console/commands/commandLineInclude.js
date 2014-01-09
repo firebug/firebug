@@ -249,7 +249,7 @@ var CommandLineIncludeRep = domplate(TableRep,
         if (!link)
             return [];
 
-        var url = tr.querySelector("a.url").href;
+        var url = link.href;
         var aliasName = tr.querySelector(".aliasName").dataset.aliasname;
         var context = Firebug.currentContext;
         var items = [
