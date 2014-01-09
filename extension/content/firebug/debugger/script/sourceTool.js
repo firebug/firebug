@@ -218,10 +218,17 @@ DynamicSourceCollector.prototype =
 
         // Set a breakpoint at the first instruction. When the breakpoint hits we can
         // see whether the script has been evaluated using eval().
+        // xxxHonza: as soon as |script.introductionKind| is available we don't need
+        // to use breakpoint to find the script-type (kind).
         var offsets = script.getAllOffsets();
         for (var p in offsets)
         {
-            script.setBreakpoint(offsets[p][0], this);
+            var firstOffset = offsets[p][0];
+
+            Trace.sysout("sourceTool.onNewScript; set a breakpoint at: " + firstOffset +
+                ", url: " + script.url);
+
+            script.setBreakpoint(firstOffset, this);
             break;
         }
 
@@ -235,7 +242,7 @@ DynamicSourceCollector.prototype =
 
     hit: function(frame)
     {
-        // We are collecting only dynamically evaluated scripts.
+        // We are collecting only dynamically evaluated scripts (using eval).
         if (frame.type != "eval")
             return;
 
