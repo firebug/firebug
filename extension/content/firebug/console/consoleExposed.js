@@ -331,7 +331,7 @@ function createFirebugConsole(context, win)
         var trace;
         if (msg && msg.stack)
         {
-            trace = StackFrame.parseToStackTrace(msg.stack, context);
+            trace = StackTrace.parseToStackTrace(msg.stack, context);
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("logAssert trace from msg.stack", trace);
         }
