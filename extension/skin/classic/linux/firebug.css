@@ -129,11 +129,6 @@ toolbarbutton[type=menu-button] > .toolbarbutton-menubutton-button {
   padding: 6px;
 }
 
-toolbarbutton:-moz-any([selected="true"],
-                       [open="true"]):not([disabled="true"]) {
-    background: transparent linear-gradient(rgba(0, 0, 0, 0.1), transparent) no-repeat;
-}
-
 toolbarbutton[type=menu-button][open="true"]:not([disabled="true"]) > .toolbarbutton-menubutton-dropmarker {
     border-color: transparent;
     box-shadow: none;
