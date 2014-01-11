@@ -266,7 +266,7 @@ function evaluateInFrame(frame, context, win, expr, origExpr, onSuccess, onError
                      frame.eval :
                      frame.evalWithBindings;
 
-    var dbgGlobal = DebuggerLib.getDebuggerDebuggeeGlobalForFrame(frame);
+    var dbgGlobal = DebuggerLib.getThreadDebuggeeGlobalForFrame(frame);
     var args = [frame, evalMethod, dbgGlobal];
     args = args.concat([].slice.call(arguments, 1));
     executeInWindowContext(win, evaluate, args);
