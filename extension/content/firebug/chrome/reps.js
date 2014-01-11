@@ -1032,6 +1032,12 @@ FirebugReps.Element = domplate(Rep,
         return (limit > 0) ? Str.cropString(attr.value, limit) : attr.value;
     },
 
+    getAttrTitle: function(attr)
+    {
+        var newValue = this.getAttrValue(attr);
+        return (attr.value != newValue) ? attr.value : undefined;
+    },
+
     getVisible: function(elt)
     {
         return Xml.isVisible(elt) ? "" : "selectorHidden";

@@ -24,7 +24,7 @@ var {domplate, FOR, TAG, DIV, SPAN} = Domplate;
 var AttrTag =
     SPAN({"class": "nodeAttr editGroup"},
         "&nbsp;", SPAN({"class": "nodeName editable"}, "$attr.name"), "=&quot;",
-        SPAN({"class": "nodeValue editable"}, "$attr|getAttrValue"), "&quot;"
+        SPAN({"class": "nodeValue editable", "title": "$attr|getAttrTitle"}, "$attr|getAttrValue"), "&quot;"
     );
 
 var TextTag =
