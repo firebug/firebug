@@ -3,9 +3,8 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/string",
-    "firebug/lib/options",
 ],
-function (FBTrace, Str, Options) {
+function (FBTrace, Str) {
 
 "use strict";
 
@@ -505,8 +504,7 @@ Url.parseURLEncodedText = function(text, noLimit)
         }
     }
 
-    if (Options.get("alphabeticallySortURLEncodedText"))
-        params.sort(function(a, b) { return a.name <= b.name ? -1 : 1; });
+    params.sort(function(a, b) { return a.name <= b.name ? -1 : 1; });
 
     return params;
 };

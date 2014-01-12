@@ -29,7 +29,6 @@ pref("extensions.firebug.hideDefaultInspector", false);
 pref("extensions.firebug.delayLoad", true);
 pref("extensions.firebug.enableOrion", true);
 pref("extensions.firebug.clearAnnotationsConfirmation", true);
-pref("extensions.firebug.alphabeticallySortURLEncodedText", false);
 
 // Command line
 pref("extensions.firebug.commandEditor", false);
