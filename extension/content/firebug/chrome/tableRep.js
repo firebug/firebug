@@ -292,6 +292,8 @@ var TableRep = domplate(Rep,
             Firebug.stringCropLength = prevValue;
             delete this.columns;
         }
+
+        return row;
     },
 
     computeColumns: function(data, cols)

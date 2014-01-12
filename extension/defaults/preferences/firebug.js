@@ -85,7 +85,7 @@ pref("extensions.firebug.onlyShowAppliedStyles", false);
 pref("extensions.firebug.showUserAgentCSS", false);
 pref("extensions.firebug.expandShorthandProps", false);
 pref("extensions.firebug.cssEditMode", "Source");
-pref("extensions.firebug.colorDisplay", "hex");
+pref("extensions.firebug.colorDisplay", "authored");
 
 // Computed
 pref("extensions.firebug.computedStylesDisplay", "grouped");

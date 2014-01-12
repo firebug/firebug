@@ -5,6 +5,9 @@ function runTest()
     FBTest.openNewTab(basePath + "console/5033/issue5033.html", function(win)
     {
         FBTest.openFirebug();
+        // xxxFlorent: Remove this when Firebug 2.0 is out.
+        // Don't display the "Slow JSD" warning message.
+        FBTest.setPref("showSlowJSDMessage", false);
 
         FBTest.enableConsolePanel();
         FBTest.enableScriptPanel(function(win)

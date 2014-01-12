@@ -931,6 +931,10 @@
     height: 100%;
 }
 
+.tableCommandLineInclude .aliasName {
+    font-family: monospace;
+}
+
 .tableCommandLineInclude td:last-child {
     width: 75%;
     padding-right: 0 !important; 

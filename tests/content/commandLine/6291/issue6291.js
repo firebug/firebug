@@ -37,7 +37,7 @@ function runTest()
             tasks.push(logProgress, "Testing the calls of the console API through the webpage");
             tasks.push(click, win.document.getElementById("logSomeText"));
             tasks.push(testLogMessageFromPage, panelNode, "some text via the webpage",
-                FW.FBL.$STRF("Line", ["issue6291.html", 20]));
+                FW.FBL.$STRF("Line", ["issue6291.html", 10]));
 
             // 6.
             tasks.push(logProgress, "Testing the evaluation of |debugger;|");

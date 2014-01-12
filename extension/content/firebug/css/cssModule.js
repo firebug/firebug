@@ -386,6 +386,17 @@ Firebug.CSSModule = Obj.extend(Module, Firebug.EditorSelector,
         return [
             "-",
             {
+                label: "computed.option.label.Colors_As_Authored",
+                tooltiptext: "computed.option.tip.Colors_As_Authored",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayAuthored",
+                command: function() {
+                    return Options.set("colorDisplay", "authored");
+                },
+                checked: Options.get("colorDisplay") == "authored"
+            },
+            {
                 label: "computed.option.label.Colors_As_Hex",
                 tooltiptext: "computed.option.tip.Colors_As_Hex",
                 type: "radio",
