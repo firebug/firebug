@@ -12,7 +12,7 @@ function(Module, FBTrace, Obj, Locale, BreakpointStore) {
 // ********************************************************************************************* //
 // Constants
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_BREAKPOINTS");
 
 // ********************************************************************************************* //

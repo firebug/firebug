@@ -34,7 +34,7 @@ var Ci = Components.interfaces;
 
 var {domplate, TAG, SPAN, DIV, TD, TR, TABLE, TBODY, A, PRE} = Domplate;
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_ERRORLOG");
 
 // ********************************************************************************************* //
@@ -55,7 +55,7 @@ var ErrorMessage = domplate(Rep,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     tag:
-        Rep.OBJECTBOX({
+        Rep.tags.OBJECTBOX({
             $hasTwisty: "$object|hasStackTrace",
             $hasBreakSwitch: "$object|hasBreakSwitch",
             $breakForError: "$object|hasErrorBreak",

@@ -66,7 +66,7 @@ var CommandLineIncludeRep = domplate(TableRep,
     tableClassName: "tableCommandLineInclude dataTable",
 
     tag:
-        Rep.OBJECTBOX({_repObject: "$object"},
+        Rep.tags.OBJECTBOX({_repObject: "$object"},
             TableRep.tag
         ),
 

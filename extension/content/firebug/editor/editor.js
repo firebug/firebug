@@ -20,7 +20,7 @@ const hugeChangeAmount = 100;
 const largeChangeAmount = 10;
 const smallChangeAmount = 0.1;
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Globals

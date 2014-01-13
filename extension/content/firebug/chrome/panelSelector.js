@@ -21,7 +21,7 @@ function(Firebug, FBTrace, Obj, Dom, Xml, Locale, Events, Options, Menu, Module)
 
 // Tracing
 var Trace = FBTrace.to("DBG_PANELSELECTOR");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // The option has been renamed in Firebug 2.0 to force all panels to be displayed.
 // This is because the panel selector menu has been moved into Firebug menu and

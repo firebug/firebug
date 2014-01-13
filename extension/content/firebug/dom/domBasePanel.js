@@ -45,7 +45,7 @@ var {domplate, DIV, SPAN} = Domplate;
 var rxIdentifier = /^[$_A-Za-z][$_A-Za-z0-9]*$/;
 
 var Trace = FBTrace.to("DBG_DOM");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 

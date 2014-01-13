@@ -27,7 +27,7 @@ function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Http, Str, J
 // ********************************************************************************************* //
 // Constants
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_JSONVIEWER");
 
 var {domplate, SPAN, DIV} = Domplate;

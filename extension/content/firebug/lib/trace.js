@@ -83,6 +83,14 @@ tracer.to = function(option)
     return new TraceWrapper(this, option);
 };
 
+/**
+ * A shorthand of |FBTrace.to("DBG_ERRORS");|
+ */
+tracer.toError = function()
+{
+    return tracer.to("DBG_ERRORS");
+}
+
 // ********************************************************************************************* //
 // Registration
 

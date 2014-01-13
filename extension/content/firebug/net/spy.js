@@ -49,7 +49,7 @@ var contexts = [];
 var redirectionLimit = Options.getPref("network.http", "redirection-limit");
 
 // Tracing
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_SPY");
 
 // ********************************************************************************************* //

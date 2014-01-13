@@ -20,6 +20,7 @@
 <button id="debuggerInXHR" onclick="loadXHRDebugger();">debugger in XHR</button>
 <button id="debuggerInScript" onclick="loadScriptDebugger();">debugger in Script</button>
 <button id="windowEvalScriptDebugger" onclick="windowEvalScriptDebugger();">debugger in window.eval()</button>
+<button id="debuggerInFunction" onclick="loadFunctionDebugger();">debugger in Function</button>
 
 <br/><br/>
 
@@ -78,12 +79,12 @@ function loadXHRDebugger(callback)
             if (callback)
                 callback(req);
 
-            eval(req.responseText);
+            window.eval(req.responseText);
             var f = 8;
             var g = 9;
         }
         else if (req.readyState == 4)
-         {
+        {
             console.error("loadXHRDebugger failed to load XHR from "+req.href);
         }
     }
@@ -117,6 +118,28 @@ function windowEvalScriptDebugger()
     eval(script);
 }
 
+function loadFunctionDebugger(callback)
+{
+    var script =
+    "debugger;\n" +
+    "var i=10;\n" +
+    "var j=20;\n" +
+    "console.log(i+j)\n";
+
+    var myFunc = new Function(script);
+    myFunc();
+}
 </script>
+
+<br/><br/>
+
+<span>Helper buttons for executing dynamically evaluated functions:</span>
+<br/>
+
+<button onclick="foo();">foo()</button>
+<button onclick="bar();">bar()</button>
+<button onclick="foo2();">foo2()</button>
+<button onclick="bar2();">bar2()</button>
+
 </body>
 </html>

@@ -5,10 +5,10 @@
 #fbContentBox:-moz-lwtheme .scrollbutton-up,
 #fbContentBox:-moz-lwtheme .scrollbutton-down {
     background: url("chrome://firebug/skin/tabbar/tab-bkgnd.png") repeat-x;
-    -moz-border-top-colors: ThreeDShadow rgba(255,255,255,.3);
-    -moz-border-left-colors: ThreeDShadow rgba(255,255,255,.3);
+    -moz-border-top-colors: ThreeDShadow rgba(255, 255, 255, 0.3);
+    -moz-border-left-colors: ThreeDShadow rgba(255, 255, 255, 0.3);
     -moz-border-right-colors: ThreeDShadow;
-    background-color: rgba(255,255,255,.5);
+    background-color: rgba(255, 255, 255, 0.5);
 }
 
 #fbContentBox:-moz-lwtheme .tabs-alltabs-button:hover,
@@ -115,13 +115,13 @@ toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
 #fbCommandToolbar {
     border-bottom: 1px solid rgb(170, 188, 207);
     background-color: rgb(219, 234, 249);
-    background-image: -moz-linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.2));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
 }
 
 #fbToolbox {
     border-bottom: 1px solid rgb(170, 188, 207);
     background-color: rgb(219, 234, 249);
-    background-image: -moz-linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.2));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
 }
 
 /* Set proper height of window buttons (close, min, detach) */
@@ -143,12 +143,12 @@ toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
 
 #fbPanelBar1-tabBoxBackground {
     background-color: rgb(219, 234, 249);
-    background-image: linear-gradient(rgba(253, 253, 253, 0.2), transparent);
+    background-image: linear-gradient(rgba(253, 253, 253, 0.2), rgba(253, 253, 253, 0));
 }
 
 #fbPanelBar2-tabBoxBackground {
     background-color: rgb(219, 234, 249);
-    background-image: -moz-linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.2));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
 }
 
 /************************************************************************************************/
@@ -193,7 +193,7 @@ panelTab[selected="true"] > panelTabMenu {
 
 #fbPanelSplitter > #fbPanelSplitterBox {
     background-color: rgb(219, 234, 249);
-    background-image: -moz-linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.2));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
     border-bottom: 1px solid rgb(170, 188, 207);
 }
 
@@ -257,15 +257,6 @@ panelTab[selected="true"] > panelTabMenu {
     color: graytext;
 }
 
-.panelStatusLabel {
-    cursor: pointer;
-    color: #000000;
-}
-
-.panelStatusLabel > .toolbarbutton-icon {
-    margin: 0 !important;
-}
-
 /************************************************************************************************/
 /* Location list */
 
@@ -308,9 +299,9 @@ panelBarArrowscrollbox > .scrollbutton-down {
     margin: 3px 0px 4px;
     padding: 0px;
     border: 1px solid rgb(170,188,207);
-    /*-moz-border-top-colors: ThreeDShadow rgba(255,255,255,.3);
+    /*-moz-border-top-colors: ThreeDShadow rgba(255, 255, 255, 0.3);
     -moz-border-right-colors: ThreeDShadow;
-    -moz-border-left-colors: ThreeDShadow rgba(255,255,255,.3);
+    -moz-border-left-colors: ThreeDShadow rgba(255, 255, 255, 0.3);
     background: url("chrome://firebug/skin/tabbar/tab-bkgnd.png") repeat-x;*/
     border-bottom: none;
     border-top: none;

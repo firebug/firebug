@@ -21,7 +21,7 @@ function(Firebug, FBTrace, Obj, Css, Url, Options, Dom, Events, Wrapper, EventSo
 // Constants
 
 var Trace = FBTrace.to("DBG_PANELS");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Implementation

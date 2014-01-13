@@ -9,7 +9,7 @@
 #fbToolbox {
     -moz-appearance: none;
     background-color: rgb(240, 240, 240);
-    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
     border-bottom: 1px solid #A0A0A0;
 }
 
@@ -84,12 +84,12 @@ panelTab:not([selected="true"]):hover {
 
 #fbPanelBar1-tabBoxBackground {
     background-color: rgb(240, 240, 240);
-    background-image: -moz-linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.2));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.2));
 }
 
 #fbPanelBar2-tabBoxBackground {
     background-color: rgb(240, 240, 240);
-    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
     border-bottom: 1px solid #A0A0A0;
 }
 
@@ -97,7 +97,7 @@ panelTab:not([selected="true"]):hover {
 
 #fbCommandToolbar {
     background-color: rgb(240, 240, 240);
-    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
     border-bottom: 1px solid #A0A0A0;
 }
 
@@ -105,7 +105,7 @@ panelTab:not([selected="true"]):hover {
 
 #fbPanelSplitter > #fbPanelSplitterBox {
     background-color: rgb(240, 240, 240);
-    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
     border-bottom: 1px solid #A0A0A0;
 }
 
@@ -127,11 +127,6 @@ panelTab:not([selected="true"]):hover {
 
 toolbarbutton[type=menu-button] > .toolbarbutton-menubutton-button {
   padding: 6px;
-}
-
-toolbarbutton:-moz-any([selected="true"],
-                       [open="true"]):not([disabled="true"]) {
-    background: transparent linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent) no-repeat;
 }
 
 toolbarbutton[type=menu-button][open="true"]:not([disabled="true"]) > .toolbarbutton-menubutton-dropmarker {

@@ -34,7 +34,7 @@ function(Firebug, FBTrace, Obj, Domplate, Firefox, ToggleBranch, Events, Dom, Cs
 // Constants
 
 var Trace = FBTrace.to("DBG_WATCH");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 var {domplate, DIV, IMG} = Domplate;
 

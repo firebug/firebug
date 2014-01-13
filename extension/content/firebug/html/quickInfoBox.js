@@ -34,7 +34,7 @@ var compAttribs = [
 
 // Tracing
 var Trace = FBTrace.to("DBG_QUICKINFOBOX");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Domplate

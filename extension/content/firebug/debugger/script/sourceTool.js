@@ -14,7 +14,7 @@ function (Firebug, FBTrace, Obj, Tool, SourceFile, DebuggerLib, DebuggerClient) 
 // ********************************************************************************************* //
 // Constants
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_SOURCETOOL");
 
 // ********************************************************************************************* //

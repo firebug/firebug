@@ -15,7 +15,7 @@ function(FBTrace, Str, Events, SourceLink, DebuggerLib) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_SOURCEFILE");
 
 // ********************************************************************************************* //
@@ -178,7 +178,7 @@ SourceFile.getSourceFileByUrl = function(context, url)
 
 SourceFile.findScriptForFunctionInContext = function(context, fn)
 {
-    var dbgGlobal = DebuggerLib.getDebuggerDebuggeeGlobalForContext(context);
+    var dbgGlobal = DebuggerLib.getThreadDebuggeeGlobalForContext(context);
     if (!dbgGlobal)
     {
         Trace.sysout("sourceFile.findScriptForFunctionInContext; no debugger");

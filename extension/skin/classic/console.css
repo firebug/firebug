@@ -18,7 +18,7 @@
 }
 
 .logGroup {
-    background: #FFFFFF linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1) 18px, transparent 51px) repeat-x;
+    background: #FFFFFF linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1) 18px, transparent 51px) repeat-x;
     padding: 0;
     border: none;
 }
@@ -87,7 +87,7 @@
     background-color: #ffffff;
     font-weight: bold;
     padding: 0 4px;
-    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6) 30%, rgba(255, 255, 255, 0.4) 30%, transparent);
+    background-image: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6) 30%, rgba(255, 255, 255, 0.4) 30%, transparent);
 }
 
 /*************************************************************************************************/
@@ -106,7 +106,7 @@
 .logRow-loading,
 .logRow-errorMessage {
     background-repeat: no-repeat;
-    background-position: 4px 2px;
+    background-position: 4px center;
 }
 
 .logRow-info > div > .logContent,
@@ -337,7 +337,7 @@ of an error log is affected (higher than other logs). */
     width: 12px;
     height: 12px;
     vertical-align: baseline;
-    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat center center;
     opacity: 0.1;
 }
 
@@ -346,7 +346,7 @@ of an error log is affected (higher than other logs). */
 }
 
 .hasBreakSwitch .errorBreak {
-    display: inline-block;
+    display: block;
 }
 
 .breakForError .errorBreak {
@@ -446,29 +446,28 @@ of an error log is affected (higher than other logs). */
 .headerCell {
     cursor: pointer;
     -moz-user-select: none;
-    border-bottom: 1px solid #9C9C9C;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
     padding: 0 !important;
     font-weight: bold;
-    background: #C8C8C8 linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+    background: linear-gradient(
+            rgba(255, 255, 255, 0.05),
+            rgba(0, 0, 0, 0.05)),
+        radial-gradient(1px 60% at right,
+            rgba(0, 0, 0, 0.8) 0%,
+            transparent 80%) repeat-x #C8D2DC;
+    color: #000000;
+    white-space: nowrap;
 }
 
 .headerCellBox {
     padding: 2px 13px 2px 4px;
-    border-left: 1px solid #D9D9D9;
-    border-right: 1px solid #9C9C9C;
-    white-space: nowrap;
-}
-
-.headerCell:hover:active {
-    background-color: #B4B4B4;
 }
 
 .headerSorted {
-    background-color: #8CA0BE;
+    background-color: #AAC3DC;
 }
 
 .headerSorted > .headerCellBox {
-    border-right-color: #6B7C93;
     background: url(chrome://firebug/skin/arrowDown.svg) no-repeat calc(100% - 4px);
 }
 
@@ -476,8 +475,13 @@ of an error log is affected (higher than other logs). */
     background-image: url(chrome://firebug/skin/arrowUp.svg);
 }
 
-.headerSorted:hover:active {
-    background-color: #6E87AA;
+.headerCell:hover:active {
+    background-image: linear-gradient(
+            rgba(0, 0, 0, 0.1),
+            transparent),
+        radial-gradient(1px 60% at right,
+            rgba(0, 0, 0, 0.8) 0%,
+            transparent 80%);
 }
 
 .linkCell {
@@ -774,7 +778,7 @@ of an error log is affected (higher than other logs). */
 
 .logRow-spy,
 .logRow-spy .objectLink-sourceLink {
-    background: #FFFFFF linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1) 18px, transparent 51px) repeat-x;
+    background: #FFFFFF linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1) 18px, transparent 51px) repeat-x;
     padding-right: 4px;
     right: 0;
 }

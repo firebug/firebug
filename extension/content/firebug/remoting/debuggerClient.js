@@ -20,7 +20,7 @@ var Cu = Components.utils;
 
 var Trace = FBTrace.to("DBG_DEBUGGERCLIENT");
 var TraceConn = FBTrace.to("DBG_CONNECTION");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 var dbgClientScope = {};
 var dbgServerScope = {};

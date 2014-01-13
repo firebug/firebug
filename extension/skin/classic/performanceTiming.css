@@ -17,7 +17,7 @@
     position: absolute;
     top: 1px;
     bottom: 1px;
-    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
     min-width: 2px;
     z-index: 10;
 }
@@ -38,7 +38,7 @@
 /* Info Tip */
 
 .timeInfoTipRow .timeInfoTipBar {
-    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
 }
 
 /*************************************************************************************************/
@@ -46,12 +46,12 @@
 
 .perfTimingBar.pageLoad,
 .timeInfoTipBar.pageLoad {
-    background-color: rgb(217, 179, 147);
+    background-color: #D9B393;
 }
 
 .perfTimingBar.redirect,
 .timeInfoTipBar.redirect {
-    background-color: rgb(0, 148, 87);
+    background-color: #009457;
 }
 
 .perfTimingBar.dns,
@@ -76,17 +76,17 @@
 
 .perfTimingBar.processing,
 .timeInfoTipBar.processing {
-    background-color: rgb(202, 206, 168);
+    background-color: #CACEA8;
 }
 
 .perfTimingBar.DOMContentLoaded,
 .timeInfoTipBar.DOMContentLoaded {
-    background-color: rgb(179, 184, 118);
+    background-color: #B3B876;
 }
 
 .perfTimingBar.onLoad,
 .timeInfoTipBar.onLoad {
-    background-color: rgb(168, 194, 196);
+    background-color: #A8C2C4;
 }
 
 /*************************************************************************************************/

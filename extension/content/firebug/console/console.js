@@ -13,12 +13,11 @@ define([
     "firebug/chrome/firefox",
     "firebug/chrome/panelNotification",
     "firebug/chrome/activableModule",
-    "firebug/console/consolePanel",
     "firebug/console/consoleBase",
     "firebug/remoting/debuggerClient",
 ],
 function(Firebug, FBTrace, Obj, Events, Locale, Search, Xml, Options, Win, Firefox,
-    PanelNotification, ActivableModule, ConsolePanel, ConsoleBase, DebuggerClient) {
+    PanelNotification, ActivableModule, ConsoleBase, DebuggerClient) {
 
 "use strict";
 
@@ -29,7 +28,7 @@ function(Firebug, FBTrace, Obj, Events, Locale, Search, Xml, Options, Win, Firef
 var defaultReturnValue = createDefaultReturnValueInstance();
 
 var Trace = FBTrace.to("DBG_CONSOLE");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Console Implementation

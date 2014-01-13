@@ -27,7 +27,7 @@ var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPro
 var {domplate, DIV, H1, SPAN, P, A} = Domplate;
 
 var Trace = FBTrace.to("DBG_ACTIVATION");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Panel Activation Implementation

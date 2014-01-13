@@ -22,7 +22,7 @@ function(Firebug, FBTrace, Obj, Domplate, Events, Dom, Css, Locale, Events, Opti
 var {domplate, TABLE, TBODY, TR, TD, DIV, SPAN, TAG, FOR} = Domplate;
 
 var Trace = FBTrace.to("DBG_DOM");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // DOM Tree Implementation

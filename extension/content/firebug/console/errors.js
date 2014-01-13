@@ -62,7 +62,7 @@ const wm = Xpcom.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMedia
 // Tracing
 
 var Trace = FBTrace.to("DBG_ERRORLOG");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 

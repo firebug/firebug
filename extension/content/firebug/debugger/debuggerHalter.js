@@ -17,7 +17,7 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 var Trace = FBTrace.to("DBG_DEBUGGERHALTER");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // DebuggerHalter Implementation

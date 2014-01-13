@@ -60,7 +60,7 @@
 .logRow-errorMessage {
     padding-left: 22px;
     background-repeat: no-repeat;
-    background-position: 4px 2px;
+    background-position: 4px center;
 }
 
 .logRow-assert,

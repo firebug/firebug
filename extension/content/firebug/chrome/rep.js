@@ -17,12 +17,18 @@ function(Firebug, FBTrace, Locale, Str, Domplate, Inspector) {
 
 var {domplate, A, DIV, SPAN} = Domplate;
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Implementation
 
+/**
+ * @domplate Basic template used as a base object for many templates in Firebug. It's usually
+ * used for templates that represents data entity (string, number, array, etc.)
+ * See existing data templates {@link module:firebug/chrome/reps}
+ */
 var Rep = Domplate.domplate(
+/** @lends Rep */
 {
     className: "",
     inspectable: true,
@@ -160,12 +166,19 @@ var Rep = Domplate.domplate(
 // ********************************************************************************************* //
 // Common tags
 
-Rep.OBJECTBOX = SPAN({"class": "objectBox objectBox-$className", role: "presentation"});
+Rep.tags = {};
 
-Rep.OBJECTBLOCK =
-    DIV({"class": "objectBox objectBox-$className focusRow subLogRow", role: "listitem"});
+Rep.tags.OBJECTBOX = SPAN({
+    "class": "objectBox objectBox-$className",
+    role: "presentation"
+});
 
-Rep.OBJECTLINK = A({
+Rep.tags.OBJECTBLOCK = DIV({
+    "class": "objectBox objectBox-$className focusRow subLogRow",
+    role: "listitem"
+});
+
+Rep.tags.OBJECTLINK = A({
     "class": "objectLink objectLink-$className a11yFocus",
     _repObject: "$object"
 });

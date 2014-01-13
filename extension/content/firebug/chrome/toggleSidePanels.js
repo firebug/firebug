@@ -16,7 +16,7 @@ function(Firebug, FBTrace, Obj, Dom, Options, Css, Module) {
 // ********************************************************************************************* //
 // Constants
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_TOGGLESIDEPANELS");
 
 // ********************************************************************************************* //

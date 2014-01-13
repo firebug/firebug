@@ -25,7 +25,7 @@ function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink, Css, D
 
 var {domplate, DIV, FOR, H1, SPAN, TAG, INPUT} = Domplate;
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_BP");
 
 // ********************************************************************************************* //

@@ -25,7 +25,7 @@ function(Firebug, FBTrace, Obj, Domplate, Options, Dom, Url, Locale, TabWatcher,
 
 var {domplate, DIV, SPAN, TR, H1, P} = Domplate;
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_SCRIPTPANELWARNING");
 
 // ********************************************************************************************* //

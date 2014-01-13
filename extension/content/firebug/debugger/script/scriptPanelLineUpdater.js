@@ -12,7 +12,7 @@ function(Firebug, FBTrace, Obj, Module, DebuggerLib) {
 // ********************************************************************************************* //
 // Constants
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_SCRIPTPANELLINEUPDATER");
 
 // 12 October 1492 – Christopher Columbus discovers America

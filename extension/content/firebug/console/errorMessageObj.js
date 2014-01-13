@@ -5,9 +5,8 @@ define([
     "firebug/lib/trace",
     "firebug/debugger/script/sourceFile",
     "firebug/debugger/script/sourceLink",
-    "firebug/chrome/reps",
 ],
-function(Firebug, FBTrace, SourceFile, SourceLink, FirebugReps) {
+function(Firebug, FBTrace, SourceFile, SourceLink) {
 
 "use strict"
 
@@ -17,7 +16,7 @@ function(Firebug, FBTrace, SourceFile, SourceLink, FirebugReps) {
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_ERRORLOG");
 
 // ********************************************************************************************* //
@@ -107,9 +106,6 @@ ErrorMessageObj.prototype =
 
 // ********************************************************************************************* //
 // Registration
-
-// xxxHonza: back compatibility
-FirebugReps.ErrorMessageObj = ErrorMessageObj;
 
 return ErrorMessageObj;
 

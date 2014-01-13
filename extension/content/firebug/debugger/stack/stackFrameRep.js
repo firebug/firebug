@@ -36,7 +36,7 @@ var StackFrameRep = domplate(Rep,
     inspectable: false,
 
     tag:
-        Rep.OBJECTBLOCK({$hasTwisty: "$object|hasArguments", _repObject: "$object",
+        Rep.tags.OBJECTBLOCK({$hasTwisty: "$object|hasArguments", _repObject: "$object",
             onclick: "$onToggleArguments"},
             SPAN({"class": "stackFrameMarker"}, ""),
             A({"class": "objectLink a11yFocus", _repObject: "$object"}, "$object|getCallName"),

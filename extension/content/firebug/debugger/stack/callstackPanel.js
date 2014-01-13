@@ -27,7 +27,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 var Trace = FBTrace.to("DBG_STACK");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Callstack Panel

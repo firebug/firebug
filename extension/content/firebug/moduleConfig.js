@@ -58,6 +58,7 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/console/commandEditor",
         "firebug/console/performanceTiming",
         "firebug/chrome/toggleSidePanels",
+        "firebug/console/consolePanel",
 
         // Commands
         "firebug/console/commands/lastCommandLineResult",

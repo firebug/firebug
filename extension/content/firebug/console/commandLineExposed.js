@@ -17,7 +17,7 @@ function(Obj, Wrapper, Locale, DebuggerLib, CommandLineAPI) {
 // Constants
 
 var Trace = FBTrace.to("DBG_COMMANDLINE");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Command Line APIs
@@ -266,7 +266,7 @@ function evaluateInFrame(frame, context, win, expr, origExpr, onSuccess, onError
                      frame.eval :
                      frame.evalWithBindings;
 
-    var dbgGlobal = frame.callee.global;
+    var dbgGlobal = DebuggerLib.getThreadDebuggeeGlobalForFrame(frame);
     var args = [frame, evalMethod, dbgGlobal];
     args = args.concat([].slice.call(arguments, 1));
     executeInWindowContext(win, evaluate, args);

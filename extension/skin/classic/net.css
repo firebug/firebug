@@ -34,10 +34,15 @@
 .netHeaderCell {
     cursor: pointer;
     -moz-user-select: none;
-    border-bottom: 1px solid #9C9C9C;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
     padding: 0 !important;
     font-weight: bold;
-    background: #C4C4C4 linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+    background: linear-gradient(
+            rgba(255, 255, 255, 0.05),
+            rgba(0, 0, 0, 0.05)),
+        radial-gradient(1px 60% at right,
+            rgba(0, 0, 0, 0.8) 0%,
+            transparent 80%) repeat-x #C8D2DC;
     color: #000000;
     white-space: nowrap;
 }
@@ -48,20 +53,13 @@
 
 .netHeaderCellBox {
     padding: 2px 14px 2px 10px;
-    border-left: 1px solid #D9D9D9;
-    border-right: 1px solid #9C9C9C;
-}
-
-.netHeaderCell:hover:active {
-    background-color: #B4B4B4;
 }
 
 .netHeaderSorted {
-    background-color: #8CA0BE;
+    background-color: #AAC3DC;
 }
 
 .netHeaderSorted > .netHeaderCellBox {
-    border-right-color: #6B7C93;
     background: url(chrome://firebug/skin/arrowDown.svg) no-repeat calc(100% - 4px);
 }
 
@@ -69,8 +67,13 @@
     background-image: url(chrome://firebug/skin/arrowUp.svg);
 }
 
-.netHeaderSorted:hover:active {
-    background-color: #6E87AA;
+.netHeaderCell:hover:active {
+    background-image: linear-gradient(
+            rgba(0, 0, 0, 0.1),
+            transparent),
+        radial-gradient(1px 60% at right,
+            rgba(0, 0, 0, 0.8) 0%,
+            transparent 80%);
 }
 
 /*************************************************************************************************/
@@ -180,7 +183,7 @@
 }
 
 /* Visual separator between phases */
-.netRow[breakLayout="true"] .netCol {
+.netRow[breakLayout="true"]:not(:nth-child(2)) > .netCol {
     border-top: 1px solid rgb(207,207,207);
 }
 
@@ -191,9 +194,12 @@
 .netCol {
     padding: 0;
     vertical-align: top;
-    border-bottom: 1px solid #EFEFEF;
     white-space: nowrap;
     height: 17px;
+}
+
+.netRow:not(:nth-last-child(-n+2)) > .netCol {
+    border-bottom: 1px solid #EFEFEF;
 }
 
 .netLabel {
@@ -325,7 +331,7 @@
     left: 0;
     top: 1px;
     bottom: 1px;
-    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
 }
 
 .netBlockingBar {
@@ -411,7 +417,7 @@
  */
 .fromCache .netReceivingBar,
 .fromCache.netReceivingBar {
-    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1));
 }
 
 .netSummaryRow .netTimeLabel,
@@ -479,7 +485,7 @@
 }
 
 .netSummaryRow {
-    background: #BBBBBB !important;
+    background: #C8D2DC;
     font-weight: bold;
 }
 
@@ -488,9 +494,8 @@
 }
 
 .netSummaryRow > .netCol {
-    border-top: 1px solid #999999;
-    border-bottom: 2px solid;
-    -moz-border-bottom-colors: #EFEFEF #999999;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .netSummaryRow > .netHrefCol:hover {
@@ -526,7 +531,7 @@
 
 .netInfoCol {
     border-top: 1px solid #EEEEEE;
-    background: #FFFFFF linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent 33px) repeat-x;
+    background: #FFFFFF linear-gradient(rgba(0, 0, 0, 0.1), transparent 33px) repeat-x;
 }
 
 .netInfoBody {

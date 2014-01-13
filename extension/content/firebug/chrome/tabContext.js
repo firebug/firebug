@@ -30,7 +30,7 @@ var throttleFlushCount = 20;
 var refreshDelay = 300;
 
 // Tracing support
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_TABCONTEXT");
 
 // ********************************************************************************************* //

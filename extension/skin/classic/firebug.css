@@ -129,7 +129,7 @@
     -moz-appearance: none;
     border: none;
     border-bottom: 1px solid rgba(10, 31, 51, 0.35);
-    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
 }
 
 #fbToolbar {
@@ -167,7 +167,7 @@
 
 #fbPanelBar2-tabBoxBackground {
     background-color: rgb(252, 252, 252);
-    background: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
 }
 
 #fbPanelBar2-panelTabs > panelTab[selected="true"] {
@@ -271,7 +271,7 @@ panelTab[selected="true"][disabled="true"] {
     height: 28px;
     width: 6px;
     background-color: -moz-dialog;
-    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
     border-bottom: 1px solid #A0A0A0;
     cursor: default;
 }
@@ -588,21 +588,21 @@ toolbarbutton {
 
 toolbarbutton:hover:not([disabled="true"]) {
     border-color: rgba(0, 0, 0, 0.2);
-    background: transparent linear-gradient(to bottom, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2)) no-repeat;
+    background: transparent linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2)) no-repeat;
     box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.6) inset, 0 0 1px rgba(255, 255, 255, 0.6) inset, 0 0 2px rgba(0, 0, 0, 0.05);
 }
 
 toolbarbutton:-moz-any([checked="true"],
                        [selected="true"],
-                       [open="true"]):not([disabled="true"]) {
+                       [open="true"]):not(.panelStatusLabel):not([disabled="true"]) {
     border-color: rgba(0, 0, 0, 0.3);
     box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1) inset, 0 0 1px rgba(0, 0, 0, 0.1) inset;
 }
 
 toolbarbutton:-moz-any([checked="true"],
                        [selected="true"],
-                       [open="true"]):not([disabled="true"]):not([type=menu-button]) {
-    background: transparent linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent) no-repeat;
+                       [open="true"]):not(.panelStatusLabel):not([disabled="true"]):not([type=menu-button]) {
+    background: transparent linear-gradient(rgba(0, 0, 0, 0.1), transparent) no-repeat;
 }
 
 toolbarbutton:hover:active:not([disabled="true"]) {
@@ -611,7 +611,7 @@ toolbarbutton:hover:active:not([disabled="true"]) {
 }
 
 toolbarbutton:hover:active:not([disabled="true"]):not([type=menu-button]) {
-    background: transparent linear-gradient(to bottom, rgba(0, 0, 0, 0.2), transparent) no-repeat;
+    background: transparent linear-gradient(rgba(0, 0, 0, 0.2), transparent) no-repeat;
 }
 
 toolbarbutton[type="menu-button"] {
@@ -631,7 +631,7 @@ toolbarbutton[type=menu-button]:hover > .toolbarbutton-menubutton-button {
 
 toolbarbutton[type=menu-button][open="true"]:not([disabled="true"]) > .toolbarbutton-menubutton-dropmarker {
     border-color: rgba(0, 0, 0, 0.3);
-    background: transparent linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent) no-repeat;
+    background: transparent linear-gradient(rgba(0, 0, 0, 0.1), transparent) no-repeat;
     box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1) inset, 0 0 1px rgba(0, 0, 0, 0.1) inset;
 }
 
@@ -649,6 +649,14 @@ toolbarbutton[type="menu"] > toolbarbutton {
 
 toolbarbutton[disabled="true"] {
     color: graytext;
+}
+
+.panelStatusLabel[selected="true"] {
+    font-weight: bold;
+}
+
+.panelStatusLabel > .toolbarbutton-icon {
+    margin: 0;
 }
 
 /*************************************************************************************************/

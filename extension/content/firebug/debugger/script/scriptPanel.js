@@ -48,7 +48,7 @@ function (Firebug, FBTrace, Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, P
 
 var {domplate, DIV} = Domplate;
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_SCRIPTPANEL");
 
 // ********************************************************************************************* //

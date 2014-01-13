@@ -22,7 +22,7 @@ function(Firebug, FBTrace, Obj, Arr, Wrapper, Dom, Locale, ClosureInspector, Pan
 // Constants
 
 var Trace = FBTrace.to("DBG_DOM");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // DOM Member Provider

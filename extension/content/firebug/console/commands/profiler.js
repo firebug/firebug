@@ -32,7 +32,7 @@ function(Firebug, FBTrace, Obj, Domplate, Locale, Url, Events, Css, Dom, Str,
 var {domplate, TAG, DIV, SPAN, TD, TR, TH, TABLE, THEAD, TBODY, P, UL, LI, A} = Domplate;
 
 var Trace = FBTrace.to("DBG_PROFILER");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Profiler
@@ -517,7 +517,7 @@ Profiler.ProfileCall = domplate(Rep,
     tag:
         TR({"class": "focusRow profileRow subFocusRow", "role": "row"},
             TD({"class": "profileCell", "role": "presentation"},
-                Rep.OBJECTLINK("$object|getCallName")
+                Rep.tags.OBJECTLINK("$object|getCallName")
             ),
             TD({"class": "a11yFocus profileCell", "role": "gridcell"}, "$object.callCount"),
             TD({"class": "a11yFocus profileCell", "role": "gridcell"}, "$object.percent%"),

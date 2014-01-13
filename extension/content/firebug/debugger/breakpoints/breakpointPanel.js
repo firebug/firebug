@@ -23,7 +23,7 @@ function(Firebug, Panel, Obj, FBTrace, FirebugReps, Locale, Events, StackFrame, 
 // Constants
 
 var Trace = FBTrace.to("DBG_BREAKPOINTPANEL");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // Breakpoint Panel

@@ -53,7 +53,7 @@
     height: 32px;
     width: 6px;
     background-color: -moz-dialog;
-    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
     border-bottom: 1px solid #bebebe;
     cursor: default;
 }
@@ -94,7 +94,7 @@
 }
 
 #fbPanelBar1-tabBox {
-    background: linear-gradient(to bottom, #f1f1f1, #d2d2d2) no-repeat 0 0;
+    background: linear-gradient(#f1f1f1, #d2d2d2) no-repeat 0 0;
 }
 
 #fbPanelBar2-tabBox {
@@ -307,14 +307,14 @@ panelTab[aria-disabled="true"] .panelTab-text {
 panelTab[selected="true"] {
     border: 1px solid #A0A0A0;
     border-bottom: none;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6)) no-repeat 0 0;
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6)) no-repeat 0 0;
     color: inherit;
 }
 
 panelTab:not([selected="true"]):hover {
     border: 1px solid #C8C8C8;
     border-bottom: none;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2)) no-repeat 0 0;
+    background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2)) no-repeat 0 0;
 }
 
 .panelTab-text {
@@ -327,7 +327,7 @@ panelTab[selected="true"] > panelTabMenu {
 
 #fbPanelBar2-panelTabs > panelTab.watchesPanelTab[selected="true"],
 #fbPanelBar2-panelTabs > panelTab.selectorsPanelTab[selected="true"] {
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6)) no-repeat 0 0;
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6)) no-repeat 0 0;
     background-color: rgb(253, 253, 253);
 }
 
@@ -352,16 +352,7 @@ panelTab[selected="true"] > panelTabMenu {
 .panelStatusLabel {
     margin: 0;
     padding: 0 4px;
-    cursor: pointer;
     color: #565656;
-}
-
-.panelStatusLabel:hover {
-    color: blue;
-}
-
-.panelStatusLabel[selected="true"] {
-    font-weight: bold;
 }
 
 .menuHeader {
@@ -520,15 +511,15 @@ panelTab[selected="true"] > panelTabMenu {
 
 #fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-up {
     border-right: 2px solid !important;
-    -moz-border-right-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15) !important;
+    -moz-border-right-colors: rgba(0,0,0,0.25) rgba(255, 255, 255, 0.15) !important;
     border-left: 2px solid transparent !important;
 }
 
 #fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-down {
     border-left: 2px solid !important;
     border-right: 2px solid !important;
-    -moz-border-left-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15) !important;
-    -moz-border-right-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15) !important;
+    -moz-border-left-colors: rgba(0,0,0,0.25) rgba(255, 255, 255, 0.15) !important;
+    -moz-border-right-colors: rgba(0,0,0,0.25) rgba(255, 255, 255, 0.15) !important;
 }
 
 /*************************************************************************************************/

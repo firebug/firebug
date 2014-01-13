@@ -77,8 +77,9 @@ const panelName = "cookies";
 // Helper array for prematurely created contexts
 var contexts = new Array();
 
-// Register stylesheet in Firebug. This method is introduced in Firebug 1.6
+// Register stylesheet in Firebug
 Firebug.registerStylesheet("chrome://firebug/skin/cookies/cookies.css");
+Firebug.registerStylesheet("chrome://firebug-os/skin/cookies.css");
 
 // ********************************************************************************************* //
 // Module Implementation

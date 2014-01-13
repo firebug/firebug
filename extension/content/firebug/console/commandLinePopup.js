@@ -19,7 +19,7 @@ function(Firebug, FBTrace, Obj, Css, Dom, Str, Xml, Events, Options, Module, Com
 // Constants
 
 var Trace = FBTrace.to("DBG_COMMANDLINE");
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 // ************************************************************************************************
 // Implementation

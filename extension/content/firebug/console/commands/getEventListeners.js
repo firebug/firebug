@@ -30,7 +30,7 @@ function(Firebug, Module, FBTrace, Obj, Locale, Wrapper, Events, Domplate, Conso
 
 var {domplate, SPAN, TAG} = Domplate;
 
-var TraceError = FBTrace.to("DBG_ERRORS");
+var TraceError = FBTrace.toError();
 
 var mutationObservers = "MutationObservers";
 var parents = "Parents";
