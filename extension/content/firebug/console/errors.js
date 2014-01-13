@@ -391,7 +391,7 @@ var Errors = Firebug.Errors = Obj.extend(Module,
         var isJSError = category == "js" && !isWarning;
 
         // the sourceLine will cause the source to be loaded.
-        var error = new FirebugReps.ErrorMessageObj(object.errorMessage, object.sourceName,
+        var error = new ErrorMessageObj(object.errorMessage, object.sourceName,
             object.lineNumber, object.sourceLine, category, context, null);
 
         // Display column info only if it isn't zero.
