@@ -1299,6 +1299,9 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Rep, new EventSource(),
                             Locale.$STR("net.label.Parameters"),
                             SPAN({"class": "netInfoPostContentType"},
                                 "application/x-www-form-urlencoded"
+                            ),
+                            SPAN({"class": "netPostParameterSort", onclick: "$onChangeSort"},
+                                "Sort by key"
                             )
                         )
                     )
@@ -1578,7 +1581,19 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Rep, new EventSource(),
         }
 
         return postData;
-    }
+    },
+    
+    onChangeSort: function(event)
+    {
+        var target = event.target;
+        
+        Options.set("netSortPostParameters", (target.textContent == "sort alphabetically"));
+        target.textContent = (target.textContent == "Sort by key") ? "Do not sort" : "Sort by key";
+
+        
+        
+        Events.cancelEvent(event);
+    },
 });
 
 // ********************************************************************************************* //
