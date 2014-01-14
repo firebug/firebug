@@ -353,6 +353,9 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
      * @param arr {Array} List of breakpoints to be created on the server side
      * @param cb {Function} Optional callback that is executed as soon as all breakpoints
      * are created on the server side and the current thread resumed again.
+     *
+     * xxxHonza: Use a better name for the |cb| argument, ideally |callback| (and refactor
+     * method implementation, so there isn't the other callback variable).
      */
     setBreakpoints: function(arr, cb)
     {
