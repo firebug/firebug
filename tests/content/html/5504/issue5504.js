@@ -8,7 +8,7 @@ function runTest()
         var panel = FBTest.selectPanel("html");
 
         // Get the selected element and execute "New Attribute" action on it.
-        var nodeBox = getSelectedNodeBox();
+        var nodeBox = FBTest.getSelectedNodeBox();
         FBTest.executeContextMenuCommand(nodeBox, "htmlNewAttribute", function()
         {
             // Wait till the inline editor is available.
@@ -20,11 +20,4 @@ function runTest()
             });
         });
     });
-}
-
-// xxxHonza: use the one from FBTest (should be in FBTest 1.10b5)
-function getSelectedNodeBox()
-{
-    var panel = FBTest.getPanel("html");
-    return panel.panelNode.querySelector(".nodeBox.selected");
 }

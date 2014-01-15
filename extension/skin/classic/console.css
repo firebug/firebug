@@ -584,7 +584,7 @@
 .objectLink-regexp > .regexpSource {
     padding-right: 4px;
     font-weight: normal;
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 
@@ -692,6 +692,7 @@
 .objectRightBrace,
 .arrayLeftBracket,
 .arrayRightBracket {
+    cursor: pointer;
     font-weight: bold;
 }
 
@@ -928,6 +929,10 @@
 .tableCommandLineInclude .commands {
     float: right;
     height: 100%;
+}
+
+.tableCommandLineInclude .aliasName {
+    font-family: monospace;
 }
 
 .tableCommandLineInclude td:last-child {

@@ -11,9 +11,12 @@ define([
     "firebug/lib/trace",
     "firebug/lib/locale",
     "firebug/console/closureInspector",
+    "firebug/chrome/panelActivation",
     "firebug/chrome/reps",
+    "firebug/debugger/debuggerLib",
 ],
-function(Firebug, Obj, Arr, Wrapper, Dom, FBTrace, Locale, ClosureInspector, FirebugReps) {
+function(Firebug, Obj, Arr, Wrapper, Dom, FBTrace, Locale, ClosureInspector, PanelActivation,
+    FirebugReps, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -185,7 +188,8 @@ DOMMemberProvider.prototype =
                 }
             }
 
-            if (isScope || (typeof object === "function" && Firebug.showClosures && this.context))
+            if (this.shouldShowClosures() &&
+                (isScope || (typeof object === "function" && this.context)))
             {
                 this.maybeAddClosureMember(object, "proto", proto, level, isScope);
             }
@@ -283,6 +287,16 @@ DOMMemberProvider.prototype =
         }
     },
 
+    shouldShowClosures: function()
+    {
+        if (!Firebug.showClosures)
+            return false;
+        var requireScriptPanel = DebuggerLib._closureInspectionRequiresDebugger();
+        if (requireScriptPanel && !PanelActivation.isPanelEnabled(Firebug.getPanelType("script")))
+            return false;
+        return true;
+    },
+
     addMemberInternal: function(object, type, props, name, value, level, parentIsScope)
     {
         // Do this first in case a call to instanceof (= QI, for XPCOM things) reveals contents.
@@ -298,7 +312,7 @@ DOMMemberProvider.prototype =
              (valueType === "object" && value !== null));
 
         // Special case for closure inspection.
-        if (!hasChildren && valueType === "function" && Firebug.showClosures && this.context)
+        if (!hasChildren && valueType === "function" && this.shouldShowClosures() && this.context)
         {
             try
             {

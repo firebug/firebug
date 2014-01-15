@@ -4,11 +4,11 @@
 /* Quick Info Box */
 
 .fbQuickInfoPanelBody {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 .fbQuickInfoName, .fbQuickInfoValue {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 .fbQuickInfoPin {

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5507: Allow displaying original color values</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #content {
+            min-height: 100px;
+        }
+
+        #content > div {
+            width: 100px;
+            height: 100px;
+            float: left;
+            margin-right: 10px;
+        }
+
+        #element1 {
+            color: #f00;
+            background: linear-gradient(135deg, rgb(180, 200, 255), #788CFF);
+        }
+
+        #element1 {
+            color: green;
+        }
+
+        #element1 {
+            color: rgba(0, 0, 255, 1);
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5507">Issue 5507</a>: Allow displaying original color values</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element1"></div>
+                <div id="element2"></div>
+                <div id="element3"></div>
+            </section>
+            <section id="description">
+                <h2>CSS panel</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>Select <em>issue5507.html</em> from the location menu</li>
+                    <li>
+                        Check the panel option <em>Colors As Authored</em><br/>
+                        <span class="ok">&rArr; All colors should be displayed as they were defined, i.e. the rules should look like this:<br/>
+                        <code>#element1 {
+    color: #f00;
+    background: linear-gradient(135deg, rgb(180, 200, 255), #788CFF);
+}
+
+#element1 {
+    color: green;
+}
+
+#element1 {
+    color: rgba(0, 0, 255, 1);
+}
+</code>
+                        </span>
+                    </li>
+                    <li>
+                        Check the panel option <em>Colors As Hex</em><br/>
+                        <span class="ok">&rArr; All colors should be displayed in hexadecimal format.</span>
+                    </li>
+                    <li>
+                        Check the panel option <em>Colors As RGB</em><br/>
+                        <span class="ok">&rArr; All colors should be displayed in RGB format.</span>
+                    </li>
+                    <li>
+                        Check the panel option <em>Colors As HSL</em><br/>
+                        <span class="ok">&rArr; All colors should be displayed in HSL format.</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The color values should be displayed according to the chosen setting.</li>
+                </ul>
+
+                <h2>Style side panel</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and in there to the <em>Style</em> side panel</li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> (<code>#element1</code>)</li>
+                    <li>
+                        Check the panel option <em>Colors As Authored</em><br/>
+                        <span class="ok">&rArr; The <code>#element1</code> rules should be displayed like this:<br/>
+                        <code>#element1 {
+    color: rgba(0, 0, 255, 1);
+}
+
+#element1 {
+    <strike>color: green;</strike>
+}
+
+#element1 {
+    background: linear-gradient(135deg, rgb(180, 200, 255), #788CFF);
+    <strike>color: #f00;</strike>
+}
+</code>
+                        </span>
+                    </li>
+                    <li>
+                        Check the panel option <em>Colors As Hex</em><br/>
+                        <span class="ok">&rArr; All colors should be displayed in hexadecimal format.</span>
+                    </li>
+                    <li>
+                        Check the panel option <em>Colors As RGB</em><br/>
+                        <span class="ok">&rArr; All colors should be displayed in RGB format.</span>
+                    </li>
+                    <li>
+                        Check the panel option <em>Colors As HSL</em><br/>
+                        <span class="ok">&rArr; All colors should be displayed in HSL format.</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The color values should be displayed according to the chosen setting.</li>
+                </ul>
+
+                <h2>Computed side panel</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Computed</em> side panel</li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> (<code>#element1</code>)</li>
+                    <li>Expand the <code>color</code> property</li>
+                    <li>
+                        Check the panel option <em>Colors As Authored</em><br/>
+                        <span class="ok">&rArr; The style trace for the <code>color</code> property should be displayed like this:<br/>
+                        <code>#element1 rgba(0,​ 0,​ 255,​ 1)
+<strike>#element1 green</strike>
+<strike>#element1 #f00</strike>
+</code>
+                        </span>
+                    </li>
+                    <li>
+                        Check the panel option <em>Colors As Hex</em><br/>
+                        <span class="ok">&rArr; All colors should be displayed in hexadecimal format.</span>
+                    </li>
+                    <li>
+                        Check the panel option <em>Colors As RGB</em><br/>
+                        <span class="ok">&rArr; All colors should be displayed in RGB format.</span>
+                    </li>
+                    <li>
+                        Check the panel option <em>Colors As HSL</em><br/>
+                        <span class="ok">&rArr; All colors should be displayed in HSL format.</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The color values should be displayed according to the chosen setting.</li>
+                </ul>
+
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>
