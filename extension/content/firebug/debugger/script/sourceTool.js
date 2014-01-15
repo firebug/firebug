@@ -528,8 +528,6 @@ function getSourceFileByScript(context, script)
 
 Firebug.registerTool("source", SourceTool);
 
-SourceTool.sysoutScript = sysoutScript;
-
 return SourceTool;
 
 // ********************************************************************************************* //
