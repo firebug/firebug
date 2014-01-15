@@ -181,7 +181,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
 
         // xxxHonza: this check should go somewhere else.
         // xxxHonza: this might be also done by removing/adding listeners.
-        // If the Script panel is disabled (not created for the current context,
+        // If the Script panel is disabled (not created for the current context),
         // the debugger should not break.
         if (this.context.getPanel("script") == null)
         {
@@ -218,7 +218,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
         }
 
         // Send event asking whether the debugger should really break. If at least
-        // one listeners returns true, the debugger just continues with pause.
+        // one listeners returns true, the debugger will resume.
         if (!this.dispatch2("shouldBreakDebugger", [this.context, event, packet]))
         {
             Trace.sysout("debuggerTool.paused; Listeners don't want to break the debugger.");
