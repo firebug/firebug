@@ -338,6 +338,9 @@ BreakpointPanel.prototype = Obj.extend(Panel,
         // Remove the rest of all the other kinds of breakpoints (after refresh).
         // These can come from various modules and perhaps extensions, so use
         // the appropriate remove buttons.
+        // xxxHonza: if the breakpoint removal fails from some reason (breakpoint doesn't
+        // exist, etc.) the UI BP entry is not removed, and so the |buttons| array is never
+        // empty. This causes infinite recursion.
         var buttons = this.panelNode.getElementsByClassName("closeButton");
         while (buttons.length)
             this.click(buttons[0]);

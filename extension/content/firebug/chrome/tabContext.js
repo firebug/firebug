@@ -231,6 +231,11 @@ TabContext.prototype =
             this.sourceFileByTag[innerTag] = sourceFile;
     },
 
+    getSourceFile: function(href)
+    {
+        return this.sourceFileMap[href];
+    },
+
     getSourceFileByTag: function(tag)
     {
         return this.sourceFileByTag[tag];
