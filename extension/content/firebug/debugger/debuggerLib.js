@@ -216,7 +216,7 @@ DebuggerLib.getThreadDebugger = function(context)
  * @return {Debugger.Object} The debuggee global, or null if the context has
  * no debugger.
  */
-DebuggerLib.getDebuggerDebuggeeGlobalForContext = function(context, global)
+DebuggerLib.getThreadDebuggeeGlobalForContext = function(context, global)
 {
     var threadActor = DebuggerLib.getThreadActor(context.browser);
     if (!threadActor || !threadActor.globalDebugObject)
@@ -225,6 +225,30 @@ DebuggerLib.getDebuggerDebuggeeGlobalForContext = function(context, global)
     var dbgGlobal = threadActor.globalDebugObject;
     global = global || context.getCurrentGlobal();
     return dbgGlobal.makeDebuggeeValue(global).unwrap().global;
+};
+
+DebuggerLib.getThreadDebuggeeGlobalForFrame = function(frame)
+{
+    if (frame.script && frame.script.global)
+        return frame.script.global;
+
+    while (frame)
+    {
+        if (frame.type === "call")
+            return frame.callee.global;
+
+        // Even though |frame.this| returns a debuggee window, it is not the Debuggee 
+        // global instance. So rather return |frame.this.global|.
+        if (frame.type === "global")
+            return frame.this.global;
+
+        // Type is either "debugger" or "eval".
+        frame = frame.older;
+    }
+
+    // We've gone through the frame chain, but couldn't get the global object. Abandon.
+    TraceError.sysout("DebuggerLib.getThreadDebuggeeGlobalForFrame; can't get the global object");
+    return null;
 };
 
 // ********************************************************************************************* //

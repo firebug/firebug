@@ -4,7 +4,7 @@ var b = 33;
 
 function foo()
 {
-    alert("hi");
+    console.log("hi");
     var x = 1;
     var y = 2;
 }

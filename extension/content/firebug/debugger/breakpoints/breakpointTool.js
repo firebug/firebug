@@ -353,6 +353,9 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
      * @param arr {Array} List of breakpoints to be created on the server side
      * @param cb {Function} Optional callback that is executed as soon as all breakpoints
      * are created on the server side and the current thread resumed again.
+     *
+     * xxxHonza: Use a better name for the |cb| argument, ideally |callback| (and refactor
+     * method implementation, so there isn't the other callback variable).
      */
     setBreakpoints: function(arr, cb)
     {
@@ -382,7 +385,7 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             // 'setBreakpoint' packets that are put in an internal queue (in the underlying
             // RDP framework) and handled step by step, i.e. the next 'setBreakpoint' packet
             // is sent as soon as a response for the previous one is received.
-            for (var i=0; i<arr.length; i++)
+            for (var i = 0; i < arr.length; i++)
                 self.onAddBreakpoint(arr[i]);
 
             if (callback)
@@ -399,12 +402,12 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         }
 
         // ... otherwise we need to interrupt the thread first.
-        thread.interrupt(function(response)
+        thread.interrupt(function(packet)
         {
-            if (response.error)
+            if (packet.error)
             {
                 TraceError.sysout("BreakpointTool.setBreakpoints; Can't set breakpoints: " +
-                    response.error);
+                    packet.error);
                 return;
             }
 
@@ -413,10 +416,21 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             {
                 Trace.sysout("breakpointTool.doSetBreakpoints; done", arguments);
 
-                // At this point, all 'setBreakpoint' packets have been generated (the first
-                // on already sent) and they are waiting in a queue. The resume packet will
-                // be received as soon as the last response for 'setBreakpoint' is received.
-                self.context.getTool("debugger").resume(cb);
+                // If interrupt happened at the moment when the thread has already been
+                // paused, after we checked |thread.paused| (e.g. breakpoints in onload scripts),
+                // do not resume. See also issue 7118
+                if (packet.why.type == "alreadyPaused")
+                {
+                    if (cb)
+                        cb();
+                }
+                else
+                {
+                    // At this point, all 'setBreakpoint' packets have been generated (the first
+                    // on already sent) and they are waiting in a queue. The resume packet will
+                    // be received as soon as the last response for 'setBreakpoint' is received.
+                    self.context.getTool("debugger").resume(cb);
+                }
             });
         });
     },
