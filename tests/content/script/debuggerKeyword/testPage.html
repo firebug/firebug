@@ -82,6 +82,10 @@ function loadXHRDebugger(callback)
             window.eval(req.responseText);
             var f = 8;
             var g = 9;
+
+
+            // Keep this code at line 88 (corresponds to line 7 in the evaluated script).
+            console.log("after eval");
         }
         else if (req.readyState == 4)
         {
