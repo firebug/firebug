@@ -1,13 +1,5 @@
 /* See license.txt for terms of usage */
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cu = Components.utils;
-
-var EXPORTED_SYMBOLS = ["Firebug"];
-
-var Firebug = Firebug || {};
-
 // ********************************************************************************************* //
 
 /**
