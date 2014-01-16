@@ -105,13 +105,16 @@ var DebuggerClient = Obj.extend(Firebug.Module,
         {
             try
             {
-                DebuggerServer.init(function () { return true; });
-                DebuggerServer.addBrowserActors();
+                // The debugger server might be already initialized either by Firebug
+                // in another browser window or by built-in devtools.
+                if (!DebuggerServer.initialized)
+                {
+                    DebuggerServer.init(function () { return true; });
+                    DebuggerServer.addBrowserActors();
+                }
             }
             catch (e)
             {
-                // If the built-in debugger has been opened browser actors
-                // can be already added.
                 TraceError.sysout("debuggerClient.connect; EXCEPTION " + e, e);
             }
         }
