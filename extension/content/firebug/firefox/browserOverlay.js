@@ -30,6 +30,9 @@ Locale.registerStringBundle("chrome://firebug/locale/selectors.properties");
 Cu.import("resource://firebug/loader.js");
 Cu.import("resource://firebug/fbtrace.js");
 
+var servicesScope = {};
+Cu.import("resource://gre/modules/Services.jsm", servicesScope);
+
 const firstRunPage = "https://getfirebug.com/firstrun#Firebug ";
 
 // ********************************************************************************************* //
@@ -152,7 +155,11 @@ BrowserOverlay.prototype =
         var self = this;
         scriptSources.forEach(function(url)
         {
-            $script(self.doc, url);
+            servicesScope.Services.scriptloader.loadSubScript(url, self.doc);
+
+            // xxxHonza: This doesn't work since Firefox 28. From some reason the script
+            // isn't parsed when inserted into the second browser window. See issue 6731
+            // $script(self.doc, url);
         });
 
         // Create Firebug splitter element.
