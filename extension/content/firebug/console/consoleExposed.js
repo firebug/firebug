@@ -158,35 +158,34 @@ function createFirebugConsole(context, win)
 
     console.count = function(key)
     {
-        var frameId = getStackFrameId();
-        if (frameId)
+        var strKey = String(key);
+        var emptyKey = false;
+        if (key === null || key === undefined || strKey === "")
         {
-            if (!context.frameCounters)
-                context.frameCounters = {};
-
-            if (key != undefined)
-                frameId += key;
-
-            var frameCounter = context.frameCounters[frameId];
-            if (!frameCounter)
-            {
-                var logRow = logFormatted(["0"], null, true, true);
-
-                frameCounter = {logRow: logRow, count: 1};
-                context.frameCounters[frameId] = frameCounter;
-            }
-            else
-            {
-                ++frameCounter.count;
-            }
-
-            var label = key == undefined
-                ? frameCounter.count
-                : key + " " + frameCounter.count;
-
-            var node = frameCounter.logRow.getElementsByClassName("objectBox-text")[0];
-            node.firstChild.nodeValue = label;
+            emptyKey = true;
+            strKey = getStackFrameId();
+            if (!strKey)
+                return Console.getDefaultReturnValue();
         }
+        var id = emptyKey + " " + strKey;
+
+        if (!context.frameCounters)
+            context.frameCounters = {};
+
+        if (!context.frameCounters[id])
+        {
+            var logRow = logFormatted(["0"], null, true, true);
+            context.frameCounters[id] = {logRow: logRow, count: 0};
+        }
+
+        var frameCounter = context.frameCounters[id];
+        frameCounter.count++;
+
+        var label = (emptyKey ? "" : strKey + " ") + frameCounter.count;
+
+        var node = frameCounter.logRow.getElementsByClassName("objectBox-text")[0];
+        node.firstChild.nodeValue = label;
+
         return Console.getDefaultReturnValue();
     };
 

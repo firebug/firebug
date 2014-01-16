@@ -482,7 +482,7 @@
 .objectLink-regexp > .regexpSource {
     padding-right: 4px;
     font-weight: normal;
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 

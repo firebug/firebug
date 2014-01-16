@@ -147,6 +147,9 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
         Firebug.Console.addListener(this);
 
         Firebug.registerUIListener(this);
+
+        if (Firebug.Console.isEnabled())
+            Firebug.Console.attachConsoleToWindows(this.context);
     },
 
     destroy: function(state)

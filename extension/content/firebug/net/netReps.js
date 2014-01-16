@@ -120,8 +120,8 @@ Firebug.NetMonitor.NetRequestTable = domplate(Rep, new EventSource(),
                             Locale.$STR("net.header.Remote IP")
                         )
                     ),
-                    TD({id: "netTimeCol", width: "53%", "class": "netHeaderCell a11yFocus",
-                        "role": "columnheader"},
+                    TD({id: "netTimeCol", width: "53%", "class": "netHeaderCell netHeaderSorted a11yFocus sortedAscending",
+                        "role": "columnheader", "aria-sort": "ascending"},
                         DIV({"class": "netHeaderCellBox",
                             title: Locale.$STR("net.header.Timeline Tooltip")},
                             Locale.$STR("net.header.Timeline")

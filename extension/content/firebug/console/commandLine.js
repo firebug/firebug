@@ -563,8 +563,11 @@ var CommandLine = Obj.extend(Module,
         var panelState = Persist.getPersistedState(this, "console");
         panelState.commandLineText = context.commandLineText;
 
+        // Clean up the Command Line (the input field it's shared among all contexts)
+        // only if this context is the currently displayed one. See also issue 7060.
         var commandLine = this.getCommandLine(context);
-        commandLine.value = "";
+        if (context === Firebug.currentContext)
+            commandLine.value = "";
 
         this.autoCompleter.hide();
         Persist.persistObjects(this, panelState);

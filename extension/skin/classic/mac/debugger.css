@@ -2,8 +2,6 @@
 
 .panelNode-script {
     overflow: hidden;
-
-    /* Do not use Monaco, otherwise the Script panel's viewport doesn't work*/
     font-family: monospace;
     font-size: 12px;  /* Issue 5060 */
 }
@@ -16,7 +14,7 @@
     padding: 2px 3px;
     border: 1px solid #CBE087;
     background: LightYellow;
-    font-family: Monaco, monospace;
+    font-family: monospace;
     color: #000000;
 }
 
@@ -190,7 +188,7 @@
     border-radius: 10px !important;
     box-shadow: 0 2px 2px -2px #000000 inset;
     padding: 2px 12px;
-    font-family: Monaco, monospace;
+    font-family: monospace;
     -moz-box-sizing: border-box;
 }
 
@@ -251,7 +249,7 @@
     padding-left: 24px;
     padding-bottom: 2px;
     border-bottom: 1px solid #D7D7D7;
-    font-family: Monaco, monospace;
+    font-family: monospace;
     color: DarkGreen;
 }
 
