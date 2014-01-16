@@ -99,7 +99,8 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
         ActivableModule.initContext.apply(this, arguments);
 
-        this.attachConsoleToWindows(context);
+        if (this.isEnabled())
+            this.attachConsoleToWindows(context);
     },
 
     destroyContext: function(context)

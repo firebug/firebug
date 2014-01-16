@@ -16,7 +16,7 @@ function runTest()
                 var iframe = win.wrappedJSObject.document.getElementById("iframe");
                 var origin = iframe.contentWindow.testOrigin;
 
-                var expected = "message origin=" + origin +", data=test » Window iframe.html";
+                var expected = "message origin=" + origin +", data=test\u00A0\u00BB\u00A0Window iframe.html";
                 FBTest.compare(expected, row.textContent,
                     "The proper message must be displayed. " + row.textContent);
                 FBTest.testDone("issue5135.DONE");

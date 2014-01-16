@@ -58,7 +58,7 @@ body {
 
 .infoTip,
 .fullPanelEditor {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 /************************************************************************************************/
@@ -85,7 +85,7 @@ body {
 .arrayLeftBracket,
 .arrayRightBracket,
 .arrayComma {
-      font-family: Monaco, monospace;
+      font-family: monospace;
 }
 
 /************************************************************************************************/
@@ -95,7 +95,7 @@ body {
 .docType,
 .breakpointCode .nodeBox.containerNodeBox,
 .breakpointCode .nodeLabel {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 .nodeBox.selected > .nodeLabel > .nodeLabelBox,
@@ -130,7 +130,7 @@ body {
 /* CSS panel */
 
 .cssRule {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 /************************************************************************************************/
@@ -138,11 +138,11 @@ body {
 
 .editor-watchNewRow,
 .editor-memberRow {
-    font-family: Monaco, monospace !important;
+    font-family: monospace !important;
 }
 
 .watchRow > .memberLabelCell {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 .closeButton {
@@ -165,5 +165,5 @@ body {
 
 .useA11y .a11yShowFullLabel,
 .netInfoText {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }

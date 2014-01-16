@@ -593,7 +593,7 @@ of an error log is affected (higher than other logs). */
 .objectLink-regexp > .regexpSource {
     padding-right: 4px;
     font-weight: normal;
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 /*************************************************************************************************/
@@ -700,6 +700,7 @@ of an error log is affected (higher than other logs). */
 .objectRightBrace,
 .arrayLeftBracket,
 .arrayRightBracket {
+    cursor: pointer;
     font-weight: bold;
 }
 
@@ -943,6 +944,10 @@ of an error log is affected (higher than other logs). */
 .tableCommandLineInclude .commands {
     float: right;
     height: 100%;
+}
+
+.tableCommandLineInclude .aliasName {
+    font-family: monospace;
 }
 
 .tableCommandLineInclude td:last-child {
