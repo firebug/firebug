@@ -1301,7 +1301,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Rep, new EventSource(),
                                 "application/x-www-form-urlencoded"
                             ),
                             SPAN({"class": "netPostParameterSort", onclick: "$onChangeSort"},
-                                "Sort by key"
+                                SPAN("$|getLabel")
                             )
                         )
                     )
@@ -1420,6 +1420,11 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Rep, new EventSource(),
             )
         ),
 
+    getLabel: function()
+    {
+       return Options.getPref("netSortPostParameters") ? Locale.$STR("net.post.parameterSort.sortbykey") : Locale.$STR("net.post.parameterSort.donotsort");
+    },
+
     getParamValueIterator: function(param)
     {
         return Firebug.NetMonitor.NetInfoBody.getParamValueIterator(param);
@@ -1427,6 +1432,8 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Rep, new EventSource(),
 
     render: function(context, parentNode, file)
     {
+        Dom.clearNode(parentNode);
+    
         var text = NetUtils.getPostText(file, context, true);
         if (text == undefined)
             return;
@@ -1586,11 +1593,13 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Rep, new EventSource(),
     onChangeSort: function(event)
     {
         var target = event.target;
-        
-        Options.set("netSortPostParameters", (target.textContent == "sort alphabetically"));
-        target.textContent = (target.textContent == "Sort by key") ? "Do not sort" : "Sort by key";
+        var netInfoBox = Dom.getAncestorByClass(target, "netInfoBody");
+        var panel = Firebug.getElementPanel(netInfoBox);
+        var file = Firebug.getRepObject(netInfoBox);
+        var postText = netInfoBox.getElementsByClassName("netInfoPostText").item(0);
 
-        
+        Options.togglePref("netSortPostParameters")
+        Firebug.NetMonitor.NetInfoPostData.render(panel.context, postText, file);
         
         Events.cancelEvent(event);
     },
