@@ -14,9 +14,10 @@ define([
     "firebug/debugger/clients/grip",
     "firebug/debugger/clients/scopeClient",
     "firebug/debugger/watch/watchExpression",
+    "firebug/debugger/watch/watchProvider",
 ],
 function(Firebug, FBTrace, Obj, Domplate, Events, Dom, Css, Arr, DomBaseTree, Locale,
-    Grip, ScopeClient, WatchExpression) {
+    Grip, ScopeClient, WatchExpression, WatchProvider) {
 
 // ********************************************************************************************* //
 // Constants
@@ -97,19 +98,19 @@ WatchTree.prototype = domplate(BaseTree,
         {
             return "watch";
         }
+        else if (object instanceof WatchProvider.FrameResultObject)
+        {
+            // Return a different class when the return value has already been emphasized.
+            if (!object.alreadyEmphasized)
+                return "frameResultValue";
+            else
+                return "frameResultValueEmphasized";
+        }
         else if (object instanceof Grip)
         {
             if (object.getType() == "function")
             {
                 return "userFunction";
-            }
-            else if (object.isFrameResultValue)
-            {
-                // Return a different class when the return value has already been emphasized.
-                if (!object.alreadyEmphasized)
-                    return "frameResultValue";
-                else
-                    return "frameResultValueEmphasized";
             }
         }
 

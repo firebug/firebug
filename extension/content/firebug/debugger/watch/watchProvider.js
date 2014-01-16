@@ -5,15 +5,16 @@ define([
     "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/lib/wrapper",
-    "firebug/debugger/clients/clientProvider",
-    "firebug/debugger/stack/stackFrame",
-    "firebug/debugger/clients/scopeClient",
     "firebug/dom/domMemberProvider",
     "firebug/debugger/debuggerLib",
+    "firebug/debugger/stack/stackFrame",
+    "firebug/debugger/clients/clientProvider",
+    "firebug/debugger/clients/scopeClient",
+    "firebug/debugger/clients/grip",
     "firebug/debugger/watch/watchExpression",
 ],
-function (FBTrace, Obj, Locale, Wrapper, ClientProvider, StackFrame, ScopeClient,
-    DOMMemberProvider, DebuggerLib, WatchExpression) {
+function (FBTrace, Obj, Locale, Wrapper, DOMMemberProvider, DebuggerLib, StackFrame,
+    ClientProvider, ScopeClient, Grip, WatchExpression) {
 
 "use strict";
 
@@ -116,7 +117,7 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
         // If frame-return value is available display it in the Watch panel too.
         // (together with the scope chain).
-        var clientObject = this.getFrameResultClientObject(stackFrame, cache);
+        var clientObject = this.getFrameResultObject(stackFrame, cache);
         if (clientObject)
             stackFrame.scopes.push(clientObject);
 
@@ -214,24 +215,66 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
      * @param {object} stackFrame
      * @param {object} cache
      */
-    getFrameResultClientObject: function(stackFrame, cache)
+    getFrameResultObject: function(stackFrame, cache)
     {
         var frameResultObj = DebuggerLib.getFrameResultObject(stackFrame.context);
         if (!frameResultObj || !frameResultObj.type)
             return;
 
-        // Create and initialize fake 'scope' client object that displays the frame-result value
-        // within other scopes in the Watch panel.
+        // Create an object that represents the frame-result value in the {@link WatchPanel}.
         var clientObject = cache.getObject(frameResultObj.value);
-        clientObject.name = Locale.$STR("watch.frameResultType." + frameResultObj.type);
-        clientObject.isFrameResultValue = true;
-        clientObject.readOnly = true;
+        var resultObject = new WatchProvider.FrameResultObject(
+            clientObject, frameResultObj.type);
 
-        Trace.sysout("watchProvider.appendFrameResultValueInScope; frameResultScope",
-            clientObject);
+        Trace.sysout("watchProvider.getFrameResultObject; object:", clientObject);
 
-        return clientObject;
+        return resultObject;
     },
+});
+
+// ********************************************************************************************* //
+// Return Value Object
+
+WatchProvider.FrameResultObject = function(value, type)
+{
+    this.value = value;
+    this.readOnly = true;
+    this.name = Locale.$STR("watch.frameResultType." + type);
+}
+
+/**
+ * @object Represents frame-result value. We need a new type for this value since it
+ * has its own representation in the Watch panel. For example, if return value from
+ * a function is |this| we want to display "return value" instead of "this" as the label
+ * (see also issue 7095).
+ */
+WatchProvider.FrameResultObject.prototype = Obj.descend(Grip.prototype,
+/** @link WatchProvider.FrameResultObject */
+{
+    getName: function()
+    {
+        return this.name;
+    },
+
+    getActor: function()
+    {
+        return this.value.getActor();
+    },
+
+    getValue: function()
+    {
+        return this.value.getValue();
+    },
+
+    hasProperties: function()
+    {
+        return this.value.hasProperties();
+    },
+
+    getChildren: function()
+    {
+        return this.value.getProperties();
+    }
 });
 
 // ********************************************************************************************* //

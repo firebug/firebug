@@ -495,6 +495,9 @@ Firebug.Debugger = Obj.extend(ActivableModule,
             if (scope.name === "this")
                 continue;
 
+            if (!scope.grip)
+                continue;
+
             // We can't synchronously read properties of objects on the scope chain,
             // so always ignore them to avoid inconsistencies. They are pretty uncommon
             // anyway (apart from the global object, which gets special treatment).
