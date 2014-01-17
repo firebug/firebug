@@ -121,16 +121,16 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
         if (clientObject)
             stackFrame.scopes.push(clientObject);
 
-        // Append 'this' as the first scope. This is not a real 'scope',
-        // but useful for debugging. The scope can't be edited in the Watch panel,
-        // so set to read only.
-        var thisScope = cache.getObject(stackFrame.nativeFrame["this"]);
+        // Append 'this' as the first scope. This is not a real scope provided by
+        // the back-end, but it's useful for debugging.
+        var thisGrip = stackFrame.nativeFrame["this"];
+        var thisScope = new ScopeClient(thisGrip, cache)
+        thisScope.value = cache.getObject(thisGrip);
         thisScope.name = "this";
-        thisScope.readOnly = true;
         stackFrame.scopes.push(thisScope);
 
-        // Now iterate all parent scopes. This represents the chain of scopes
-        // in the Watch panel.
+        // Now iterate all real scopes. This represents the chain of scopes
+        // in the {@link WatchPanel}.
         var scope = stackFrame.nativeFrame.environment;
         while (scope)
         {
@@ -150,8 +150,14 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
         for (var i = 0; i < scopes.length; i++)
         {
             var scope = scopes[i];
-            if (scope instanceof ScopeClient)
-                return scope;
+            if (!(scope instanceof ScopeClient))
+                continue;
+
+            // Ignore 'this' scope (not real scope).
+            if (scope.name == "this")
+                continue;
+
+            return scope;
         }
     },
 

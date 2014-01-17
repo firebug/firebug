@@ -34,6 +34,9 @@ ScopeClient.prototype = Obj.descend(ObjectClient.prototype,
 {
     getName: function()
     {
+        if (this.name)
+            return this.name;
+
         // Construct the scope name.
         var name = Str.capitalize(this.grip.type);
 
@@ -63,6 +66,9 @@ ScopeClient.prototype = Obj.descend(ObjectClient.prototype,
         // xxxHonza: needs refactoring (e.g. we need WindowGrip object)
         // Global scope is usually a window, which is displayed with href.
 
+        if (this.value)
+            return this.value;
+
         var object;
         switch (this.grip.type)
         {
@@ -77,7 +83,10 @@ ScopeClient.prototype = Obj.descend(ObjectClient.prototype,
         }
 
         if (object)
-            return object.getValue();
+        {
+            this.value = object.getValue();
+            return this.value;
+        }
 
         return ObjectClient.prototype.getValue.apply(this, arguments);
     },
