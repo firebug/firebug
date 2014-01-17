@@ -32,10 +32,6 @@ Locale.registerStringBundle("chrome://firebug/locale/keys.properties");
 Locale.registerStringBundle("chrome://global-platform/locale/platformKeys.properties");
 Locale.registerStringBundle("chrome://global/locale/keys.properties");
 
-// JSD2 related new strings are in a separate bundle
-// They should be integrated/remoted at the end of JSD2 refactoring
-Locale.registerStringBundle("chrome://firebug/locale/firebug-jsd2.properties");
-
 Cu.import("resource://firebug/loader.js");
 Cu.import("resource://firebug/fbtrace.js");
 
