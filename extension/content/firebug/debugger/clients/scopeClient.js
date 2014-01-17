@@ -42,7 +42,7 @@ ScopeClient.prototype = Obj.descend(ObjectClient.prototype,
 
         // If there is no parent the scope is global.
         if (!this.grip.parent)
-            name = Locale.$STR("Global Scope");
+            name = Locale.$STR("scopes.Global Scope");
 
         var label = name;//Locale.STRF$("scopeLabel", [name]);
         switch (this.grip.type)
