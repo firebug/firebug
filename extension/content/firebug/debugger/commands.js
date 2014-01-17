@@ -172,19 +172,30 @@ function getSource(context, args)
 
         var actor = args[0];
         if (!actor)
-            return "No actor specified";
-
-        // xxxHonza: SourceFile object should be utilized here
-        var sourceClient = context.activeThread.source({actor: actor});
-        sourceClient.source(function(response)
         {
-            FBTrace.sysout("commands.getSource:", response);
+            context.activeThread.getSources(function(response)
+            {
+                FBTrace.sysout("commands.getSource(s):", response);
 
-            if (response.error)
-                return Firebug.Console.log(response.error);
+                if (response.error)
+                    return Firebug.Console.log(response.error);
 
-            return Firebug.Console.log(response.source);
-        });
+                return Firebug.Console.log(response.sources);
+            });
+        }
+        else
+        {
+            var sourceClient = context.activeThread.source({actor: actor});
+            sourceClient.source(function(response)
+            {
+                FBTrace.sysout("commands.getSource:", response);
+
+                if (response.error)
+                    return Firebug.Console.log(response.error);
+
+                return Firebug.Console.log(response.source);
+            });
+        }
     }
     catch (e)
     {
