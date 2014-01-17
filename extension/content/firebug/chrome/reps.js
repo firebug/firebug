@@ -1179,6 +1179,12 @@ FirebugReps.Element = domplate(Rep,
         System.copyToClipboard(xpath);
     },
 
+    copyAbsoluteXPath: function(elt)
+    {
+        var xpath = Xpath.getElementTreeXPath(elt);
+        System.copyToClipboard(xpath);
+    },
+
     copyCSSPath: function(elt)
     {
         var csspath = Css.getElementCSSPath(elt);
@@ -1364,6 +1370,12 @@ FirebugReps.Element = domplate(Rep,
                 tooltiptext: "html.tip.Copy_XPath",
                 id: "fbCopyXPath",
                 command: Obj.bindFixed(this.copyXPath, this, elt)
+            },
+            {
+                label: "CopyAbsoluteXPath",
+                tooltiptext: "html.tip.Copy_Absolute_XPath",
+                id: "fbCopyAbsoluteXPath",
+                command: Obj.bindFixed(this.copyAbsoluteXPath, this, elt)
             },
             {
                 label: "Copy_CSS_Path",
