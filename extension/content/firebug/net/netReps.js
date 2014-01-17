@@ -1301,7 +1301,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Rep, new EventSource(),
                                 "application/x-www-form-urlencoded"
                             ),
                             SPAN({"class": "netPostParameterSort", onclick: "$onChangeSort"},
-                                SPAN("$|getLabel")
+                                SPAN("$object|getLabel")
                             )
                         )
                     )
@@ -1420,9 +1420,11 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Rep, new EventSource(),
             )
         ),
 
-    getLabel: function()
+    getLabel: function(object)
     {
-       return Options.getPref("netSortPostParameters") ? Locale.$STR("net.post.parameterSort.sortbykey") : Locale.$STR("net.post.parameterSort.donotsort");
+        return Options.get("netSortPostParameters") ?
+            Locale.$STR("net.post.parameterSort.donotsort") :
+            Locale.$STR("net.post.parameterSort.sortbykey");
     },
 
     getParamValueIterator: function(param)
@@ -1433,7 +1435,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Rep, new EventSource(),
     render: function(context, parentNode, file)
     {
         Dom.clearNode(parentNode);
-    
+
         var text = NetUtils.getPostText(file, context, true);
         if (text == undefined)
             return;
@@ -1482,7 +1484,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Rep, new EventSource(),
         if (!params || !params.length)
             return;
 
-        var paramTable = this.paramsTable.append(null, parentNode);
+        var paramTable = this.paramsTable.append({object: null}, parentNode);
         var row = paramTable.getElementsByClassName("netInfoPostParamsTitle").item(0);
 
         Firebug.NetMonitor.NetInfoBody.headerDataTag.insertRows({headers: params}, row);
@@ -1600,7 +1602,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Rep, new EventSource(),
 
         Options.togglePref("netSortPostParameters")
         Firebug.NetMonitor.NetInfoPostData.render(panel.context, postText, file);
-        
+
         Events.cancelEvent(event);
     },
 });
