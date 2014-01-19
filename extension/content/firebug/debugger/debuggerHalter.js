@@ -1,4 +1,6 @@
 /* See license.txt for terms of usage */
+/*jshint esnext:true, curly:false, evil:true, forin:false*/
+/*global Components:true, define:true */
 
 define([
     "firebug/firebug",
@@ -95,7 +97,7 @@ var DebuggerHalter = Obj.extend(Module,
         {
             context.breakNowInProgress = false;
 
-            var callback = context.breakNowCallback
+            var callback = context.breakNowCallback;
             context.breakNowCallback = null;
 
             if (callback)
@@ -115,6 +117,18 @@ var DebuggerHalter = Obj.extend(Module,
             Trace.sysout("debuggerHalter.shouldResumeDebugger; resume debugger");
 
             context.resumeLimit = {type: "step"};
+            return true;
+        }
+
+        // Resume the debugger if the current frame is global and we have reached the limit
+        // of the execution of the frame. We don't want to display the frame result (issue 7134).
+        if (packet.frame && packet.frame.type === "global" && packet.why.frameFinished &&
+            packet.why.frameFinished.hasOwnProperty("return"))
+        {
+            Trace.sysout("debuggerHalter.shouldResumeDebugger; resume debugger");
+
+            // null means resume completely.
+            context.resumeLimit = null;
             return true;
         }
 
