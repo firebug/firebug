@@ -180,7 +180,7 @@ DebuggerLib.getObject = function(context, actorId)
     }
 };
 
-DebuggerLib.getThreadActor = function(browser)
+DebuggerLib.getTabActor = function(browser)
 {
     try
     {
@@ -188,7 +188,19 @@ DebuggerLib.getThreadActor = function(browser)
         // See: https://bugzilla.mozilla.org/show_bug.cgi?id=878472
         var conn = Firebug.debuggerClient._transport._serverConnection;
         var tabList = conn.rootActor._parameters.tabList;
-        var tabActor = tabList._actorByBrowser.get(browser);
+        return tabList._actorByBrowser.get(browser);
+    }
+    catch (e)
+    {
+        TraceError.sysout("debuggerClient.getObject; EXCEPTION " + e, e);
+    }
+};
+
+DebuggerLib.getThreadActor = function(browser)
+{
+    try
+    {
+        var tabActor = this.getTabActor(browser);
         if (!tabActor)
             return null;
 
