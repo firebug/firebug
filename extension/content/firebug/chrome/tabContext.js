@@ -503,8 +503,12 @@ TabContext.prototype =
         if (!this.invalidPanels)
             this.invalidPanels = {};
 
-        if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("tabContext.invalidatePanels; " + Arr.cloneArray(arguments).toString());
+        // xxxHonza: this is generating too many traces.
+        //if (FBTrace.DBG_PANELS)
+        //{
+        //    FBTrace.sysout("tabContext.invalidatePanels; " +
+        //        Arr.cloneArray(arguments).toString());
+        //}
 
         for (var i = 0; i < arguments.length; ++i)
         {
