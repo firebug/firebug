@@ -435,7 +435,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         Trace.sysout("scriptPanel.updateLocation; " + object, object);
 
-        // Make sure the update panel's content. If there is currently a warning displayed
+        // Make sure to update panel's content. If there is currently a warning displayed
         // it might disappears since no longer valid (e.g. "Debugger is already active").
         if (ScriptPanelWarning.updateLocation(this))
             return;
@@ -1340,8 +1340,16 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("scriptPanel.newSource; " + sourceFile.href, sourceFile);
 
         // New script has been appended, update the default location if necessary.
+        // xxxHonza: Do not use this.navigate() method since it would fire "onPanelNavigate"
+        // event and cause {@linke NavigationHistory} to be updated (issue 6950).
+        // Also, explicit executing of syncLocationList here is not ideal (are there any
+        // other options?)
         if (!this.location)
-            this.navigate(null);
+        {
+            this.location = this.getDefaultLocation();
+            this.updateLocation(this.location);
+            Firebug.chrome.syncLocationList();
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
