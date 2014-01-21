@@ -343,6 +343,9 @@ var NavigationHistory = Obj.extend(Module,
 
         var panel = panelBar.selectedPanel;
         var tab = panelBar.selectedTab;
+        if (!tab)
+            return;
+
         var panelName = tab.panelType.prototype.name;
         var location = panel ? panel.location : null;
 
