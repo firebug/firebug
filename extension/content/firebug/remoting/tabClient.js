@@ -223,6 +223,12 @@ TabClient.prototype = Obj.extend(new EventSource(),
 
         this.threadAttached = true;
 
+        // xxxHonza: the ThreadActor's |global| might have been changed (see issue 7029)
+        // referencing an embedded frame. So, make sure it's set to the top level
+        // window again. This should be removed as soon as the platform if fixed.
+        var threadActorObj = DebuggerLib.getThreadActor(this.browser);
+        threadActorObj.global = this.window.wrappedJSObject;
+
         this.client.attachThread(this.threadActor, this.onThreadAttached.bind(this));
     },
 
