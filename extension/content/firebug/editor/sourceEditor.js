@@ -843,6 +843,18 @@ SourceEditor.prototype =
         }
     },
 
+    removeAllBreakpoints: function()
+    {
+        var viewport = this.editorObject.getViewport();
+        var currentLine = viewport.from;
+
+        // Iterate over all visible lines.
+        this.editorObject.eachLine(viewport.from, viewport.to, (handle) =>
+        {
+            this.removeGutterMarker(bpGutter, currentLine++);
+        });
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Gutters and Marker API
 

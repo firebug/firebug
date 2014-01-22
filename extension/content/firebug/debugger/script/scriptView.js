@@ -459,20 +459,8 @@ ScriptView.prototype = Obj.extend(new EventSource(),
     {
         Trace.sysout("scriptView.removeAllBreakpoints;");
 
-        if (!this.editor)
-            return;
-
-        // xxxHonza: TODO support for breakpoints.
-        return;
-
-        var annotations = this.editor._getAnnotationsByType("breakpoint", 0,
-            this.editor.getCharCount());
-
-        if (annotations.length > 0)
-        {
-            annotations.forEach(this.editor._annotationModel.removeAnnotation,
-                this.editor._annotationModel);
-        }
+        if (this.editor)
+            this.editor.removeAllBreakpoints();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
