@@ -480,9 +480,15 @@ var CommandLine = Obj.extend(Module,
         }
     },
 
-    onCommandLineOverflow: function(event)
+    onCommandLinePaste: function(event)
     {
-        this.checkOverflow(Firebug.currentContext);
+        // When pasting mutli-line command (a text including end-of-line characters) into
+        // the Command Line make sure the Console panel and Command Editor is selected,
+        // see also issue 5146. Also, use timeout since the value is set asynchronously.
+        // Switching into the Console panel is done upon "paste" event not "overflow",
+        // see issue 7124.
+        var context = Firebug.currentContext;
+        context.setTimeout(() => this.checkOverflow(context));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -523,10 +529,10 @@ var CommandLine = Obj.extend(Module,
     initializeUI: function()
     {
         this.onCommandLineInput = Obj.bind(this.onCommandLineInput, this);
-        this.onCommandLineOverflow = Obj.bind(this.onCommandLineOverflow, this);
         this.onCommandLineKeyUp = Obj.bind(this.onCommandLineKeyUp, this);
         this.onCommandLineKeyDown = Obj.bind(this.onCommandLineKeyDown, this);
         this.onCommandLineKeyPress = Obj.bind(this.onCommandLineKeyPress, this);
+        this.onCommandLinePaste = Obj.bind(this.onCommandLinePaste, this);
         this.attachListeners();
     },
 
@@ -535,10 +541,10 @@ var CommandLine = Obj.extend(Module,
         var commandLine = this.getSingleRowCommandLine();
 
         Events.addEventListener(commandLine, "input", this.onCommandLineInput, true);
-        Events.addEventListener(commandLine, "overflow", this.onCommandLineOverflow, true);
         Events.addEventListener(commandLine, "keyup", this.onCommandLineKeyUp, true);
         Events.addEventListener(commandLine, "keydown", this.onCommandLineKeyDown, true);
         Events.addEventListener(commandLine, "keypress", this.onCommandLineKeyPress, true);
+        Events.addEventListener(commandLine, "paste", this.onCommandLinePaste, true);
     },
 
     shutdown: function()
@@ -552,10 +558,10 @@ var CommandLine = Obj.extend(Module,
             this.commandHistory.detachListeners();
 
         Events.removeEventListener(commandLine, "input", this.onCommandLineInput, true);
-        Events.removeEventListener(commandLine, "overflow", this.onCommandLineOverflow, true);
         Events.removeEventListener(commandLine, "keyup", this.onCommandLineKeyUp, true);
         Events.removeEventListener(commandLine, "keydown", this.onCommandLineKeyDown, true);
         Events.removeEventListener(commandLine, "keypress", this.onCommandLineKeyPress, true);
+        Events.removeEventListener(commandLine, "paste", this.onCommandLinePaste, true);
     },
 
     destroyContext: function(context, persistedState)
