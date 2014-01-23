@@ -252,10 +252,16 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
                     bp.condition, bp);
 
                 // xxxHonza: the condition-eval could be done server-side
-                // see: https://bugzilla.mozilla.org/show_bug.cgi?id=812172 
-                tool.eval(context.currentFrame, bp.condition);
-                context.conditionalBreakpointEval = true;
-                return false;
+                // see: https://bugzilla.mozilla.org/show_bug.cgi?id=812172
+
+                // xxxHonza: evaluate the condition locally to make it faster
+                // (no RDP communication), wait for platform fix. 
+                var result = Firebug.Debugger.evaluate(bp.condition, context);
+                return result ? true : false;
+
+                //tool.eval(context.currentFrame, bp.condition);
+                //context.conditionalBreakpointEval = true;
+                //return false;
             }
         }
 
