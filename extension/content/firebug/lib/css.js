@@ -540,7 +540,7 @@ Css.createStyleSheet = function(doc, url)
     style.setAttribute("charset", "utf-8");
     style.setAttribute("type", "text/css");
 
-    var cssText = url ? Http.getResource(url) : null;
+    var cssText = url ? Http.getResource(url, true) : null;
     if (cssText)
     {
         var index = url.lastIndexOf("/");

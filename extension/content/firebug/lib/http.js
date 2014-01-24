@@ -92,7 +92,7 @@ Http.readPostTextFromPage = function(url, context)
      }
 };
 
-Http.getResource = function(aURL)
+Http.getResource = function(aURL, ignoreMissing)
 {
     try
     {
@@ -103,7 +103,7 @@ Http.getResource = function(aURL)
     }
     catch (e)
     {
-        if (FBTrace.DBG_ERRORS)
+        if (!ignoreMissing && FBTrace.DBG_ERRORS)
             FBTrace.sysout("lib.getResource FAILS for \'"+aURL+"\'", e);
     }
 };
