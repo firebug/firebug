@@ -9,8 +9,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/css",
     "firebug/lib/options",
+    "firebug/lib/system",
 ],
-function(Obj, Firebug, Events, Menu, Dom, Locale, Css, Options) {
+function(Obj, Firebug, Events, Menu, Dom, Locale, Css, Options, System) {
 
 "use strict";
 
@@ -23,24 +24,15 @@ var MODE_JAVASCRIPT = "js";
 var CONTEXT_MENU = "";
 var TEXT_CHANGED = "";
 
-try
-{
-    // Introduced in Firefox 8
-    Cu["import"]("resource:///modules/source-editor.jsm");
-}
-catch (err)
-{
-    try
-    {
-        // URL changed in Firefox 27
-        Cu["import"]("resource:///modules/devtools/sourceeditor/source-editor.jsm");
-    }
-    catch (err)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("commandEditor: EXCEPTION source-editors is not available!");
-    }
-}
+// Orion editor has been introduced in Firefox 8 (modules/source-editor.jsm)
+// It's been moved into different location in Firefox 27(sourceeditor/source-editor.jsm)
+// Finally, it's been removed in Firefox 28, so Firebug needs to include it.
+var sourceEditorScope = System.importModule([
+    "resource://firebugui/orion/source-editor.jsm",
+    "resource:///modules/devtools/sourceeditor/source-editor.jsm",
+    "resource:///modules/source-editor.jsm"]);
+
+var SourceEditor = sourceEditorScope.SourceEditor;
 
 if (typeof(SourceEditor) != "undefined")
 {
