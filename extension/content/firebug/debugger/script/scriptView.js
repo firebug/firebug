@@ -459,8 +459,11 @@ ScriptView.prototype = Obj.extend(new EventSource(),
     {
         Trace.sysout("scriptView.removeAllBreakpoints;");
 
-        if (this.editor)
-            this.editor.removeAllBreakpoints();
+        var bps = [];
+        this.dispatch("getBreakpoints", [bps]);
+
+        for (var i = 0; i < bps.length; i++)
+            this.editor.removeBreakpointMarker(bps[i].lineNo);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

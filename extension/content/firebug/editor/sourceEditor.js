@@ -843,6 +843,11 @@ SourceEditor.prototype =
         }
     },
 
+    removeBreakpointMarker: function(lineNo)
+    {
+        this.removeGutterMarker(bpGutter, lineNo);
+    },
+
     removeAllBreakpoints: function()
     {
         var viewport = this.editorObject.getViewport();
