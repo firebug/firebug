@@ -42,6 +42,9 @@ BreakpointActor.prototype.hit = function(frame)
 
     // Do not break if the condition is evaluated to false (to avoid unnecessary
     // RDP communication). This can improve performance a lot (see issue 6867).
+    // Note that the client side doesn't evaluate the condition again.
+    // See {@link BreakpointModule.shouldBreakDebugger}
+    // Bugzilla: https://bugzilla.mozilla.org/show_bug.cgi?id=812172
     if (!evalCondition(frame, bp))
         return undefined;
 
