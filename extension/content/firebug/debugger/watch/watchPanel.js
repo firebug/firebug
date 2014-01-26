@@ -265,7 +265,10 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             var frameResultObject = Firebug.getRepObject(frameResultNode);
             var frameResultValue = frameResultObject.value;
             // Put the flag on the ClientObject (which is cached) representing the return value.
-            frameResultValue.alreadyEmphasized = true;
+            // Issue 7025: doUpdateSelection is called twice, first from watchPanel.onStartDebugging
+            // and second from watchPanel.framesadded. Each time, the watch panel is rebuilt.
+            // So to workaround this, defer the moment when we put that flag.
+            this.context.setTimeout(() => frameResultValue.alreadyEmphasized = true, 1000);
         }
 
         // Asynchronously evaluate all user-expressions, but make sure it isn't
