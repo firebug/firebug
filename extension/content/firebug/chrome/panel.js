@@ -460,14 +460,14 @@ var Panel = Obj.extend(new EventSource(),
     },
 
     /**
-     * Navigates to the next document whose match parameter returns true.
+     * Gets the next document from the list of documents
+     *
+     * @param {Boolean} reverse Indicates whether passing through the documents
+     *     should be done in reverse order
+     * @returns {Object} Next document
      */
-    navigateToNextDocument: function(match, reverse)
+    getNextDocument: function(doc, reverse)
     {
-        // This is an approximation of the UI that is displayed by the location
-        // selector. This should be close enough, although it may be better
-        // to simply generate the sorted list within the module, rather than
-        // sorting within the UI.
         var self = this;
         function compare(a, b)
         {
@@ -486,33 +486,55 @@ var Panel = Obj.extend(new EventSource(),
             return 0;
         }
 
-        var allLocs = this.getLocationList().sort(compare);
-        for (var curPos = 0; curPos < allLocs.length && allLocs[curPos] != this.location; curPos++);
-
-        function transformIndex(index)
+        if (!this.sortedLocationList)
         {
-            if (reverse)
-            {
-                // For the reverse case we need to implement wrap around.
-                var intermediate = curPos - index - 1;
-                return (intermediate < 0 ? allLocs.length : 0) + intermediate;
-            }
-            else
-            {
-                return (curPos + index + 1) % allLocs.length;
-            }
-        };
-
-        for (var next = 0; next < allLocs.length - 1; next++)
-        {
-            var object = allLocs[transformIndex(next)];
-
-            if (match(object))
-            {
-                this.navigate(object);
-                return object;
-            }
+            // This is an approximation of the UI that is displayed by the location
+            // selector. This should be close enough, although it may be better
+            // to simply generate the sorted list within the module, rather than
+            // sorting within the UI.
+            this.sortedLocationList = this.getLocationList().sort(compare);
         }
+
+        if (!doc)
+            doc = this.location;
+
+        var locationIndex = 0;
+        while (locationIndex < this.sortedLocationList.length && this.sortedLocationList[locationIndex] != doc)
+            locationIndex++;
+
+        if (reverse)
+        {
+            locationIndex--;
+            if (locationIndex < 0)
+                locationIndex = this.sortedLocationList.length - 1;
+        }
+        else
+        {
+            locationIndex = (locationIndex + 1) % this.sortedLocationList.length;
+        }
+
+        return this.sortedLocationList[locationIndex];
+    },
+
+    /**
+     * Navigates to the next document whose match parameter returns true.
+     *
+     * @param {Function} match Function used for matching
+     * @param {Boolean} reverse Indicates whether passing through the documents
+     *     should be done in reverse order
+     */
+    navigateToNextDocument: function(match, reverse)
+    {
+        var doc = this.location;
+        do
+        {
+            var doc = this.getNextDocument(doc, reverse);
+            if (match(doc))
+            {
+                this.navigate(doc);
+                return doc;
+            }
+        } while (doc !== this.location);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
