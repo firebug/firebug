@@ -1,20 +1,20 @@
 /* See license.txt for terms of usage */
-/*global define:1, Components:1, MouseEvent:1, Window: 1, Firebug:1*/
+/*global define:1, Components:1, MouseEvent:1, Firebug:1, window:1*/
 
 define([
     "firebug/lib/trace",
-    "firebug/lib/xpcom"
+    "firebug/lib/wrapper",
 ],
-function(FBTrace, Xpcom) {
+function(FBTrace, Wrapper) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-var Cu = Components.utils;
-
-var elService = Xpcom.CCSV("@mozilla.org/eventlistenerservice;1", "nsIEventListenerService");
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+var elService = Cc["@mozilla.org/eventlistenerservice;1"].getService(Ci.nsIEventListenerService);
 
 // ********************************************************************************************* //
 // Implementation
@@ -233,7 +233,7 @@ Events.isShift = function(event)
 // ********************************************************************************************* //
 // DOM Events
 
-const eventTypes =
+var eventTypes =
 {
     composition: [
         "composition",
@@ -604,11 +604,7 @@ Events.getEventListenersForTarget = function(target)
         if (!listener.func || rawListener.inSystemEventGroup)
             continue;
 
-        var funcGlobal = Cu.getGlobalForObject(listener.func);
-        if (!(funcGlobal instanceof Window))
-            continue;
-
-        if (funcGlobal.document.nodePrincipal.subsumes(document.nodePrincipal))
+        if (Wrapper.isChromeObject(listener.func, window))
             continue;
 
         ret.push(listener);
