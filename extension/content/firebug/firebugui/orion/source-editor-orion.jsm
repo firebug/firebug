@@ -154,12 +154,6 @@ this.EXPORTED_SYMBOLS = ["SourceEditor"];
  * @constructor
  */
 this.SourceEditor = function SourceEditor() {
-  // Update the SourceEditor defaults from user preferences.
-
-  SourceEditor.DEFAULTS.tabSize =
-    Services.prefs.getIntPref(SourceEditor.PREFS.TAB_SIZE);
-  SourceEditor.DEFAULTS.expandTab =
-    Services.prefs.getBoolPref(SourceEditor.PREFS.EXPAND_TAB);
 
   this._onOrionSelection = this._onOrionSelection.bind(this);
   this._onTextChanged = this._onTextChanged.bind(this);

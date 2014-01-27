@@ -11,26 +11,13 @@ Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://firebugui/orion/source-editor-ui.jsm");
 
-const PREF_EDITOR_COMPONENT = "devtools.editor.component";
 const SOURCEEDITOR_L10N = "chrome://firebug/locale/sourceeditor.properties";
 
-var component = Services.prefs.getCharPref(PREF_EDITOR_COMPONENT);
 var obj = {};
 try {
-  if (component == "ui") {
-    throw new Error("The ui editor component is not available.");
-  }
-  Cu.import("resource://firebugui/orion/source-editor-" + component + ".jsm", obj);
+  Cu.import("resource://firebugui/orion/source-editor-orion.jsm", obj);
 } catch (ex) {
   Cu.reportError(ex);
-  Cu.reportError("SourceEditor component failed to load: " + component);
-
-  // If the component does not exist, clear the user pref back to the default.
-  Services.prefs.clearUserPref(PREF_EDITOR_COMPONENT);
-
-  // Load the default editor component.
-  component = Services.prefs.getCharPref(PREF_EDITOR_COMPONENT);
-  Cu.import("resource:///modules/devtools/sourceeditor/source-editor-" + component + ".jsm", obj);
 }
 
 // Export the SourceEditor.
@@ -42,15 +29,6 @@ this.EXPORTED_SYMBOLS = ["SourceEditor"];
 XPCOMUtils.defineLazyGetter(SourceEditorUI, "strings", function() {
   return Services.strings.createBundle(SOURCEEDITOR_L10N);
 });
-
-/**
- * Known SourceEditor preferences.
- */
-SourceEditor.PREFS = {
-  TAB_SIZE: "devtools.editor.tabsize",
-  EXPAND_TAB: "devtools.editor.expandtab",
-  COMPONENT: PREF_EDITOR_COMPONENT,
-};
 
 /**
  * Predefined source editor modes for JavaScript, CSS and other languages.
@@ -106,16 +84,14 @@ SourceEditor.DEFAULTS = {
   undoLimit: 200,
 
   /**
-   * Define how many spaces to use for a tab character. This value is overridden
-   * by a user preference, see SourceEditor.PREFS.TAB_SIZE.
+   * Define how many spaces to use for a tab character.
    *
    * @type number
    */
   tabSize: 4,
 
   /**
-   * Tells if you want tab characters to be expanded to spaces. This value is
-   * overridden by a user preference, see SourceEditor.PREFS.EXPAND_TAB.
+   * Tells if you want tab characters to be expanded to spaces.
    * @type boolean
    */
   expandTab: true,
