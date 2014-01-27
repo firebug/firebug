@@ -102,6 +102,18 @@ Wrapper.unwrapIValueObject = function(scope, viewChrome)
     return scopeVars;
 };
 
+Wrapper.isChromeObject = function(obj, chromeWin)
+{
+    var global = Cu.getGlobalForObject(obj);
+    if (!(global instanceof chromeWin.Window))
+        return true;
+
+    if (global.document.nodePrincipal.subsumes(chromeWin.document.nodePrincipal))
+        return true;
+
+    return false;
+};
+
 /**
  * Create a content-accessible view of a simple chrome object. All properties
  * are marked as non-writable, except if they have explicit getters/setters.

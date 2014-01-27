@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
-/*global define:1*/
+/*global define:1, window:1*/
 
 define([
     "firebug/firebug",
@@ -198,7 +198,6 @@ function onExecuteCommand(context, args)
  * Get sorted list of listeners registered for the target and list of listeners
  * registered for all ancestor elements (if required).
  *
- * @param context {TabContext} The current Firebug context.
  * @param target {Object} The event target for which listeners should be returned.
  * @param includeParents {Boolean} True if parent listeners should also be returned.
  */
@@ -360,7 +359,7 @@ function getMutationObserversForTarget(target, parent)
     var result = [];
 
     // getBoundMutationObservers() API has been introduced in Firefox 23
-    // Also |window| that can be passed as an event target doeesn't implement
+    // Also |window| that can be passed as an event target doesn't implement
     // the method.
     if (typeof(target.getBoundMutationObservers) != "function")
         return result;
@@ -381,6 +380,11 @@ function getMutationObserversForTarget(target, parent)
             if (parent && !info.subtree)
                 continue;
 
+            // Prevent chrome observers from leaking into the page.
+            var callback = observer.mutationCallback;
+            if (!callback || Wrapper.isChromeObject(callback, window))
+                continue;
+
             // OK, insert the observer into the result array.
             result.push({
                 attributeOldValue: info.attributeOldValue,
@@ -390,7 +394,7 @@ function getMutationObserversForTarget(target, parent)
                 childList: info.childList,
                 subtree: info.subtree,
                 observedNode: info.observedNode,
-                mutationCallback: observer.mutationCallback,
+                mutationCallback: callback,
             });
         }
     }
