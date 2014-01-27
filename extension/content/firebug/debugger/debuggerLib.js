@@ -19,9 +19,6 @@ var comparator = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersi
 var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
 var pre27 = (comparator.compare(appInfo.version, "27.0*") < 0);
 
-// Debuggees
-var dbgGlobalWeakMap = new WeakMap();
-
 // Module object
 var DebuggerLib = {};
 
@@ -57,7 +54,9 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
 {
     global = global || context.getCurrentGlobal();
 
-    var dbgGlobal = dbgGlobalWeakMap.get(global.document);
+    if (!context.inactiveDbgGlobalWeakMap)
+        context.inactiveDbgGlobalWeakMap = new WeakMap();
+    var dbgGlobal = context.inactiveDbgGlobalWeakMap.get(global.document);
     if (!dbgGlobal)
     {
         var dbg = getInactiveDebuggerForContext(context);
@@ -77,7 +76,7 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
             dbgGlobal = dbg.addDebuggee(contentView);
             dbg.removeDebuggee(contentView);
         }
-        dbgGlobalWeakMap.set(global.document, dbgGlobal);
+        context.inactiveDbgGlobalWeakMap.set(global.document, dbgGlobal);
 
         if (FBTrace.DBG_DEBUGGER)
             FBTrace.sysout("new debuggee global instance created", dbgGlobal);
@@ -93,9 +92,6 @@ DebuggerLib._closureInspectionRequiresDebugger = function()
 
 /**
  * Runs a callback with a debugger for a global temporarily enabled.
- *
- * Currently this throws an exception unless the Script panel is enabled, because
- * otherwise debug GCs kill us.
  */
 DebuggerLib.withTemporaryDebugger = function(context, global, callback)
 {
