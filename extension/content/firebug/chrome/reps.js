@@ -998,6 +998,12 @@ FirebugReps.Element = domplate(Rep,
         return (limit > 0) ? Str.cropString(attr.value, limit) : attr.value;
     },
 
+    getAttrTitle: function(attr)
+    {
+        var newValue = this.getAttrValue(attr);
+        return (attr.value != newValue) ? attr.value : undefined;
+    },
+
     getVisible: function(elt)
     {
         return Xml.isVisible(elt) ? "" : "selectorHidden";
@@ -1153,53 +1159,12 @@ FirebugReps.Element = domplate(Rep,
 
     paste: function(elt, clipboardContent, mode)
     {
-        if (elt instanceof window.HTMLElement)
-            return this.pasteHTML.apply(this, arguments);
-        else
-            return this.pasteXML.apply(this, arguments);
-    },
-
-    pasteHTML: function(elt, clipboardContent, mode)
-    {
         if (mode === "replaceInner")
             elt.innerHTML = clipboardContent;
         else if (mode === "replaceOuter")
             elt.outerHTML = clipboardContent;
         else
             elt.insertAdjacentHTML(mode, clipboardContent);
-    },
-
-    pasteXML: function(elt, clipboardContent, mode)
-    {
-        var contextNode, parentNode = elt.parentNode;
-        if (["beforeBegin", "afterEnd", "replaceOuter"].indexOf(mode) >= 0)
-            contextNode = parentNode;
-        else
-            contextNode = elt;
-
-        var pastedElements = Dom.markupToDocFragment(clipboardContent, contextNode);
-        switch (mode)
-        {
-            case "beforeBegin":
-                parentNode.insertBefore(pastedElements, elt);
-                break;
-            case "afterBegin":
-                elt.insertBefore(pastedElements, elt.firstChild);
-                break;
-            case "beforeEnd":
-                elt.appendChild(pastedElements);
-                break;
-            case "afterEnd":
-                Dom.insertAfter(pastedElements, elt);
-                break;
-            case "replaceInner":
-                Dom.eraseNode(elt);
-                elt.appendChild(pastedElements);
-                break;
-            case "replaceOuter":
-                parentNode.replaceChild(pastedElements, elt);
-                break;
-        }
     },
 
     persistor: function(context, xpath)

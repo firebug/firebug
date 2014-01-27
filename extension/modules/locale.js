@@ -61,6 +61,10 @@ var Locale = {};
  */
 Locale.$STR = function(name, bundle)
 {
+    // The empty string localizes to the empty string.
+    if (!name)
+        return "";
+
     var strKey = name.replace(" ", "_", "g");
 
     if (!PrefLoader.getPref("useDefaultLocale"))

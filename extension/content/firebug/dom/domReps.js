@@ -81,7 +81,7 @@ var DirTablePlate = domplate(Rep,
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick",
             _repObject: "$object", role: "tree",
-            "aria-label": Locale.$STR("aria.labels.dom properties")},
+            "aria-label": Locale.$STR("a11y.labels.dom properties")},
             TBODY({role: "presentation"},
                 SizerRow,
                 FOR("member", "$object|memberIterator",

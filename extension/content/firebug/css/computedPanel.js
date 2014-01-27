@@ -63,7 +63,7 @@ CSSComputedPanel.prototype = Obj.extend(Panel,
     {
         computedStylesTag:
             DIV({"class": "a11yCSSView", role: "list", "aria-label":
-                Locale.$STR("aria.labels.computed styles")}),
+                Locale.$STR("a11y.labels.computed styles")}),
 
         groupedStylesTag:
             FOR("group", "$groups",
