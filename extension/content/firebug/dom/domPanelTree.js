@@ -78,7 +78,7 @@ DomPanelTree.prototype = domplate(BaseTree,
             ),
             TD({"class": "memberValueCell", $readOnly: "$member.readOnly",
                 role: "presentation"},
-                TAG("$member.tag", {object: "$member.value"})
+                TAG("$member.tag", {object: "$member|getMemberValue"})
             )
         ),
 
@@ -96,6 +96,18 @@ DomPanelTree.prototype = domplate(BaseTree,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Domplate Accessors
+
+    getMemberValue: function(member)
+    {
+        // xxxHonza: the return value is passed into TAG that can be evaluated to
+        // FirebugReps.Obj. This template is based on OBJECTLINK, which assigns
+        // the value to |repObject| expando of the target node. In case where the
+        // value is referencing an object coming from chrome scope the assignment
+        // fails with an exception:
+        // Permission denied for <resource://firebugui> to create wrapper
+        // (see issue 7138 and DomplateTag.generateDOM method)
+        return member.value;
+    },
 
     /**
      * Override the derived method since this tree template uses different domplate

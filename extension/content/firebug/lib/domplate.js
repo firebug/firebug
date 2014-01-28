@@ -566,7 +566,13 @@ DomplateTag.prototype =
             {
                 var val = this.props[name];
                 var arg = generateArg(val, path, args);
-                blocks.push('node.', name, ' = ', arg, ';\n');
+
+                // Permission denied for <resource://firebugui> to create wrapper
+                // There is an exception when creating reference to chrome object
+                // within content scope. Typically |repObject| in content scope can't
+                // point to an object from chrome scope (see issue 7138).
+                // xxxHonza: It would be nice to avoid such reference in the first place.
+                blocks.push("try {node.", name, " = ", arg, ";} catch(e) {}\n");
             }
         }
 
