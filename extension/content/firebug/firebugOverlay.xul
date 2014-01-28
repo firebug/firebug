@@ -535,8 +535,8 @@
             </vbox>
 
             <!-- Command Line (static) Arrow -->
-            <vbox pack="end">
-                <label id="fbCommandArrow" value="&gt;&gt;&gt;"/>
+            <vbox pack="center">
+                <html:div id="fbCommandArrow">&gt;&gt;&gt;</html:div>
             </vbox>
 
             <!-- Command Line Input -->
