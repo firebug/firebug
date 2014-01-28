@@ -81,11 +81,11 @@
 }
 
 #fbCommandLineHistoryButton {
-    margin-left: 2px;
+    margin: 2px;
 }
 
 #fbToggleCommandLine {
-    margin-right: 2px;
+    margin: 2px;
 }
 
 #fbCommandLine > .textbox-input-box > .textbox-textarea {

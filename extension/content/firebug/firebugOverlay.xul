@@ -523,15 +523,23 @@
             </deck>
         </vbox>
 
-        <!-- Command Line (small) -->
+        <!-- Command Line -->
         <hbox id="fbCommandBox">
-            <toolbarbutton id="fbCommandLineHistoryButton" tooltiptext="Command_History"
-                class="toolbarbutton-iconic fbInternational"
-                onmousedown="Firebug.CommandLine.commandHistory.show(this);"
-                disabled="true" type="checkbox" checked="false"/>
-            <vbox pack="center">
+
+            <!-- Command Line History Button -->
+            <vbox pack="end">
+                <toolbarbutton id="fbCommandLineHistoryButton" tooltiptext="Command_History"
+                    class="toolbarbutton-iconic fbInternational"
+                    onmousedown="Firebug.CommandLine.commandHistory.show(this);"
+                    disabled="true" type="checkbox" checked="false"/>
+            </vbox>
+
+            <!-- Command Line (static) Arrow -->
+            <vbox pack="end">
                 <label id="fbCommandArrow" value="&gt;&gt;&gt;"/>
             </vbox>
+
+            <!-- Command Line Input -->
             <hbox flex="1">
                 <vbox class="fbCommandHtmlBox" pack="center" flex="100%">
                     <!-- transparent background, silver text over user inputs -->
@@ -551,13 +559,17 @@
             </hbox>
 
             <!-- Toggle into multi-line command line -->
-            <toolbarbutton id="fbToggleCommandLine" tooltiptext="console.option.Show_Command_Editor"
-                class="toolbarbutton-iconic fbInternational"
-                oncommand="Firebug.toggleCommandLine(true)"/>
+            <vbox pack="end">
+                <toolbarbutton id="fbToggleCommandLine"
+                    tooltiptext="console.option.Show_Command_Editor"
+                    class="toolbarbutton-iconic fbInternational"
+                    oncommand="Firebug.toggleCommandLine(true)"/>
+            </vbox>
         </hbox>
 
     </vbox>
 <script>
 
 </script>
+
 </overlay>
