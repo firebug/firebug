@@ -70,6 +70,36 @@ var BrowserCommands =
 
     overlayShortcuts: function(doc)
     {
+        function getShortcutInfo(shortcut)
+        {
+            var tokens = shortcut.split(" ");
+            var key = tokens.pop();
+            var modifiers = tokens.join(",");
+            var attr = "";
+            if (key.length <= 1)
+                attr = "key";
+            else if (doc.defaultView.KeyEvent["DOM_"+key])
+                attr = "keycode";
+
+            return {attr: attr, key: key, modifiers: modifiers};
+        }
+
+        var self = this;
+        function disableAllExistingShortcuts()
+        {
+            Services.obs.removeObserver(this, "devtools-loaded", false);
+
+            for (var i = 0; i < shortcuts.length; i++)
+            {
+                var id = shortcuts[i];
+                var shortcut = Options.get("key.shortcut." + id);
+                var {attr, key, modifiers} = getShortcutInfo(shortcut);
+
+                // Disable existing global shortcuts
+                self.disableExistingShortcuts.call(self, node, attr, key, modifiers);
+            }
+        }
+
         var win = $(doc, "main-window");
         var keyset = $el(doc, "keyset", {id: "firebugKeyset"}, win);
 
@@ -77,9 +107,7 @@ var BrowserCommands =
         {
             var id = shortcuts[i];
             var shortcut = Options.get("key.shortcut." + id);
-            var tokens = shortcut.split(" ");
-            var key = tokens.pop();
-            var modifiers = tokens.join(",");
+            var {attr, key, modifiers} = getShortcutInfo(shortcut);
 
             var keyProps = {
                 id: "key_firebug_" + id,
@@ -87,12 +115,6 @@ var BrowserCommands =
                 command: "cmd_firebug_" + id,
                 position: 1
             };
-
-            var attr = "";
-            if (key.length <= 1)
-                attr = "key";
-            else if (doc.defaultView.KeyEvent["DOM_"+key])
-                attr = "keycode";
             keyProps[attr] = key;
 
             $el(doc, "key", keyProps, keyset);
@@ -101,23 +123,27 @@ var BrowserCommands =
             this.disableExistingShortcuts(doc, attr, key, modifiers);
         }
 
+        Services.obs.addObserver(disableAllExistingShortcuts, "devtools-loaded", false);
         keyset.parentNode.insertBefore(keyset, keyset.nextSibling);
     },
 
-    disableExistingShortcuts: function(doc, attr, key, modifiers)
+    disableExistingShortcuts: function(root, attr, key, modifiers)
     {
         var selector = ":-moz-any(key[" + attr + "='" + key + "'], key[" + attr + "='" +
-            key.toUpperCase() + "'])[modifiers='" + modifiers + "']" +
+            key.toUpperCase() + "'])" + (modifiers ? "[modifiers='" + modifiers + "']" : "") +
             ":not([id*='firebug']):not([disabled='true'])";
 
         if (!this.disabledKeyElements)
             this.disabledKeyElements = [];
 
-        var existingKeyElements = doc.querySelectorAll(selector);
+        var existingKeyElements = root.querySelectorAll(selector);
         for (var i = existingKeyElements.length - 1; i >= 0; i--)
         {
-            existingKeyElements[i].setAttribute("disabled", "true");
-            this.disabledKeyElements.push(existingKeyElements[i]);
+            if (this.disabledKeyElements.indexOf(existingKeyElements[i]) === -1)
+            {
+                existingKeyElements[i].setAttribute("disabled", "true");
+                this.disabledKeyElements.push(existingKeyElements[i]);
+            }
         }
     },
 
@@ -125,14 +151,11 @@ var BrowserCommands =
     {
         if (this.disabledKeyElements)
         {
-            for (var i=0; i<this.disabledKeyElements.length; i++)
-            {
-                var elem = this.disabledKeyElements[i];
-                elem.removeAttribute("disabled");
-            }
+            for (var element of this.disabledKeyElements)
+                element.removeAttribute("disabled");
         }
 
-        this.disabledKeyElements = [];
+        delete this.disabledKeyElements;
     }
 };
 
