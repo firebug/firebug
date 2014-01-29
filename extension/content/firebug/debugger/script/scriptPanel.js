@@ -793,6 +793,14 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
 
         var conditionEditor = this.getEditor();
+        if (!conditionEditor.breakpoint)
+        {
+            // xxxHonza: Another reason why Conditional Editor feature needs refactoring.
+            TraceError.sysout("ScriptPanel.openBreakpointConditionEditor; ERROR " +
+                "conditionEditor.breakpoint == null?");
+            return;
+        }
+
         conditionEditor.breakpoint.lineNo = lineNo;
 
         // As Editor scrolls(not panel itself) with long scripts, we need to set
