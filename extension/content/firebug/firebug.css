@@ -45,7 +45,7 @@ window[chromehidden~="toolbar"] #fbToolbar {
     -moz-binding: url("firefox/bindings.xml#initializer");
     height: 270px;
     background-color: -moz-dialog;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 #mainPopupSet {
