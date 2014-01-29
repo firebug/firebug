@@ -26,13 +26,13 @@ var statusCropSize = 20;
 
 /**
  * @module The object is responsible for 'Status path' maintenance (aka breadcrumbs) that
- * is used to display path to the selected element in the {@HTMLPanel}, path to the
- * selected object in the {@DOMPanel} and call-stack in the {@ScriptPanel}.
+ * is used to display path to the selected element in the {@link HTMLPanel}, path to the
+ * selected object in the {@link DOMPanel} and call-stack in the {@link ScriptPanel}.
  *
- * The path is displayed in panel-toolbar and the logic is based on {@Panel.getObjectPath}
- * method, so any panel can support it.
+ * The path is displayed in panel-toolbar and the logic is based on {@link Panel.getObjectPath}
+ * and {@link Panel.getCurrentObject} methods, so any panel can support it.
  *
- * The path can be updated through clear and update methods. Further, {@Panel} instance can
+ * The path can be updated through clear and update methods. Further, {@link Panel} instance can
  * specify whether the update should be synchronous or asynchronous through:
  * 'objectPathAsyncUpdate' member.
  */
@@ -128,19 +128,22 @@ var StatusPath = Obj.extend(Module,
         Trace.sysout("statusPath.update;");
 
         var context = Firebug.currentContext;
-
         var panelStatus = Firebug.chrome.getElementById("fbPanelStatus");
         var panelStatusSeparator = Firebug.chrome.getElementById("fbStatusSeparator");
         var panelBar1 = Firebug.chrome.getElementById("fbPanelBar1");
         var panel = panelBar1.selectedPanel;
+        var currentObject = panel ? panel.getCurrentObject() : null;
 
-        if (!panel || (panel && !panel.selection))
+        // The |currentObject| is the one that should be emphasized in the path. It's
+        // usually the current selection, but can be different (e.g. if the debugger is halted
+        // the Script panel emphasizes the current frame).
+        if (!panel || !currentObject)
         {
             panelStatus.clear();
         }
         else
         {
-            var path = panel.getObjectPath(panel.selection);
+            var path = panel.getObjectPath(currentObject);
             if (!path || !path.length)
             {
                 Dom.hide(panelStatusSeparator, true);
@@ -171,15 +174,14 @@ var StatusPath = Obj.extend(Module,
                     panelStatus.clear();
 
                 // If the object already exists in the list, just select it and keep the path.
-                var selection = panel.selection;
-                var existingItem = panelStatus.getItemByObject(panel.selection);
+                var existingItem = panelStatus.getItemByObject(currentObject);
                 if (existingItem)
                 {
                     // Update the labels of the status path elements, because it can be,
                     // that the elements changed even when the selected element exists
                     // inside the path (issue 4826)
                     var statusItems = panelStatus.getItems();
-                    for (var i = 0; i < statusItems.length; ++i)
+                    for (var i = 0; i < statusItems.length; i++)
                     {
                         var object = Firebug.getRepObject(statusItems[i]);
                         var rep = Firebug.getRep(object, context);
@@ -205,7 +207,7 @@ var StatusPath = Obj.extend(Module,
                         panelStatus.addItem(title, object, rep, panel.statusSeparator);
                     }
 
-                    panelStatus.selectObject(panel.selection);
+                    panelStatus.selectObject(currentObject);
 
                     Trace.sysout("statusPath.update " + path.length + " items ", path);
                 }
@@ -226,7 +228,9 @@ var StatusPath = Obj.extend(Module,
         if (panel)
         {
             var panelStatus = Firebug.chrome.getElementById("fbPanelStatus");
-            var item = panelStatus.getItemByObject(panel.selection);
+            var currentObject = panel.getCurrentObject();
+
+            var item = panelStatus.getItemByObject(currentObject);
             if (item)
             {
                 if (reverse)

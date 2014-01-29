@@ -104,6 +104,12 @@ TabClient.prototype = Obj.extend(new EventSource(),
 
     onListTabs: function(response)
     {
+        if (response.error)
+        {
+            TraceError.sysout("tabClient.onListTabs; ERROR " + response.error + ": " +
+                response.message, response);
+        }
+
         // If the tab object has been detached in just after 'listTabs' has been send
         // Just ignore rest of the attach sequence.
         if (!this.tabAttached)

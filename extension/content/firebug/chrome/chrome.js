@@ -1208,19 +1208,35 @@ var FirebugChrome =
             return;
 
         var zoom = Options.getZoomByTextSize(value);
-        var zoomString = (zoom * 100) + "%";
+
+        var setRemSize = function(doc)
+        {
+            // Set the relative font size of the root element (<html> or <window>)
+            // so that 'rem' units can be used for sizing relative to the font size.
+            // 1rem equals 1px times the zoom level. This doesn't affect any of the
+            // UI, because <body>, #fbContentBox, etc. override the font-size.
+
+            doc.documentElement.style.fontSize = zoom + "px";
+        };
 
         // scale the aspect relative to 11pt Lucida Grande
         // xxxsz: The magic number 0.547 should be replaced some logic retrieving this value.
         var fontSizeAdjust = zoom * 0.547;
         var contentBox = Firebug.chrome.$("fbContentBox");
         contentBox.style.fontSizeAdjust = fontSizeAdjust;
+        setRemSize(contentBox.ownerDocument);
 
-        //panelBar1.browser.contentDocument.documentElement.style.fontSizeAdjust = fontSizeAdjust;
-        //panelBar2.browser.contentDocument.documentElement.style.fontSizeAdjust = fontSizeAdjust;
+        var setZoom = function(browser)
+        {
+            var doc = browser.contentDocument;
+            // doc.documentElement.style.fontSizeAdjust = fontSizeAdjust;
 
-        panelBar1.browser.markupDocumentViewer.textZoom = zoom;
-        panelBar2.browser.markupDocumentViewer.textZoom = zoom;
+            browser.markupDocumentViewer.textZoom = zoom;
+            setRemSize(doc);
+        };
+
+        setZoom(panelBar1.browser);
+        setZoom(panelBar2.browser);
 
         var cmdPopupBrowser = this.getElementById("fbCommandPopupBrowser");
         cmdPopupBrowser.markupDocumentViewer.textZoom = zoom;

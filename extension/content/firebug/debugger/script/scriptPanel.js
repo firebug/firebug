@@ -495,7 +495,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Breadcrumbs (object path)
+    // Status Path (callstack)
 
     framesadded: function(stackTrace)
     {
@@ -527,6 +527,18 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             return this.context.currentTrace.frames;
     },
 
+    getCurrentObject: function()
+    {
+        // If the debugger is halted the emphasized object in the status path (i.e. callstack)
+        // is always the current frame (can be changed through the Callstack panel).
+        if (this.context.currentFrame)
+            return this.context.currentFrame;
+
+        // If the debugger isn't halted the status path is hidden, but still, let's return
+        // the default value (the current panel selection).
+        return BasePanel.getCurrentObject.apply(this, arguments);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Source
 
@@ -545,13 +557,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!compilationUnit)
             return;
 
-        var self = this;
         function callback(unit, firstLineNumber, lastLineNumber, lines)
         {
             // There could have been more asynchronous requests done at the same time
             // (e.g. show default script and restore the last visible script).
             // Use only the callback that corresponds to the current location URL.
-            if (!self.location || self.location.getURL() != unit.getURL())
+            if (!this.location || this.location.getURL() != unit.getURL())
             {
                 Trace.sysout("scriptPanel.showSource; Bail out, different location now");
                 return;
@@ -566,31 +577,31 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // 2) Get its content type that should be set at this moment. If not set
             //     it's guessed according to the file extension.
             // 3) Get the type/category from the content type.
-            var sourceFile = SourceFile.getSourceFileByUrl(self.context, sourceLink.href);
+            var sourceFile = SourceFile.getSourceFileByUrl(this.context, sourceLink.href);
             var mimeType = NetUtils.getMimeType(sourceFile.contentType, sourceFile.href);
             var category = NetUtils.getCategory(mimeType);
 
             // Display the source.
-            self.scriptView.showSource(lines.join(""), category);
+            this.scriptView.showSource(lines.join(""), category);
 
             var options = sourceLink.getOptions();
 
             // Make sure the current execution line is marked if the current frame
             // is coming from the current location.
-            var frame = self.context.currentFrame;
-            if (frame && frame.href == self.location.href && frame.line == self.location.line)
+            var frame = this.context.currentFrame;
+            if (frame && frame.href == this.location.href && frame.line == this.location.line)
                 options.debugLocation = true;
 
             // If the location object is SourceLink automatically scroll to the
             // specified line. Otherwise make sure to reset the scroll position
             // to the top since new script is probably just being displayed.
-            if (self.location instanceof SourceLink)
-                self.scrollToLine(self.location.line, options);
+            if (this.location instanceof SourceLink)
+                this.scrollToLine(this.location.line, options);
             else
-                self.scrollToLine(0);
+                this.scrollToLine(0);
         }
 
-        compilationUnit.getSourceLines(-1, -1, callback);
+        compilationUnit.getSourceLines(-1, -1, callback.bind(this));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

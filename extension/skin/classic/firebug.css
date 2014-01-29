@@ -22,15 +22,17 @@
 /* Command Line */
 
 #fbCommandArrow {
-    margin: 2px 0 2px 7px;
+    margin-left: 7px;
     font-family: monospace;
     color: #0000FF;
+    line-height: 0;
+    padding: 2px 0;
 }
 
 .fbCommandLine {
     -moz-appearance: none;
-    margin: 0 0 2px 4px !important;
-    padding: 0;
+    margin: 0 0 0 4px !important;
+    padding: 2px 0 !important;
     border: none;
     font-family: monospace;
     font-size: 12px;
@@ -81,11 +83,11 @@
 }
 
 #fbCommandLineHistoryButton {
-    margin-left: 2px;
+    margin: 2px;
 }
 
 #fbToggleCommandLine {
-    margin-right: 2px;
+    margin: 2px;
 }
 
 #fbCommandLine > .textbox-input-box > .textbox-textarea {
@@ -100,6 +102,8 @@
 .fbCommandHtmlBox .background {
     position: relative;
     background: none repeat scroll 0% 0% transparent;
+    line-height: 0;
+    vertical-align: middle;
 }
 
 #fbCommandLineCompletionHolder {

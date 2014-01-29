@@ -1057,11 +1057,6 @@ window.Firebug =
         this.showBar(browser && browser.showFirebug);
     },
 
-    toggleCommandLine: function(showCommandEditor)
-    {
-        Options.set("commandEditor", showCommandEditor);
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     /**
