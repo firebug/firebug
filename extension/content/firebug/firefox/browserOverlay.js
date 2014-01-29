@@ -189,7 +189,7 @@ BrowserOverlay.prototype =
     stopFirebug: function()
     {
         this.unloadContextMenuOverlay();
-        BrowserCommands.resetDisabledKeys();
+        BrowserCommands.resetDisabledKeys(this.win);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

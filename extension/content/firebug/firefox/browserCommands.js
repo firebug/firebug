@@ -132,30 +132,31 @@ var BrowserCommands =
         var selector = ":-moz-any(key[" + attr + "='" + key + "'], key[" + attr + "='" +
             key.toUpperCase() + "'])" + (modifiers ? "[modifiers='" + modifiers + "']" : "") +
             ":not([id*='firebug']):not([disabled='true'])";
+        var win = root.defaultView || root.ownerDocument.defaultView;
 
-        if (!this.disabledKeyElements)
-            this.disabledKeyElements = [];
+        if (!win.disabledKeyElements)
+            win.disabledKeyElements = [];
 
         var existingKeyElements = root.querySelectorAll(selector);
         for (var i = existingKeyElements.length - 1; i >= 0; i--)
         {
-            if (this.disabledKeyElements.indexOf(existingKeyElements[i]) === -1)
+            if (win.disabledKeyElements.indexOf(existingKeyElements[i]) === -1)
             {
                 existingKeyElements[i].setAttribute("disabled", "true");
-                this.disabledKeyElements.push(existingKeyElements[i]);
+                win.disabledKeyElements.push(existingKeyElements[i]);
             }
         }
     },
 
-    resetDisabledKeys: function()
+    resetDisabledKeys: function(win)
     {
-        if (this.disabledKeyElements)
+        if (win.disabledKeyElements)
         {
-            for (var element of this.disabledKeyElements)
+            for (var element of win.disabledKeyElements)
                 element.removeAttribute("disabled");
         }
 
-        delete this.disabledKeyElements;
+        delete win.disabledKeyElements;
     }
 };
 
