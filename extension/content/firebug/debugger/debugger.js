@@ -489,6 +489,13 @@ Firebug.Debugger = Obj.extend(ActivableModule,
     getCurrentFrameKeys: function(context)
     {
         var frame = context.stoppedFrame;
+        if (!frame || !frame.scopes)
+        {
+            TraceError.sysout("debugger.getCurrentFrameKeys; ERROR scopes: " +
+                (frame ? frame.scopes : "no stopped frame"));
+            return;
+        }
+
         var ret = [];
         for (var scope of frame.scopes)
         {
@@ -513,6 +520,7 @@ Firebug.Debugger = Obj.extend(ActivableModule,
             for (var prop of props)
                 ret.push(prop.name);
         }
+
         return ret;
     },
 

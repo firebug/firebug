@@ -435,6 +435,9 @@ var Panel = Obj.extend(new EventSource(),
             Css.setClassTimed(node, "jumpHighlight", this.context);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Search
+
     /**
      * Called by the framework when panel search is used.
      * This is responsible for finding and highlighting search matches.
@@ -516,6 +519,7 @@ var Panel = Obj.extend(new EventSource(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Options
 
     /**
      * Options menu item
@@ -538,6 +542,9 @@ var Panel = Obj.extend(new EventSource(),
         return null;
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context Menu
+
     /**
      * Called by chrome.onContextMenu to build the context menu when this panel has focus.
      * See also FirebugRep for a similar function also called by onContextMenu
@@ -556,6 +563,9 @@ var Panel = Obj.extend(new EventSource(),
     {
         return [];
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Editing
 
     getEditor: function(target, value)
     {
@@ -587,10 +597,21 @@ var Panel = Obj.extend(new EventSource(),
 
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Status Path
+
     getObjectPath: function(object)
     {
         return null;
     },
+
+    getCurrentObject: function()
+    {
+        return this.selection;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Location List
 
     /**
      * An array of objects that can be passed to getObjectLocation.
@@ -629,6 +650,8 @@ var Panel = Obj.extend(new EventSource(),
         var url = this.getObjectLocation(object);
         return Url.splitURLBase(url);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     /**
      *  UI signal that a tab needs attention, e.g. Script panel is currently stopped on a breakpoint
