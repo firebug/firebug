@@ -9,9 +9,10 @@ define([
     "firebug/lib/system",
     "firebug/lib/string",
     "firebug/lib/locale",
-    "firebug/lib/options"
+    "firebug/lib/options",
+    "firebug/lib/promise"
 ],
-function(Module, Obj, Firebug, Css, Search, System, Str, Locale, Options) {
+function(Module, Obj, Firebug, Css, Search, System, Str, Locale, Options, Promise) {
 
 // ********************************************************************************************* //
 // Constants
@@ -163,40 +164,62 @@ Firebug.Search = Obj.extend(Module,
         }
         else
         {
-            var sBox = this;
+            var self = this;
             // After a delay, perform the search
             panelNode.searchTimeout = setTimeout(function()
             {
-                var found = panel.search(value, reverse);
+                var result = panel.search(value, reverse);
                 panel.searchText = value;
-                if (!found && value)
+                if (Promise.isPromise(result))
                 {
-                    var shouldIgnore = panel.shouldIgnoreIntermediateSearchFailure;
-                    if (shouldIgnore && shouldIgnore.call(panel, value))
-                        found = true;
-                    else
-                        sBox.onNotFound();
-                }
-
-                if (value)
-                {
-                    // Hides all nodes that didn't pass the filter
-                    Css.setClass(panelNode, "searching");
+                    result.then(function (found) {
+                        self.onResult(found);
+                    });
                 }
                 else
                 {
-                    // Makes all nodes visible again
-                    Css.removeClass(panelNode, "searching");
+                    self.onResult(result);
                 }
-
-                searchBox.status = (found ? "found" : "notfound");
-                sBox.setPlaceholder();
-
-                if (FBTrace.DBG_SEARCH)
-                    FBTrace.sysout("search " + searchBox.status + " " + value);
-
             }, searchDelay);
         }
+    },
+
+    onResult: function(found)
+    {
+        var panel = Firebug.chrome.getSelectedPanel();
+        if (!panel || !panel.searchable)
+            return;
+
+        var searchBox = Firebug.chrome.$("fbSearchBox");
+        var panelNode = panel.panelNode;
+
+        var value = searchBox.value;
+
+        if (!found && value)
+        {
+            var shouldIgnore = panel.shouldIgnoreIntermediateSearchFailure;
+            if (shouldIgnore && shouldIgnore.call(panel, value))
+                found = true;
+            else
+                this.onNotFound();
+        }
+
+        if (value)
+        {
+            // Hides all nodes that didn't pass the filter
+            Css.setClass(panelNode, "searching");
+        }
+        else
+        {
+            // Makes all nodes visible again
+            Css.removeClass(panelNode, "searching");
+        }
+
+        searchBox.status = (found ? "found" : "notfound");
+        this.setPlaceholder();
+
+        if (FBTrace.DBG_SEARCH)
+            FBTrace.sysout("search " + searchBox.status + " " + value);
     },
 
     onNotFound: function()

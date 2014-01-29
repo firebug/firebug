@@ -15,6 +15,7 @@ define([
     "firebug/lib/keywords",
     "firebug/lib/system",
     "firebug/lib/options",
+    "firebug/lib/promise",
     "firebug/chrome/activablePanel",
     "firebug/chrome/menu",
     "firebug/chrome/rep",
@@ -36,8 +37,8 @@ define([
     "arch/compilationunit",
 ],
 function (Firebug, FBTrace, Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, Persist, Keywords,
-    System, Options, ActivablePanel, Menu, Rep, StatusPath, Editor, ScriptView, StackFrame,
-    SourceLink, SourceFile, Breakpoint, BreakpointStore, BreakpointConditionEditor,
+    System, Options, Promise, ActivablePanel, Menu, Rep, StatusPath, Editor, ScriptView,
+    StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, BreakpointConditionEditor,
     ScriptPanelWarning, BreakNotification, ScriptPanelLineUpdater, DebuggerLib, CommandLine,
     NetUtils, CompilationUnit) {
 
@@ -108,7 +109,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.context.getTool("breakpoint").addListener(this);
         this.context.getTool("source").addListener(this);
 
-        // Register as a listener for 'updateSidePanels' event. 
+        // Register as a listener for 'updateSidePanels' event.
         Firebug.registerUIListener(this);
     },
 
@@ -597,7 +598,92 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     search: function(text, reverse)
     {
-        return this.scriptView.search(text, reverse);
+        // Check if the search is for a line number.
+        var m = /^[^\\]?#(\d*)$/.exec(text);
+        if (m)
+        {
+            // Don't beep if only a # has been typed.
+            if (!m[1])
+                return true;
+
+            var lineNo = +m[1];
+            if (!isNaN(lineNo) && 0 < lineNo && lineNo <= this.editor.getLineCount())
+            {
+                this.scrollToLine(lineNo, {highlight: true});
+                return true;
+            }
+        }
+
+        var curDoc = this.searchCurrentDoc(!Options.get("searchGlobal"), text, reverse);
+        if (!curDoc && Options.get("searchGlobal"))
+            return this.searchOtherDocs(text, reverse);
+
+        return curDoc;
+    },
+
+
+    searchOtherDocs: function(text, reverse)
+    {
+        var scanRE = Firebug.Search.getTestingRegex(text);
+
+        var self = this;
+
+        function scanDoc(compilationUnit)
+        {
+            var deferred = Promise.defer();
+
+            compilationUnit.getSourceLines(-1, -1, function loadSource(unit, firstLineNumber,
+                lastLineNumber, linesRead)
+            {
+                if (!lines)
+                {
+                    deferred.resolve(false);
+                    return;
+                }
+
+                // We don't care about reverse here as we are just looking for existence.
+                // If we do have a result, we will handle the reverse logic on display.
+                for (var i = 0; i < lines.length; i++)
+                {
+                    if (scanRE.test(lines[i]))
+                    {
+                        deferred.resolve(true);
+                        return;
+                    }
+                }
+            });
+
+            return deferred.promise;
+        }
+
+        if (this.navigateToNextDocument(scanDoc, reverse))
+            return this.searchCurrentDoc(true, text, reverse);
+    },
+
+    searchCurrentDoc: function(wrapSearch, text, reverse)
+    {
+        var options =
+        {
+            ignoreCase: !Firebug.Search.isCaseSensitive(text),
+            backwards: reverse
+        };
+
+        if (this.currentSearch && text == this.currentSearch.text)
+        {
+            options.start = this.currentSearch.start;
+            if (reverse)
+                options.start.ch -= 1;
+        }
+        else
+        {
+            this.currentSearch = {text: text, start: null};
+        }
+
+        var offsets = this.scriptView.search(text, options)
+
+        if (offsets)
+            this.currentSearch.start = offsets.end;
+        return !!offsets;
     },
 
     getSearchOptionsMenuItems: function()
@@ -610,11 +696,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             Firebug.Search.searchOptionMenu("search.Use_Regular_Expression",
                 "searchUseRegularExpression", "search.tip.Use_Regular_Expression")
         ];
-    },
-
-    onNavigateToNextDocument: function(scanDoc, reverse)
-    {
-        return this.navigateToNextDocument(scanDoc, reverse);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

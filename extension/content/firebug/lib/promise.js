@@ -15,6 +15,11 @@ Components.utils["import"]("resource://gre/modules/commonjs/sdk/core/promise.js"
 // ********************************************************************************************* //
 // Registration
 
+imported.Promise.isPromise = function(object)
+{
+    return object && typeof object.then === "function";
+};
+
 return imported.Promise;
 
 // ********************************************************************************************* //

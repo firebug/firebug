@@ -7,13 +7,15 @@ define([
     "firebug/lib/css",
     "firebug/lib/url",
     "firebug/lib/options",
+    "firebug/lib/promise",
     "firebug/lib/dom",
     "firebug/lib/events",
     "firebug/lib/wrapper",
     "firebug/chrome/eventSource",
     "firebug/chrome/searchBox",
 ],
-function(Firebug, FBTrace, Obj, Css, Url, Options, Dom, Events, Wrapper, EventSource, SearchBox) {
+function(Firebug, FBTrace, Obj, Css, Url, Options, Promise, Dom, Events, Wrapper, EventSource,
+    SearchBox) {
 
 "use strict";
 
@@ -529,7 +531,16 @@ var Panel = Obj.extend(new EventSource(),
         do
         {
             var doc = this.getNextDocument(doc, reverse);
-            if (match(doc))
+            var result = match(doc);
+            if (Promise.isPromise(result))
+            {
+                if (result.then(function (match) { return match; }))
+                {
+                    this.navigate(doc);
+                    return doc;
+                }
+            }
+            else if (result)
             {
                 this.navigate(doc);
                 return doc;
