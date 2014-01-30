@@ -147,9 +147,11 @@
     -moz-box-align: center;
     overflow: hidden;
     padding: 1px 0;
+    height: 27rem;
 }
 
 .panelTabBox {
+    height: 28rem;
     padding: 0;
     overflow: hidden;
 }
@@ -270,6 +272,7 @@ panelTab[selected="true"][disabled="true"] {
 
 #fbPanelSplitter > #fbPanelSplitterBox {
     visibility: visible;
+    height: 28rem;
     width: 6px;
     background-color: -moz-dialog;
     background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
