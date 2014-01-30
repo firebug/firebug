@@ -294,10 +294,8 @@ panelTab[selected="true"][disabled="true"] {
 /* Search Box */
 
 #fbSearchBox {
-    margin-left: 0;
-    margin-right: 10px;
+    margin: 3px 10px 3px 0;
     min-width: 100px;
-    margin-bottom: 1px;
 }
 
 .fbsearch-textbox[status="notfound"] {
