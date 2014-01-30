@@ -150,6 +150,10 @@
     height: calc(20rem + 7px);
 }
 
+#fbToolbarInner > hbox {
+    -moz-box-align: center;
+}
+
 .panelTabBox {
     height: calc(20rem + 8px);
     padding: 0;
