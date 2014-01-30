@@ -424,7 +424,7 @@
                     </vbox>
 
                     <splitter id="fbPanelSplitter" valign="top">
-                        <box id="fbPanelSplitterBox" />
+                        <label id="fbPanelSplitterBox" value="&#8203;"/>
                     </splitter>
 
                     <deck id="fbSidePanelDeck" persist="width,height">
