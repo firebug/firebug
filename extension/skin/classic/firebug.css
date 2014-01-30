@@ -63,7 +63,7 @@
     padding-left: 27px;
     padding: 1px 0;
     border-bottom: 1px solid rgba(10, 31, 51, 0.35);
-    height: 27px;
+    height: calc(20rem + 8px);
 }
 
 #fbToggleCommandEditorBox {
@@ -147,11 +147,11 @@
     -moz-box-align: center;
     overflow: hidden;
     padding: 1px 0;
-    height: 27rem;
+    height: calc(20rem + 7px);
 }
 
 .panelTabBox {
-    height: 28rem;
+    height: calc(20rem + 8px);
     padding: 0;
     overflow: hidden;
 }
@@ -272,14 +272,14 @@ panelTab[selected="true"][disabled="true"] {
 
 #fbPanelSplitter > #fbPanelSplitterBox {
     visibility: visible;
-    height: 28rem;
+    height: calc(20rem + 8px);
     width: 6px;
     background-color: -moz-dialog;
     background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
     border-bottom: 1px solid #A0A0A0;
     cursor: default;
     margin: 0;
-    padding: 4px 0;
+    padding: 1px 0;
 }
 
 #fbPanelSplitter[orient=vertical] > #fbPanelSplitterBox {

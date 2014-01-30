@@ -21,7 +21,7 @@
 }
 
 #fbCommandToolbar {
-    height: 28px;
+    height: calc(20rem + 8px);
 }
 
 #fbCommandArrow {
