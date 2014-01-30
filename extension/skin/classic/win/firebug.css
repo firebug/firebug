@@ -24,7 +24,7 @@
 }
 
 toolbarbutton {
-    padding: 2px 6px;
+    padding: 1px 6px;
 }
 
 .toolbar-text-button > .toolbarbutton-icon:not([src]),

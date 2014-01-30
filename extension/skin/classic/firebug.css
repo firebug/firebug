@@ -154,6 +154,10 @@
     -moz-box-align: center;
 }
 
+#fbToolbarInner > hbox {
+    -moz-box-align: center;
+}
+
 .panelTabBox {
     height: calc(20rem + 8px);
     padding: 0;
@@ -203,9 +207,9 @@
 
 #fbBreakOnNextButton,
 .toolbar-image-button {
-    width: 25px;
-    height: 25px;
-    padding: 3px;
+    width: 23px;
+    height: 23px;
+    padding: 1px;
 }
 
 .toolbarbutton-menu-dropmarker {
@@ -629,7 +633,7 @@ toolbarbutton[type="menu-button"] {
 toolbarbutton[type=menu-button] > .toolbarbutton-menubutton-button {
   -moz-appearance: none;
   border-radius: 0;
-  padding: 2px 6px;
+  padding: 1px 6px;
   -moz-border-end: 1px solid rgba(0, 0, 0, 0.15);
 }
 
