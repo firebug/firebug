@@ -15,7 +15,7 @@ function(Firebug, FBTrace, Obj, Module, DebuggerLib) {
 var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_SCRIPTPANELLINEUPDATER");
 
-// 12 October 1492 – Christopher Columbus discovers America
+// 12 October 1492 Christopher Columbus discovers America
 var delay = 1492;
 
 // ********************************************************************************************* //
@@ -83,6 +83,8 @@ var ScriptPanelLineUpdater = Obj.extend(Module,
         if (panel.executableLineUpdater)
             return;
 
+        // The life of the updater is limited.
+        panel.executableLineUpdaterCounter = 7;
         panel.executableLineUpdater = panel.context.setInterval(
             this.onUpdateExecutableLines.bind(this, panel), delay);
 
@@ -96,12 +98,23 @@ var ScriptPanelLineUpdater = Obj.extend(Module,
 
         panel.context.clearInterval(panel.executableLineUpdater);
         panel.executableLineUpdater = null;
+        panel.executableLineUpdaterCounter = 0;
 
         Trace.sysout("scriptPanelLineUpdater.stopExecutableLinesUpdate;");
     },
 
     onUpdateExecutableLines: function(panel)
     {
+        // The interval will execute only N times. If a script is not GCed in that period
+        // of time, then it probably never will be, so we don't need to update the UI
+        // for ever. There might be exceptions (removing globals that make a script not rooted),
+        // but probably not often.
+        if (panel.executableLineUpdaterCounter-- <= 0)
+        {
+            this.stopExecutableLinesUpdate(panel);
+            return;
+        }
+
         var editor = panel.scriptView.editor;
         if (!editor)
             return;
@@ -111,7 +124,8 @@ var ScriptPanelLineUpdater = Obj.extend(Module,
         var currentLine = viewport.from;
 
         Trace.sysout("scriptPanelLineUpdater.onUpdateExecutableLines; from: " +
-            viewport.from + ", to: " + viewport.to);
+            viewport.from + ", to: " + viewport.to + " (" +
+            panel.executableLineUpdaterCounter + ")");
 
         // Iterate over all visible lines.
         editorObject.eachLine(viewport.from, viewport.to, function(handle)
