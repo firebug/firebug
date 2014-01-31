@@ -145,7 +145,7 @@
                                     insertbefore="fbDetachButton">
 
                                     <!-- Break On Next -->
-                                    <hbox id="fbBonButtons" collapsed="true" class="noTabStop" align="center">
+                                    <hbox id="fbBonButtons" collapsed="true" class="noTabStop">
                                         <toolbarbutton id="fbBreakOnNextButton"
                                             command="cmd_firebug_toggleBreakOn"
                                             tooltiptext="script.Break On Next" breakable="disabled"
@@ -162,7 +162,7 @@
                                         </toolbarbutton>
                                     </hbox>
 
-                                    <hbox id="fbConsoleButtons" collapsed="true" class="noTabStop" align="center">
+                                    <hbox id="fbConsoleButtons" collapsed="true" class="noTabStop">
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <toolbarbutton id="fbConsoleClear" label="firebug.Clear"
                                             class="toolbar-text-button fbInternational"
@@ -216,7 +216,7 @@
                                         </hbox>
                                     </hbox>
 
-                                    <hbox id="fbHTMLButtons" collapsed="true" class="noTabStop" align="center">
+                                    <hbox id="fbHTMLButtons" collapsed="true" class="noTabStop">
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <toolbarbutton id="fbToggleHTMLEditing" label="firebug.Edit"
                                             class="toolbar-text-button fbInternational"
@@ -225,7 +225,7 @@
                                     </hbox>
 
                                     <!-- Toolbar buttons for the CSS panel -->
-                                    <hbox id="fbCSSButtons" collapsed="true" class="noTabStop" align="center">
+                                    <hbox id="fbCSSButtons" collapsed="true" class="noTabStop">
                                         <toolbarbutton id="fbToggleCSSEditing"
                                             label="firebug.Edit"
                                             class="fbInternational"
@@ -251,7 +251,7 @@
                                         </toolbarbutton>
                                     </hbox>
 
-                                    <hbox id="fbScriptButtons" collapsed="true" class="noTabStop" align="center">
+                                    <hbox id="fbScriptButtons" collapsed="true" class="noTabStop">
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <tooltip id="fbScriptFilterMenuTooltip" role="presentation"
                                             onpopupshowing="return Firebug.Debugger.onScriptFilterMenuTooltipShowing(this, Firebug.currentContext)"/>
@@ -277,7 +277,7 @@
                                         </toolbarbutton>
                                     </hbox>
 
-                                    <hbox id="fbNetButtons" collapsed="true" class="noTabStop" align="center">
+                                    <hbox id="fbNetButtons" collapsed="true" class="noTabStop">
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <toolbarbutton id="fbNetClear" label="firebug.Clear"
                                             class="toolbar-text-button fbInternational"
@@ -345,7 +345,7 @@
                                         </hbox>
                                     </hbox>
 
-                                    <hbox id="fbTraceButtons" collapsed="true" align="center">
+                                    <hbox id="fbTraceButtons" collapsed="true">
                                         <toolbarseparator/>
                                         <toolbarbutton id="fbTraceOpenConsole" class="toolbar-text-button"
                                             label="Open Console" tooltiptext="Open Console Tooltip"
@@ -355,7 +355,7 @@
                                     <!-- Location buttons, used e.g. by the Script panel
                                         to show name of the currently displayed file name.
                                         The button also allows to pick another one. -->
-                                    <hbox id="fbLocationButtons" collapsed="true" align="center">
+                                    <hbox id="fbLocationButtons" collapsed="true">
                                         <toolbarseparator id="fbLocationSeparator"/>
                                         <toolbarbutton id="fbLocationList" type="menu"
                                             locationProvider="Firebug.chrome.getLocationProvider();"
@@ -367,7 +367,7 @@
 
                                     <!-- Status buttons, used e.g. by the HTML panel to show
                                         a parent list of the currently selected element. -->
-                                    <hbox id="fbStatusButtons" flex="100" collapsed="true" align="center">
+                                    <hbox id="fbStatusButtons" flex="100" collapsed="true">
                                         <toolbarseparator id="fbStatusSeparator"/>
                                         <arrowscrollbox flex="1" smoothscroll="true" orient="horizontal">
                                             <panelStatus id="fbPanelStatus"
@@ -376,7 +376,7 @@
                                         </arrowscrollbox>
                                     </hbox>
 
-                                    <hbox id="fbDebuggerButtons" collapsed="true" class="noTabStop" align="center">
+                                    <hbox id="fbDebuggerButtons" collapsed="true" class="noTabStop">
                                         <toolbarbutton id="fbRerunButton" command="cmd_firebug_rerun"
                                             tooltiptext="firebug.Rerun"
                                             class="toolbar-image-button fbInternational" />
@@ -396,11 +396,11 @@
                                     </hbox>
 
                                     <!-- Toolbar buttons provided by extensions through Firebug API -->
-                                    <hbox id="fbPanelToolbar" collapsed="true" class="noTabStop" align="center">
+                                    <hbox id="fbPanelToolbar" collapsed="true" class="noTabStop">
                                     </hbox>
 
                                     <!-- Toggle visibility of the side panels area -->
-                                    <hbox id="fbToggleSidePanelsBox" collapsed="false" align="center">
+                                    <hbox id="fbToggleSidePanelsBox" collapsed="false">
                                         <toolbarbutton id="fbToggleSidePanels"
                                             class="fbToggleSidePanels toolbar-image-button fbInternational"
                                             tooltiptext="firebug.tip.Toggle_Side_Panels"/>
