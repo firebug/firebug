@@ -574,7 +574,7 @@ var Panel = Obj.extend(new EventSource(),
                         // Navigate the panel to the document and resolve the final
                         // promise to true.
                         this.navigate(doc);
-                        deferred.resolve(true);
+                        deferred.resolve(found);
                     }
                     else
                     {

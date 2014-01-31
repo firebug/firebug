@@ -208,20 +208,20 @@ var SearchBox = Obj.extend(Module,
             {
                 result.then(function(found)
                 {
-                    self.onResult(found);
+                    // In case the promise is resolved synchronously, the return value
+                    // from the |update| method will be the real result value (not a promise).
+                    result = self.onResult(found);
                 });
-
-                return;
             }
             else
             {
                 if (!result && value)
-                   this.onNotFound();
+                    this.onNotFound();
 
                 this.updatePanelStyle(panel, value);
-
-                return result;
             }
+
+            return result;
         }
         else
         {
@@ -271,11 +271,22 @@ var SearchBox = Obj.extend(Module,
 
         this.updatePanelStyle(panel, value);
 
-        searchBox.status = (result ? "found" : "notfound");
+        // The {@link Panel.search} method result value has three states:
+        // true: match has been found further in the current document
+        // false: match not found
+        // "wraparound": match has been found in the next document, or search started
+        //      from the beginning again.
+        if (typeof(result) == "string")
+            searchBox.status = result;
+        else
+            searchBox.status = (result ? "found" : "notfound");
+
         this.setPlaceholder();
 
         Trace.sysout("searchBox.onResult; status: " + searchBox.status +
-            ", value: " + value);
+            ", value: " + value + ", result: " + result);
+
+        return result;
     },
 
     updatePanelStyle: function(panel, value)

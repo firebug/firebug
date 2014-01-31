@@ -633,9 +633,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         var searchGlobal = Options.get("searchGlobal");
         var curDoc = this.searchCurrentDoc(!searchGlobal, text, reverse);
-
         if (!curDoc && searchGlobal)
-            return this.searchOtherDocs(text, reverse) && "wraparound";
+            return this.searchOtherDocs(text, reverse);
+
+        Trace.sysout("scriptPanel.search; result: " + curDoc, curDoc);
 
         return curDoc;
     },
@@ -667,7 +668,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 {
                     if (scanRE.test(lines[i]))
                     {
-                        deferred.resolve(true);
+                        deferred.resolve("wraparound");
                         return;
                     }
                 }
@@ -698,8 +699,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         var result = this.navigateToNextDocument(scanDoc, reverse, doc);
         result.then((found) =>
         {
+            Trace.sysout("scriptPanel.searchOtherDocs; next doc found: " + found);
+
             if (found)
-                this.searchCurrentDoc(true, text, reverse);
+                this.searchCurrentDoc(false, text, reverse);
         });
 
         // Result is the promise returned from 'scanDoc' as soon as it's resolved
@@ -732,19 +735,34 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 href: this.location.href
             };
 
+            options.start = this.currentSearch.start;
+
             Trace.sysout("scriptPanel.searchCurrentDoc; new current search created: ",
                 this.currentSearch);
         }
 
-        var offsets = this.scriptView.search(text, options)
+        var offsets = this.scriptView.search(text, options);
 
         if (offsets)
-            this.currentSearch.start = offsets.end;
+            this.currentSearch.start = reverse ? offsets.start : offsets.end;
+
+        var result = !!offsets;
+
+        // xxxHonza: wrap search implementation
+        if (!result && wrapSearch)
+        {
+
+            // Return "wraparound" as the result value if the search found a match,
+            // but reached the end/begin of the document and start from begin/end again.
+            //if (result)
+            //    result = "wraparound"
+        }
 
         Trace.sysout("scriptPanel.searchCurrentDoc; " + this.location.href +
-            ", result: " + !!offsets, this.currentSearch);
+            ", result: " + result + ", wrapSearch: " + wrapSearch,
+            {currentSearch: this.currentSearch, offsets: offsets});
 
-        return !!offsets;
+        return result;
     },
 
     getSearchOptionsMenuItems: function()
