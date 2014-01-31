@@ -1,10 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/chrome/activableModule",
-    "firebug/chrome/activablePanel",
-    "firebug/lib/xpcom",
+    "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/lib/object",
+    "firebug/lib/xpcom",
     "firebug/lib/locale",
     "firebug/lib/domplate",
     "firebug/lib/dom",
@@ -16,6 +16,9 @@ define([
     "firebug/lib/events",
     "firebug/lib/array",
     "firebug/lib/search",
+    "firebug/chrome/activableModule",
+    "firebug/chrome/activablePanel",
+    "firebug/chrome/searchBox",
     "firebug/cookies/menuUtils",
     "firebug/cookies/cookieReps",
     "firebug/cookies/headerResizer",
@@ -26,9 +29,10 @@ define([
     "firebug/cookies/cookiePermissions",
     "firebug/cookies/cookieClipboard",
 ],
-function(ActivableModule, ActivablePanel, Xpcom, Obj, Locale, Domplate, Dom, Options, Persist,
-    Str, Http, Css, Events, Arr, Search, MenuUtils, CookieReps, HeaderResizer, CookieObserver,
-    CookieUtils, Cookie, Breakpoints, CookiePermissions, CookieClipboard) {
+function(Firbug, FBTrace, Obj, Xpcom, Locale, Domplate, Dom, Options, Persist, Str, Http, Css,
+    Events, Arr, Search, ActivableModule, ActivablePanel, SearchBox, MenuUtils, CookieReps,
+    HeaderResizer, CookieObserver, CookieUtils, Cookie, Breakpoints, CookiePermissions,
+    CookieClipboard) {
 
 // ********************************************************************************************* //
 // Constants
@@ -360,7 +364,7 @@ CookiePanel.prototype = Obj.extend(ActivablePanel,
 
         var search = new Search.TextSearch(this.panelNode, findRow);
 
-        var caseSensitive = Firebug.Search.isCaseSensitive(text);
+        var caseSensitive = SearchBox.isCaseSensitive(text);
         var cookieRow = search.find(text, false, caseSensitive);
         if (!cookieRow)
             return false;

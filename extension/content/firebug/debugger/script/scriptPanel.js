@@ -20,6 +20,7 @@ define([
     "firebug/chrome/menu",
     "firebug/chrome/rep",
     "firebug/chrome/statusPath",
+    "firebug/chrome/searchBox",
     "firebug/editor/editor",
     "firebug/debugger/script/scriptView",
     "firebug/debugger/stack/stackFrame",
@@ -37,7 +38,7 @@ define([
     "arch/compilationunit",
 ],
 function (Firebug, FBTrace, Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, Persist, Keywords,
-    System, Options, Promise, ActivablePanel, Menu, Rep, StatusPath, Editor, ScriptView,
+    System, Options, Promise, ActivablePanel, Menu, Rep, StatusPath, SearchBox, Editor, ScriptView,
     StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, BreakpointConditionEditor,
     ScriptPanelWarning, BreakNotification, ScriptPanelLineUpdater, DebuggerLib, CommandLine,
     NetUtils, CompilationUnit) {
@@ -645,7 +646,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         Trace.sysout("scriptPanel.searchOtherDocs; text: " + text);
 
-        var scanRE = Firebug.Search.getTestingRegex(text);
+        var scanRE = SearchBox.getTestingRegex(text);
 
         function scanDoc(compilationUnit)
         {
@@ -715,7 +716,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         var options =
         {
-            ignoreCase: !Firebug.Search.isCaseSensitive(text),
+            ignoreCase: !SearchBox.isCaseSensitive(text),
             backwards: reverse
         };
 
@@ -768,11 +769,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     getSearchOptionsMenuItems: function()
     {
         return [
-            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
+            SearchBox.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
                 "search.tip.Case_Sensitive"),
-            Firebug.Search.searchOptionMenu("search.Multiple_Files", "searchGlobal",
+            SearchBox.searchOptionMenu("search.Multiple_Files", "searchGlobal",
                 "search.tip.Multiple_Files"),
-            Firebug.Search.searchOptionMenu("search.Use_Regular_Expression",
+            SearchBox.searchOptionMenu("search.Use_Regular_Expression",
                 "searchUseRegularExpression", "search.tip.Use_Regular_Expression")
         ];
     },
