@@ -217,19 +217,7 @@ ScriptView.prototype = Obj.extend(new EventSource(),
 
     search: function(text, options)
     {
-        var offsets = this.editor.find(text, options.start, options);
-
-        FBTrace.sysout("search: " + text + ", offsets: " + !!offsets, {options: options, offsets: offsets});
-        if (offsets)
-        {
-            var characterOffsets = this.editor.getCharacterOffsets(offsets.start, offsets.end);
-            this.scrollToLine(offsets.start.line + 1, {highlight: true});
-            this.editor.setSelection(characterOffsets.start, characterOffsets.end);
-
-            return offsets;
-        }
-
-        return null;
+        return this.editor.search(text, options);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

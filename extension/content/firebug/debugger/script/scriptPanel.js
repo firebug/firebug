@@ -607,8 +607,14 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Search
 
+    /**
+     * Executed by the framework when the user uses the {@link SearchBox} box (located
+     * on the right side of the main Firebug toolbar) to search within the Script panel.
+     */
     search: function(text, reverse)
     {
+        Trace.sysout("scriptPanel.search; " + text + ", reverse: " + reverse);
+
         // Check if the search is for a line number.
         var m = /^[^\\]?#(\d*)$/.exec(text);
         if (m)
@@ -625,27 +631,30 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             }
         }
 
-        var curDoc = this.searchCurrentDoc(!Options.get("searchGlobal"), text, reverse);
-        if (!curDoc && Options.get("searchGlobal"))
-            return this.searchOtherDocs(text, reverse);
+        var searchGlobal = Options.get("searchGlobal");
+        var curDoc = this.searchCurrentDoc(!searchGlobal, text, reverse);
+
+        if (!curDoc && searchGlobal)
+            return this.searchOtherDocs(text, reverse) && "wraparound";
 
         return curDoc;
     },
 
-
     searchOtherDocs: function(text, reverse)
     {
-        var scanRE = Firebug.Search.getTestingRegex(text);
+        Trace.sysout("scriptPanel.searchOtherDocs; text: " + text);
 
-        var self = this;
+        var scanRE = Firebug.Search.getTestingRegex(text);
 
         function scanDoc(compilationUnit)
         {
             var deferred = Promise.defer();
 
-            compilationUnit.getSourceLines(-1, -1, function loadSource(unit, firstLineNumber,
-                lastLineNumber, linesRead)
+            function callback(unit, firstLineNumber, lastLineNumber, lines)
             {
+                Trace.sysout("scriptPanel.searchOtherDocs; Source loaded for: " +
+                    unit.url + " (" + lines.length + ")", lines);
+
                 if (!lines)
                 {
                     deferred.resolve(false);
@@ -662,13 +671,41 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                         return;
                     }
                 }
-            });
 
+                deferred.resolve(false);
+            }
+
+            Trace.sysout("scriptPanel.searchOtherDocs; Source loading... " +
+                compilationUnit.url, compilationUnit);
+
+            //xxxHonza: As soon as {@link SourceFile.loadScriptLines} returns a promise
+            // we can nicely use it as direct return value.
+            compilationUnit.getSourceLines(-1, -1, callback.bind(this));
+
+            // Get source might happen asynchronously. Return a promise so,
+            // the caller can wait for it.
             return deferred.promise;
         }
 
-        if (this.navigateToNextDocument(scanDoc, reverse))
-            return this.searchCurrentDoc(true, text, reverse);
+        // Get current document (location). We need an instance that is also
+        // used within the location list.
+        var doc = this.context.getCompilationUnit(this.location.href);
+
+        // Navigate to the next document that has at least one search match.
+        // Each document is tested using the 'scanDoc' callback.
+        // The return value is a promise (returned from 'scanDoc') that is resolved
+        // to true if a document has been found, it's resolved to false otherwise.
+        var result = this.navigateToNextDocument(scanDoc, reverse, doc);
+        result.then((found) =>
+        {
+            if (found)
+                this.searchCurrentDoc(true, text, reverse);
+        });
+
+        // Result is the promise returned from 'scanDoc' as soon as it's resolved
+        // and after the above searchCurrentDoc happens (if found == true), the
+        // {@link SearchBox} will be able to (asynchronously) update itself.
+        return result;
     },
 
     searchCurrentDoc: function(wrapSearch, text, reverse)
@@ -679,7 +716,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             backwards: reverse
         };
 
-        if (this.currentSearch && text == this.currentSearch.text)
+        if (this.currentSearch &&
+            this.currentSearch.text == text &&
+            this.currentSearch.href == this.location.href)
         {
             options.start = this.currentSearch.start;
             if (reverse)
@@ -687,13 +726,24 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
         else
         {
-            this.currentSearch = {text: text, start: null};
+            this.currentSearch = {
+                text: text,
+                start: null,
+                href: this.location.href
+            };
+
+            Trace.sysout("scriptPanel.searchCurrentDoc; new current search created: ",
+                this.currentSearch);
         }
 
         var offsets = this.scriptView.search(text, options)
 
         if (offsets)
             this.currentSearch.start = offsets.end;
+
+        Trace.sysout("scriptPanel.searchCurrentDoc; " + this.location.href +
+            ", result: " + !!offsets, this.currentSearch);
+
         return !!offsets;
     },
 

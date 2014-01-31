@@ -5,27 +5,42 @@ define([
 ],
 function(FBTrace) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
-
+// xxxHonza: move this entire module into firebug/editor directory
 
 // ********************************************************************************************* //
-// Module
+// Implementation
 
 function SourceSearch(editor)
 {
     this.editor = editor;
 }
 
-SourceSearch.prototype.findNext = function(text, start, options)
+/**
+ * Helper object for searching within {@link SourceEditor}.
+ */
+SourceSearch.prototype =
+/** @lends SourceSearch */
 {
-    var editor = this.editor.editorObject;
-    var cursor = editor.getSearchCursor(text, start, options.ignoreCase);
-    if (!cursor.find(options.backwards))
-        return null;
+    findNext: function(text, start, options)
+    {
+        var editor = this.editor.editorObject;
+        var cursor = editor.getSearchCursor(text, start, options.ignoreCase);
 
-    return {start: cursor.from(), end: cursor.to()};
+        if (!cursor.find(options.backwards))
+            return null;
+
+        var result = {
+            start: cursor.from(),
+            end: cursor.to()
+        };
+
+        return result;
+    }
 };
 
 // ********************************************************************************************* //

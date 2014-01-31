@@ -635,7 +635,25 @@ SourceEditor.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Line API
+    // Search
+
+    search: function(text, options)
+    {
+        var offsets = this.find(text, options.start, options);
+        if (offsets)
+        {
+            var characterOffsets = this.getCharacterOffsets(offsets.start, offsets.end);
+
+            this.scrollToLine(offsets.start.line);
+            this.highlightLine(offsets.start.line);
+
+            this.setSelection(characterOffsets.start, characterOffsets.end);
+
+            return offsets;
+        }
+
+        return null;
+    },
 
     find: function(text, start, options)
     {
@@ -700,8 +718,11 @@ SourceEditor.prototype =
 
         if (this.highlightedLine != -1)
         {
+            // Remove the previous highlighted line, but make sure the handle is still
+            // there, the editor content could have been changed (replaced by new text).
             var handle = this.editorObject.getLineHandle(this.highlightedLine);
-            this.editorObject.removeLineClass(handle, "wrap", HIGHLIGHTED_LINE_CLASS);
+            if (handle)
+                this.editorObject.removeLineClass(handle, "wrap", HIGHLIGHTED_LINE_CLASS);
         }
 
         this.highlightedLine = line;
@@ -1062,7 +1083,7 @@ function ScriptLoader(doc, callback)
  * Helper object for tracing from within the CM files.
  */
 ScriptLoader.prototype =
-/** @lends SourceEditor */
+/** @lends ScriptLoader */
 {
     addScript: function(doc, id, url)
     {
