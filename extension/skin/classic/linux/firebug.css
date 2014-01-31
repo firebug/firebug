@@ -12,16 +12,8 @@
     background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
 }
 
-#fbPanelBar1 toolbarbutton {
-    font-size: 12.4px;
-}
-
 #fbCommandEditorHistoryButton[disabled="true"] {
     color: graytext;
-}
-
-#fbCommandToolbar {
-    height: calc(20rem + 8px);
 }
 
 #fbCommandArrow {
@@ -109,8 +101,22 @@ panelTab:not([selected="true"]):hover {
 
 /*************************************************************************************************/
 /* Buttons */
+toolbarbutton,
+toolbarbutton[type=menu-button] > .toolbarbutton-menubutton-button {
+    padding: 2px 6px;
+}
+
+#fbPanelBar1 toolbarbutton {
+    font-size: 12.4px;
+}
 
 toolbarbutton[type=menu-button][open="true"]:not([disabled="true"]) > .toolbarbutton-menubutton-dropmarker {
     border-color: transparent;
     box-shadow: none;
+}
+
+#fbBreakOnNextButton,
+.toolbar-image-button {
+    width: 21px;
+    height: 21px;
 }
