@@ -8,11 +8,6 @@ function(FBTrace) {
 "use strict";
 
 // ********************************************************************************************* //
-// Constants
-
-// xxxHonza: move this entire module into firebug/editor directory
-
-// ********************************************************************************************* //
 // Implementation
 
 function SourceSearch(editor)

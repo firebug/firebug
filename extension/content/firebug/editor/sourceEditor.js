@@ -9,7 +9,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/wrapper",
     "firebug/lib/array",
-    "firebug/debugger/sourceSearch"
+    "firebug/editor/sourceSearch"
 ],
 function(Firebug, FBTrace, Obj, Http, Dom, Css, Wrapper, Arr, SourceSearch) {
 
