@@ -1366,25 +1366,25 @@ FirebugReps.Element = domplate(Rep,
             });
         }
 
-        items = items.concat([
+        items.push(
             {
                 label: "CopyAbsoluteXPath",
                 tooltiptext: "html.tip.Copy_Absolute_XPath",
                 id: "fbCopyAbsoluteXPath",
                 command: Obj.bindFixed(this.copyAbsoluteXPath, this, elt)
             }
-        ]);
+        );
 
         if (relativexpath != absolutexpath)
         {
-            items = items.concat([
+            items.push(
                 {
                     label: "CopyXPath",
                     tooltiptext: "html.tip.Copy_XPath",
                     id: "fbCopyXPath",
                     command: Obj.bindFixed(this.copyXPath, this, elt)
                 }
-            ]);
+            );
         }
 
         items = items.concat([
