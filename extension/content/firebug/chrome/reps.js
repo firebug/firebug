@@ -1335,6 +1335,8 @@ FirebugReps.Element = domplate(Rep,
         var items = [];
         var clipboardContent = System.getStringDataFromClipboard();
         var isEltRoot = (elt === elt.ownerDocument.documentElement);
+        var relativexpath = Xpath.getElementXPath(elt);
+        var absolutexpath = Xpath.getElementTreeXPath(elt);
 
         if (Xml.isElementHTMLOrXHTML(elt))
             type = "HTML";
@@ -1366,17 +1368,26 @@ FirebugReps.Element = domplate(Rep,
 
         items = items.concat([
             {
-                label: "CopyXPath",
-                tooltiptext: "html.tip.Copy_XPath",
-                id: "fbCopyXPath",
-                command: Obj.bindFixed(this.copyXPath, this, elt)
-            },
-            {
                 label: "CopyAbsoluteXPath",
                 tooltiptext: "html.tip.Copy_Absolute_XPath",
                 id: "fbCopyAbsoluteXPath",
                 command: Obj.bindFixed(this.copyAbsoluteXPath, this, elt)
-            },
+            }
+        ]);
+
+        if (relativexpath != absolutexpath)
+        {
+            items = items.concat([
+                {
+                    label: "CopyXPath",
+                    tooltiptext: "html.tip.Copy_XPath",
+                    id: "fbCopyXPath",
+                    command: Obj.bindFixed(this.copyXPath, this, elt)
+                }
+            ]);
+        }
+
+        items = items.concat([
             {
                 label: "Copy_CSS_Path",
                 tooltiptext: "html.tip.Copy_CSS_Path",
