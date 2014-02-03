@@ -204,7 +204,7 @@ var SearchBox = Obj.extend(Module,
 
             // It's not nice to use isPromise in general, but {@link Promise} as the return
             // value of {@link Panel.search} method isn't mandatory for now.
-            if (Promise.isPromise(result))
+            if (isPromise(result))
             {
                 result.then(function(found)
                 {
@@ -231,7 +231,7 @@ var SearchBox = Obj.extend(Module,
                 var result = panel.search(value, reverse);
                 panel.searchText = value;
 
-                if (Promise.isPromise(result))
+                if (isPromise(result))
                 {
                     // TODO: we can set the icon to a doc-loading spinner
                     // (or keep "searching" in place).
@@ -409,6 +409,14 @@ var SearchBox = Obj.extend(Module,
         }
     },
 });
+
+// ********************************************************************************************* //
+// Helpers
+
+function isPromise(object)
+{
+    return object && typeof(object.then) == "function";
+}
 
 // ********************************************************************************************* //
 // Registration

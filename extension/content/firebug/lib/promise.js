@@ -15,12 +15,6 @@ Components.utils["import"]("resource://gre/modules/commonjs/sdk/core/promise.js"
 // ********************************************************************************************* //
 // Registration
 
-// xxxHonza: using "isPromise" is not nice in general, so use it wisely.
-imported.Promise.isPromise = function(object)
-{
-    return object && typeof object.then === "function";
-};
-
 return imported.Promise;
 
 // ********************************************************************************************* //

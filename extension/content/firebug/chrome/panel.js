@@ -560,7 +560,7 @@ var Panel = Obj.extend(new EventSource(),
             // It isn't nice to use isPromise in general, but we don't want to force
             // every panel to use promises, so {@link Promise} as the return value is not
             // mandatory (at least for now, perhaps in the future).
-            if (Promise.isPromise(result))
+            if (isPromise(result))
             {
                 // Wait till the |match| callback finishes.
                 result.then((found) =>
@@ -858,6 +858,14 @@ var Panel = Obj.extend(new EventSource(),
         this._selection = val;
     }
 });
+
+// ********************************************************************************************* //
+// Helpers
+
+function isPromise(object)
+{
+    return object && typeof(object.then) == "function";
+}
 
 // ********************************************************************************************* //
 // Registration
