@@ -432,6 +432,8 @@ SourceEditor.prototype =
 
     setSelection: function(start, end)
     {
+        Trace.sysout("sourceEditor.setSelection; " + start + ", " + end);
+
         var allCharCount = this.getCharCount();
 
         // It would be wrong If start is out of the body
@@ -671,7 +673,8 @@ SourceEditor.prototype =
 
     highlightLine: function(line)
     {
-        Trace.sysout("sourceEditor.highlightLine; line: " + line);
+        Trace.sysout("sourceEditor.highlightLine; line: " + line + " (previous: " +
+            this.highlightedLine + ")");
 
         if (this.highlightedLine == line)
             return;
@@ -700,6 +703,8 @@ SourceEditor.prototype =
 
     scrollToLine: function(line, options)
     {
+        Trace.sysout("sourceEditor.scrollToLine; " + line, options);
+
         line = line || 0;
         options = options || {};
 
@@ -709,31 +714,47 @@ SourceEditor.prototype =
         // If direct scroll (pixel) position is specified use it.
         if (options.scrollTop)
         {
+            Trace.sysout("sourceEditor.scrollToLine; scrollTop: " + scrollTop);
             this.editorObject.scrollTo(null, options.scrollTop);
         }
         else
         {
-            var scrollInfo = this.editorObject.getScrollInfo();
-            var hScrollBar = this.view.getElementsByClassName("CodeMirror-hscrollbar")[0];
-
-            // Do not include h-scrollbar in editor height (even if CM docs says getScrollInfo
-            // returns the visible area minus scrollbars, it doesn't seem to work).
-            var editorHeight = scrollInfo.clientHeight - hScrollBar.offsetHeight;
-            var top = coords.top;
-            var bottom = coords.bottom;
-            var lineHeight = this.editorObject.defaultTextHeight();
-
-            // Scroll only if the target line is outside of the viewport.
-            if (top <= scrollInfo.top || bottom >= scrollInfo.top + editorHeight)
+            // xxxHonza: the scroll position isn't set immediatelly after
+            // seting the source. So, we need to update it asynchronously :-(
+            setTimeout(() =>
             {
-                var middle = top - (editorHeight / 2);
-                this.editorObject.scrollTo(null, middle);
-            }
+                var scrollInfo = this.editorObject.getScrollInfo();
+                var hScrollBar = this.view.getElementsByClassName("CodeMirror-hscrollbar")[0];
+
+                // Do not include h-scrollbar in editor height (even if CM docs says getScrollInfo
+                // returns the visible area minus scrollbars, it doesn't seem to work).
+                var editorHeight = scrollInfo.clientHeight - hScrollBar.offsetHeight;
+                var top = coords.top;
+                var bottom = coords.bottom;
+                var lineHeight = this.editorObject.defaultTextHeight();
+
+                // Scroll only if the target line is outside of the viewport.
+                var scrollNeeded = (top <= scrollInfo.top ||
+                    bottom >= (scrollInfo.top + editorHeight));
+
+                Trace.sysout("sourceEditor.scrollToLine; top: " + top + ", bottom: " + bottom +
+                    ", scrollbar height: " + hScrollBar.offsetHeight + ", editorHeight: " +
+                    editorHeight + ", " + "scrollNeeded: " + scrollNeeded,
+                    {scrollInfo: scrollInfo, coords: coords});
+
+                if (scrollNeeded)
+                {
+                    var middle = top - (editorHeight / 2);
+                    this.editorObject.scrollTo(null, middle);
+                }
+            });
         }
     },
 
     scrollTo: function(left, top)
     {
+        Trace.sysout("sourceEditor.scrollTo; left: " + left + ", top: " + top);
+
         this.editorObject.scrollTo(left, top);
     },
 
@@ -752,6 +773,8 @@ SourceEditor.prototype =
 
     setTopIndex: function(line)
     {
+        Trace.sysout("sourceEditor.setTopIndex; line: " + line);
+
         var coords = this.cloneIntoCMScope({line: line, ch: 0});
         this.editorObject.scrollTo(0, this.editor.charCoords(coords, "local").top);
     },
