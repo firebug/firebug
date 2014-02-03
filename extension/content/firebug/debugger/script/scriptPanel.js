@@ -386,12 +386,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     removeDebugLocation: function()
     {
-        this.scriptView.setDebugLocation(-1);
+        this.scriptView.setDebugLocation(-1, true);
     },
 
-    setDebugLocation: function(lineNo)
+    setDebugLocation: function(lineNo, noScroll)
     {
-        this.scriptView.setDebugLocation(lineNo);
+        this.scriptView.setDebugLocation(lineNo, noScroll);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -586,10 +586,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             var options = sourceLink.getOptions();
 
             // Make sure the current execution line is marked if the current frame
-            // is coming from the current location.
+            // is coming from the same location.
             var frame = this.context.currentFrame;
-            if (frame && frame.href == this.location.href && frame.line == this.location.line)
-                options.debugLocation = true;
+            if (frame && frame.href == this.location.href)
+                this.setDebugLocation(frame.line - 1, true);
 
             // If the location object is SourceLink automatically scroll to the
             // specified line. Otherwise make sure to reset the scroll position
@@ -597,7 +597,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             if (this.location instanceof SourceLink)
                 this.scrollToLine(this.location.line, options);
             else
-                this.scrollToLine(0);
+                this.scrollToLine(1);
         }
 
         compilationUnit.getSourceLines(-1, -1, callback.bind(this));
@@ -895,7 +895,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // Remove breakpoint from the UI.
         this.scriptView.removeBreakpoint(bp);
         if (this.scriptView.editor && this.scriptView.editor.debugLocation == bp.lineNo)
-            this.scriptView.setDebugLocation(bp.lineNo);
+            this.scriptView.setDebugLocation(bp.lineNo, true);
     },
 
     onBreakpointEnabled: function(context, bp, bpClient)
