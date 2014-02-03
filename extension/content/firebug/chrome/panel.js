@@ -535,6 +535,11 @@ var Panel = Obj.extend(new EventSource(),
      * @param {Boolean} reverse Indicates whether passing through the documents
      * should be done in reverse order
      * @param {Object} The current document used in the (asynchronous) loop.
+     *
+     * @return {Object} The method can return
+     * 1) A document object that has been found
+     * 2) null if there is no document matching the search keyword
+     * 3) {@link Promise} instance that will be resolved asynchronously
      */
     navigateToNextDocument: function(match, reverse, doc, deferred)
     {
