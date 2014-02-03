@@ -571,8 +571,7 @@ var Panel = Obj.extend(new EventSource(),
                     if (found)
                     {
                         // A document that matches the search keyword has been found.
-                        // Navigate the panel to the document and resolve the final
-                        // promise to true.
+                        // Navigate the panel to the document and resolve the final promise.
                         this.navigate(doc);
                         deferred.resolve(found);
                     }
@@ -590,6 +589,9 @@ var Panel = Obj.extend(new EventSource(),
                         // to the next one. If the next one is the one we started with
                         // we already iterated all documents, so resolve the final
                         // promise to false.
+                        // xxxHonza: ideally we should compare (doc !== this.location)
+                        // but the Script panel is also using SourceLink instances as the
+                        // location and so, it wouldn't work.
                         if (doc.href !== this.location.href)
                             this.navigateToNextDocument(match, reverse, doc, deferred);
                         else
@@ -864,7 +866,7 @@ var Panel = Obj.extend(new EventSource(),
 
 function isPromise(object)
 {
-    return object && typeof(object.then) == "function";
+    return object && typeof object.then == "function";
 }
 
 // ********************************************************************************************* //

@@ -193,6 +193,7 @@ var SearchBox = Obj.extend(Module,
             SearchBox.isAutoSensitive(value) + " for " + value, searchBox);
 
         // Cancel the previous search to keep typing smooth
+        // xxxHonza: perhaps we could also reject the previous in-progress promise?
         clearTimeout(panelNode.searchTimeout);
 
         var self = this;
@@ -276,7 +277,7 @@ var SearchBox = Obj.extend(Module,
         // false: match not found
         // "wraparound": match has been found in the next document, or search started
         //      from the beginning again.
-        if (typeof(result) == "string")
+        if (typeof result == "string")
             searchBox.status = result;
         else
             searchBox.status = (result ? "found" : "notfound");
@@ -415,7 +416,7 @@ var SearchBox = Obj.extend(Module,
 
 function isPromise(object)
 {
-    return object && typeof(object.then) == "function";
+    return object && typeof object.then == "function";
 }
 
 // ********************************************************************************************* //
