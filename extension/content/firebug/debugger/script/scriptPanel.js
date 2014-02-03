@@ -717,7 +717,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         var options =
         {
             ignoreCase: !SearchBox.isCaseSensitive(text),
-            backwards: reverse
+            backwards: reverse,
+            wrapSearch: wrapSearch
         };
 
         if (this.currentSearch &&
@@ -732,7 +733,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         {
             this.currentSearch = {
                 text: text,
-                start: null,
+                start: reverse ? -1 : 0,
                 href: this.location.href
             };
 
