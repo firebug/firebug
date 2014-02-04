@@ -55,7 +55,7 @@ function SourceEditor()
 {
     this.editorObject = null;
     this.debugLocation = -1;
-    this.highlightedLines = {};
+    this.highlightedLines = new Map();
 }
 
 // ********************************************************************************************* //
@@ -98,7 +98,8 @@ SourceEditor.DefaultConfig =
     // autofocus: true
 };
 
-SourceEditor.ReadOnlyConfig = Obj.extend(SourceEditor.DefaultConfig, {
+SourceEditor.ReadOnlyConfig = Obj.extend(SourceEditor.DefaultConfig,
+{
     // Do not use "nocursor" to hide the cursor otherwise Ctrl+C doesn't work (see issue 6819)
     readOnly: true,
 
@@ -732,9 +733,12 @@ SourceEditor.prototype =
         // Create highlighter that will highlight the line and automatically
         // unhighlight it after a timeout. If a highlighter is already in place
         // (for the given line) just use it. Its timeout will be reset.
-        var highlighter = this.highlightedLines[line];
+        var highlighter = this.highlightedLines.get(line);
         if (!highlighter)
-            this.highlightedLines[line] = highlighter = new LineHighlighter(this);
+        {
+            highlighter = new LineHighlighter(this);
+            this.highlightedLines.set(line, highlighter);
+        }
 
         highlighter.highlight(line);
     },
@@ -744,10 +748,8 @@ SourceEditor.prototype =
         Trace.sysout("sourceEditor.unhighlightAllLines;");
 
         // Make sure to unhighlight all active highlighters.
-        for (var p in this.highlightedLines)
-            this.highlightedLines[p].cancel();
-
-        this.highlightedLines = {};
+        this.highlightedLines.forEach((highlighter) => highlighter.cancel());
+        this.highlightedLines = new Map();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1099,8 +1101,8 @@ LineHighlighter.prototype =
         if (handle)
             this.cm.removeLineClass(handle, "wrap", HIGHLIGHTED_LINE_CLASS);
 
-        // Explicitely delete the highlighter, so the map doesn't grow.
-        delete this.editor.highlightedLines[this.line];
+        // Do not forget to delete the highlighter, so the map doesn't grow.
+        this.editor.highlightedLines.delete(this.line);
     },
 
     cancel: function()
