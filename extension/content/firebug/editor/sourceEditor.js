@@ -46,6 +46,8 @@ var BACK_CLASS = "CodeMirror-debugLocation-background";
 var HIGHLIGHTED_LINE_CLASS = "CodeMirror-highlightedLine";
 var BP_WRAP_CLASS = "CodeMirror-breakpoint";
 
+var unhighlightDelay = 1300;
+
 // ********************************************************************************************* //
 // Source Editor Constructor
 
@@ -53,7 +55,7 @@ function SourceEditor()
 {
     this.editorObject = null;
     this.debugLocation = -1;
-    this.highlightedLine = -1;
+    this.highlightedLines = {};
 }
 
 // ********************************************************************************************* //
@@ -212,6 +214,8 @@ SourceEditor.prototype =
     destroy: function()
     {
         Trace.sysout("sourceEditor.destroy;");
+
+        this.unhighlightAllLines();
     },
 
     isInitialized: function()
@@ -387,6 +391,9 @@ SourceEditor.prototype =
 
     setText: function(text, type)
     {
+        // The text is changing, remove all highlighter.
+        this.unhighlightAllLines();
+
         Trace.sysout("sourceEditor.setText: " + type + " " + text, text);
 
         // xxxHonza: the default 'mixedmode' mode should be set only if the text
@@ -529,7 +536,7 @@ SourceEditor.prototype =
         var start = this.getCursor("start");
         var end = this.getCursor("end");
 
-        return getNumericalOffsets(start, end);
+        return this.getCharacterOffsets(start, end);
     },
 
     hasSelection: function()
@@ -709,37 +716,36 @@ SourceEditor.prototype =
         }
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Line Highlight
+
     highlightLine: function(line)
     {
         Trace.sysout("sourceEditor.highlightLine; line: " + line);
 
-        if (this.highlightedLine == line)
-            return;
+        // Create highlighter that will highlight the line and automatically
+        // unhighlight it after a timeout. If a highlighter is already in place
+        // (for the given line) just use it. Its timeout will be reset.
+        var highlighter = this.highlightedLines[line];
+        if (!highlighter)
+            this.highlightedLines[line] = highlighter = new LineHighlighter(this);
 
-        if (this.highlightedLine != -1)
-        {
-            // Remove the previous highlighted line, but make sure the handle is still
-            // there, the editor content could have been changed (replaced by new text).
-            var handle = this.editorObject.getLineHandle(this.highlightedLine);
-            if (handle)
-                this.editorObject.removeLineClass(handle, "wrap", HIGHLIGHTED_LINE_CLASS);
-        }
-
-        this.highlightedLine = line;
-
-        if (this.highlightedLine == -1)
-            return;
-
-        var handle = this.editorObject.getLineHandle(line);
-        this.editorObject.addLineClass(handle, "wrap", HIGHLIGHTED_LINE_CLASS);
-
-        // Unhighlight after a timeout.
-        var self = this;
-        setTimeout(function()
-        {
-            self.highlightLine(-1);
-        }, 1300);
+        highlighter.highlight(line);
     },
+
+    unhighlightAllLines: function()
+    {
+        Trace.sysout("sourceEditor.unhighlightAllLines;");
+
+        // Make sure to unhighlight all active highlighters.
+        for (var p in this.highlightedLines)
+            this.highlightedLines[p].cancel();
+
+        this.highlightedLines = {};
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Scroll
 
     scrollToLine: function(line, options)
     {
@@ -798,6 +804,9 @@ SourceEditor.prototype =
         var coords = this.cloneIntoCMScope({line: line, ch: 0});
         this.editorObject.scrollTo(0, this.editor.charCoords(coords, "local").top);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Focus
 
     hasFocus: function()
     {
@@ -1040,6 +1049,59 @@ function getEventObject(type, eventArg)
     }
 
     return event;
+}
+
+// ********************************************************************************************* //
+// Line Highlighter Implementation
+
+function LineHighlighter(editor)
+{
+    this.line = -1;
+    this.timeout = null;
+    this.editor = editor;
+    this.cm = editor.editorObject;
+}
+
+LineHighlighter.prototype =
+{
+    highlight: function(line)
+    {
+        // If the highlighter is currently in progress, just reset the timeout.
+        // Otherwise, make sure to highlight the line.
+        if (this.timeout)
+        {
+            clearInterval(this.timeout);
+        }
+        else
+        {
+            this.line = line;
+            var handle = this.cm.getLineHandle(line);
+            this.cm.addLineClass(handle, "wrap", HIGHLIGHTED_LINE_CLASS);
+        }
+
+        // Unhighlight after a timeout.
+        this.timeout = setTimeout(this.unhighlight.bind(this), unhighlightDelay);
+    },
+
+    unhighlight: function()
+    {
+        if (this.line == -1)
+            return;
+
+        // Remove the previously highlighted line.
+        var handle = this.cm.getLineHandle(this.line);
+        if (handle)
+            this.cm.removeLineClass(handle, "wrap", HIGHLIGHTED_LINE_CLASS);
+
+        // Explicitely delete the highlighter, so the map doesn't grow.
+        delete this.editor.highlightedLines[this.line];
+    },
+
+    cancel: function()
+    {
+        clearInterval(this.timeout);
+        this.unhighlight();
+    }
 }
 
 // ********************************************************************************************* //
