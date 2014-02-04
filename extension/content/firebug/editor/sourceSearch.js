@@ -8,6 +8,13 @@ function(FBTrace) {
 "use strict";
 
 // ********************************************************************************************* //
+// Constants
+
+// Tracing
+var TraceError = FBTrace.toError();
+var Trace = FBTrace.to("DBG_SEARCH");
+
+// ********************************************************************************************* //
 // Implementation
 
 function SourceSearch(editor)
@@ -23,6 +30,16 @@ SourceSearch.prototype =
 {
     findNext: function(text, start, options)
     {
+        Trace.sysout("sourceSearch.findNext; text: " + text, options);
+
+        if (options.useRegularExpression)
+        {
+            text = this.editor.cloneIntoCMScope({
+                source: text,
+                ignoreCase: options.ignoreCase,
+            });
+        }
+
         var rev = options.backwards;
         var editor = this.editor.editorObject;
 

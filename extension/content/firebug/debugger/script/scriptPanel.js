@@ -718,7 +718,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         {
             ignoreCase: !SearchBox.isCaseSensitive(text),
             backwards: reverse,
-            wrapSearch: wrapSearch
+            wrapSearch: wrapSearch,
+            useRegularExpression: Options.get("searchUseRegularExpression")
         };
 
         if (this.currentSearch &&
