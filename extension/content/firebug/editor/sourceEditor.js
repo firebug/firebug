@@ -391,7 +391,8 @@ SourceEditor.prototype =
 
     setText: function(text, type)
     {
-        // The text is changing, remove all highlighter.
+        // The text is changing, remove markers.
+        this.removeDebugLocation();
         this.unhighlightAllLines();
 
         Trace.sysout("sourceEditor.setText: " + type + " " + text, text);
@@ -714,6 +715,11 @@ SourceEditor.prototype =
                 }
             }
         }
+    },
+
+    removeDebugLocation: function()
+    {
+        this.setDebugLocation(-1);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
