@@ -19,6 +19,8 @@ var Trace = FBTrace.to("DBG_SEARCH");
 
 function SourceSearch(editor)
 {
+    Trace.sysout("sourceSearch.constructor;");
+
     this.editor = editor;
 }
 
@@ -50,6 +52,8 @@ SourceSearch.prototype =
         // limited privileges (not chrome)
         start = this.editor.cloneIntoCMScope(start);
 
+        var wraparound = false;
+
         // Get the search cursor and find first match. If there is no result, try to
         // search from the begin/end again (if wrap-around is on).
         var cursor = editor.getSearchCursor(text, start, options.ignoreCase);
@@ -65,9 +69,12 @@ SourceSearch.prototype =
             cursor = editor.getSearchCursor(text, start, rev);
             if (!cursor.find(rev))
                 return;
+
+            wraparound = true;
         }
 
         var result = {
+            wraparound: wraparound,
             start: cursor.from(),
             end: cursor.to()
         };

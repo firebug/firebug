@@ -669,7 +669,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 {
                     if (scanRE.test(lines[i]))
                     {
-                        deferred.resolve("wraparound");
+                        deferred.resolve(true);
                         return;
                     }
                 }
@@ -698,22 +698,24 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // The return value is a promise (returned from 'scanDoc') that is resolved
         // to true if a document has been found, it's resolved to false otherwise.
         var result = this.navigateToNextDocument(scanDoc, reverse, doc);
-        result.then((found) =>
+
+        // The final result is a promise resolved with the result of searchCurrentDoc below
+        // (if found == true), so the {@link SearchBox} will be able to (asynchronously)
+        // update itself.
+        return result.then((found) =>
         {
             Trace.sysout("scriptPanel.searchOtherDocs; next doc found: " + found);
 
             if (found)
-                this.searchCurrentDoc(false, text, reverse);
+                return this.searchCurrentDoc(true, text, reverse);
         });
-
-        // Result is the promise returned from 'scanDoc' as soon as it's resolved
-        // and after the above searchCurrentDoc happens (if found == true), the
-        // {@link SearchBox} will be able to (asynchronously) update itself.
-        return result;
     },
 
     searchCurrentDoc: function(wrapSearch, text, reverse)
     {
+        Trace.sysout("scriptPanel.searchCurrentDoc; wrapSearch: " + wrapSearch +
+            ", text: " + text + ", reverse: " + reverse);
+
         var options =
         {
             ignoreCase: !SearchBox.isCaseSensitive(text),
@@ -751,14 +753,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         var result = !!offsets;
 
-        // xxxHonza: wrap search implementation
-        if (!result && wrapSearch)
+        if (offsets && offsets.wraparound)
         {
-
             // Return "wraparound" as the result value if the search found a match,
             // but reached the end/begin of the document and start from begin/end again.
-            //if (result)
-            //    result = "wraparound"
+            // xxxHonza: dispatch an event: see issue 7159
+            if (result)
+                result = "wraparound";
         }
 
         Trace.sysout("scriptPanel.searchCurrentDoc; " + this.location.href +
