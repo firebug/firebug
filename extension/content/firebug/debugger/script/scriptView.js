@@ -61,8 +61,6 @@ ScriptView.prototype = Obj.extend(new EventSource(),
 
         this.initializeExecuted = true;
 
-        Trace.sysout("scriptView.initialize; " + parentNode);
-
         //xxxHonza: do we need this? this.onContextMenuListener = this.onContextMenu.bind(this);
         this.onBreakpointChangeListener = this.onBreakpointChange.bind(this);
         this.onMouseMoveListener = this.onMouseMove.bind(this);
@@ -75,6 +73,8 @@ ScriptView.prototype = Obj.extend(new EventSource(),
         // Initialize source editor.
         this.editor = new SourceEditor();
         this.editor.init(parentNode, SourceEditor.ReadOnlyConfig, this.onEditorLoad.bind(this));
+
+        Trace.sysout("scriptView.initialize; " + parentNode);
     },
 
     onEditorLoad: function()
@@ -165,6 +165,7 @@ ScriptView.prototype = Obj.extend(new EventSource(),
         if (!this.initialized)
         {
             this.defaultSource = {source: source, type: type};
+            Trace.sysout("scriptView.showSource; not initialized");
             return;
         }
 
@@ -427,7 +428,7 @@ ScriptView.prototype = Obj.extend(new EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Debug Location
 
-    setDebugLocation: function(line)
+    setDebugLocation: function(line, noScroll)
     {
         if (!this.initialized)
             return;
@@ -435,8 +436,9 @@ ScriptView.prototype = Obj.extend(new EventSource(),
         if (this.editor)
             this.editor.setDebugLocation(line);
 
-        // If the debug location is being removed (line == -1) do not scroll.
-        if (line > 0)
+        // If the debug location is being removed (line == -1) or |noScroll|
+        // is explicitly set do not scroll.
+        if (line > 0 && !noScroll)
             this.scrollToLine(line);
     },
 
