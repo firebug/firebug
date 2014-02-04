@@ -197,8 +197,7 @@ var SearchBox = Obj.extend(Module,
         clearTimeout(panelNode.searchTimeout);
 
         var self = this;
-
-        if (immediate)
+        var doSearch = function()
         {
             var result = panel.search(value, reverse);
             panel.searchText = value;
@@ -207,52 +206,35 @@ var SearchBox = Obj.extend(Module,
             // value of {@link Panel.search} method isn't mandatory for now.
             if (isPromise(result))
             {
+                // TODO: we can set the icon to a doc-loading spinner
+                // (or keep "searching" in place).
                 result.then(function(found)
                 {
+                    // TODO: remove the doc-loading icon if any.
+                    self.onResult(found, immediate);
+
                     // In case the promise is resolved synchronously, the return value
-                    // from the |update| method will be the real result value (not a promise).
-                    result = self.onResult(found);
+                    // will be the real result value (not a promise).
+                    result = found;
                 });
             }
             else
             {
-                if (!result && value)
-                    this.onNotFound();
-
-                this.updatePanelStyle(panel, value);
+                self.onResult(result, immediate);
             }
 
             return result;
-        }
-        else
-        {
-            // After a delay, perform the search
-            panelNode.searchTimeout = setTimeout(function()
-            {
-                var result = panel.search(value, reverse);
-                panel.searchText = value;
+        };
 
-                if (isPromise(result))
-                {
-                    // TODO: we can set the icon to a doc-loading spinner
-                    // (or keep "searching" in place).
-                    result.then(function(found)
-                    {
-                        // TODO: remove the doc-loading icon if any.
-                        self.onResult(found);
-                    });
-                }
-                else
-                {
-                    self.onResult(result);
-                }
-            }, searchDelay);
-        }
+        if (immediate)
+            return doSearch();
+        else
+            panelNode.searchTimeout = setTimeout(doSearch, searchDelay);
 
         Trace.sysout("searchBox.update; END");
     },
 
-    onResult: function(result)
+    onResult: function(result, immediate)
     {
         Trace.sysout("searchBox.onResult; result: " + result, result);
 
@@ -263,8 +245,12 @@ var SearchBox = Obj.extend(Module,
 
         if (!result && value)
         {
+            // For non-immediate (automatic) searches, ignore search failures if
+            // the panel tells us to. This is used e.g. for HTML panel selector
+            // searches, where even if a typed string (".cla", say) doesn't
+            // match anything, an extension of it (".class") still could.
             var shouldIgnore = panel.shouldIgnoreIntermediateSearchFailure;
-            if (shouldIgnore && shouldIgnore.call(panel, value))
+            if (!immediate && shouldIgnore && shouldIgnore.call(panel, value))
                 result = true;
             else
                 this.onNotFound();
@@ -281,8 +267,6 @@ var SearchBox = Obj.extend(Module,
             searchBox.status = result;
         else
             searchBox.status = (result ? "found" : "notfound");
-
-        this.setPlaceholder();
 
         Trace.sysout("searchBox.onResult; status: " + searchBox.status +
             ", value: " + value + ", result: " + result);
