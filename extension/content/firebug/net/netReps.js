@@ -1300,8 +1300,8 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Rep, new EventSource(),
                             SPAN({"class": "netInfoPostContentType"},
                                 "application/x-www-form-urlencoded"
                             ),
-                            SPAN({"class": "netPostParameterSort", onclick: "$onChangeSort"},
-                                SPAN("$object|getLabel")
+                            A({"class": "netPostParameterSort", onclick: "$onChangeSort"},
+                                "$object|getLabel"
                             )
                         )
                     )
@@ -1423,8 +1423,8 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Rep, new EventSource(),
     getLabel: function(object)
     {
         return Options.get("netSortPostParameters") ?
-            Locale.$STR("net.post.parameterSort.donotsort") :
-            Locale.$STR("net.post.parameterSort.sortbykey");
+            Locale.$STR("netParametersDoNotSort") :
+            Locale.$STR("netParametersSortAlphabetically");
     },
 
     getParamValueIterator: function(param)
