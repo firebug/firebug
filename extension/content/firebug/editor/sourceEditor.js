@@ -216,7 +216,7 @@ SourceEditor.prototype =
     {
         Trace.sysout("sourceEditor.destroy;");
 
-        this.unhighlightAllLines();
+        this.removeHighlighter();
     },
 
     isInitialized: function()
