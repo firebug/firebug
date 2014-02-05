@@ -714,7 +714,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     searchCurrentDoc: function(wrapSearch, text, reverse)
     {
         Trace.sysout("scriptPanel.searchCurrentDoc; wrapSearch: " + wrapSearch +
-            ", text: " + text + ", reverse: " + reverse);
+            ", text: " + text + ", reverse: " + reverse, this.currentSearch);
 
         var options =
         {
@@ -724,20 +724,41 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             useRegularExpression: Options.get("searchUseRegularExpression")
         };
 
-        if (this.currentSearch &&
-            this.currentSearch.text == text &&
-            this.currentSearch.href == this.location.href)
+        var wraparound = false;
+
+        // If the search keyword is the same reuse the current search object,
+        // otherwise create new one.
+        if (this.currentSearch && this.currentSearch.text == text)
         {
-            options.start = this.currentSearch.start;
-            if (reverse)
-                options.start.ch -= 1;
+            // In case of "multiple files" search the next document could have been
+            // displayed in the UI. In such case:
+            // 1) Check if it's the same document the search started in (wraparound)
+            // 2) Reset start position where the search should begin.
+            if (this.currentSearch.href != this.location.href)
+            {
+                // If true, we reached the original document this search started in
+                // (this search == this search keyword)
+                wraparound = (this.location.href == this.currentSearch.originalHref);
+
+                // Searching in the next document starts from the beginning or,
+                // in case of reverse search, from the end.
+                this.currentSearch.start = reverse ? -1 : 0;
+                this.currentSearch.href = this.location.href;
+            }
+            else
+            {
+                options.start = this.currentSearch.start;
+                if (reverse)
+                    options.start.ch -= 1;
+            }
         }
         else
         {
             this.currentSearch = {
                 text: text,
                 start: reverse ? -1 : 0,
-                href: this.location.href
+                href: this.location.href,
+                originalHref: this.location.href
             };
 
             options.start = this.currentSearch.start;
@@ -746,15 +767,17 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 this.currentSearch);
         }
 
+        // Search for the next occurrence of the search keyword in the document.
         var offsets = this.scriptView.search(text, options);
-
         if (offsets)
             this.currentSearch.start = reverse ? offsets.start : offsets.end;
 
         var result = !!offsets;
 
-        if (offsets && offsets.wraparound)
+        if (wraparound || offsets && offsets.wraparound)
         {
+            Trace.sysout("scriptPanel.searchCurrentDoc; wraparound active");
+
             // Return "wraparound" as the result value if the search found a match,
             // but reached the end/begin of the document and start from begin/end again.
             // xxxHonza: dispatch an event: see issue 7159

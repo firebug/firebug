@@ -19,8 +19,6 @@ var Trace = FBTrace.to("DBG_SEARCH");
 
 function SourceSearch(editor)
 {
-    Trace.sysout("sourceSearch.constructor;");
-
     this.editor = editor;
 }
 
