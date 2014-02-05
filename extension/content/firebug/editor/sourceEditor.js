@@ -55,7 +55,7 @@ function SourceEditor()
 {
     this.editorObject = null;
     this.debugLocation = -1;
-    this.highlightedLines = new Map();
+    this.highlighter = null;
 }
 
 // ********************************************************************************************* //
@@ -394,7 +394,7 @@ SourceEditor.prototype =
     {
         // The text is changing, remove markers.
         this.removeDebugLocation();
-        this.unhighlightAllLines();
+        this.removeHighlighter();
 
         Trace.sysout("sourceEditor.setText: " + type + " " + text, text);
 
@@ -730,26 +730,22 @@ SourceEditor.prototype =
     {
         Trace.sysout("sourceEditor.highlightLine; line: " + line);
 
-        // Create highlighter that will highlight the line and automatically
-        // unhighlight it after a timeout. If a highlighter is already in place
-        // (for the given line) just use it. Its timeout will be reset.
-        var highlighter = this.highlightedLines.get(line);
-        if (!highlighter)
-        {
-            highlighter = new LineHighlighter(this);
-            this.highlightedLines.set(line, highlighter);
-        }
+        // If an existing highlighter is in place, cancel it (i.e. clear the timeout),
+        // so there are no two highlighted lines at the same time.
+        this.removeHighlighter();
 
-        highlighter.highlight(line);
+        // Create highlighter in order to highlight given line. The highlighter will
+        // automatically unhighlight it after a timeout.
+        this.highlighter = new LineHighlighter(this);
+        this.highlighter.highlight(line);
     },
 
-    unhighlightAllLines: function()
+    removeHighlighter: function()
     {
-        Trace.sysout("sourceEditor.unhighlightAllLines;");
+        if (this.highlighter)
+            this.highlighter.cancel();
 
-        // Make sure to unhighlight all active highlighters.
-        this.highlightedLines.forEach((highlighter) => highlighter.cancel());
-        this.highlightedLines = new Map();
+        this.highlighter = null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1101,8 +1097,8 @@ LineHighlighter.prototype =
         if (handle)
             this.cm.removeLineClass(handle, "wrap", HIGHLIGHTED_LINE_CLASS);
 
-        // Do not forget to delete the highlighter, so the map doesn't grow.
-        this.editor.highlightedLines.delete(this.line);
+        // Do not forget to delete the highlighter.
+        this.editor.highlighter = null;
     },
 
     cancel: function()
