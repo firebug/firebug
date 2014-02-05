@@ -341,14 +341,15 @@ function createFirebugConsole(context, win)
                 FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
         }
 
-        trace = StackFrame.cleanStackTraceOfFirebug(trace);
+        if (!trace || !trace.frames || !trace.frames.length)
+            trace = null;
 
         var url = msg && msg.fileName ? msg.fileName : win.location.href;
 
         // we may have only the line popped above
         var lineNo = (trace && msg && msg.lineNumber) ? msg.lineNumber : 0;
         var errorObject = new ErrorMessageObj(msg, url, lineNo, null, category, context, trace);
-        if (trace && trace.frames && trace.frames[0])
+        if (trace)
             errorObject.correctWithStackTrace(trace);
 
         errorObject.resetSource();
@@ -371,25 +372,24 @@ function createFirebugConsole(context, win)
     {
         // Starting with our stack, walk back to the user-level code
         var frame = Components.stack;
-        var userURL = win.location.href.toString();
+        var userURL = null;
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector.getComponentsStackDump initial stack for userURL " +
+        {
+            userURL = win.location.href.toString();
+            FBTrace.sysout("consoleExposed.getComponentsStackDump initial stack for userURL " +
                 userURL, frame);
+        }
 
         // Drop frames until we get into user code.
-        while (frame && Url.isSystemURL(frame.filename) )
+        while (frame && Url.isSystemURL(frame.filename))
             frame = frame.caller;
 
-        // Drop two more frames, the injected console function and firebugAppendConsole()
-        //if (frame)
-        //    frame = frame.caller;
-        //if (frame)
-        //    frame = frame.caller;
-
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector.getComponentsStackDump final stack for userURL " +
+        {
+            FBTrace.sysout("consoleExposed.getComponentsStackDump final stack for userURL " +
                 userURL, frame);
+        }
 
         return frame;
     }
@@ -413,24 +413,13 @@ function createFirebugConsole(context, win)
         var filteredFrames = [];
         for (var i = 0; i < frames.length; i++)
         {
-            if (Str.hasPrefix(frames[i].href, "chrome:"))
-                continue;
-
-            if (Str.hasPrefix(frames[i].href, "resource:"))
-                continue;
-
-            // firebug-service scope reached, in some cases the url starts with file://
-            if (frames[i].href.indexOf("modules/firebug-service.js") != -1)
+            var href = frames[i].href;
+            if (href.startsWith("chrome:") || href.startsWith("resource:"))
                 continue;
 
             // xxxFlorent: should be reverted if we integrate
             // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
-            if (DebuggerLib.isFrameLocationEval(frames[i].href))
-                continue;
-
-            // command line
-            var fn = String(frames[i].getFunctionName());
-            if (fn && (fn.indexOf("_firebugEvalEvent") != -1))
+            if (DebuggerLib.isFrameLocationEval(href))
                 continue;
 
             filteredFrames.push(frames[i]);

@@ -81,15 +81,11 @@ Wrapper.cloneIntoContentScope = function(global, obj)
 
 // ********************************************************************************************* //
 
-Wrapper.ignoreVars =
-{
-    // internal firebug things XXXjjb todo we should privatize these
-    "_firebug": 1,
-};
-
+// XXX Obsolete, but left for extension compatibility.
+Wrapper.ignoreVars = {};
 Wrapper.shouldIgnore = function(name)
 {
-    return (Wrapper.ignoreVars[name] === 1);
+    return false;
 };
 
 function isPrimitive(obj)

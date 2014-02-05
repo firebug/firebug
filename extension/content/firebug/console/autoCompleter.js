@@ -1833,9 +1833,6 @@ function propertiesToHide(expr, obj)
             "PaintRequest", "PaintRequestList", "WindowUtils",
             "GlobalPropertyInitializer", "GlobalObjectConstructor"
         );
-
-        // Hide ourselves.
-        ret.push("_firebug");
     }
 
     // Old and ugly.
@@ -1897,12 +1894,11 @@ function setCompletionsFromObject(out, object, context)
             var hideMap = Object.create(null);
             for (var i = 0; i < hide.length; ++i)
                 hideMap[hide[i]] = 1;
-            var hideRegex = /^XUL[A-Za-z]+$/;
 
             var newCompletions = [];
             out.completions.forEach(function(prop)
             {
-                if (prop in hideMap || hideRegex.test(prop))
+                if (prop in hideMap)
                     out.hiddenCompletions.push(prop);
                 else
                     newCompletions.push(prop);

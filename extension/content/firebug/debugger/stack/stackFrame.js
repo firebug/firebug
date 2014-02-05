@@ -319,26 +319,17 @@ StackFrame.parseToStackFrame = function(line, context)
     return new StackFrame({href:m[2]}, m[3], m[1], [], null, null, context);
 };
 
+// XXX This probably isn't needed any more.
 StackFrame.cleanStackTraceOfFirebug = function(trace)
 {
-    if (trace && trace.frames)
-    {
-        var count = trace.frames.length - 1;
-        while (trace.frames.length && (/^_[fF]irebug/.test(trace.frames[count].fn) ||
-            /^\s*with\s*\(\s*_[fF]irebug/.test(trace.frames[count].sourceFile.source)))
-        {
-            trace.frames.pop();
-        }
-
-        if (trace.frames.length == 0)
-            trace = undefined;
-    }
+    if (trace && trace.frames && !trace.frames.length)
+        return undefined;
     return trace;
 };
 
 StackFrame.getFrameSourceLink = function(frame)
 {
-    if (frame && frame.filename && frame.filename.indexOf("XPCSafeJSObjectWrapper") == -1)
+    if (frame && frame.filename)
         return new SourceLink(frame.filename, frame.lineNumber, "js");
     else
         return null;
