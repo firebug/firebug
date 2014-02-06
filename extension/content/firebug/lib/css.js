@@ -28,7 +28,6 @@ var Css = {};
 var cssKeywordMap = {};
 var cssPropNames = {};
 var cssColorNames = null;
-var imageRules = null;
 var domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
 
 function buildKeywordMap(nodeType)
@@ -205,22 +204,22 @@ Css.isColorKeyword = function(keyword)
     return cssColorNames.indexOf(keyword.toLowerCase()) != -1;
 };
 
-Css.isImageRule = function(nodeType,rule)
+var imageProps = null;
+Css.isImageProperty = function(propName)
 {
-    if (!imageRules)
+    if (!imageProps)
     {
-        imageRules = [];
+        imageProps = [];
 
-        for (var i in Css.cssInfo[nodeType])
+        // Note: It suffices to look at HTML cssInfo.
+        for (var p in Css.cssInfo.html)
         {
-            var r = i.toLowerCase();
-            var suffix = "image";
-            if (r.match(suffix + "$") == suffix || r == "background")
-                imageRules.push(r);
+            if (/image$/.test(p) || p == "background")
+                imageProps.push(p);
         }
     }
 
-    return imageRules.indexOf(rule.toLowerCase()) != -1;
+    return imageProps.indexOf(propName) != -1;
 };
 
 Css.copyTextStyles = function(fromNode, toNode, style)
