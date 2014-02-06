@@ -302,7 +302,7 @@ Xml.getValuesForAttribute = function(nodeType, tagName, attribute)
     {
         var presentational = Xml.getPresentationalSVGProperties();
         if (presentational.hasOwnProperty(attribute))
-            return presentational[attribute];
+            return presentational[attribute].concat(["inherit"]);
     }
     return [];
 };
