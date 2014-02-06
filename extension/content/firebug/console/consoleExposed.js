@@ -108,6 +108,8 @@ function createFirebugConsole(context, win)
     console.trace = function firebugDebuggerTracer()
     {
         var trace = getJSDUserStack();
+        if (!trace)
+            trace = getComponentsUserStack();
 
         // This should never happen, but inform the user if it does.
         if (!trace)
@@ -339,6 +341,13 @@ function createFirebugConsole(context, win)
             trace = getJSDUserStack();
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
+
+            if (!trace)
+            {
+                trace = getComponentsUserStack();
+                if (FBTrace.DBG_CONSOLE)
+                    FBTrace.sysout("logAssert trace from getComponentsUserStack", trace);
+            }
         }
 
         if (!trace || !trace.frames || !trace.frames.length)
@@ -435,6 +444,78 @@ function createFirebugConsole(context, win)
         if (!Firebug.Debugger.isAlwaysEnabled())
             return null;
         var trace = Firebug.Debugger.getCurrentStackTrace(context);
+        return removeChromeFrames(trace);
+    }
+
+    function getComponentsUserStack()
+    {
+        // Walk Components.stack and function.caller/arguments simultaneously.
+        var func = arguments.callee;
+        var seenFunctions = new Set();
+        seenFunctions.add(func);
+
+        var trace = new StackTrace();
+        var frame = Components.stack;
+        while (frame)
+        {
+            var fileName = frame.filename;
+            if (fileName)
+            {
+                var frameName = frame.name;
+                var args = [];
+                if (func)
+                {
+                    try
+                    {
+                        if (func.name && func.name !== frameName)
+                        {
+                            // Something is off, abort!
+                            func = null;
+                        }
+                        else
+                        {
+                            var argValues = Array.prototype.slice.call(func.arguments);
+                            var argNames =
+                                StackFrame.guessFunctionArgNamesFromSource(String(func));
+                            if (argNames && argNames.length === func.length)
+                            {
+                                for (var i = 0; i < func.length; i++)
+                                    args.push({name: argNames[i], value: argValues[i]});
+                            }
+                        }
+                    }
+                    catch (exc) {} // strict mode etc.
+                }
+
+                var sframe = new StackFrame({href: fileName},
+                    frame.lineNumber, frameName, args, null, null, context);
+                trace.frames.push(sframe);
+            }
+
+            frame = frame.caller;
+            if (func)
+            {
+                try
+                {
+                    func = func.caller;
+                    if (seenFunctions.has(func))
+                    {
+                        // Recursion; we cannot go on unfortunately.
+                        func = null;
+                    }
+                    else
+                    {
+                        seenFunctions.add(func);
+                    }
+                }
+                catch (exc)
+                {
+                    // Strict mode functions etc.
+                    func = null;
+                }
+            }
+        }
+
         return removeChromeFrames(trace);
     }
 

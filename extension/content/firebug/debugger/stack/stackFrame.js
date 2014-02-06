@@ -319,6 +319,27 @@ StackFrame.parseToStackFrame = function(line, context)
     return new StackFrame({href:m[2]}, m[3], m[1], [], null, null, context);
 };
 
+StackFrame.guessFunctionArgNamesFromSource = function(source)
+{
+    // XXXsimon: This fails with ES6 destructuring and parentheses in default parameters.
+    // We'd need a proper JavaScript parser for that.
+    var m = /[^\(]*\(([^\)]*)\)/.exec(source);
+    if (!m)
+        return null;
+    var args = m[1].split(",");
+    for (var i = 0; i < args.length; i++)
+    {
+        var arg = args[i];
+        if (arg.indexOf("=") !== -1)
+            arg = arg.substr(0, arg.indexOf("="));
+        arg = arg.trim();
+        if (!/^[a-zA-Z$_][a-zA-Z$_0-9]*$/.test(arg))
+            return null;
+        args[i] = arg;
+    }
+    return args;
+};
+
 // XXX This probably isn't needed any more.
 StackFrame.cleanStackTraceOfFirebug = function(trace)
 {
