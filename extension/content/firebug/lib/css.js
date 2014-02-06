@@ -978,6 +978,7 @@ Css.cssInfo.html =
     "caption-side": ["captionSide"],
     "clear": ["clear", "none"],
     "clip": ["shape", "auto"],
+    "clip-path": ["url()", "none"],
     "color": ["color"],
     "content": ["string", "none", "normal"],
     "counter-increment": ["none"],
@@ -986,6 +987,7 @@ Css.cssInfo.html =
     "direction": ["direction"],
     "display": ["display"],
     "empty-cells": ["emptyCells"],
+    "filter": ["url()", "none"],
     "float": ["float"],
 
     "align-items": ["alignItems"],
@@ -998,7 +1000,7 @@ Css.cssInfo.html =
     "justify-content": ["justifyContent"],
     "order": [],
 
-    // specification of font families in "font" is special-cased
+    // specification of font families in "font" is special-cased by auto-completion
     "font": ["fontStyle", "fontVariant", "namedFontWeight", "fontSize", "lineHeight", "mozFont"],
     "font-family": ["fontFamily"],
     "font-size": ["fontSize", "length"],
@@ -1008,7 +1010,8 @@ Css.cssInfo.html =
     "font-variant": ["fontVariant"],
     "font-weight": ["fontWeight"],
 
-    "ime-mode": ["imeMode"], // FF 3.0
+    "image-rendering": ["imageRendering"],
+    "ime-mode": ["imeMode"],
     "letter-spacing": ["normal", "length"],
     "line-height": ["lineHeight", "length"],
     "word-break": ["wordBreak"],
@@ -1024,6 +1027,7 @@ Css.cssInfo.html =
     "margin-bottom": ["auto", "length"],
     "margin-left": ["auto", "length"],
 
+    "mask": ["url()", "none"],
     "marker-offset": ["auto", "length"],
     "min-height": ["length"],
     "max-height": ["none", "length"],
@@ -1038,9 +1042,9 @@ Css.cssInfo.html =
     "outline-width": ["thickness", "length"],
     "outline-offset": ["length"],
 
-    "overflow": ["overflow", "auto"],
-    "overflow-x": ["overflow", "auto"],
-    "overflow-y": ["overflow", "auto"],
+    "overflow": ["overflow"],
+    "overflow-x": ["overflow"],
+    "overflow-y": ["overflow"],
 
     "padding": ["length"],
     "padding-top": ["length"],
@@ -1063,6 +1067,7 @@ Css.cssInfo.html =
     "text-rendering": ["textRendering"],
     "text-shadow": ["color", "length"],
     "text-transform": ["textTransform"],
+    "text-overflow": ["textOverflow"],
     "transition": ["transitionProperty", "timingFunction"],
     "transition-property": ["transitionProperty"],
     "transition-duration": [],
@@ -1119,13 +1124,11 @@ Css.cssInfo.html =
     "-moz-font-feature-settings": ["mozFontFeatureSettings"], // FF 4.0
     "-moz-font-language-override": ["normal"],
     "-moz-tab-size": [], // FF 4.0,
-    "orient": ["horizontal", "vertical"], // FF 6.0
-    "-moz-text-blink": ["none", "blink"], // FF 6.0
+    "-moz-orient": ["horizontal", "vertical", "auto"],
     "-moz-text-decoration-color": ["color"], // FF 6.0
     "-moz-text-decoration-line": ["mozTextDecorationLine"], // FF 6.0
     "-moz-text-decoration-style": ["mozTextDecorationStyle"], // FF 6.0
     "-moz-hyphens": ["mozHyphens"], // FF 6.0
-    "text-overflow": ["textOverflow"], // FF 7.0
     "-moz-perspective": ["none", "length"], // FF 10.0
     "-moz-perspective-origin": ["position", "length"] // FF 10.0
 };
@@ -1137,7 +1140,6 @@ Css.cssInfo.svg =
     "alignment-baseline": ["alignmentBaseline"],
     "baseline-shift": ["baselineShift"],
     "clip": ["auto", "length"],
-    "clip-path": ["url()", "none"],
     "clip-rule": ["clipRule"],
     "color": ["color"],
     "color-interpolation": ["colorInterpolation"],
@@ -1152,7 +1154,6 @@ Css.cssInfo.svg =
     "fill": ["clipRule"],
     "fill-opacity": [],
     "fill-rule": ["clipRule"],
-    "filter": ["url()", "none"],
     "flood-color": ["currentColor"],
     "flood-opacity": [],
     "font": ["fontStyle", "fontSize", "fontVariant", "namedFontWeight"],
@@ -1165,16 +1166,17 @@ Css.cssInfo.svg =
     "font-weight": ["fontWeight"],
     "glyph-orientation-horizontal": [],
     "glyph-orientation-vertical": ["auto"],
-    "image-rendering": ["imageRendering"], // FF 3.6
+    "image-rendering": ["svgImageRendering"],
     "kerning": ["auto"],
     "letter-spacing": ["normal"],
     "lighting-color": ["currentColor"],
-    "marker": ["none"],
-    "marker-end": ["none"],
-    "mask": ["url()", "none"],
+    "marker": ["none", "url()"],
+    "marker-end": ["none", "url()"],
+    "marker-mid": ["none", "url()"],
+    "marker-start": ["none", "url()"],
     "opacity": [],
-    "overflow": ["auto", "svgOverflow"],
-    "pointer-events": ["pointerEvents"], // FF 1.5/3.6
+    "overflow": ["svgOverflow"],
+    "pointer-events": ["pointerEvents"],
     "shape-rendering": ["auto", "shapeRendering"],
     "stop-color": ["currentColor"],
     "stop-opacity": [],
@@ -1186,7 +1188,7 @@ Css.cssInfo.svg =
     "stroke-miterlimit": [],
     "stroke-opacity": [],
     "stroke-width": [],
-    "text-anchor": ["mozBoxPack"],
+    "text-anchor": ["start", "middle", "end"],
     "text-decoration": ["textDecoration"],
     "text-rendering": ["textRendering"],
     "unicode-bidi": ["unicodeBidi"],
@@ -2626,16 +2628,24 @@ Css.cssKeywords =
     "imageRendering":
     [
         "auto",
-        "optimizespeed",
-        "optimizequality",
+        "optimizeSpeed",
+        "optimizeQuality",
         "-moz-crisp-edges"
+    ],
+
+    "svgImageRendering":
+    [
+        "auto",
+        "optimizeSpeed",
+        "optimizeQuality"
     ],
 
     "svgOverflow":
     [
         "visible",
         "hidden",
-        "scroll"
+        "scroll",
+        "auto"
     ],
 
     "pointerEvents":
@@ -2892,7 +2902,7 @@ Css.nonDeletableTags =
 Xml.getPresentationalSVGProperties = function()
 {
     buildKeywordMap("svg");
-    return cssKeywordMap["svg"];
+    return cssKeywordMap.svg;
 };
 
 // ********************************************************************************************* //
