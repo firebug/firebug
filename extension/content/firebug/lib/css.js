@@ -3,14 +3,15 @@
 
 define([
     "firebug/lib/trace",
+    "firebug/lib/array",
     "firebug/lib/url",
     "firebug/lib/options",
-    "firebug/chrome/window",
     "firebug/lib/xml",
     "firebug/lib/http",
-    "firebug/lib/xpath"
+    "firebug/lib/xpath",
+    "firebug/chrome/window",
 ],
-function(FBTrace, Url, Options, Win, Xml, Http, Xpath) {
+function(FBTrace, Arr, Url, Options, Xml, Http, Xpath, Win) {
 
 // ********************************************************************************************* //
 // Constants
@@ -29,8 +30,21 @@ var Css = {};
 var cssKeywordMap = null;
 var cssColorNames = null;
 var cachedPropNames = null;
-var implementedCssProps = null;
 var domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
+
+function expandKeywordList(list)
+{
+    var res = [];
+    for (var prop of list)
+    {
+        var keywords = Css.cssKeywords[prop];
+        if (keywords)
+            res.push.apply(res, keywords);
+        else
+            res.push(prop);
+    }
+    return res;
+}
 
 function initPropertyData()
 {
@@ -38,39 +52,24 @@ function initPropertyData()
         return;
     cssKeywordMap = {};
 
-    // Use the nsIDOMUtils service to list all property names. This includes also
-    // SVG presentational attributes, so filter them into two groups based on
-    // that. Also remove -moz-math-display and -moz-script-level from the list,
-    // as they are impossible to set (they are internal helpers for MathML).
+    // Create the list of property names through the help of inIDOMUtils.
+    // This includes also SVG presentational attributes, so filter the names
+    // into two groups based on that. Also remove -moz-math-display and
+    // -moz-script-level from the list, as they are impossible to set (they are
+    // internal helpers for MathML).
     var props = new Set(domUtils.getCSSPropertyNames(domUtils.INCLUDE_ALIASES));
     props.delete("-moz-math-display");
     props.delete("-moz-script-level");
-    implementedCssProps = props;
 
     var htmlProps = [], svgProps = [];
     for (let prop of props)
     {
-        var html = !svgPresentationalProperties.has(prop);
-        var svg = !html || svgInheritedFromHtml.has(prop);
+        let html = !svgPresentationalProperties.has(prop);
+        let svg = !html || svgInheritedFromHtml.has(prop);
         if (html)
             htmlProps.push(prop);
         if (svg)
             svgProps.push(prop);
-
-        if (cssData.hasOwnProperty(prop))
-        {
-            var list = [];
-            var types = cssData[prop];
-            for (var i = 0; i < types.length; ++i)
-            {
-                var keywords = Css.cssKeywords[types[i]];
-                if (keywords)
-                    list.push.apply(list, keywords);
-                else
-                    list.push(types[i]);
-            }
-            cssKeywordMap[prop] = list;
-        }
     }
 
     cachedPropNames = {
@@ -78,6 +77,84 @@ function initPropertyData()
         svg: svgProps.sort(),
         mathml: []
     };
+
+    // Set up a map of property values. Let's start with some helpers for
+    // munging the property data given to us by the API.
+
+    // We block initial, inherit and unset from appearing in results, instead
+    // we manually add them to auto-completion when they constitute the only
+    // value in an editor. -moz-calc is also removed, because calc should be
+    // used instead, and it can be annoying when writing negative numbers.
+    var forbiddenValues = new Set(["initial", "inherit", "unset", "-moz-calc"]);
+    var filterValues = function(list)
+    {
+        return list.filter((value) => !forbiddenValues.has(value));
+    };
+
+    // The API doesn't indicate whether a value represents a function or not,
+    // so we hard-code a list and add parens to any known returned function.
+    // We also camel-case some SVG property values to make them more readable.
+    var functionNames = new Set([
+        "url", "calc", "hsl", "hsla", "rgb", "rgba",
+        "-moz-element", "-moz-image-rect",
+        "linear-gradient", "radial-gradient",
+        "repeating-linear-gradient", "repeating-radial-gradient",
+        "cubic-bezier", "steps",
+    ]);
+    var convertCase = new Map();
+    for (let value of ["linearRGB", "sRGB", "geometricPrecision",
+        "optimizeQuality", "optimizeSpeed", "optimizeLegibility", "crispEdges",
+        "visibleFill", "visiblePainted", "visibleStroke"])
+    {
+        convertCase.set(value.toLowerCase(), value);
+    }
+    var transformPropertyValue = function(value)
+    {
+        if (functionNames.has(value))
+            value += "()";
+        if (convertCase.has(value))
+            return convertCase.get(value);
+        return value;
+    };
+
+    // Some types of values are simply missing from the API, such as Mozilla-
+    // specific colors, and gradient images. Add those when detected.
+    var addMissingValues = function(values, propName)
+    {
+        if (propName === "transition" || propName === "transition-property")
+            values = values.concat(animatableProperties);
+
+        if (values.indexOf("aqua") !== -1)
+            values = values.concat(extraColors);
+
+        if (values.indexOf("-moz-element()") !== -1)
+            values = values.concat(extraImages);
+
+        return values;
+    };
+
+    // Set up part of the data tables.
+    var colors = filterValues(domUtils.getCSSValuesForProperty("color"));
+    Css.cssKeywords.color = Arr.sortUnique(colors.concat(extraColors));
+
+    for (let prop of props)
+    {
+        var values;
+
+        // See if the property is special-cased due to missing or incorrect values.
+        if (cssDataExceptions.hasOwnProperty(prop))
+        {
+            values = expandKeywordList(cssDataExceptions[prop]);
+        }
+        else
+        {
+            values = domUtils.getCSSValuesForProperty(prop);
+            values = filterValues(values);
+            values = values.map(transformPropertyValue);
+            values = addMissingValues(values, prop);
+        }
+        cssKeywordMap[prop] = Arr.sortUnique(values);
+    }
 }
 
 Css.getCSSKeywordsByProperty = function(nodeType, propName, avoid)
@@ -107,10 +184,17 @@ Css.getCSSKeywordsByProperty = function(nodeType, propName, avoid)
     return cssKeywordMap[propName];
 };
 
+function assertShorthand(propName)
+{
+    if (["background", "border", "font"].indexOf(propName) === -1)
+        throw new Error("invalid shorthand name " + propName);
+}
+
 function getCSSPropertyKeywordsExcludingCategories(propName, avoid)
 {
+    assertShorthand(propName);
     var list = [];
-    var types = cssData[propName];
+    var types = cssDataExceptions[propName];
     for (var i = 0; i < types.length; ++i)
     {
         var type = types[i];
@@ -133,11 +217,9 @@ Css.getCSSPropertyNames = function(nodeType)
 
 Css.getCSSShorthandCategory = function(nodeType, shorthandProp, keyword)
 {
-    if (!cssData.hasOwnProperty(shorthandProp))
-        return null;
-
+    assertShorthand(shorthandProp);
     var category = null;
-    var types = cssData[shorthandProp];
+    var types = cssDataExceptions[shorthandProp];
     for (var i = 0; i < types.length; ++i)
     {
         var type = types[i], matches;
@@ -239,21 +321,10 @@ Css.isColorKeyword = function(keyword)
     return cssColorNames.indexOf(keyword.toLowerCase()) != -1;
 };
 
-var imageProps = null;
+var reImageProperty = /(^background|image)$/;
 Css.isImageProperty = function(propName)
 {
-    if (!imageProps)
-    {
-        imageProps = [];
-
-        for (var p in cssData)
-        {
-            if (/image$/.test(p) || p == "background")
-                imageProps.push(p);
-        }
-    }
-
-    return imageProps.indexOf(propName) != -1;
+    return reImageProperty.test(propName);
 };
 
 Css.copyTextStyles = function(fromNode, toNode, style)
@@ -946,9 +1017,66 @@ Css.rgbToHSL = function(value)
 };
 
 // ********************************************************************************************* //
-// CSS Info
+// CSS Data
 
-var cssData =
+var cssDataExceptions =
+{
+    // Fonts. Note that specification of font families in "font" is
+    // special-cased by auto-completion, so "fontFamily" isn't included in the list.
+    // (For SVG presentational attribute completion it is wanted, but let's ignore
+    // that case for now - it's rather uncommon.)
+    "font": ["fontStyle", "fontVariant", "namedFontWeight", "fontSize", "lineHeight", "mozFont"],
+    "font-family": ["fontFamily"],
+
+    // Shorthands (incorrect values, and we are also interested in how they
+    // split into subproperties for improved cycling in auto-completion)
+    "border-image": ["borderImageRepeat", "thickness", "image"],
+    "background": ["bgRepeat", "bgAttachment", "position", "length", "color", "image", "boxModels"],
+    "border": ["borderStyle", "thickness", "length", "color"],
+
+    // Incorrect values
+    "text-decoration": ["textDecoration"],
+    "-moz-text-decoration-line": ["textDecoration"],
+
+    // Missing values
+    "background-position": ["position", "length"],
+    "background-size": ["bgSize", "length"],
+    "border-image-slice": ["fill"],
+    "border-image-width": ["auto", "length"],
+    "border-image-outset": ["length"],
+    "border-image-repeat": ["borderImageRepeat"],
+    "border-top-left-radius": ["length"],
+    "border-top-right-radius": ["length"],
+    "border-bottom-right-radius": ["length"],
+    "border-bottom-left-radius": ["length"],
+    "border-spacing": ["length"],
+    "-moz-border-bottom-colors": ["color"],
+    "-moz-border-left-colors": ["color"],
+    "-moz-border-right-colors": ["color"],
+    "-moz-border-top-colors": ["color"],
+    "box-shadow": ["boxShadow", "color", "none", "length"],
+    "clip": ["shape", "auto"],
+    "content": ["string", "url()", "none", "normal"],
+    "counter-increment": ["none"],
+    "counter-reset": ["none"],
+    "cursor": ["cursor", "url()"],
+    "fill": ["clipRule"],
+    "filter": ["url()", "none"],
+    "font-weight": ["fontWeight"],
+    "-moz-font-feature-settings": ["mozFontFeatureSettings"],
+    "-moz-image-region": ["rect()"],
+    "paint-order": ["normal", "fill", "stroke", "markers"],
+    "stroke-dasharray": ["none"],
+    "quotes": ["none"],
+    "text-overflow": ["textOverflow"],
+    "text-shadow": ["color", "length"],
+    "transform": ["transformFunction", "none", "length"],
+    "transform-origin": ["position", "length"],
+    "border-radius": ["length"],
+    "-moz-perspective-origin": ["position", "length"],
+};
+
+var cssDataOld =
 {
     "animation": [],
     "animation-delay": [],
@@ -960,17 +1088,17 @@ var cssData =
     "animation-timing-function": [],
     "animation-fill-mode": ["none", "forwards", "backwards", "both"],
 
-    "background": ["bgRepeat", "bgAttachment", "position", "color", "image", "none", "boxModels"],
+    "background": ["bgRepeat", "bgAttachment", "position", "color", "image", "boxModels"],
     "background-attachment": ["bgAttachment"],
     "background-color": ["color"],
-    "background-image": ["image", "none"],
+    "background-image": ["image"],
     "background-position": ["position", "length"],
     "background-repeat": ["bgRepeat"],
     "background-size": ["bgSize", "length"],
     "background-clip": ["boxModels"], // FF 4.0
     "background-origin": ["boxModels"], // FF 4.0
 
-    "border": ["borderStyle", "thickness", "color"],
+    "border": ["borderStyle", "thickness", "length", "color"],
     "border-top": ["borderStyle", "borderCollapse", "color"],
     "border-right": ["borderStyle", "borderCollapse", "color"],
     "border-bottom": ["borderStyle", "borderCollapse", "color"],
@@ -1001,7 +1129,7 @@ var cssData =
     "border-image-outset": ["length"], // FF 15.0
     "border-image-repeat": ["borderImageRepeat"], // FF 15.0
     "border-image-slice": ["fill"],
-    "border-image-source": ["image", "none"],
+    "border-image-source": ["image"],
     "border-image-width": ["auto", "length"], // FF 15.0
 
     "top": ["auto", "length"],
@@ -1014,10 +1142,10 @@ var cssData =
     "clip": ["shape", "auto"],
     "clip-path": ["url()", "none"],
     "color": ["color"],
-    "content": ["string", "none", "normal"],
+    "content": ["string", "url()", "none", "normal"],
     "counter-increment": ["none"],
     "counter-reset": ["none"],
-    "cursor": ["cursor", "url()", "none"],
+    "cursor": ["cursor", "url()"],
     "direction": ["direction"],
     "display": ["display"],
     "empty-cells": ["emptyCells"],
@@ -1035,7 +1163,7 @@ var cssData =
     "order": [],
 
     // specification of font families in "font" is special-cased by auto-completion
-    "font": ["fontStyle", "fontVariant", "namedFontWeight", "fontSize", "lineHeight", "mozFont"],
+    "font": ["fontStyle", "fontVariant", "fontWeight", "fontSize", "lineHeight", "mozFont"],
     "font-family": ["fontFamily"],
     "font-size": ["fontSize", "length"],
     "font-size-adjust": ["none"],
@@ -1160,14 +1288,14 @@ var cssData =
     "-moz-tab-size": [], // FF 4.0,
     "-moz-orient": ["horizontal", "vertical", "auto"],
     "-moz-text-decoration-color": ["color"], // FF 6.0
-    "-moz-text-decoration-line": ["mozTextDecorationLine"], // FF 6.0
+    "-moz-text-decoration-line": ["textDecoration"], // FF 6.0
     "-moz-text-decoration-style": ["mozTextDecorationStyle"], // FF 6.0
     "-moz-hyphens": ["mozHyphens"], // FF 6.0
     "-moz-perspective": ["none", "length"], // FF 10.0
     "-moz-perspective-origin": ["position", "length"], // FF 10.0
 };
 
-var svgData = {
+var svgDataOld = {
     "clip-rule": ["clipRule"],
     "color-interpolation": ["colorInterpolation"],
     "color-interpolation-filters": ["colorInterpolation"],
@@ -1209,12 +1337,53 @@ var svgData = {
     "paint-order": ["normal", "fill", "stroke", "markers"],
     "writing-mode": ["writingMode"],
 };
-
-var svgPresentationalProperties = new Set(Object.keys(svgData));
-Object.keys(svgData).forEach(function(prop)
+Object.keys(svgDataOld).forEach(function(prop)
 {
-    cssData[prop] = svgData[prop];
+    cssDataOld[prop] = svgDataOld[prop];
 });
+
+var svgPresentationalProperties = new Set([
+    "clip-rule",
+    "color-interpolation",
+    "color-interpolation-filters",
+    "dominant-baseline",
+    "fill",
+    "fill-opacity",
+    "fill-rule",
+    "flood-color",
+    "flood-opacity",
+    "lighting-color",
+    "marker",
+    "marker-end",
+    "marker-mid",
+    "marker-start",
+    "mask-type",
+    "shape-rendering",
+    "stop-color",
+    "stop-opacity",
+    "stroke",
+    "stroke-dasharray",
+    "stroke-dashoffset",
+    "stroke-linecap",
+    "stroke-linejoin",
+    "stroke-miterlimit",
+    "stroke-opacity",
+    "stroke-width",
+    "text-anchor",
+    "vector-effect",
+
+    // Unimplemented by Firefox, but it doesn't hurt to include them for future compatibility.
+    "alignment-baseline",
+    "baseline-shift",
+    "color-profile",
+    "color-rendering",
+    "enable-background",
+    "glyph-orientation-horizontal",
+    "glyph-orientation-vertical",
+    "kerning",
+    "paint-order",
+    "writing-mode",
+]);
 
 // CSS properties for HTML that also apply to SVG, taken from:
 // http://www.w3.org/TR/SVG/styling.html#SVGStylingProperties
@@ -1398,242 +1567,7 @@ Css.cssKeywords =
         "hidden"
     ],
 
-    "color":
-    [
-        // Color functions
-        "rgb()",
-        "rgba()",
-        "hsl()",
-        "hsla()",
-
-        // Color keywords
-        "aliceblue",
-        "antiquewhite",
-        "aqua",
-        "aquamarine",
-        "azure",
-        "beige",
-        "bisque",
-        "black",
-        "blanchedalmond",
-        "blue",
-        "blueviolet",
-        "brown",
-        "burlywood",
-        "cadetblue",
-        "chartreuse",
-        "chocolate",
-        "coral",
-        "cornflowerblue",
-        "cornsilk",
-        "crimson",
-        "cyan",
-        "darkblue",
-        "darkcyan",
-        "darkgoldenrod",
-        "darkgray",
-        "darkgreen",
-        "darkgrey",
-        "darkkhaki",
-        "darkmagenta",
-        "darkolivegreen",
-        "darkorange",
-        "darkorchid",
-        "darkred",
-        "darksalmon",
-        "darkseagreen",
-        "darkslateblue",
-        "darkslategray",
-        "darkslategrey",
-        "darkturquoise",
-        "darkviolet",
-        "deeppink",
-        "deepskyblue",
-        "dimgray",
-        "dimgrey",
-        "dodgerblue",
-        "firebrick",
-        "floralwhite",
-        "forestgreen",
-        "fuchsia",
-        "gainsboro",
-        "ghostwhite",
-        "gold",
-        "goldenrod",
-        "gray",
-        "green",
-        "greenyellow",
-        "grey",
-        "honeydew",
-        "hotpink",
-        "indianred",
-        "indigo",
-        "ivory",
-        "khaki",
-        "lavender",
-        "lavenderblush",
-        "lawngreen",
-        "lemonchiffon",
-        "lightblue",
-        "lightcoral",
-        "lightcyan",
-        "lightgoldenrodyellow",
-        "lightgray",
-        "lightgreen",
-        "lightgrey",
-        "lightpink",
-        "lightsalmon",
-        "lightseagreen",
-        "lightskyblue",
-        "lightslategray",
-        "lightslategrey",
-        "lightsteelblue",
-        "lightyellow",
-        "lime",
-        "limegreen",
-        "linen",
-        "magenta",
-        "maroon",
-        "mediumaquamarine",
-        "mediumblue",
-        "mediumorchid",
-        "mediumpurple",
-        "mediumseagreen",
-        "mediumslateblue",
-        "mediumspringgreen",
-        "mediumturquoise",
-        "mediumvioletred",
-        "midnightblue",
-        "mintcream",
-        "mistyrose",
-        "moccasin",
-        "navajowhite",
-        "navy",
-        "oldlace",
-        "olive",
-        "olivedrab",
-        "orange",
-        "orangered",
-        "orchid",
-        "palegoldenrod",
-        "palegreen",
-        "paleturquoise",
-        "palevioletred",
-        "papayawhip",
-        "peachpuff",
-        "peru",
-        "pink",
-        "plum",
-        "powderblue",
-        "purple",
-        "red",
-        "rosybrown",
-        "royalblue",
-        "saddlebrown",
-        "salmon",
-        "sandybrown",
-        "seagreen",
-        "seashell",
-        "sienna",
-        "silver",
-        "skyblue",
-        "slateblue",
-        "slategray",
-        "slategrey",
-        "snow",
-        "springgreen",
-        "steelblue",
-        "tan",
-        "teal",
-        "thistle",
-        "tomato",
-        "turquoise",
-        "violet",
-        "wheat",
-        "white",
-        "whitesmoke",
-        "yellow",
-        "yellowgreen",
-
-        // Special color keywords
-        "transparent",
-        "currentColor",
-
-        // System colors
-        "ActiveBorder",
-        "ActiveCaption",
-        "AppWorkspace",
-        "Background",
-        "ButtonFace",
-        "ButtonHighlight",
-        "ButtonShadow",
-        "ButtonText",
-        "CaptionText",
-        "GrayText",
-        "Highlight",
-        "HighlightText",
-        "InactiveBorder",
-        "InactiveCaption",
-        "InactiveCaptionText",
-        "InfoBackground",
-        "InfoText",
-        "Menu",
-        "MenuText",
-        "Scrollbar",
-        "ThreeDDarkShadow",
-        "ThreeDFace",
-        "ThreeDHighlight",
-        "ThreeDLightShadow",
-        "ThreeDShadow",
-        "Window",
-        "WindowFrame",
-        "WindowText",
-
-        // Mozilla system color extensions
-        "-moz-ButtonDefault",
-        "-moz-ButtonHoverFace",
-        "-moz-ButtonHoverText",
-        "-moz-CellHighlight",
-        "-moz-CellHighlightText",
-        "-moz-Combobox",
-        "-moz-ComboboxText",
-        "-moz-Dialog",
-        "-moz-DialogText",
-        "-moz-dragtargetzone",
-        "-moz-EvenTreeRow",
-        "-moz-Field",
-        "-moz-FieldText",
-        "-moz-html-CellHighlight",
-        "-moz-html-CellHighlightText",
-        "-moz-mac-accentdarkestshadow",
-        "-moz-mac-accentdarkshadow",
-        "-moz-mac-accentface",
-        "-moz-mac-accentlightesthighlight",
-        "-moz-mac-accentlightshadow",
-        "-moz-mac-accentregularhighlight",
-        "-moz-mac-accentregularshadow",
-        "-moz-mac-chrome-active",
-        "-moz-mac-chrome-inactive",
-        "-moz-mac-focusring",
-        "-moz-mac-menuselect",
-        "-moz-mac-menushadow",
-        "-moz-mac-menutextselect",
-        "-moz-MenuHover",
-        "-moz-MenuHoverText",
-        "-moz-MenuBarText",
-        "-moz-MenuBarHoverText",
-        "-moz-nativehyperlinktext",
-        "-moz-OddTreeRow",
-        "-moz-win-communicationstext",
-        "-moz-win-mediatext",
-
-        // Mozilla color preference extensions
-        "-moz-activehyperlinktext",
-        "-moz-default-background-color", // FF 5.0
-        "-moz-default-color", // FF 5.0
-        "-moz-hyperlinktext",
-        "-moz-visitedhyperlinktext"
-    ],
+    // "color" is set in initPropertyData.
 
     "auto":
     [
@@ -1655,7 +1589,9 @@ Css.cssKeywords =
         "top",
         "bottom",
         "left",
-        "right"
+        "right",
+        "bottom-outside",
+        "top-outside",
     ],
 
     "emptyCells":
@@ -1725,7 +1661,7 @@ Css.cssKeywords =
         "help",
         "no-drop",
         "not-allowed",
-        "none", // FF 3.0
+        "none",
         "-moz-grab",
         "-moz-grabbing",
         "-moz-zoom-in",
@@ -1769,6 +1705,7 @@ Css.cssKeywords =
 
     "bgAttachment":
     [
+        "local",
         "scroll",
         "fixed"
     ],
@@ -1809,9 +1746,6 @@ Css.cssKeywords =
         "ridge",
         "inset",
         "outset",
-        "-moz-bg-inset",
-        "-moz-bg-outset",
-        "-moz-bg-solid"
     ],
 
     "borderCollapse":
@@ -1897,7 +1831,6 @@ Css.cssKeywords =
         "close-quote",
         "no-open-quote",
         "no-close-quote",
-        "url()",
         "attr()",
         "counter()",
         "counters()"
@@ -1916,29 +1849,22 @@ Css.cssKeywords =
         "small-caps"
     ],
 
+
     // Named font-weight values, worth completing in "font"
     "namedFontWeight":
     [
-        // Absolute keywords
         "normal",
         "bold",
-
-        // Relative keywords
         "bolder",
         "lighter"
     ],
 
     "fontWeight":
     [
-        // Absolute keywords
         "normal",
         "bold",
-
-        // Relative keywords
         "bolder",
         "lighter",
-
-        // Numeric values
         "100",
         "200",
         "300",
@@ -2101,7 +2027,6 @@ Css.cssKeywords =
         "underline",
         "overline",
         "line-through",
-        "blink",
         "-moz-anchor-decoration"
     ],
 
@@ -2247,12 +2172,9 @@ Css.cssKeywords =
         "radial-gradient()",
         "repeating-linear-gradient()",
         "repeating-radial-gradient()",
-        "-moz-linear-gradient()",
-        "-moz-radial-gradient()",
-        "-moz-repeating-linear-gradient()",
-        "-moz-repeating-radial-gradient()",
         "-moz-image-rect()",
         "-moz-element()",
+        "none",
     ],
 
     "length":
@@ -2273,7 +2195,6 @@ Css.cssKeywords =
         "scaleY()",
         "scaleZ()",
         "scale3d()",
-        "scaleZ()",
         "skewX()",
         "skewY()",
         "translate()",
@@ -2461,7 +2382,7 @@ Css.cssKeywords =
         "letter-spacing",
         "lighting-color",
         "line-height",
-        "margin ",
+        "margin",
         "marker-offset",
         "max-height",
         "max-width",
@@ -2512,14 +2433,6 @@ Css.cssKeywords =
         "step-start",
         "step-end",
         "steps()"
-    ],
-
-    "mozTextDecorationLine": // FF 6.0
-    [
-        "underline",
-        "overline",
-        "line-through",
-        "none"
     ],
 
     "mozTextDecorationStyle": // FF 6.0
@@ -2735,6 +2648,157 @@ Css.cssKeywords =
         "vertical"
     ]
 };
+
+var extraColors = [
+    "currentColor",
+
+    // System colors
+    "ActiveBorder",
+    "ActiveCaption",
+    "AppWorkspace",
+    "Background",
+    "ButtonFace",
+    "ButtonHighlight",
+    "ButtonShadow",
+    "ButtonText",
+    "CaptionText",
+    "GrayText",
+    "Highlight",
+    "HighlightText",
+    "InactiveBorder",
+    "InactiveCaption",
+    "InactiveCaptionText",
+    "InfoBackground",
+    "InfoText",
+    "Menu",
+    "MenuText",
+    "Scrollbar",
+    "ThreeDDarkShadow",
+    "ThreeDFace",
+    "ThreeDHighlight",
+    "ThreeDLightShadow",
+    "ThreeDShadow",
+    "Window",
+    "WindowFrame",
+    "WindowText",
+
+    // Mozilla system color extensions
+    "-moz-ButtonDefault",
+    "-moz-ButtonHoverFace",
+    "-moz-ButtonHoverText",
+    "-moz-CellHighlight",
+    "-moz-CellHighlightText",
+    "-moz-Combobox",
+    "-moz-ComboboxText",
+    "-moz-Dialog",
+    "-moz-DialogText",
+    "-moz-dragtargetzone",
+    "-moz-EvenTreeRow",
+    "-moz-Field",
+    "-moz-FieldText",
+    "-moz-html-CellHighlight",
+    "-moz-html-CellHighlightText",
+    "-moz-mac-accentdarkestshadow",
+    "-moz-mac-accentdarkshadow",
+    "-moz-mac-accentface",
+    "-moz-mac-accentlightesthighlight",
+    "-moz-mac-accentlightshadow",
+    "-moz-mac-accentregularhighlight",
+    "-moz-mac-accentregularshadow",
+    "-moz-mac-chrome-active",
+    "-moz-mac-chrome-inactive",
+    "-moz-mac-focusring",
+    "-moz-mac-menuselect",
+    "-moz-mac-menushadow",
+    "-moz-mac-menutextselect",
+    "-moz-MenuHover",
+    "-moz-MenuHoverText",
+    "-moz-MenuBarText",
+    "-moz-MenuBarHoverText",
+    "-moz-nativehyperlinktext",
+    "-moz-OddTreeRow",
+    "-moz-win-communicationstext",
+    "-moz-win-mediatext",
+
+    // Mozilla color preference extensions
+    "-moz-activehyperlinktext",
+    "-moz-default-background-color",
+    "-moz-default-color",
+    "-moz-hyperlinktext",
+    "-moz-visitedhyperlinktext",
+];
+
+var extraImages = [
+    "linear-gradient()",
+    "repeating-linear-gradient()",
+    "radial-gradient()",
+    "repeating-radial-gradient()",
+];
+
+var animatableProperties = [
+    "background-color",
+    "background-image",
+    "background-position",
+    "background-size",
+    "border-color",
+    "border-radius",
+    "border-width",
+    "border-spacing",
+    "bottom",
+    "box-shadow",
+    "color",
+    "clip",
+    "fill",
+    "fill-opacity",
+    "flood-color",
+    "font-size",
+    "font-size-adjust",
+    "font-stretch",
+    "font-weight",
+    "height",
+    "left",
+    "letter-spacing",
+    "lighting-color",
+    "line-height",
+    "margin",
+    "marker-offset",
+    "max-height",
+    "max-width",
+    "min-height",
+    "min-width",
+    "opacity",
+    "outline-color",
+    "outline-offset",
+    "outline-width",
+    "padding",
+    "right",
+    "stop-color",
+    "stop-opacity",
+    "stroke",
+    "stroke-dasharray",
+    "stroke-dashoffset",
+    "stroke-miterlimit",
+    "stroke-opacity",
+    "stroke-width",
+    "text-indent",
+    "text-shadow",
+    "top",
+    "transform-origin",
+    "transform",
+    "vertical-align",
+    "visibility",
+    "width",
+    "word-spacing",
+    "z-index",
+    "-moz-box-flex",
+    "-moz-column-count",
+    "-moz-column-gap",
+    "-moz-column-rule-color",
+    "-moz-column-rule-width",
+    "-moz-column-width",
+    "-moz-image-region",
+    "-moz-outline-radius",
+];
 
 // Most common supported charsets according to http://en.wikipedia.org/wiki/Character_encoding
 Css.charsets =
