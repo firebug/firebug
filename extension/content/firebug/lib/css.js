@@ -1,4 +1,5 @@
 /* See license.txt for terms of usage */
+/*global define:1, Components:1, Firebug:1, CSSRule:1, CSSStyleRule:1, CSSImportRule:1, Node:1*/
 
 define([
     "firebug/lib/trace",
@@ -542,13 +543,14 @@ Css.isValidStylesheet = function(styleSheet)
 {
     try
     {
-        var dummy = styleSheet.cssRules; // Mozilla throws
+        // See if the getter triggers an exception. "void" is there to silence jshint.
+        void styleSheet.cssRules;
         return true;
     }
-    catch (e)
+    catch (exc)
     {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("isValidStylesheet "+e, e);
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("isValidStylesheet " + exc, exc);
     }
 
     return false;
@@ -616,7 +618,7 @@ Css.appendStylesheet = function(doc, uri)
     if (styleSheet)
         return styleSheet;
 
-    var styleSheet = Css.createStyleSheet(doc, uri);
+    styleSheet = Css.createStyleSheet(doc, uri);
     styleSheet.setAttribute("id", uri);
     Css.addStyleSheet(doc, styleSheet);
 
@@ -710,7 +712,7 @@ Css.getAllStyleSheets = function(context)
             for (var i = 0; i < sheet.cssRules.length; ++i)
             {
                 var rule = sheet.cssRules[i];
-                if (rule instanceof window.CSSImportRule)
+                if (rule instanceof CSSImportRule)
                     addSheet(rule.styleSheet);
             }
         }
