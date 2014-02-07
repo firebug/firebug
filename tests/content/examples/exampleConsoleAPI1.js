@@ -3,7 +3,6 @@ function runTest()
     FBTest.sysout("examples.console.START");
     FBTest.openNewTab(basePath + "examples/exampleConsoleAPI1.html", function(win)
     {
-        FBTest.openFirebug();
         FBTest.enableConsolePanel(function(win)
         {
             var config = {tagName: "div", classes: "logRow logRow-log"};
