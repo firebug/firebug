@@ -1095,9 +1095,15 @@ this.enablePanels = function(panelNames, callback)
     }
 
     var name = panelNames.pop();
-    var panelName = name.charAt(0).toUpperCase() + name.slice(1);
-    var methodName = "enable" + panelName + "Panel";
-    var method = FBTestFirebug[methodName];
+
+    var method;
+    if (name === "script")
+        method = FBTestFirebug.enableScriptPanel;
+    else if (name === "net")
+        method = FBTestFirebug.enableNetPanel;
+    else if (name === "console")
+        method = FBTestFirebug.enableConsolePanel;
+
     if (!method)
     {
         FBTest.sysout("enablePanels; ERROR wrong panel name " + panelName);
