@@ -1084,7 +1084,7 @@ this.enableAllPanels = function()
 };
 
 /**
- * Enable specified panels one by one.
+ * Enable specified panels one by one and selects the first one.
  */
 this.enablePanels = function(panelNames, callback)
 {
