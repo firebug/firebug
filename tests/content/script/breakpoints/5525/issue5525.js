@@ -3,11 +3,7 @@ function runTest()
     FBTest.sysout("issue5525.START");
     FBTest.openNewTab(basePath + "script/breakpoints/5525/issue5525.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableScriptPanel();
-
-        FBTest.selectPanel("console");
-        FBTest.enableConsolePanel(function(win)
+        FBTest.enablePanels(["console", "script"], function(win)
         {
             var text = "var test = undefinedVariable;";
             FBTest.waitForDisplayedText("console", text, function()
