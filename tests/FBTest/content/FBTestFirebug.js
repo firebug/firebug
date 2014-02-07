@@ -924,7 +924,7 @@ this.clearCache = function()
 };
 
 // ********************************************************************************************* //
-// Firebug Panel Enablement.
+// Firebug Panel Enablement
 
 this.getPanelTypeByName = function(panelName, doc)
 {
@@ -946,6 +946,8 @@ this.getPanelTypeByName = function(panelName, doc)
 
 this.setPanelState = function(model, panelName, callback, enable, reload)
 {
+    this.selectPanel(panelName);
+
     // Open Firebug UI is asynchronous since it involves attaching to the backend.
     this.pressToggleFirebug(true, undefined, () =>
     {
@@ -985,8 +987,11 @@ this.setPanelState = function(model, panelName, callback, enable, reload)
         if (reload)
             this.reload(callback);
 
-        var browser = FBTestFirebug.getCurrentTabBrowser();
-        callback(browser.contentDocument.defaultView);
+        if (callback)
+        {
+            var browser = FBTestFirebug.getCurrentTabBrowser();
+            callback(browser.contentDocument.defaultView);
+        }
     });
 };
 
@@ -1077,6 +1082,39 @@ this.enableAllPanels = function()
 {
     FW.FBL.$("cmd_firebug_enablePanels").doCommand();
 };
+
+/**
+ * Enable specified panels one by one.
+ */
+this.enablePanels = function(panelNames, callback)
+{
+    if (!panelNames.length)
+    {
+        FBTest.sysout("enablePanels; ERROR no panels to enable!");
+        return;
+    }
+
+    var name = panelNames.pop();
+    var panelName = name.charAt(0).toUpperCase() + name.slice(1);
+    var methodName = "enable" + panelName + "Panel";
+    var method = FBTestFirebug[methodName];
+    if (!method)
+    {
+        FBTest.sysout("enablePanels; ERROR wrong panel name " + panelName);
+        return;
+    }
+
+    method.call(this, function(win)
+    {
+        if (!panelNames.length)
+            callback(win)
+        else
+            FBTestFirebug.enablePanels(panelNames, callback);
+    });
+}
+
+// ********************************************************************************************* //
+// Panel Selection
 
 /**
  * Select specific panel in the UI.
@@ -1206,6 +1244,8 @@ this.getPanel = function(name)
 
     return FW.Firebug.currentContext.getPanel(name);
 };
+
+// ********************************************************************************************* //
 
 /**
  * Wait until the debugger has been activated, after enabling the Script panel.

@@ -77,7 +77,8 @@ EventHandler.prototype =
         if (typeof(this.listener[type]) != "function")
             return;
 
-        Trace.sysout("EventHandler.handleEvent; " + type, event);
+        Trace.sysout("EventHandler.handleEvent; " + type + ", " +
+            event.target.currentURI.spec, event);
 
         try
         {
