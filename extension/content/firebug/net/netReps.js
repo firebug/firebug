@@ -1600,7 +1600,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Rep, new EventSource(),
         var file = Firebug.getRepObject(netInfoBox);
         var postText = netInfoBox.getElementsByClassName("netInfoPostText").item(0);
 
-        Options.togglePref("netSortPostParameters")
+        Options.togglePref("netSortPostParameters");
         Firebug.NetMonitor.NetInfoPostData.render(panel.context, postText, file);
 
         Events.cancelEvent(event);
