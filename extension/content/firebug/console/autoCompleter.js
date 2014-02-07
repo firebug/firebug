@@ -836,7 +836,7 @@ function JSAutoCompleter(textBox, completionBox, options)
                 {
                     var separator = this.completionPopup.ownerDocument.
                         createElementNS("http://www.w3.org/1999/xhtml", "div");
-                    separator.textContent = Locale.$STR("Firebug Command Line API");
+                    separator.textContent = Locale.$STR("console.Firebug_Command_Line_API");
                     separator.classList.add("fbPopupSeparator");
                     vbox.appendChild(separator);
 
