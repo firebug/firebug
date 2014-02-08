@@ -100,14 +100,10 @@ var BrowserCommands =
             }
         }
 
-<<<<<<< HEAD
-        for (var i=0; i<shortcuts.length; i++)
-=======
         var win = $(doc, "main-window");
         var keyset = $el(doc, "keyset", {id: "firebugKeyset"}, win);
 
         for (var i = 0; i < shortcuts.length; i++)
->>>>>>> upstream/master
         {
             var id = shortcuts[i];
             var shortcut = Options.get("key.shortcut." + id);
