@@ -1289,7 +1289,8 @@ FirebugReps.Element = domplate(Rep,
         {
             label: Locale.$STRF("html.Copy_Node", [type]),
             tooltiptext: Locale.$STRF("html.tip.Copy_Node", [type]),
-            command: Obj.bindFixed(this.copyHTML, this, elt)
+            command: Obj.bindFixed(this.copyHTML, this, elt),
+            nol10n: true
         });
 
         if (Xml.isElementHTMLOrXHTML(elt))
@@ -1333,6 +1334,7 @@ FirebugReps.Element = domplate(Rep,
             {
                 label: Locale.$STRF("html.menu.Paste", [type]),
                 tooltiptext: Locale.$STRF("html.tip.Paste", [type]),
+                nol10n: true,
                 disabled: !clipboardContent,
                 id: "fbPaste",
                 items: [

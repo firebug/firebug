@@ -256,6 +256,8 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
         Trace.sysout("debuggerTool.resumed; currently stopped: " +
             this.context.stopped, arguments);
 
+        Firebug.dispatchEvent(this.context.browser, "onResumed");
+
         // When Firebug is attached to the {@link ThreadClient} object the debugger is paused.
         // As soon as all initialization steps are done {@link TabClient} resumes the
         // debugger. In such case the {@link TabContext} object isn't stopped and there is no

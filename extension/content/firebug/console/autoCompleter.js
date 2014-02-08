@@ -836,7 +836,7 @@ function JSAutoCompleter(textBox, completionBox, options)
                 {
                     var separator = this.completionPopup.ownerDocument.
                         createElementNS("http://www.w3.org/1999/xhtml", "div");
-                    separator.textContent = Locale.$STR("Firebug Command Line API");
+                    separator.textContent = Locale.$STR("console.Firebug_Command_Line_API");
                     separator.classList.add("fbPopupSeparator");
                     vbox.appendChild(separator);
 
@@ -1833,9 +1833,6 @@ function propertiesToHide(expr, obj)
             "PaintRequest", "PaintRequestList", "WindowUtils",
             "GlobalPropertyInitializer", "GlobalObjectConstructor"
         );
-
-        // Hide ourselves.
-        ret.push("_firebug");
     }
 
     // Old and ugly.
@@ -1897,12 +1894,11 @@ function setCompletionsFromObject(out, object, context)
             var hideMap = Object.create(null);
             for (var i = 0; i < hide.length; ++i)
                 hideMap[hide[i]] = 1;
-            var hideRegex = /^XUL[A-Za-z]+$/;
 
             var newCompletions = [];
             out.completions.forEach(function(prop)
             {
-                if (prop in hideMap || hideRegex.test(prop))
+                if (prop in hideMap)
                     out.hiddenCompletions.push(prop);
                 else
                     newCompletions.push(prop);

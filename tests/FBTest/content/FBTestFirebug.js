@@ -565,30 +565,33 @@ this.clickContentButton = function(win, buttonId)
  * Open/close Firebug UI. If forceOpen is true, Firebug is only opened if closed.
  * @param {Boolean} forceOpen Set to true if Firebug should stay opened.
  */
-this.pressToggleFirebug = function(forceOpen, target)
+this.pressToggleFirebug = function(forceOpen, target, callback)
 {
     var isOpen = this.isFirebugOpen();
-    FBTest.sysout("pressToggleFirebug; before forceOpen: " + forceOpen + ", is open: " + isOpen);
+
+    FBTest.sysout("pressToggleFirebug; forceOpen: " + forceOpen + ", is open: " + isOpen);
 
     // Don't close if it's open and should stay open.
     if (forceOpen && isOpen)
     {
         FBTest.sysout("pressToggleFirebug; bail out");
+        callback();
         return;
     }
 
-    FBTest.sendKey("F12", target); // F12
+    waitForTabAttach(callback);
 
-    isOpen = this.isFirebugOpen();
-    FBTest.sysout("pressToggleFirebug; after forceOpen: " + forceOpen + ", is open: " + isOpen);
+    FBTest.sendKey("F12", target);
+
+    this.isFirebugOpen();
 };
 
 /**
  * Open Firebug UI. If it's already opened, it stays opened.
  */
-this.openFirebug = function()
+this.openFirebug = function(callback)
 {
-    this.pressToggleFirebug(true);
+    this.pressToggleFirebug(true, undefined, callback);
 };
 
 /**
@@ -700,6 +703,12 @@ this.getBrowser = function()
     return FW.Firebug.Firefox.getTabBrowser();
 };
 
+this.getCurrentTabBrowser = function()
+{
+    var tabbrowser = FBTestFirebug.getBrowser();
+    return tabbrowser.selectedBrowser;
+};
+
 // ********************************************************************************************* //
 // URLs
 
@@ -745,7 +754,7 @@ this.openURL = function(url, callback)
 };
 
 /**
- * Refres the current tab.
+ * Refresh the current tab.
  * @param {Function} callback Callback handler that is called as soon as the page is reloaded.
  */
 this.reload = function(callback)
@@ -915,7 +924,7 @@ this.clearCache = function()
 };
 
 // ********************************************************************************************* //
-// Firebug Panel Enablement.
+// Firebug Panel Enablement
 
 this.getPanelTypeByName = function(panelName, doc)
 {
@@ -935,44 +944,55 @@ this.getPanelTypeByName = function(panelName, doc)
     return null;
 };
 
-this.setPanelState = function(model, panelName, callbackTriggersReload, enable)
+this.setPanelState = function(model, panelName, callback, enable, reload)
 {
-    // Open Firebug UI
-    this.pressToggleFirebug(true);
+    this.selectPanel(panelName);
 
-    var panelType = FW.Firebug.getPanelType(panelName);
-    if (panelType.prototype.isEnabled() != enable)
+    // Open Firebug UI is asynchronous since it involves attaching to the backend.
+    this.pressToggleFirebug(true, undefined, () =>
     {
-        var panelTab;
-
-        var doc = FW.Firebug.chrome.window.document;
-        var panelTabs = doc.getElementById("fbPanelBar1-panelTabs");
-        for (var child = panelTabs.firstChild; child; child = child.nextSibling)
+        var panelType = FW.Firebug.getPanelType(panelName);
+        if (panelType.prototype.isEnabled() != enable)
         {
-            if (panelType == child.panelType)
+            var panelTab;
+
+            var doc = FW.Firebug.chrome.window.document;
+            var panelTabs = doc.getElementById("fbPanelBar1-panelTabs");
+            for (var child = panelTabs.firstChild; child; child = child.nextSibling)
             {
-                panelTab = child;
-                break;
+                if (panelType == child.panelType)
+                {
+                    panelTab = child;
+                    break;
+                }
             }
+
+            if (!panelTab)
+            {
+                this.ok(panelTab, "Such panel doesn't exist! " + panelName + ", " + enable);
+                return;
+            }
+
+            // Execute directly menu commands.
+            if (enable)
+                panelTab.tabMenu.onEnable();
+            else
+                panelTab.tabMenu.onDisable();
         }
 
-        if (!panelTab)
+        // Clear cache and reload.
+        this.clearCache();
+
+        // Do not reload automatically, JSD2 doesn't need that anymore.
+        if (reload)
+            this.reload(callback);
+
+        if (callback)
         {
-            this.ok(panelTab, "Such panel doesn't exist! " + panelName + ", " + enable);
-            return;
+            var browser = FBTestFirebug.getCurrentTabBrowser();
+            callback(browser.contentDocument.defaultView);
         }
-
-        // Execute directly menu commands.
-        if (enable)
-            panelTab.tabMenu.onEnable();
-        else
-            panelTab.tabMenu.onDisable();
-    }
-
-    // Clear cache and reload.
-    this.clearCache();
-    if (callbackTriggersReload)
-        this.reload(callbackTriggersReload);
+    });
 };
 
 /**
@@ -1010,7 +1030,10 @@ this.enableScriptPanel = function(callback)
 {
     function onCallback(win)
     {
-        waitForDebuggerAttach(win, callback);
+        waitForThreadAttach(function()
+        {
+            callback(win);
+        });
     }
 
     var cb = callback ? onCallback : null;
@@ -1034,7 +1057,10 @@ this.enableConsolePanel = function(callback)
 {
     function onCallback(win)
     {
-        waitForDebuggerAttach(win, callback);
+        waitForTabAttach(function()
+        {
+            callback(win);
+        });
     }
 
     var cb = callback ? onCallback : null;
@@ -1056,6 +1082,45 @@ this.enableAllPanels = function()
 {
     FW.FBL.$("cmd_firebug_enablePanels").doCommand();
 };
+
+/**
+ * Enable specified panels one by one and selects the first one.
+ */
+this.enablePanels = function(panelNames, callback)
+{
+    if (!panelNames.length)
+    {
+        FBTest.sysout("enablePanels; ERROR no panels to enable!");
+        return;
+    }
+
+    var name = panelNames.pop();
+
+    var method;
+    if (name === "script")
+        method = FBTestFirebug.enableScriptPanel;
+    else if (name === "net")
+        method = FBTestFirebug.enableNetPanel;
+    else if (name === "console")
+        method = FBTestFirebug.enableConsolePanel;
+
+    if (!method)
+    {
+        FBTest.sysout("enablePanels; ERROR wrong panel name " + panelName);
+        return;
+    }
+
+    method.call(this, function(win)
+    {
+        if (!panelNames.length)
+            callback(win)
+        else
+            FBTestFirebug.enablePanels(panelNames, callback);
+    });
+}
+
+// ********************************************************************************************* //
+// Panel Selection
 
 /**
  * Select specific panel in the UI.
@@ -1185,6 +1250,8 @@ this.getPanel = function(name)
 
     return FW.Firebug.currentContext.getPanel(name);
 };
+
+// ********************************************************************************************* //
 
 /**
  * Wait until the debugger has been activated, after enabling the Script panel.
@@ -3122,72 +3189,84 @@ this.isMac = function()
 // ********************************************************************************************* //
 // JSD2
 
-function waitForDebuggerAttach(win, callback)
+function waitForTabAttach(callback)
 {
-    var context = FW.Firebug.currentContext;
-    if (!context)
+    if (!callback)
     {
-        FBTest.ok(context, "There is no current context!" + context);
+        FBTest.sysout("waitForTabAttach; ERROR no callback!");
         return;
     }
 
-    FBTest.sysout("waitForDebuggerAttach.window loaded: " + win.location.href);
-
-    var listener;
-
-    // If the thread is already attached just execute the callback.
-    if (context.activeThread)
+    // The tab might be alraedy attached (e.g. if the page is just reloaded).
+    // Execute the callback directly in such case.
+    var browser = FBTestFirebug.getCurrentTabBrowser();
+    var attached = FW.Firebug.DebuggerClient.isTabAttached(browser);
+    if (attached)
     {
-        FBTest.sysout("waitForDebuggerAttach.thread-actor already attached " +
-            context.activeThread.paused, context.activeThread);
+        callback();
+    }
 
-        // xxxHonza: hack, why the ThreadClient isn't paused too?
-        var actor = FW.Firebug.DebuggerLib.getThreadActor(context.browser);
-        var state = actor ? actor._state : "no tab actor";
-        FBTest.sysout("waitForDebuggerAttach; actor: " + state);
-
-        if (state == "paused")
+    var listener =
+    {
+        onTabAttached: function()
         {
-            listener =
-            {
-                onResumed: function()
-                {
-                    FBTest.sysout("waitForDebuggerAttach.onResumed;");
-                    DebuggerController.removeListener(listener);
+            FBTest.sysout("waitForTabAttach; On tab attached");
 
-                    if (callback)
-                        callback(win);
-                }
-            };
+            DebuggerController.removeListener(browser, listener);
+
+            callback();
         }
-        else
+    };
+
+    DebuggerController.addListener(browser, listener);
+}
+
+function waitForThreadAttach(callback)
+{
+    if (!callback)
+    {
+        FBTest.sysout("waitForThreadAttach; ERROR no callback!");
+        return;
+    }
+
+    var browser = FW.Firebug.currentContext.browser;
+    var attached = FW.Firebug.DebuggerClient.isThreadAttached(browser);
+    if (attached)
+    {
+        // The thread must be attached and also resumed. If the state isn't running
+        // keep the 'attached' set to true and let the listener below wait for 'onResumed'
+        var state = FW.Firebug.DebuggerClient.getThreadState(browser);
+        if (state == "running")
         {
-            if (callback)
-                callback(win);
+            callback();
             return;
         }
     }
-    else
+
+    var listener =
     {
-        // Listener for 'onThreadAttached' event
-        listener =
+        onThreadAttached: function()
         {
-            onThreadAttached: function()
-            {
-                FBTest.sysout("waitForDebuggerAttach.onThreadAttached;");
-                DebuggerController.removeListener(listener);
+            FBTest.sysout("waitForThreadAttach; On thread attached");
 
-                if (callback)
-                    callback(win);
-            }
-        };
-    }
+            attached = true;
 
-    // Wait till the context is attached to the thread.
-    if (listener)
-        DebuggerController.addListener(listener);
+            var actor = FW.Firebug.DebuggerLib.getThreadActor(browser);
+            var tab = FW.Firebug.DebuggerClient.getTabClient(browser);
+        },
 
-    FBTest.sysout("waitForDebuggerAttach.add debugger listener; " + listener);
+        onResumed: function()
+        {
+            FBTest.sysout("waitForThreadAttach; On thread resumed");
+
+            DebuggerController.removeListener(browser, listener);
+
+            if (attached)
+                callback();
+        }
+    };
+
+    DebuggerController.addListener(browser, listener);
 }
 
 // ********************************************************************************************* //

@@ -1,4 +1,5 @@
 /* See license.txt for terms of usage */
+/*global define:1, Components:1, Firebug:1, CSSRule:1, CSSStyleRule:1, CSSImportRule:1, Node:1*/
 
 define([
     "firebug/lib/trace",
@@ -25,55 +26,91 @@ var Css = {};
 // ********************************************************************************************* //
 // CSS
 
-var cssKeywordMap = {};
-var cssPropNames = {};
+var cssKeywordMap = null;
 var cssColorNames = null;
-var imageRules = null;
+var cachedPropNames = null;
+var implementedCssProps = null;
 var domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
 
-function buildKeywordMap(nodeType)
+function initPropertyData()
 {
-    if (cssKeywordMap[nodeType])
+    if (cssKeywordMap)
         return;
-    cssKeywordMap[nodeType] = {};
+    cssKeywordMap = {};
 
-    for (var name in Css.cssInfo[nodeType])
+    // Use the nsIDOMUtils service to list all property names. This includes also
+    // SVG presentational attributes, so filter them into two groups based on
+    // that. Also remove -moz-math-display and -moz-script-level from the list,
+    // as they are impossible to set (they are internal helpers for MathML).
+    var props = new Set(domUtils.getCSSPropertyNames(domUtils.INCLUDE_ALIASES));
+    props.delete("-moz-math-display");
+    props.delete("-moz-script-level");
+    implementedCssProps = props;
+
+    var htmlProps = [], svgProps = [];
+    for (let prop of props)
     {
-        var list = [];
+        var html = !svgPresentationalProperties.has(prop);
+        var svg = !html || svgInheritedFromHtml.has(prop);
+        if (html)
+            htmlProps.push(prop);
+        if (svg)
+            svgProps.push(prop);
 
-        var types = Css.cssInfo[nodeType][name];
-        for (var i = 0; i < types.length; ++i)
+        if (cssData.hasOwnProperty(prop))
         {
-            var keywords = Css.cssKeywords[types[i]];
-            if (keywords)
-                list.push.apply(list, keywords);
-            else
-                list.push(types[i]);
+            var list = [];
+            var types = cssData[prop];
+            for (var i = 0; i < types.length; ++i)
+            {
+                var keywords = Css.cssKeywords[types[i]];
+                if (keywords)
+                    list.push.apply(list, keywords);
+                else
+                    list.push(types[i]);
+            }
+            cssKeywordMap[prop] = list;
         }
-
-        cssKeywordMap[nodeType][name] = list;
     }
+
+    cachedPropNames = {
+        html: htmlProps.sort(),
+        svg: svgProps.sort(),
+        mathml: []
+    };
 }
 
 Css.getCSSKeywordsByProperty = function(nodeType, propName, avoid)
 {
-    propName = propName.toLowerCase();
+    initPropertyData();
 
-    buildKeywordMap(nodeType);
-
-    if (avoid)
-        return getCSSPropertyKeywordsExcludingCategories(nodeType, propName, avoid);
-
-    return cssKeywordMap[nodeType][propName] || [];
-};
-
-function getCSSPropertyKeywordsExcludingCategories(nodeType, propName, avoid)
-{
-    if (!(nodeType in Css.cssInfo) || !(propName in Css.cssInfo[nodeType]))
+    // CSS isn't supported for MathML elements.
+    if (nodeType === "mathml")
         return [];
 
+    // For other kinds of elements, return keywords from the global pool of
+    // properties, not just the ones specific to the nodeType, since:
+    // a) it's simpler,
+    // b) technically the CSS is still valid.
+
+    propName = propName.toLowerCase();
+    if (!cssKeywordMap.hasOwnProperty(propName))
+        return [];
+
+    // Special case: most "pointer-events" values are only supported for SVG.
+    if (nodeType === "html" && propName === "pointer-events")
+        return ["auto", "none"];
+
+    if (avoid)
+        return getCSSPropertyKeywordsExcludingCategories(propName, avoid);
+
+    return cssKeywordMap[propName];
+};
+
+function getCSSPropertyKeywordsExcludingCategories(propName, avoid)
+{
     var list = [];
-    var types = Css.cssInfo[nodeType][propName];
+    var types = cssData[propName];
     for (var i = 0; i < types.length; ++i)
     {
         var type = types[i];
@@ -90,29 +127,26 @@ function getCSSPropertyKeywordsExcludingCategories(nodeType, propName, avoid)
 
 Css.getCSSPropertyNames = function(nodeType)
 {
-    if (!cssPropNames[nodeType])
-    {
-        cssPropNames[nodeType] = [];
-
-        for (var name in Css.cssInfo[nodeType])
-            cssPropNames[nodeType].push(name);
-    }
-
-    return cssPropNames[nodeType];
+    initPropertyData();
+    return cachedPropNames[nodeType];
 };
 
 Css.getCSSShorthandCategory = function(nodeType, shorthandProp, keyword)
 {
-    if (!(nodeType in Css.cssInfo) || !(shorthandProp in Css.cssInfo[nodeType]))
+    if (!cssData.hasOwnProperty(shorthandProp))
         return null;
 
     var category = null;
-    var types = Css.cssInfo[nodeType][shorthandProp];
+    var types = cssData[shorthandProp];
     for (var i = 0; i < types.length; ++i)
     {
-        var type = types[i];
-        var keywords = Css.cssKeywords[type];
-        if (keywords ? (keywords.indexOf(keyword) !== -1) : (type === keyword))
+        var type = types[i], matches;
+        if (type in Css.cssKeywords)
+            matches = (Css.cssKeywords[type].indexOf(keyword) !== -1);
+        else
+            matches = (type === keyword);
+
+        if (matches)
         {
             // Set this as the matched category, or if there is one already
             // bail out (we don't have a unique one).
@@ -205,22 +239,21 @@ Css.isColorKeyword = function(keyword)
     return cssColorNames.indexOf(keyword.toLowerCase()) != -1;
 };
 
-Css.isImageRule = function(nodeType,rule)
+var imageProps = null;
+Css.isImageProperty = function(propName)
 {
-    if (!imageRules)
+    if (!imageProps)
     {
-        imageRules = [];
+        imageProps = [];
 
-        for (var i in Css.cssInfo[nodeType])
+        for (var p in cssData)
         {
-            var r = i.toLowerCase();
-            var suffix = "image";
-            if (r.match(suffix + "$") == suffix || r == "background")
-                imageRules.push(r);
+            if (/image$/.test(p) || p == "background")
+                imageProps.push(p);
         }
     }
 
-    return imageRules.indexOf(rule.toLowerCase()) != -1;
+    return imageProps.indexOf(propName) != -1;
 };
 
 Css.copyTextStyles = function(fromNode, toNode, style)
@@ -510,13 +543,14 @@ Css.isValidStylesheet = function(styleSheet)
 {
     try
     {
-        var dummy = styleSheet.cssRules; // Mozilla throws
+        // See if the getter triggers an exception. "void" is there to silence jshint.
+        void styleSheet.cssRules;
         return true;
     }
-    catch (e)
+    catch (exc)
     {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("isValidStylesheet "+e, e);
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("isValidStylesheet " + exc, exc);
     }
 
     return false;
@@ -584,12 +618,12 @@ Css.appendStylesheet = function(doc, uri)
     if (styleSheet)
         return styleSheet;
 
-    var styleSheet = Css.createStyleSheet(doc, uri);
+    styleSheet = Css.createStyleSheet(doc, uri);
     styleSheet.setAttribute("id", uri);
     Css.addStyleSheet(doc, styleSheet);
 
     return styleSheet;
-},
+};
 
 Css.getStyleSheetByHref = function(url, context)
 {
@@ -678,7 +712,7 @@ Css.getAllStyleSheets = function(context)
             for (var i = 0; i < sheet.cssRules.length; ++i)
             {
                 var rule = sheet.cssRules[i];
-                if (rule instanceof window.CSSImportRule)
+                if (rule instanceof CSSImportRule)
                     addSheet(rule.styleSheet);
             }
         }
@@ -914,8 +948,7 @@ Css.rgbToHSL = function(value)
 // ********************************************************************************************* //
 // CSS Info
 
-Css.cssInfo = {};
-Css.cssInfo.html =
+var cssData =
 {
     "animation": [],
     "animation-delay": [],
@@ -979,6 +1012,7 @@ Css.cssInfo.html =
     "caption-side": ["captionSide"],
     "clear": ["clear", "none"],
     "clip": ["shape", "auto"],
+    "clip-path": ["url()", "none"],
     "color": ["color"],
     "content": ["string", "none", "normal"],
     "counter-increment": ["none"],
@@ -987,6 +1021,7 @@ Css.cssInfo.html =
     "direction": ["direction"],
     "display": ["display"],
     "empty-cells": ["emptyCells"],
+    "filter": ["url()", "none"],
     "float": ["float"],
 
     "align-items": ["alignItems"],
@@ -999,7 +1034,7 @@ Css.cssInfo.html =
     "justify-content": ["justifyContent"],
     "order": [],
 
-    // specification of font families in "font" is special-cased
+    // specification of font families in "font" is special-cased by auto-completion
     "font": ["fontStyle", "fontVariant", "namedFontWeight", "fontSize", "lineHeight", "mozFont"],
     "font-family": ["fontFamily"],
     "font-size": ["fontSize", "length"],
@@ -1009,7 +1044,8 @@ Css.cssInfo.html =
     "font-variant": ["fontVariant"],
     "font-weight": ["fontWeight"],
 
-    "ime-mode": ["imeMode"], // FF 3.0
+    "image-rendering": ["imageRendering"],
+    "ime-mode": ["imeMode"],
     "letter-spacing": ["normal", "length"],
     "line-height": ["lineHeight", "length"],
     "word-break": ["wordBreak"],
@@ -1025,6 +1061,7 @@ Css.cssInfo.html =
     "margin-bottom": ["auto", "length"],
     "margin-left": ["auto", "length"],
 
+    "mask": ["url()", "none"],
     "marker-offset": ["auto", "length"],
     "min-height": ["length"],
     "max-height": ["none", "length"],
@@ -1039,9 +1076,9 @@ Css.cssInfo.html =
     "outline-width": ["thickness", "length"],
     "outline-offset": ["length"],
 
-    "overflow": ["overflow", "auto"],
-    "overflow-x": ["overflow", "auto"],
-    "overflow-y": ["overflow", "auto"],
+    "overflow": ["overflow"],
+    "overflow-x": ["overflow"],
+    "overflow-y": ["overflow"],
 
     "padding": ["length"],
     "padding-top": ["length"],
@@ -1051,7 +1088,7 @@ Css.cssInfo.html =
 
     "page-break-after": ["pageBreak"],
     "page-break-before": ["pageBreak"],
-    "pointer-events": ["auto", "none"],
+    "pointer-events": ["pointerEvents"],
     "position": ["elPosition"],
     "quotes": ["none"],
     "resize": ["resize"], // FF 4.0
@@ -1064,6 +1101,7 @@ Css.cssInfo.html =
     "text-rendering": ["textRendering"],
     "text-shadow": ["color", "length"],
     "text-transform": ["textTransform"],
+    "text-overflow": ["textOverflow"],
     "transition": ["transitionProperty", "timingFunction"],
     "transition-property": ["transitionProperty"],
     "transition-duration": [],
@@ -1120,62 +1158,31 @@ Css.cssInfo.html =
     "-moz-font-feature-settings": ["mozFontFeatureSettings"], // FF 4.0
     "-moz-font-language-override": ["normal"],
     "-moz-tab-size": [], // FF 4.0,
-    "orient": ["horizontal", "vertical"], // FF 6.0
-    "-moz-text-blink": ["none", "blink"], // FF 6.0
+    "-moz-orient": ["horizontal", "vertical", "auto"],
     "-moz-text-decoration-color": ["color"], // FF 6.0
     "-moz-text-decoration-line": ["mozTextDecorationLine"], // FF 6.0
     "-moz-text-decoration-style": ["mozTextDecorationStyle"], // FF 6.0
     "-moz-hyphens": ["mozHyphens"], // FF 6.0
-    "text-overflow": ["textOverflow"], // FF 7.0
     "-moz-perspective": ["none", "length"], // FF 10.0
-    "-moz-perspective-origin": ["position", "length"] // FF 10.0
+    "-moz-perspective-origin": ["position", "length"], // FF 10.0
 };
 
-// ::-moz-progress-bar  // FF 6 TODO
-
-Css.cssInfo.svg =
-{
-    "alignment-baseline": ["alignmentBaseline"],
-    "baseline-shift": ["baselineShift"],
-    "clip": ["auto", "length"],
-    "clip-path": ["url()", "none"],
+var svgData = {
     "clip-rule": ["clipRule"],
-    "color": ["color"],
     "color-interpolation": ["colorInterpolation"],
     "color-interpolation-filters": ["colorInterpolation"],
-    "color-profile": ["colorProfile"],
-    "color-rendering": ["colorRendering"],
-    "cursor": ["cursor", "url()"],
-    "direction": ["direction"],
-    "display": ["display"],
     "dominant-baseline": ["dominantBaseline"],
-    "enable-background": ["accumulate"],
     "fill": ["clipRule"],
     "fill-opacity": [],
     "fill-rule": ["clipRule"],
-    "filter": ["url()", "none"],
     "flood-color": ["currentColor"],
     "flood-opacity": [],
-    "font": ["fontStyle", "fontSize", "fontVariant", "namedFontWeight"],
-    "font-family": ["fontFamily"],
-    "font-size": ["fontSize"],
-    "font-size-adjust": [],
-    "font-stretch": ["fontStretch"],
-    "font-style": ["fontStyle"],
-    "font-variant": ["fontVariant"],
-    "font-weight": ["fontWeight"],
-    "glyph-orientation-horizontal": [],
-    "glyph-orientation-vertical": ["auto"],
-    "image-rendering": ["imageRendering"], // FF 3.6
-    "kerning": ["auto"],
-    "letter-spacing": ["normal"],
     "lighting-color": ["currentColor"],
-    "marker": ["none"],
-    "marker-end": ["none"],
-    "mask": ["url()", "none"],
-    "opacity": [],
-    "overflow": ["auto", "svgOverflow"],
-    "pointer-events": ["pointerEvents"], // FF 1.5/3.6
+    "marker": ["none", "url()"],
+    "marker-end": ["none", "url()"],
+    "marker-mid": ["none", "url()"],
+    "marker-start": ["none", "url()"],
+    "mask-type": ["luminance", "alpha"],
     "shape-rendering": ["auto", "shapeRendering"],
     "stop-color": ["currentColor"],
     "stop-opacity": [],
@@ -1187,14 +1194,57 @@ Css.cssInfo.svg =
     "stroke-miterlimit": [],
     "stroke-opacity": [],
     "stroke-width": [],
-    "text-anchor": ["mozBoxPack"],
-    "text-decoration": ["textDecoration"],
-    "text-rendering": ["textRendering"],
-    "unicode-bidi": ["unicodeBidi"],
-    "visibility": ["visibility"],
-    "word-spacing": ["normal"],
-    "writing-mode": ["writingMode"]
+    "text-anchor": ["start", "middle", "end"],
+    "vector-effect": ["non-scaling-stroke"],
+
+    // Unimplemented by Firefox, but it doesn't hurt to include them for future compatibility.
+    "alignment-baseline": ["alignmentBaseline"],
+    "baseline-shift": ["baselineShift"],
+    "color-profile": ["colorProfile"],
+    "color-rendering": ["colorRendering"],
+    "enable-background": ["accumulate"],
+    "glyph-orientation-horizontal": ["auto", "inline"],
+    "glyph-orientation-vertical": ["auto", "upright", "inline"],
+    "kerning": ["auto"],
+    "paint-order": ["normal", "fill", "stroke", "markers"],
+    "writing-mode": ["writingMode"],
 };
+
+var svgPresentationalProperties = new Set(Object.keys(svgData));
+Object.keys(svgData).forEach(function(prop)
+{
+    cssData[prop] = svgData[prop];
+});
+
+// CSS properties for HTML that also apply to SVG, taken from:
+// http://www.w3.org/TR/SVG/styling.html#SVGStylingProperties
+var svgInheritedFromHtml = new Set([
+    "clip",
+    "color",
+    "cursor",
+    "direction",
+    "display",
+    "filter",
+    "font",
+    "font-family",
+    "font-size",
+    "font-size-adjust",
+    "font-stretch",
+    "font-style",
+    "font-variant",
+    "font-weight",
+    "image-rendering",
+    "letter-spacing",
+    "mask",
+    "opacity",
+    "overflow",
+    "pointer-events",
+    "text-decoration",
+    "text-rendering",
+    "unicode-bidi",
+    "visibility",
+    "word-spacing",
+]);
 
 Css.multiValuedProperties =
 {
@@ -2627,16 +2677,9 @@ Css.cssKeywords =
     "imageRendering":
     [
         "auto",
-        "optimizespeed",
-        "optimizequality",
+        "optimizeSpeed",
+        "optimizeQuality",
         "-moz-crisp-edges"
-    ],
-
-    "svgOverflow":
-    [
-        "visible",
-        "hidden",
-        "scroll"
     ],
 
     "pointerEvents":
@@ -2890,10 +2933,16 @@ Css.nonDeletableTags =
 };
 
 // lib/xml can't depend on lib/css, so inject the relevant function from here.
+var presentationalPropMap = null;
 Xml.getPresentationalSVGProperties = function()
 {
-    buildKeywordMap("svg");
-    return cssKeywordMap["svg"];
+    if (!presentationalPropMap)
+    {
+        presentationalPropMap = {};
+        for (let name of Css.getCSSPropertyNames("svg"))
+            presentationalPropMap[name] = Css.getCSSKeywordsByProperty("svg", name);
+    }
+    return presentationalPropMap;
 };
 
 // ********************************************************************************************* //

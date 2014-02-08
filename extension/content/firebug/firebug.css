@@ -48,7 +48,7 @@ window[chromehidden~="toolbar"] #fbToolbar {
     font-size: 12px;
 }
 
-#mainPopupSet {
+#mainPopupSet, #fbResumeBox {
     font-size: initial;
 }
 

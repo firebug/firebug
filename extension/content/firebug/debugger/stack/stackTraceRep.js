@@ -52,12 +52,8 @@ var StackTraceRep = domplate(Firebug.Rep,
         {
             var frame = frames[i];
             var sf = frame.sourceFile;
-            if ((sf && sf.href && Str.hasPrefix(sf.href, "chrome")) ||
-                (frame.fn == "_firebugRerun") ||
-                (frame.fn == "jsdbug_NoScriptFunctionName"))
-            {
+            if (sf && sf.href && sf.href.startsWith("chrome:"))
                 continue;
-            }
 
             result.push(frames[i]);
         }

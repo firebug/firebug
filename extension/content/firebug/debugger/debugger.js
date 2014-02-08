@@ -68,18 +68,17 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         chrome.setGlobalAttribute("cmd_firebug_stepOut", "oncommand",
             "Firebug.Debugger.stepOut(Firebug.currentContext)");
 
-        // Set tooltips to stepping buttons.
-        Firebug.chrome.$("fbRerunButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Rerun"), "Shift+F8"]));
-        Firebug.chrome.$("fbContinueButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Continue"), "F8"]));
-        Firebug.chrome.$("fbStepIntoButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Into"), "F11"]));
-        Firebug.chrome.$("fbStepOverButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Over"), "F10"]));
-        Firebug.chrome.$("fbStepOutButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut",
-                [Locale.$STR("script.Step_Out"), "Shift+F11"]));
+        // Set tooltips for stepping buttons.
+        var setTooltip = function(id, tooltip, shortcut)
+        {
+            tooltip = Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR(tooltip), shortcut]);
+            Firebug.chrome.$(id).setAttribute("tooltiptext", tooltip);
+        };
+        setTooltip("fbRerunButton", "script.Rerun", "Shift+F8");
+        setTooltip("fbContinueButton", "script.Continue", "F8");
+        setTooltip("fbStepIntoButton", "script.Step_Into", "F11");
+        setTooltip("fbStepOverButton", "script.Step_Over", "F10");
+        setTooltip("fbStepOutButton", "script.Step_Out", "Shift+F11");
     },
 
     shutdown: function()

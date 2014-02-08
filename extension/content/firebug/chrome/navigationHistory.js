@@ -278,6 +278,9 @@ var NavigationHistory = Obj.extend(Module,
 
         var url = (location ? location.href : "No Location");
         var context = panel ? panel.context : Firebug.currentContext;
+        if (!context)
+            return;
+
         var currIndex = this.getCurrentIndex(context);
         var list = this.getHistory(context);
 

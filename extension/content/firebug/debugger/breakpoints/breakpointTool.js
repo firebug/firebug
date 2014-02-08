@@ -84,6 +84,13 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         {
             Trace.sysout("breakpointTool.onAddBreakpoint; callback executed", response);
 
+            if (response.error)
+            {
+                TraceError.sysout("breakpointTool.onAddBreakpoint; ERROR: " +
+                    response.message, response);
+                return;
+            }
+
             // Auto-correct shared breakpoint object if necessary and store the original
             // line so, listeners (like e.g. the Script panel) can update the UI.
             var currentLine = bpClient.location.line - 1;
@@ -251,6 +258,13 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             };
 
             Trace.sysout("breakpointTool.doSetBreakpoint; (" + lineNumber + ")", location);
+
+            if (!self.context.activeThread)
+            {
+                TraceError.sysout("breakpointTool.doSetBreakpoint; ERROR no thread " +
+                    url + "(" + lineNumber + ")");
+                return;
+            }
 
             // Send RDP packet to set a breakpoint on the server side. The callback will be
             // executed as soon as we receive a response.
