@@ -68,6 +68,7 @@ pref("extensions.firebug.consoleFilterTypes", "all");
 pref("extensions.firebug.preferJSDSourceLinks", false);
 pref("extensions.firebug.commandLineShowCompleterPopup", true);
 pref("extensions.firebug.console.groupLogMessages", true);
+pref("extensions.firebug.consoleCommandHistoryMax", 1000);
 
 // HTML
 pref("extensions.firebug.showCommentNodes", false);
