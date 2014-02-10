@@ -1909,6 +1909,12 @@ this.setWatchExpressionValue = function(chrome, varName, expression, callback)
     if (!chrome)
         chrome = FW.Firebug.chrome;
 
+    if (!callback)
+    {
+        FBTest.sysout("setWatchExpressionValue; ERROR missing callback");
+        return;
+    }
+
     var watchPanel = FBTest.getPanel("watches", true);
     var row = this.getWatchExpressionRow(chrome, varName);
     if (!row)
@@ -1921,18 +1927,17 @@ this.setWatchExpressionValue = function(chrome, varName, expression, callback)
     var editor = panelNode.querySelector(".completionInput");
     FBTest.ok(editor, "The editor must be there; " + varName);
 
-    // Wait till the result is evaluated and displayed.
+    // Wait till the tree-row (with given variable name) is refreshed
     var doc = FBTest.getSidePanelDocument();
-    var recognizer = new MutationRecognizer(doc.defaultView, "td",
-        {"class": "memberValueCell"});
+    var recognizer = new MutationRecognizer(doc.defaultView, "Text",
+        {"class": "memberLabelBox"}, varName);
 
-    recognizer.onRecognizeAsync(function(memberValueColumn)
+    recognizer.onRecognizeAsync(function(element)
     {
-        var td = FW.FBL.hasClass(memberValueColumn, "memberValueCell") ?
-            memberValueColumn : memberValueColumn.querySelector(".memberValueCell");
+        FBTest.sysout("setWatchExpressionValue; row refreshed: " + varName);
 
-        if (callback)
-            callback(td);
+        var row = FW.FBL.getAncestorByClass(element, "memberRow");
+        callback(row);
     });
 
     // Set expression and press enter.
@@ -1952,6 +1957,12 @@ this.toggleWatchExpressionBooleanValue = function(chrome, varName, callback)
     if (!chrome)
         chrome = FW.Firebug.chrome;
 
+    if (!callback)
+    {
+        FBTest.sysout("setWatchExpressionValue; ERROR missing callback");
+        return;
+    }
+
     var watchPanel = FBTest.getPanel("watches", true);
     var row = this.getWatchExpressionRow(chrome, varName);
     if (!row)
@@ -1960,7 +1971,18 @@ this.toggleWatchExpressionBooleanValue = function(chrome, varName, callback)
     // Click to open a text editor.
     FBTest.dblclick(row);
 
-    callback(row);
+    // Wait till the tree-row (with given variable name) is refreshed
+    var doc = FBTest.getSidePanelDocument();
+    var recognizer = new MutationRecognizer(doc.defaultView, "Text",
+        {"class": "memberLabelBox"}, varName);
+
+    recognizer.onRecognizeAsync(function(element)
+    {
+        FBTest.sysout("toggleWatchExpressionBooleanValue; row refreshed: " + varName);
+
+        var row = FW.FBL.getAncestorByClass(element, "memberRow");
+        callback(row);
+    });
 }
 
 /**
