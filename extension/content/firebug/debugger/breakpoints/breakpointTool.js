@@ -131,6 +131,8 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         this.removeBreakpoint(bp.href, bp.lineNo, function(response, bpClient)
         {
             self.dispatch("onBreakpointRemoved", [self.context, bp]);
+
+            Firebug.dispatchEvent(self.context.browser, "onBreakpointRemoved", [bp]);
         });
     },
 
