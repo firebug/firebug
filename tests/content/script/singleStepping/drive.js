@@ -54,7 +54,7 @@ function checkBreakOnNext()
     stepInto();
 }
 
-var stepIntoLineNo = (FF3p5OrLess || FF4OrHigher) ? 14 : 13;
+var stepIntoLineNo = 14;
 
 function stepInto()
 {
@@ -84,7 +84,7 @@ function stepOver()
     FBTest.clickToolbarButton(FW.Firebug.chrome, "fbStepOverButton");
 }
 
-var stepOverLineNo = (FF3p5OrLess || FF4OrHigher) ? 15 : 14;
+var stepOverLineNo = 15;
 var stepOverFileName = "index.html";
 
 function checkStepOver()
