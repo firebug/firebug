@@ -414,6 +414,11 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         // Used by FBTest
     },
 
+    /**
+     * Breaks the debugger in the newest frame (if any) or in the debuggee global.
+     *
+     * @param {*} context
+     */
     breakNow: function(context)
     {
         DebuggerHalter.breakNow(context);
