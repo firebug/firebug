@@ -12,7 +12,7 @@
                   <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
                   <em:minVersion>22.0</em:minVersion>
                   <em:maxVersion>30.*</em:maxVersion>
-                  <em:updateLink>https://getfirebug.com/releases/fbtrace/1.12/fbTrace-@VERSION@@RELEASE@.xpi</em:updateLink>
+                  <em:updateLink>https://getfirebug.com/releases/fbtrace/@VERSION@/fbTrace-@VERSION@@RELEASE@.xpi</em:updateLink>
                 </RDF:Description>
               </em:targetApplication>
             </RDF:Description>

@@ -143,6 +143,7 @@ pref("extensions.firebug.netResponseHeadersVisible", true);
 pref("extensions.firebug.netRequestHeadersVisible", true);
 pref("extensions.firebug.netCachedHeadersVisible", false);
 pref("extensions.firebug.netPostRequestHeadersVisible", false);
+pref("extensions.firebug.netSortPostParameters", true);
 
 // JSON Preview
 pref("extensions.firebug.sortJsonPreview", false);
