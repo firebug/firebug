@@ -183,8 +183,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     // Content
 
     /**
-     * Executed by the user from within the Panel options menu of through
-     * the panel context menu.
+     * Executed by the user from within the options menu or through the context menu.
      */
     refresh: function()
     {
