@@ -1864,7 +1864,19 @@ this.hasBreakpoint = function(line, chrome)
 
     var bpNode = line.getElementsByClassName("breakpoint");
     return (bpNode.length > 0);
-}
+};
+
+this.waitForDisplayedBreakpoint = function(chrome, url, lineNo, callback)
+{
+    FBTest.selectSourceLine(url, lineNo, "js", chrome, function(row)
+    {
+        var config = {tagName: "div", classes: "breakpoint"};
+        FBTest.waitForDisplayedElement("script", config, function(element)
+        {
+            callback(row);
+        });
+    });
+};
 
 // ********************************************************************************************* //
 // Watch Panel
