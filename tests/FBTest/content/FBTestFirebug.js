@@ -2750,6 +2750,34 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
     this.synthesizeMouse(target, 2, 2, eventDetails);
 };
 
+this.showScriptPanelContextMenu = function(target, callback)
+{
+    var contextMenu = ContextMenuController.getContextMenu(target);
+
+    function onPopupShown(event)
+    {
+        ContextMenuController.removeListener(target, "popupshown", onPopupShown);
+        callback(contextMenu);
+    }
+
+    ContextMenuController.addListener(target, "popupshown", onPopupShown);
+
+    var cm = FW.FBL.getAncestorByClass(target, "CodeMirror");
+    var textArea = cm.getElementsByTagName("TEXTAREA").item(0);
+
+    // xxxHonza: the way how clicking is done is a hack and it should be fixed.
+    // 'mousedown' is sent so {@link SourceEditor} can handle it and remember
+    // the currentTarget, see SourceEditor.onInit().
+    // 'contextmenu' is sent so the {@link ScriptPanel} can handle it and show
+    // the right context menu items. In this case CM's TEXTAREA must be the target
+    // see ScriptPanel.getContextMenuItems().
+    var eventDetails1 = {type: "mousedown", button: 2};
+    FBTest.synthesizeMouse(target, 2, 2, eventDetails1);
+
+    var eventDetails2 = {type: "contextmenu", button: 2};
+    FBTest.synthesizeMouse(textArea, 2, 2, eventDetails2);
+}
+
 // ********************************************************************************************* //
 // Clipboard
 
