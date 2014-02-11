@@ -81,27 +81,51 @@ function sendMouseEvent(aEvent, aTarget, aWindow) {
 
 /**
  * Send the char aChar to the node with id aTarget.  If aTarget is not
- * provided, use "target".  This method handles casing of chars (sends the
- * right charcode, and sends a shift key for uppercase chars).  No other
- * modifiers are handled at this point.
+ * provided, use "target". This method handles casing of
+ * chars (sends the right charcode, and sends a shift key for uppercase chars).
+ * No other modifiers are handled at this point.
  *
- * For now this method only works for English letters (lower and upper case)
- * and the digits 0-9.
- *
- * Returns true if the keypress event was accepted (no calls to preventDefault
- * or anything like that), false otherwise.
+ * For now this method only works for ASCII characters and emulates the shift
+ * key state on US keyboard layout.
  */
 function sendChar(aChar, aTarget) {
-  // DOM event charcodes match ASCII (JS charcodes) for a-zA-Z0-9.
-  var hasShift = (aChar == aChar.toUpperCase());
-  var charCode = aChar.charCodeAt(0);
-  var keyCode = charCode;
-  if (!hasShift) {
-    // For lowercase letters, the keyCode is actually 32 less than the charCode
-    keyCode -= 0x20;
-  }
+    var hasShift;
+    // Emulate US keyboard layout for the shiftKey state.
+    switch (aChar) {
+      case "!":
+      case "@":
+      case "#":
+      case "$":
+      case "%":
+      case "^":
+      case "&":
+      case "*":
+      case "(":
+      case ")":
+      case "_":
+      case "+":
+      case "{":
+      case "}":
+      case ":":
+      case "\"":
+      case "|":
+      case "<":
+      case ">":
+      case "?":
+          hasShift = true;
+          break;
+      default:
+          hasShift = (aChar == aChar.toUpperCase());
+          break;
+    }
+    var charCode = aChar.charCodeAt(0);
+    var keyCode = charCode;
+    if (!hasShift) {
+      // For lowercase letters, the keyCode is actually 32 less than the charCode
+      keyCode -= 0x20;
+    }
 
-  return __doEventDispatch(aTarget, charCode, keyCode, hasShift);
+    return __doEventDispatch(aTarget, charCode, keyCode, hasShift);
 }
 
 /**

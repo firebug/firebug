@@ -428,16 +428,32 @@ DebuggerLib.getFrameResultObject = function(context)
 // ********************************************************************************************* //
 // Debugger
 
+
+/**
+ * Breaks the debugger in the newest frame (if any) or in the debuggee global.
+ * Should not be used directly. Instead use Debugger.breakNow()
+ *
+ * @param {*} context
+ */
 DebuggerLib.breakNow = function(context)
 {
-    // getInactiveDebuggeeGlobal uses the current global (i.e. stopped frame, current
-    // iframe or top level window associated with the context object).
-    // There can be cases (e.g. BON XHR) where the current window is an iframe, but
-    // the event the debugger breaks on - comes from top level window (or vice versa).
-    // For now there are not known problems, but we might want to use the second
-    // argument of the getInactiveDebuggeeGlobal() and pass explicit global object.
-    var dbgGlobal = this.getInactiveDebuggeeGlobal(context);
-    return dbgGlobal.evalInGlobal("debugger");
+    var actor = DebuggerLib.getThreadActor(context.browser);
+    var frame = actor.dbg.getNewestFrame();
+    if (frame)
+    {
+        return frame.eval("debugger;");
+    }
+    else
+    {
+        // getInactiveDebuggeeGlobal uses the current global (i.e. stopped frame, current
+        // iframe or top level window associated with the context object).
+        // There can be cases (e.g. BON XHR) where the current window is an iframe, but
+        // the event the debugger breaks on - comes from top level window (or vice versa).
+        // For now there are not known problems, but we might want to use the second
+        // argument of the getInactiveDebuggeeGlobal() and pass explicit global object.
+        var dbgGlobal = this.getInactiveDebuggeeGlobal(context);
+        return dbgGlobal.evalInGlobal("debugger;");
+    }
 };
 
 DebuggerLib.makeDebugger = function()

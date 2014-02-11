@@ -1787,27 +1787,23 @@ this.setBreakpoint = function(chrome, url, lineNo, attributes, callback)
     // of the problem with the test case for Issue 4553
     FBTest.selectSourceLine(url, lineNo, "js", chrome, function(row)
     {
-        if (!FBTest.hasBreakpoint(row))
-        {
-            if (attributes && attributes.condition)
-            {
-                // xxxHonza: TODO
-            }
-            else
-            {
-                var config = {tagName: "div", classes: "breakpoint"};
-                FBTest.waitForDisplayedElement("script", config, function(element)
-                {
-                    callback(row);
-                });
+        var hasBreakpoint = FBTest.hasBreakpoint(lineNo);
+        FBTest.ok(!hasBreakpoint, "There must not be a breakpoint at line: " + lineNo);
 
-                var target = row.querySelector(".CodeMirror-linenumber");
-                FBTest.synthesizeMouse(target, 2, 2, {type: "mousedown"});
-            }
+        if (false && attributes && attributes.condition)
+        {
+            // xxxHonza: TODO
         }
         else
         {
-            callback(row);
+            var config = {tagName: "div", classes: "breakpoint"};
+            FBTest.waitForDisplayedElement("script", config, function(element)
+            {
+                callback(row);
+            });
+
+            var target = row.querySelector(".CodeMirror-linenumber");
+            FBTest.synthesizeMouse(target, 2, 2, {type: "mousedown"});
         }
     });
 };
