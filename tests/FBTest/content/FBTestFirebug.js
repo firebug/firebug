@@ -423,6 +423,12 @@ function _getEventTarget(aTarget)
 
 this.synthesizeMouse = function(node, offsetX, offsetY, event, win)
 {
+    if (!node)
+    {
+        FBTest.ok(false, "ERROR no target node");
+        return;
+    }
+
     win = win || node.ownerDocument.defaultView;
 
     event = event || {};
@@ -1630,13 +1636,6 @@ this.getSourceLineNode = function(lineNo, chrome)
         var line = lines[i].parentNode;
         var lineHeight = line.clientHeight;
 
-        // Skip lines outside the viewport,
-        if (line.offsetTop + lineHeight < scroller.scrollTop ||
-            line.offsetTop > scroller.scrollTop + scroller.clientHeight)
-        {
-            continue;
-        }
-
         var lineNumberNode = line.getElementsByClassName("CodeMirror-linenumber")[0];
         if (!lineNumberNode)
             continue;
@@ -1922,7 +1921,7 @@ this.addWatchExpression = function(chrome, expression, callback)
     recognizer.onRecognizeAsync(function(element)
     {
         var row = FW.FBL.getAncestorByClass(element, "memberRow");
-        var value = FW.FBL.getChildByClass(element, "memberValueCell");
+        var value = FW.FBL.getChildByClass(row, "memberValueCell");
 
         if (callback)
             callback(value);
