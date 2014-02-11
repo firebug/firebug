@@ -597,6 +597,9 @@ var Panel = Obj.extend(new EventSource(),
                         // xxxHonza: ideally we should compare (doc !== this.location)
                         // but the Script panel is also using SourceLink instances as the
                         // location and so, it wouldn't work.
+                        // It should be possible to normalize panel's location through
+                        // 'normalizeLocation' API implemented by derived panels.
+                        // (jut like it's done for the selection, see: normalizeSelection)
                         if (doc.href !== this.location.href)
                             this.navigateToNextDocument(match, reverse, doc, deferred);
                         else
