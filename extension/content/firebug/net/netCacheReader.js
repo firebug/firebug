@@ -28,6 +28,9 @@ var CacheService = Cc["@mozilla.org/network/cache-service;1"];
 var cacheSession = null;
 var autoFetchDelay = 1000;
 
+var TraceError = FBTrace.toError();
+var Trace = FBTrace.to("DBG_NETCACHEREADER");
+
 // ********************************************************************************************* //
 // Domplate Templates
 
@@ -173,10 +176,7 @@ var NetCacheReader = Obj.extend(Module,
         catch (exc)
         {
             if (exc.name != "NS_ERROR_CACHE_KEY_NOT_FOUND")
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("net.getCacheEntry; FAILS " + file.href, exc);
-            }
+                TraceError.sysout("netCacheReader.getCacheEntry; ERROR " + file.href, exc);
         }
     }
 });
@@ -189,8 +189,7 @@ function fetchCacheEntry(file, netProgress)
     if (file.cacheEntry)
         return;
 
-    if (FBTrace.DBG_NET_EVENTS)
-        FBTrace.sysout("net.getCacheEntry; file.href: " + file.href);
+    Trace.sysout("netCacheReader.getCacheEntry; file.href: " + file.href);
 
     // Initialize cache session.
     if (!cacheSession)
@@ -204,8 +203,7 @@ function fetchCacheEntry(file, netProgress)
     {
         onCacheEntryAvailable: function(descriptor, accessGranted, status)
         {
-            if (FBTrace.DBG_NET_EVENTS)
-                FBTrace.sysout("net.onCacheEntryAvailable; file.href: " + file.href);
+            Trace.sysout("netCacheReader.onCacheEntryAvailable; file.href: " + file.href);
 
             if (descriptor)
                 onDescriptorAvailable(netProgress, file, descriptor);
@@ -217,6 +215,8 @@ function fetchCacheEntry(file, netProgress)
 
 function onDescriptorAvailable(netProgress, file, descriptor)
 {
+    Trace.sysout("netCacheReader.onDescriptorAvailable; file.href: " + file.href, descriptor);
+
     if (file.size <= 0)
         file.size = descriptor.dataSize;
 
@@ -263,8 +263,7 @@ function onDescriptorAvailable(netProgress, file, descriptor)
     }
     catch (e)
     {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("net.onCacheEntryAvailable; EXCEPTION " + e, e);
+        TraceError.sysout("netCacheReader.onCacheEntryAvailable; EXCEPTION " + e, e);
     }
 
     descriptor.close();
