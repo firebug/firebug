@@ -2160,6 +2160,10 @@ this.selectSourceLine = function(url, lineNo, category, chrome, callback)
             return;
 
         clearInterval(checking);
+
+        if (!FBTest.ok(row, "Source line must exist " + url + ", " + lineNo))
+            return;
+
         callback(row);
     }, 50);
 };
