@@ -8,7 +8,7 @@ function runTest()
         {
             FBTest.progress("Wait till the iframe is loaded");
 
-            var url = basePath + "script/3985/issue3985-frame.js";
+            var url = basePath + "script/3985/issue3985-iframe.js";
             FBTest.setBreakpoint(null, url, 3, null, function()
             {
                 FBTest.progress("Reload");
@@ -24,9 +24,12 @@ function runTest()
                         FBTest.testDone("issue3985.DONE");
                     });
 
-                    // Click a button.
-                    var frame = win.document.getElementById("testFrame");
-                    FBTest.click(frame.contentDocument.getElementById("trigger"));
+                    FBTest.waitForDisplayedBreakpoint(null, url, 3, function(row)
+                    {
+                        // Click a button.
+                        var frame = win.document.getElementById("testFrame");
+                        FBTest.click(frame.contentDocument.getElementById("trigger"));
+                    });
                 });
             });
         });
