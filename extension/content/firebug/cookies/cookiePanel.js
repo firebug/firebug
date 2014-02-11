@@ -3,54 +3,55 @@
 define([
     "firebug/firebug",
     "firebug/lib/trace",
-    "firebug/lib/object",
-    "firebug/lib/xpcom",
-    "firebug/lib/locale",
-    "firebug/lib/domplate",
-    "firebug/lib/dom",
-    "firebug/lib/options",
-    "firebug/lib/persist",
-    "firebug/lib/string",
-    "firebug/lib/http",
-    "firebug/lib/css",
-    "firebug/lib/events",
     "firebug/lib/array",
+    "firebug/lib/css",
+    "firebug/lib/dom",
+    "firebug/lib/domplate",
+    "firebug/lib/locale",
+    "firebug/lib/object",
+    "firebug/lib/options",
     "firebug/lib/search",
-    "firebug/chrome/activableModule",
     "firebug/chrome/activablePanel",
     "firebug/chrome/searchBox",
-    "firebug/cookies/menuUtils",
-    "firebug/cookies/cookieReps",
-    "firebug/cookies/headerResizer",
-    "firebug/cookies/cookieObserver",
-    "firebug/cookies/cookieUtils",
-    "firebug/cookies/cookie",
+    "firebug/console/console",
+    "firebug/console/consolePanel",
     "firebug/cookies/breakpoints",
+    "firebug/cookies/cookie",
+    "firebug/cookies/cookieModule",
+    "firebug/cookies/cookieObserver",
     "firebug/cookies/cookiePermissions",
-    "firebug/cookies/cookieClipboard",
+    "firebug/cookies/cookieReps",
+    "firebug/cookies/cookieUtils",
+    "firebug/cookies/headerResizer",
+    "firebug/cookies/menuUtils",
+    "firebug/debugger/debugger"
 ],
-function(Firbug, FBTrace, Obj, Xpcom, Locale, Domplate, Dom, Options, Persist, Str, Http, Css,
-    Events, Arr, Search, ActivableModule, ActivablePanel, SearchBox, MenuUtils, CookieReps,
-    HeaderResizer, CookieObserver, CookieUtils, Cookie, Breakpoints, CookiePermissions,
-    CookieClipboard) {
+function(Firebug, FBTrace, Arr, Css, Dom, Domplate, Locale, Obj, Options, Search, ActivablePanel,
+    SearchBox, Console, ConsolePanel, Breakpoints, Cookie, CookieModule, CookieObserver,
+    CookiePermissions, CookieReps, CookieUtils, HeaderResizer, MenuUtils, Debugger) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
 
 var {domplate, DIV, TR, P, A} = Domplate;
 
-const Ci = Components.interfaces;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+
+var Trace = FBTrace.to("DBG_COOKIES");
 
 // Cookies preferences
-const showRejectedCookies = "cookies.showRejectedCookies";
-const lastSortedColumn = "cookies.lastSortedColumn";
-const hiddenColsPref = "cookies.hiddenColumns";
-const removeConfirmation = "cookies.removeConfirmation";
+var showRejectedCookies = "cookies.showRejectedCookies";
+var lastSortedColumn = "cookies.lastSortedColumn";
+var hiddenColsPref = "cookies.hiddenColumns";
+var removeConfirmation = "cookies.removeConfirmation";
 
 // Services
-var cookieManager = Xpcom.CCSV("@mozilla.org/cookiemanager;1", "nsICookieManager2");
+var cookieManager = Cc["@mozilla.org/cookiemanager;1"].getService(Ci.nsICookieManager2);
 
-const panelName = "cookies";
+var panelName = "cookies";
 
 // ********************************************************************************************* //
 // Panel Implementation
@@ -92,17 +93,17 @@ CookiePanel.prototype = Obj.extend(ActivablePanel,
 
         ActivablePanel.initialize.apply(this, arguments);
 
-        Firebug.ConsolePanel.prototype.addListener(this);
+        ConsolePanel.prototype.addListener(this);
 
         // Just after the initialization, so the this.document member is set
-        Firebug.CookieModule.addStyleSheet(this);
+        CookieModule.addStyleSheet(this);
 
         this.refresh();
     },
 
     shutdown: function()
     {
-        Firebug.ConsolePanel.prototype.removeListener(this);
+        ConsolePanel.prototype.removeListener(this);
     },
 
     /**
@@ -110,7 +111,7 @@ CookiePanel.prototype = Obj.extend(ActivablePanel,
      */
     refresh: function()
     {
-        if (!Firebug.CookieModule.isEnabled(this.context))
+        if (!CookieModule.isEnabled(this.context))
             return;
 
         // Create cookie list table
@@ -149,12 +150,8 @@ CookiePanel.prototype = Obj.extend(ActivablePanel,
             // this must be because FB isn't correctly initialized.
             if (!this.context.cookies)
             {
-                if (FBTrace.DBG_COOKIES)
-                {
-                    FBTrace.sysout(
-                        "cookies.Cookie context isn't properly initialized - ERROR: " +
-                        this.context.getName());
-                }
+                Trace.sysout("cookies.Cookie context isn't properly initialized - ERROR: " +
+                    this.context.getName());
                 return;
             }
 
@@ -187,8 +184,7 @@ CookiePanel.prototype = Obj.extend(ActivablePanel,
             }
         }
 
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.Cookie list refreshed.", cookies);
+        Trace.sysout("cookies.Cookie list refreshed.", cookies);
 
         // Automatically sort the last sorted column. The preference stores
         // two things: name of the sorted column and sort direction asc|desc.
@@ -211,8 +207,7 @@ CookiePanel.prototype = Obj.extend(ActivablePanel,
 
     initializeNode: function(oldPanelNode)
     {
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.CookiePanel.initializeNode");
+        Trace.sysout("cookies.CookiePanel.initializeNode");
 
         // xxxHonza:
         // This method isn't called when FB UI is detached. So, the columns
@@ -230,8 +225,7 @@ CookiePanel.prototype = Obj.extend(ActivablePanel,
 
     destroyNode: function()
     {
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.CookiePanel.destroyNode");
+        Trace.sysout("cookies.CookiePanel.destroyNode");
 
         this.document.removeEventListener("mouseclick", this.onMouseClick, true);
         this.document.removeEventListener("mousedown", this.onMouseDown, true);
@@ -270,29 +264,7 @@ CookiePanel.prototype = Obj.extend(ActivablePanel,
         // Update permission button in the toolbar
         CookiePermissions.updatePermButton(this.context);
 
-        // For backward compatibility with Firebug 1.1
-        //
-        // Firebug 1.6 removes Firebug.DisabledPanelPage, simplifies the activation
-        // and the following code is not necessary any more.
-        if (ActivableModule && Firebug.DisabledPanelPage)
-        {
-            var shouldShow = Firebug.CookieModule.isEnabled(this.context);
-            this.showToolbarButtons("fbCookieButtons", shouldShow);
-            if (!shouldShow)
-            {
-                // The activation model has been changed in Firebug 1.4. This is
-                // just to keep backward compatibility.
-                if (Firebug.DisabledPanelPage.show)
-                    Firebug.DisabledPanelPage.show(this, Firebug.CookieModule);
-                else
-                    Firebug.CookieModule.disabledPanelPage.show(this);
-                return;
-            }
-        }
-        else
-        {
-            this.showToolbarButtons("fbCookieButtons", true);
-        }
+        this.showToolbarButtons("fbCookieButtons", true);
 
         if (Firebug.chrome.setGlobalAttribute)
         {
@@ -453,11 +425,8 @@ CookiePanel.prototype = Obj.extend(ActivablePanel,
     {
         this.context.breakOnCookie = breaking;
 
-        if (FBTrace.DBG_COOKIES)
-        {
-            FBTrace.sysout("cookies.breakOnNext; " + this.context.breakOnCookie + ", " +
-                this.context.getName());
-        }
+        Trace.sysout("cookies.breakOnNext; " + this.context.breakOnCookie + ", " +
+            this.context.getName());
     },
 
     shouldBreakOnNext: function()
@@ -484,20 +453,19 @@ CookiePanel.prototype = Obj.extend(ActivablePanel,
 
     onActivationChanged: function(enable)
     {
-        if (FBTrace.DBG_COOKIES || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("cookies.CookiePanel.onActivationChanged; " + enable);
+        Trace.sysout("cookies.CookiePanel.onActivationChanged; " + enable);
 
         if (enable)
         {
-            Firebug.CookieModule.addObserver(this);
-            Firebug.Debugger.addListener(Firebug.CookieModule.DebuggerListener);
-            Firebug.Console.addListener(Firebug.CookieModule.ConsoleListener);
+            CookieModule.addObserver(this);
+            Debugger.addListener(CookieModule.DebuggerListener);
+            Console.addListener(CookieModule.ConsoleListener);
         }
         else
         {
-            Firebug.CookieModule.removeObserver(this);
-            Firebug.Debugger.removeListener(Firebug.CookieModule.DebuggerListener);
-            Firebug.Console.removeListener(Firebug.CookieModule.ConsoleListener);
+            CookieModule.removeObserver(this);
+            Debugger.removeListener(CookieModule.DebuggerListener);
+            Console.removeListener(CookieModule.ConsoleListener);
         }
     },
 
@@ -535,10 +503,10 @@ CookiePanel.prototype = Obj.extend(ActivablePanel,
 // Cookie Breakpoints
 
 /**
- * @class Represents an {@link Firebug.Debugger} listener. This listener is reponsible for
+ * @class Represents an {@link Debugger} listener. This listener is reponsible for
  * providing a list of cookie breakpoints for the Breakpoints side panel.
  */
-Firebug.CookieModule.DebuggerListener =
+CookieModule.DebuggerListener =
 {
     getBreakpoints: function(context, groups)
     {
@@ -550,7 +518,7 @@ Firebug.CookieModule.DebuggerListener =
 // ********************************************************************************************* //
 // Custom output in the Console panel for document.cookie
 
-Firebug.CookieModule.ConsoleListener =
+CookieModule.ConsoleListener =
 {
     tag:
         DIV({_repObject: "$object"},
@@ -573,8 +541,8 @@ Firebug.CookieModule.ConsoleListener =
 
         // Create an empty log row that serves as a container for the list of cookies
         // created from the document.cookie property
-        var appendObject = Firebug.ConsolePanel.prototype.appendObject;
-        var row = Firebug.ConsoleBase.logRow(appendObject, object, context,
+        var appendObject = ConsolePanel.prototype.appendObject;
+        var row = Console.logRow(appendObject, object, context,
             "documentCookie", this, null, true);
 
         var rowBody = Dom.getElementByClass(row, "documentCookieBody");
