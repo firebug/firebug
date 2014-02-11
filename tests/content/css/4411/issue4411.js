@@ -32,10 +32,7 @@ function hexValue(callback)
 
 function namedColor(callback)
 {
-    // Since FF 22.0a2 inIDOMUtils has a function colorNameToRGB()
-    var colorValue = (FBTest.compareFirefoxVersion("22.0a2") >= 0) ?
-        "rgb(144, 238, 144)" : "lightgreen";
-    executeTest("#name", colorValue, callback);
+    executeTest("#name", "lightgreen", callback);
 }
 
 function rgb(callback)

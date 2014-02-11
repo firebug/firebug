@@ -29,6 +29,7 @@ define([
     "firebug/debugger/breakpoints/breakpoint",
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/debugger/breakpoints/breakpointConditionEditor",
+    "firebug/debugger/breakpoints/breakOnNext",
     "firebug/debugger/script/scriptPanelWarning",
     "firebug/debugger/script/breakNotification",
     "firebug/debugger/script/scriptPanelLineUpdater",
@@ -40,8 +41,8 @@ define([
 function (Firebug, FBTrace, Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, Persist, Keywords,
     System, Options, Promise, ActivablePanel, Menu, Rep, StatusPath, SearchBox, Editor, ScriptView,
     StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, BreakpointConditionEditor,
-    ScriptPanelWarning, BreakNotification, ScriptPanelLineUpdater, DebuggerLib, CommandLine,
-    NetUtils, CompilationUnit) {
+    BreakOnNext, ScriptPanelWarning, BreakNotification, ScriptPanelLineUpdater,
+    DebuggerLib, CommandLine, NetUtils, CompilationUnit) {
 
 "use strict";
 
@@ -866,17 +867,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Events.cancelEvent(event);
     },
 
-    onEditorMouseUp: function(event)
-    {
-        Trace.sysout("scriptPanel.onEditorMouseUp;", event);
-
-        // Click anywhere in the script panel closes breakpoint-condition-editor
-        // if it's currently opened. It's valid to close the editor this way
-        // and that's why the 'cancel' argument is set to false.
-        if (this.editing)
-            Editor.stopEditing(false);
-    },
-
     onEditorKeyDown: function(event)
     {
         if (event.keyCode === KeyEvent.DOM_VK_L && Events.isControl(event))
@@ -1313,10 +1303,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     breakOnNext: function(enabled)
     {
-        if (enabled)
-            this.tool.breakOnNext(this.context, true);
-        else
-            this.tool.breakOnNext(this.context, false);
+        BreakOnNext.breakOnNext(this.context, enabled);
     },
 
     getBreakOnNextTooltip: function(armed)
@@ -1327,7 +1314,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     shouldBreakOnNext: function()
     {
-        return !!this.context.breakOnNextHook;  // TODO BTI
+        return !!this.context.breakOnNextActivated;  // TODO BTI
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

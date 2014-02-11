@@ -19,8 +19,8 @@ function runTest()
             FBTest.waitForClipboard("issue5461", function()
             {
                 var expected = new RegExp("#element\\s+\\{[\\r\\n]{1,2}"+
-                    "\\s+background:\\s+-moz-linear-gradient\\(135deg, #788CFF, #B4C8FF\\) repeat "+
-                    "scroll 0 0 #8C8CFF;[\\r\\n]{1,2}"+
+                    "\\s+background:\\s+-moz-linear-gradient\\(135deg, #788cff, #b4c8ff\\) repeat "+
+                    "scroll 0 0 #8c8cff;[\\r\\n]{1,2}"+
                     "\\s+height:\\s+100px;[\\r\\n]{1,2}"+
                     "\\s+width:\\s+100px;[\\r\\n]{1,2}"+
                     "\\}[\\r\\n]{1,2}"+

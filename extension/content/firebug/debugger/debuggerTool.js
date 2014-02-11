@@ -1,19 +1,17 @@
 /* See license.txt for terms of usage */
+/*jshint noempty:false, esnext:true, curly:false, moz:true*/
+/*global define:1*/
 
 define([
     "firebug/firebug",
     "firebug/lib/trace",
     "firebug/lib/object",
-    "firebug/lib/array",
     "firebug/lib/options",
     "firebug/chrome/tool",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/stack/stackTrace",
-    "firebug/debugger/clients/clientCache",
-    "arch/compilationunit",
 ],
-function (Firebug, FBTrace, Obj, Arr, Options, Tool, StackFrame, StackTrace,
-    ClientCache, CompilationUnit) {
+function (Firebug, FBTrace, Obj, Options, Tool, StackFrame, StackTrace) {
 
 "use strict";
 
@@ -207,7 +205,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
         this.context.currentPauseActor = packet.actor;
 
         // Notify listeners, about debugger pause event.
-        this.dispatch("onDebuggerPaused", [this.context, event, packet])
+        this.dispatch("onDebuggerPaused", [this.context, event, packet]);
 
         // Send event allowing immediate resume. If at least one listener returns
         // true, the debugger will resume.
@@ -446,7 +444,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
             {
                 TraceError.sysout("debuggerTool.evalCallback; EXCEPTION " + e, e);
             }
-        }
+        };
     },
 
     // xxxHonza: used to get boolean result of evaluated breakpoint condition
@@ -490,6 +488,10 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
         });
     },
 });
+
+// ********************************************************************************************* //
+// Helpers
+
 
 // ********************************************************************************************* //
 // Registration
