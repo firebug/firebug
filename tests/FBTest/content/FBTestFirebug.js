@@ -2080,8 +2080,7 @@ window.onerror = function(errType, errURL, errLineNum)
     var fileName = path.substr(path.lastIndexOf("/") + 1);
     var errorDesc = errType + " (" + errLineNum + ")" + " " + errURL;
     FBTest.sysout(fileName + " ERROR " + errorDesc);
-    if (!FBTrace.DBG_ERRORS)  // then we are watching with another tracer, let it go
-        FBTest.ok(false, fileName + " ERROR " + errorDesc);
+    FBTest.ok(false, fileName + " ERROR " + errorDesc);
     FBTestFirebug.testDone();
     return false;
 };
