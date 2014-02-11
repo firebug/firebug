@@ -2402,12 +2402,17 @@ this.searchInScriptPanel = function(searchText, callback)
     var config =
     {
         tagName: "div",
-        classes: "sourceRow jumpHighlight"
+        classes: "CodeMirror-highlightedLine"
     };
 
     FBTest.waitForDisplayedElement("script", config, function(element)
     {
-        waitForUnhighlight(config, callback);
+        // Wait till CodeMirror-highlightedLine is removed.
+        var attributes = {"class": "CodeMirror-highlightedLine"}
+        var doc = FBTestFirebug.getPanelDocument();
+        var recognizer = new MutationRecognizer(doc.defaultView, config.tagName,
+            null, null, attributes);
+        recognizer.onRecognizeAsync(callback);
     });
 
     // Set search string into the search box.
@@ -2440,7 +2445,12 @@ this.searchInCssPanel = function(searchText, callback)
 
     FBTest.waitForDisplayedElement("stylesheet", config, function(element)
     {
-        waitForUnhighlight(config, callback);
+        // Wait till jumpHighlight is removed.
+        var attributes = {"class": "jumpHighlight"}
+        var doc = FBTestFirebug.getPanelDocument();
+        var recognizer = new MutationRecognizer(doc.defaultView, config.tagName,
+            null, null, attributes);
+        recognizer.onRecognizeAsync(callback);
     });
 
     // Set search string into the search box
@@ -2454,25 +2464,6 @@ this.searchInCssPanel = function(searchText, callback)
     // press enter instead (asynchronously).
     FBTest.sendKey("RETURN", "fbSearchBox");
 };
-
-/**
- * Helper for searchInScriptPanel and searchInCssPanel, waits till the highlighted line
- * (using jumpHighlight class) is unhighlighted (Firebug unhilights this on timeout).
- *
- * @param {Object} config Specifies the tagName fo the target element.
- * @param {Object} callback
- */
-function waitForUnhighlight(config, callback)
-{
-    var doc = FBTestFirebug.getPanelDocument();
-
-    // Wait till jumpHighlight is removed.
-    var attributes = {"class": "jumpHighlight"}
-    var recognizer = new MutationRecognizer(doc.defaultView, config.tagName,
-        null, null, attributes);
-
-    recognizer.onRecognizeAsync(callback);
-}
 
 /**
  * Executes search within the HTML panel.
