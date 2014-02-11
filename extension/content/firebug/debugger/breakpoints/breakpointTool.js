@@ -169,15 +169,15 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
 
         // Filter out those breakpoints that have been already set on the backend
         // (i.e. there is a corresponding client object already).
-        bps = bps.filter((bp) =>
+        var filtered = bps.filter((bp) =>
         {
             return !this.getBreakpointClient(bp.href, bp.lineNo);
         });
 
         // Bail out if there is nothing to set.
-        if (!bps.length)
+        if (!filtered.length)
         {
-            Trace.sysout("breakpointTool.newSource; No breakpoints to set");
+            Trace.sysout("breakpointTool.newSource; No breakpoints to set for: " + url, bps);
             return;
         }
 
@@ -185,16 +185,16 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         // (unless the user enables them later).
         // xxxHonza: we shouldn't create server-side breakpoints for normal disabled
         // breakpoints, but not in case there are other breakpoints at the same line.
-        /*bps = bps.filter(function(bp, index, array)
+        /*filtered = filtered.filter(function(bp, index, array)
         {
             return bp.isEnabled();
         });*/
 
         Trace.sysout("breakpointTool.newSource; Initialize server side breakpoints: (" +
-            bps.length + ") " + url, bps);
+            filtered.length + ") " + url, filtered);
 
         // Set breakpoints on the server side.
-        this.setBreakpoints(bps, function()
+        this.setBreakpoints(filtered, function()
         {
             // Some breakpoints could have been auto-corrected so, save all now.
             // xxxHonza: what about breakpoints in other contexts using the same URL?
