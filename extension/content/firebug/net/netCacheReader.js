@@ -45,10 +45,6 @@ var cacheBodyTag =
 /**
  * @module Responsible for fetching given URL entry from the browser cache. The Net panel
  * displays such info for requests that are stored in the cache.
- *
- * The cache descriptor is fetched asynchronously when the user expands a requests row
- * within the Net panel. Note that opening the cache descriptor during the page load can
- * influence the caching logic (see issue 6385).
  */
 var NetCacheReader = Obj.extend(Firebug.Module,
 /** @lends NetCacheReader */
@@ -56,7 +52,13 @@ var NetCacheReader = Obj.extend(Firebug.Module,
     dispatchName: "netCacheReader",
 
     // Set to true if cache-data should be fetched automatically.
-    autoFetch: false,
+    // It's set to true by default since the Net panel needs to display
+    // file size (coming from the cache) for all requests immediately
+    // (see issue 6837).
+    // The cache descriptor was previously fetched asynchronously when the
+    // user expanded a requests row (see issue 6385), but his problem
+    // isn't reproducible any more.
+    autoFetch: true,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
