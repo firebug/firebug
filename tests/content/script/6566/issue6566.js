@@ -3,10 +3,7 @@ function runTest()
     FBTest.sysout("issue6566.START");
     FBTest.openNewTab(basePath + "script/6566/issue6566.html", function(win)
     {
-        FBTest.enableScriptPanel();
-
-        FBTest.selectPanel("console");
-        FBTest.enableConsolePanel(function(win)
+        FBTest.enablePanels(["console", "script"], function(win)
         {
             var taskList = new FBTest.TaskList();
 
@@ -25,6 +22,8 @@ function runTest()
 
 function monitorFunction(callback)
 {
+    FBTest.progress("monitorFunction");
+
     var config = {tagName: "div", classes: "logRow logRow-command"};
     FBTest.waitForDisplayedElement("console", config, function(row)
     {
@@ -37,6 +36,8 @@ function monitorFunction(callback)
 
 function createErrorBreakpoint(callback, win)
 {
+    FBTest.progress("createErrorBreakpoint");
+
     var config = {tagName: "div", classes: "logRow logRow-errorMessage"};
     FBTest.waitForDisplayedElement("console", config, function(row)
     {
@@ -56,11 +57,17 @@ function createErrorBreakpoint(callback, win)
 
 function clickFunctionLink(callback)
 {
+    FBTest.progress("clickFunctionLink");
+
     FBTest.waitForDisplayedText("console", "function()", function(element)
     {
-        var config = {tagName: "div", classes: "sourceRow jumpHighlight"};
+        FBTest.progress("clickFunctionLink 1");
+
+        var config = {tagName: "div", classes: "CodeMirror-highlightedLine"};
         FBTest.waitForDisplayedElement("script", config, function(element)
         {
+            FBTest.progress("clickFunctionLink 2");
+
             FBTest.compare("15", element.children[0].textContent, "The line number must match.");
             callback();
         });
@@ -73,6 +80,8 @@ function clickFunctionLink(callback)
 
 function verifyBreakpointsPanel(callback)
 {
+    FBTest.progress("verifyBreakpointsPanel");
+
     var panel = FBTest.selectSidePanel("breakpoints");
     var panelNode = panel.panelNode;
 

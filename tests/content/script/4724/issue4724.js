@@ -2,15 +2,14 @@ function runTest()
 {
     FBTest.sysout("issue4724.START");
 
-    FBTest.openNewTab(basePath + "script/4724/issue4724.html", function(win)
+    var url = basePath + "script/4724/issue4724.html";
+    FBTest.openNewTab(url, function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("script");
         var line = 8;
 
         FBTest.enableScriptPanel(function(win)
         {
-            FBTest.setBreakpoint(null, "issue4724.html", line, null, function()
+            FBTest.setBreakpoint(null, url, line, null, function()
             {
                 var contextMenu = FW.FBL.$("fbContextMenu");
                 var menuItemLabel = "Set Breakpoint";
@@ -19,7 +18,8 @@ function runTest()
                 {
                     contextMenu.removeEventListener("popupshown", onPopupShown, false);
 
-                    // Fire the event handler asynchronously so items have a chance to be appended.
+                    // Fire the event handler asynchronously so items
+                    // have a chance to be appended.
                     setTimeout(function()
                     {
                         for (var i=0; i<contextMenu.children.length; i++)
