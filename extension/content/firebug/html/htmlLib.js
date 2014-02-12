@@ -64,7 +64,7 @@ var HTMLLib =
                 ++matchCount;
 
                 var node = match.node;
-                var nodeBox = this.openToNode(node, match.isValue);
+                var nodeBox = this.openToNode(node, match.isValue, match.ownerElement);
 
                 this.selectMatched(nodeBox, node, match, reverse);
             }
@@ -111,14 +111,23 @@ var HTMLLib =
             function walkNode() { return reverse ? walker.previousNode() : walker.nextNode(); }
 
             var node;
+            var ownerElement;
             while (node = walkNode())
             {
-                if (node.nodeType == Node.TEXT_NODE && HTMLLib.isSourceElement(node.parentNode))
+                if (node.nodeType === Node.TEXT_NODE && HTMLLib.isSourceElement(node.parentNode))
                     continue;
+
+                if (node.nodeType === Node.ELEMENT_NODE)
+                  ownerElement = node;
 
                 var m = this.checkNode(node, reverse, caseSensitive);
                 if (m)
+                {
+                    if (node.nodeType === Node.ATTRIBUTE_NODE)
+                        m.ownerElement = ownerElement;
+
                     return m;
+                }
             }
         };
 
@@ -190,7 +199,7 @@ var HTMLLib =
          *
          * @private
          */
-        this.openToNode = function(node, isValue)
+        this.openToNode = function(node, isValue, ownerElement)
         {
             if (node.nodeType == Node.ELEMENT_NODE)
             {
@@ -199,7 +208,7 @@ var HTMLLib =
             }
             else if (node.nodeType == Node.ATTRIBUTE_NODE)
             {
-                var nodeBox = ioBox.openToObject(node.ownerElement);
+                var nodeBox = ioBox.openToObject(ownerElement);
                 if (nodeBox)
                 {
                     var attrNodeBox = HTMLLib.findNodeAttrBox(nodeBox, node.name);
