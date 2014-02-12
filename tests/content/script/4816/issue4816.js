@@ -5,8 +5,12 @@ function runTest()
     var url = basePath + "script/4816/issue4816.html";
     FBTest.openNewTab(url, function(win)
     {
+        FBTest.sysout("issue4816.tab opened");
+
         FBTest.enableScriptPanel(function(win)
         {
+            FBTest.sysout("issue4816.script panel enabled");
+
             var tasks = new FBTest.TaskList();
             tasks.push(clickTestButton, win);
             tasks.push(openNewTab, url);

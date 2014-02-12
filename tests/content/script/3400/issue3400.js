@@ -3,11 +3,8 @@ function runTest()
     FBTest.sysout("issue3400.START");
     FBTest.openNewTab(basePath + "script/3400/issue3400.html", function(win)
     {
-        FBTest.openFirebug();
         FBTest.enableScriptPanel(function(win)
         {
-            var panel = FW.Firebug.chrome.selectPanel("script");
-
             var chrome = FW.Firebug.chrome;
             FBTest.waitForBreakInDebugger(chrome, 21, false, function(row)
             {
