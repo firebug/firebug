@@ -240,7 +240,8 @@ function unregisterCommand(name)
  */
 function evaluateInPageContext(context, win)
 {
-    executeInWindowContext(win, evaluate, arguments);
+    var dbgGlobal = DebuggerLib.getDebuggeeGlobal(context, win);
+    executeInWindowContext(win, evaluate, arguments, dbgGlobal);
 }
 
 /**
@@ -396,11 +397,11 @@ function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
             result.source = exc.source;
         }
 
-        executeInWindowContext(window, onError, [result, context]);
+        executeInWindowContext(window, onError, [result, context], dglobal);
         return;
     }
 
-    executeInWindowContext(window, onSuccess, [result, context]);
+    executeInWindowContext(window, onSuccess, [result, context], dglobal);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -474,15 +475,28 @@ function removeConflictingNames(commandLine, context, contentView)
  * @param {function} func The function to execute
  * @param {Array or Array-Like object} args The arguments to pass to the function
  */
-function executeInWindowContext(win, func, args)
+function executeInWindowContext(win, func, args, dbgGlobal)
 {
     var listener = function()
     {
-        win.document.removeEventListener("firebugCommandLine", listener);
-        func.apply(null, args);
+        win.document.removeEventListener("firebugCommandLine", listenerInWindow);
+        if (func)
+            func.apply(null, args);
     };
-    win.document.addEventListener("firebugCommandLine", listener);
-    var event = document.createEvent("Events");
+
+    // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=971673, see issue 7177.
+    // The listener has to come from the content window's compartment, otherwise the entry
+    // global is incorrect and code like `location = "x.html"` will end up trying to set
+    // location to chrome://firebug/content/firefox/x.html.
+    var code = "(function() { callback(); })";
+    var bindings = Object.create(null);
+    bindings.callback = dbgGlobal.makeDebuggeeValue(listener);
+    var listenerInWindow = dbgGlobal.evalInGlobalWithBindings(code, bindings)
+        .return.unsafeDereference();
+
+    win.document.addEventListener("firebugCommandLine", listenerInWindow);
+
+    var event = win.document.createEvent("Events");
     event.initEvent("firebugCommandLine", true, false);
     win.document.dispatchEvent(event);
 }
