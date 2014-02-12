@@ -773,6 +773,8 @@ SourceEditor.prototype =
         {
             // xxxHonza: the scroll position isn't set immediatelly after
             // seting the source. So, we need to update it asynchronously :-(
+            // (see also issue 7160)
+            // We might want to re-check when the next CM version is used.
             setTimeout(() =>
             {
                 var scrollInfo = this.editorObject.getScrollInfo();
