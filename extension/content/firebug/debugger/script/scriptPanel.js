@@ -1136,6 +1136,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         var isCodeTarget = (target.tagName === "TEXTAREA" &&
             Dom.getAncestorByClass(target, "CodeMirror"));
 
+        Trace.sysout("scriptPanel.getContextMenuItems; isCodeTarget: " + isCodeTarget, target);
+
         if (!isCodeTarget)
             return;
 

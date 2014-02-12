@@ -438,6 +438,8 @@ this.synthesizeMouse = function(node, offsetX, offsetY, event, win)
     // Use the first client rect for clicking (e.g. SPAN can have more).
     var rect = rectCollection[0]; //node.getBoundingClientRect();
 
+    FBTest.sysout("synthesizeMouse; rect", rectCollection);
+
     if (!FBTest.ok(rect, "Mouse event must be synthesized"))
         return;
 
@@ -561,6 +563,8 @@ this.pressKey = function(keyCode, target)
 
 this.clickContentButton = function(win, buttonId)
 {
+    FBTest.sysout("clickContentButton; " + buttonId);
+
     FBTest.click(win.document.getElementById(buttonId));
 };
 
@@ -1627,8 +1631,16 @@ this.getSourceLineNode = function(lineNo, chrome)
 
     var sourceLineNode;
 
+    if (!isSourceLineVisible(lineNo))
+        return;
+
     var panelNode = FBTest.getPanel("script").panelNode;
     var scroller = panelNode.getElementsByClassName("CodeMirror-scroll")[0];
+    if (!scroller)
+    {
+        FBTest.sysout("getSourceLineNode; ERROR no scroller!");
+        return;
+    }
 
     var lines = scroller.getElementsByClassName("firebug-line");
     for (var i=0; i<lines.length; i++)
@@ -1650,6 +1662,35 @@ this.getSourceLineNode = function(lineNo, chrome)
 
     return sourceLineNode;
 };
+
+function isSourceLineVisible(lineNo)
+{
+    var scriptPanel = FBTest.getPanel("script");
+    var editor = scriptPanel.scriptView.editor;
+    if (!editor)
+        return false;
+
+    var editorObject = editor.editorObject;
+    var view = scriptPanel.scriptView.editor.view;
+    var scrollInfo = editorObject.getScrollInfo();
+    var hScrollBar = view.getElementsByClassName("CodeMirror-hscrollbar")[0];
+
+    var scrollInfo = editorObject.getScrollInfo();
+
+    var pos = editor.cloneIntoCMScope({line: lineNo, ch: 0});
+    var coords = editor.editorObject.charCoords(pos, "local");
+
+    // Do not include h-scrollbar in editor height (even if CM docs says getScrollInfo
+    // returns the visible area minus scrollbars, it doesn't seem to work).
+    var editorHeight = scrollInfo.clientHeight - hScrollBar.offsetHeight;
+    var top = coords.top;
+    var bottom = coords.bottom;
+    var lineHeight = editorObject.defaultTextHeight();
+
+    // Scroll only if the target line is outside of the viewport.
+    var scrollNeeded = (top <= scrollInfo.top || bottom >= (scrollInfo.top + editorHeight));
+    return !scrollNeeded;
+}
 
 /**
  * Registers handler for break in Debugger. The handler is called as soon as Firebug
@@ -1782,12 +1823,16 @@ this.setBreakpoint = function(chrome, url, lineNo, attributes, callback)
     if (!url)
         url = panel.getObjectLocation(panel.location);
 
+    FBTest.sysout("setBreakpoint; " + url + ", " + lineNo);
+
     // FIXME: xxxpedro this function seems to be hacky, and could be the source
     // of the problem with the test case for Issue 4553
     FBTest.selectSourceLine(url, lineNo, "js", chrome, function(row)
     {
         var hasBreakpoint = FBTest.hasBreakpoint(lineNo);
         FBTest.ok(!hasBreakpoint, "There must not be a breakpoint at line: " + lineNo);
+
+        FBTest.sysout("setBreakpoint; source line selected", row);
 
         if (false && attributes && attributes.condition)
         {
@@ -1798,10 +1843,13 @@ this.setBreakpoint = function(chrome, url, lineNo, attributes, callback)
             var config = {tagName: "div", classes: "breakpoint"};
             FBTest.waitForDisplayedElement("script", config, function(element)
             {
+                FBTest.sysout("setBreakpoint; breakpoint created");
+
                 callback(row);
             });
 
-            var target = row.querySelector(".CodeMirror-linenumber");
+            var lineNode = FBTest.getSourceLineNode(lineNo, chrome);
+            var target = lineNode.querySelector(".CodeMirror-linenumber");
             FBTest.synthesizeMouse(target, 2, 2, {type: "mousedown"});
         }
     });
@@ -2135,6 +2183,8 @@ this.getCurrentLocation = function()
 // TODO: xxxpedro this function seems to be hacky
 this.selectSourceLine = function(url, lineNo, category, chrome, callback)
 {
+    FBTest.sysout("selectSourceLine; " + url + ", lineNo: " + lineNo);
+
     if (!url)
     {
         var panel = FBTest.getSelectedPanel();
