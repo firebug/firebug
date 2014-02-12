@@ -789,9 +789,9 @@ SourceEditor.prototype =
                 var scrollNeeded = (top <= scrollInfo.top ||
                     bottom >= (scrollInfo.top + editorHeight));
 
-                Trace.sysout("sourceEditor.scrollToLine; top: " + top + ", bottom: " + bottom +
-                    ", scrollbar height: " + hScrollBar.offsetHeight + ", editorHeight: " +
-                    editorHeight + ", " + "scrollNeeded: " + scrollNeeded,
+                Trace.sysout("sourceEditor.scrollToLine; (" + line + ") top: " + top +
+                    ", bottom: " + bottom + ", scrollbar height: " + hScrollBar.offsetHeight +
+                    ", editorHeight: " + editorHeight + ", " + "scrollNeeded: " + scrollNeeded,
                     {scrollInfo: scrollInfo, coords: coords});
 
                 if (scrollNeeded)
