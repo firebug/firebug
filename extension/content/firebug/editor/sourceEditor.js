@@ -9,8 +9,9 @@ define([
     "firebug/lib/css",
     "firebug/lib/wrapper",
     "firebug/lib/array",
+    "firebug/editor/sourceSearch"
 ],
-function(Firebug, FBTrace, Obj, Http, Dom, Css, Wrapper, Arr) {
+function(Firebug, FBTrace, Obj, Http, Dom, Css, Wrapper, Arr, SourceSearch) {
 
 "use strict";
 
@@ -28,6 +29,8 @@ var Cu = Components.utils;
 // Note that panel.html runs in content scope with restricted (no chrome) privileges.
 var codeMirrorSrc = "chrome://firebug/content/editor/codemirror/codemirror.js";
 var showHintSrc = "chrome://firebug/content/editor/codemirror/addon/show-hint.js";
+var searchSrc = "chrome://firebug/content/editor/codemirror/addon/search/search.js";
+var searchCursorSrc = "chrome://firebug/content/editor/codemirror/addon/search/searchcursor.js";
 var jsModeSrc = "chrome://firebug/content/editor/codemirror/mode/javascript.js";
 var htmlMixedModeSrc = "chrome://firebug/content/editor/codemirror/mode/htmlmixed.js";
 var xmlModeSrc = "chrome://firebug/content/editor/codemirror/mode/xml.js";
@@ -43,6 +46,8 @@ var BACK_CLASS = "CodeMirror-debugLocation-background";
 var HIGHLIGHTED_LINE_CLASS = "CodeMirror-highlightedLine";
 var BP_WRAP_CLASS = "CodeMirror-breakpoint";
 
+var unhighlightDelay = 1300;
+
 // ********************************************************************************************* //
 // Source Editor Constructor
 
@@ -50,7 +55,7 @@ function SourceEditor()
 {
     this.editorObject = null;
     this.debugLocation = -1;
-    this.highlightedLine = -1;
+    this.highlighter = null;
 }
 
 // ********************************************************************************************* //
@@ -93,7 +98,8 @@ SourceEditor.DefaultConfig =
     // autofocus: true
 };
 
-SourceEditor.ReadOnlyConfig = Obj.extend(SourceEditor.DefaultConfig, {
+SourceEditor.ReadOnlyConfig = Obj.extend(SourceEditor.DefaultConfig,
+{
     // Do not use "nocursor" to hide the cursor otherwise Ctrl+C doesn't work (see issue 6819)
     readOnly: true,
 
@@ -209,6 +215,8 @@ SourceEditor.prototype =
     destroy: function()
     {
         Trace.sysout("sourceEditor.destroy;");
+
+        this.removeHighlighter();
     },
 
     isInitialized: function()
@@ -235,6 +243,8 @@ SourceEditor.prototype =
 
         loader.addScript(doc, "cm", codeMirrorSrc);
         loader.addScript(doc, "cm-showhint", showHintSrc);
+        loader.addScript(doc, "cm-search", searchSrc);
+        loader.addScript(doc, "cm-searchcursor", searchCursorSrc);
         loader.addScript(doc, "cm-js", jsModeSrc);
         loader.addScript(doc, "cm-xml", xmlModeSrc);
         loader.addScript(doc, "cm-css", cssModeSrc);
@@ -382,6 +392,10 @@ SourceEditor.prototype =
 
     setText: function(text, type)
     {
+        // The text is changing, remove markers.
+        this.removeDebugLocation();
+        this.removeHighlighter();
+
         Trace.sysout("sourceEditor.setText: " + type + " " + text, text);
 
         // xxxHonza: the default 'mixedmode' mode should be set only if the text
@@ -423,6 +437,33 @@ SourceEditor.prototype =
     getLineCount: function()
     {
         return this.getDocument().lineCount();
+    },
+
+    getCharacterOffsets: function(start, end)
+    {
+        var startOffset = 0;
+        var endOffset = 0;
+
+        // Count the chars of the lines before the
+        // end/start lines, including newlines.
+        for (var i = 0; i < end.line; i++)
+        {
+            var lineCharCount = this.getCharCount(i);
+            if (start.line > i)
+                startOffset += lineCharCount + 1;
+
+            endOffset += lineCharCount + 1;
+        }
+
+        // Add the number of chars between the first char
+        // of the lines and cursor position.
+        startOffset += start.ch;
+        endOffset += end.ch;
+
+        return {
+            start: startOffset,
+            end: endOffset
+        };
     },
 
     getSelectedText: function()
@@ -498,29 +539,8 @@ SourceEditor.prototype =
     {
         var start = this.getCursor("start");
         var end = this.getCursor("end");
-        var startOffset = 0;
-        var endOffset = 0;
 
-        // Count the chars of the lines before the
-        // end/start lines, including newlines.
-        for (var i = 0; i < end.line; i++)
-        {
-            var lineCharCount = this.getCharCount(i);
-            if (start.line > i)
-                startOffset += lineCharCount + 1;
-
-            endOffset += lineCharCount + 1;
-        }
-
-        // Add the number of chars between the first char
-        // of the lines and cursor position.
-        startOffset += start.ch;
-        endOffset += end.ch;
-
-        return {
-            start: startOffset,
-            end: endOffset
-        };
+        return this.getCharacterOffsets(start, end);
     },
 
     hasSelection: function()
@@ -626,6 +646,35 @@ SourceEditor.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Search
+
+    search: function(text, options)
+    {
+        var offsets = this.find(text, options.start, options);
+        if (offsets)
+        {
+            var characterOffsets = this.getCharacterOffsets(offsets.start, offsets.end);
+
+            this.scrollToLine(offsets.start.line);
+            this.highlightLine(offsets.start.line);
+
+            this.setSelection(characterOffsets.start, characterOffsets.end);
+
+            return offsets;
+        }
+
+        return null;
+    },
+
+    find: function(text, start, options)
+    {
+        if (!this.sourceSearch)
+            this.sourceSearch = new SourceSearch(this);
+
+        return this.sourceSearch.findNext(text, start, options);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     setDebugLocation: function(line)
     {
@@ -671,35 +720,38 @@ SourceEditor.prototype =
         }
     },
 
+    removeDebugLocation: function()
+    {
+        this.setDebugLocation(-1);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Line Highlight
+
     highlightLine: function(line)
     {
-        Trace.sysout("sourceEditor.highlightLine; line: " + line + " (previous: " +
-            this.highlightedLine + ")");
+        Trace.sysout("sourceEditor.highlightLine; line: " + line);
 
-        if (this.highlightedLine == line)
-            return;
+        // If an existing highlighter is in place, cancel it (i.e. clear the timeout),
+        // so there are no two highlighted lines at the same time.
+        this.removeHighlighter();
 
-        if (this.highlightedLine != -1)
-        {
-            var handle = this.editorObject.getLineHandle(this.highlightedLine);
-            this.editorObject.removeLineClass(handle, "wrap", HIGHLIGHTED_LINE_CLASS);
-        }
-
-        this.highlightedLine = line;
-
-        if (this.highlightedLine == -1)
-            return;
-
-        var handle = this.editorObject.getLineHandle(line);
-        this.editorObject.addLineClass(handle, "wrap", HIGHLIGHTED_LINE_CLASS);
-
-        // Unhighlight after a timeout.
-        var self = this;
-        setTimeout(function()
-        {
-            self.highlightLine(-1);
-        }, 1300);
+        // Create highlighter in order to highlight given line. The highlighter will
+        // automatically unhighlight it after a timeout.
+        this.highlighter = new LineHighlighter(this);
+        this.highlighter.highlight(line);
     },
+
+    removeHighlighter: function()
+    {
+        if (this.highlighter)
+            this.highlighter.cancel();
+
+        this.highlighter = null;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Scroll
 
     scrollToLine: function(line, options)
     {
@@ -778,6 +830,9 @@ SourceEditor.prototype =
         var coords = this.cloneIntoCMScope({line: line, ch: 0});
         this.editorObject.scrollTo(0, this.editor.charCoords(coords, "local").top);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Focus
 
     hasFocus: function()
     {
@@ -1023,6 +1078,59 @@ function getEventObject(type, eventArg)
 }
 
 // ********************************************************************************************* //
+// Line Highlighter Implementation
+
+function LineHighlighter(editor)
+{
+    this.line = -1;
+    this.timeout = null;
+    this.editor = editor;
+    this.cm = editor.editorObject;
+}
+
+LineHighlighter.prototype =
+{
+    highlight: function(line)
+    {
+        // If the highlighter is currently in progress, just reset the timeout.
+        // Otherwise, make sure to highlight the line.
+        if (this.timeout)
+        {
+            clearInterval(this.timeout);
+        }
+        else
+        {
+            this.line = line;
+            var handle = this.cm.getLineHandle(line);
+            this.cm.addLineClass(handle, "wrap", HIGHLIGHTED_LINE_CLASS);
+        }
+
+        // Unhighlight after a timeout.
+        this.timeout = setTimeout(this.unhighlight.bind(this), unhighlightDelay);
+    },
+
+    unhighlight: function()
+    {
+        if (this.line == -1)
+            return;
+
+        // Remove the previously highlighted line.
+        var handle = this.cm.getLineHandle(this.line);
+        if (handle)
+            this.cm.removeLineClass(handle, "wrap", HIGHLIGHTED_LINE_CLASS);
+
+        // Do not forget to delete the highlighter.
+        this.editor.highlighter = null;
+    },
+
+    cancel: function()
+    {
+        clearInterval(this.timeout);
+        this.unhighlight();
+    }
+}
+
+// ********************************************************************************************* //
 // Support for Debugging - Tracing
 
 /**
@@ -1063,7 +1171,7 @@ function ScriptLoader(doc, callback)
  * Helper object for tracing from within the CM files.
  */
 ScriptLoader.prototype =
-/** @lends SourceEditor */
+/** @lends ScriptLoader */
 {
     addScript: function(doc, id, url)
     {

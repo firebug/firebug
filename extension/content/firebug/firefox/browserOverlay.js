@@ -186,6 +186,12 @@ BrowserOverlay.prototype =
         }, false);
     },
 
+    stopFirebug: function()
+    {
+        this.unloadContextMenuOverlay();
+        BrowserCommands.resetDisabledKeys(this.win);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Firebug Menu Handlers
 

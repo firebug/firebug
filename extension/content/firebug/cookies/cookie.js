@@ -64,8 +64,8 @@ Cookie.prototype =
             new String(this.cookie.isDomain).toUpperCase() + "\t" +
             this.cookie.path + "\t" +
             new String(this.cookie.isSecure).toUpperCase() + "\t" +
-            this.cookie.expires + "\t" +
-            this.cookie.maxAge + "\t" +
+            (this.cookie.expires ? this.cookie.expires + "\t" : "") +
+            (this.cookie.maxAge ? this.cookie.maxAge + "\t" : "") +
             this.cookie.name + "\t" +
             this.cookie.rawValue + "\r\n";
     },

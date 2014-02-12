@@ -25,7 +25,8 @@ function runTest()
 
 function createBreakpoint(callback, lineNo)
 {
-    FBTest.setBreakpoint(null, "issue4839.html", lineNo, null, callback);
+    FBTest.setBreakpoint(null, basePath + "script/stepping/4839/issue4839.html",
+        lineNo, null, callback);
 }
 
 function refreshPage(callback, win)

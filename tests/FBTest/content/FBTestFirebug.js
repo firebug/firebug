@@ -423,6 +423,12 @@ function _getEventTarget(aTarget)
 
 this.synthesizeMouse = function(node, offsetX, offsetY, event, win)
 {
+    if (!node)
+    {
+        FBTest.ok(false, "ERROR no target node");
+        return;
+    }
+
     win = win || node.ownerDocument.defaultView;
 
     event = event || {};
@@ -565,30 +571,33 @@ this.clickContentButton = function(win, buttonId)
  * Open/close Firebug UI. If forceOpen is true, Firebug is only opened if closed.
  * @param {Boolean} forceOpen Set to true if Firebug should stay opened.
  */
-this.pressToggleFirebug = function(forceOpen, target)
+this.pressToggleFirebug = function(forceOpen, target, callback)
 {
     var isOpen = this.isFirebugOpen();
-    FBTest.sysout("pressToggleFirebug; before forceOpen: " + forceOpen + ", is open: " + isOpen);
+
+    FBTest.sysout("pressToggleFirebug; forceOpen: " + forceOpen + ", is open: " + isOpen);
 
     // Don't close if it's open and should stay open.
     if (forceOpen && isOpen)
     {
         FBTest.sysout("pressToggleFirebug; bail out");
+        callback();
         return;
     }
 
-    FBTest.sendKey("F12", target); // F12
+    waitForTabAttach(callback);
 
-    isOpen = this.isFirebugOpen();
-    FBTest.sysout("pressToggleFirebug; after forceOpen: " + forceOpen + ", is open: " + isOpen);
+    FBTest.sendKey("F12", target);
+
+    this.isFirebugOpen();
 };
 
 /**
  * Open Firebug UI. If it's already opened, it stays opened.
  */
-this.openFirebug = function()
+this.openFirebug = function(callback)
 {
-    this.pressToggleFirebug(true);
+    this.pressToggleFirebug(true, undefined, callback);
 };
 
 /**
@@ -700,6 +709,12 @@ this.getBrowser = function()
     return FW.Firebug.Firefox.getTabBrowser();
 };
 
+this.getCurrentTabBrowser = function()
+{
+    var tabbrowser = FBTestFirebug.getBrowser();
+    return tabbrowser.selectedBrowser;
+};
+
 // ********************************************************************************************* //
 // URLs
 
@@ -745,7 +760,7 @@ this.openURL = function(url, callback)
 };
 
 /**
- * Refres the current tab.
+ * Refresh the current tab.
  * @param {Function} callback Callback handler that is called as soon as the page is reloaded.
  */
 this.reload = function(callback)
@@ -915,7 +930,7 @@ this.clearCache = function()
 };
 
 // ********************************************************************************************* //
-// Firebug Panel Enablement.
+// Firebug Panel Enablement
 
 this.getPanelTypeByName = function(panelName, doc)
 {
@@ -935,44 +950,55 @@ this.getPanelTypeByName = function(panelName, doc)
     return null;
 };
 
-this.setPanelState = function(model, panelName, callbackTriggersReload, enable)
+this.setPanelState = function(model, panelName, callback, enable, reload)
 {
-    // Open Firebug UI
-    this.pressToggleFirebug(true);
+    this.selectPanel(panelName);
 
-    var panelType = FW.Firebug.getPanelType(panelName);
-    if (panelType.prototype.isEnabled() != enable)
+    // Open Firebug UI is asynchronous since it involves attaching to the backend.
+    this.pressToggleFirebug(true, undefined, () =>
     {
-        var panelTab;
-
-        var doc = FW.Firebug.chrome.window.document;
-        var panelTabs = doc.getElementById("fbPanelBar1-panelTabs");
-        for (var child = panelTabs.firstChild; child; child = child.nextSibling)
+        var panelType = FW.Firebug.getPanelType(panelName);
+        if (panelType.prototype.isEnabled() != enable)
         {
-            if (panelType == child.panelType)
+            var panelTab;
+
+            var doc = FW.Firebug.chrome.window.document;
+            var panelTabs = doc.getElementById("fbPanelBar1-panelTabs");
+            for (var child = panelTabs.firstChild; child; child = child.nextSibling)
             {
-                panelTab = child;
-                break;
+                if (panelType == child.panelType)
+                {
+                    panelTab = child;
+                    break;
+                }
             }
+
+            if (!panelTab)
+            {
+                this.ok(panelTab, "Such panel doesn't exist! " + panelName + ", " + enable);
+                return;
+            }
+
+            // Execute directly menu commands.
+            if (enable)
+                panelTab.tabMenu.onEnable();
+            else
+                panelTab.tabMenu.onDisable();
         }
 
-        if (!panelTab)
+        // Clear cache and reload.
+        this.clearCache();
+
+        // Do not reload automatically, JSD2 doesn't need that anymore.
+        if (reload)
+            this.reload(callback);
+
+        if (callback)
         {
-            this.ok(panelTab, "Such panel doesn't exist! " + panelName + ", " + enable);
-            return;
+            var browser = FBTestFirebug.getCurrentTabBrowser();
+            callback(browser.contentDocument.defaultView);
         }
-
-        // Execute directly menu commands.
-        if (enable)
-            panelTab.tabMenu.onEnable();
-        else
-            panelTab.tabMenu.onDisable();
-    }
-
-    // Clear cache and reload.
-    this.clearCache();
-    if (callbackTriggersReload)
-        this.reload(callbackTriggersReload);
+    });
 };
 
 /**
@@ -1010,7 +1036,10 @@ this.enableScriptPanel = function(callback)
 {
     function onCallback(win)
     {
-        waitForDebuggerAttach(win, callback);
+        waitForThreadAttach(function()
+        {
+            callback(win);
+        });
     }
 
     var cb = callback ? onCallback : null;
@@ -1034,7 +1063,10 @@ this.enableConsolePanel = function(callback)
 {
     function onCallback(win)
     {
-        waitForDebuggerAttach(win, callback);
+        waitForTabAttach(function()
+        {
+            callback(win);
+        });
     }
 
     var cb = callback ? onCallback : null;
@@ -1056,6 +1088,45 @@ this.enableAllPanels = function()
 {
     FW.FBL.$("cmd_firebug_enablePanels").doCommand();
 };
+
+/**
+ * Enable specified panels one by one and selects the first one.
+ */
+this.enablePanels = function(panelNames, callback)
+{
+    if (!panelNames.length)
+    {
+        FBTest.sysout("enablePanels; ERROR no panels to enable!");
+        return;
+    }
+
+    var name = panelNames.pop();
+
+    var method;
+    if (name === "script")
+        method = FBTestFirebug.enableScriptPanel;
+    else if (name === "net")
+        method = FBTestFirebug.enableNetPanel;
+    else if (name === "console")
+        method = FBTestFirebug.enableConsolePanel;
+
+    if (!method)
+    {
+        FBTest.sysout("enablePanels; ERROR wrong panel name " + panelName);
+        return;
+    }
+
+    method.call(this, function(win)
+    {
+        if (!panelNames.length)
+            callback(win)
+        else
+            FBTestFirebug.enablePanels(panelNames, callback);
+    });
+}
+
+// ********************************************************************************************* //
+// Panel Selection
 
 /**
  * Select specific panel in the UI.
@@ -1185,6 +1256,8 @@ this.getPanel = function(name)
 
     return FW.Firebug.currentContext.getPanel(name);
 };
+
+// ********************************************************************************************* //
 
 /**
  * Wait until the debugger has been activated, after enabling the Script panel.
@@ -1563,13 +1636,6 @@ this.getSourceLineNode = function(lineNo, chrome)
         var line = lines[i].parentNode;
         var lineHeight = line.clientHeight;
 
-        // Skip lines outside the viewport,
-        if (line.offsetTop + lineHeight < scroller.scrollTop ||
-            line.offsetTop > scroller.scrollTop + scroller.clientHeight)
-        {
-            continue;
-        }
-
         var lineNumberNode = line.getElementsByClassName("CodeMirror-linenumber")[0];
         if (!lineNumberNode)
             continue;
@@ -1720,33 +1786,35 @@ this.setBreakpoint = function(chrome, url, lineNo, attributes, callback)
     // of the problem with the test case for Issue 4553
     FBTest.selectSourceLine(url, lineNo, "js", chrome, function(row)
     {
-        if (!FBTest.hasBreakpoint(row))
-        {
-            if (attributes && attributes.condition)
-            {
-                // xxxHonza: TODO
-            }
-            else
-            {
-                var config = {tagName: "div", classes: "breakpoint"};
-                FBTest.waitForDisplayedElement("script", config, function(element)
-                {
-                    callback(row);
-                });
+        var hasBreakpoint = FBTest.hasBreakpoint(lineNo);
+        FBTest.ok(!hasBreakpoint, "There must not be a breakpoint at line: " + lineNo);
 
-                var target = row.querySelector(".CodeMirror-linenumber");
-                FBTest.synthesizeMouse(target, 2, 2, {type: "mousedown"});
-            }
+        if (false && attributes && attributes.condition)
+        {
+            // xxxHonza: TODO
         }
         else
         {
-            callback(row);
+            var config = {tagName: "div", classes: "breakpoint"};
+            FBTest.waitForDisplayedElement("script", config, function(element)
+            {
+                callback(row);
+            });
+
+            var target = row.querySelector(".CodeMirror-linenumber");
+            FBTest.synthesizeMouse(target, 2, 2, {type: "mousedown"});
         }
     });
 };
 
 this.removeBreakpoint = function(chrome, url, lineNo, callback)
 {
+    if (!callback)
+    {
+        FBTest.sysout("removeBreakpoint; ERROR missing callback");
+        return;
+    }
+
     if (!chrome)
         chrome = FW.Firebug.chrome;
 
@@ -1756,13 +1824,28 @@ this.removeBreakpoint = function(chrome, url, lineNo, callback)
 
     FBTestFirebug.selectSourceLine(url, lineNo, "js", chrome, function(row)
     {
-        if (FBTest.hasBreakpoint(row))
+        var hasBreakpoint = FBTest.hasBreakpoint(lineNo);
+        FBTest.ok(hasBreakpoint, "There must be a breakpoint at line: " + lineNo);
+
+        var listener =
         {
-            // Click to remove a breakpoint.
-            FBTest.mouseDown(row.querySelector(".breakpoint"));
-            FBTest.ok(!FBTest.hasBreakpoint(row), "Breakpoint must be removed");
-        }
-        callback(row);
+            onBreakpointRemoved: function()
+            {
+                DebuggerController.removeListener(browser, listener);
+
+                hasBreakpoint = FBTest.hasBreakpoint(lineNo);
+                FBTest.ok(!hasBreakpoint, "Breakpoint must be removed");
+
+                callback();
+            }
+        };
+
+        var browser = FBTestFirebug.getCurrentTabBrowser();
+        DebuggerController.addListener(browser, listener);
+
+        // Click to remove a breakpoint.
+        var target = row.querySelector(".CodeMirror-linenumber");
+        FBTest.synthesizeMouse(target, 2, 2, {type: "mousedown"});
     });
 };
 
@@ -1770,7 +1853,7 @@ this.hasBreakpoint = function(line, chrome)
 {
     var line = line;
     if (typeof(line) == "number")
-        line = FBTest.getSourceLineNode(lineNo, chrome);
+        line = FBTest.getSourceLineNode(line, chrome);
 
     if (!line)
     {
@@ -1780,7 +1863,19 @@ this.hasBreakpoint = function(line, chrome)
 
     var bpNode = line.getElementsByClassName("breakpoint");
     return (bpNode.length > 0);
-}
+};
+
+this.waitForDisplayedBreakpoint = function(chrome, url, lineNo, callback)
+{
+    FBTest.selectSourceLine(url, lineNo, "js", chrome, function(row)
+    {
+        var config = {tagName: "div", classes: "breakpoint"};
+        FBTest.waitForDisplayedElement("script", config, function(element)
+        {
+            callback(row);
+        });
+    });
+};
 
 // ********************************************************************************************* //
 // Watch Panel
@@ -1810,18 +1905,26 @@ this.addWatchExpression = function(chrome, expression, callback)
     var editor = panelNode.querySelector(".completionInput");
     FBTest.ok(editor, "The editor must be there; " + expression);
 
+    // xxxHonza: the variable name is used to identify the row, but note that the same
+    // variable can be displayed more than once in the Watch panel. Once as an
+    // user expression and once as part of the scope chain.
+    // The API works in this particular case since user expressions are displayed
+    // first, but the entire logic should be improved.
+    // It would help if MutationRecognizer can target elements through CSS selectors
+    // (e.g. .memberRow.wathRow .memberLabelBox -> identifies user expression label)
+
     // Wait till the result is evaluated and displayed.
     var doc = FBTest.getSidePanelDocument();
-    var recognizer = new MutationRecognizer(doc.defaultView, "td",
-        {"class": "memberValueCell"});
+    var recognizer = new MutationRecognizer(doc.defaultView, "Text",
+        {"class": "memberLabelBox"}, expression);
 
-    recognizer.onRecognizeAsync(function(memberValueColumn)
+    recognizer.onRecognizeAsync(function(element)
     {
-        var td = FW.FBL.hasClass(memberValueColumn, "memberValueCell") ?
-            memberValueColumn : memberValueColumn.querySelector(".memberValueCell");
+        var row = FW.FBL.getAncestorByClass(element, "memberRow");
+        var value = FW.FBL.getChildByClass(row, "memberValueCell");
 
         if (callback)
-            callback(td);
+            callback(value);
     });
 
     // Set expression and press enter.
@@ -1842,6 +1945,12 @@ this.setWatchExpressionValue = function(chrome, varName, expression, callback)
     if (!chrome)
         chrome = FW.Firebug.chrome;
 
+    if (!callback)
+    {
+        FBTest.sysout("setWatchExpressionValue; ERROR missing callback");
+        return;
+    }
+
     var watchPanel = FBTest.getPanel("watches", true);
     var row = this.getWatchExpressionRow(chrome, varName);
     if (!row)
@@ -1854,18 +1963,17 @@ this.setWatchExpressionValue = function(chrome, varName, expression, callback)
     var editor = panelNode.querySelector(".completionInput");
     FBTest.ok(editor, "The editor must be there; " + varName);
 
-    // Wait till the result is evaluated and displayed.
+    // Wait till the tree-row (with given variable name) is refreshed
     var doc = FBTest.getSidePanelDocument();
-    var recognizer = new MutationRecognizer(doc.defaultView, "td",
-        {"class": "memberValueCell"});
+    var recognizer = new MutationRecognizer(doc.defaultView, "Text",
+        {"class": "memberLabelBox"}, varName);
 
-    recognizer.onRecognizeAsync(function(memberValueColumn)
+    recognizer.onRecognizeAsync(function(element)
     {
-        var td = FW.FBL.hasClass(memberValueColumn, "memberValueCell") ?
-            memberValueColumn : memberValueColumn.querySelector(".memberValueCell");
+        FBTest.sysout("setWatchExpressionValue; row refreshed: " + varName);
 
-        if (callback)
-            callback(td);
+        var row = FW.FBL.getAncestorByClass(element, "memberRow");
+        callback(row);
     });
 
     // Set expression and press enter.
@@ -1885,6 +1993,12 @@ this.toggleWatchExpressionBooleanValue = function(chrome, varName, callback)
     if (!chrome)
         chrome = FW.Firebug.chrome;
 
+    if (!callback)
+    {
+        FBTest.sysout("setWatchExpressionValue; ERROR missing callback");
+        return;
+    }
+
     var watchPanel = FBTest.getPanel("watches", true);
     var row = this.getWatchExpressionRow(chrome, varName);
     if (!row)
@@ -1893,7 +2007,18 @@ this.toggleWatchExpressionBooleanValue = function(chrome, varName, callback)
     // Click to open a text editor.
     FBTest.dblclick(row);
 
-    callback(row);
+    // Wait till the tree-row (with given variable name) is refreshed
+    var doc = FBTest.getSidePanelDocument();
+    var recognizer = new MutationRecognizer(doc.defaultView, "Text",
+        {"class": "memberLabelBox"}, varName);
+
+    recognizer.onRecognizeAsync(function(element)
+    {
+        FBTest.sysout("toggleWatchExpressionBooleanValue; row refreshed: " + varName);
+
+        var row = FW.FBL.getAncestorByClass(element, "memberRow");
+        callback(row);
+    });
 }
 
 /**
@@ -1954,8 +2079,7 @@ window.onerror = function(errType, errURL, errLineNum)
     var fileName = path.substr(path.lastIndexOf("/") + 1);
     var errorDesc = errType + " (" + errLineNum + ")" + " " + errURL;
     FBTest.sysout(fileName + " ERROR " + errorDesc);
-    if (!FBTrace.DBG_ERRORS)  // then we are watching with another tracer, let it go
-        FBTest.ok(false, fileName + " ERROR " + errorDesc);
+    FBTest.ok(false, fileName + " ERROR " + errorDesc);
     FBTestFirebug.testDone();
     return false;
 };
@@ -2034,6 +2158,10 @@ this.selectSourceLine = function(url, lineNo, category, chrome, callback)
             return;
 
         clearInterval(checking);
+
+        if (!FBTest.ok(row, "Source line must exist " + url + ", " + lineNo))
+            return;
+
         callback(row);
     }, 50);
 };
@@ -2276,12 +2404,17 @@ this.searchInScriptPanel = function(searchText, callback)
     var config =
     {
         tagName: "div",
-        classes: "sourceRow jumpHighlight"
+        classes: "CodeMirror-highlightedLine"
     };
 
     FBTest.waitForDisplayedElement("script", config, function(element)
     {
-        waitForUnhighlight(config, callback);
+        // Wait till CodeMirror-highlightedLine is removed.
+        var attributes = {"class": "CodeMirror-highlightedLine"}
+        var doc = FBTestFirebug.getPanelDocument();
+        var recognizer = new MutationRecognizer(doc.defaultView, config.tagName,
+            null, null, attributes);
+        recognizer.onRecognizeAsync(callback);
     });
 
     // Set search string into the search box.
@@ -2314,7 +2447,12 @@ this.searchInCssPanel = function(searchText, callback)
 
     FBTest.waitForDisplayedElement("stylesheet", config, function(element)
     {
-        waitForUnhighlight(config, callback);
+        // Wait till jumpHighlight is removed.
+        var attributes = {"class": "jumpHighlight"}
+        var doc = FBTestFirebug.getPanelDocument();
+        var recognizer = new MutationRecognizer(doc.defaultView, config.tagName,
+            null, null, attributes);
+        recognizer.onRecognizeAsync(callback);
     });
 
     // Set search string into the search box
@@ -2328,25 +2466,6 @@ this.searchInCssPanel = function(searchText, callback)
     // press enter instead (asynchronously).
     FBTest.sendKey("RETURN", "fbSearchBox");
 };
-
-/**
- * Helper for searchInScriptPanel and searchInCssPanel, waits till the highlighted line
- * (using jumpHighlight class) is unhighlighted (Firebug unhilights this on timeout).
- *
- * @param {Object} config Specifies the tagName fo the target element.
- * @param {Object} callback
- */
-function waitForUnhighlight(config, callback)
-{
-    var doc = FBTestFirebug.getPanelDocument();
-
-    // Wait till jumpHighlight is removed.
-    var attributes = {"class": "jumpHighlight"}
-    var recognizer = new MutationRecognizer(doc.defaultView, config.tagName,
-        null, null, attributes);
-
-    recognizer.onRecognizeAsync(callback);
-}
 
 /**
  * Executes search within the HTML panel.
@@ -2630,6 +2749,34 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
     var eventDetails = {type: "contextmenu", button: 2};
     this.synthesizeMouse(target, 2, 2, eventDetails);
 };
+
+this.showScriptPanelContextMenu = function(target, callback)
+{
+    var contextMenu = ContextMenuController.getContextMenu(target);
+
+    function onPopupShown(event)
+    {
+        ContextMenuController.removeListener(target, "popupshown", onPopupShown);
+        callback(contextMenu);
+    }
+
+    ContextMenuController.addListener(target, "popupshown", onPopupShown);
+
+    var cm = FW.FBL.getAncestorByClass(target, "CodeMirror");
+    var textArea = cm.getElementsByTagName("TEXTAREA").item(0);
+
+    // xxxHonza: the way how clicking is done is a hack and it should be fixed.
+    // 'mousedown' is sent so {@link SourceEditor} can handle it and remember
+    // the currentTarget, see SourceEditor.onInit().
+    // 'contextmenu' is sent so the {@link ScriptPanel} can handle it and show
+    // the right context menu items. In this case CM's TEXTAREA must be the target
+    // see ScriptPanel.getContextMenuItems().
+    var eventDetails1 = {type: "mousedown", button: 2};
+    FBTest.synthesizeMouse(target, 2, 2, eventDetails1);
+
+    var eventDetails2 = {type: "contextmenu", button: 2};
+    FBTest.synthesizeMouse(textArea, 2, 2, eventDetails2);
+}
 
 // ********************************************************************************************* //
 // Clipboard
@@ -3122,72 +3269,84 @@ this.isMac = function()
 // ********************************************************************************************* //
 // JSD2
 
-function waitForDebuggerAttach(win, callback)
+function waitForTabAttach(callback)
 {
-    var context = FW.Firebug.currentContext;
-    if (!context)
+    if (!callback)
     {
-        FBTest.ok(context, "There is no current context!" + context);
+        FBTest.sysout("waitForTabAttach; ERROR no callback!");
         return;
     }
 
-    FBTest.sysout("waitForDebuggerAttach.window loaded: " + win.location.href);
-
-    var listener;
-
-    // If the thread is already attached just execute the callback.
-    if (context.activeThread)
+    // The tab might be alraedy attached (e.g. if the page is just reloaded).
+    // Execute the callback directly in such case.
+    var browser = FBTestFirebug.getCurrentTabBrowser();
+    var attached = FW.Firebug.DebuggerClient.isTabAttached(browser);
+    if (attached)
     {
-        FBTest.sysout("waitForDebuggerAttach.thread-actor already attached " +
-            context.activeThread.paused, context.activeThread);
+        callback();
+    }
 
-        // xxxHonza: hack, why the ThreadClient isn't paused too?
-        var actor = FW.Firebug.DebuggerLib.getThreadActor(context.browser);
-        var state = actor ? actor._state : "no tab actor";
-        FBTest.sysout("waitForDebuggerAttach; actor: " + state);
-
-        if (state == "paused")
+    var listener =
+    {
+        onTabAttached: function()
         {
-            listener =
-            {
-                onResumed: function()
-                {
-                    FBTest.sysout("waitForDebuggerAttach.onResumed;");
-                    DebuggerController.removeListener(listener);
+            FBTest.sysout("waitForTabAttach; On tab attached");
 
-                    if (callback)
-                        callback(win);
-                }
-            };
+            DebuggerController.removeListener(browser, listener);
+
+            callback();
         }
-        else
+    };
+
+    DebuggerController.addListener(browser, listener);
+}
+
+function waitForThreadAttach(callback)
+{
+    if (!callback)
+    {
+        FBTest.sysout("waitForThreadAttach; ERROR no callback!");
+        return;
+    }
+
+    var browser = FW.Firebug.currentContext.browser;
+    var attached = FW.Firebug.DebuggerClient.isThreadAttached(browser);
+    if (attached)
+    {
+        // The thread must be attached and also resumed. If the state isn't running
+        // keep the 'attached' set to true and let the listener below wait for 'onResumed'
+        var state = FW.Firebug.DebuggerClient.getThreadState(browser);
+        if (state == "running")
         {
-            if (callback)
-                callback(win);
+            callback();
             return;
         }
     }
-    else
+
+    var listener =
     {
-        // Listener for 'onThreadAttached' event
-        listener =
+        onThreadAttached: function()
         {
-            onThreadAttached: function()
-            {
-                FBTest.sysout("waitForDebuggerAttach.onThreadAttached;");
-                DebuggerController.removeListener(listener);
+            FBTest.sysout("waitForThreadAttach; On thread attached");
 
-                if (callback)
-                    callback(win);
-            }
-        };
-    }
+            attached = true;
 
-    // Wait till the context is attached to the thread.
-    if (listener)
-        DebuggerController.addListener(listener);
+            var actor = FW.Firebug.DebuggerLib.getThreadActor(browser);
+            var tab = FW.Firebug.DebuggerClient.getTabClient(browser);
+        },
 
-    FBTest.sysout("waitForDebuggerAttach.add debugger listener; " + listener);
+        onResumed: function()
+        {
+            FBTest.sysout("waitForThreadAttach; On thread resumed");
+
+            DebuggerController.removeListener(browser, listener);
+
+            if (attached)
+                callback();
+        }
+    };
+
+    DebuggerController.addListener(browser, listener);
 }
 
 // ********************************************************************************************* //

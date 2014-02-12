@@ -7,13 +7,15 @@ define([
     "firebug/lib/css",
     "firebug/lib/url",
     "firebug/lib/options",
+    "firebug/lib/promise",
     "firebug/lib/dom",
     "firebug/lib/events",
     "firebug/lib/wrapper",
     "firebug/chrome/eventSource",
     "firebug/chrome/searchBox",
 ],
-function(Firebug, FBTrace, Obj, Css, Url, Options, Dom, Events, Wrapper, EventSource, SearchBox) {
+function(Firebug, FBTrace, Obj, Css, Url, Options, Promise, Dom, Events, Wrapper, EventSource,
+    SearchBox) {
 
 "use strict";
 
@@ -463,9 +465,14 @@ var Panel = Obj.extend(new EventSource(),
     },
 
     /**
-     * Navigates to the next document whose match parameter returns true.
+     * Gets the next document from the list of documents (locations). Actual document
+     * instances in the list depend on the current panel.
+     *
+     * @param {Boolean} reverse If true the previous document is returned.
+     * @returns {Object} Next document from the location list. Must be an object
+     * that also appears in the location list (the logic will lookup for it).
      */
-    navigateToNextDocument: function(match, reverse)
+    getNextDocument: function(doc, reverse)
     {
         // This is an approximation of the UI that is displayed by the location
         // selector. This should be close enough, although it may be better
@@ -489,33 +496,141 @@ var Panel = Obj.extend(new EventSource(),
             return 0;
         }
 
-        var allLocs = this.getLocationList().sort(compare);
-        for (var curPos = 0; curPos < allLocs.length && allLocs[curPos] != this.location; curPos++);
+        var list = this.getLocationList().sort(compare);
+        var currIndex = list.indexOf(doc);
 
-        function transformIndex(index)
+        // The document object must always be in the location list.
+        if (currIndex == -1)
+            TraceError.sysout("panel.getNextDocument; ERROR invalid location", doc);
+
+        // Get the next index in the array. Do start from begin/end
+        // in case of index overflow/underflow.
+        if (reverse)
         {
-            if (reverse)
-            {
-                // For the reverse case we need to implement wrap around.
-                var intermediate = curPos - index - 1;
-                return (intermediate < 0 ? allLocs.length : 0) + intermediate;
-            }
-            else
-            {
-                return (curPos + index + 1) % allLocs.length;
-            }
-        };
+            currIndex--;
 
-        for (var next = 0; next < allLocs.length - 1; next++)
-        {
-            var object = allLocs[transformIndex(next)];
-
-            if (match(object))
-            {
-                this.navigate(object);
-                return object;
-            }
+            if (currIndex < 0)
+                currIndex = list.length - 1;
         }
+        else
+        {
+            currIndex++;
+
+            if (currIndex > list.length - 1)
+                currIndex = 0;
+        }
+
+        // Return the next document object.
+        return list[currIndex];
+    },
+
+    /**
+     * Navigates to the next document whose match callback returns true. The loop
+     * we use for finding the next document (that matches the search keyword) might be
+     * asynchronous (e.g. in case of scripts, we need to get the source from the server,
+     * which might happen asynchronously if not on the client yet).
+     *
+     * @param {Function} match Callback used to find out whether the document has any matches
+     * for the current search keyword.
+     * @param {Boolean} reverse Indicates whether passing through the documents
+     * should be done in reverse order
+     * @param {Object} The current document used in the (asynchronous) loop.
+     *
+     * @return {Object} The method can return
+     * 1) A document object that has been found
+     * 2) null if there is no document matching the search keyword
+     * 3) {@link Promise} instance that will be resolved asynchronously
+     */
+    navigateToNextDocument: function(match, reverse, doc, deferred)
+    {
+        // The result value of the following promise will be resolved to
+        // true if a document matching the search keyword has been found.
+        // It'll be resolved to false if all documents have been checked
+        // and no match found.
+        var deferred = deferred || Promise.defer();
+
+        do
+        {
+            // Loop over documents in the location list and find one that has at least
+            // one search result. We are using the |match| callback function to search
+            // through the document. The loop ends when we get the same doc we started with.
+            doc = this.getNextDocument(doc, reverse);
+
+            // Some 'match' implementations can be asynchronous (depends on the current panel)
+            // The result value must be a promise in such case.
+            var result = match(doc);
+
+            Trace.sysout("panel.navigateToNextDocument; " + doc.href + ", match: " + result);
+
+            // It isn't nice to use isPromise in general, but we don't want to force
+            // every panel to use promises, so {@link Promise} as the return value is not
+            // mandatory (at least for now, perhaps in the future).
+            if (isPromise(result))
+            {
+                // Wait till the |match| callback finishes.
+                result.then((found) =>
+                {
+                    Trace.sysout("panel.navigateToNextDocument; async match done: " +
+                        found + ", for: " + doc.href, result);
+
+                    if (found)
+                    {
+                        // A document that matches the search keyword has been found.
+                        // Navigate the panel to the document and resolve the final promise.
+                        this.navigate(doc);
+                        deferred.resolve(found);
+                    }
+                    else
+                    {
+                        if (Trace.active)
+                        {
+                            Trace.sysout("panel.navigateToNextDocument; next async cycle: " +
+                                (doc.href !== this.location.href ? "yes" : "no") + ", [doc: " +
+                                Url.getFileName(doc.href) + "], [location: " +
+                                Url.getFileName(this.location.href) + "]");
+                        }
+
+                        // There was no search match in the current document, let's move
+                        // to the next one. If the next one is the one we started with
+                        // we already iterated all documents, so resolve the final
+                        // promise to false.
+                        // xxxHonza: ideally we should compare (doc !== this.location)
+                        // but the Script panel is also using SourceLink instances as the
+                        // location and so, it wouldn't work.
+                        // It should be possible to normalize panel's location through
+                        // 'normalizeLocation' API implemented by derived panels.
+                        // (jut like it's done for the selection, see: normalizeSelection)
+                        if (doc.href !== this.location.href)
+                            this.navigateToNextDocument(match, reverse, doc, deferred);
+                        else
+                            deferred.resolve(false);
+                    }
+                });
+
+                return deferred.promise;
+            }
+            else if (result)
+            {
+                Trace.sysout("panel.navigateToNextDocument; sync result for: " + doc.href);
+
+                // Immediately navigate the current panel to the document
+                // that matches the search keyword. In this case, the |match| callback
+                // finished synchronously.
+                this.navigate(doc);
+                return doc;
+            }
+
+            Trace.sysout("panel.navigateToNextDocument; next cycle? " + doc.href +
+                " !== " + this.location.href);
+
+        } while (doc.href !== this.location.href);
+
+        // There is no document that would match the search keyword, so resolve
+        // the final promise to false.
+        deferred.resolve(false);
+
+        // No synchronous match has been found. 
+        return null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -753,6 +868,14 @@ var Panel = Obj.extend(new EventSource(),
         this._selection = val;
     }
 });
+
+// ********************************************************************************************* //
+// Helpers
+
+function isPromise(object)
+{
+    return object && typeof object.then == "function";
+}
 
 // ********************************************************************************************* //
 // Registration

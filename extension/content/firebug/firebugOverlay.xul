@@ -378,21 +378,15 @@
 
                                     <hbox id="fbDebuggerButtons" collapsed="true" class="noTabStop">
                                         <toolbarbutton id="fbRerunButton" command="cmd_firebug_rerun"
-                                            tooltiptext="firebug.Rerun"
-                                            class="toolbar-image-button fbInternational" />
-                                        <toolbarbutton id="fbContinueButton"
-                                            command="cmd_firebug_resumeExecution"
-                                            tooltiptext="firebug.Continue"
-                                            class="toolbar-image-button fbInternational" />
+                                            class="toolbar-image-button" />
+                                        <toolbarbutton id="fbContinueButton" command="cmd_firebug_resumeExecution"
+                                            class="toolbar-image-button" />
                                         <toolbarbutton id="fbStepIntoButton" command="cmd_firebug_stepInto"
-                                            tooltiptext="firebug.StepInto"
-                                            class="toolbar-image-button fbInternational" />
+                                            class="toolbar-image-button" />
                                         <toolbarbutton id="fbStepOverButton" command="cmd_firebug_stepOver"
-                                            tooltiptext="firebug.StepOver"
-                                            class="toolbar-image-button fbInternational" />
+                                            class="toolbar-image-button" />
                                         <toolbarbutton id="fbStepOutButton" command="cmd_firebug_stepOut"
-                                            tooltiptext="firebug.StepOut"
-                                            class="toolbar-image-button fbInternational"/>
+                                            class="toolbar-image-button"/>
                                     </hbox>
 
                                     <!-- Toolbar buttons provided by extensions through Firebug API -->
@@ -410,7 +404,7 @@
                         </toolbox>
 
                         <deck anonid="deck" id="fbPanelBar1-deck" flex="1">
-                            <!-- src attribute should be set here otherwise about:empty
+                            <!-- src attribute should be set here otherwise about:blank
                                 is used by default, which could launch FirebugChrome.initializeUI
                                 yet before the right content (i.e. panel.html) is loaded.
                                 The same for the fbPanelBar1-browser. -->

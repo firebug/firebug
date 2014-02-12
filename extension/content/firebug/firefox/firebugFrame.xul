@@ -69,15 +69,15 @@
     <!-- If Firebug is displayed in this external window, but not active for currently selected
          Firefox tab, the following button allows to resume it. -->
     <vbox id="fbResumeBox" flex="1" collapsed="true">
-        <hbox id="fbWindowButtons" role="toolbar" class="innerToolbar" aria-label="a11y.labels.firebug window">
+        <hbox id="fbWindowButtons" role="toolbar" class="innerToolbar" aria-label="a11y.labels.firebug_window">
             <spacer flex="1"/>
             <!-- Allow to minimize/attach Firebug if deactivated -->
             <toolbarbutton id="fbMinimizeButton" class="toolbarbutton-iconic fbInternational"
-                tooltiptext="Minimize Firebug" command="cmd_firebug_minimizeFirebug"/>
+                tooltiptext="Minimize_Firebug" command="cmd_firebug_minimizeFirebug"/>
         </hbox>
         <hbox flex="1" pack="center" align="center">
             <button id="fbResumeBoxButton"
-                label="label.Activate Firebug for the current website"
+                label="Activate_Firebug_for_the_current_website"
                 command="cmd_firebug_toggleSuspendFirebug" class="fbInternational"/>
         </hbox>
     </vbox>

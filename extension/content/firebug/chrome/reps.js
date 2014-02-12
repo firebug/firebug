@@ -1145,9 +1145,15 @@ FirebugReps.Element = domplate(Rep,
         System.copyToClipboard(elt.innerHTML);
     },
 
-    copyXPath: function(elt)
+    copyMinimalXPath: function(elt)
     {
         var xpath = Xpath.getElementXPath(elt);
+        System.copyToClipboard(xpath);
+    },
+
+    copyXPath: function(elt)
+    {
+        var xpath = Xpath.getElementTreeXPath(elt);
         System.copyToClipboard(xpath);
     },
 
@@ -1265,6 +1271,8 @@ FirebugReps.Element = domplate(Rep,
         var items = [];
         var clipboardContent = System.getStringDataFromClipboard();
         var isEltRoot = (elt === elt.ownerDocument.documentElement);
+        var minimalXPath = Xpath.getElementXPath(elt);
+        var absoluteXPath = Xpath.getElementTreeXPath(elt);
 
         if (Xml.isElementHTMLOrXHTML(elt))
             type = "HTML";
@@ -1281,7 +1289,8 @@ FirebugReps.Element = domplate(Rep,
         {
             label: Locale.$STRF("html.Copy_Node", [type]),
             tooltiptext: Locale.$STRF("html.tip.Copy_Node", [type]),
-            command: Obj.bindFixed(this.copyHTML, this, elt)
+            command: Obj.bindFixed(this.copyHTML, this, elt),
+            nol10n: true
         });
 
         if (Xml.isElementHTMLOrXHTML(elt))
@@ -1294,13 +1303,28 @@ FirebugReps.Element = domplate(Rep,
             });
         }
 
-        items = items.concat([
+        items.push(
             {
                 label: "CopyXPath",
                 tooltiptext: "html.tip.Copy_XPath",
                 id: "fbCopyXPath",
-                command: Obj.bindFixed(this.copyXPath, this, elt)
-            },
+                command: this.copyXPath.bind(this, elt)
+            }
+        );
+
+        if (minimalXPath != absoluteXPath)
+        {
+            items.push(
+                {
+                    label: "CopyMinimalXPath",
+                    tooltiptext: "html.tip.Copy_Minimal_XPath",
+                    id: "fbCopyMinimalXPath",
+                    command: this.copyMinimalXPath.bind(this, elt)
+                }
+            );
+        }
+
+        items = items.concat([
             {
                 label: "Copy_CSS_Path",
                 tooltiptext: "html.tip.Copy_CSS_Path",
@@ -1310,6 +1334,7 @@ FirebugReps.Element = domplate(Rep,
             {
                 label: Locale.$STRF("html.menu.Paste", [type]),
                 tooltiptext: Locale.$STRF("html.tip.Paste", [type]),
+                nol10n: true,
                 disabled: !clipboardContent,
                 id: "fbPaste",
                 items: [

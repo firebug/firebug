@@ -26,7 +26,7 @@
       </Description>
     </em:targetApplication>
 
-    <em:updateURL>https://getfirebug.com/releases/fbtest/1.10/update.rdf</em:updateURL>
+    <em:updateURL>https://getfirebug.com/releases/fbtest/1.13/update.rdf</em:updateURL>
     <em:homepageURL>http://getfirebug.com/wiki/index.php/Firebug_Tests</em:homepageURL>
 
   </Description>

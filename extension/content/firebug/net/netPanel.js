@@ -27,13 +27,13 @@ define([
     "firebug/net/timeInfoTip",
     "firebug/chrome/panelNotification",
     "firebug/chrome/activablePanel",
+    "firebug/chrome/searchBox",
     "firebug/net/xmlViewer",
     "firebug/net/svgViewer",
     "firebug/net/jsonViewer",
     "firebug/net/fontViewer",
     "firebug/chrome/infotip",
     "firebug/css/cssPanel",
-    "firebug/chrome/searchBox",
     "firebug/console/errors",
     "firebug/net/netMonitor",
     "firebug/net/netReps",
@@ -42,7 +42,7 @@ define([
 function(Obj, Firebug, Firefox, Domplate, Xpcom, Locale,
     Events, Options, Url, SourceLink, Http, Css, Dom, Win, Search, Str,
     Arr, System, Menu, NetUtils, NetProgress, CSSInfoTip, ConditionEditor, TimeInfoTip,
-    PanelNotification, ActivablePanel) {
+    PanelNotification, ActivablePanel, SearchBox) {
 
 // ********************************************************************************************* //
 // Constants
@@ -750,13 +750,13 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
     getSearchOptionsMenuItems: function()
     {
         return [
-            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
+            SearchBox.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
                 "search.tip.Case_Sensitive"),
-            //Firebug.Search.searchOptionMenu("search.net.Headers", "netSearchHeaders"),
-            //Firebug.Search.searchOptionMenu("search.net.Parameters", "netSearchParameters"),
-            Firebug.Search.searchOptionMenu("search.Use_Regular_Expression",
+            //SearchBox.searchOptionMenu("search.net.Headers", "netSearchHeaders"),
+            //SearchBox.searchOptionMenu("search.net.Parameters", "netSearchParameters"),
+            SearchBox.searchOptionMenu("search.Use_Regular_Expression",
                 "searchUseRegularExpression", "search.tip.Use_Regular_Expression"),
-            Firebug.Search.searchOptionMenu("search.net.Response_Bodies", "netSearchResponseBody",
+            SearchBox.searchOptionMenu("search.net.Response_Bodies", "netSearchResponseBody",
                 "search.net.tip.Response_Bodies")
         ];
     },
@@ -773,12 +773,12 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
         var row;
         if (this.currentSearch && text == this.currentSearch.text)
         {
-            row = this.currentSearch.findNext(true, false, reverse, Firebug.Search.isCaseSensitive(text));
+            row = this.currentSearch.findNext(true, false, reverse, SearchBox.isCaseSensitive(text));
         }
         else
         {
             this.currentSearch = new NetPanelSearch(this);
-            row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
+            row = this.currentSearch.find(text, reverse, SearchBox.isCaseSensitive(text));
         }
 
         if (row)
@@ -1614,7 +1614,7 @@ var NetPanelSearch = function(panel, rowFinder)
         if (!file)
             return;
 
-        var scanRE = Firebug.Search.getTestingRegex(this.text);
+        var scanRE = SearchBox.getTestingRegex(this.text);
         if (scanRE.test(file.responseText))
         {
             if (!Css.hasClass(this.currentRow, "opened"))

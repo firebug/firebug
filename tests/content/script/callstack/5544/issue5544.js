@@ -5,11 +5,7 @@ function runTest()
 
     FBTest.openNewTab(basePath + "script/callstack/5544/issue5544.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("console");
-
-        FBTest.enableScriptPanel();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.enablePanels(["console", "script"], function(win)
         {
             var config = {tagName: "div", classes: "logRow logRow-errorMessage"};
             FBTest.waitForDisplayedElement("console", config, function(row)

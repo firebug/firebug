@@ -3,8 +3,9 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/string",
+    "firebug/lib/options",
 ],
-function (FBTrace, Str) {
+function (FBTrace, Str, Options) {
 
 "use strict";
 
@@ -139,8 +140,6 @@ Url.isSystemURL = function(url)
     if (url.substr(0, 9) == "resource:")
         return true;
     else if (url.substr(0, 16) == "chrome://firebug")
-        return true;
-    else if (url  == "XPCSafeJSObjectWrapper.cpp")
         return true;
     else if (url.substr(0, 6) == "about:")
         return true;
@@ -500,7 +499,8 @@ Url.parseURLEncodedText = function(text, noLimit)
         }
     }
 
-    params.sort(function(a, b) { return a.name <= b.name ? -1 : 1; });
+    if (Options.get("netSortPostParameters"))
+        params.sort((a, b) => { return a.name <= b.name ? -1 : 1; });
 
     return params;
 };

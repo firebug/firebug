@@ -120,6 +120,9 @@ var ScriptPanelLineUpdater = Obj.extend(Module,
             return;
 
         var editorObject = editor.editorObject;
+        if (!editorObject)
+            return;
+
         var viewport = editorObject.getViewport();
         var currentLine = viewport.from;
 

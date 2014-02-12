@@ -4,17 +4,13 @@ function runTest()
 
     FBTest.openNewTab(basePath + "script/watch/5019/issue5019.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("script");
-
-        FBTest.enableConsolePanel();
-        FBTest.enableScriptPanel(function(win)
+        FBTest.enablePanels(["script", "console"], function(win)
         {
             FBTest.waitForBreakInDebugger(null, 17, false, function()
             {
                 FBTest.setWatchExpressionValue(null, "a", "200", function()
                 {
-                    FBTest.setWatchExpressionValue(null, "b", "\"helloworld\"", function()
+                    FBTest.setWatchExpressionValue(null, "b", "helloworld", function()
                     {
                         FBTest.toggleWatchExpressionBooleanValue(null, "c", function()
                         {

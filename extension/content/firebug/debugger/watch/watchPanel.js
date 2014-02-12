@@ -183,8 +183,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     // Content
 
     /**
-     * Executed by the user from within the Panel options menu of through
-     * the panel context menu.
+     * Executed by the user from within the options menu or through the context menu.
      */
     refresh: function()
     {
@@ -211,9 +210,14 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     {
         Trace.sysout("WatchPanel.updateSelection", object);
 
+        // xxxHonza: revisit the entire panel update when fixing issue 6943
+
         // Do not synchronize the content of the {@link WatchPanel} with
         // selection changes (e.g. in the Script panel). Clicking on any object
-        // anywhere in the UI should not affect its content.
+        // anywhere in the UI should not affect its content. Unless it's changing
+        // the current frame.
+        if (object instanceof StackFrame)
+            this.doUpdateSelection(object);
 
         // Content of the Watch panel is synchronized/updated through debugging
         // events such as 'onStartDebugging' and 'onStopDebugging' sent by
