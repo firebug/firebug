@@ -766,7 +766,7 @@ SourceEditor.prototype =
         // If direct scroll (pixel) position is specified use it.
         if (options.scrollTop)
         {
-            Trace.sysout("sourceEditor.scrollToLine; scrollTop: " + scrollTop);
+            Trace.sysout("sourceEditor.scrollToLine; scrollTop: " + options.scrollTop);
             this.editorObject.scrollTo(null, options.scrollTop);
         }
         else
