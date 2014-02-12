@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Issue 4816: Issue summary</title>
+    <title>Issue 4816: Script panel claims No JavaScript when it means "you're stopped
+        on a breakpoint on some other tab"</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <link href="../../_common/testcase.css"
-        type="text/css" rel="stylesheet"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
 </head>
 <body>
 <header>
     <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4816">Issue 4816</a>:
-        Script panel claims No JavaScript when it means "you're stopped on a breakpoint on some other tab"</h1>
+        Script panel claims No JavaScript when it means "you're stopped on a breakpoint
+        on some other tab"</h1>
 </header>
 <script type="text/javascript">
 function onClick()
@@ -21,17 +22,16 @@ function onClick()
     <section id="description">
         <h3>Steps to reproduce</h3>
         <ol>
+            <li>Open Firbug and enable the Script panel</li>
             <li>Click this button
                 <button id="testButton" onclick="onClick()">Click Me!</button></li>
-            <li>Step 2</li>
-            <li>Step 3</li>
+            <li>The debugger should break on line 18</li>
+            <li>Open this <a href="issue4816.html">link</a> in a new tab</li>
+            <li>Switch to the new tab.</li>
+            <li>The Script panel should say: Debugger is already active</li>
+            <li>Click the: Go to that page link</li>
+            <li>You should be navigated back to the tab where the debugger paused.</li>
         </ol>
-        <h3>Observed result</h3>
-        <ul>
-            <li>Point 1</li>
-            <li>Point 2</li>
-            <li>Point 3</li>
-        </ul>
     </section>
     <footer>
         Jan Odvarko, odvarko@gmail.com;
