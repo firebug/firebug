@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 // ************************************************************************************************
-// Text selection conroller.
+// Text selection controller.
 
 /** @namespace */
 var SelectionController =
