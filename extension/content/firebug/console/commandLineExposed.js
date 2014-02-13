@@ -241,7 +241,7 @@ function evaluateInGlobal(context, win, expr, origExpr, onSuccess, onError, opti
     var args = [dbgGlobal, evalMethod, dbgGlobal];
     args.push.apply(args, arguments);
 
-    executeInWindowContext(win, evaluate, args);
+    executeInWindowContext(win, evaluate, args, dbgGlobal);
 }
 
 /**
@@ -269,7 +269,7 @@ function evaluateInFrame(frame, context, win, expr, origExpr, onSuccess, onError
     var dbgGlobal = DebuggerLib.getThreadDebuggeeGlobalForFrame(frame);
     var args = [frame, evalMethod, dbgGlobal];
     args = args.concat([].slice.call(arguments, 1));
-    executeInWindowContext(win, evaluate, args);
+    executeInWindowContext(win, evaluate, args, dbgGlobal);
 }
 
 
@@ -333,11 +333,11 @@ function evaluate(subject, evalMethod, dbgGlobal, context, win, expr, origExpr, 
     else if (resObj.hasOwnProperty("throw"))
     {
         var exc = DebuggerLib.unwrapDebuggeeValue(resObj.throw);
-        handleException(exc, origExpr, context, onError);
+        handleException(exc, origExpr, context, onError, dbgGlobal);
         return;
     }
 
-    executeInWindowContext(window, onSuccess, [result, context]);
+    executeInWindowContext(window, onSuccess, [result, context], dbgGlobal);
 }
 
 // ********************************************************************************************* //
@@ -404,7 +404,7 @@ function removeConflictingNames(commandLine, context, contentView)
     }
 }
 
-function handleException(exc, origExpr, context, onError)
+function handleException(exc, origExpr, context, onError, dbgGlobal)
 {
     // Change source and line number of exceptions from commandline code
     // create new error since properties of nsIXPCException are not modifiable.
@@ -494,7 +494,7 @@ function handleException(exc, origExpr, context, onError)
         result.source = exc.source;
     }
 
-    executeInWindowContext(window, onError, [result, context]);
+    executeInWindowContext(window, onError, [result, context], dbgGlobal);
 }
 
 /**
@@ -507,20 +507,30 @@ function handleException(exc, origExpr, context, onError)
  * @param {function} func The function to execute
  * @param {Array or Array-Like object} args The arguments to pass to the function
  */
-function executeInWindowContext(win, func, args)
+function executeInWindowContext(win, func, args, dbgGlobal)
 {
     Trace.sysout("commandLineExposed.executeInWindowContext; " + func, args);
 
     var listener = function()
     {
-        win.document.removeEventListener("firebugCommandLine", listener);
+        win.document.removeEventListener("firebugCommandLine", listenerInWindow);
         if (func)
             func.apply(null, args);
     };
 
-    win.document.addEventListener("firebugCommandLine", listener);
+    // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=971673, see issue 7177.
+    // The listener has to come from the content window's compartment, otherwise the entry
+    // global is incorrect and code like `location = "x.html"` will end up trying to set
+    // location to chrome://firebug/content/firefox/x.html.
+    var code = "(function() { callback(); })";
+    var bindings = Object.create(null);
+    bindings.callback = dbgGlobal.makeDebuggeeValue(listener);
+    var listenerInWindow = dbgGlobal.evalInGlobalWithBindings(code, bindings)
+        .return.unsafeDereference();
 
-    var event = document.createEvent("Events");
+    win.document.addEventListener("firebugCommandLine", listenerInWindow);
+
+    var event = win.document.createEvent("Events");
     event.initEvent("firebugCommandLine", true, false);
     win.document.dispatchEvent(event);
 }
