@@ -333,11 +333,10 @@ function evaluate(subject, evalMethod, dbgGlobal, context, win, expr, origExpr, 
     else if (resObj.hasOwnProperty("throw"))
     {
         var exc = DebuggerLib.unwrapDebuggeeValue(resObj.throw);
-        handleException(exc, origExpr, context, onError, dbgGlobal);
-        return;
+        return handleException(exc, origExpr, context, onError, dbgGlobal);
     }
 
-    executeInWindowContext(window, onSuccess, [result, context], dbgGlobal);
+    return [onSuccess, [result, context]];
 }
 
 // ********************************************************************************************* //
@@ -494,7 +493,7 @@ function handleException(exc, origExpr, context, onError, dbgGlobal)
         result.source = exc.source;
     }
 
-    executeInWindowContext(window, onError, [result, context], dbgGlobal);
+    return [onError, [result, context]];
 }
 
 /**
@@ -511,11 +510,11 @@ function executeInWindowContext(win, func, args, dbgGlobal)
 {
     Trace.sysout("commandLineExposed.executeInWindowContext; " + func, args);
 
+    var result = null;
     var listener = function()
     {
         win.document.removeEventListener("firebugCommandLine", listenerInWindow);
-        if (func)
-            func.apply(null, args);
+        result = func.apply(null, args);
     };
 
     // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=971673, see issue 7177.
@@ -533,6 +532,13 @@ function executeInWindowContext(win, func, args, dbgGlobal)
     var event = win.document.createEvent("Events");
     event.initEvent("firebugCommandLine", true, false);
     win.document.dispatchEvent(event);
+
+    // Run the returned callback from outside the event listener, so we don't
+    // end up with content code on the stack and break the closure inspector.
+    var callback = result[0];
+    var args = result[1];
+    if (callback)
+        callback.apply(null, args);
 }
 
 function getAutoCompletionList()
