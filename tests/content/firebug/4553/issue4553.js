@@ -34,6 +34,8 @@ function runTest()
                 // causes the test to fail on timeout.
                 FBTest.testDone("issue4553.DONE");
             });
+
+            FBTest.reload();
         });
     });
 }
