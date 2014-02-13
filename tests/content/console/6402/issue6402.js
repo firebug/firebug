@@ -2,36 +2,36 @@ function runTest()
 {
     FBTest.sysout("issue6402.START");
 
-    FBTest.openNewTab(basePath + "console/6402/issue6402.html", function(wrappedWin)
+    FBTest.openNewTab(basePath + "console/6402/issue6402.html", function()
     {
-        var tasks = new FBTest.TaskList();
-        var iframe = wrappedWin.document.querySelector("#iframe");
-
         // Note: do NOT reload at this moment.
-        FBTest.enableConsolePanel();
-
-        // Note: Test for the FW.Firebug.getConsoleByGlobal() function.
-        var oriIframeConsoleInstance = FW.Firebug.getConsoleByGlobal(iframe.contentWindow);
-
-        tasks.push(reloadIframe, iframe);
-
-        tasks.push(testGetConsoleByGlobal, iframe, oriIframeConsoleInstance);
-
-        tasks.wrapAndPush(checkConsole, wrappedWin, "false", "window._console should NOT refer to "+
-            "the exposed Firebug console");
-
-        tasks.push(FBTest.reload);
-
-        tasks.wrapAndPush(checkConsole, wrappedWin, "true", "window._console should refer to the "+
-            "exposed Firebug console");
-
-        tasks.push(checkConsoleXMLPage);
-
-        tasks.run(function()
+        FBTest.enableConsolePanel(function(wrappedWin)
         {
-            FBTestFirebug.testDone("issue6402.DONE");
-        });
+            var tasks = new FBTest.TaskList();
+            var iframe = wrappedWin.document.querySelector("#iframe");
 
+            // Note: Test for the FW.Firebug.getConsoleByGlobal() function.
+            var oriIframeConsoleInstance = FW.Firebug.getConsoleByGlobal(iframe.contentWindow);
+
+            tasks.push(reloadIframe, iframe);
+
+            tasks.push(testGetConsoleByGlobal, iframe, oriIframeConsoleInstance);
+
+            tasks.wrapAndPush(checkConsole, wrappedWin, "false", "window._console should NOT refer to "+
+                "the exposed Firebug console");
+
+            tasks.push(FBTest.reload);
+
+            tasks.wrapAndPush(checkConsole, wrappedWin, "true", "window._console should refer to the "+
+                "exposed Firebug console");
+
+            tasks.push(checkConsoleXMLPage);
+
+            tasks.run(function()
+            {
+                FBTestFirebug.testDone("issue6402.DONE");
+            });
+        });
     });
 }
 
