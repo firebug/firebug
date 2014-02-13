@@ -93,7 +93,7 @@ this.disableNetPanel = function(callback)
  */
 this.enableNetPanel = function(callback)
 {
-    this.setPanelState(FW.Firebug.NetMonitor, "net", callback, true);
+    this.setPanelState(FW.Firebug.NetMonitor, "net", callback, true, true);
 };
 
 /**
