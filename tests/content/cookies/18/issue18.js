@@ -5,7 +5,7 @@ function runTest()
     FBTest.openNewTab(basePath + "cookies/18/issue18.php", function(win)
     {
         // Open Firebug UI and enable Net panel.
-        FBTestFireCookie.enableCookiePanel(function(win)
+        FBTest.enableCookiesPanel(function(win)
         {
             FBTest.sysout("cookies.test.issue18; Check clipboard functionality");
 
@@ -14,7 +14,7 @@ function runTest()
             var panelNode = FBTest.selectPanel("cookies").panelNode;
 
             // Get proper (for this test) cookie row.
-            var row = FBTestFireCookie.getCookieRowByName(panelNode, "TestCookie18");
+            var row = FBTest.getCookieRowByName(panelNode, "TestCookie18");
 
             // Test label displayed in the row.
             var value = FW.FBL.getElementByClass(row, "cookieValueLabel", "cookieLabel");

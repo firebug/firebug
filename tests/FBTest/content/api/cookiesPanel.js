@@ -1,7 +1,5 @@
 /* See license.txt for terms of usage */
 
-var FBTestFireCookie = FBTest.FireCookie = {};
-
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
@@ -22,7 +20,7 @@ var winWatcher = Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsI
  * Enables Cookies panel
  * @param {Function} callback Executed as soon as the panel is enabled.
  */
-this.enableCookiePanel = function(callback)
+this.enableCookiesPanel = function(callback)
 {
     FBTestFirebug.setPanelState(FW.Firebug.CookieModule, "cookies", callback, true);
 };
@@ -161,4 +159,4 @@ this.clickTestButton = function(win, buttonId)
 }
 
 // ************************************************************************************************
-}).apply(FBTest.FireCookie);
+}).apply(FBTest);
