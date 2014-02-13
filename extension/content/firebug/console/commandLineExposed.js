@@ -397,11 +397,10 @@ function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
             result.source = exc.source;
         }
 
-        executeInWindowContext(window, onError, [result, context], dglobal);
-        return;
+        return [onError, [result, context]];
     }
 
-    executeInWindowContext(window, onSuccess, [result, context], dglobal);
+    return [onSuccess, [result, context]];
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -477,11 +476,11 @@ function removeConflictingNames(commandLine, context, contentView)
  */
 function executeInWindowContext(win, func, args, dbgGlobal)
 {
+    var result = null;
     var listener = function()
     {
         win.document.removeEventListener("firebugCommandLine", listenerInWindow);
-        if (func)
-            func.apply(null, args);
+        result = func.apply(null, args);
     };
 
     // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=971673, see issue 7177.
@@ -499,6 +498,13 @@ function executeInWindowContext(win, func, args, dbgGlobal)
     var event = win.document.createEvent("Events");
     event.initEvent("firebugCommandLine", true, false);
     win.document.dispatchEvent(event);
+
+    // Run the returned callback from outside the event listener, so we don't
+    // end up with content code on the stack and break the closure inspector.
+    var callback = result[0];
+    var args = result[1];
+    if (callback)
+        callback.apply(null, args);
 }
 
 function getAutoCompletionList()
