@@ -68,5 +68,23 @@ this.getDOMPropertyRow = function(chrome, propName)
     return getDOMMemberRow(domPanel, propName);
 };
 
+//********************************************************************************************* //
+// Local Helpers
+
+function getDOMMemberRow(panel, name)
+{
+    var panelNode = panel.panelNode;
+    var rows = panelNode.getElementsByClassName("memberRow");
+
+    // Iterate over all rows and pick the one that fits the name.
+    for (var i=0; i<rows.length; i++)
+    {
+        var row = rows[i];
+        var labelCell = row.getElementsByClassName("memberLabelCell")[0];
+        if (labelCell.textContent == name)
+            return row;
+    }
+}
+
 // ********************************************************************************************* //
 }).apply(FBTest);
