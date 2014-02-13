@@ -68,9 +68,10 @@ this.setPanelState = function(model, panelName, callback, enable, reload)
 
         // Do not reload automatically, JSD2 doesn't need that anymore.
         if (reload)
+        {
             this.reload(callback);
-
-        if (callback)
+        }
+        else if (callback)
         {
             var browser = FBTestFirebug.getCurrentTabBrowser();
             callback(browser.contentDocument.defaultView);
