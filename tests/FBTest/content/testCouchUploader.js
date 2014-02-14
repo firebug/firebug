@@ -182,7 +182,8 @@ FBTestApp.TestCouchUploader =
                 versions.set("6.2", "8");
                 versions.set("6.3", "8.1");
 
-                return "Windows " + versions.get(version);
+                if (versions.get(version))
+                    return "Windows " + versions.get(version);
                 break;
 
             case "Darwin":
@@ -211,7 +212,12 @@ FBTestApp.TestCouchUploader =
                 versions.set("12.5.0", "10.8.5");
                 versions.set("13.0.0", "10.9");
 
-                return "Mac OS X " + versions.get(version);
+                if (versions.get(version))
+                    return "Mac OS X " + versions.get(version);
+                break;
+
+            default:
+                return "";
         }
     },
 
