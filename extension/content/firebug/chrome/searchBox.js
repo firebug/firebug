@@ -211,7 +211,7 @@ var SearchBox = Obj.extend(Module,
                 result.then(function(found)
                 {
                     // TODO: remove the doc-loading icon if any.
-                    self.onResult(found, immediate);
+                    self.onResult(panel, found, immediate);
 
                     // In case the promise is resolved synchronously, the return value
                     // will be the real result value (not a promise).
@@ -220,7 +220,7 @@ var SearchBox = Obj.extend(Module,
             }
             else
             {
-                self.onResult(result, immediate);
+                self.onResult(panel, result, immediate);
             }
 
             return result;
@@ -234,13 +234,11 @@ var SearchBox = Obj.extend(Module,
         Trace.sysout("searchBox.update; END");
     },
 
-    onResult: function(result, immediate)
+    onResult: function(panel, result, immediate)
     {
         Trace.sysout("searchBox.onResult; result: " + result, result);
 
-        var panel = Firebug.chrome.getSelectedPanel();
         var searchBox = Firebug.chrome.$("fbSearchBox");
-        var panelNode = panel.panelNode;
         var value = searchBox.value;
 
         if (!result && value)
