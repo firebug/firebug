@@ -281,6 +281,7 @@ FBTestApp.TestCouchUploader =
         var result = Obj.extend(this.getHeaderDoc(), {type: "user-result"});
 
         result.description = test.desc;
+        result.test = test.uri;
         result.file = test.testPage ? test.testPage : test.uri;
         result.result = test.error ? (test.category == "fails" ? "TEST-KNOWN-FAIL" :
             "TEST-UNEXPECTED-FAIL") : "TEST-PASS";
