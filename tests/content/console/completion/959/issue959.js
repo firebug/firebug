@@ -24,7 +24,7 @@ function runTest()
 
                 if (wanted)
                 {
-                    FBTest.compare(expr + wanted, completionBox.value,
+                    FBTest.compare(wanted, completionBox.value.substr(expr.length),
                         "Completing \"" + expr + "|" + wanted + "\"");
                     FBTest.compare(wantedPopup, (popup.state !== "closed"),
                         "Completion box should " + (wantedPopup ? "" : "not ") + " open.");
