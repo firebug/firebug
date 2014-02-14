@@ -2,13 +2,15 @@ function runTest()
 {
     FBTest.sysout("issue6402.START");
 
-    FBTest.openNewTab(basePath + "console/6402/issue6402.html", function()
+    FBTest.openNewTab(basePath + "console/6402/issue6402.html", function(wrappedWin)
     {
-        // Note: do NOT reload at this moment.
-        FBTest.enableConsolePanel(function(wrappedWin)
+        FBTest.openFirebug(function()
         {
             var tasks = new FBTest.TaskList();
             var iframe = wrappedWin.document.querySelector("#iframe");
+
+            // Note: do NOT reload at this moment.
+            FBTest.enableConsolePanel();
 
             // Note: Test for the FW.Firebug.getConsoleByGlobal() function.
             var oriIframeConsoleInstance = FW.Firebug.getConsoleByGlobal(iframe.contentWindow);
@@ -31,6 +33,7 @@ function runTest()
             {
                 FBTestFirebug.testDone("issue6402.DONE");
             });
+
         });
     });
 }
