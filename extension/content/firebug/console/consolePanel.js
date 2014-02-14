@@ -1120,7 +1120,6 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
         // Make sure the break notification popup appears.
         context.breakingCause =
         {
-            title: Locale.$STR("Break on Error"),
             message: error.message,
             copyAction: Obj.bindFixed(FirebugReps.ErrorMessage.copyError,
                 FirebugReps.ErrorMessage, error),
