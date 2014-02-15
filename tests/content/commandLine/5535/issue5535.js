@@ -1,4 +1,4 @@
-var testPageURL = basePath + "console/executeSelection.html";
+var testPageURL = basePath + "commandLine/5535/issue5535.html";
 var fileName = "index.js";
 
 function runTest()
