@@ -93,8 +93,8 @@ this.sendMouseEvent = function(event, target, win)
  */
 this.sendChar = function(aChar, aTarget)
 {
-    aTarget = _getEventTarget(aTarget);
-    return sendChar(aChar, aTarget);
+    var win = _getWindowForTarget(aTarget);
+    return sendChar(aChar, win);
 };
 
 /**
@@ -105,8 +105,8 @@ this.sendChar = function(aChar, aTarget)
  */
 this.sendString = function(aStr, aTarget)
 {
-    for (var i = 0; i < aStr.length; ++i)
-        this.sendChar(aStr.charAt(i), aTarget);
+    var win = _getWindowForTarget(aTarget);
+    return sendString(aStr, win);
 };
 
 /**
@@ -120,8 +120,8 @@ this.sendString = function(aStr, aTarget)
  */
 this.sendKey = function(aKey, aTarget)
 {
-    aTarget = _getEventTarget(aTarget);
-    return sendKey(aKey, aTarget, aTarget.ownerDocument.defaultView);
+    var win = _getWindowForTarget(aTarget);
+    return sendKey(aKey, win);
 };
 
 this.synthesizeMouse = function(node, offsetX, offsetY, event, win)
@@ -275,6 +275,12 @@ function _getEventTarget(aTarget)
     FBTest.focus(aTarget);
 
     return aTarget;
+}
+
+function _getWindowForTarget(aTarget)
+{
+    aTarget = _getEventTarget(aTarget);
+    return aTarget.ownerDocument.defaultView;
 }
 
 // ********************************************************************************************* //
