@@ -22,14 +22,27 @@ function getCommandLine(useCommandEditor)
  * @param {Object} the Firebug.chrome object
  * @param {Boolean} if set to true, type in the CommandEditor, or in the CommandLine otherwise
  */
-this.executeCommand = function(expr, chrome, useCommandEditor)
+this.executeCommand = function(expr, chrome, useCommandEditor, callback)
 {
     FBTest.clearAndTypeCommand(expr, useCommandEditor);
 
     if (useCommandEditor)
-        FBTest.clickToolbarButton(chrome, "fbCmdLineRunButton");
+    {
+        // A delay of 20ms (somehow) exists between the time when the expression has been typed and
+        // the Command Line / Command Editor is really updated.
+        setTimeout(function()
+        {
+            FBTest.clickToolbarButton(chrome, "fbCmdLineRunButton");
+            if (callback)
+                callback();
+        }, 20);
+    }
     else
+    {
         FBTest.sendKey("RETURN", "fbCommandLine");
+        if (callback)
+            callback();
+    }
 };
 
 /**
