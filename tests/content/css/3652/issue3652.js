@@ -24,7 +24,7 @@ function runTest()
             // Type 'arrow-up' and verify completion (should be the previous
             // color starting with 'r').
             FBTest.sendKey("UP", editor);
-            FBTest.compare("RGBA()", editor.value, "Must be autocompleted to RGBA().");
+            FBTest.compare("ROYALBLUE", editor.value, "Must be autocompleted to ROYALBLUE.");
 
             // Type 'arrow-down' and verify completion.
             FBTest.sendKey("DOWN", editor);

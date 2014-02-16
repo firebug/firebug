@@ -44,6 +44,7 @@ var CSSAutoCompleter =
 
     autoCompletePropertyValue: function(nodeType, propName, preExpr, expr, postExpr, range, cycle, context, out)
     {
+        propName = propName.toLowerCase();
         if (expr.charAt(0) === "!")
             return ["!important"];
 
@@ -102,13 +103,13 @@ var CSSAutoCompleter =
         }
         else
         {
-            var lowerProp = propName.toLowerCase(), avoid;
-            if (["background", "border", "font"].indexOf(lowerProp) !== -1)
+            var avoid;
+            if (["background", "border", "font"].indexOf(propName) !== -1)
             {
                 if (cycle)
                 {
                     // Cycle only within the same category, if possible.
-                    var cat = Css.getCSSShorthandCategory(nodeType, lowerProp, expr);
+                    var cat = Css.getCSSShorthandCategory(nodeType, propName, expr);
                     if (cat)
                         return (cat in Css.cssKeywords ? Css.cssKeywords[cat] : [cat]);
                 }
@@ -127,7 +128,7 @@ var CSSAutoCompleter =
                     var tokens = preTokens.concat(postTokens);
                     for (var i = 0; i < tokens.length; ++i)
                     {
-                        var cat = Css.getCSSShorthandCategory(nodeType, lowerProp, tokens[i]);
+                        var cat = Css.getCSSShorthandCategory(nodeType, propName, tokens[i]);
                         if (cat && cat !== "position" && cat !== "bgRepeat")
                             avoid.push(cat);
                     }
@@ -136,10 +137,9 @@ var CSSAutoCompleter =
             keywords = Css.getCSSKeywordsByProperty(nodeType, propName, avoid);
         }
 
-        // Add the magic inherit property, if it's sufficiently alone.
-        // XXX Firefox 19 also has "initial"
+        // Add the magic inherit, initial and unset values, if they are sufficiently alone.
         if (!preExpr)
-            keywords = keywords.concat(["inherit"]);
+            keywords = keywords.concat(["inherit", "initial", "unset"]);
 
         if (!cycle)
         {
