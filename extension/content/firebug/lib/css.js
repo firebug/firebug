@@ -95,11 +95,14 @@ function initPropertyData()
     // so we hard-code a list and add parens to any known returned function.
     // We also camel-case some SVG property values to make them more readable.
     var functionNames = new Set([
-        "url", "calc", "hsl", "hsla", "rgb", "rgba",
+        "url", "calc", "rect", "hsl", "hsla", "rgb", "rgba",
         "-moz-element", "-moz-image-rect",
         "linear-gradient", "radial-gradient",
         "repeating-linear-gradient", "repeating-radial-gradient",
-        "cubic-bezier", "steps",
+        "cubic-bezier", "steps", "attr", "counter", "counters",
+        "matrix", "matrix3d", "rotate", "rotateX", "rotateY", "rotateZ",
+        "scale", "scaleX", "scaleY", "scaleZ", "scale3d", "skewX", "skewY",
+        "translate", "translateX", "translateY", "translateZ",
     ]);
     var convertCase = new Map();
     for (let value of ["linearRGB", "sRGB", "geometricPrecision",
@@ -186,6 +189,10 @@ Css.getCSSKeywordsByProperty = function(nodeType, propName, avoid)
 
 function assertShorthand(propName)
 {
+    // Currently getCSSPropertyKeywordsExcludingCategories and getCSSShorthandCategory
+    // only support background, border and font, assert that nothing else gets passed
+    // in so we don't get subtle failures. Ideally this would be extended to any
+    // shorthand property in the future. (See also css/autoCompleter.js.)
     if (["background", "border", "font"].indexOf(propName) === -1)
         throw new Error("invalid shorthand name " + propName);
 }
