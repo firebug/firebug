@@ -137,10 +137,9 @@ var CSSAutoCompleter =
             keywords = Css.getCSSKeywordsByProperty(nodeType, propName, avoid);
         }
 
-        // Add the magic inherit property, if it's sufficiently alone.
-        // XXX Firefox 19 also has "initial"
+        // Add the magic inherit, initial and unset values, if they are sufficiently alone.
         if (!preExpr)
-            keywords = keywords.concat(["inherit"]);
+            keywords = keywords.concat(["inherit", "initial", "unset"]);
 
         if (!cycle)
         {
