@@ -635,7 +635,8 @@ function JSAutoCompleter(textBox, completionBox, options)
 
     this.setTabWarning = function()
     {
-        this.completionBox.value = this.textBox.value + "    " +
+        var whitespace = " ".repeat(this.textBox.value.length);
+        this.completionBox.value = whitespace + "    " +
             Locale.$STR("firebug.completion.empty");
 
         this.tabWarning = true;
