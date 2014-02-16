@@ -452,7 +452,7 @@ function JSAutoCompleter(textBox, completionBox, options)
             return "";
         var userTyped = this.textBox.value;
         var value = this.completionBase.pre + this.completionBase.expr + completion;
-        var whitespace = new Array(userTyped.length + 1).join(" ");
+        var whitespace = " ".repeat(userTyped.length);
         return whitespace + value.substr(userTyped.length);
     };
 
