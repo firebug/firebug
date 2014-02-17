@@ -614,7 +614,8 @@ toolbarbutton:-moz-any([checked="true"],
 toolbarbutton:-moz-any([checked="true"],
                        [selected="true"],
                        [open="true"]):not(.panelStatusLabel):not([disabled="true"]):not([type=menu-button]) {
-    background: transparent linear-gradient(rgba(0, 0, 0, 0.1), transparent) no-repeat;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.1), transparent);
+    background-repeat: no-repeat;
 }
 
 toolbarbutton:hover:active:not([disabled="true"]) {
@@ -623,7 +624,8 @@ toolbarbutton:hover:active:not([disabled="true"]) {
 }
 
 toolbarbutton:hover:active:not([disabled="true"]):not([type=menu-button]) {
-    background: transparent linear-gradient(rgba(0, 0, 0, 0.2), transparent) no-repeat;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.2), transparent);
+    background-repeat: no-repeat;
 }
 
 toolbarbutton[type="menu-button"] {
