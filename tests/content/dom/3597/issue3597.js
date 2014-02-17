@@ -11,7 +11,6 @@ function runTest()
             expandProperty("childObj", "lastItem", function()
             {
                 FBTest.click(win.document.getElementById("testButton"));
-                FBTest.refreshDOMPanel();
 
                 // Wait till the _testString is displayed again.
                 FBTest.waitForDOMProperty("_testString", function(row)
@@ -20,11 +19,13 @@ function runTest()
 
                     // The _testString must have 'string' type now.
                     FBTest.compare(
-                        /_testString\"\{\"childObj\"\:\{\"a\"\:5\,\"b\"\:4\,\"lastItem\"\:5\}\}/,
+                        /_testString\s+\"\{\"childObj\"\:\{\"a\"\:5\,\"b\"\:4\,\"lastItem\"\:5\}\}/,
                         row.textContent, "The object must be displayed as a string now");
 
                     FBTest.testDone("issue3597.DONE");
                 });
+
+                FBTest.refreshDOMPanel();
             });
         });
     });
