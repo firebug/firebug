@@ -10,7 +10,7 @@
 #fbCommandToolbar {
     height: calc(22rem + 9px);
     border: none;
-    background: #F6F6F6 linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2)) repeat-x;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
 }
 
 #fbCommandArrow,
