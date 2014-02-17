@@ -238,7 +238,7 @@
     -moz-user-select: none;
     padding-right: 10px;
     padding-bottom: 2px;
-    max-width: -moz-calc(100% - 38px);
+    max-width: calc(100% - 38px);
     background: #FFFFFF;
     z-index: 200;
     text-overflow: ellipsis;
