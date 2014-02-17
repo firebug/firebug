@@ -52,6 +52,10 @@
     background-color: #B4B4B4;
 }
 
+.netInfoHeadersContainer {
+    overflow-x: auto;
+}
+
 .netHeaderSorted {
     background-color: #8CA0BE;
 }

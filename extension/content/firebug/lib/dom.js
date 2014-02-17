@@ -20,6 +20,7 @@ var Dom = {};
 var domMemberCache = null;
 var domMemberMap = {};
 var domMappedData = new WeakMap();
+var scrollBarWidth = -1;
 
 Dom.domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
 
@@ -508,6 +509,42 @@ Dom.getLTRBWH = function(elt)
         }
     }
     return dims;
+};
+
+/**
+ * Gets the scrollbar width
+ * @param {Object} doc Document to get the scrollbar width for
+ * @returns {Number} Scrollbar width in pixels
+ */
+Dom.getScrollBarWidth = function(doc)
+{
+    if (scrollBarWidth !== -1)
+        return scrollBarWidth;
+
+    var inner = doc.createElement("p");
+    inner.style.width = "100%";
+    inner.style.height = "200px";
+
+    var outer = doc.createElement("div");
+    outer.style.position = "absolute";
+    outer.style.top = "0px";
+    outer.style.left = "0px";
+    outer.style.visibility = "hidden";
+    outer.style.width = "200px";
+    outer.style.height = "150px";
+    outer.style.overflow = "hidden";
+    outer.appendChild(inner);
+
+    doc.body.appendChild(outer);
+    var widthWithoutScrollbar = inner.offsetWidth;
+    outer.style.overflow = "scroll";
+    var widthWithScrollbar = outer.clientWidth;
+
+    doc.body.removeChild(outer);
+
+    scrollBarWidth = widthWithoutScrollbar - widthWithScrollbar;
+    FBTrace.sysout("scrollBarWidth "+scrollBarWidth);
+    return scrollBarWidth;
 };
 
 /**

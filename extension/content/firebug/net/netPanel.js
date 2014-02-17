@@ -106,8 +106,9 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
         Events.addEventListener(this.panelNode, "contextmenu", this.onContextMenu, false);
 
         this.onResizer = Obj.bind(this.onResize, this);
-        this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
+        this.resizeEventTarget = Firebug.chrome.$("fbContentBox");
         Events.addEventListener(this.resizeEventTarget, "resize", this.onResizer, true);
+        Firebug.NetMonitor.NetInfoBody.addListener(this);
 
         ActivablePanel.initializeNode.apply(this, arguments);
     },
@@ -115,6 +116,7 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
     destroyNode : function()
     {
         Events.removeEventListener(this.panelNode, "contextmenu", this.onContextMenu, false);
+        Firebug.NetMonitor.NetInfoBody.removeListener(this);
         Events.removeEventListener(this.resizeEventTarget, "resize", this.onResizer, true);
 
         ActivablePanel.destroyNode.apply(this, arguments);
@@ -807,6 +809,10 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
         }
     },
 
+    onToggleSourceView: function()
+    {
+        this.updateHeadersSourceWidth();
+    },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     onFiltersSet: function(filterCategories)
@@ -1472,6 +1478,7 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
     onResize: function()
     {
         this.updateHRefLabelWidth();
+        this.updateHeadersSourceWidth();
     },
 
     updateHRefLabelWidth: function()
@@ -1513,6 +1520,23 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
             }
         }
     },
+
+    updateHeadersSourceWidth: function()
+    {
+        if (!this.table)
+            return;
+
+        var netInfoHeadersTable = this.table.querySelector(".netInfoHeadersTable");
+
+        if (!netInfoHeadersTable)
+            return;
+
+        var doc = this.table.ownerDocument;
+        var bodyWidth = doc.body.clientWidth;
+        var offset = Dom.getClientOffset(netInfoHeadersTable);
+        var scrollBarWidth = Dom.getScrollBarWidth(doc);
+        netInfoHeadersTable.style.width = (bodyWidth - offset.x - scrollBarWidth - 8) + "px";
+    }
 });
 
 // ********************************************************************************************* //

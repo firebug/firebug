@@ -1628,14 +1628,16 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Rep, new EventSource(),
                         Locale.$STR("net.headers.view source")
                     )
                 ),
-                TABLE({cellpadding: 0, cellspacing: 0},
-                    TBODY({"class": "netInfoResponseHeadersBody", "role": "list",
-                        "aria-label": Locale.$STR("ResponseHeaders")})
+                DIV({"class": "netInfoHeadersContainer"},
+                    TABLE({cellpadding: 0, cellspacing: 0},
+                        TBODY({"class": "netInfoResponseHeadersBody", "role": "list",
+                            "aria-label": Locale.$STR("ResponseHeaders")})
+                    )
                 )
             ),
             DIV({"class": "netHeadersGroup collapsed", "data-pref": "netRequestHeadersVisible"},
                 DIV({"class": "netInfoHeadersGroup netInfoRequestHeadersTitle"},
-                    SPAN({"class": "netHeader twisty", 
+                    SPAN({"class": "netHeader twisty",
                         onclick: "$toggleHeaderContent"},
                         Locale.$STR("RequestHeaders")),
                     SPAN({"class": "netHeadersViewSource request collapsed", onclick: "$onViewSource",
@@ -1643,14 +1645,16 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Rep, new EventSource(),
                         Locale.$STR("net.headers.view source")
                     )
                 ),
-                TABLE({cellpadding: 0, cellspacing: 0},
-                    TBODY({"class": "netInfoRequestHeadersBody", "role": "list",
-                    "aria-label": Locale.$STR("RequestHeaders")})
+                DIV({"class": "netInfoHeadersContainer"},
+                    TABLE({cellpadding: 0, cellspacing: 0},
+                        TBODY({"class": "netInfoRequestHeadersBody", "role": "list",
+                        "aria-label": Locale.$STR("RequestHeaders")})
+                    )
                 )
             ),
             DIV({"class": "netHeadersGroup collapsed", "data-pref": "netCachedHeadersVisible"},
                 DIV({"class": "netInfoHeadersGroup netInfoCachedResponseHeadersTitle"},
-                    SPAN({"class": "netHeader twisty", 
+                    SPAN({"class": "netHeader twisty",
                         onclick: "$toggleHeaderContent"},
                         Locale.$STR("CachedResponseHeaders"))
                 ),
@@ -1661,7 +1665,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Rep, new EventSource(),
             ),
             DIV({"class": "netHeadersGroup collapsed", "data-pref": "netPostRequestHeadersVisible"},
                 DIV({"class": "netInfoHeadersGroup netInfoPostRequestHeadersTitle"},
-                    SPAN({"class": "netHeader twisty", 
+                    SPAN({"class": "netHeader twisty",
                         onclick: "$toggleHeaderContent"},
                     Locale.$STR("PostRequestHeaders"))
                 ),
@@ -1683,9 +1687,9 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Rep, new EventSource(),
     {
         var target = event.target;
         var headerGroup = Dom.getAncestorByClass(target, "netHeadersGroup");
-        
+
         Css.toggleClass(headerGroup, "opened");
-        if (Css.hasClass(headerGroup, "opened")) 
+        if (Css.hasClass(headerGroup, "opened"))
         {
             headerGroup.setAttribute("aria-expanded", "true");
             Options.set(headerGroup.dataset.pref, true);
@@ -1719,6 +1723,10 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Rep, new EventSource(),
         }
 
         target.sourceDisplayed = !target.sourceDisplayed;
+
+        // Notify listeners, so additional actions can be done when source view was toggled
+        Events.dispatch(Firebug.NetMonitor.NetInfoBody.fbListeners, "onToggleSourceView",
+            [target.sourceDisplayed]);
 
         Events.cancelEvent(event);
     },
