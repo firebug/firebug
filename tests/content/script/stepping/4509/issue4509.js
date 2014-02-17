@@ -1,25 +1,22 @@
 function runTest()
 {
     FBTest.sysout("issue4509.START");
-
     FBTest.openNewTab(basePath + "script/stepping/4509/issue4509.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel();
-        FBTest.enableScriptPanel();
-        FBTest.selectPanel("script");
-
-        var tasks = new FBTest.TaskList();
-        tasks.push(testViaContextMenu);
-        tasks.push(testViaCtrlClick);
-
-        // xxxHonza: sending middle click event breaks the test-harness.
-        // All the following test from script/watch group fails 
-        //tasks.push(testViaMiddleClick);
-
-        tasks.run(function()
+        FBTest.enablePanels("script", "console", function()
         {
-            FBTest.testDone("issue4509.DONE");
+            var tasks = new FBTest.TaskList();
+            tasks.push(testViaContextMenu);
+            tasks.push(testViaCtrlClick);
+
+            // xxxHonza: sending middle click event breaks the test-harness.
+            // All the following test from script/watch group fails 
+            //tasks.push(testViaMiddleClick);
+
+            tasks.run(function()
+            {
+                FBTest.testDone("issue4509.DONE");
+            });
         });
     });
 }
@@ -74,6 +71,7 @@ function testViaMiddleClick(callback)
         {
             verifyResults(row, callback);
         });
+
         FBTest.sendMouseEvent({type: "mousedown", button: 1}, row12.firstChild);
     });
 

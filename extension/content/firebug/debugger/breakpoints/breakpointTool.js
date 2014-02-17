@@ -84,6 +84,13 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         {
             Trace.sysout("breakpointTool.onAddBreakpoint; callback executed", response);
 
+            if (response.error)
+            {
+                TraceError.sysout("breakpointTool.onAddBreakpoint; ERROR: " +
+                    response.message, response);
+                return;
+            }
+
             // Auto-correct shared breakpoint object if necessary and store the original
             // line so, listeners (like e.g. the Script panel) can update the UI.
             var currentLine = bpClient.location.line - 1;
@@ -124,6 +131,8 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         this.removeBreakpoint(bp.href, bp.lineNo, function(response, bpClient)
         {
             self.dispatch("onBreakpointRemoved", [self.context, bp]);
+
+            Firebug.dispatchEvent(self.context.browser, "onBreakpointRemoved", [bp]);
         });
     },
 
@@ -160,15 +169,15 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
 
         // Filter out those breakpoints that have been already set on the backend
         // (i.e. there is a corresponding client object already).
-        bps = bps.filter((bp) =>
+        var filtered = bps.filter((bp) =>
         {
             return !this.getBreakpointClient(bp.href, bp.lineNo);
         });
 
         // Bail out if there is nothing to set.
-        if (!bps.length)
+        if (!filtered.length)
         {
-            Trace.sysout("breakpointTool.newSource; No breakpoints to set");
+            Trace.sysout("breakpointTool.newSource; No breakpoints to set for: " + url, bps);
             return;
         }
 
@@ -176,16 +185,16 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         // (unless the user enables them later).
         // xxxHonza: we shouldn't create server-side breakpoints for normal disabled
         // breakpoints, but not in case there are other breakpoints at the same line.
-        /*bps = bps.filter(function(bp, index, array)
+        /*filtered = filtered.filter(function(bp, index, array)
         {
             return bp.isEnabled();
         });*/
 
         Trace.sysout("breakpointTool.newSource; Initialize server side breakpoints: (" +
-            bps.length + ") " + url, bps);
+            filtered.length + ") " + url, filtered);
 
         // Set breakpoints on the server side.
-        this.setBreakpoints(bps, function()
+        this.setBreakpoints(filtered, function()
         {
             // Some breakpoints could have been auto-corrected so, save all now.
             // xxxHonza: what about breakpoints in other contexts using the same URL?
@@ -251,6 +260,13 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             };
 
             Trace.sysout("breakpointTool.doSetBreakpoint; (" + lineNumber + ")", location);
+
+            if (!self.context.activeThread)
+            {
+                TraceError.sysout("breakpointTool.doSetBreakpoint; ERROR no thread " +
+                    url + "(" + lineNumber + ")");
+                return;
+            }
 
             // Send RDP packet to set a breakpoint on the server side. The callback will be
             // executed as soon as we receive a response.
@@ -353,6 +369,9 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
      * @param arr {Array} List of breakpoints to be created on the server side
      * @param cb {Function} Optional callback that is executed as soon as all breakpoints
      * are created on the server side and the current thread resumed again.
+     *
+     * xxxHonza: Use a better name for the |cb| argument, ideally |callback| (and refactor
+     * method implementation, so there isn't the other callback variable).
      */
     setBreakpoints: function(arr, cb)
     {

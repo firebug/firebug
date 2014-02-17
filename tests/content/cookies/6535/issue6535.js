@@ -7,7 +7,7 @@ function runTest()
         FBTest.openFirebug();
         FBTest.selectPanel("net");
 
-        FBTestFireCookie.enableCookiePanel();
+        FBTest.enableCookiesPanel();
         FBTest.enableNetPanel(function(win)
         {
             var options =

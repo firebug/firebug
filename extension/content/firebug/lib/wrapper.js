@@ -44,6 +44,18 @@ Wrapper.isDeadWrapper = function(wrapper)
     return Cu.isDeadWrapper(wrapper);
 };
 
+Wrapper.isChromeObject = function(obj, chromeWin)
+{
+    var global = Cu.getGlobalForObject(obj);
+    if (!(global instanceof chromeWin.Window))
+        return true;
+
+    if (global.document.nodePrincipal.subsumes(chromeWin.document.nodePrincipal))
+        return true;
+
+    return false;
+};
+
 /**
  * Create a content-accessible view of a simple chrome object. All properties
  * are marked as non-writable, except if they have explicit getters/setters.
@@ -69,15 +81,11 @@ Wrapper.cloneIntoContentScope = function(global, obj)
 
 // ********************************************************************************************* //
 
-Wrapper.ignoreVars =
-{
-    // internal firebug things XXXjjb todo we should privatize these
-    "_firebug": 1,
-};
-
+// XXX Obsolete, but left for extension compatibility.
+Wrapper.ignoreVars = {};
 Wrapper.shouldIgnore = function(name)
 {
-    return (Wrapper.ignoreVars[name] === 1);
+    return false;
 };
 
 function isPrimitive(obj)

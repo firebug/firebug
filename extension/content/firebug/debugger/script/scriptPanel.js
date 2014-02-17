@@ -15,10 +15,12 @@ define([
     "firebug/lib/keywords",
     "firebug/lib/system",
     "firebug/lib/options",
+    "firebug/lib/promise",
     "firebug/chrome/activablePanel",
     "firebug/chrome/menu",
     "firebug/chrome/rep",
     "firebug/chrome/statusPath",
+    "firebug/chrome/searchBox",
     "firebug/editor/editor",
     "firebug/debugger/script/scriptView",
     "firebug/debugger/stack/stackFrame",
@@ -27,6 +29,7 @@ define([
     "firebug/debugger/breakpoints/breakpoint",
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/debugger/breakpoints/breakpointConditionEditor",
+    "firebug/debugger/breakpoints/breakOnNext",
     "firebug/debugger/script/scriptPanelWarning",
     "firebug/debugger/script/breakNotification",
     "firebug/debugger/script/scriptPanelLineUpdater",
@@ -36,10 +39,10 @@ define([
     "arch/compilationunit",
 ],
 function (Firebug, FBTrace, Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, Persist, Keywords,
-    System, Options, ActivablePanel, Menu, Rep, StatusPath, Editor, ScriptView, StackFrame,
-    SourceLink, SourceFile, Breakpoint, BreakpointStore, BreakpointConditionEditor,
-    ScriptPanelWarning, BreakNotification, ScriptPanelLineUpdater, DebuggerLib, CommandLine,
-    NetUtils, CompilationUnit) {
+    System, Options, Promise, ActivablePanel, Menu, Rep, StatusPath, SearchBox, Editor, ScriptView,
+    StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, BreakpointConditionEditor,
+    BreakOnNext, ScriptPanelWarning, BreakNotification, ScriptPanelLineUpdater,
+    DebuggerLib, CommandLine, NetUtils, CompilationUnit) {
 
 "use strict";
 
@@ -108,7 +111,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.context.getTool("breakpoint").addListener(this);
         this.context.getTool("source").addListener(this);
 
-        // Register as a listener for 'updateSidePanels' event. 
+        // Register as a listener for 'updateSidePanels' event.
         Firebug.registerUIListener(this);
     },
 
@@ -386,12 +389,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     removeDebugLocation: function()
     {
-        this.scriptView.setDebugLocation(-1);
+        this.scriptView.setDebugLocation(-1, true);
     },
 
-    setDebugLocation: function(lineNo)
+    setDebugLocation: function(lineNo, noScroll)
     {
-        this.scriptView.setDebugLocation(lineNo);
+        this.scriptView.setDebugLocation(lineNo, noScroll);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -435,7 +438,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         Trace.sysout("scriptPanel.updateLocation; " + object, object);
 
-        // Make sure the update panel's content. If there is currently a warning displayed
+        // Make sure to update panel's content. If there is currently a warning displayed
         // it might disappears since no longer valid (e.g. "Debugger is already active").
         if (ScriptPanelWarning.updateLocation(this))
             return;
@@ -494,7 +497,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Breadcrumbs (object path)
+    // Status Path (callstack)
 
     framesadded: function(stackTrace)
     {
@@ -526,6 +529,18 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             return this.context.currentTrace.frames;
     },
 
+    getCurrentObject: function()
+    {
+        // If the debugger is halted the emphasized object in the status path (i.e. callstack)
+        // is always the current frame (can be changed through the Callstack panel).
+        if (this.context.currentFrame)
+            return this.context.currentFrame;
+
+        // If the debugger isn't halted the status path is hidden, but still, let's return
+        // the default value (the current panel selection).
+        return BasePanel.getCurrentObject.apply(this, arguments);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Source
 
@@ -544,13 +559,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!compilationUnit)
             return;
 
-        var self = this;
         function callback(unit, firstLineNumber, lastLineNumber, lines)
         {
             // There could have been more asynchronous requests done at the same time
             // (e.g. show default script and restore the last visible script).
             // Use only the callback that corresponds to the current location URL.
-            if (!self.location || self.location.getURL() != unit.getURL())
+            if (!this.location || this.location.getURL() != unit.getURL())
             {
                 Trace.sysout("scriptPanel.showSource; Bail out, different location now");
                 return;
@@ -565,56 +579,230 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // 2) Get its content type that should be set at this moment. If not set
             //     it's guessed according to the file extension.
             // 3) Get the type/category from the content type.
-            var sourceFile = SourceFile.getSourceFileByUrl(self.context, sourceLink.href);
+            var sourceFile = SourceFile.getSourceFileByUrl(this.context, sourceLink.href);
             var mimeType = NetUtils.getMimeType(sourceFile.contentType, sourceFile.href);
             var category = NetUtils.getCategory(mimeType);
 
             // Display the source.
-            self.scriptView.showSource(lines.join(""), category);
+            this.scriptView.showSource(lines.join(""), category);
 
             var options = sourceLink.getOptions();
 
             // Make sure the current execution line is marked if the current frame
-            // is coming from the current location.
-            var frame = self.context.currentFrame;
-            if (frame && frame.href == self.location.href && frame.line == self.location.line)
-                options.debugLocation = true;
+            // is coming from the same location.
+            var frame = this.context.currentFrame;
+            if (frame && frame.href == this.location.href)
+                this.setDebugLocation(frame.line - 1, true);
 
             // If the location object is SourceLink automatically scroll to the
             // specified line. Otherwise make sure to reset the scroll position
             // to the top since new script is probably just being displayed.
-            if (self.location instanceof SourceLink)
-                self.scrollToLine(self.location.line, options);
+            if (this.location instanceof SourceLink)
+                this.scrollToLine(this.location.line, options);
             else
-                self.scrollToLine(0);
+                this.scrollToLine(1);
         }
 
-        compilationUnit.getSourceLines(-1, -1, callback);
+        compilationUnit.getSourceLines(-1, -1, callback.bind(this));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Search
 
+    /**
+     * Executed by the framework when the user uses the {@link SearchBox} box (located
+     * on the right side of the main Firebug toolbar) to search within the Script panel.
+     */
     search: function(text, reverse)
     {
-        return this.scriptView.search(text, reverse);
+        Trace.sysout("scriptPanel.search; " + text + ", reverse: " + reverse);
+
+        // Check if the search is for a line number.
+        var m = /^[^\\]?#(\d*)$/.exec(text);
+        if (m)
+        {
+            // Don't beep if only a # has been typed.
+            if (!m[1])
+                return true;
+
+            var lineNo = +m[1];
+            if (!isNaN(lineNo) && 0 < lineNo && lineNo <= this.editor.getLineCount())
+            {
+                this.scrollToLine(lineNo, {highlight: true});
+                return true;
+            }
+        }
+
+        var searchGlobal = Options.get("searchGlobal");
+        var curDoc = this.searchCurrentDoc(!searchGlobal, text, reverse);
+        if (!curDoc && searchGlobal)
+            return this.searchOtherDocs(text, reverse);
+
+        Trace.sysout("scriptPanel.search; result: " + curDoc, curDoc);
+
+        return curDoc;
+    },
+
+    searchOtherDocs: function(text, reverse)
+    {
+        Trace.sysout("scriptPanel.searchOtherDocs; text: " + text);
+
+        var scanRE = SearchBox.getTestingRegex(text);
+
+        function scanDoc(compilationUnit)
+        {
+            var deferred = Promise.defer();
+
+            function callback(unit, firstLineNumber, lastLineNumber, lines)
+            {
+                Trace.sysout("scriptPanel.searchOtherDocs; Source loaded for: " +
+                    unit.url + " (" + lines.length + ")", lines);
+
+                if (!lines)
+                {
+                    deferred.resolve(false);
+                    return;
+                }
+
+                // We don't care about reverse here as we are just looking for existence.
+                // If we do have a result, we will handle the reverse logic on display.
+                for (var i = 0; i < lines.length; i++)
+                {
+                    if (scanRE.test(lines[i]))
+                    {
+                        deferred.resolve(true);
+                        return;
+                    }
+                }
+
+                deferred.resolve(false);
+            }
+
+            Trace.sysout("scriptPanel.searchOtherDocs; Source loading... " +
+                compilationUnit.url, compilationUnit);
+
+            //xxxHonza: As soon as {@link SourceFile.loadScriptLines} returns a promise
+            // we can nicely use it as direct return value.
+            compilationUnit.getSourceLines(-1, -1, callback.bind(this));
+
+            // Get source might happen asynchronously. Return a promise so,
+            // the caller can wait for it.
+            return deferred.promise;
+        }
+
+        // Get current document (location). We need an instance that is also
+        // used within the location list.
+        var doc = this.context.getCompilationUnit(this.location.href);
+
+        // Navigate to the next document that has at least one search match.
+        // Each document is tested using the 'scanDoc' callback.
+        // The return value is a promise (returned from 'scanDoc') that is resolved
+        // to true if a document has been found, it's resolved to false otherwise.
+        var result = this.navigateToNextDocument(scanDoc, reverse, doc);
+
+        // The final result is a promise resolved with the result of searchCurrentDoc below
+        // (if found == true), so the {@link SearchBox} will be able to (asynchronously)
+        // update itself.
+        return result.then((found) =>
+        {
+            Trace.sysout("scriptPanel.searchOtherDocs; next doc found: " + found);
+
+            if (found)
+                return this.searchCurrentDoc(true, text, reverse);
+        });
+    },
+
+    searchCurrentDoc: function(wrapSearch, text, reverse)
+    {
+        Trace.sysout("scriptPanel.searchCurrentDoc; wrapSearch: " + wrapSearch +
+            ", text: " + text + ", reverse: " + reverse, this.currentSearch);
+
+        var options =
+        {
+            ignoreCase: !SearchBox.isCaseSensitive(text),
+            backwards: reverse,
+            wrapSearch: wrapSearch,
+            useRegularExpression: Options.get("searchUseRegularExpression")
+        };
+
+        var wraparound = false;
+
+        // If the search keyword is the same reuse the current search object,
+        // otherwise create new one.
+        if (this.currentSearch && this.currentSearch.text == text)
+        {
+            // In case of "multiple files" search the next document could have been
+            // displayed in the UI. In such case:
+            // 1) Check if it's the same document the search started in (wraparound)
+            // 2) Reset start position where the search should begin.
+            if (this.currentSearch.href != this.location.href)
+            {
+                // If true, we reached the original document this search started in
+                // (this search == this search keyword)
+                wraparound = (this.location.href == this.currentSearch.originalHref);
+
+                // Searching in the next document starts from the beginning or,
+                // in case of reverse search, from the end.
+                this.currentSearch.start = reverse ? -1 : 0;
+                this.currentSearch.href = this.location.href;
+            }
+            else
+            {
+                options.start = this.currentSearch.start;
+                if (reverse)
+                    options.start.ch -= 1;
+            }
+        }
+        else
+        {
+            this.currentSearch = {
+                text: text,
+                start: reverse ? -1 : 0,
+                href: this.location.href,
+                originalHref: this.location.href
+            };
+
+            options.start = this.currentSearch.start;
+
+            Trace.sysout("scriptPanel.searchCurrentDoc; new current search created: ",
+                this.currentSearch);
+        }
+
+        // Search for the next occurrence of the search keyword in the document.
+        var offsets = this.scriptView.search(text, options);
+        if (offsets)
+            this.currentSearch.start = reverse ? offsets.start : offsets.end;
+
+        var result = !!offsets;
+
+        if (wraparound || offsets && offsets.wraparound)
+        {
+            Trace.sysout("scriptPanel.searchCurrentDoc; wraparound active");
+
+            // Return "wraparound" as the result value if the search found a match,
+            // but reached the end/begin of the document and start from begin/end again.
+            // xxxHonza: dispatch an event: see issue 7159
+            if (result)
+                result = "wraparound";
+        }
+
+        Trace.sysout("scriptPanel.searchCurrentDoc; " + this.location.href +
+            ", result: " + result + ", wrapSearch: " + wrapSearch,
+            {currentSearch: this.currentSearch, offsets: offsets});
+
+        return result;
     },
 
     getSearchOptionsMenuItems: function()
     {
         return [
-            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
+            SearchBox.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
                 "search.tip.Case_Sensitive"),
-            Firebug.Search.searchOptionMenu("search.Multiple_Files", "searchGlobal",
+            SearchBox.searchOptionMenu("search.Multiple_Files", "searchGlobal",
                 "search.tip.Multiple_Files"),
-            Firebug.Search.searchOptionMenu("search.Use_Regular_Expression",
+            SearchBox.searchOptionMenu("search.Use_Regular_Expression",
                 "searchUseRegularExpression", "search.tip.Use_Regular_Expression")
         ];
-    },
-
-    onNavigateToNextDocument: function(scanDoc, reverse)
-    {
-        return this.navigateToNextDocument(scanDoc, reverse);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -677,17 +865,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.initializeEditBreakpointCondition(lineIndex);
 
         Events.cancelEvent(event);
-    },
-
-    onEditorMouseUp: function(event)
-    {
-        Trace.sysout("scriptPanel.onEditorMouseUp;", event);
-
-        // Click anywhere in the script panel closes breakpoint-condition-editor
-        // if it's currently opened. It's valid to close the editor this way
-        // and that's why the 'cancel' argument is set to false.
-        if (this.editing)
-            Editor.stopEditing(false);
     },
 
     onEditorKeyDown: function(event)
@@ -782,6 +959,14 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
 
         var conditionEditor = this.getEditor();
+        if (!conditionEditor.breakpoint)
+        {
+            // xxxHonza: Another reason why Conditional Editor feature needs refactoring.
+            TraceError.sysout("ScriptPanel.openBreakpointConditionEditor; ERROR " +
+                "conditionEditor.breakpoint == null?");
+            return;
+        }
+
         conditionEditor.breakpoint.lineNo = lineNo;
 
         // As Editor scrolls(not panel itself) with long scripts, we need to set
@@ -876,7 +1061,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // Remove breakpoint from the UI.
         this.scriptView.removeBreakpoint(bp);
         if (this.scriptView.editor && this.scriptView.editor.debugLocation == bp.lineNo)
-            this.scriptView.setDebugLocation(bp.lineNo);
+            this.scriptView.setDebugLocation(bp.lineNo, true);
     },
 
     onBreakpointEnabled: function(context, bp, bpClient)
@@ -950,6 +1135,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // See issue 4378
         var isCodeTarget = (target.tagName === "TEXTAREA" &&
             Dom.getAncestorByClass(target, "CodeMirror"));
+
+        Trace.sysout("scriptPanel.getContextMenuItems; isCodeTarget: " + isCodeTarget, target);
 
         if (!isCodeTarget)
             return;
@@ -1118,10 +1305,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     breakOnNext: function(enabled)
     {
-        if (enabled)
-            this.tool.breakOnNext(this.context, true);
-        else
-            this.tool.breakOnNext(this.context, false);
+        BreakOnNext.breakOnNext(this.context, enabled);
     },
 
     getBreakOnNextTooltip: function(armed)
@@ -1132,7 +1316,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     shouldBreakOnNext: function()
     {
-        return !!this.context.breakOnNextHook;  // TODO BTI
+        return !!this.context.breakOnNextActivated;  // TODO BTI
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1340,8 +1524,16 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("scriptPanel.newSource; " + sourceFile.href, sourceFile);
 
         // New script has been appended, update the default location if necessary.
+        // xxxHonza: Do not use this.navigate() method since it would fire "onPanelNavigate"
+        // event and cause {@linke NavigationHistory} to be updated (issue 6950).
+        // Also, explicit executing of syncLocationList here is not ideal (are there any
+        // other options?)
         if (!this.location)
-            this.navigate(null);
+        {
+            this.location = this.getDefaultLocation();
+            this.updateLocation(this.location);
+            Firebug.chrome.syncLocationList();
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

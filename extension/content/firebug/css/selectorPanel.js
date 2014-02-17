@@ -404,7 +404,7 @@ CSSSelectorsPanelEditor.prototype = domplate(SelectorEditor.prototype,
     tag:
         INPUT({"class": "fixedWidthEditor selectorsPanelEditor a11yFocusNoTab",
             type: "text",
-            title: Locale.$STR("Selector"),
+            title: Locale.$STR("css.selector.tip.Selector"),
             oninput: "$onInput",
             onkeypress: "$onKeyPress"}
         ),

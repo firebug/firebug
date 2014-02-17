@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <title>Issue 6841: Use platform API for CSS autocompletion</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+      <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+      <style type="text/css">
+          #element1 {
+              background: #8C8CFF linear-gradient(135deg, #788CFF, #B4C8FF);
+              color: green;
+              height: 100px;
+              width: 100px;
+          }
+          code {
+              color: unset;
+          }
+      </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6841">Issue 6841</a>: Use platform API for CSS autocompletion</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element1">Testing</div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug and select the <em>HTML</em> panel</li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> above</li>
+                    <li>Select the <em>Style</em> side panel</li>
+                    <li>Add the following properties and confirm the auto-completions:
+                    <ul>
+                        <li><code>text-transform: up</code> <span class="ok">&rArr; <code>uppercase</code></span></li>
+                        <li><code>-moz-appearance: no</code> <span class="ok">&rArr; <code>none</code></span></li>
+                        <li><code>transition: 1s height, 1s col</code> <span class="ok">&rArr; <code>1s height, 1s color</code></span></li>
+                        <li><code>color: w</code> <span class="ok">&rArr; <code>white</code></span></li>
+                        <li><code>color: inac</code> <span class="ok">&rArr; <code>inactiveborder</code></span></li>
+                        <li><code>color: rg</code> <span class="ok">&rArr; <code>rgb()</code></span></li>
+                        <li><code>height: 50px</code> <span class="ok">&rArr; no completion</span></li>
+                        <li><code>background-image: line</code> <span class="ok">&rArr; <code>linear-gradient()</code></span></li>
+                        <li><code>background: linea</code> <span class="ok">&rArr; <code>linear-gradient()</code></span></li>
+                        <li><code>background: bl</code> <span class="ok">&rArr; <code>black</code></span></li>
+                        <li><code>background: yellow bl</code> <span class="ok">&rArr; no completion</span></li>
+                        <li><code>background: yellow rep</code> <span class="ok">&rArr; <code>yellow repeat</code></span></li>
+                        <li><code>image-rendering: opt</code> <span class="ok">&rArr; <code>optimizeSpeed</code></span></li>
+                        <li><code>pointer-events: no</code> <span class="ok">&rArr; <code>none</code></span></li>
+                        <li><code>pointer-events: vis</code> <span class="ok">&rArr; no completion</span></li>
+                        <li><code>content: at</code> <span class="ok">&rArr; <code>attr()</code></span></li>
+                        <li><code>content: ur</code> <span class="ok">&rArr; <code>url()</code></span></li>
+                        <li><code>content: un</code> <span class="ok">&rArr; <code>unset</code></span></li>
+                        <li><code>font: cal</code> <span class="ok">&rArr; no completion</span></li>
+                    </ul>
+                    </li>
+                </ol>
+            </section>
+            <footer>Simon Lindholm, simon.lindholm10@gmail.com</footer>
+        </div>
+    </body>
+</html>

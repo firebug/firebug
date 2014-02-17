@@ -3,11 +3,8 @@ function runTest()
     FBTest.sysout("issue5336.START");
     FBTest.openNewTab(basePath + "script/watch/5336/issue5336.html", function(win)
     {
-        FBTest.openFirebug();
         FBTest.enableScriptPanel(function(win)
         {
-            var panel = FW.Firebug.chrome.selectPanel("script");
-
             FBTest.waitForBreakInDebugger(FW.Firebug.chrome, 13, false, function(row)
             {
                 FW.Firebug.chrome.selectSidePanel("watches");

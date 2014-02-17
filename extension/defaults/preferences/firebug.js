@@ -68,6 +68,7 @@ pref("extensions.firebug.consoleFilterTypes", "all");
 pref("extensions.firebug.preferJSDSourceLinks", false);
 pref("extensions.firebug.commandLineShowCompleterPopup", true);
 pref("extensions.firebug.console.groupLogMessages", true);
+pref("extensions.firebug.consoleCommandHistoryMax", 1000);
 
 // HTML
 pref("extensions.firebug.showCommentNodes", false);
@@ -88,7 +89,7 @@ pref("extensions.firebug.onlyShowAppliedStyles", false);
 pref("extensions.firebug.showUserAgentCSS", false);
 pref("extensions.firebug.expandShorthandProps", false);
 pref("extensions.firebug.cssEditMode", "Source");
-pref("extensions.firebug.colorDisplay", "hex");
+pref("extensions.firebug.colorDisplay", "authored");
 
 // Computed
 pref("extensions.firebug.computedStylesDisplay", "grouped");
@@ -142,6 +143,7 @@ pref("extensions.firebug.netResponseHeadersVisible", true);
 pref("extensions.firebug.netRequestHeadersVisible", true);
 pref("extensions.firebug.netCachedHeadersVisible", false);
 pref("extensions.firebug.netPostRequestHeadersVisible", false);
+pref("extensions.firebug.netSortPostParameters", true);
 
 // JSON Preview
 pref("extensions.firebug.sortJsonPreview", false);

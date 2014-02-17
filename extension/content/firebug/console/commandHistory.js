@@ -7,9 +7,10 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/string",
+    "firebug/lib/options",
     "firebug/console/autoCompleter"
 ],
-function(Firebug, Events, Wrapper, Css, Dom, Str) {
+function(Firebug, Events, Wrapper, Css, Dom, Str, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -21,8 +22,6 @@ const Ci = Components.interfaces;
 
 Firebug.CommandHistory = function()
 {
-    const commandHistoryMax = 1000;
-
     var commandsPopup = Firebug.chrome.$("fbCommandHistory");
     var commands = this.commands = [];
     var commandPointer = 0;
@@ -41,9 +40,12 @@ Firebug.CommandHistory = function()
     {
         if (commands[commandInsertPointer] != command)
         {
-            commandInsertPointer++;
-            if (commandInsertPointer >= commandHistoryMax)
-                commandInsertPointer = 0;
+            var commandHistoryMax = Options.get("consoleCommandHistoryMax")
+
+            if (commandHistoryMax > 0 && commandInsertPointer + 1 >= commandHistoryMax)
+                commands.shift();
+            else
+                commandInsertPointer++;
 
             commands[commandInsertPointer] = command;
         }

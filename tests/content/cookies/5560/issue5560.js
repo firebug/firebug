@@ -7,10 +7,10 @@ function runTest()
         FBTest.openFirebug();
         FBTest.selectPanel("cookies");
 
-        FBTestFireCookie.enableCookiePanel(function(win)
+        FBTest.enableCookiesPanel(function(win)
         {
             var panelNode = FBTest.selectPanel("cookies").panelNode;
-            var cookie = FBTestFireCookie.getCookieByName(panelNode, "TestCookie5560");
+            var cookie = FBTest.getCookieByName(panelNode, "TestCookie5560");
             var rawValue = cookie.row.getElementsByClassName("cookieRawValueCol").item(0);
 
             FBTest.compare("%23", rawValue.textContent, "The raw value of the cookie must be displayed correctly.");

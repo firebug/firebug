@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 7067: Firebug overwrites the Console object even when the Console Panel is disabled</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script>
+            function isConsoleNative(_console)
+            {
+                return _console.log.toSource().contains("[native code]");
+            }
+
+            // Do not check the DevTools console logged message directly.
+            // Just trap what should have been logged into it.
+            function wrapIfAutomated(_console)
+            {
+                if (top.location.search.contains("automated=true") && isConsoleNative(_console))
+                {
+                    if (!top.logged)
+                        top.logged = [];
+
+                    _console.log = function(log)
+                    {
+                        top.logged.push(log);
+                    }
+                }
+            }
+            wrapIfAutomated(console);
+            console.log("log from the main window");
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=7068">Issue 7068</a>: Firebug overwrites the Console object even when the Console Panel is disabled</h1>
+        </header>
+        <div>
+            <section id="content">
+                <iframe style="display: none;" src="data:text/html,<html><head><script>top.wrapIfAutomated(console); console.log('log from the iframe');</script></head><body></body></html>"></iframe>
+                <button onclick="console.log('log from the button');" id="button">Log something</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the console panel but <b>do not</b> enable it yet</li>
+                    <li>Open the Console of the DevTools (CTRL-K)</li>
+                    <li>Reload the page</li>
+                    <li>Check in the DevTools that these two logs appear:<br/>
+                        <ul>
+                            <li><code>"log from the main window"</code></li>
+                            <li><code>"log from the iframe"</code></li>
+                        </ul>
+                    </li>
+                    <li>Click the <code>Log something</code> button<br/>
+                        &#x21b3;Check that the DevTools console displays "log from the button"</li>
+                    <li>Enable the console panel</li>
+                    <li>Click the <code>Log something</code> button<br/>
+                        &#x21b3;Check that the <b>Firebug</b> console displays "log from the button"</li>
+                    <li>Reload the page</li>
+                    <li>Check in the <b>Firebug Console</b> that these two logs appear:<br/>
+                        <ul>
+                            <li><code>"log from the main window"</code></li>
+                            <li><code>"log from the iframe"</code></li>
+                        </ul>
+                    </li>
+                </ol>
+            </section>
+            <footer>
+                Florent Fayolle, florent.fayolle69@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>

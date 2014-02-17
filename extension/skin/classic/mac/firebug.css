@@ -8,9 +8,9 @@
 /************************************************************************************************/
 
 #fbCommandToolbar {
-    border-top: 1px solid #BBB9BA;
-    border-bottom: 1px solid #BBB9BA;
-    background: #F6F6F6 linear-gradient(to top, #FFFFFF, #E9E9E9 55%, #F2F2F2 55%, #FAFAFA) repeat-x;
+    height: calc(22rem + 9px);
+    border: none;
+    background: #F6F6F6 linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2)) repeat-x;
 }
 
 #fbCommandArrow,
@@ -19,7 +19,7 @@
 #fbCommandLineCompletion,
 #fbCommandLineMeasurer,
 .fbCommandLineCompletions {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 /* Add some more padding to the completion popup */
@@ -50,7 +50,7 @@
 
 #fbPanelSplitter > #fbPanelSplitterBox {
     visibility: visible;
-    height: 32px;
+    height: calc(22rem + 10px);
     width: 6px;
     background-color: -moz-dialog;
     background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
@@ -90,7 +90,7 @@
 
 #fbPanelBar1-tabBox,
 #fbPanelBar2-tabBox {
-    height: 32px;
+    height: calc(22rem + 10px);
 }
 
 #fbPanelBar1-tabBox {
@@ -106,7 +106,7 @@
 #fbToolbarInner.innerToolbar {
     margin-left: -5px;
     margin-right: 0;
-    height: 31px;
+    height: calc(22rem + 9px);
     background-color: transparent;
 }
 
@@ -264,14 +264,14 @@
 /* Quick Info Box */
 
 #fbQuickInfoPanel {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 /************************************************************************************************/
 /* Command History panel */
 
 #fbCommandHistory {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 /********************************************************************************************/
@@ -545,5 +545,5 @@ panelTab[selected="true"]:active > panelTabMenu .menuTarget {
 /************************************************************************************************/
 
 #fbMigrationOk {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }

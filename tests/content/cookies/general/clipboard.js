@@ -7,7 +7,7 @@ function runTest()
     FBTest.openNewTab(basePath + "cookies/general/clipboard.php", function(win)
     {
         FBTest.openFirebug(true);
-        FBTestFireCookie.enableCookiePanel(function(win)
+        FBTest.enableCookiesPanel(function(win)
         {
             FBTest.sysout("cookies.general.cookieClipboard; Check clipboard functionality");
 
@@ -15,7 +15,7 @@ function runTest()
             var panelNode = FBTest.selectPanel("cookies").panelNode;
 
             // Copy cookie into the clipboard, get from clipboard again and check.
-            var originalCookie = FBTestFireCookie.getCookieByName(panelNode, "CopyPasteCookie");
+            var originalCookie = FBTest.getCookieByName(panelNode, "CopyPasteCookie");
             FBTest.ok(originalCookie, "There must be 'CopyPasteCookie'.");
             if (!originalCookie)
                 return FBTest.testDone();
@@ -35,7 +35,7 @@ function runTest()
                 CookieRow.onPaste(null);
 
                 // Check the new cookie
-                var newCookie = FBTestFireCookie.getCookieByName(panelNode, "CopyPasteCookie-1");
+                var newCookie = FBTest.getCookieByName(panelNode, "CopyPasteCookie-1");
                 FBTest.ok(newCookie, "There must be 'CopyPasteCookie-1'.");
                 if (!originalCookie || !newCookie)
                     return FBTest.testDone();
@@ -51,7 +51,7 @@ function runTest()
 
                 // Delete the cookie
                 CookieRow.onRemove(newCookie);
-                newCookie = FBTestFireCookie.getCookieByName(panelNode, "CopyPasteCookie-1");
+                newCookie = FBTest.getCookieByName(panelNode, "CopyPasteCookie-1");
                 FBTest.ok(!newCookie, "There must not be 'CopyPasteCookie-1'.");
 
                 return FBTest.testDone("cookies.general.cookieClipboard.DONE");

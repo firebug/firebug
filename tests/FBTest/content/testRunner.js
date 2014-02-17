@@ -278,45 +278,6 @@ FBTestApp.TestRunner = Obj.extend(new Firebug.Listener(),
         this.onFinishCallback = null;
     },
 
-    manualVerify: function(verifyMsg, instructions, cleanupHandler)
-    {
-        if (!this.currentTest)
-            return;
-
-        if (FBTrace.DBG_FBTEST)
-        {
-            FBTrace.sysout("fbtest.TestRunner.Test manualVerify: " + verifyMsg + " " +
-                this.currentTest.path, this.currentTest);
-        }
-
-        // Test is done so, clear the break-timeout.
-        this.clearTestTimeout();
-
-        this.currentTest.isManual = true;
-        this.currentTest.cleanupHandler = cleanupHandler;
-        this.currentTest.end = (new Date()).getTime();
-
-        // If the test is currently opened, append the result directly into the UI.
-        TestList.expandTest(this.currentTest.row);
-
-        var infoBodyRow = this.currentTest.row.nextSibling;
-        var table = Dom.getElementByClass(infoBodyRow, "testResultTable");
-        if (!table)
-            table = TestResultRep.tableTag.replace({}, infoBodyRow.firstChild);
-
-        var tbody = table.firstChild;
-        var verify = TestResultRep.manualVerifyTag.insertRows(
-            {test: this.currentTest, verifyMsg: verifyMsg, instructions: instructions},
-            tbody.lastChild ? tbody.lastChild : tbody)[0];
-
-        var scrollCurrentTestIntoView = Firebug.getPref(FBTestApp.prefDomain,
-            "scrollCurrentTestIntoView");
-        if (scrollCurrentTestIntoView)
-            scrollIntoCenterView(verify, null, true);
-
-        this.currentTest.onManualVerify(verifyMsg, instructions);
-    },
-
     getNextTest: function()
     {
         var randomSelection = Firebug.getPref(FBTestApp.prefDomain, "randomTestSelection");

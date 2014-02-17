@@ -1057,11 +1057,6 @@ window.Firebug =
         this.showBar(browser && browser.showFirebug);
     },
 
-    toggleCommandLine: function(showCommandEditor)
-    {
-        Options.set("commandEditor", showCommandEditor);
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     /**
@@ -1275,10 +1270,26 @@ window.Firebug =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Events
 
     dispatch: function(listeners, eventId, args)
     {
         Events.dispatch(listeners, eventId, args);
+    },
+
+    /**
+     * Dispatch an event to given target. These event can be consumed by automation
+     * system such as {@link FBTest}.
+     */
+    dispatchEvent: function(target, eventType, args)
+    {
+        var detail = {
+            type: eventType,
+            args: args
+        };
+
+        var event = new window.CustomEvent("FirebugEvent", {detail: detail});
+        target.dispatchEvent(event);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

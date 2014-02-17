@@ -2,7 +2,6 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "script/6476/issue6476.html", function(win)
     {
-        FBTest.selectPanel("script");
         FBTest.enableScriptPanel(function(win)
         {
             FBTest.click(win.document.getElementById("testButtonEval"));

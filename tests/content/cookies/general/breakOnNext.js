@@ -4,7 +4,7 @@ function runTest()
 
     FBTest.openNewTab(basePath + "cookies/general/breakOnNext.php", function(win)
     {
-        FBTestFireCookie.enableCookiePanel(function(win)
+        FBTest.enableCookiesPanel(function(win)
         {
             var panelNode = FBTest.selectPanel("cookies").panelNode;
 

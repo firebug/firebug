@@ -104,6 +104,12 @@ TabClient.prototype = Obj.extend(new EventSource(),
 
     onListTabs: function(response)
     {
+        if (response.error)
+        {
+            TraceError.sysout("tabClient.onListTabs; ERROR " + response.error + ": " +
+                response.message, response);
+        }
+
         // If the tab object has been detached in just after 'listTabs' has been send
         // Just ignore rest of the attach sequence.
         if (!this.tabAttached)
@@ -116,8 +122,25 @@ TabClient.prototype = Obj.extend(new EventSource(),
         this.listTabsResponse = response;
 
         // Attach to the currently selected tab.
-        var tabGrip = response.tabs[response.selected];
-        this.attachTab(tabGrip.actor);
+        // xxxHonza: The tab we want to attach to doesn't have to be the currently
+        // selected one. This might happen e.g. if an existing tab is moved into
+        // a new window. This action activates the next tab in the original window
+        // (causing new Firebug context to be created), but the selected tab is the
+        // one moved in the new window (see also issue 6856).
+        //var tabGrip = response.tabs[response.selected];
+        //this.attachTab(tabGrip.actor);
+
+        // ... so we need to find the proper tab-actor by direct access
+        // to the backend -> fix me (the 'tabListChanged' packet might be utilized
+        // causing to re-request tab-list if received in the middle).
+        var tabActor = DebuggerLib.getTabActor(this.browser);
+        if (!tabActor)
+        {
+            Trace.sysout("tabClient.onListTab; no tab actor, tab closing?", response);
+            return;
+        }
+
+        this.attachTab(tabActor.actorID);
     },
 
     attachTab: function(tabActor)
@@ -211,6 +234,13 @@ TabClient.prototype = Obj.extend(new EventSource(),
         }
 
         this.threadAttached = true;
+
+        // xxxHonza: the ThreadActor's |global| might have been changed (see issue 7029)
+        // referencing an embedded frame. So, make sure it's set to the top level
+        // window again. This should be removed as soon as the platform if fixed:
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=962632
+        var threadActorObj = DebuggerLib.getThreadActor(this.browser);
+        threadActorObj.global = this.window.wrappedJSObject;
 
         this.client.attachThread(this.threadActor, this.onThreadAttached.bind(this));
     },

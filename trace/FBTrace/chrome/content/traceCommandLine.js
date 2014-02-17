@@ -18,6 +18,7 @@ const Ci = Components.interfaces;
 const Cu = Components.utils;
 
 var sourceEditorScope = System.importModule([
+    "resource://fbtrace/orion/source-editor.jsm",
     "resource:///modules/source-editor.jsm",
     "resource:///modules/devtools/sourceeditor/source-editor.jsm"]);
 

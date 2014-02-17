@@ -19,9 +19,10 @@ function runTest()
         FW.Firebug.chrome.selectPanel("net");
         tab2 = FBTest.openNewTab(basePath + "net/activation/activation2.html", function() {
             FBTest.progress("Opened new tab at "+win.location);
-            FBTest.openFirebug();
-            FW.Firebug.chrome.selectPanel("net");
-            onRunTest();
+            FBTest.openFirebug(function () {
+                FW.Firebug.chrome.selectPanel("net");
+                onRunTest();
+            });
         });
     });
 }

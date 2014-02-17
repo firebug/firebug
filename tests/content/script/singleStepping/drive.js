@@ -1,29 +1,12 @@
-var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
-var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
-var FF3p5OrLess = versionChecker.compare(appInfo.version, "3.5.*") <= 0;
-var FF4OrHigher = versionChecker.compare(appInfo.version, "4.0b8") >= 0;
-var win;
-
 function runTest()
 {
     FBTest.sysout("1603 runTest starts");
 
-    if (FBTest.FirebugWindow)
-        FBTest.ok(true, "We have the Firebug Window: "+FBTest.FirebugWindow.location);
-    else
-        FBTest.ok(false, "No Firebug Window");
-
-    FBTest.progress("Version dependent test, version "+appInfo.version+" is "+
-        (FF3p5OrLess?"3.5 or less":"newer than 3.5")+" ="+
-        versionChecker.compare(appInfo.version, "3.5*"));
-
     FBTest.openNewTab(basePath + "script/singleStepping/index.html", function()
     {
-        // Open Firebug UI, enable Script panel, reload and start first test.
-        FBTest.openFirebug();
         FBTest.clearCache();
-        FBTest.selectPanel("script");
-        FBTest.enableScriptPanel(function callbackOnReload(testWindow) {
+        FBTest.enableScriptPanel(function callbackOnReload(testWindow)
+        {
             win = testWindow;
             selectFile();
         });
@@ -41,7 +24,8 @@ function selectFile()
     var panel = FBTest.getSelectedPanel();
 
     var found = FBTest.selectPanelLocationByName(panel, fileName);
-    FBTest.compare(found, true, "The "+fileName+" should be found");
+    FBTest.compare(found, true, "The " + fileName + " should be found");
+
     if (found)
         breakOnNext(panel);
     else
@@ -70,7 +54,7 @@ function checkBreakOnNext()
     stepInto();
 }
 
-var stepIntoLineNo = (FF3p5OrLess || FF4OrHigher) ? 14 : 13;
+var stepIntoLineNo = 14;
 
 function stepInto()
 {
@@ -100,7 +84,7 @@ function stepOver()
     FBTest.clickToolbarButton(FW.Firebug.chrome, "fbStepOverButton");
 }
 
-var stepOverLineNo = (FF3p5OrLess || FF4OrHigher) ? 15 : 14;
+var stepOverLineNo = 15;
 var stepOverFileName = "index.html";
 
 function checkStepOver()
@@ -128,9 +112,12 @@ var stepOutFileName = "onclick";
 function checkstepOut()
 {
     var panel = FBTest.getSelectedPanel();
-    var name = panel.getObjectDescription(panel.location).name.split('/')[0];
+    var name = panel.getObjectDescription(panel.location).name.split("/")[0];
+
     FBTest.sysout("panel.location.getObjectDescription().name: " +
-            panel.getObjectDescription(panel.location).name, panel.getObjectDescription(panel.location));
+        panel.getObjectDescription(panel.location).name,
+        panel.getObjectDescription(panel.location));
+
     FBTest.compare(stepOutFileName, name, "StepOut should land in " +
         stepOutFileName);
 
@@ -139,7 +126,6 @@ function checkstepOut()
         FBTest.sysout("Failing row is "+row.parentNode.innerHTML, row);
 
     FBTest.clickContinueButton();
-    FBTest.progress("The continue button was pushed");
 
     FBTest.testDone("singleStepping.DONE");
 }

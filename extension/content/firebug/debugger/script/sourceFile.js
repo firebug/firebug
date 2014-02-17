@@ -96,6 +96,7 @@ SourceFile.prototype =
         return false;
     },
 
+    // xxxHonza: This method should return a promise
     loadScriptLines: function(callback)
     {
         if (this.loaded)

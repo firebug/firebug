@@ -6,7 +6,7 @@ function runTest()
     FBTest.openNewTab(basePath + "console/grouping/cookies.php", function(win)
     {
         FBTest.openFirebug();
-        FBTestFireCookie.enableCookiePanel();
+        FBTest.enableCookiesPanel();
 
         FBTest.selectPanel("console");
         FBTest.enableConsolePanel(function(win)

@@ -6,8 +6,9 @@ define([
     "firebug/firebug",
     "firebug/chrome/firefox",
     "firebug/firefox/customizeShortcuts",
+    "firebug/firefox/browserCommands"
 ],
-function(Module, Obj, Firebug, Firefox, CustomizeShortcuts) {
+function(Module, Obj, Firebug, Firefox, CustomizeShortcuts, BrowserCommands) {
 
 // ********************************************************************************************* //
 // Constants
@@ -40,20 +41,15 @@ Firebug.ShortcutsModel = Obj.extend(Module,
 
         // We need to touch keyset to apply keychanges without restart
         this.keysets = [];
-        this.disabledKeyElements = [];
+        BrowserCommands.resetDisabledKeys(window.top);
+
         shortcutNames.forEach(this.initShortcut, this);
 
         this.keysets.forEach(function(keyset) {
             keyset.parentNode.insertBefore(keyset, keyset.nextSibling);
         });
 
-        for (var i=0; i<this.disabledKeyElements.length; i++)
-        {
-            var elem = this.disabledKeyElements[i];
-            elem.removeAttribute("disabled");
-        }
-
-        this.keysets = this.disabledKeyElements = null;
+        this.keysets = null;
     },
 
     initShortcut: function(element, index, array)
@@ -109,20 +105,11 @@ Firebug.ShortcutsModel = Obj.extend(Module,
         if (FBTrace.DBG_SHORTCUTS)
         {
             FBTrace.sysout("Firebug.ShortcutsModel.initShortcut; global shortcut",
-                {key: key, modifiers: modifiers});
+                {key: key, modifiers: modifiers, command: "cmd_firebug_" + element});
         }
 
         // Disable existing global shortcuts
-        var selector = "key[" + attr + "='" + key + "'][modifiers='" + modifiers + "']"
-            + ":not([id='key_firebug_" + element + "']):not([disabled='true'])";
-
-        var existingKeyElements = keyElem.ownerDocument.querySelectorAll(selector);
-        for (var i=existingKeyElements.length-1; i>=0; i--)
-        {
-            var existingKeyElement = existingKeyElements[i];
-            existingKeyElement.setAttribute("disabled", "true");
-            this.disabledKeyElements.push(existingKeyElement);
-        }
+        BrowserCommands.disableExistingShortcuts(keyElem.ownerDocument, attr, key, modifiers);
 
         keyElem.setAttribute("modifiers", modifiers);
         keyElem.setAttribute(attr, key);

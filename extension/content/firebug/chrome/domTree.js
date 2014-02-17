@@ -143,10 +143,9 @@ DomTree.prototype = domplate(
         var row = Dom.getAncestorByClass(event.target, "memberRow");
         var label = Dom.getAncestorByClass(event.target, "memberLabel");
         if (label && Css.hasClass(row, "hasChildren"))
-        {
             this.toggleRow(row);
-            Events.cancelEvent(event);
-        }
+
+        Events.cancelEvent(event);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

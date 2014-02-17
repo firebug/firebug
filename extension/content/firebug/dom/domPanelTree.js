@@ -78,14 +78,14 @@ DomPanelTree.prototype = domplate(BaseTree,
             ),
             TD({"class": "memberValueCell", $readOnly: "$member.readOnly",
                 role: "presentation"},
-                TAG("$member.tag", {object: "$member.value"})
+                TAG("$member.tag", {object: "$member|getMemberValue"})
             )
         ),
 
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick",
             _repObject: "$object", role: "tree",
-            "aria-label": Locale.$STR("aria.labels.dom properties")},
+            "aria-label": Locale.$STR("a11y.labels.dom_properties")},
             TBODY({role: "presentation"},
                 TAG("$sizerRowTag"),
                 FOR("member", "$object|memberIterator",
@@ -96,6 +96,25 @@ DomPanelTree.prototype = domplate(BaseTree,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Domplate Accessors
+
+    getMemberValue: function(member)
+    {
+        // xxxHonza: the return value is passed into TAG that can be evaluated to
+        // FirebugReps.Obj. This template is based on OBJECTLINK, which assigns
+        // the value to |repObject| expando of the target node. In case where the
+        // value is referencing an object coming from chrome scope the assignment
+        // fails with an exception:
+        // Permission denied for <resource://firebugui> to create wrapper
+        // (see issue 7138 and DomplateTag.generateDOM method)
+        //
+        // The right solution seems to be passing the |member| structure into TAG template
+        // (i.e. return it from this method), and cause the A.repObject (created by
+        // OBJECTLINK) to reference it instead of referencing the member.value directly
+        // (which points to chrome object).
+        // This has impact on other parts of the UI where object links are used.
+        // (e.g. the Console panel, onPanelClick in firebug/chrome/chrome).
+        return member.value;
+    },
 
     /**
      * Override the derived method since this tree template uses different domplate

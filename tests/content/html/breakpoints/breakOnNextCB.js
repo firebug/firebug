@@ -16,16 +16,16 @@ function runTest()
         // A suite of asynchronous tests.
         var testSuite = [];
         testSuite.push(function(callback) {
-            breakOnMutation(win, "breakOnAttrModified", 42, callback);
+            breakOnMutation(win, "breakOnAttrModified", 41, callback);
         });
         testSuite.push(function(callback) {
-            breakOnMutation(win, "breakOnNodeInserted", 53, callback);
+            breakOnMutation(win, "breakOnNodeInserted", 52, callback);
         });
         testSuite.push(function(callback) {
-            breakOnMutation(win, "breakOnNodeRemoved", 59, callback);
+            breakOnMutation(win, "breakOnNodeRemoved", 58, callback);
         });
         testSuite.push(function(callback) {
-            breakOnMutation(win, "breakOnTextModified", 48, callback);
+            breakOnMutation(win, "breakOnTextModified", 47, callback);
         });
 
         // Reload window to activate debugger and run all tests.

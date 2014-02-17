@@ -6,13 +6,15 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/events",
+    "firebug/lib/options",
     "firebug/chrome/eventSource",
     "firebug/chrome/menu",
     "firebug/chrome/infotip",
     "firebug/chrome/firefox",
     "firebug/editor/sourceEditor",
 ],
-function(FBTrace, Obj, Dom, Css, Events, EventSource, Menu, InfoTip, Firefox, SourceEditor) {
+function(FBTrace, Obj, Dom, Css, Events, Options, EventSource, Menu, InfoTip, Firefox,
+    SourceEditor) {
 
 "use strict";
 
@@ -59,8 +61,6 @@ ScriptView.prototype = Obj.extend(new EventSource(),
 
         this.initializeExecuted = true;
 
-        Trace.sysout("scriptView.initialize; " + parentNode);
-
         //xxxHonza: do we need this? this.onContextMenuListener = this.onContextMenu.bind(this);
         this.onBreakpointChangeListener = this.onBreakpointChange.bind(this);
         this.onMouseMoveListener = this.onMouseMove.bind(this);
@@ -73,6 +73,8 @@ ScriptView.prototype = Obj.extend(new EventSource(),
         // Initialize source editor.
         this.editor = new SourceEditor();
         this.editor.init(parentNode, SourceEditor.ReadOnlyConfig, this.onEditorLoad.bind(this));
+
+        Trace.sysout("scriptView.initialize; " + parentNode);
     },
 
     onEditorLoad: function()
@@ -163,6 +165,7 @@ ScriptView.prototype = Obj.extend(new EventSource(),
         if (!this.initialized)
         {
             this.defaultSource = {source: source, type: type};
+            Trace.sysout("scriptView.showSource; not initialized");
             return;
         }
 
@@ -213,97 +216,9 @@ ScriptView.prototype = Obj.extend(new EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Search
 
-    search: function(text, reverse)
+    search: function(text, options)
     {
-        // Check if the search is for a line number.
-        var m = /^[^\\]?#(\d*)$/.exec(text);
-        if (m)
-        {
-            // Don't beep if only a # has been typed.
-            if (!m[1])
-                return true;
-
-            var lineNo = +m[1];
-            if (!isNaN(lineNo) && 0 < lineNo && lineNo <= this.editor.getLineCount())
-            {
-                this.scrollToLine(lineNo, {highlight: true});
-                return true;
-            }
-        }
-
-        var curDoc = this.searchCurrentDoc(!Firebug.searchGlobal, text, reverse);
-        if (!curDoc && Firebug.searchGlobal)
-        {
-            return this.searchOtherDocs(text, reverse) ||
-                this.searchCurrentDoc(true, text, reverse);
-        }
-        return curDoc;
-    },
-
-    searchOtherDocs: function(text, reverse)
-    {
-        var scanRE = Firebug.Search.getTestingRegex(text);
-
-        var self = this;
-
-        function scanDoc(compilationUnit)
-        {
-            var lines = null;
-
-            // TODO The source lines arrive asynchronous in general
-            compilationUnit.getSourceLines(-1, -1, function loadSource(unit, firstLineNumber,
-                lastLineNumber, linesRead)
-            {
-                lines = linesRead;
-            });
-
-            if (!lines)
-                return;
-
-            // We don't care about reverse here as we are just looking for existence.
-            // If we do have a result, we will handle the reverse logic on display.
-            for (var i = 0; i < lines.length; i++)
-            {
-                if (scanRE.test(lines[i]))
-                    return true;
-            }
-        }
-
-        if (this.dispatch("onNavigateToNextDocument", [scanDoc, reverse]))
-            return this.searchCurrentDoc(true, text, reverse) && "wraparound";
-    },
-
-    searchCurrentDoc: function(wrapSearch, text, reverse)
-    {
-        var options =
-        {
-            ignoreCase: !Firebug.Search.isCaseSensitive(text),
-            backwards: reverse
-        };
-
-        if (this.currentSearch && text == this.currentSearch.text)
-        {
-            options.start = this.currentSearch.start;
-            if (reverse)
-                options.start -= text.length + 1;
-        }
-        else
-        {
-            this.currentSearch = {text: text, start: 0};
-        }
-
-        // xxxHonza: this.editor.find doesn't exist
-        var offset = this.editor.find(text, options);
-        Trace.sysout("search", {options: options, offset: offset});
-
-        if (offset != -1)
-        {
-            this.editor.setSelection(offset, offset + text.length);
-            this.currentSearch.start = offset + text.length;
-            return true;
-        }
-
-        return false;
+        return this.editor.search(text, options);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -459,20 +374,8 @@ ScriptView.prototype = Obj.extend(new EventSource(),
     {
         Trace.sysout("scriptView.removeAllBreakpoints;");
 
-        if (!this.editor)
-            return;
-
-        // xxxHonza: TODO support for breakpoints.
-        return;
-
-        var annotations = this.editor._getAnnotationsByType("breakpoint", 0,
-            this.editor.getCharCount());
-
-        if (annotations.length > 0)
-        {
-            annotations.forEach(this.editor._annotationModel.removeAnnotation,
-                this.editor._annotationModel);
-        }
+        if (this.editor)
+            this.editor.removeAllBreakpoints();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -525,7 +428,7 @@ ScriptView.prototype = Obj.extend(new EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Debug Location
 
-    setDebugLocation: function(line)
+    setDebugLocation: function(line, noScroll)
     {
         if (!this.initialized)
             return;
@@ -533,8 +436,9 @@ ScriptView.prototype = Obj.extend(new EventSource(),
         if (this.editor)
             this.editor.setDebugLocation(line);
 
-        // If the debug location is being removed (line == -1) do not scroll.
-        if (line > 0)
+        // If the debug location is being removed (line == -1) or |noScroll|
+        // is explicitly set do not scroll.
+        if (line > 0 && !noScroll)
             this.scrollToLine(line);
     },
 

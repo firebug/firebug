@@ -4,7 +4,6 @@ function runTest()
 
     FBTest.openNewTab(basePath + "examples/exampleScript2.html", function(win)
     {
-        FBTest.openFirebug();
         FBTest.enableScriptPanel(function(win)
         {
             var chrome = FW.Firebug.chrome;

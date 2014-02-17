@@ -49,6 +49,7 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         Firebug.registerTracePrefix("debuggerTool.", "DBG_DEBUGGERTOOL", false);
         Firebug.registerTracePrefix("sourceTool.", "DBG_SOURCETOOL", false);
         Firebug.registerTracePrefix("breakpointTool.", "DBG_BREAKPOINTTOOL", false);
+        Firebug.registerTracePrefix("sourceTool.", "DBG_SOURCETOOL", false);
 
         // Listen to the main client, which represents the connection to the server.
         // The main client object sends various events about attaching/detaching
@@ -68,18 +69,17 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         chrome.setGlobalAttribute("cmd_firebug_stepOut", "oncommand",
             "Firebug.Debugger.stepOut(Firebug.currentContext)");
 
-        // Set tooltips to stepping buttons.
-        Firebug.chrome.$("fbRerunButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Rerun"), "Shift+F8"]));
-        Firebug.chrome.$("fbContinueButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Continue"), "F8"]));
-        Firebug.chrome.$("fbStepIntoButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Into"), "F11"]));
-        Firebug.chrome.$("fbStepOverButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Over"), "F10"]));
-        Firebug.chrome.$("fbStepOutButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut",
-                [Locale.$STR("script.Step_Out"), "Shift+F11"]));
+        // Set tooltips for stepping buttons.
+        var setTooltip = function(id, tooltip, shortcut)
+        {
+            tooltip = Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR(tooltip), shortcut]);
+            Firebug.chrome.$(id).setAttribute("tooltiptext", tooltip);
+        };
+        setTooltip("fbRerunButton", "script.Rerun", "Shift+F8");
+        setTooltip("fbContinueButton", "script.Continue", "F8");
+        setTooltip("fbStepIntoButton", "script.Step_Into", "F11");
+        setTooltip("fbStepOverButton", "script.Step_Over", "F10");
+        setTooltip("fbStepOutButton", "script.Step_Out", "Shift+F11");
     },
 
     shutdown: function()
@@ -415,6 +415,11 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         // Used by FBTest
     },
 
+    /**
+     * Breaks the debugger in the newest frame (if any) or in the debuggee global.
+     *
+     * @param {*} context
+     */
     breakNow: function(context)
     {
         DebuggerHalter.breakNow(context);
@@ -489,6 +494,13 @@ Firebug.Debugger = Obj.extend(ActivableModule,
     getCurrentFrameKeys: function(context)
     {
         var frame = context.stoppedFrame;
+        if (!frame || !frame.scopes)
+        {
+            TraceError.sysout("debugger.getCurrentFrameKeys; ERROR scopes: " +
+                (frame ? frame.scopes : "no stopped frame"));
+            return;
+        }
+
         var ret = [];
 
         if (!frame.scopes)
@@ -501,6 +513,9 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         {
             // "this" is not a real scope.
             if (scope.name === "this")
+                continue;
+
+            if (!scope.grip)
                 continue;
 
             // We can't synchronously read properties of objects on the scope chain,
@@ -517,6 +532,7 @@ Firebug.Debugger = Obj.extend(ActivableModule,
             for (var prop of props)
                 ret.push(prop.name);
         }
+
         return ret;
     },
 

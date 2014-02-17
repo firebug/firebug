@@ -17,8 +17,8 @@ function runTest()
             {
                 executeSearchTest("script", false, false, true, function(counter)
                 {
-                    FBTest.compare(13, counter, "There must be precise number " +
-                         "of occurences (13) actual: " + counter);
+                    FBTest.compare(13, counter, "There must be exactly 13 occurrences of the " +
+                        "word 'script' including the response bodies; actual: " + counter);
                     callback();
                 });
             });
@@ -28,8 +28,9 @@ function runTest()
             {
                 executeSearchTest("Script", false, true, true, function(counter)
                 {
-                    FBTest.compare(2, counter, "There must be precise number " +
-                        "of occurences (2) actual: " + counter);
+                    FBTest.compare(2, counter, "There must be exactly 2 occurrences of the " +
+                        "(case-sensitive) word 'Script' including the response bodies; actual: " +
+                        counter);
                     callback();
                 });
             });
@@ -39,8 +40,8 @@ function runTest()
             {
                 executeSearchTest("script", false, false, false, function(counter)
                 {
-                    FBTest.compare(1, counter, "There must be precise number " +
-                        "of occurences (1) actual: " + counter);
+                    FBTest.compare(1, counter, "There must exactly 1 occurrence of the word " +
+                        "'script'; actual: " + counter);
                     callback();
                 });
             });
