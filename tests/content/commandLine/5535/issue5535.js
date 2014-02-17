@@ -3,7 +3,7 @@ var fileName = "index.js";
 
 function runTest()
 {
-    FBTest.sysout("executeSelection.START");
+    FBTest.sysout("issue5535.START");
     FBTest.openNewTab(testPageURL, function(win)
     {
         FBTest.openFirebug();
@@ -32,7 +32,7 @@ function runTest()
 
             tasks.run(function()
             {
-                FBTest.testDone("executeSelection.DONE");
+                FBTest.testDone("issue5535.DONE");
             });
         });
     });
@@ -49,7 +49,7 @@ function executeAndVerifyNoSelection(callback, instructions, expected, useComman
 function executeAndVerifySelection(callback, instructions, expected, useCommandEditor,
     selectionStart, selectionEnd)
 {
-    FBTest.sysout("executeSelection executeAndVerifySelection : instructions : \"" +
+    FBTest.sysout("issue5535 executeAndVerifySelection : instructions : \"" +
         instructions + "\"; useCommandEditor : " +
         useCommandEditor + "; expect : "+expected);
 
