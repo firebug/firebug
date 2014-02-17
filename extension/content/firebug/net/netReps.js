@@ -1102,6 +1102,9 @@ Firebug.NetMonitor.NetInfoBody = domplate(Rep, new EventSource(),
             }
         }
 
+        // Notify listeners, so additional actions can be done when the headers are displayed
+        Events.dispatch(Firebug.NetMonitor.NetInfoBody.fbListeners, "onHeadersDisplayed", [this]);
+
         if (Css.hasClass(tab, "netInfoPostTab"))
         {
             if (!netInfoBox.postPresented)
@@ -1723,10 +1726,6 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Rep, new EventSource(),
         }
 
         target.sourceDisplayed = !target.sourceDisplayed;
-
-        // Notify listeners, so additional actions can be done when source view was toggled
-        Events.dispatch(Firebug.NetMonitor.NetInfoBody.fbListeners, "onToggleSourceView",
-            [target.sourceDisplayed]);
 
         Events.cancelEvent(event);
     },

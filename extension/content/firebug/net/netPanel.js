@@ -809,7 +809,7 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
         }
     },
 
-    onToggleSourceView: function()
+    onHeadersDisplayed: function()
     {
         this.updateHeadersSourceWidth();
     },

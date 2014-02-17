@@ -543,7 +543,6 @@ Dom.getScrollBarWidth = function(doc)
     doc.body.removeChild(outer);
 
     scrollBarWidth = widthWithoutScrollbar - widthWithScrollbar;
-    FBTrace.sysout("scrollBarWidth "+scrollBarWidth);
     return scrollBarWidth;
 };
 
