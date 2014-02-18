@@ -120,16 +120,17 @@ function initPropertyData()
         return value;
     };
 
-    // Some types of values are simply missing from the API, such as Mozilla-
-    // specific colors, and gradient images. Add those when detected.
+    // Some values are simply missing from the API. Add those when detected.
     var addMissingValues = function(values, propName)
     {
         if (propName === "transition" || propName === "transition-property")
             values = values.concat(animatableProperties);
 
+        // "currentColor" is missing, see https://bugzilla.mozilla.org/show_bug.cgi?id=927367
         if (values.indexOf("aqua") !== -1)
-            values = values.concat(extraColors);
+            values.push("currentColor");
 
+        // gradients are missing, see https://bugzilla.mozilla.org/show_bug.cgi?id=973345
         if (values.indexOf("-moz-element()") !== -1)
             values = values.concat(extraImages);
 
@@ -138,7 +139,7 @@ function initPropertyData()
 
     // Set up part of the data tables.
     var colors = filterValues(domUtils.getCSSValuesForProperty("color"));
-    Css.cssKeywords.color = Arr.sortUnique(colors.concat(extraColors));
+    Css.cssKeywords.color = addMissingValues(colors, "color");
 
     for (let prop of props)
     {
@@ -1609,85 +1610,6 @@ Css.cssKeywords =
         "evenodd"
     ],
 };
-
-var extraColors = [
-    "currentColor",
-
-    // System colors
-    "ActiveBorder",
-    "ActiveCaption",
-    "AppWorkspace",
-    "Background",
-    "ButtonFace",
-    "ButtonHighlight",
-    "ButtonShadow",
-    "ButtonText",
-    "CaptionText",
-    "GrayText",
-    "Highlight",
-    "HighlightText",
-    "InactiveBorder",
-    "InactiveCaption",
-    "InactiveCaptionText",
-    "InfoBackground",
-    "InfoText",
-    "Menu",
-    "MenuText",
-    "Scrollbar",
-    "ThreeDDarkShadow",
-    "ThreeDFace",
-    "ThreeDHighlight",
-    "ThreeDLightShadow",
-    "ThreeDShadow",
-    "Window",
-    "WindowFrame",
-    "WindowText",
-
-    // Mozilla system color extensions
-    "-moz-ButtonDefault",
-    "-moz-ButtonHoverFace",
-    "-moz-ButtonHoverText",
-    "-moz-CellHighlight",
-    "-moz-CellHighlightText",
-    "-moz-Combobox",
-    "-moz-ComboboxText",
-    "-moz-Dialog",
-    "-moz-DialogText",
-    "-moz-dragtargetzone",
-    "-moz-EvenTreeRow",
-    "-moz-Field",
-    "-moz-FieldText",
-    "-moz-html-CellHighlight",
-    "-moz-html-CellHighlightText",
-    "-moz-mac-accentdarkestshadow",
-    "-moz-mac-accentdarkshadow",
-    "-moz-mac-accentface",
-    "-moz-mac-accentlightesthighlight",
-    "-moz-mac-accentlightshadow",
-    "-moz-mac-accentregularhighlight",
-    "-moz-mac-accentregularshadow",
-    "-moz-mac-chrome-active",
-    "-moz-mac-chrome-inactive",
-    "-moz-mac-focusring",
-    "-moz-mac-menuselect",
-    "-moz-mac-menushadow",
-    "-moz-mac-menutextselect",
-    "-moz-MenuHover",
-    "-moz-MenuHoverText",
-    "-moz-MenuBarText",
-    "-moz-MenuBarHoverText",
-    "-moz-nativehyperlinktext",
-    "-moz-OddTreeRow",
-    "-moz-win-communicationstext",
-    "-moz-win-mediatext",
-
-    // Mozilla color preference extensions
-    "-moz-activehyperlinktext",
-    "-moz-default-background-color",
-    "-moz-default-color",
-    "-moz-hyperlinktext",
-    "-moz-visitedhyperlinktext",
-];
 
 var extraImages = [
     "linear-gradient()",
