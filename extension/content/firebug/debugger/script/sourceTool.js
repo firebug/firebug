@@ -9,11 +9,10 @@ define([
     "firebug/debugger/script/sourceFile",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/debuggerLib",
-    "firebug/debugger/breakpoints/breakpointStore",
     "firebug/remoting/debuggerClient",
 ],
 function (Firebug, FBTrace, Obj, Str, Tool, SourceFile, StackFrame, DebuggerLib,
-    BreakpointStore, DebuggerClient) {
+    DebuggerClient) {
 
 // ********************************************************************************************* //
 // Documentation
@@ -40,10 +39,6 @@ function (Firebug, FBTrace, Obj, Str, Tool, SourceFile, StackFrame, DebuggerLib,
 
 var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_SOURCETOOL");
-
-var Cu = Components.utils;
-
-Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
 
 // ********************************************************************************************* //
 // Source Tool
@@ -82,8 +77,6 @@ SourceTool.prototype = Obj.extend(new Tool(),
         // Hook local thread actor to get notification about dynamic scripts creation.
         this.dynamicSourceCollector = new DynamicSourceCollector(this);
         this.dynamicSourceCollector.attach();
-
-        BreakpointStore.addListener(this);
     },
 
     onDetach: function()
@@ -98,8 +91,6 @@ SourceTool.prototype = Obj.extend(new Tool(),
 
         this.dynamicSourceCollector.detach();
         this.dynamicSourceCollector = null;
-
-        BreakpointStore.removeListener(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -176,129 +167,6 @@ SourceTool.prototype = Obj.extend(new Tool(),
 
         this.addScript(response.source);
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // BreakpointStore Event Listener
-
-    onAddBreakpoint: function(bp)
-    {
-        if (!this.isDynamicScriptBreakpoint(bp))
-            return;
-
-        Trace.sysout("sourceTool.onAddBreakpoint; (" + bp.lineNo + ") " + bp.href, bp);
-
-        // Use instance of (server side) BreakpointActor as the breakpoint handler.
-        var threadActor = DebuggerLib.getThreadActor(this.context.browser);
-        var handler = new DebuggerServer.BreakpointActor(threadActor, {
-            url: bp.href,
-            line: bp.lineNo + 1,
-        });
-
-        var sourceFile = this.context.getSourceFile(bp.href);
-        if (!sourceFile)
-        {
-            TraceError.sysout("sourceTool.onAddBreakpoint; ERROR no source file: " +
-                bp.href, bp);
-            return;
-        }
-
-        var parentScript = sourceFile.nativeScript;
-
-        // Firebug's support for breakpoints in dynamic scripts might end up not using
-        // BreakpointActors object. For now set the breakpoint handler directly on the
-        // script and handle it by Firebug (the code above).
-        var childScripts = parentScript.getChildScripts();
-        for (var script of childScripts)
-        {
-            var offsets = script.getLineOffsets(bp.lineNo + parentScript.startLine);
-            if (offsets.length > 0)
-                script.setBreakpoint(offsets[0], handler);
-        }
-
-        if (!childScripts.length)
-        {
-            TraceError.sysout("sourceTool.onAddBreakpoint; ERROR can't add " +
-                "a breakpoint at this line");
-        }
-    },
-
-    onRemoveBreakpoint: function(bp)
-    {
-        if (!this.isDynamicScriptBreakpoint(bp))
-            return;
-
-        Trace.sysout("sourceTool.onRemoveBreakpoint; (" + bp.lineNo + ") " + bp.href, bp);
-    },
-
-    onEnableBreakpoint: function(bp)
-    {
-        if (!this.isDynamicScriptBreakpoint(bp))
-            return;
-
-        Trace.sysout("sourceTool.onEnableBreakpoint; (" + bp.lineNo + ") " + bp.href, bp);
-    },
-
-    onDisableBreakpoint: function(bp)
-    {
-        if (!this.isDynamicScriptBreakpoint(bp))
-            return;
-
-        Trace.sysout("sourceTool.onDisableBreakpoint; (" + bp.lineNo + ") " + bp.href, bp);
-    },
-
-    onModifyBreakpoint: function(bp)
-    {
-        if (!this.isDynamicScriptBreakpoint(bp))
-            return;
-
-        Trace.sysout("sourceTool.onModifyBreakpoint; (" + bp.lineNo + ") " + bp.href, bp);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Temporary
-
-    /**
-     * Compute location (URL, line) of breakpoints created in dynamically generated scripts.
-     * The Script view properly shows only the dynamic script text, but the line number and
-     * URL must be related to the parent script.
-     */
-    normalizeBreakpointLocation: function(bp)
-    {
-        return;
-        if (!this.isDynamicScriptBreakpoint(bp))
-            return;
-
-        Trace.sysout("sourceTool.normalizeBreakpointLocation; " + bp.href + "(" +
-            bp.lineNo + ")");
-
-        // Store dynamic values.
-        bp.dynamicUrl = bp.href;
-        bp.dynamicLine = bp.lineNo;
-
-        // Get parent script URL.
-        var url = bp.href;
-        var index = url.indexOf("@eval");
-        bp.href = url.slice(0, index);
-
-        // Compute line number related to the parent script.
-        var sourceFile = this.context.getSourceFile(url);
-        bp.lineNo = sourceFile.nativeScript.startLine + bp.lineNo - 1;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Breakpoints Helpers
-
-    isDynamicScriptBreakpoint: function(bp)
-    {
-        if (!bp)
-        {
-            TraceError.sysout("sourceToo.isDynamicScriptBreakpoint; ERROR no breakpoint?");
-            return;
-        }
-
-        // xxxHonza: a hack, but good enough for now.
-        return bp.href.indexOf("@eval") != -1;
-    }
 });
 
 // ********************************************************************************************* //
@@ -348,15 +216,16 @@ DynamicSourceCollector.prototype =
         if (script.url == "debugger eval code")
             return;
 
-        // xxxHonza: more introduction types will be ready soon.
-        if (script.source.introductionType != "eval")
-            return;
+        var dynamicTypes = ["eval", "Function", "handler"];
+        var type = script.source.introductionType;
 
         sysoutScript("dynamicSourceCollector.onNewScript; " + script.url  + " " +
-            script.lineCount, script);
+            script.lineCount + ", " + type, script);
 
-        this.addScript(script);
+        if (dynamicTypes.indexOf(type) != -1)
+            this.addScript(script);
 
+        // Don't forget to execute the original logic.
         var dbg = DebuggerLib.getThreadDebugger(this.context);
         this.originalOnNewScript.apply(dbg, arguments);
     },
@@ -374,7 +243,7 @@ DynamicSourceCollector.prototype =
         // the introduction call (and so, unique for every dynamic script).
         // xxxHonza: introductionScriptOffset is not yet implemented,
         // using the start Line for now.
-        var url = script.url + "@eval" + script.startLine;
+        var url = script.source.url;
 
         // xxxHonza: there should be only one place where instance of SourceFile is created.
         var sourceFile = new SourceFile(this.context, null, url, false);
@@ -391,49 +260,8 @@ DynamicSourceCollector.prototype =
         sourceFile.nativeScript = script;
         sourceFile.introductionUrl = script.url;
 
-        this.setBreakpoints(sourceFile);
-
         this.sourceTool.dispatch("newSource", [sourceFile]);
     },
-
-    setBreakpoints: function(sourceFile)
-    {
-        // xxxHonza: copied from {@link BreakpointTool.newSource}, the backend doesn't
-        // know how to deal with breakpoints in dynamic scripts (also because the URL uses
-        // @eval postfix), so set all breakpoints here. 
-        var url = sourceFile.getURL();
-        var bps = BreakpointStore.getBreakpoints(url);
-
-        // Get only dynamic breakpoints.
-        var filtered = bps.filter((bp) =>
-        {
-            return this.sourceTool.isDynamicScriptBreakpoint(bp);
-        });
-
-        Trace.sysout("dynamicSourceCollector.setBreakpoints; " + filtered.length, filtered);
-
-        // Bail out if there is nothing to set.
-        if (!filtered.length)
-        {
-            Trace.sysout("dynamicSourceCollector.setBreakpoints; No breakpoints to set for: " +
-                url, bps);
-            return;
-        }
-
-        // Filter out disabled breakpoints. These won't be set on the server side
-        // (unless the user enables them later).
-        // xxxHonza: we shouldn't create server-side breakpoints for normal disabled
-        // breakpoints, but not in case there are other breakpoints at the same line.
-        /*filtered = filtered.filter(function(bp, index, array)
-        {
-            return bp.isEnabled();
-        });*/
-
-        Trace.sysout("dynamicSourceCollector.setBreakpoints; " + filtered.length, filtered);
-
-        for (var i = 0; i < bps.length; i++)
-            this.sourceTool.onAddBreakpoint(bps[i]);
-    }
 };
 
 // ********************************************************************************************* //
@@ -443,11 +271,10 @@ var originalBuildStackFrame = StackFrame.buildStackFrame;
 
 /**
  * StackFrame build decorator fixes information related to dynamic scripts.
- * 1) URL - dynamically evaluated scripts uses the same URL as the parent script,
- * i.e. the script which executed eval()
- * 2) Line - dynamically evaluated script uses the line with eval() statement
- * as the first line. We need to use this first line as an offset when a break
- * in the debugger happen.
+ * 1) URL - dynamically evaluated scripts uses different URLs derived from the parent
+ * script URL.
+ *
+ * xxxHonza: This can be remove as soon as RDP sends proper URLs dynamic scripts.
  */
 function buildStackFrame(frame, context)
 {
@@ -458,8 +285,10 @@ function buildStackFrame(frame, context)
         TraceError.sysout("stackFrame.buildStackFrame; ERROR wrong thread actor state!");
 
     //xxxHonza: rename: nativeFrame -> framePacket and jsdFrame -> nativeFrame
-    stackFrame.jsdFrame = threadActor.youngestFrame;
-    var sourceFile = getSourceFileByScript(context, stackFrame.jsdFrame.script);
+    var frameActor = threadActor._framePool.get(frame.actor);
+    stackFrame.jsdFrame = frameActor.frame;
+
+    var sourceFile = getSourceFileByScript(context, frameActor.frame.script);
     if (sourceFile)
     {
         // Use proper source file that corresponds to the current frame.
@@ -467,10 +296,9 @@ function buildStackFrame(frame, context)
 
         // Fix the starting line (subtract the parent offset).
         // See also: https://bugzilla.mozilla.org/show_bug.cgi?id=332176
-        stackFrame.line = frame.where.line - sourceFile.startLine + 1;
+        //stackFrame.line = frame.where.line - sourceFile.startLine + 1;
 
-        // Use proper (dynamically generated) URL. Dynamic scripts use the same
-        // URL as their parent scripts (scripts that called eval).
+        // Use proper (dynamically generated) URL.
         stackFrame.href = sourceFile.href;
     }
 
