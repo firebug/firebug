@@ -63,7 +63,7 @@
         <!-- Bar with testList.html URL (e.g. chrome://firebug/content/testList.html -->
         <toolbar id="testListUrlBar" class="testURLBar fbInternational" align="center"
             autocompletesearch="FBTestHistory" disablePicker="false"
-            coollapsed="false" label="fbtest.urlbar.label.Test List"
+            collapsed="false" label="fbtest.urlbar.label.Test List"
             barTooltiptext="fbtest.urlbar.tooltip.Test_List_URL"
             pickerTooltiptext="fbtest.cmd.tip.Browse For Test List"/>
 
