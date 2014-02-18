@@ -81,6 +81,15 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         setTooltip("fbStepOutButton", "script.Step_Out", "Shift+F11");
     },
 
+    initializeUI: function()
+    {
+        ActivableModule.initializeUI.apply(this, arguments);
+
+        // TODO move to script.js
+        this.filterButton = Firebug.chrome.$("fbScriptFilterMenu");
+        this.filterMenuUpdate();
+    },
+
     shutdown: function()
     {
         Firebug.unregisterTracePrefix("debuggerTool.");
@@ -558,6 +567,7 @@ Firebug.Debugger = Obj.extend(ActivableModule,
     {
         var menu = event.target;
         Options.set("scriptsFilter", menu.value);
+
         Firebug.Debugger.filterMenuUpdate();
     },
 
