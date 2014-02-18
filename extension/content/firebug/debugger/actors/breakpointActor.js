@@ -37,6 +37,9 @@ BreakpointActor.prototype.hit = function(frame)
     var line = this.location.line;
 
     var bp = BreakpointStore.findBreakpoint(url, line - 1);
+
+    Trace.sysout("breakpointActor.hit; " + url + " " + line, bp);
+
     if (!bp || !bp.condition)
         return originalHit.apply(this, arguments);
 

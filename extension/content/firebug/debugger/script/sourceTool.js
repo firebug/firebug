@@ -41,6 +41,10 @@ function (Firebug, FBTrace, Obj, Str, Tool, SourceFile, StackFrame, DebuggerLib,
 var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_SOURCETOOL");
 
+var Cu = Components.utils;
+
+Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
+
 // ********************************************************************************************* //
 // Source Tool
 
@@ -183,32 +187,21 @@ SourceTool.prototype = Obj.extend(new Tool(),
 
         Trace.sysout("sourceTool.onAddBreakpoint; (" + bp.lineNo + ") " + bp.href, bp);
 
-        // Breakpoint hit handler implementation. 
-        var self = this;
-        var handler =
-        {
-            hit: function(frame)
-            {
-                var threadActor = DebuggerLib.getThreadActor(self.context.browser);
-
-                var {url} = threadActor.synchronize(
-                    threadActor.sources.getOriginalLocation({
-                        url: bp.href,
-                        line: bp.lineNo,
-                        column: 0
-                    })
-                );
-
-                if (threadActor.sources.isBlackBoxed(url) || frame.onStep)
-                    return undefined;
-
-                // Send "pause" packet with a new "dynamic-breakpoint" type.
-                // The debugging will start as usual within {@link DebuggerTool#paused} method.
-                return threadActor._pauseAndRespond(frame, "dynamic-breakpoint");
-            }
-        }
+        // Use instance of (server side) BreakpointActor as the breakpoint handler.
+        var threadActor = DebuggerLib.getThreadActor(this.context.browser);
+        var handler = new DebuggerServer.BreakpointActor(threadActor, {
+            url: bp.href,
+            line: bp.lineNo + 1,
+        });
 
         var sourceFile = this.context.getSourceFile(bp.href);
+        if (!sourceFile)
+        {
+            TraceError.sysout("sourceTool.onAddBreakpoint; ERROR no source file: " +
+                bp.href, bp);
+            return;
+        }
+
         var parentScript = sourceFile.nativeScript;
 
         // Firebug's support for breakpoints in dynamic scripts might end up not using
@@ -233,24 +226,32 @@ SourceTool.prototype = Obj.extend(new Tool(),
     {
         if (!this.isDynamicScriptBreakpoint(bp))
             return;
+
+        Trace.sysout("sourceTool.onRemoveBreakpoint; (" + bp.lineNo + ") " + bp.href, bp);
     },
 
     onEnableBreakpoint: function(bp)
     {
         if (!this.isDynamicScriptBreakpoint(bp))
             return;
+
+        Trace.sysout("sourceTool.onEnableBreakpoint; (" + bp.lineNo + ") " + bp.href, bp);
     },
 
     onDisableBreakpoint: function(bp)
     {
         if (!this.isDynamicScriptBreakpoint(bp))
             return;
+
+        Trace.sysout("sourceTool.onDisableBreakpoint; (" + bp.lineNo + ") " + bp.href, bp);
     },
 
     onModifyBreakpoint: function(bp)
     {
         if (!this.isDynamicScriptBreakpoint(bp))
             return;
+
+        Trace.sysout("sourceTool.onModifyBreakpoint; (" + bp.lineNo + ") " + bp.href, bp);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -347,38 +348,23 @@ DynamicSourceCollector.prototype =
         if (script.url == "debugger eval code")
             return;
 
-        // Set a breakpoint at the first instruction. When the breakpoint hits we can
-        // see whether the script has been evaluated using eval().
-        // xxxHonza: as soon as |script.introductionKind| is available we don't need
-        // to use breakpoint to find the script-type (kind).
-        var offsets = script.getAllOffsets();
-        for (var p in offsets)
-        {
-            var firstOffset = offsets[p][0];
+        // xxxHonza: more introduction types will be ready soon.
+        if (script.source.introductionType != "eval")
+            return;
 
-            Trace.sysout("sourceTool.onNewScript; set a breakpoint at: " + firstOffset +
-                ", url: " + script.url);
+        sysoutScript("dynamicSourceCollector.onNewScript; " + script.url  + " " +
+            script.lineCount, script);
 
-            script.setBreakpoint(firstOffset, this);
-            break;
-        }
+        this.addScript(script);
 
         var dbg = DebuggerLib.getThreadDebugger(this.context);
         this.originalOnNewScript.apply(dbg, arguments);
-
-        sysoutScript("sourceTool.onNewScript; " + script.lineCount, script);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    hit: function(frame)
+    addScript: function(script)
     {
-        // We are collecting only dynamically evaluated scripts (using eval).
-        if (frame.type != "eval")
-            return;
-
-        var script = frame.script;
-
         // xxxHonza: Dynamic scripts don't have URL (see bug 957798), so we need to
         // compute one ourselves. It should have the following form
         // Introduction Script URL + fixed (non URL) key + introductionScriptOffset.
@@ -405,12 +391,48 @@ DynamicSourceCollector.prototype =
         sourceFile.nativeScript = script;
         sourceFile.introductionUrl = script.url;
 
+        this.setBreakpoints(sourceFile);
+
         this.sourceTool.dispatch("newSource", [sourceFile]);
+    },
 
-        sysoutScript("sourceTool.hit; frame type: " + frame.type + ", " +
-            script.lineCount, script);
+    setBreakpoints: function(sourceFile)
+    {
+        // xxxHonza: copied from {@link BreakpointTool.newSource}, the backend doesn't
+        // know how to deal with breakpoints in dynamic scripts (also because the URL uses
+        // @eval postfix), so set all breakpoints here. 
+        var url = sourceFile.getURL();
+        var bps = BreakpointStore.getBreakpoints(url);
 
-        // TODO remove the breakpoint.
+        // Get only dynamic breakpoints.
+        var filtered = bps.filter((bp) =>
+        {
+            return this.sourceTool.isDynamicScriptBreakpoint(bp);
+        });
+
+        Trace.sysout("dynamicSourceCollector.setBreakpoints; " + filtered.length, filtered);
+
+        // Bail out if there is nothing to set.
+        if (!filtered.length)
+        {
+            Trace.sysout("dynamicSourceCollector.setBreakpoints; No breakpoints to set for: " +
+                url, bps);
+            return;
+        }
+
+        // Filter out disabled breakpoints. These won't be set on the server side
+        // (unless the user enables them later).
+        // xxxHonza: we shouldn't create server-side breakpoints for normal disabled
+        // breakpoints, but not in case there are other breakpoints at the same line.
+        /*filtered = filtered.filter(function(bp, index, array)
+        {
+            return bp.isEnabled();
+        });*/
+
+        Trace.sysout("dynamicSourceCollector.setBreakpoints; " + filtered.length, filtered);
+
+        for (var i = 0; i < bps.length; i++)
+            this.sourceTool.onAddBreakpoint(bps[i]);
     }
 };
 
@@ -492,7 +514,7 @@ function convertScriptObject(script)
         source: {
             text: script.source.text,
             url: script.source.url,
-            introductionKind: script.source.introductionKind,
+            introductionType: script.source.introductionType,
         },
         snippet: script.source.text.slice(script.sourceStart, script.sourceStart +
             script.sourceLength)
