@@ -50,7 +50,6 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         Firebug.registerTracePrefix("debuggerTool.", "DBG_DEBUGGERTOOL", false);
         Firebug.registerTracePrefix("sourceTool.", "DBG_SOURCETOOL", false);
         Firebug.registerTracePrefix("breakpointTool.", "DBG_BREAKPOINTTOOL", false);
-        Firebug.registerTracePrefix("sourceTool.", "DBG_SOURCETOOL", false);
 
         // Listen to the main client, which represents the connection to the server.
         // The main client object sends various events about attaching/detaching
