@@ -276,19 +276,18 @@ FirebugReps.Func = domplate(Rep,
             FBTrace.sysout("reps.function.inspectObject selected sourceLink is ", sourceLink);
     },
 
+    getTooltipForScript: function(script)
+    {
+        return Locale.$STRF("Line", [Url.normalizeURL(script.url), script.startLine]);
+    },
+
     getTooltip: function(fn, context)
     {
         var script = SourceFile.findScriptForFunctionInContext(context, fn);
         if (script)
-        {
-            return Locale.$STRF("Line", [Url.normalizeURL(script.url),
-                script.startLine]);
-        }
-        else
-        {
-            if (fn.toString)
-                return fn.toString();
-        }
+            return this.getTooltipForScript(script);
+        if (fn.toString)
+            return fn.toString();
     },
 
     getTitle: function(fn, context)

@@ -568,15 +568,7 @@ Profiler.ProfileCall = domplate(Rep,
 
     getTooltip: function(call)
     {
-        try
-        {
-            var fn = StackFrame.getFunctionName(call.script, call.context);
-            return FirebugReps.Func.getTooltip(fn, call.context);
-        }
-        catch (exc)
-        {
-            TraceError.sysout("profiler.getTooltip; EXCEPTION " + exc, exc);
-        }
+        return FirebugReps.Func.getTooltipForScript(call.script);
     },
 
     getContextMenuItems: function(call, target, context)
