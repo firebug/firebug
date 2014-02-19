@@ -317,7 +317,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     showSourceLink: function(sourceLink)
     {
-        this.navigate(sourceLink);
+        // Show the source only if the target source file actually exists.
+        if (SourceFile.getSourceFileByUrl(this.context, sourceLink.href))
+            this.navigate(sourceLink);
     },
 
     showFunction: function(fn)
@@ -905,7 +907,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // Get only standard breakpoints. Breakpoints for errors or monitors, etc.
         // Are not displayed in the breakpoint column.
-        BreakpointStore.enumerateBreakpoints(url, function(bp)
+        // Do not get dynamic breakpoints either (second argument false).
+        BreakpointStore.enumerateBreakpoints(url, false, function(bp)
         {
             // xxxHonza: perhaps we should pass only line numbers to the ScriptView?
             breakpoints.push(bp);

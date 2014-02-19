@@ -230,7 +230,7 @@ DynamicSourceCollector.prototype =
 
         var scriptType = dynamicTypesMap[type];
         if (scriptType)
-            this.addScript(script, scriptType);
+            this.addDynamicScript(script, scriptType);
 
         // Don't forget to execute the original logic.
         var dbg = DebuggerLib.getThreadDebugger(this.context);
@@ -239,37 +239,55 @@ DynamicSourceCollector.prototype =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    addScript: function(script, type)
+    addDynamicScript: function(script, type)
     {
-        // xxxHonza: Dynamic scripts don't have URL (see bug 957798), so we need to
-        // compute one ourselves. It should have the following form
-        // Introduction Script URL + fixed (non URL) key + introductionScriptOffset.
-        // The URL should be unique and solid, so created breakpoints work
-        // even across Firefox restarts. That's why we need introductionScriptOffset.
-        // script.introductionScriptOffset: is the bytecode offset within that script of
-        // the introduction call (and so, unique for every dynamic script).
-        // xxxHonza: introductionScriptOffset is not yet implemented,
-        // using the start Line for now.
+        // Dynamic scripts has different derived from URL of the parent script.
         var url = script.source.url;
+        var sourceFile = this.context.getSourceFile(url);
 
-        // xxxHonza: there should be only one place where instance of SourceFile is created.
-        var sourceFile = new SourceFile(this.context, null, url, false);
+        // xxxHonza: we shouldn't create a new {@link SourceFile} for every new
+        // instance of the same dynamically evaluated script.
+        // Fix me and also getSourceFileByScript
+        //if (!sourceFile)
+        {
+            // xxxHonza: there should be only one place where instance of SourceFile is created.
+            var sourceFile = new SourceFile(this.context, null, url, false);
 
-        // xxxHonza: duplicated from {@link SourceFile}
-        var source = script.source.text.replace(/\r\n/gm, "\n");
-        sourceFile.loaded = true;
-        sourceFile.inProgress = false;
-        sourceFile.lines = Str.splitLines(source);
-        sourceFile.contentType = "text/javascript";
+            // xxxHonza: duplicated from {@link SourceFile}
+            var source = script.source.text.replace(/\r\n/gm, "\n");
+            sourceFile.loaded = true;
+            sourceFile.inProgress = false;
+            sourceFile.lines = Str.splitLines(source);
+            sourceFile.contentType = "text/javascript";
 
-        sourceFile.startLine = script.startLine;
-        sourceFile.nativeScript = script;
-        sourceFile.introductionUrl = script.url;
-        sourceFile.compilation_unit_type = type;
+            sourceFile.startLine = script.startLine;
+            sourceFile.nativeScript = script;
+            sourceFile.introductionUrl = script.url;
+            sourceFile.compilation_unit_type = type;
 
-        this.context.addSourceFile(sourceFile);
+            this.context.addSourceFile(sourceFile);
 
-        this.sourceTool.dispatch("newSource", [sourceFile]);
+            this.sourceTool.dispatch("newSource", [sourceFile]);
+        }
+
+        // xxxHonza: register existing breakpoints on the server side to break also
+        // in the newly created script.
+        // Interestingly this doesn't work for the first time the script is evaluated
+        // even if the breakpoint is set to the server side when the parent script
+        // is loaded.
+        // xxxHonza: this should be done by the backend. But backend doesn't support
+        // dynamic scripts yet. Make sure there is a platform bug reported (+ test case).
+        var threadActor = DebuggerLib.getThreadActor(this.context.browser);
+        var endLine = script.startLine + script.lineCount - 1;
+        for (var bp of threadActor.breakpointStore.findBreakpoints({url: script.source.url}))
+        {
+            Trace.sysout("dynamicSourceCollector.addDynamicScript; " + script.url + ", " +
+                bp.actor.scripts.length + ", " + 
+                bp.line + ", " + script.startLine + ", " + endLine);
+
+            if (bp.line >= script.startLine && bp.line <= endLine)
+                threadActor._setBreakpoint(bp);
+        }
     },
 };
 

@@ -516,6 +516,7 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         var frame = context.stoppedFrame;
         if (!frame || !frame.scopes)
         {
+            //xxxHonza: Simon, I am seeing this a looot, is it a problem?
             TraceError.sysout("debugger.getCurrentFrameKeys; ERROR scopes: " +
                 (frame ? frame.scopes : "no stopped frame"));
             return;
