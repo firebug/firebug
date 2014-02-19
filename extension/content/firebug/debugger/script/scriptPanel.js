@@ -400,9 +400,59 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Location List
 
+    showThisCompilationUnit: function(compilationUnit)
+    {
+        if (compilationUnit.getURL().lastIndexOf("chrome://", 0) === 0)
+            return false;
+
+        if (compilationUnit.getKind() === CompilationUnit.EVAL && !this.showEvals)
+            return false;
+
+        if (compilationUnit.getKind() === CompilationUnit.BROWSER_GENERATED && !this.showEvents)
+            return false;
+
+        return true;
+    },
+
     getLocationList: function()
     {
-        return this.context.getAllCompilationUnits();
+        var allSources = this.context.getAllCompilationUnits();
+
+        if (!allSources.length)
+            return [];
+
+        var filter = Options.get("scriptsFilter");
+        this.showEvents = (filter == "all" || filter == "events");
+        this.showEvals = (filter == "all" || filter == "evals");
+
+        var list = [];
+        for (var i = 0; i < allSources.length; i++)
+        {
+            if (this.showThisCompilationUnit(allSources[i]))
+            {
+                FBTrace.sysout("show " + allSources[i].href);
+                list.push(allSources[i]);
+            }
+            else if (FBTrace.DBG_COMPILATION_UNITS)
+            {
+                FBTrace.sysout("scrpt.getLocationList filtered " + allSources[i].getURL(),
+                    allSources[i]);
+            }
+        }
+
+        if (!list.length && allSources.length)
+            this.context.allScriptsWereFiltered = true;
+        else
+            delete this.context.allScriptsWereFiltered;
+
+        if (FBTrace.DBG_COMPILATION_UNITS)
+        {
+            FBTrace.sysout("script.getLocationList enabledOnLoad:" + context.onLoadWindowContent +
+                " all:" + allSources.length + " filtered:" + list.length + " allFiltered: " +
+                this.context.allScriptsWereFiltered, list);
+        }
+
+        return list;
     },
 
     getDefaultCompilationUnit: function()

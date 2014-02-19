@@ -38,8 +38,8 @@ function SourceFile(context, actor, href, isBlackBoxed)
     // The content type is set when 'source' packet is received (see onSourceLoaded).
     this.contentType = null;
 
-    // xxxHonza: remove
-    this.compilation_unit_type = "remote-script";
+    // xxxHonza: refactore the flag logic.
+    this.compilation_unit_type = "script_tag";
     this.callbacks = [];
 }
 
