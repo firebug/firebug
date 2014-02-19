@@ -220,21 +220,16 @@ StackFrame.buildStackFrame = function(frame, context)
 
 StackFrame.getFunctionName = function(frame)
 {
-    // Get real function name
-    var funcName = "";
-    if (!frame.callee)
-        return funcName;
-
-    funcName = frame.callee.displayName;
-    if (!funcName)
-        funcName = frame.callee.name;
+    var func = frame.callee;
+    if (!func)
+        return "";
 
     // Use custom displayName (coming from the script) if provided.
-    if (frame.callee.userDisplayName)
-        funcName = frame.callee.userDisplayName;
+    if (func.userDisplayName)
+        return func.userDisplayName;
 
-    return funcName;
-}
+    return func.displayName || func.name;
+};
 
 StackFrame.guessFunctionName = function(url, lineNo, sourceFile)
 {

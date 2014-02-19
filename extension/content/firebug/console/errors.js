@@ -344,15 +344,6 @@ var Errors = Firebug.Errors = Obj.extend(Module,
         if (!context)
             return;
 
-        if (Trace.active)
-        {
-            Trace.sysout("errors.observe logScriptError " +
-                (Firebug.errorStackTrace ? "have " : "NO ") +
-                (Firebug.showStackTrace ? "show stack trace" : "do not show stack trace ") +
-                "errorStackTrace error object:",
-                {object: object, errorStackTrace: Firebug.errorStackTrace});
-        }
-
         var category = getBaseCategory(object.category);
         var isJSError = category == "js" && !isWarning;
 
@@ -364,10 +355,10 @@ var Errors = Firebug.Errors = Obj.extend(Module,
         if (object.columnNumber > 0)
             error.colNumber = object.columnNumber;
 
-        // xxxHonza: ErrorStackTraceObserver should be used to access the error stack trace.
-        if (Firebug.errorStackTrace)
+        var errorStackTrace = ErrorStackTraceObserver.getAndConsumeStackTrace(context);
+        if (errorStackTrace)
         {
-            error.correctWithStackTrace(Firebug.errorStackTrace);
+            error.correctWithStackTrace(errorStackTrace);
             if (!Firebug.showStackTrace)
                 error.trace = null;
         }
@@ -376,12 +367,19 @@ var Errors = Firebug.Errors = Obj.extend(Module,
             error.missingTraceBecauseNoDebugger = true;
         }
 
+        if (Trace.active)
+        {
+            Trace.sysout("errors.observe logScriptError " +
+                (errorStackTrace ? "have " : "NO ") +
+                "stack trace, is " +
+                (Firebug.showStackTrace ? "" : "not ") +
+                "shown, errorStackTrace error object: ",
+                {object: object, errorStackTrace: errorStackTrace});
+        }
+
         var msgId = lessTalkMoreAction(context, object, isWarning);
         if (!msgId)
             return null;
-
-        // clear global: either we copied it or we don't use it.
-        Firebug.errorStackTrace = null;
 
         if (!isWarning)
             this.increaseCount(context);
