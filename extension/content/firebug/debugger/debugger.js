@@ -74,6 +74,7 @@ Firebug.Debugger = Obj.extend(ActivableModule,
             tooltip = Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR(tooltip), shortcut]);
             Firebug.chrome.$(id).setAttribute("tooltiptext", tooltip);
         };
+
         setTooltip("fbRerunButton", "script.Rerun", "Shift+F8");
         setTooltip("fbContinueButton", "script.Continue", "F8");
         setTooltip("fbStepIntoButton", "script.Step_Into", "F11");
@@ -574,17 +575,17 @@ Firebug.Debugger = Obj.extend(ActivableModule,
     menuFullLabel:
     {
         "static": Locale.$STR("ScriptsFilterStatic"),
-        evals: Locale.$STR("ScriptsFilterEval"),
-        events: Locale.$STR("ScriptsFilterEvent"),
-        all: Locale.$STR("ScriptsFilterAll"),
+        "evals": Locale.$STR("ScriptsFilterEval"),
+        "events": Locale.$STR("ScriptsFilterEvent"),
+        "all": Locale.$STR("ScriptsFilterAll"),
     },
 
     menuShortLabel:
     {
         "static": Locale.$STR("ScriptsFilterStaticShort"),
-        evals: Locale.$STR("ScriptsFilterEvalShort"),
-        events: Locale.$STR("ScriptsFilterEventShort"),
-        all: Locale.$STR("ScriptsFilterAllShort"),
+        "evals": Locale.$STR("ScriptsFilterEvalShort"),
+        "events": Locale.$STR("ScriptsFilterEventShort"),
+        "all": Locale.$STR("ScriptsFilterAllShort"),
     },
 
     onScriptFilterMenuPopupShowing: function(menu, context)

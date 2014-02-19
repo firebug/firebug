@@ -10,9 +10,10 @@ define([
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/debuggerLib",
     "firebug/remoting/debuggerClient",
+    "arch/compilationunit",
 ],
 function (Firebug, FBTrace, Obj, Str, Tool, SourceFile, StackFrame, DebuggerLib,
-    DebuggerClient) {
+    DebuggerClient, CompilationUnit) {
 
 // ********************************************************************************************* //
 // Documentation
@@ -216,14 +217,20 @@ DynamicSourceCollector.prototype =
         if (script.url == "debugger eval code")
             return;
 
-        var dynamicTypes = ["eval", "Function", "handler"];
+        var dynamicTypesMap = {
+            "eval": CompilationUnit.EVAL,
+            "Function": CompilationUnit.EVAL,
+            "handler": CompilationUnit.BROWSER_GENERATED
+        };
+
         var type = script.source.introductionType;
 
         sysoutScript("dynamicSourceCollector.onNewScript; " + script.url  + " " +
             script.lineCount + ", " + type, script);
 
-        if (dynamicTypes.indexOf(type) != -1)
-            this.addScript(script);
+        var scriptType = dynamicTypesMap[type];
+        if (scriptType)
+            this.addScript(script, scriptType);
 
         // Don't forget to execute the original logic.
         var dbg = DebuggerLib.getThreadDebugger(this.context);
@@ -232,7 +239,7 @@ DynamicSourceCollector.prototype =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    addScript: function(script)
+    addScript: function(script, type)
     {
         // xxxHonza: Dynamic scripts don't have URL (see bug 957798), so we need to
         // compute one ourselves. It should have the following form
@@ -247,7 +254,6 @@ DynamicSourceCollector.prototype =
 
         // xxxHonza: there should be only one place where instance of SourceFile is created.
         var sourceFile = new SourceFile(this.context, null, url, false);
-        this.context.addSourceFile(sourceFile);
 
         // xxxHonza: duplicated from {@link SourceFile}
         var source = script.source.text.replace(/\r\n/gm, "\n");
@@ -259,6 +265,9 @@ DynamicSourceCollector.prototype =
         sourceFile.startLine = script.startLine;
         sourceFile.nativeScript = script;
         sourceFile.introductionUrl = script.url;
+        sourceFile.compilation_unit_type = type;
+
+        this.context.addSourceFile(sourceFile);
 
         this.sourceTool.dispatch("newSource", [sourceFile]);
     },
