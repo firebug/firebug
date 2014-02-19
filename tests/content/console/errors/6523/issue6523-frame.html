@@ -5,17 +5,11 @@
 </head>
 <body>
 <script>
-function onExecuteTest()
+function onExecuteTest2()
 {
     function a(x)
     {
-        try
-        {
-            x.toLowerCase();
-        }
-        catch(e)
-        {
-        }
+        x.toLowerCase();
     }
 
     function b(age, name)
@@ -33,7 +27,9 @@ function onExecuteTest()
         b(age, name);
     }
 
-    a();
+    try {
+        a();
+    } catch(e) {}
     d(12, "test");
     c();
 }
