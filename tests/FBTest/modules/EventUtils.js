@@ -204,6 +204,11 @@ function __doEventDispatch(aTarget, aCharCode, aKeyCode, aHasShift) {
  */
 function _parseModifiers(aEvent)
 {
+  // Window object is required to access the 'navigator' property
+  var hwindow = Components.classes["@mozilla.org/appshell/appShellService;1"]
+      .getService(Components.interfaces.nsIAppShellService)
+      .hiddenDOMWindow;
+
   const nsIDOMWindowUtils = Components.interfaces.nsIDOMWindowUtils;
   var mval = 0;
   if (aEvent.shiftKey) {
@@ -219,7 +224,7 @@ function _parseModifiers(aEvent)
     mval |= nsIDOMWindowUtils.MODIFIER_META;
   }
   if (aEvent.accelKey) {
-    mval |= (navigator.platform.indexOf("Mac") >= 0) ?
+    mval |= (hwindow.navigator.platform.indexOf("Mac") >= 0) ?
       nsIDOMWindowUtils.MODIFIER_META : nsIDOMWindowUtils.MODIFIER_CONTROL;
   }
   if (aEvent.altGrKey) {

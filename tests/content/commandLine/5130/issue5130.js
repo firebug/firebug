@@ -10,7 +10,8 @@ function runTest()
             var tasks = new FBTest.TaskList();
 
             var expr = "console.dir([0,1,2,3,4,5,6,7,8,9,10]);";
-            var expected = /\s*00\s*11\s*22\s*33\s*44\s*55\s*66\s*77\s*88\s*99\s*1010/;
+            var expected = new RegExp("0\\s*0\\s*1\\s*1\\s*2\\s*2\\s*3\\s*3\\s*4\\s*4\\s*5\\s*5" +
+                "\\s*6\\s*6\\s*7\\s*7\\s*8\\s*8\\s*9\\s*9\\s*10\\s*10");
             tasks.push(FBTest.executeCommandAndVerify, expr, expected,
                 "div", "logRow logRow-dir");
 

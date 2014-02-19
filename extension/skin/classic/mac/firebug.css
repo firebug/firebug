@@ -10,7 +10,7 @@
 #fbCommandToolbar {
     height: calc(22rem + 9px);
     border: none;
-    background: #F6F6F6 linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2)) repeat-x;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
 }
 
 #fbCommandArrow,
@@ -371,6 +371,7 @@ panelTab[selected="true"] > panelTabMenu {
     min-width: 0;
     max-width: 13em;
     font-weight: bold;
+    font-size: 11px;
     color: #3a3a3a;
     border: none !important;
     border-radius: 9px;
@@ -404,15 +405,15 @@ panelTab[selected="true"] > panelTabMenu {
     text-shadow: 0 1px rgba(120, 120, 120, 1);
 }
 
-.toolbar-text-button[checked="true"]:not([disabled="true"]),
-.toolbar-text-menubutton[open="true"]:not([disabled="true"]) {
+toolbarbutton.toolbar-text-button[checked="true"]:not([disabled="true"]),
+toolbarbutton.toolbar-text-menubutton[open="true"]:not([disabled="true"]) {
     text-shadow: 0 1px rgba(120, 120, 120, 1);
     box-shadow: 0 1px 2px rgba(0, 0, 0, .5) inset;
     background: rgba(0, 0, 0, 0.3);
 }
 
-.toolbar-text-menubutton:hover:active:not([disabled="true"]) > .toolbarbutton-text,
-.toolbar-text-menubutton[open="true"]:not([disabled="true"]) > .toolbarbutton-text {
+toolbarbutton.toolbar-text-menubutton:hover:active:not([disabled="true"]) > .toolbarbutton-text,
+toolbarbutton.toolbar-text-menubutton[open="true"]:not([disabled="true"]) > .toolbarbutton-text {
     color: #fff;
 }
 
@@ -546,4 +547,9 @@ panelTab[selected="true"]:active > panelTabMenu .menuTarget {
 
 #fbMigrationOk {
     font-family: monospace;
+}
+
+#fbCommandEditorBrowser {
+    position: relative;
+    margin: -1px -2px;
 }

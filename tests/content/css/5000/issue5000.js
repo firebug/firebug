@@ -8,7 +8,9 @@ function runTest()
         var panel = FBTest.selectPanel("stylesheet");
         var id = "element1";
 
-        FBTest.searchInCssPanel("#"+id, function(node)
+        FBTest.selectPanelLocationByName(panel, "issue5000.html");
+
+        FBTest.searchInCssPanel("#" + id, function(node)
         {
             var elementDisplayBefore = FBTest.getImageDataFromNode(win.document.getElementById(id));
             FBTest.executeContextMenuCommand(node, "fbDeleteRuleDeclaration", function()
@@ -18,11 +20,11 @@ function runTest()
 
                 for (var i=0; ruleDeleted && i<selectors.length; i++)
                 {
-                    if (selectors[i] == "#"+id)
+                    if (selectors[i] == "#" + id)
                         ruleDeleted = false;
                 }
 
-                FBTest.ok(ruleDeleted, "The rule '#"+id+"' should be deleted");
+                FBTest.ok(ruleDeleted, "The rule '#" + id + "' should be deleted");
 
                 var elementDisplayNow = FBTest.getImageDataFromNode(win.document.getElementById(id));
                 FBTest.ok(elementDisplayBefore != elementDisplayNow, "The styles of the deleted rule shouldn't affect the element anymore");

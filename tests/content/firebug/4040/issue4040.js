@@ -9,11 +9,12 @@ function runTest()
 
         FBTest.openNewTab("about:blank", function(win)
         {
-            FBTest.openFirebug();
-            var panel = FBTest.selectPanel("stylesheet");
-            FBTest.compare(0, getNumberOfRules(panel), "There must be no CSS rule");
+            FBTest.openFirebug(function () {
+                var panel = FBTest.selectPanel("stylesheet");
+                FBTest.compare(0, getNumberOfRules(panel), "There must be no CSS rule");
 
-            FBTest.testDone("issue4040.DONE");
+                FBTest.testDone("issue4040.DONE");
+            });
         });
     });
 }
