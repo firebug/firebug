@@ -247,7 +247,7 @@ var BreakpointModule = Obj.extend(Firebug.Module,
             if (!bp)
             {
                 TraceError.sysout("breakpointModule.shouldBreakDebugger; " +
-                    "Paused on a breakpoint, but there is no such breakpoint.");
+                    "Paused on a breakpoint, but there is no such breakpoint.", location);
                 return true;
             }
 

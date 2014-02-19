@@ -84,7 +84,9 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         {
             Trace.sysout("breakpointTool.onAddBreakpoint; callback executed", response);
 
-            if (response.error)
+            // Do not log error if it's 'noScript'. It's quite common that breakpoints
+            // are set before scripts exists (or no longer exists since garbage collected).
+            if (response.error && response.error != "noScript")
             {
                 TraceError.sysout("breakpointTool.onAddBreakpoint; ERROR: " +
                     response.message, response);
@@ -164,8 +166,10 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
 
     newSource: function(sourceFile)
     {
+        // Get all breakpoints (including dynamic breakpoints) that belong to the
+        // newly created source.
         var url = sourceFile.getURL();
-        var bps = BreakpointStore.getBreakpoints(url);
+        var bps = BreakpointStore.getBreakpoints(url, true);
 
         // Filter out those breakpoints that have been already set on the backend
         // (i.e. there is a corresponding client object already).

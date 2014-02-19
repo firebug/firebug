@@ -242,7 +242,7 @@ StackFrame.guessFunctionName = function(url, lineNo, sourceFile)
     if (sourceFile)
         return StackFrame.guessFunctionNameFromLines(url, lineNo, sourceFile);
 
-    return "? in " + Url.getFileName(url) + "@" + lineNo;
+    return Url.getFileName(url) + "@" + lineNo;
 }
 
 var reGuessFunction = /['"]?([$0-9A-Za-z_]+)['"]?\s*[:=]\s*(function|eval|new Function)/;

@@ -173,8 +173,7 @@ SourceFile.prototype =
 
 SourceFile.getSourceFileByUrl = function(context, url)
 {
-    if (context.sourceFileMap)
-        return context.sourceFileMap[url];
+    return context.getSourceFile(url);
 };
 
 SourceFile.findScriptForFunctionInContext = function(context, fn)
