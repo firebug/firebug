@@ -430,12 +430,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         {
             if (this.showThisCompilationUnit(allSources[i]))
             {
-                FBTrace.sysout("show " + allSources[i].href);
                 list.push(allSources[i]);
             }
-            else if (FBTrace.DBG_COMPILATION_UNITS)
+            else
             {
-                FBTrace.sysout("scrpt.getLocationList filtered " + allSources[i].getURL(),
+                Trace.sysout("scriptPanel.getLocationList; filtered " + allSources[i].getURL(),
                     allSources[i]);
             }
         }
@@ -445,12 +444,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         else
             delete this.context.allScriptsWereFiltered;
 
-        if (FBTrace.DBG_COMPILATION_UNITS)
-        {
-            FBTrace.sysout("script.getLocationList enabledOnLoad:" + context.onLoadWindowContent +
-                " all:" + allSources.length + " filtered:" + list.length + " allFiltered: " +
-                this.context.allScriptsWereFiltered, list);
-        }
+        Trace.sysout("scriptPanel.getLocationList; enabledOnLoad: " +
+            this.context.onLoadWindowContent + " all:" + allSources.length + " filtered:" +
+            list.length + " allFiltered: " + this.context.allScriptsWereFiltered, list);
 
         return list;
     },
