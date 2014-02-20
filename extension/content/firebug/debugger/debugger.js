@@ -649,6 +649,18 @@ Firebug.Debugger = Obj.extend(ActivableModule,
     {
         Firebug.connection.removeListener(listener);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    onSourceLoaded: function(sourceFile, lines)
+    {
+        Trace.sysout("debugger.SourceLoaded; " + sourceFile.href);
+
+        // Delegate the event to the Script panel.
+        var panel = sourceFile.context.getPanel("script");
+        if (panel)
+            panel.onSourceLoaded(sourceFile, lines);
+    }
 });
 
 // ********************************************************************************************* //

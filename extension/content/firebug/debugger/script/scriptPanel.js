@@ -35,14 +35,13 @@ define([
     "firebug/debugger/script/scriptPanelLineUpdater",
     "firebug/debugger/debuggerLib",
     "firebug/console/commandLine",
-    "firebug/net/netUtils",
     "arch/compilationunit",
 ],
 function (Firebug, FBTrace, Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, Persist, Keywords,
     System, Options, Promise, ActivablePanel, Menu, Rep, StatusPath, SearchBox, Editor, ScriptView,
     StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, BreakpointConditionEditor,
     BreakOnNext, ScriptPanelWarning, BreakNotification, ScriptPanelLineUpdater,
-    DebuggerLib, CommandLine, NetUtils, CompilationUnit) {
+    DebuggerLib, CommandLine, CompilationUnit) {
 
 "use strict";
 
@@ -522,6 +521,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             return this.context.getCompilationUnit(this.location.href);
     },
 
+    getSourceFile: function()
+    {
+        return this.context.getSourceFile(this.location.href);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // ActivablePanel
 
@@ -628,8 +632,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             //     it's guessed according to the file extension.
             // 3) Get the type/category from the content type.
             var sourceFile = SourceFile.getSourceFileByUrl(this.context, sourceLink.href);
-            var mimeType = NetUtils.getMimeType(sourceFile.contentType, sourceFile.href);
-            var category = NetUtils.getCategory(mimeType);
+            var category = sourceFile.getCategory();
 
             // Display the source.
             this.scriptView.showSource(lines.join(""), category);
@@ -652,6 +655,18 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
 
         compilationUnit.getSourceLines(-1, -1, callback.bind(this));
+    },
+
+    onSourceLoaded: function(sourceFile, lines)
+    {
+        Trace.sysout("debugger.SourceLoaded; " + sourceFile.href);
+
+        if (this.location.href != sourceFile.href)
+            return;
+
+        this.scriptView.showSource(sourceFile.lines.join(""), "js");
+
+        this.context.invalidatePanels("breakpoints");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1289,6 +1304,20 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             )
         }
 
+        var sourceFile = this.getSourceFile();
+        var category = sourceFile.getCategory();
+        if (category == "js")
+        {
+            items.push("-",
+            {
+                label: "script.Pretty Print",
+                tooltiptext: "script.tip.Format the current script",
+                type: "checkbox",
+                checked: sourceFile.isPrettyPrinted,
+                command: Obj.bindFixed(this.togglePrettyPrint, this)
+            });
+        }
+
         return items;
     },
 
@@ -1342,6 +1371,14 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             BreakpointStore.enableBreakpoint(currentUrl, line);
         else
             BreakpointStore.disableBreakpoint(currentUrl, line);
+    },
+
+    togglePrettyPrint: function()
+    {
+        Trace.sysout("scriptPanel.togglePrettyPrint;");
+
+        var sourceFile = this.getSourceFile();
+        sourceFile.togglePrettyPrint();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
