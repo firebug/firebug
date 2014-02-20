@@ -119,7 +119,7 @@ ProfilerEngine.prototype =
             script.initialized = true;
 
             if (!script.funcName)
-                script.funcName = StackFrame.getFunctionName(frame);
+                script.funcName = frame.callee && frame.callee.displayName;
 
             if (typeof(script.callCount) == "undefined")
                 script.callCount = 0;
