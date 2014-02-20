@@ -276,7 +276,7 @@
 
 .panelTabBox {
     border-bottom: 1px solid #bebebe;
-    padding-left: 5px;
+    padding-left: 6px;
     overflow: hidden;
 }
 
@@ -349,7 +349,7 @@ panelTab[selected="true"] > panelTabMenu {
 
 .panelStatusLabel {
     margin: 1px 0 0 0;
-    padding: 2px 4px;
+    padding: 3px 4px;
     color: #565656;
 }
 
@@ -373,6 +373,20 @@ panelTab[selected="true"] > panelTabMenu {
     color: #4a4a4a;
     border: none !important;
     border-radius: 9px;
+}
+
+.toolbarbutton-menubutton-dropmarker {
+    padding-top: 3px;
+}
+
+toolbarbutton[type=menu-button] > .toolbarbutton-menubutton-button {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+toolbarbutton[type="menu"],
+toolbarbutton[type="menu"] > toolbarbutton {
+    padding-left: 2px;
 }
 
 .toolbarbutton {
