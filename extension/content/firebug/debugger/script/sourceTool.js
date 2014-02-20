@@ -225,9 +225,6 @@ DynamicSourceCollector.prototype =
 
         var type = script.source.introductionType;
 
-        sysoutScript("dynamicSourceCollector.onNewScript; " + script.url  + " " +
-            script.lineCount + ", " + type, script);
-
         var scriptType = dynamicTypesMap[type];
         if (scriptType)
             this.addDynamicScript(script, scriptType);
@@ -334,47 +331,6 @@ function buildStackFrame(frame, context)
 
 // Monkey patch the original function.
 StackFrame.buildStackFrame = buildStackFrame;
-
-// ********************************************************************************************* //
-// Tracing Helpers
-
-// xxxHonza: refactor or remove these tracing helpers
-function sysoutScript(msg, script)
-{
-    FBTrace.sysout(msg, convertScriptObject(script));
-}
-
-function convertScriptObject(script)
-{
-    var props = Obj.getPropertyNames(script);
-    var obj = {};
-
-    for (var p in props)
-        obj[props[p]] = script[props[p]];
-
-    var children = script.getChildScripts();
-
-    var result = [];
-    for (var i in children)
-        result.push(convertScriptObject(children[i]));
-
-    return {
-        script: obj,
-        childScripts: result,
-        url: script.url,
-        startLine: script.startLine,
-        lineCount: script.lineCount,
-        sourceStart: script.sourceStart,
-        sourceLength: script.sourceLength,
-        source: {
-            text: script.source.text,
-            url: script.source.url,
-            introductionType: script.source.introductionType,
-        },
-        snippet: script.source.text.slice(script.sourceStart, script.sourceStart +
-            script.sourceLength)
-    };
-}
 
 // ********************************************************************************************* //
 // Script Helpers
