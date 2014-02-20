@@ -80,7 +80,7 @@ this.selectElementInHtmlPanel = function(element, callback)
     htmlPanel.select(element);
 
     // find the related nodeBox in the HTML Panel tree that corresponds to the element
-    var nodeBox = htmlPanel.panelNode.querySelector(".nodeBox.selected");
+    var nodeBox = htmlPanel.panelNode.getElementsByClassName("nodeBox selected")[0];
 
     // call the callback with the nodeBox
     //setTimeout(function()
