@@ -16,7 +16,7 @@ function onExecuteTest()
 
     frame.onload = function()
     {
-        frame.contentWindow.onExecuteTest();
+        frame.contentWindow.onExecuteTest2();
     }
 
     var parentNode = document.getElementById("frameContainer");
@@ -41,10 +41,10 @@ function onExecuteTest()
             <li>There should be one error log in the Console panel: <code>Error: b</code><br/>
             Expand it and check the stack trace. It should be:<br/>
 <code>
-b()
-d()
-onExecuteTest()
-onclick()
+b(age=12, name="test")
+d(age=12, name="test")
+onExecuteTest2()
+onExecuteTest/frame.onload()
 </code>
             </li>
         </ol>

@@ -92,12 +92,6 @@ ErrorMessageObj.prototype =
         }
     },
 
-    correctSourcePoint: function(sourceName, lineNumber)
-    {
-        this.href = sourceName;
-        this.lineNo = lineNumber;
-    },
-
     getId: function()
     {
         return this.href + ":" + this.message + ":" + this.lineNo + ":" +

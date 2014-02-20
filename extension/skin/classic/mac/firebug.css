@@ -8,9 +8,10 @@
 /************************************************************************************************/
 
 #fbCommandToolbar {
-    height: calc(22rem + 9px);
+    font-size: 11px;
     border: none;
-    background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
+    height: calc(22rem + 9px);
+    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
 }
 
 #fbCommandArrow,
@@ -32,7 +33,6 @@
     border: none;
     border-top: 1px solid;
     -moz-border-top-colors: #BBB9BA;
-    padding: 2px;
 }
 
 #fbContentSplitter {
@@ -80,6 +80,7 @@
 }
 
 #fbToolbar {
+    font-size: 11px;
     padding-left: 4px;
     border-bottom: none;
 }
@@ -118,7 +119,8 @@
 /* Search Box */
 
 #fbSearchBox {
-    margin-bottom: 0px;
+    margin-top: 4px;
+    margin-bottom: 3px;
 }
 
 .fbsearch-textbox {
@@ -217,11 +219,6 @@
 #fbDetachButton,
 #fbToggleCommandLine {
     list-style-image: url(chrome://firebug/skin/mac/detach.svg);
-}
-
-#fbToggleCommandLine,
-#fbToggleCommandEditor {
-    margin-right: 20px !important;
 }
 
 #fbCloseButton {
@@ -350,8 +347,8 @@ panelTab[selected="true"] > panelTabMenu {
 }
 
 .panelStatusLabel {
-    margin: 0;
-    padding: 0 4px;
+    margin: 1px 0 0 0;
+    padding: 2px 4px;
     color: #565656;
 }
 
@@ -362,19 +359,23 @@ panelTab[selected="true"] > panelTabMenu {
 
 /************************************************************************************************/
 
+.toolbarbutton,
 .toolbar-text-button,
 .toolbar-text-menubutton {
     -moz-appearance: none;
-    margin-top: 7px;
+    margin-top: 6px;
     margin-bottom: 6px;
-    padding: 0 8px;
+    padding: 1px 8px;
     min-width: 0;
     max-width: 13em;
     font-weight: bold;
-    font-size: 11px;
-    color: #3a3a3a;
+    color: #4a4a4a;
     border: none !important;
     border-radius: 9px;
+}
+
+.toolbarbutton {
+    font-weight: normal;
 }
 
 .toolbar-text-button > .toolbarbutton-text {
@@ -395,39 +396,45 @@ panelTab[selected="true"] > panelTabMenu {
 
 .toolbar-text-button:hover:active:not([disabled="true"]),
 .toolbar-text-menubutton:hover:active:not([disabled="true"]) {
-    background: rgba(0, 0, 0, 0.5);
+    color: #4a4a4a;
+    text-shadow: 0 1px rgba(255, 255, 255, .4);
 }
 
 .toolbar-text-button:hover:not([disabled="true"]) > .toolbarbutton-text,
 .toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-menu-dropmarker,
 .toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-text {
+    color: #4a4a4a;
+    text-shadow: 0 1px rgba(255, 255, 255, .4);
+}
+
+.toolbar-text-button[checked="true"]:not([disabled="true"]),
+.toolbar-text-menubutton[open="true"]:not([disabled="true"]) {
+    color: #4a4a4a;
+    text-shadow: 0 1px rgba(255, 255, 255, .4);
+}
+
+.toolbar-text-menubutton:hover:active:not([disabled="true"]) > .toolbarbutton-text,
+.toolbar-text-menubutton[open="true"]:not([disabled="true"]) > .toolbarbutton-text {
     color: #fff;
-    text-shadow: 0 1px rgba(120, 120, 120, 1);
 }
 
-toolbarbutton.toolbar-text-button[checked="true"]:not([disabled="true"]),
-toolbarbutton.toolbar-text-menubutton[open="true"]:not([disabled="true"]) {
-    text-shadow: 0 1px rgba(120, 120, 120, 1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .5) inset;
-    background: rgba(0, 0, 0, 0.3);
-}
-
-toolbarbutton.toolbar-text-menubutton:hover:active:not([disabled="true"]) > .toolbarbutton-text,
-toolbarbutton.toolbar-text-menubutton[open="true"]:not([disabled="true"]) > .toolbarbutton-text {
-    color: #fff;
-}
-
+.toolbarbutton > .toolbarbutton-text,
 .toolbar-text-button > .toolbarbutton-text {
-    color: #3a3a3a;
+    color: #4a4a4a;
 }
 
+.toolbarbutton[checked="true"] > .toolbarbutton-text,
 .toolbar-text-button[checked="true"] > .toolbarbutton-text {
-    color: #fff;
+    color: #4a4a4a;
+}
+
+.toolbarbutton[disabled=true] > .toolbarbutton-text,
+.toolbar-text-button[disabled=true] > .toolbarbutton-text {
+    color: graytext;
 }
 
 .toolbar-text-button .toolbarbutton-text,
 .toolbar-text-menubutton .toolbarbutton-text {
-  font-size: 100% !important;
   margin: 0 !important;
 }
 
