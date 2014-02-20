@@ -28,9 +28,9 @@ var Css = {};
 // CSS
 
 var cssKeywordMap = null;
-var cssColorNames = null;
 var cachedPropNames = null;
 var domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
+var universalValues = new Set(["initial", "inherit", "unset"]);
 
 function expandKeywordList(list)
 {
@@ -85,7 +85,8 @@ function initPropertyData()
     // we manually add them to auto-completion when they constitute the only
     // value in an editor. -moz-calc is also removed, because calc should be
     // used instead, and it can be annoying when writing negative numbers.
-    var forbiddenValues = new Set(["initial", "inherit", "unset", "-moz-calc"]);
+    var forbiddenValues = new Set(universalValues.values());
+    forbiddenValues.add("-moz-calc");
     var filterValues = function(list)
     {
         return list.filter((value) => !forbiddenValues.has(value));
@@ -120,16 +121,17 @@ function initPropertyData()
         return value;
     };
 
-    // Some types of values are simply missing from the API, such as Mozilla-
-    // specific colors, and gradient images. Add those when detected.
+    // Some values are simply missing from the API. Add those when detected.
     var addMissingValues = function(values, propName)
     {
         if (propName === "transition" || propName === "transition-property")
             values = values.concat(animatableProperties);
 
+        // "currentColor", system colors, Mozilla-specific colors, see bug 927367
         if (values.indexOf("aqua") !== -1)
             values = values.concat(extraColors);
 
+        // Gradients, see bug 973345
         if (values.indexOf("-moz-element()") !== -1)
             values = values.concat(extraImages);
 
@@ -137,8 +139,7 @@ function initPropertyData()
     };
 
     // Set up part of the data tables.
-    var colors = filterValues(domUtils.getCSSValuesForProperty("color"));
-    Css.cssKeywords.color = Arr.sortUnique(colors.concat(extraColors));
+    Css.cssKeywords.color = getColorValues();
 
     for (let prop of props)
     {
@@ -224,6 +225,8 @@ Css.getCSSPropertyNames = function(nodeType)
 
 Css.getCSSShorthandCategory = function(nodeType, shorthandProp, keyword)
 {
+    initPropertyData();
+
     assertShorthand(shorthandProp);
     var category = null;
     var types = cssDataExceptions[shorthandProp];
@@ -311,21 +314,23 @@ Css.parseCSSProps = function(style, element)
     return props;
 };
 
+function getColorValues()
+{
+    return domUtils.getCSSValuesForProperty("color")
+        .filter((value) => !universalValues.has(value))
+        .concat(extraColors);
+}
+
+var colorKeywordSet = null;
 Css.isColorKeyword = function(keyword)
 {
     if (keyword == "transparent")
         return false;
 
-    if (!cssColorNames)
-    {
-        cssColorNames = [];
+    if (!colorKeywordSet)
+        colorKeywordSet = new Set(getColorValues());
 
-        var colors = Css.cssKeywords["color"];
-        for (var i = 0; i < colors.length; ++i)
-            cssColorNames.push(colors[i].toLowerCase());
-    }
-
-    return cssColorNames.indexOf(keyword.toLowerCase()) != -1;
+    return colorKeywordSet.has(keyword.toLowerCase());
 };
 
 var reImageProperty = /(^background|image)$/;
