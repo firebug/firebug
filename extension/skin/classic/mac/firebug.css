@@ -12,6 +12,7 @@
     border: none;
     height: calc(22rem + 9px);
     background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    padding-left: 25px;
 }
 
 #fbCommandArrow,
@@ -81,7 +82,7 @@
 
 #fbToolbar {
     font-size: 11px;
-    padding-left: 4px;
+    padding-left: 10px;
     border-bottom: none;
 }
 
@@ -275,7 +276,7 @@
 
 .panelTabBox {
     border-bottom: 1px solid #bebebe;
-    padding: 0;
+    padding-left: 5px;
     overflow: hidden;
 }
 
