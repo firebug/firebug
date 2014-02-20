@@ -14,14 +14,17 @@ function runTest()
 
             FBTest.ok(button.disabled, "Profile button should be disabled");
 
-            FBTest.enableScriptPanel();
+            function onMutationObserve(records) {
+                mutationObserver.disconnect();
 
-            FBTest.waitForDebuggerActivation(function()
-            {
                 FBTest.ok(!button.disabled, "Profile button should not be disabled");
 
                 FBTest.testDone("issue4384.DONE");
-            });
+            }
+            var mutationObserver = new MutationObserver(onMutationObserve);
+            mutationObserver.observe(button, {attributes: true});
+
+            FBTest.enableScriptPanel();
         });
     });
 }
