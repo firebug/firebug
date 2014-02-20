@@ -28,9 +28,9 @@ var Css = {};
 // CSS
 
 var cssKeywordMap = null;
-var cssColorNames = null;
 var cachedPropNames = null;
 var domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
+var universalValues = new Set(["initial", "inherit", "unset"]);
 
 function expandKeywordList(list)
 {
@@ -85,7 +85,8 @@ function initPropertyData()
     // we manually add them to auto-completion when they constitute the only
     // value in an editor. -moz-calc is also removed, because calc should be
     // used instead, and it can be annoying when writing negative numbers.
-    var forbiddenValues = new Set(["initial", "inherit", "unset", "-moz-calc"]);
+    var forbiddenValues = new Set(universalValues.values());
+    forbiddenValues.add("-moz-calc");
     var filterValues = function(list)
     {
         return list.filter((value) => !forbiddenValues.has(value));
@@ -126,11 +127,11 @@ function initPropertyData()
         if (propName === "transition" || propName === "transition-property")
             values = values.concat(animatableProperties);
 
-        // "currentColor" is missing, see https://bugzilla.mozilla.org/show_bug.cgi?id=927367
+        // "currentColor", system colors, Mozilla-specific colors, see bug 927367
         if (values.indexOf("aqua") !== -1)
-            values.push("currentColor");
+            values = values.concat(extraColors);
 
-        // gradients are missing, see https://bugzilla.mozilla.org/show_bug.cgi?id=973345
+        // Gradients, see bug 973345
         if (values.indexOf("-moz-element()") !== -1)
             values = values.concat(extraImages);
 
@@ -138,8 +139,7 @@ function initPropertyData()
     };
 
     // Set up part of the data tables.
-    var colors = filterValues(domUtils.getCSSValuesForProperty("color"));
-    Css.cssKeywords.color = addMissingValues(colors, "color");
+    Css.cssKeywords.color = getColorValues();
 
     for (let prop of props)
     {
@@ -225,6 +225,8 @@ Css.getCSSPropertyNames = function(nodeType)
 
 Css.getCSSShorthandCategory = function(nodeType, shorthandProp, keyword)
 {
+    initPropertyData();
+
     assertShorthand(shorthandProp);
     var category = null;
     var types = cssDataExceptions[shorthandProp];
@@ -312,21 +314,23 @@ Css.parseCSSProps = function(style, element)
     return props;
 };
 
+function getColorValues()
+{
+    return domUtils.getCSSValuesForProperty("color")
+        .filter((value) => !universalValues.has(value))
+        .concat(extraColors);
+}
+
+var colorKeywordSet = null;
 Css.isColorKeyword = function(keyword)
 {
     if (keyword == "transparent")
         return false;
 
-    if (!cssColorNames)
-    {
-        cssColorNames = [];
+    if (!colorKeywordSet)
+        colorKeywordSet = new Set(getColorValues());
 
-        var colors = Css.cssKeywords["color"];
-        for (var i = 0; i < colors.length; ++i)
-            cssColorNames.push(colors[i].toLowerCase());
-    }
-
-    return cssColorNames.indexOf(keyword.toLowerCase()) != -1;
+    return colorKeywordSet.has(keyword.toLowerCase());
 };
 
 var reImageProperty = /(^background|image)$/;
@@ -1610,6 +1614,85 @@ Css.cssKeywords =
         "evenodd"
     ],
 };
+
+var extraColors = [
+    "currentColor",
+
+    // System colors
+    "ActiveBorder",
+    "ActiveCaption",
+    "AppWorkspace",
+    "Background",
+    "ButtonFace",
+    "ButtonHighlight",
+    "ButtonShadow",
+    "ButtonText",
+    "CaptionText",
+    "GrayText",
+    "Highlight",
+    "HighlightText",
+    "InactiveBorder",
+    "InactiveCaption",
+    "InactiveCaptionText",
+    "InfoBackground",
+    "InfoText",
+    "Menu",
+    "MenuText",
+    "Scrollbar",
+    "ThreeDDarkShadow",
+    "ThreeDFace",
+    "ThreeDHighlight",
+    "ThreeDLightShadow",
+    "ThreeDShadow",
+    "Window",
+    "WindowFrame",
+    "WindowText",
+
+    // Mozilla system color extensions
+    "-moz-ButtonDefault",
+    "-moz-ButtonHoverFace",
+    "-moz-ButtonHoverText",
+    "-moz-CellHighlight",
+    "-moz-CellHighlightText",
+    "-moz-Combobox",
+    "-moz-ComboboxText",
+    "-moz-Dialog",
+    "-moz-DialogText",
+    "-moz-dragtargetzone",
+    "-moz-EvenTreeRow",
+    "-moz-Field",
+    "-moz-FieldText",
+    "-moz-html-CellHighlight",
+    "-moz-html-CellHighlightText",
+    "-moz-mac-accentdarkestshadow",
+    "-moz-mac-accentdarkshadow",
+    "-moz-mac-accentface",
+    "-moz-mac-accentlightesthighlight",
+    "-moz-mac-accentlightshadow",
+    "-moz-mac-accentregularhighlight",
+    "-moz-mac-accentregularshadow",
+    "-moz-mac-chrome-active",
+    "-moz-mac-chrome-inactive",
+    "-moz-mac-focusring",
+    "-moz-mac-menuselect",
+    "-moz-mac-menushadow",
+    "-moz-mac-menutextselect",
+    "-moz-MenuHover",
+    "-moz-MenuHoverText",
+    "-moz-MenuBarText",
+    "-moz-MenuBarHoverText",
+    "-moz-nativehyperlinktext",
+    "-moz-OddTreeRow",
+    "-moz-win-communicationstext",
+    "-moz-win-mediatext",
+
+    // Mozilla color preference extensions
+    "-moz-activehyperlinktext",
+    "-moz-default-background-color",
+    "-moz-default-color",
+    "-moz-hyperlinktext",
+    "-moz-visitedhyperlinktext",
+];
 
 var extraImages = [
     "linear-gradient()",

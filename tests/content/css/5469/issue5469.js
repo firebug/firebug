@@ -22,7 +22,8 @@ function runTest()
                 var zero = input.indexOf("0");
                 editor.setSelectionRange(zero, zero);
                 FBTest.synthesizeKey("VK_UP", null, win);
-                FBTest.compare(output, editor.value, "Incrementing zero of \"" + input + "\" → \"" + output + "\"");
+                FBTest.compare(output, editor.value, "Incrementing zero of \"" + input + "\" " +
+                    String.fromCharCode(8594) + " \"" + output + "\"");
                 callback();
             }
 
