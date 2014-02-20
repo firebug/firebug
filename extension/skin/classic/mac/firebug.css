@@ -75,7 +75,7 @@
 /*************************************************************************************************/
 /* Toolbars */
 
-#fbToolbox {
+#fbToolbox, #fbCommandToolbar {
     border-bottom: 1px solid #bebebe;
 }
 
