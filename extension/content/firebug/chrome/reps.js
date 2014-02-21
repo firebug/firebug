@@ -230,6 +230,8 @@ FirebugReps.Func = domplate(Rep,
         {
             // XXX use Debugger.Object.displayName here?
             var name = regularFn[1] || fn.displayName || "function";
+            if ((name == "anonymous") && fn.displayName)
+                name = fn.displayName;
             var args = regularFn[2];
             result = name + args;
         }
