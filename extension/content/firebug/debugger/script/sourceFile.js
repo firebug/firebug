@@ -173,9 +173,18 @@ SourceFile.prototype =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Pretty Print
 
-    togglePrettyPrint: function()
+    /**
+     * xxxHonza: yet need to be revisited
+     */
+    togglePrettyPrint: function(cb)
     {
-        var callback = this.onSourceLoaded.bind(this);
+        function callback(response)
+        {
+            this.onSourceLoaded(response);
+            cb();
+        }
+
+        callback = callback.bind(this);
         var sourceClient = this.context.activeThread.source(this);
 
         if (this.isPrettyPrinted)

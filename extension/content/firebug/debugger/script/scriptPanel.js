@@ -1310,11 +1310,20 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         {
             items.push("-",
             {
-                label: "script.Pretty Print",
-                tooltiptext: "script.tip.Format the current script",
+                label: "script.PrettyPrint",
+                tooltiptext: "script.tip.PrettyPrint",
                 type: "checkbox",
                 checked: sourceFile.isPrettyPrinted,
                 command: Obj.bindFixed(this.togglePrettyPrint, this)
+            });
+
+            // xxxHonza: for debugging purposes only.
+            items.push(
+            {
+                label: "Get All Column Offsets",
+                nol10n: true,
+                tooltiptext: "Just for JSD2 testing",
+                command: Obj.bindFixed(this.getAllColumnOffsets, this)
             });
         }
 
@@ -1378,7 +1387,36 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("scriptPanel.togglePrettyPrint;");
 
         var sourceFile = this.getSourceFile();
-        sourceFile.togglePrettyPrint();
+        sourceFile.togglePrettyPrint(() =>
+        {
+            var lines = DebuggerLib.getExecutableLines(this.context, sourceFile);
+            FBTrace.sysout("lines " + lines.join(", "), lines);
+        });
+    },
+
+    getAllColumnOffsets: function()
+    {
+        var sourceFile = this.getSourceFile();
+        var url = sourceFile.href;
+        var threadActor = DebuggerLib.getThreadActor(this.context.browser);
+
+        var query = {
+            url: url,
+        };
+
+        var scripts = threadActor.dbg.findScripts(query);
+        FBTrace.sysout("----- offsets for script(s): (" + scripts.length + ") " + url);
+        for (var i = 0; i < scripts.length; i++)
+        {
+            var script = scripts[i];
+            var offsets = script.getAllColumnOffsets();
+            var arr = offsets.map(function(o) {
+                return "[" + o.lineNumber + ":" + o.columnNumber + ":" + o.offset + "]";
+            });
+
+            FBTrace.sysout("script " + i + " (number of offsets: " + offsets.length + ") " + arr.join(", "), offsets);
+        }
+        FBTrace.sysout("-----");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
