@@ -78,7 +78,7 @@ SourceEditor.DefaultConfig =
     value: "",
     mode: "htmlmixed",
     theme: "firebug",
-    indentUnit: 2,
+    indentUnit: Options.get("tabSize"),
     tabSize: Options.get("tabSize"),
     smartIndent: true,
     extraKeys: {},
