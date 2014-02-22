@@ -28,6 +28,7 @@ pref("extensions.firebug.stringCropLength", 50);
 pref("extensions.firebug.hideDefaultInspector", false);
 pref("extensions.firebug.delayLoad", true);
 pref("extensions.firebug.clearAnnotationsConfirmation", true);
+pref("extensions.firebug.tabSize", 4);
 
 // Remoting
 pref("extensions.firebug.serverHost", "localhost");

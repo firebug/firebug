@@ -9,9 +9,10 @@ define([
     "firebug/lib/css",
     "firebug/lib/wrapper",
     "firebug/lib/array",
+    "firebug/lib/options",
     "firebug/editor/sourceSearch"
 ],
-function(Firebug, FBTrace, Obj, Http, Dom, Css, Wrapper, Arr, SourceSearch) {
+function(Firebug, FBTrace, Obj, Http, Dom, Css, Wrapper, Arr, Options, SourceSearch) {
 
 "use strict";
 
@@ -78,7 +79,7 @@ SourceEditor.DefaultConfig =
     mode: "htmlmixed",
     theme: "firebug",
     indentUnit: 2,
-    tabSize: 4,
+    tabSize: Options.get("tabSize"),
     smartIndent: true,
     extraKeys: {},
     lineWrapping: false,
