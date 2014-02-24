@@ -5,11 +5,9 @@ function runTest()
     FBTest.openNewTab(basePath + "cookies/6570/issue6570.php", function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enableCookiesPanel();
+            FBTest.enablePanels(["cookies", "net"], function() {
+                FBTest.selectPanel("net");
 
-            FBTest.selectPanel("net");
-            FBTest.enableNetPanel(function(win)
-            {
                 var options =
                 {
                     tagName: "tr",

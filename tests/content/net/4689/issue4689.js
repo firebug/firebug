@@ -54,7 +54,6 @@ function testConsolPanel(callback)
 {
     FBTest.enableConsolePanel(function(win)
     {
-        FBTest.selectPanel("console");
         FBTest.waitForDisplayedElement("console", null, function(row)
         {
             var  panel = FBTest.selectPanel("console");

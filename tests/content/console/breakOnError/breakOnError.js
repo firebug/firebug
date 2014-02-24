@@ -4,10 +4,8 @@ function runTest()
     FBTest.openNewTab(basePath + "console/breakOnError/breakOnError.html", function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enableScriptPanel();
-            FBTest.enableConsolePanel(function(win)
-            {
-                var panel = FBTest.selectPanel("console");
+            FBTest.enablePanels(["script", "console"], function() {
+                FBTest.selectPanel("console");
 
                 FBTest.waitForBreakInDebugger(null, 28, false, function(row)
                 {

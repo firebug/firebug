@@ -6,11 +6,9 @@ function runTest()
     FBTest.openNewTab(basePath + "console/errors/6523/issue6523.html", function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enableScriptPanel();
+            FBTest.enablePanels(["script", "console"], function() {
+                FBTest.selectPanel("console");
 
-            FBTest.selectPanel("console");
-            FBTest.enableConsolePanel(function(win)
-            {
                 var config = {tagName: "div", classes: "logRow logRow-errorMessage"};
                 FBTest.waitForDisplayedElement("console", config, function()
                 {

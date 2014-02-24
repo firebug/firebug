@@ -5,9 +5,7 @@ function runTest()
     FBTest.openNewTab(basePath + "console/2914/issue2914.html", function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enableScriptPanel();
-            FBTest.enableConsolePanel(function(win)
-            {
+            FBTest.enablePanels(["script", "console"], function() {
                 var panelNode = FBTest.selectPanel("console").panelNode;
 
                 var errorNode = panelNode.querySelector(".objectBox.objectBox-errorMessage");

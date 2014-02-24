@@ -8,9 +8,9 @@ function runTest()
     FBTest.clearCache();
     FBTest.openNewTab(pageURI, function(win)
     {
-        FBTest.enableScriptPanel();
-        FBTest.enableNetPanel(function(win)
-        {
+        FBTest.enablePanels(["script", "net"], function() {
+            FBTest.selectPanel("net");
+
             // Remove issue1299.js from Firebug cache.
             FW.Firebug.currentContext.sourceCache.invalidate(scriptURI);
 

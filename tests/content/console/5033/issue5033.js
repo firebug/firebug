@@ -9,9 +9,7 @@ function runTest()
             // Don't display the "Slow JSD" warning message.
             FBTest.setPref("showSlowJSDMessage", false);
 
-            FBTest.enableConsolePanel();
-            FBTest.enableScriptPanel(function(win)
-            {
+            FBTest.enablePanels(["script", "console"], function() {
                 FBTest.selectPanel("script");
 
                 FBTest.waitForBreakInDebugger(null, 10, true, function()

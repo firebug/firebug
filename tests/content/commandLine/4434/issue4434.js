@@ -5,9 +5,9 @@ function runTest()
     FBTest.openNewTab(basePath + "commandLine/4434/issue4434.html", function(win)
     {
         FBTest.selectPanel("script");
-        FBTest.enableConsolePanel();
-        FBTest.enableScriptPanel(function(win)
-        {
+        FBTest.enablePanels(["console", "script"], function() {
+            FBTest.selectPanel("script");
+
             var tasks = new FBTest.TaskList();
             tasks.push(waitForBreak, win, 21);
             tasks.push(testAutocompletion, "myVar", "myVar1", win);

@@ -4,10 +4,9 @@ function runTest()
     FBTest.openNewTab(basePath + "commandLine/6522/issue6522.html", function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enableScriptPanel();
-            FBTest.selectPanel("console");
-            FBTest.enableConsolePanel(function(win)
-            {
+            FBTest.enablePanels(["script", "console"], function() {
+                FBTest.selectPanel("console");
+
                 var taskList = new FBTest.TaskList();
                 taskList.push(FBTest.executeCommandAndVerify, "getEventListeners(window).load[0].useCapture", "false",
                     "span", "objectBox-number", true, false);

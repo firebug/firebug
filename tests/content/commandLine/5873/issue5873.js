@@ -5,10 +5,8 @@ function runTest()
     FBTest.openNewTab(basePath + "commandLine/5873/issue5873.html", function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enableConsolePanel();
-            FBTest.enableScriptPanel(function(win)
-            {
-                var panel = FW.Firebug.chrome.selectPanel("console");
+            FBTest.enablePanels(["script", "console"], function() {
+                FBTest.selectPanel("console");
 
                 var doc = FW.Firebug.chrome.window.document;
                 var cmdLine = doc.getElementById("fbCommandLine");
@@ -198,7 +196,7 @@ function runTest()
                     function step8()
                     {
                         // Whew, done. Switch back to the console panel.
-                        panel = FW.Firebug.chrome.selectPanel("console");
+                        FBTest.selectPanel("console");
                         callback();
                     }
                     step0();

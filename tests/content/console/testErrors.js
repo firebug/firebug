@@ -5,14 +5,9 @@ function runTest()
     FBTest.sysout("testErrors.START");
     FBTest.openNewTab(basePath + "console/testErrors.html", function(win)
     {
-        FBTest.selectPanel("console");
-        FBTest.enableScriptPanel(function(win) // causes reload
-        {
-            FBTest.enableConsolePanel(function(win) // causes reload
-            {
-                 FBTest.selectPanel("console");
-                 fireTest(win, 0);
-            });
+        FBTest.enablePanels(["script", "console"], function() {
+            FBTest.selectPanel("console");
+            fireTest(win, 0);
         });
     });
 }

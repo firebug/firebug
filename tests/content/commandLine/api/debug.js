@@ -4,9 +4,9 @@ function runTest()
     FBTest.openNewTab(basePath + "commandLine/api/debug.html", function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enableScriptPanel();
-            FBTest.enableConsolePanel(function(win)
-            {
+            FBTest.enablePanels(["script", "console"], function() {
+                FBTest.selectPanel("console");
+
                 var tasks = new FBTest.TaskList();
 
                 // Create breakpoint using 'debug(onTextExecute)' method on the cmd line.

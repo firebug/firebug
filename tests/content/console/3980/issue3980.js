@@ -5,10 +5,9 @@ function runTest()
     FBTest.openNewTab(basePath + "console/3980/issue3980.html", function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enableScriptPanel();
-            FBTest.selectPanel("console");
-            FBTest.enableConsolePanel(function(win)
-            {
+            FBTest.enablePanels(["script", "console"], function() {
+                FBTest.selectPanel("console");
+
                 var tests = [];
                 tests.push(testCPUProfileClearButton);
                 tests.push(testCPUProfileConsoleClearCommand);
