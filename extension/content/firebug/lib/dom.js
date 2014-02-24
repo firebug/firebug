@@ -684,7 +684,7 @@ Dom.linesIntoCenterView = function(element, scrollBox)  // {before: int, after: 
  * Scrolls an element into view
  * @param {Object} element Element to scroll to
  * @param {Object} scrollBox Scrolled element (Must be an ancestor of "element" or
- *     null for automatically determining the ancestor) 
+ *     null for automatically determining the ancestor)
  * @param {String} alignmentX Horizontal alignment for the element
  *     (valid values: "centerOrLeft", "left", "middle", "right", "none")
  * @param {String} alignmentY Vertical alignment for the element
@@ -783,7 +783,7 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY, scrollWhenVi
  * Centers an element inside a scrollable area
  * @param {Object} element Element to scroll to
  * @param {Object} scrollBox Scrolled element (Must be an ancestor of "element" or
- *     null for automatically determining the ancestor) 
+ *     null for automatically determining the ancestor)
  * @param {Boolean} notX Specifies whether the element should be centered horizontally
  * @param {Boolean} notY Specifies whether the element should be centered vertically
  */
@@ -2587,6 +2587,8 @@ Dom.domConstantMap =
     "DOM_VK_BACK_SPACE": 1,
     "DOM_VK_CLEAR": 1,
     "DOM_VK_RETURN": 1,
+    // xxxsz: May be removed as soon as Firefox 30 is the minimum supported version
+    // See https://bugzil.la/969247
     "DOM_VK_ENTER": 1,
     "DOM_VK_SHIFT": 1,
     "DOM_VK_CONTROL": 1,

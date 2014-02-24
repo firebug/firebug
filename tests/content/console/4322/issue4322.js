@@ -6,9 +6,6 @@ function runTest()
         FBTest.openFirebug();
         FBTest.enableConsolePanel(function(win)
         {
-            FBTest.openFirebug();
-            FBTest.selectPanel("console");
-
             var config = {tagName: "div", classes: "logRow logRow-errorMessage"};
             FBTest.waitForDisplayedElement("console", config, function(row)
             {

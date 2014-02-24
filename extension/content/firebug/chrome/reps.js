@@ -230,6 +230,8 @@ FirebugReps.Func = domplate(Rep,
         {
             // XXX use Debugger.Object.displayName here?
             var name = regularFn[1] || fn.displayName || "function";
+            if ((name == "anonymous") && fn.displayName)
+                name = fn.displayName;
             var args = regularFn[2];
             result = name + args;
         }
@@ -276,19 +278,18 @@ FirebugReps.Func = domplate(Rep,
             FBTrace.sysout("reps.function.inspectObject selected sourceLink is ", sourceLink);
     },
 
+    getTooltipForScript: function(script)
+    {
+        return Locale.$STRF("Line", [Url.normalizeURL(script.url), script.startLine]);
+    },
+
     getTooltip: function(fn, context)
     {
         var script = SourceFile.findScriptForFunctionInContext(context, fn);
         if (script)
-        {
-            return Locale.$STRF("Line", [Url.normalizeURL(script.url),
-                script.startLine]);
-        }
-        else
-        {
-            if (fn.toString)
-                return fn.toString();
-        }
+            return this.getTooltipForScript(script);
+        if (fn.toString)
+            return fn.toString();
     },
 
     getTitle: function(fn, context)

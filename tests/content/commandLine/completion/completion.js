@@ -1,7 +1,7 @@
 function runTest()
 {
     FBTest.sysout("issue2934.START");
-    FBTest.openNewTab(basePath + "commandLine/2934/issue2934.html", function(win)
+    FBTest.openNewTab(basePath + "commandLine/completion/completion.html", function(win)
     {
         FBTest.openFirebug();
         FBTest.selectPanel("console");
@@ -57,50 +57,56 @@ function runTest()
             checkUncompleted('/hi/i', win, cmdLine);
 
             // Issue 3600
-            FBTest.executeCommand("aaaaaaaaaaaaaaaaBBBBBBBBBBBBBBBBB = 1; aaaaaaaaaaaaaaaaKKKKKKKKKKKKKKKKKKKKKK = 2; aaaaaaaaaaaaaaaaZZTop = 3;");
-            FBTest.typeCommand('a');
-            FBTest.typeCommand('a');
+            FBTest.executeCommand("aaaaaBBB = 1; aaaaaCCC = 2; aaaaaD = 3;");
+            FBTest.typeCommand("a");
+            FBTest.typeCommand("a");
             FBTest.synthesizeKey("VK_TAB", null, win);
-            FBTest.compare("aaaaaaaaaaaaaaaaZZTop", cmdLine.value,"The command line must display 'aaaaaaaaaaaaaaaaZZTop' after tab key completion.");
+            FBTest.compare("aaaaaD", cmdLine.value,"The command line must display 'aaaaaaaaaaaaaaaaZZTop' after tab key completion.");
 
-            FBTest.sendKey("ESCAPE", "fbCommandLine");  // revert with escape
-            FBTest.compare("aa", cmdLine.value, "The command line must display 'aa', the original typing, after escape key");
+            // Revert completion
+            FBTest.sendKey("ESCAPE", "fbCommandLine");
+            FBTest.compare("aa", cmdLine.value, "The command line must display 'aa', the original typing, after pressing Escape");
+            FBTest.compare("  aaaD", completionBox.value, "The completion suggestion must be 'aaaD' after pressing Escape");
+
+            // Hide completion list popup
             FBTest.sendKey("ESCAPE", "fbCommandLine"); // hide completions with escape
+            FBTest.compare("aa", cmdLine.value, "The command line must display 'aa', the original typing, after pressing Escape again");
+            FBTest.compare("  aaaD", completionBox.value, "The completion suggestion must be 'aaaD' after pressing Escape");
 
+            // Cancel the auto-completion
+            FBTest.sendKey("ESCAPE", "fbCommandLine");
             FBTest.compare("aa", cmdLine.value, "The command line must still display 'aa', after escape key");
             FBTest.compare("", completionBox.value, "There must be no completions.");
 
-            FBTest.typeCommand('a');
-            FBTest.typeCommand('a');
+            FBTest.typeCommand("a");
+            FBTest.typeCommand("a");
             FBTest.compare("", completionBox.value, "Completions must still be hidden after typing 'aa'.");
 
             FBTest.sendKey("ESCAPE", "fbCommandLine"); // clear by escape
 
             FBTest.compare("", cmdLine.value, "The command line must be cleared after escape key");
 
-            FBTest.typeCommand('a');
-            FBTest.typeCommand('a');
+            FBTest.typeCommand("a");
+            FBTest.typeCommand("a");
             FBTest.sendKey("UP", "fbCommandLine");
             FBTest.synthesizeKey("VK_TAB", null, win);
-            FBTest.compare("aaaaaaaaaaaaaaaaKKKKKKKKKKKKKKKKKKKKKK", cmdLine.value, "The command line must display 'aaaaaaaaaaaaaaaaKKKKKKKKKKKKKKKKKKKKKK' after up arrow key");
-            FBTest.sendKey("ESCAPE", "fbCommandLine");
-            FBTest.sendKey("ESCAPE", "fbCommandLine");
-            FBTest.sendKey("ESCAPE", "fbCommandLine");  // clear by escape three times
+            FBTest.compare("aaaaaCCC", cmdLine.value, "The command line must display 'aaaaaCCC' after up arrow key");
+            FBTest.sendKey("RETURN", "fbCommandLine");
 
-            FBTest.typeCommand('a');
-            FBTest.typeCommand('a');
+            FBTest.typeCommand("a");
+            FBTest.typeCommand("a");
             FBTest.sendKey("DOWN", "fbCommandLine");
             FBTest.synthesizeKey("VK_TAB", null, win);
-            FBTest.compare("aaaaaaaaaaaaaaaaBBBBBBBBBBBBBBBBB", cmdLine.value, "The command line must display 'aaaaaaaaaaaaaaaaBBBBBBBBBBBBBBBBB' after up arrow key");
+            FBTest.compare("aaaaaBBB", cmdLine.value, "The command line must display 'aaaaaBBB' after up arrow key");
 
             FBTest.sendKey("DOWN", "fbCommandLine");  // clear by down arrow
             FBTest.compare("", cmdLine.value, "The command line must be empty after down arrow key");
 
             FBTest.typeCommand('aa');
             FBTest.sendKey("RIGHT", "fbCommandLine");
-            FBTest.compare("aaaaaaaaaaaaaaaaZZTop", cmdLine.value,"The command line must display 'aaaaaaaaaaaaaaaaZZTop' after right arrow completion.");
+            FBTest.compare("aaaaaD", cmdLine.value,"The command line must display 'aaaaaD' after right arrow completion.");
 
-            FBTest.sendKey("DOWN", "fbCommandLine");  // clear by down arrow
+            FBTest.sendKey("RETURN", "fbCommandLine");
 
             FBTest.testDone("issue2934.DONE");
         });

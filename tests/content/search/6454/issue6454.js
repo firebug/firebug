@@ -8,11 +8,11 @@ function runTest()
         FBTest.selectPanel("html");
 
         var tasks = new FBTest.TaskList();
-        tasks.push(searchTest, "testing", false, 10);
-        tasks.push(searchTest, "testing", true, 5);
+        tasks.push(searchTest, "testing", false, 13);
+        tasks.push(searchTest, "testing", true, 8);
         tasks.push(searchTest, "Testing", false, 6);
-        tasks.push(searchTest, "ol li", false, 8);
-        tasks.push(searchTest, "/html/body", true, 2);
+        tasks.push(searchTest, "#test div", false, 5);
+        tasks.push(searchTest, "/html/body", true, 3);
         tasks.run(function()
         {
             FBTest.testDone("issue6454.DONE");
