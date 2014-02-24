@@ -5,48 +5,48 @@ function runTest()
 
     FBTest.openNewTab(basePath + "console/errors/6523/issue6523.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("console");
+        FBTest.openFirebug(function() {
+            FBTest.enableScriptPanel();
 
-        FBTest.enableScriptPanel();
-
-        FBTest.enableConsolePanel(function(win)
-        {
-            var config = {tagName: "div", classes: "logRow logRow-errorMessage"};
-            FBTest.waitForDisplayedElement("console", config, function()
+            FBTest.selectPanel("console");
+            FBTest.enableConsolePanel(function(win)
             {
-                var panelNode = FBTest.getPanel("console").panelNode;
-                var row = panelNode.querySelector(".logRow.logRow-errorMessage");
-
-                // Verify displayed text.
-                var reTextContent = /\s*b\s*throw new Error\(\"b\"\)\;\s*issue6...me\.html\s*\(line\s*17\)\s*/;
-                FBTest.compare(reTextContent, row.textContent, "Text content must match.");
-
-                // Show stack trace.
-                var objectBox = row.getElementsByClassName("errorTitle")[0];
-                FBTest.click(objectBox);
-
-                // Verify stack frames
-                var frames = panelNode.querySelectorAll(".objectBox-stackFrame");
-                if (FBTest.compare(4, frames.length, "There must be four frames"))
+                var config = {tagName: "div", classes: "logRow logRow-errorMessage"};
+                FBTest.waitForDisplayedElement("console", config, function()
                 {
-                    FBTest.compare(/^b\(age=12/, frames[0].textContent,
-                        "The function name must be correct " + frames[0].textContent);
+                    var panelNode = FBTest.getPanel("console").panelNode;
+                    var row = panelNode.querySelector(".logRow.logRow-errorMessage");
 
-                    FBTest.compare(/^d\(age=12/, frames[1].textContent,
-                        "The function name must be correct " + frames[1].textContent);
+                    // Verify displayed text.
+                    var reTextContent = /\s*b\s*throw new Error\(\"b\"\)\;\s*issue6...me\.html\s*\(line\s*17\)\s*/;
+                    FBTest.compare(reTextContent, row.textContent, "Text content must match.");
 
-                    FBTest.compare(/^onExecuteTest2\(\)/, frames[2].textContent,
-                        "The function name must be correct " + frames[2].textContent);
+                    // Show stack trace.
+                    var objectBox = row.getElementsByClassName("errorTitle")[0];
+                    FBTest.click(objectBox);
 
-                    FBTest.compare(/onload/, frames[3].textContent,
-                        "The function name must be correct " + frames[3].textContent);
-                }
+                    // Verify stack frames
+                    var frames = panelNode.querySelectorAll(".objectBox-stackFrame");
+                    if (FBTest.compare(4, frames.length, "There must be four frames"))
+                    {
+                        FBTest.compare(/^b\(age=12/, frames[0].textContent,
+                            "The function name must be correct " + frames[0].textContent);
 
-                FBTest.testDone("issue6523.DONE");
+                        FBTest.compare(/^d\(age=12/, frames[1].textContent,
+                            "The function name must be correct " + frames[1].textContent);
+
+                        FBTest.compare(/^onExecuteTest2\(\)/, frames[2].textContent,
+                            "The function name must be correct " + frames[2].textContent);
+
+                        FBTest.compare(/onload/, frames[3].textContent,
+                            "The function name must be correct " + frames[3].textContent);
+                    }
+
+                    FBTest.testDone("issue6523.DONE");
+                });
+
+                FBTest.clickContentButton(win, "testButton");
             });
-
-            FBTest.clickContentButton(win, "testButton");
         });
     });
 }

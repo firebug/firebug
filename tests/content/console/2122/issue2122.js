@@ -13,21 +13,22 @@ function runTest()
 
     FBTest.openNewTab(basePath + "console/2122/issue2122.html", function()
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
-        {
-            FBTest.selectPanel("console");
+        FBTest.openFirebug(function() {
+            FBTest.enableConsolePanel(function(win)
+            {
+                FBTest.selectPanel("console");
 
-            theWindow = win;
+                theWindow = win;
 
-            var tests = [];
-            tests.push(test0);
-            tests.push(test1);
-            tests.push(test2);
-            tests.push(test3);
+                var tests = [];
+                tests.push(test0);
+                tests.push(test1);
+                tests.push(test2);
+                tests.push(test3);
 
-            FBTest.runTestSuite(tests, function() {
-                FBTest.testDone("issue2122; DONE");
+                FBTest.runTestSuite(tests, function() {
+                    FBTest.testDone("issue2122; DONE");
+                });
             });
         });
     });

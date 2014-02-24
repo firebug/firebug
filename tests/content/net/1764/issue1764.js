@@ -19,34 +19,34 @@ function runTest()
             FBTest.openNewTab(basePath + "net/1764/issue1764-2.html", function(win)
             {
                 // Step 2.
-                FBTest.openFirebug();
+                FBTest.openFirebug(function() {
+                    // Step 3.
+                    FBTest.enableNetPanel(function(win)
+                    {
+                        FBTest.selectPanel("net");
 
-                // Step 3.
-                FBTest.enableNetPanel(function(win)
-                {
-                    FBTest.selectPanel("net");
+                        // Step 4.
+                        FBTest.clearCache();
+                        FBTest.reload(function() {
+                            verifyNetPanel("Step 4");
 
-                    // Step 4.
-                    FBTest.clearCache();
-                    FBTest.reload(function() {
-                        verifyNetPanel("Step 4");
-
-                        // Step 5 & 6.
-                        nextStep(function() {
-                            var tabbrowser = FBTest.getBrowser();
-                            tabbrowser.removeTab(tabbrowser.selectedTab);
-
-                            // Step 7.
+                            // Step 5 & 6.
                             nextStep(function() {
-                                // ... clear cache and open again.
-                                FBTest.clearCache();
+                                var tabbrowser = FBTest.getBrowser();
+                                tabbrowser.removeTab(tabbrowser.selectedTab);
+
+                                // Step 7.
                                 nextStep(function() {
-                                    FBTest.openNewTab(basePath + "net/1764/issue1764-2.html", function(win)
-                                    {
-                                        // Step 8.
-                                        verifyNetPanel("Step 8");
-                                        nextStep(function() {
-                                            FBTest.testDone("issue1764.DONE");
+                                    // ... clear cache and open again.
+                                    FBTest.clearCache();
+                                    nextStep(function() {
+                                        FBTest.openNewTab(basePath + "net/1764/issue1764-2.html", function(win)
+                                        {
+                                            // Step 8.
+                                            verifyNetPanel("Step 8");
+                                            nextStep(function() {
+                                                FBTest.testDone("issue1764.DONE");
+                                            });
                                         });
                                     });
                                 });

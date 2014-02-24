@@ -4,37 +4,38 @@ function runTest()
 
     FBTest.openNewTab(basePath + "console/api/assert.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
-        {
-            FBTest.setPref("filterSystemURLs", true);
-
-            var doNotFilter = FBTest.getPref("filterSystemURLs");
-
-            FBTest.compare(true, doNotFilter, "Pref filterSystemURLs must be set true");
-            FBTest.compare(true, FW.Firebug.filterSystemURLs, "Pref Firebug.filterSystemURLs must be set true");
-
-            var config = {tagName: "div", classes: "logRow logRow-errorMessage", counter: 2};
-            FBTest.waitForDisplayedElement("console", config, function(row)
+        FBTest.openFirebug(function() {
+            FBTest.enableConsolePanel(function(win)
             {
-                verifyConsoleUI(config);
-                FW.Firebug.Console.clear();
-                FBTest.setPref("filterSystemURLs", false);
-                var filter = FBTest.getPref("filterSystemURLs");
-                FBTest.compare(false, filter, "Pref filterSystemURLs must not be set true");
-                FBTest.compare(false, FW.Firebug.filterSystemURLs, "Pref filterSystemURLs must not be set true");
+                FBTest.setPref("filterSystemURLs", true);
+
+                var doNotFilter = FBTest.getPref("filterSystemURLs");
+
+                FBTest.compare(true, doNotFilter, "Pref filterSystemURLs must be set true");
+                FBTest.compare(true, FW.Firebug.filterSystemURLs, "Pref Firebug.filterSystemURLs must be set true");
+
+                var config = {tagName: "div", classes: "logRow logRow-errorMessage", counter: 2};
                 FBTest.waitForDisplayedElement("console", config, function(row)
                 {
                     verifyConsoleUI(config);
-                    FBTest.testDone("console.assert.DONE");
+                    FW.Firebug.Console.clear();
+                    FBTest.setPref("filterSystemURLs", false);
+                    var filter = FBTest.getPref("filterSystemURLs");
+                    FBTest.compare(false, filter, "Pref filterSystemURLs must not be set true");
+                    FBTest.compare(false, FW.Firebug.filterSystemURLs, "Pref filterSystemURLs must not be set true");
+                    FBTest.waitForDisplayedElement("console", config, function(row)
+                    {
+                        verifyConsoleUI(config);
+                        FBTest.testDone("console.assert.DONE");
+                    });
+
+                    // Execute test implemented on the test page.
+                    FBTest.click(win.document.getElementById("testButton"));
                 });
 
                 // Execute test implemented on the test page.
                 FBTest.click(win.document.getElementById("testButton"));
             });
-
-            // Execute test implemented on the test page.
-            FBTest.click(win.document.getElementById("testButton"));
         });
     });
 }

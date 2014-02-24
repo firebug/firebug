@@ -3,17 +3,16 @@ function runTest()
     FBTest.sysout("issue6356.START");
     FBTest.openNewTab(basePath + "console/6356/issue6356.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("console");
+        FBTest.openFirebug(function() {
+            FBTest.enableConsolePanel(function(win)
+            {
+                var tasks = new FBTest.TaskList();
+                tasks.push(test1, win);
+                tasks.push(test2, win);
 
-        FBTest.enableConsolePanel(function(win)
-        {
-            var tasks = new FBTest.TaskList();
-            tasks.push(test1, win);
-            tasks.push(test2, win);
-
-            tasks.run(function() {
-                FBTest.testDone("issue6356.DONE");
+                tasks.run(function() {
+                    FBTest.testDone("issue6356.DONE");
+                });
             });
         });
     });

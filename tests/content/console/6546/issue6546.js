@@ -4,15 +4,14 @@ function runTest()
 
     FBTest.openNewTab(basePath + "console/6546/issue6546.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("console");
+        FBTest.openFirebug(function() {
+            FBTest.enableConsolePanel(function(win)
+            {
+                var doc = FW.Firebug.chrome.window.document;
+                FBTest.compare("textbox-input", doc.activeElement.className, "Command Line must be focused");
 
-        FBTest.enableConsolePanel(function(win)
-        {
-            var doc = FW.Firebug.chrome.window.document;
-            FBTest.compare("textbox-input", doc.activeElement.className, "Command Line must be focused");
-
-            FBTest.testDone("issue6546.DONE");
+                FBTest.testDone("issue6546.DONE");
+            });
         });
     });
 }

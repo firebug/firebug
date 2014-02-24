@@ -6,48 +6,49 @@ function runTest()
 
     FBTest.openNewTab(basePath + "search/6435/issue6435.html", function()
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("dom");
+        FBTest.openFirebug(function() {
+            FBTest.selectPanel("dom");
 
-        // There is several configurations.
-        var testSuite = [];
+            // There is several configurations.
+            var testSuite = [];
 
-        // Test 1: 'test', forward, case insensitive
-        testSuite.push(function(callback)
-        {
-            executeSearchTest("test", false, false, function(counter)
+            // Test 1: 'test', forward, case insensitive
+            testSuite.push(function(callback)
             {
-                FBTest.compare(4, counter, "There must be precise number " +
-                     "of occurences (4) actual: " + counter);
-                callback();
+                executeSearchTest("test", false, false, function(counter)
+                {
+                    FBTest.compare(4, counter, "There must be precise number " +
+                         "of occurences (4) actual: " + counter);
+                    callback();
+                });
             });
-        });
 
-        // Test 2: 'test', forward, case sensitive
-        testSuite.push(function(callback)
-        {
-            executeSearchTest("test", false, true, function(counter)
+            // Test 2: 'test', forward, case sensitive
+            testSuite.push(function(callback)
             {
-                FBTest.compare(2, counter, "There must be precise number " +
-                    "of occurences (2) actual: " + counter);
-                callback();
+                executeSearchTest("test", false, true, function(counter)
+                {
+                    FBTest.compare(2, counter, "There must be precise number " +
+                        "of occurences (2) actual: " + counter);
+                    callback();
+                });
             });
-        });
 
-        // Test 3: '21', forward, case insensitive.
-        testSuite.push(function(callback)
-        {
-            executeSearchTest("21", false, false, function(counter)
+            // Test 3: '21', forward, case insensitive.
+            testSuite.push(function(callback)
             {
-                FBTest.compare(2, counter, "There must be precise number " +
-                    "of occurences (2) actual: " + counter);
-                callback();
+                executeSearchTest("21", false, false, function(counter)
+                {
+                    FBTest.compare(2, counter, "There must be precise number " +
+                        "of occurences (2) actual: " + counter);
+                    callback();
+                });
             });
-        });
 
-        FBTest.runTestSuite(testSuite, function()
-        {
-            FBTest.testDone("issue6435.DONE");
+            FBTest.runTestSuite(testSuite, function()
+            {
+                FBTest.testDone("issue6435.DONE");
+            });
         });
     });
 }

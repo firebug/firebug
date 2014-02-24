@@ -3,30 +3,31 @@ function runTest()
     FBTest.sysout("commandline.cd.START");
     FBTest.openNewTab(basePath + "commandLine/api/cd.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.clearCache();
-        FBTest.enableConsolePanel(function(win)
-        {
-            var tasks = new FBTest.TaskList();
-            tasks.push(FBTest.executeCommandAndVerify, "cd(frames[0])",
-                /Window cdFrame\.html/,
-                "div", "logRow-info");
+        FBTest.openFirebug(function() {
+            FBTest.clearCache();
+            FBTest.enableConsolePanel(function(win)
+            {
+                var tasks = new FBTest.TaskList();
+                tasks.push(FBTest.executeCommandAndVerify, "cd(frames[0])",
+                    /Window cdFrame\.html/,
+                    "div", "logRow-info");
 
-            tasks.push(FBTest.executeCommandAndVerify, "$(\"#test-iframe-1\")",
-                /<div\s*id=\"test-iframe-1\">/,
-                "a", "objectLink objectLink-element");
+                tasks.push(FBTest.executeCommandAndVerify, "$(\"#test-iframe-1\")",
+                    /<div\s*id=\"test-iframe-1\">/,
+                    "a", "objectLink objectLink-element");
 
-            tasks.push(FBTest.executeCommandAndVerify, "cd(top)",
-                /Window cd\.html/,
-                "div", "logRow-info");
+                tasks.push(FBTest.executeCommandAndVerify, "cd(top)",
+                    /Window cd\.html/,
+                    "div", "logRow-info");
 
-            tasks.push(FBTest.executeCommandAndVerify, "cd(undefined)",
-                "Error: The cd() argument must be a window.", "div", "subLogRow", false);
+                tasks.push(FBTest.executeCommandAndVerify, "cd(undefined)",
+                    "Error: The cd() argument must be a window.", "div", "subLogRow", false);
 
-            tasks.push(testErrorInfo);
+                tasks.push(testErrorInfo);
 
-            tasks.run(function() {
-                FBTest.testDone("commandline.cd.DONE");
+                tasks.run(function() {
+                    FBTest.testDone("commandline.cd.DONE");
+                });
             });
         });
     });

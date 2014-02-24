@@ -5,22 +5,23 @@ function runTest()
 
     FBTest.openNewTab(basePath + "css/4411/issue4411.html", function(win)
     {
-        FBTest.openFirebug();
-        var panel = FBTest.selectPanel("stylesheet");
+        FBTest.openFirebug(function() {
+            var panel = FBTest.selectPanel("stylesheet");
 
-        FBTest.selectPanelLocationByName(panel, "issue4411.html");
+            FBTest.selectPanelLocationByName(panel, "issue4411.html");
 
-        var tests = [];
-        tests.push(hexValue);
-        tests.push(namedColor);
-        tests.push(rgb);
-        tests.push(rgba);
-        tests.push(hsl);
-        tests.push(hsla);
+            var tests = [];
+            tests.push(hexValue);
+            tests.push(namedColor);
+            tests.push(rgb);
+            tests.push(rgba);
+            tests.push(hsl);
+            tests.push(hsla);
 
-        FBTest.runTestSuite(tests, function()
-        {
-            FBTest.testDone("issue4411; DONE");
+            FBTest.runTestSuite(tests, function()
+            {
+                FBTest.testDone("issue4411; DONE");
+            });
         });
     });
 }

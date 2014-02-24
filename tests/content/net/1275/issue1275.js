@@ -8,36 +8,36 @@ function runTest()
     {
         FBTest.sysout("issue1275.START");
 
-        // Open Firebug UI and enable Net panel.
-        FBTest.openFirebug();
-        FBTest.enableNetPanel();
-        FBTest.enableConsolePanel();
-        FBTest.clearCache();
-        FBTest.selectPanel("net");
+        FBTest.openFirebug(function() {
+            FBTest.enableNetPanel();
+            FBTest.enableConsolePanel();
+            FBTest.clearCache();
+            FBTest.selectPanel("net");
 
-        // Reload test page.
-        FBTest.reload(function()
-        {
-            onRequestDisplayed("tr", "netRow category-xhr hasHeaders loaded", function(row)
+            // Reload test page.
+            FBTest.reload(function()
             {
-                // Verify Net panel response
-                var panel = FBTest.getPanel("net");
-                FBTest.click(row);
-                verifyResponse(panel);
+                onRequestDisplayed("tr", "netRow category-xhr hasHeaders loaded", function(row)
+                {
+                    // Verify Net panel response
+                    var panel = FBTest.getPanel("net");
+                    FBTest.click(row);
+                    verifyResponse(panel);
 
-                // Verify Console panel response
-                panel = FBTest.getPanel("console");
-                var spyLogRow = FW.FBL.getElementByClass(panel.panelNode, "logRow",
-                    "logRow-spy", "loaded");
-                var xhr = FW.FBL.getElementByClass(spyLogRow, "spyTitleCol", "spyCol");
-                FBTest.click(xhr);
-                verifyResponse(panel);
+                    // Verify Console panel response
+                    panel = FBTest.getPanel("console");
+                    var spyLogRow = FW.FBL.getElementByClass(panel.panelNode, "logRow",
+                        "logRow-spy", "loaded");
+                    var xhr = FW.FBL.getElementByClass(spyLogRow, "spyTitleCol", "spyCol");
+                    FBTest.click(xhr);
+                    verifyResponse(panel);
 
-                FBTest.setPref("showXMLHttpRequests", prefOrigValue);
-                FBTest.testDone("issue1275.DONE");
+                    FBTest.setPref("showXMLHttpRequests", prefOrigValue);
+                    FBTest.testDone("issue1275.DONE");
+                });
+
+                FBTest.click(win.document.getElementById("testButton"));
             });
-
-            FBTest.click(win.document.getElementById("testButton"));
         });
     })
 }

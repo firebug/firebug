@@ -4,21 +4,22 @@ function runTest()
 
     FBTest.openNewTab(basePath + "console/2948/issue2948.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
-        {
-            var panel = FW.Firebug.chrome.selectPanel("console");
+        FBTest.openFirebug(function() {
+            FBTest.enableConsolePanel(function(win)
+            {
+                var panel = FW.Firebug.chrome.selectPanel("console");
 
-            // Define individual async tasks.
-            var tasks = new FBTest.TaskList();
-            tasks.push(executeResponse, win);
-            tasks.push(openPopup, win);
-            tasks.push(executeResponse, win);
+                // Define individual async tasks.
+                var tasks = new FBTest.TaskList();
+                tasks.push(executeResponse, win);
+                tasks.push(openPopup, win);
+                tasks.push(executeResponse, win);
 
-            // Run them all.
-            tasks.run(function() {
-                FBTest.testDone("issue2948.DONE");
-            })
+                // Run them all.
+                tasks.run(function() {
+                    FBTest.testDone("issue2948.DONE");
+                });
+            });
         });
     });
 }

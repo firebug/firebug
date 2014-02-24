@@ -3,12 +3,13 @@ function runTest()
     FBTest.sysout("issue4931.START");
     FBTest.openNewTab(basePath + "console/completion/4931/issue4931.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
-        {
-            executeAndVerify("a", "\"Hello\"", "span", "objectBox objectBox-string", function()
+        FBTest.openFirebug(function() {
+            FBTest.enableConsolePanel(function(win)
             {
-                FBTest.testDone("issue4931.DONE");
+                executeAndVerify("a", "\"Hello\"", "span", "objectBox objectBox-string", function()
+                {
+                    FBTest.testDone("issue4931.DONE");
+                });
             });
         });
     });

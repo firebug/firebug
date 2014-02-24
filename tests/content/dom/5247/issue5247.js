@@ -4,25 +4,26 @@ function runTest()
 
     FBTest.openNewTab(basePath + "dom/5247/issue5247.html", function(win)
     {
-        FBTest.openFirebug();
-        var panel = FBTest.selectPanel("stylesheet");
+        FBTest.openFirebug(function() {
+            var panel = FBTest.selectPanel("stylesheet");
 
-        if (FBTest.selectPanelLocationByName(panel, "issue5247.html"))
-        {
-            FBTest.executeContextMenuCommand(FW.Firebug.chrome.$("fbLocationList"),
-                "InspectIndomPanel", function()
+            if (FBTest.selectPanelLocationByName(panel, "issue5247.html"))
             {
-                // xxxHonza, xxxsz: hack that fixes this test on Mac. The panel can
-                // be selected asynchronously.
-                setTimeout(function() {
-                    onInspect();
-                }, 1000);
-            });
-        }
-        else
-        {
-            FBTest.testDone("issue5247.DONE");
-        }
+                FBTest.executeContextMenuCommand(FW.Firebug.chrome.$("fbLocationList"),
+                    "InspectIndomPanel", function()
+                {
+                    // xxxHonza, xxxsz: hack that fixes this test on Mac. The panel can
+                    // be selected asynchronously.
+                    setTimeout(function() {
+                        onInspect();
+                    }, 1000);
+                });
+            }
+            else
+            {
+                FBTest.testDone("issue5247.DONE");
+            }
+        });
     });
 }
 

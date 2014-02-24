@@ -4,26 +4,26 @@ function runTest()
 
     FBTest.openNewTab(basePath + "net/4382/issue4382.html", function(win)
     {
-        FBTest.openFirebug();
-
-        var tests = [];
-        tests.push(function(callback)
-        {
-            FBTest.progress("Testing JSON array");
-            testJSONArray(win, callback);
-        });
-
-        tests.push(function(callback)
-        {
-            FBTest.progress("Testing JSON object");
-            testJSONObject(win, callback);
-        });
-
-        FBTest.enableNetPanel(function(win)
-        {
-            FBTestFirebug.runTestSuite(tests, function()
+        FBTest.openFirebug(function() {
+            var tests = [];
+            tests.push(function(callback)
             {
-                FBTest.testDone("issue4382; DONE");
+                FBTest.progress("Testing JSON array");
+                testJSONArray(win, callback);
+            });
+
+            tests.push(function(callback)
+            {
+                FBTest.progress("Testing JSON object");
+                testJSONObject(win, callback);
+            });
+
+            FBTest.enableNetPanel(function(win)
+            {
+                FBTestFirebug.runTestSuite(tests, function()
+                {
+                    FBTest.testDone("issue4382; DONE");
+                });
             });
         });
     });

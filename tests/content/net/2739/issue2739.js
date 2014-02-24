@@ -10,16 +10,17 @@ function runTest()
     FBTest.openNewTab(basePath + "net/2739/issue2739.html", function(win)
     {
         // Open Firebug and enable the Net panel.
-        FBTest.openFirebug();
-        FBTest.enableNetPanel(function(win)
-        {
-            var panel = FW.Firebug.chrome.selectPanel("net");
+        FBTest.openFirebug(function() {
+            FBTest.enableNetPanel(function(win)
+            {
+                var panel = FW.Firebug.chrome.selectPanel("net");
 
-            // Asynchronously wait for two requests beeing displayed.
-            waitForResponse(panel);
+                // Asynchronously wait for two requests beeing displayed.
+                waitForResponse(panel);
 
-            // Execute test.
-            FBTest.click(win.document.getElementById("testButton"));
+                // Execute test.
+                FBTest.click(win.document.getElementById("testButton"));
+            });
         });
     });
 }

@@ -11,20 +11,21 @@ function runTest()
 
     FBTest.openNewTab(basePath + "console/2659/issue2659.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
-        {
-            FW.Firebug.chrome.selectPanel("console");
-            FBTest.reload(function()
+        FBTest.openFirebug(function() {
+            FBTest.enableConsolePanel(function(win)
             {
-                verifyNumberOfLogs(1);
-                FBTest.clickToolbarButton(FW.Firebug.chrome, "fbConsolePersist");
+                FW.Firebug.chrome.selectPanel("console");
                 FBTest.reload(function()
                 {
-                    verifyNumberOfLogs(2);
-                    FBTest.testDone("issue2659.DONE");
+                    verifyNumberOfLogs(1);
+                    FBTest.clickToolbarButton(FW.Firebug.chrome, "fbConsolePersist");
+                    FBTest.reload(function()
+                    {
+                        verifyNumberOfLogs(2);
+                        FBTest.testDone("issue2659.DONE");
+                    })
                 })
-            })
+            });
         });
     });
 }

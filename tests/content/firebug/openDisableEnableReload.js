@@ -15,10 +15,7 @@ function runTest()
     FBTest.openNewTab(basePath + "firebug/OpenFirebugOnThisPage.html", function(win)
     {
         FBTest.progress("opened tab for "+win.location);
-        FBTest.openFirebug();
-
-        setTimeout(function delayChecks()
-        {
+        FBTest.openFirebug(function() {
             FBTest.progress("All panels should be disabled: check them");
             // All panels must be disabled.
             checkIsDisabled(FW.FBL.$STR("Panel-console"), FW.Firebug.Console);  // console must be disabled first

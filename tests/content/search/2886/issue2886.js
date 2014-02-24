@@ -4,18 +4,17 @@ function runTest()
 
     FBTest.openNewTab(basePath + "search/2886/issue2886.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("script");
-
-        FBTest.enableScriptPanel(function(win)
-        {
-            var tests = new FBTest.TaskList();
-            tests.push(doSearch, "(!(accidental-regexp))", 8, false);
-            tests.push(doSearch, "keyword\\s+\\d+", 10, true);
-
-            tests.run(function()
+        FBTest.openFirebug(function() {
+            FBTest.enableScriptPanel(function(win)
             {
-                FBTest.testDone("issue2886.DONE");
+                var tests = new FBTest.TaskList();
+                tests.push(doSearch, "(!(accidental-regexp))", 8, false);
+                tests.push(doSearch, "keyword\\s+\\d+", 10, true);
+
+                tests.run(function()
+                {
+                    FBTest.testDone("issue2886.DONE");
+                });
             });
         });
     });

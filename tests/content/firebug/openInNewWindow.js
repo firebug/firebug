@@ -8,20 +8,21 @@ function runTest()
     FBTest.sysout("openInNewWindow.START");
     FBTest.openNewTab(testPageURL, function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableAllPanels();
+        FBTest.openFirebug(function() {
+            FBTest.enableAllPanels();
 
-        // Reload afeter enable panels.
-        FBTest.reload(function()
-        {
-            var tasks = new FBTest.TaskList();
-            tasks.push(waitForDetachedFirebug);
-            tasks.push(setBreakpointReloadAndWaitForBreak);
-            tasks.push(reloadAgainAndWaitForBreak);
+            // Reload afeter enable panels.
+            FBTest.reload(function()
+            {
+                var tasks = new FBTest.TaskList();
+                tasks.push(waitForDetachedFirebug);
+                tasks.push(setBreakpointReloadAndWaitForBreak);
+                tasks.push(reloadAgainAndWaitForBreak);
 
-            tasks.run(function() {
-                FBTest.testDone("openInNewWindow.DONE");
-            })
+                tasks.run(function() {
+                    FBTest.testDone("openInNewWindow.DONE");
+                })
+            });
         });
     });
 };
