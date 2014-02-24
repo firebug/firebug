@@ -81,62 +81,75 @@ function sendMouseEvent(aEvent, aTarget, aWindow) {
 
 /**
  * Send the char aChar to the node with id aTarget.  If aTarget is not
- * provided, use "target".  This method handles casing of chars (sends the
- * right charcode, and sends a shift key for uppercase chars).  No other
- * modifiers are handled at this point.
+ * provided, use "target". This method handles casing of
+ * chars (sends the right charcode, and sends a shift key for uppercase chars).
+ * No other modifiers are handled at this point.
  *
- * For now this method only works for English letters (lower and upper case)
- * and the digits 0-9.
- *
- * Returns true if the keypress event was accepted (no calls to preventDefault
- * or anything like that), false otherwise.
+ * For now this method only works for ASCII characters and emulates the shift
+ * key state on US keyboard layout.
  */
-function sendChar(aChar, aTarget) {
-  // DOM event charcodes match ASCII (JS charcodes) for a-zA-Z0-9.
-  var hasShift = (aChar == aChar.toUpperCase());
-  var charCode = aChar.charCodeAt(0);
-  var keyCode = charCode;
-  if (!hasShift) {
-    // For lowercase letters, the keyCode is actually 32 less than the charCode
-    keyCode -= 0x20;
-  }
+function sendChar(aChar, aWindow) {
+    var hasShift;
+    // Emulate US keyboard layout for the shiftKey state.
+    switch (aChar) {
+      case "!":
+      case "@":
+      case "#":
+      case "$":
+      case "%":
+      case "^":
+      case "&":
+      case "*":
+      case "(":
+      case ")":
+      case "_":
+      case "+":
+      case "{":
+      case "}":
+      case ":":
+      case "\"":
+      case "|":
+      case "<":
+      case ">":
+      case "?":
+          hasShift = true;
+          break;
+      default:
+          hasShift = (aChar == aChar.toUpperCase());
+          break;
+    }
+    var charCode = aChar.charCodeAt(0);
+    var keyCode = charCode;
+    if (!hasShift) {
+      // For lowercase letters, the keyCode is actually 32 less than the charCode
+      keyCode -= 0x20;
+    }
 
-  return __doEventDispatch(aTarget, charCode, keyCode, hasShift);
+    synthesizeKey(aChar, { shiftKey: hasShift }, aWindow);
+    return true;
 }
 
 /**
- * Send the string aStr to the node with id aTarget.  If aTarget is not
- * provided, use "target".
+ * Send the string aStr to the focused element.
  *
- * For now this method only works for English letters (lower and upper case)
- * and the digits 0-9.
+ * For now this method only works for ASCII characters and emulates the shift
+ * key state on US keyboard layout.
  */
-function sendString(aStr, aTarget) {
+function sendString(aStr, aWindow) {
   for (var i = 0; i < aStr.length; ++i) {
-    sendChar(aStr.charAt(i), aTarget);
+    sendChar(aStr.charAt(i), aWindow);
   }
 }
 
 /**
- * Send the non-character key aKey to the node with id aTarget. If aTarget is
- * not provided, use "target".  The name of the key should be a lowercase
- * version of the part that comes after "DOM_VK_" in the KeyEvent constant
- * name for this key.  No modifiers are handled at this point.
- *
- * Returns true if the keypress event was accepted (no calls to preventDefault
- * or anything like that), false otherwise.
+ * Send the non-character key aKey to the focused node.
+ * The name of the key should be the part that comes after "DOM_VK_" in the
+ *   KeyEvent constant name for this key.
+ * No modifiers are handled at this point.
  */
-function sendKey(aKey, aTarget, aWindow) {
-  if (!aWindow)
-    aWindow = window;
-
-  keyName = "DOM_VK_" + aKey.toUpperCase();
-
-  if (!getKeyEvent(aWindow)[keyName]) {
-    throw "Unknown key: " + keyName;
-  }
-
-  return __doEventDispatch(aTarget, 0, getKeyEvent(aWindow)[keyName], false);
+function sendKey(aKey, aWindow) {
+  var keyName = "VK_" + aKey.toUpperCase();
+  synthesizeKey(keyName, { shiftKey: false }, aWindow);
 }
 
 /**
@@ -191,23 +204,50 @@ function __doEventDispatch(aTarget, aCharCode, aKeyCode, aHasShift) {
  */
 function _parseModifiers(aEvent)
 {
+  // Window object is required to access the 'navigator' property
   var hwindow = Components.classes["@mozilla.org/appshell/appShellService;1"]
-                          .getService(Components.interfaces.nsIAppShellService)
-                          .hiddenDOMWindow;
+      .getService(Components.interfaces.nsIAppShellService)
+      .hiddenDOMWindow;
 
-  const masks = Components.interfaces.nsIDOMNSEvent;
+  const nsIDOMWindowUtils = Components.interfaces.nsIDOMWindowUtils;
   var mval = 0;
-  if (aEvent.shiftKey)
-    mval |= masks.SHIFT_MASK;
-  if (aEvent.ctrlKey)
-    mval |= masks.CONTROL_MASK;
-  if (aEvent.altKey)
-    mval |= masks.ALT_MASK;
-  if (aEvent.metaKey)
-    mval |= masks.META_MASK;
-  if (aEvent.accelKey)
-    mval |= (hwindow.navigator.platform.indexOf("Mac") >= 0) ? masks.META_MASK :
-                                                               masks.CONTROL_MASK;
+  if (aEvent.shiftKey) {
+    mval |= nsIDOMWindowUtils.MODIFIER_SHIFT;
+  }
+  if (aEvent.ctrlKey) {
+    mval |= nsIDOMWindowUtils.MODIFIER_CONTROL;
+  }
+  if (aEvent.altKey) {
+    mval |= nsIDOMWindowUtils.MODIFIER_ALT;
+  }
+  if (aEvent.metaKey) {
+    mval |= nsIDOMWindowUtils.MODIFIER_META;
+  }
+  if (aEvent.accelKey) {
+    mval |= (hwindow.navigator.platform.indexOf("Mac") >= 0) ?
+      nsIDOMWindowUtils.MODIFIER_META : nsIDOMWindowUtils.MODIFIER_CONTROL;
+  }
+  if (aEvent.altGrKey) {
+    mval |= nsIDOMWindowUtils.MODIFIER_ALTGRAPH;
+  }
+  if (aEvent.capsLockKey) {
+    mval |= nsIDOMWindowUtils.MODIFIER_CAPSLOCK;
+  }
+  if (aEvent.fnKey) {
+    mval |= nsIDOMWindowUtils.MODIFIER_FN;
+  }
+  if (aEvent.numLockKey) {
+    mval |= nsIDOMWindowUtils.MODIFIER_NUMLOCK;
+  }
+  if (aEvent.scrollLockKey) {
+    mval |= nsIDOMWindowUtils.MODIFIER_SCROLLLOCK;
+  }
+  if (aEvent.symbolLockKey) {
+    mval |= nsIDOMWindowUtils.MODIFIER_SYMBOLLOCK;
+  }
+  if (aEvent.osKey) {
+    mval |= nsIDOMWindowUtils.MODIFIER_OS;
+  }
 
   return mval;
 }
@@ -306,6 +346,120 @@ function synthesizeMouseScroll(aTarget, aOffsetX, aOffsetY, aEvent, aWindow)
   }
 }
 
+function _computeKeyCodeFromChar(aChar)
+{
+  if (aChar.length != 1) {
+    return 0;
+  }
+  const nsIDOMKeyEvent = Components.interfaces.nsIDOMKeyEvent;
+  if (aChar >= 'a' && aChar <= 'z') {
+    return nsIDOMKeyEvent.DOM_VK_A + aChar.charCodeAt(0) - 'a'.charCodeAt(0);
+  }
+  if (aChar >= 'A' && aChar <= 'Z') {
+    return nsIDOMKeyEvent.DOM_VK_A + aChar.charCodeAt(0) - 'A'.charCodeAt(0);
+  }
+  if (aChar >= '0' && aChar <= '9') {
+    return nsIDOMKeyEvent.DOM_VK_0 + aChar.charCodeAt(0) - '0'.charCodeAt(0);
+  }
+  // returns US keyboard layout's keycode
+  switch (aChar) {
+    case '~':
+    case '`':
+      return nsIDOMKeyEvent.DOM_VK_BACK_QUOTE;
+    case '!':
+      return nsIDOMKeyEvent.DOM_VK_1;
+    case '@':
+      return nsIDOMKeyEvent.DOM_VK_2;
+    case '#':
+      return nsIDOMKeyEvent.DOM_VK_3;
+    case '$':
+      return nsIDOMKeyEvent.DOM_VK_4;
+    case '%':
+      return nsIDOMKeyEvent.DOM_VK_5;
+    case '^':
+      return nsIDOMKeyEvent.DOM_VK_6;
+    case '&':
+      return nsIDOMKeyEvent.DOM_VK_7;
+    case '*':
+      return nsIDOMKeyEvent.DOM_VK_8;
+    case '(':
+      return nsIDOMKeyEvent.DOM_VK_9;
+    case ')':
+      return nsIDOMKeyEvent.DOM_VK_0;
+    case '-':
+    case '_':
+      return nsIDOMKeyEvent.DOM_VK_SUBTRACT;
+    case '+':
+    case '=':
+      return nsIDOMKeyEvent.DOM_VK_EQUALS;
+    case '{':
+    case '[':
+      return nsIDOMKeyEvent.DOM_VK_OPEN_BRACKET;
+    case '}':
+    case ']':
+      return nsIDOMKeyEvent.DOM_VK_CLOSE_BRACKET;
+    case '|':
+    case '\\':
+      return nsIDOMKeyEvent.DOM_VK_BACK_SLASH;
+    case ':':
+    case ';':
+      return nsIDOMKeyEvent.DOM_VK_SEMICOLON;
+    case '\'':
+    case '"':
+      return nsIDOMKeyEvent.DOM_VK_QUOTE;
+    case '<':
+    case ',':
+      return nsIDOMKeyEvent.DOM_VK_COMMA;
+    case '>':
+    case '.':
+      return nsIDOMKeyEvent.DOM_VK_PERIOD;
+    case '?':
+    case '/':
+      return nsIDOMKeyEvent.DOM_VK_SLASH;
+    case '\n':
+      return nsIDOMKeyEvent.DOM_VK_RETURN;
+    case ' ':
+      return nsIDOMKeyEvent.DOM_VK_SPACE;
+    default:
+      return 0;
+  }
+}
+
+/**
+ * isKeypressFiredKey() returns TRUE if the given key should cause keypress
+ * event when widget handles the native key event.  Otherwise, FALSE.
+ *
+ * aDOMKeyCode should be one of consts of nsIDOMKeyEvent::DOM_VK_*, or a key
+ * name begins with "VK_", or a character.
+ */
+function isKeypressFiredKey(aDOMKeyCode, aWindow)
+{
+  var KeyEvent = getKeyEvent(aWindow);
+  if (typeof(aDOMKeyCode) == "string") {
+    if (aDOMKeyCode.indexOf("VK_") == 0) {
+      aDOMKeyCode = KeyEvent["DOM_" + aDOMKeyCode];
+      if (!aDOMKeyCode) {
+        throw "Unknown key: " + aDOMKeyCode;
+      }
+    } else {
+      // If the key generates a character, it must cause a keypress event.
+      return true;
+    }
+  }
+  switch (aDOMKeyCode) {
+    case KeyEvent.DOM_VK_SHIFT:
+    case KeyEvent.DOM_VK_CONTROL:
+    case KeyEvent.DOM_VK_ALT:
+    case KeyEvent.DOM_VK_CAPS_LOCK:
+    case KeyEvent.DOM_VK_NUM_LOCK:
+    case KeyEvent.DOM_VK_SCROLL_LOCK:
+    case KeyEvent.DOM_VK_META:
+      return false;
+    default:
+      return true;
+  }
+}
+
 /**
  * Synthesize a key event. It is targeted at whatever would be targeted by an
  * actual keypress by the user, typically the focused element.
@@ -314,7 +468,10 @@ function synthesizeMouseScroll(aTarget, aOffsetX, aOffsetY, aEvent, aWindow)
  * VK_ENTER.
  *
  * aEvent is an object which may contain the properties:
- *   shiftKey, ctrlKey, altKey, metaKey, accessKey, type
+ *   shiftKey, ctrlKey, altKey, metaKey, accessKey, type, location
+ *
+ * Sets one of KeyboardEvent.DOM_KEY_LOCATION_* to location.  Otherwise,
+ * DOMWindowUtils will choose good location from the keycode.
  *
  * If the type is specified, a key event of that type is fired. Otherwise,
  * a keydown, a keypress and then a keyup event are fired in sequence.
@@ -323,29 +480,59 @@ function synthesizeMouseScroll(aTarget, aOffsetX, aOffsetY, aEvent, aWindow)
  */
 function synthesizeKey(aKey, aEvent, aWindow)
 {
-  if (!aWindow)
-    aWindow = window;
-
-  var utils = aWindow.QueryInterface(Components.interfaces.nsIInterfaceRequestor).
-                      getInterface(Components.interfaces.nsIDOMWindowUtils);
+  var utils = _getDOMWindowUtils(aWindow);
+  var KeyEvent = getKeyEvent(aWindow);
   if (utils) {
     var keyCode = 0, charCode = 0;
-    if (aKey.indexOf("VK_") == 0)
-      keyCode = getKeyEvent(aWindow)["DOM_" + aKey];
-    else
+    if (aKey.indexOf("VK_") == 0) {
+      keyCode = KeyEvent["DOM_" + aKey];
+      if (!keyCode) {
+        throw "Unknown key: " + aKey;
+      }
+    } else {
       charCode = aKey.charCodeAt(0);
+      keyCode = _computeKeyCodeFromChar(aKey.charAt(0));
+    }
 
     var modifiers = _parseModifiers(aEvent);
-
-    if (aEvent.type) {
-      utils.sendKeyEvent(aEvent.type, keyCode, charCode, modifiers);
+    var flags = 0;
+    if (aEvent.location != undefined) {
+      switch (aEvent.location) {
+        case KeyboardEvent.DOM_KEY_LOCATION_STANDARD:
+          flags |= utils.KEY_FLAG_LOCATION_STANDARD;
+          break;
+        case KeyboardEvent.DOM_KEY_LOCATION_LEFT:
+          flags |= utils.KEY_FLAG_LOCATION_LEFT;
+          break;
+        case KeyboardEvent.DOM_KEY_LOCATION_RIGHT:
+          flags |= utils.KEY_FLAG_LOCATION_RIGHT;
+          break;
+        case KeyboardEvent.DOM_KEY_LOCATION_NUMPAD:
+          flags |= utils.KEY_FLAG_LOCATION_NUMPAD;
+          break;
+        case KeyboardEvent.DOM_KEY_LOCATION_MOBILE:
+          flags |= utils.KEY_FLAG_LOCATION_MOBILE;
+          break;
+        case KeyboardEvent.DOM_KEY_LOCATION_JOYSTICK:
+          flags |= utils.KEY_FLAG_LOCATION_JOYSTICK;
+          break;
+      }
     }
-    else {
+
+    if (!("type" in aEvent) || !aEvent.type) {
+      // Send keydown + (optional) keypress + keyup events.
       var keyDownDefaultHappened =
-          utils.sendKeyEvent("keydown", keyCode, charCode, modifiers);
-      utils.sendKeyEvent("keypress", keyCode, charCode, modifiers,
-                         !keyDownDefaultHappened);
-      utils.sendKeyEvent("keyup", keyCode, charCode, modifiers);
+        utils.sendKeyEvent("keydown", keyCode, 0, modifiers, flags);
+      if (isKeypressFiredKey(keyCode, aWindow) && keyDownDefaultHappened) {
+        utils.sendKeyEvent("keypress", keyCode, charCode, modifiers, flags);
+      }
+      utils.sendKeyEvent("keyup", keyCode, 0, modifiers, flags);
+    } else if (aEvent.type == "keypress") {
+      // Send standalone keypress event.
+      utils.sendKeyEvent(aEvent.type, keyCode, charCode, modifiers, flags);
+    } else {
+      // Send other standalone event than keypress.
+      utils.sendKeyEvent(aEvent.type, keyCode, 0, modifiers, flags);
     }
   }
 }

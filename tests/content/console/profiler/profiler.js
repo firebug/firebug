@@ -1,15 +1,11 @@
 function runTest()
 {
     FBTest.sysout("profiler.START");
-    FBTest.progress("profile start");
     FBTest.openNewTab(basePath + "console/profiler/profiler.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.enablePanels(["console", "script"], function(win)
         {
-            FBTest.progress("script panel enabled");
-
-            var panel = FBTest.selectPanel("console");
+            var panel = FBTest.getPanel("console");
             FBTest.clearConsole();
 
             var config = {tagName: "tr", classes: "profileRow", counter: 2};
@@ -34,7 +30,7 @@ function runTest()
                 FBTest.compare("fib", profileRows[0].childNodes[0].textContent,
                     "The 'fib' function was profiled.");
                 FBTest.compare(177, profileRows[0].childNodes[1].textContent,
-                    "The 'fib' function was called exactly 242785 times.");
+                    "The 'fib' function was called exactly 177 times.");
 
                 FBTest.testDone("profiler.DONE");
             });

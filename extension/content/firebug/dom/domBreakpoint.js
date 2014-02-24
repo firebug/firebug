@@ -66,7 +66,6 @@ DOMBreakpoint.prototype =
         if (this.checked)
         {
             this.context.breakingCause = {
-                title: Locale.$STR("dom.Break On Property"),
                 message: Str.cropString(prop, 200),
                 prevValue: oldval,
                 newValue: newval

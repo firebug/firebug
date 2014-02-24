@@ -1,19 +1,11 @@
 function runTest()
 {
-    if (FBTest.compareFirefoxVersion("3.6.*") <= 0)
-    {
-        FBTest.progress("This test is only for Firefox 4.0+");
-        FBTest.testDone("issue2871.DONE");
-        return;
-    }
-
     var lineNo = 16;
     var fileName = basePath + "script/2871/issue2871.html";
 
     FBTest.sysout("issue2871.START");
     FBTest.openNewTab(fileName, function(win)
     {
-        FBTest.openFirebug();
         FBTest.enableScriptPanel(function(win)
         {
             // Create a new breakpoint

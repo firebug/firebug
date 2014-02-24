@@ -63,7 +63,7 @@ CSSComputedPanel.prototype = Obj.extend(Panel,
     {
         computedStylesTag:
             DIV({"class": "a11yCSSView", role: "list", "aria-label":
-                Locale.$STR("aria.labels.computed styles")}),
+                Locale.$STR("a11y.labels.computed styles")}),
 
         groupedStylesTag:
             FOR("group", "$groups",
@@ -672,7 +672,7 @@ CSSComputedPanel.prototype = Obj.extend(Panel,
                     return CSSInfoTip.populateColorInfoTip(infoTip, cssValue.value);
 
                 case "url":
-                    if (Css.isImageRule(Xml.getElementSimpleType(propInfo), prop))
+                    if (Css.isImageProperty(prop))
                     {
                         var baseURL = typeof propInfo.href == "object" ? propInfo.href.href : propInfo.href;
                         if (!baseURL)

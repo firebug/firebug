@@ -1,15 +1,17 @@
 /* See license.txt for terms of usage */
+/*global define:1, Components:1, Firebug:1, CSSRule:1, CSSStyleRule:1, CSSImportRule:1, Node:1*/
 
 define([
     "firebug/lib/trace",
+    "firebug/lib/array",
     "firebug/lib/url",
     "firebug/lib/options",
-    "firebug/chrome/window",
     "firebug/lib/xml",
     "firebug/lib/http",
-    "firebug/lib/xpath"
+    "firebug/lib/xpath",
+    "firebug/chrome/window",
 ],
-function(FBTrace, Url, Options, Win, Xml, Http, Xpath) {
+function(FBTrace, Arr, Url, Options, Xml, Http, Xpath, Win) {
 
 // ********************************************************************************************* //
 // Constants
@@ -25,55 +27,182 @@ var Css = {};
 // ********************************************************************************************* //
 // CSS
 
-var cssKeywordMap = {};
-var cssPropNames = {};
+var cssKeywordMap = null;
 var cssColorNames = null;
-var imageRules = null;
+var cachedPropNames = null;
 var domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
 
-function buildKeywordMap(nodeType)
+function expandKeywordList(list)
 {
-    if (cssKeywordMap[nodeType])
-        return;
-    cssKeywordMap[nodeType] = {};
-
-    for (var name in Css.cssInfo[nodeType])
+    var res = [];
+    for (var prop of list)
     {
-        var list = [];
+        var keywords = Css.cssKeywords[prop];
+        if (keywords)
+            res.push.apply(res, keywords);
+        else
+            res.push(prop);
+    }
+    return res;
+}
 
-        var types = Css.cssInfo[nodeType][name];
-        for (var i = 0; i < types.length; ++i)
+function initPropertyData()
+{
+    if (cssKeywordMap)
+        return;
+    cssKeywordMap = {};
+
+    // Create the list of property names through the help of inIDOMUtils.
+    // This includes also SVG presentational attributes, so filter the names
+    // into two groups based on that. Also remove -moz-math-display and
+    // -moz-script-level from the list, as they are impossible to set (they are
+    // internal helpers for MathML).
+    var props = new Set(domUtils.getCSSPropertyNames(domUtils.INCLUDE_ALIASES));
+    props.delete("-moz-math-display");
+    props.delete("-moz-script-level");
+
+    var htmlProps = [], svgProps = [];
+    for (let prop of props)
+    {
+        let html = !svgPresentationalProperties.has(prop);
+        let svg = !html || svgInheritedFromHtml.has(prop);
+        if (html)
+            htmlProps.push(prop);
+        if (svg)
+            svgProps.push(prop);
+    }
+
+    cachedPropNames = {
+        html: htmlProps.sort(),
+        svg: svgProps.sort(),
+        mathml: []
+    };
+
+    // Set up a map of property values. Let's start with some helpers for
+    // munging the property data given to us by the API.
+
+    // We block initial, inherit and unset from appearing in results, instead
+    // we manually add them to auto-completion when they constitute the only
+    // value in an editor. -moz-calc is also removed, because calc should be
+    // used instead, and it can be annoying when writing negative numbers.
+    var forbiddenValues = new Set(["initial", "inherit", "unset", "-moz-calc"]);
+    var filterValues = function(list)
+    {
+        return list.filter((value) => !forbiddenValues.has(value));
+    };
+
+    // The API doesn't indicate whether a value represents a function or not,
+    // so we hard-code a list and add parens to any known returned function.
+    // We also camel-case some SVG property values to make them more readable.
+    var functionNames = new Set([
+        "url", "calc", "rect", "hsl", "hsla", "rgb", "rgba",
+        "-moz-element", "-moz-image-rect",
+        "linear-gradient", "radial-gradient",
+        "repeating-linear-gradient", "repeating-radial-gradient",
+        "cubic-bezier", "steps", "attr", "counter", "counters",
+        "matrix", "matrix3d", "rotate", "rotateX", "rotateY", "rotateZ",
+        "scale", "scaleX", "scaleY", "scaleZ", "scale3d", "skewX", "skewY",
+        "translate", "translateX", "translateY", "translateZ",
+    ]);
+    var convertCase = new Map();
+    for (let value of ["linearRGB", "sRGB", "geometricPrecision",
+        "optimizeQuality", "optimizeSpeed", "optimizeLegibility", "crispEdges",
+        "visibleFill", "visiblePainted", "visibleStroke"])
+    {
+        convertCase.set(value.toLowerCase(), value);
+    }
+    var transformPropertyValue = function(value)
+    {
+        if (functionNames.has(value))
+            value += "()";
+        if (convertCase.has(value))
+            return convertCase.get(value);
+        return value;
+    };
+
+    // Some values are simply missing from the API. Add those when detected.
+    var addMissingValues = function(values, propName)
+    {
+        if (propName === "transition" || propName === "transition-property")
+            values = values.concat(animatableProperties);
+
+        // "currentColor" is missing, see https://bugzilla.mozilla.org/show_bug.cgi?id=927367
+        if (values.indexOf("aqua") !== -1)
+            values.push("currentColor");
+
+        // gradients are missing, see https://bugzilla.mozilla.org/show_bug.cgi?id=973345
+        if (values.indexOf("-moz-element()") !== -1)
+            values = values.concat(extraImages);
+
+        return values;
+    };
+
+    // Set up part of the data tables.
+    var colors = filterValues(domUtils.getCSSValuesForProperty("color"));
+    Css.cssKeywords.color = addMissingValues(colors, "color");
+
+    for (let prop of props)
+    {
+        var values;
+
+        // See if the property is special-cased due to missing or incorrect values.
+        if (cssDataExceptions.hasOwnProperty(prop))
         {
-            var keywords = Css.cssKeywords[types[i]];
-            if (keywords)
-                list.push.apply(list, keywords);
-            else
-                list.push(types[i]);
+            values = expandKeywordList(cssDataExceptions[prop]);
         }
-
-        cssKeywordMap[nodeType][name] = list;
+        else
+        {
+            values = domUtils.getCSSValuesForProperty(prop);
+            values = filterValues(values);
+            values = values.map(transformPropertyValue);
+            values = addMissingValues(values, prop);
+        }
+        cssKeywordMap[prop] = Arr.sortUnique(values);
     }
 }
 
 Css.getCSSKeywordsByProperty = function(nodeType, propName, avoid)
 {
-    propName = propName.toLowerCase();
+    initPropertyData();
 
-    buildKeywordMap(nodeType);
-
-    if (avoid)
-        return getCSSPropertyKeywordsExcludingCategories(nodeType, propName, avoid);
-
-    return cssKeywordMap[nodeType][propName] || [];
-};
-
-function getCSSPropertyKeywordsExcludingCategories(nodeType, propName, avoid)
-{
-    if (!(nodeType in Css.cssInfo) || !(propName in Css.cssInfo[nodeType]))
+    // CSS isn't supported for MathML elements.
+    if (nodeType === "mathml")
         return [];
 
+    // For other kinds of elements, return keywords from the global pool of
+    // properties, not just the ones specific to the nodeType, since:
+    // a) it's simpler,
+    // b) technically the CSS is still valid.
+
+    propName = propName.toLowerCase();
+    if (!cssKeywordMap.hasOwnProperty(propName))
+        return [];
+
+    // Special case: most "pointer-events" values are only supported for SVG.
+    if (nodeType === "html" && propName === "pointer-events")
+        return ["auto", "none"];
+
+    if (avoid)
+        return getCSSPropertyKeywordsExcludingCategories(propName, avoid);
+
+    return cssKeywordMap[propName];
+};
+
+function assertShorthand(propName)
+{
+    // Currently getCSSPropertyKeywordsExcludingCategories and getCSSShorthandCategory
+    // only support background, border and font, assert that nothing else gets passed
+    // in so we don't get subtle failures. Ideally this would be extended to any
+    // shorthand property in the future. (See also css/autoCompleter.js.)
+    if (["background", "border", "font"].indexOf(propName) === -1)
+        throw new Error("invalid shorthand name " + propName);
+}
+
+function getCSSPropertyKeywordsExcludingCategories(propName, avoid)
+{
+    assertShorthand(propName);
     var list = [];
-    var types = Css.cssInfo[nodeType][propName];
+    var types = cssDataExceptions[propName];
     for (var i = 0; i < types.length; ++i)
     {
         var type = types[i];
@@ -90,29 +219,24 @@ function getCSSPropertyKeywordsExcludingCategories(nodeType, propName, avoid)
 
 Css.getCSSPropertyNames = function(nodeType)
 {
-    if (!cssPropNames[nodeType])
-    {
-        cssPropNames[nodeType] = [];
-
-        for (var name in Css.cssInfo[nodeType])
-            cssPropNames[nodeType].push(name);
-    }
-
-    return cssPropNames[nodeType];
+    initPropertyData();
+    return cachedPropNames[nodeType];
 };
 
 Css.getCSSShorthandCategory = function(nodeType, shorthandProp, keyword)
 {
-    if (!(nodeType in Css.cssInfo) || !(shorthandProp in Css.cssInfo[nodeType]))
-        return null;
-
+    assertShorthand(shorthandProp);
     var category = null;
-    var types = Css.cssInfo[nodeType][shorthandProp];
+    var types = cssDataExceptions[shorthandProp];
     for (var i = 0; i < types.length; ++i)
     {
-        var type = types[i];
-        var keywords = Css.cssKeywords[type];
-        if (keywords ? (keywords.indexOf(keyword) !== -1) : (type === keyword))
+        var type = types[i], matches;
+        if (type in Css.cssKeywords)
+            matches = (Css.cssKeywords[type].indexOf(keyword) !== -1);
+        else
+            matches = (type === keyword);
+
+        if (matches)
         {
             // Set this as the matched category, or if there is one already
             // bail out (we don't have a unique one).
@@ -205,22 +329,10 @@ Css.isColorKeyword = function(keyword)
     return cssColorNames.indexOf(keyword.toLowerCase()) != -1;
 };
 
-Css.isImageRule = function(nodeType,rule)
+var reImageProperty = /(^background|image)$/;
+Css.isImageProperty = function(propName)
 {
-    if (!imageRules)
-    {
-        imageRules = [];
-
-        for (var i in Css.cssInfo[nodeType])
-        {
-            var r = i.toLowerCase();
-            var suffix = "image";
-            if (r.match(suffix + "$") == suffix || r == "background")
-                imageRules.push(r);
-        }
-    }
-
-    return imageRules.indexOf(rule.toLowerCase()) != -1;
+    return reImageProperty.test(propName);
 };
 
 Css.copyTextStyles = function(fromNode, toNode, style)
@@ -510,13 +622,14 @@ Css.isValidStylesheet = function(styleSheet)
 {
     try
     {
-        var dummy = styleSheet.cssRules; // Mozilla throws
+        // See if the getter triggers an exception. "void" is there to silence jshint.
+        void styleSheet.cssRules;
         return true;
     }
-    catch (e)
+    catch (exc)
     {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("isValidStylesheet "+e, e);
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("isValidStylesheet " + exc, exc);
     }
 
     return false;
@@ -540,7 +653,7 @@ Css.createStyleSheet = function(doc, url)
     style.setAttribute("charset", "utf-8");
     style.setAttribute("type", "text/css");
 
-    var cssText = url ? Http.getResource(url) : null;
+    var cssText = url ? Http.getResource(url, true) : null;
     if (cssText)
     {
         var index = url.lastIndexOf("/");
@@ -584,12 +697,12 @@ Css.appendStylesheet = function(doc, uri)
     if (styleSheet)
         return styleSheet;
 
-    var styleSheet = Css.createStyleSheet(doc, uri);
+    styleSheet = Css.createStyleSheet(doc, uri);
     styleSheet.setAttribute("id", uri);
     Css.addStyleSheet(doc, styleSheet);
 
     return styleSheet;
-},
+};
 
 Css.getStyleSheetByHref = function(url, context)
 {
@@ -678,7 +791,7 @@ Css.getAllStyleSheets = function(context)
             for (var i = 0; i < sheet.cssRules.length; ++i)
             {
                 var rule = sheet.cssRules[i];
-                if (rule instanceof window.CSSImportRule)
+                if (rule instanceof CSSImportRule)
                     addSheet(rule.styleSheet);
             }
         }
@@ -912,289 +1025,137 @@ Css.rgbToHSL = function(value)
 };
 
 // ********************************************************************************************* //
-// CSS Info
+// CSS Data
 
-Css.cssInfo = {};
-Css.cssInfo.html =
+var cssDataExceptions =
 {
-    "animation": [],
-    "animation-delay": [],
-    "animation-direction": ["normal", "alternate", "reverse", "alternate-reverse"],
-    "animation-duration": [],
-    "animation-iteration-count": ["infinite"],
-    "animation-name" : ["none"],
-    "animation-play-state": ["running", "paused"],
-    "animation-timing-function": [],
-    "animation-fill-mode": ["none", "forwards", "backwards", "both"],
-
-    "background": ["bgRepeat", "bgAttachment", "position", "color", "image", "none", "boxModels"],
-    "background-attachment": ["bgAttachment"],
-    "background-color": ["color"],
-    "background-image": ["image", "none"],
-    "background-position": ["position", "length"],
-    "background-repeat": ["bgRepeat"],
-    "background-size": ["bgSize", "length"],
-    "background-clip": ["boxModels"], // FF 4.0
-    "background-origin": ["boxModels"], // FF 4.0
-
-    "border": ["borderStyle", "thickness", "color"],
-    "border-top": ["borderStyle", "borderCollapse", "color"],
-    "border-right": ["borderStyle", "borderCollapse", "color"],
-    "border-bottom": ["borderStyle", "borderCollapse", "color"],
-    "border-left": ["borderStyle", "borderCollapse", "color"],
-    "border-collapse": ["borderCollapse"],
-    "border-color": ["color"],
-    "border-top-color": ["color"],
-    "border-right-color": ["color"],
-    "border-bottom-color": ["color"],
-    "border-left-color": ["color"],
-    "border-spacing": ["length"],
-    "border-style": ["borderStyle"],
-    "border-top-style": ["borderStyle"],
-    "border-right-style": ["borderStyle"],
-    "border-bottom-style": ["borderStyle"],
-    "border-left-style": ["borderStyle"],
-    "border-width": ["thickness", "length"],
-    "border-top-width": ["thickness", "length"],
-    "border-right-width": ["thickness", "length"],
-    "border-bottom-width": ["thickness", "length"],
-    "border-left-width": ["thickness", "length"],
-    "border-radius": ["length"], // FF 4.0
-    "border-top-left-radius": ["length"], // FF 4.0
-    "border-top-right-radius": ["length"], // FF 4.0
-    "border-bottom-right-radius": ["length"], // FF 4.0
-    "border-bottom-left-radius": ["length"], // FF 4.0
-    "border-image": ["borderImageRepeat", "thickness", "url()", "none"], // FF 15.0
-    "border-image-outset": ["length"], // FF 15.0
-    "border-image-repeat": ["borderImageRepeat"], // FF 15.0
-    "border-image-slice": ["fill"],
-    "border-image-source": ["image", "none"],
-    "border-image-width": ["auto", "length"], // FF 15.0
-
-    "top": ["auto", "length"],
-    "right": ["auto", "length"],
-    "bottom": ["auto", "length"],
-    "left": ["auto", "length"],
-    "height": ["auto", "length"],
-    "caption-side": ["captionSide"],
-    "clear": ["clear", "none"],
-    "clip": ["shape", "auto"],
-    "color": ["color"],
-    "content": ["string", "none", "normal"],
-    "counter-increment": ["none"],
-    "counter-reset": ["none"],
-    "cursor": ["cursor", "url()", "none"],
-    "direction": ["direction"],
-    "display": ["display"],
-    "empty-cells": ["emptyCells"],
-    "float": ["float"],
-
-    "align-items": ["alignItems"],
-    "align-self": ["alignSelf"],
-    "flex": ["flexBasis"],
-    "flex-basis": ["flexBasis"],
-    "flex-direction": ["flexDirection"],
-    "flex-grow": [],
-    "flex-shrink": [],
-    "justify-content": ["justifyContent"],
-    "order": [],
-
-    // specification of font families in "font" is special-cased
-    "font": ["fontStyle", "fontVariant", "namedFontWeight", "fontSize", "lineHeight", "mozFont"],
+    // Fonts. Note that specification of font families in "font" is
+    // special-cased by auto-completion, so "fontFamily" isn't included in the list.
+    // (For SVG presentational attribute completion it is wanted, but let's ignore
+    // that case for now - it's rather uncommon.)
+    "font": ["fontStyle", "fontVariant", "namedFontWeight", "fontSize", "mozFont"],
     "font-family": ["fontFamily"],
-    "font-size": ["fontSize", "length"],
-    "font-size-adjust": ["none"],
-    "font-stretch": ["fontStretch"],
-    "font-style": ["fontStyle"],
-    "font-variant": ["fontVariant"],
-    "font-weight": ["fontWeight"],
 
-    "ime-mode": ["imeMode"], // FF 3.0
-    "letter-spacing": ["normal", "length"],
-    "line-height": ["lineHeight", "length"],
-    "word-break": ["wordBreak"],
+    // Shorthands (incorrect values, and we are also interested in how they
+    // split into subproperties for improved cycling in auto-completion)
+    "border-image": ["borderImageRepeat", "thickness", "image"],
+    "background": ["bgRepeat", "bgAttachment", "position", "length", "color", "image", "boxModels"],
+    "border": ["borderStyle", "thickness", "length", "color"],
 
-    "list-style": ["listStyleType", "listStylePosition"],
-    "list-style-image": ["url()", "none"],
-    "list-style-position": ["listStylePosition"],
-    "list-style-type": ["listStyleType"],
-
-    "margin": ["auto", "length"],
-    "margin-top": ["auto", "length"],
-    "margin-right": ["auto", "length"],
-    "margin-bottom": ["auto", "length"],
-    "margin-left": ["auto", "length"],
-
-    "marker-offset": ["auto", "length"],
-    "min-height": ["length"],
-    "max-height": ["none", "length"],
-    "min-width": ["width", "length"],
-    "max-width": ["width", "none", "length"],
-
-    "opacity": [],
-
-    "outline": ["color", "borderStyle", "thickness", "auto"],
-    "outline-color": ["color"],
-    "outline-style": ["borderStyle", "auto"],
-    "outline-width": ["thickness", "length"],
-    "outline-offset": ["length"],
-
-    "overflow": ["overflow", "auto"],
-    "overflow-x": ["overflow", "auto"],
-    "overflow-y": ["overflow", "auto"],
-
-    "padding": ["length"],
-    "padding-top": ["length"],
-    "padding-right": ["length"],
-    "padding-bottom": ["length"],
-    "padding-left": ["length"],
-
-    "page-break-after": ["pageBreak"],
-    "page-break-before": ["pageBreak"],
-    "pointer-events": ["auto", "none"],
-    "position": ["elPosition"],
-    "quotes": ["none"],
-    "resize": ["resize"], // FF 4.0
-    "table-layout": ["tableLayout"],
-    "text-align": ["textAlign"],
-    "-moz-text-align-last": ["textAlign"], // FF 12.0
-    "box-shadow": ["boxShadow", "color", "none", "length"], // FF 4.0
+    // Incorrect values
     "text-decoration": ["textDecoration"],
-    "text-indent": ["length"],
-    "text-rendering": ["textRendering"],
-    "text-shadow": ["color", "length"],
-    "text-transform": ["textTransform"],
-    "transition": ["transitionProperty", "timingFunction"],
-    "transition-property": ["transitionProperty"],
-    "transition-duration": [],
-    "transition-timing-function": ["timingFunction"],
-    "transition-delay": [],
-    "transform": ["transformFunction", "none", "length"],
-    "transform-origin": ["position", "length"],
-    "transform-style": ["transformStyle"],
-    "unicode-bidi": ["unicodeBidi"],
-    "vertical-align": ["verticalAlign", "length"],
-    "visibility": ["visibility"],
-    "white-space": ["whiteSpace"],
-    "width": ["width", "length", "auto"],
-    "word-spacing": ["normal", "length"],
-    "word-wrap": ["wordWrap"], // FF 3.5
-    "z-index": ["auto"],
+    "-moz-text-decoration-line": ["textDecoration"],
 
-    "-moz-appearance": ["mozAppearance"],
-    "-moz-backface-visibility": ["mozBackfaceVisibility"], // FF 10.0
-    "-moz-border-top-colors": ["color"],
-    "-moz-border-right-colors": ["color"],
+    // Missing values
+    "background-position": ["position", "length"],
+    "background-size": ["bgSize", "length"],
+    "border-image-slice": ["fill"],
+    "border-image-width": ["auto", "length"],
+    "border-image-outset": ["length"],
+    "border-image-repeat": ["borderImageRepeat"],
+    "border-top-left-radius": ["length"],
+    "border-top-right-radius": ["length"],
+    "border-bottom-right-radius": ["length"],
+    "border-bottom-left-radius": ["length"],
+    "border-spacing": ["length"],
     "-moz-border-bottom-colors": ["color"],
     "-moz-border-left-colors": ["color"],
-    "-moz-border-start": ["borderStyle", "borderCollapse", "color", "none"],
-    "-moz-border-end": ["borderStyle", "borderCollapse", "color", "none"],
-    "-moz-border-start-color": ["color"],
-    "-moz-border-end-color": ["color"],
-    "-moz-border-start-style": ["borderStyle"],
-    "-moz-border-end-style": ["borderStyle"],
-    "-moz-border-start-width": ["thickness"],
-    "-moz-border-end-width": ["thickness"],
-    "-moz-box-align": ["mozBoxAlign"],
-    "-moz-box-direction": ["mozBoxDirection"],
-    "-moz-box-flex": [],
-    "-moz-box-ordinal-group": [],
-    "-moz-box-orient": ["mozBoxOrient"],
-    "-moz-box-pack": ["mozBoxPack"],
-    "-moz-box-sizing": ["mozBoxSizing"],
-    "-moz-user-focus": ["userFocus", "none"],
-    "-moz-user-input": ["userInput", "none"],
-    "-moz-user-modify": ["mozUserModify"],
-    "-moz-user-select": ["userSelect", "none"],
-    "-moz-background-inline-policy": [],
-    "-moz-binding": ["url()", "none"],
-    "-moz-columns": ["auto", "length"],
-    "-moz-column-count": ["auto"],
-    "-moz-column-gap": ["normal", "length"],
-    "-moz-column-rule": ["thickness", "borderStyle", "color"],
-    "-moz-column-rule-width": ["thickness", "length"],
-    "-moz-column-rule-style": ["borderStyle"],
-    "-moz-column-rule-color": ["color"],
-    "-moz-column-width": ["auto", "length"],
-    "-moz-image-region": ["rect()"],
-    "-moz-font-feature-settings": ["mozFontFeatureSettings"], // FF 4.0
-    "-moz-font-language-override": ["normal"],
-    "-moz-tab-size": [], // FF 4.0,
-    "orient": ["horizontal", "vertical"], // FF 6.0
-    "-moz-text-blink": ["none", "blink"], // FF 6.0
-    "-moz-text-decoration-color": ["color"], // FF 6.0
-    "-moz-text-decoration-line": ["mozTextDecorationLine"], // FF 6.0
-    "-moz-text-decoration-style": ["mozTextDecorationStyle"], // FF 6.0
-    "-moz-hyphens": ["mozHyphens"], // FF 6.0
-    "text-overflow": ["textOverflow"], // FF 7.0
-    "-moz-perspective": ["none", "length"], // FF 10.0
-    "-moz-perspective-origin": ["position", "length"] // FF 10.0
-};
-
-// ::-moz-progress-bar  // FF 6 TODO
-
-Css.cssInfo.svg =
-{
-    "alignment-baseline": ["alignmentBaseline"],
-    "baseline-shift": ["baselineShift"],
-    "clip": ["auto", "length"],
-    "clip-path": ["url()", "none"],
-    "clip-rule": ["clipRule"],
-    "color": ["color"],
-    "color-interpolation": ["colorInterpolation"],
-    "color-interpolation-filters": ["colorInterpolation"],
-    "color-profile": ["colorProfile"],
-    "color-rendering": ["colorRendering"],
+    "-moz-border-right-colors": ["color"],
+    "-moz-border-top-colors": ["color"],
+    "box-shadow": ["boxShadow", "color", "none", "length"],
+    "clip": ["rect()", "auto"],
+    "content": ["string", "url()", "none", "normal"],
+    "counter-increment": ["none"],
+    "counter-reset": ["none"],
     "cursor": ["cursor", "url()"],
-    "direction": ["direction"],
-    "display": ["display"],
-    "dominant-baseline": ["dominantBaseline"],
-    "enable-background": ["accumulate"],
     "fill": ["clipRule"],
-    "fill-opacity": [],
-    "fill-rule": ["clipRule"],
     "filter": ["url()", "none"],
-    "flood-color": ["currentColor"],
-    "flood-opacity": [],
-    "font": ["fontStyle", "fontSize", "fontVariant", "namedFontWeight"],
-    "font-family": ["fontFamily"],
-    "font-size": ["fontSize"],
-    "font-size-adjust": [],
-    "font-stretch": ["fontStretch"],
-    "font-style": ["fontStyle"],
-    "font-variant": ["fontVariant"],
     "font-weight": ["fontWeight"],
-    "glyph-orientation-horizontal": [],
-    "glyph-orientation-vertical": ["auto"],
-    "image-rendering": ["imageRendering"], // FF 3.6
-    "kerning": ["auto"],
-    "letter-spacing": ["normal"],
-    "lighting-color": ["currentColor"],
-    "marker": ["none"],
-    "marker-end": ["none"],
-    "mask": ["url()", "none"],
-    "opacity": [],
-    "overflow": ["auto", "svgOverflow"],
-    "pointer-events": ["pointerEvents"], // FF 1.5/3.6
-    "shape-rendering": ["auto", "shapeRendering"],
-    "stop-color": ["currentColor"],
-    "stop-opacity": [],
-    "stroke": [],
+    "-moz-font-feature-settings": ["mozFontFeatureSettings"],
+    "-moz-image-region": ["rect()"],
+    "paint-order": ["normal", "fill", "stroke", "markers"],
     "stroke-dasharray": ["none"],
-    "stroke-dashoffset": [],
-    "stroke-linecap": ["strokeLinecap"],
-    "stroke-linejoin": ["strokeLinejoin"],
-    "stroke-miterlimit": [],
-    "stroke-opacity": [],
-    "stroke-width": [],
-    "text-anchor": ["mozBoxPack"],
-    "text-decoration": ["textDecoration"],
-    "text-rendering": ["textRendering"],
-    "unicode-bidi": ["unicodeBidi"],
-    "visibility": ["visibility"],
-    "word-spacing": ["normal"],
-    "writing-mode": ["writingMode"]
+    "quotes": ["none"],
+    "text-overflow": ["textOverflow"],
+    "text-shadow": ["color", "length"],
+    "transform": ["transformFunction", "none", "length"],
+    "transform-origin": ["position", "length"],
+    "border-radius": ["length"],
+    "-moz-perspective-origin": ["position", "length"],
 };
+
+var svgPresentationalProperties = new Set([
+    "clip-rule",
+    "color-interpolation",
+    "color-interpolation-filters",
+    "dominant-baseline",
+    "fill",
+    "fill-opacity",
+    "fill-rule",
+    "flood-color",
+    "flood-opacity",
+    "lighting-color",
+    "marker",
+    "marker-end",
+    "marker-mid",
+    "marker-start",
+    "mask-type",
+    "shape-rendering",
+    "stop-color",
+    "stop-opacity",
+    "stroke",
+    "stroke-dasharray",
+    "stroke-dashoffset",
+    "stroke-linecap",
+    "stroke-linejoin",
+    "stroke-miterlimit",
+    "stroke-opacity",
+    "stroke-width",
+    "text-anchor",
+    "vector-effect",
+
+    // Unimplemented by Firefox, but it doesn't hurt to include them for future compatibility.
+    "alignment-baseline",
+    "baseline-shift",
+    "color-profile",
+    "color-rendering",
+    "enable-background",
+    "glyph-orientation-horizontal",
+    "glyph-orientation-vertical",
+    "kerning",
+    "paint-order",
+    "writing-mode",
+]);
+
+// CSS properties for HTML that also apply to SVG, taken from:
+// http://www.w3.org/TR/SVG/styling.html#SVGStylingProperties
+var svgInheritedFromHtml = new Set([
+    "clip",
+    "color",
+    "cursor",
+    "direction",
+    "display",
+    "filter",
+    "font",
+    "font-family",
+    "font-size",
+    "font-size-adjust",
+    "font-stretch",
+    "font-style",
+    "font-variant",
+    "font-weight",
+    "image-rendering",
+    "letter-spacing",
+    "mask",
+    "opacity",
+    "overflow",
+    "pointer-events",
+    "text-decoration",
+    "text-rendering",
+    "unicode-bidi",
+    "visibility",
+    "word-spacing",
+]);
 
 Css.multiValuedProperties =
 {
@@ -1229,440 +1190,7 @@ Css.unitlessProperties =
 
 Css.cssKeywords =
 {
-    "mozAppearance":
-    [
-        "none",
-        "button",
-        "button-arrow-down",
-        "button-arrow-next",
-        "button-arrow-previous",
-        "button-arrow-up",
-        "button-bevel",
-        "button-focus",
-        "caret",
-        "checkbox",
-        "checkbox-container",
-        "checkbox-label",
-        "checkmenuitem",
-        "dualbutton",
-        "groupbox",
-        "listbox",
-        "listitem",
-        "menuarrow",
-        "menubar",
-        "menucheckbox",
-        "menuimage",
-        "menuitem",
-        "menuitemtext",
-        "menulist",
-        "menulist-button",
-        "menulist-text",
-        "menulist-textfield",
-        "menupopup",
-        "menuradio",
-        "menuseparator",
-        "meterbar",
-        "meterchunk",
-        "progressbar",
-        "progressbar-vertical",
-        "progresschunk",
-        "progresschunk-vertical",
-        "radio",
-        "radio-container",
-        "radio-label",
-        "radiomenuitem",
-        "resizer",
-        "resizerpanel",
-        "scale-horizontal",
-        "scalethumbend",
-        "scalethumb-horizontal",
-        "scalethumbstart",
-        "scalethumbtick",
-        "scalethumb-vertical",
-        "scale-vertical",
-        "scrollbarbutton-down",
-        "scrollbarbutton-left",
-        "scrollbarbutton-right",
-        "scrollbarbutton-up",
-        "scrollbarthumb-horizontal",
-        "scrollbarthumb-vertical",
-        "scrollbartrack-horizontal",
-        "scrollbartrack-vertical",
-        "searchfield",
-        "separator",
-        "sheet",
-        "spinner",
-        "spinner-downbutton",
-        "spinner-textfield",
-        "spinner-upbutton",
-        "splitter",
-        "statusbar",
-        "statusbarpanel",
-        "tab",
-        "tabpanel",
-        "tabpanels",
-        "tab-scroll-arrow-back",
-        "tab-scroll-arrow-forward",
-        "textfield",
-        "textfield-multiline",
-        "toolbar",
-        "toolbarbutton",
-        "toolbarbutton-dropdown",
-        "toolbargripper",
-        "toolbox",
-        "tooltip",
-        "treeheader",
-        "treeheadercell",
-        "treeheadersortarrow",
-        "treeitem",
-        "treeline",
-        "treetwisty",
-        "treetwistyopen",
-        "treeview",
-
-        "-moz-mac-unified-toolbar",
-        "-moz-win-borderless-glass", // FF 4.0
-        "-moz-win-browsertabbar-toolbox",
-        "-moz-win-communicationstext",
-        "-moz-win-communications-toolbox",
-        "-moz-win-exclude-glass", // FF 6.0
-        "-moz-win-glass",
-        "-moz-win-mediatext",
-        "-moz-win-media-toolbox",
-        "-moz-window-button-box",
-        "-moz-window-button-box-maximized",
-        "-moz-window-button-close",
-        "-moz-window-button-maximize",
-        "-moz-window-button-minimize",
-        "-moz-window-button-restore",
-        "-moz-window-frame-bottom",
-        "-moz-window-frame-left",
-        "-moz-window-frame-right",
-        "-moz-window-titlebar",
-        "-moz-window-titlebar-maximized"
-    ],
-
-    "mozBackfaceVisibility":
-    [
-        "visible",
-        "hidden"
-    ],
-
-    "color":
-    [
-        // Color functions
-        "rgb()",
-        "rgba()",
-        "hsl()",
-        "hsla()",
-
-        // Color keywords
-        "aliceblue",
-        "antiquewhite",
-        "aqua",
-        "aquamarine",
-        "azure",
-        "beige",
-        "bisque",
-        "black",
-        "blanchedalmond",
-        "blue",
-        "blueviolet",
-        "brown",
-        "burlywood",
-        "cadetblue",
-        "chartreuse",
-        "chocolate",
-        "coral",
-        "cornflowerblue",
-        "cornsilk",
-        "crimson",
-        "cyan",
-        "darkblue",
-        "darkcyan",
-        "darkgoldenrod",
-        "darkgray",
-        "darkgreen",
-        "darkgrey",
-        "darkkhaki",
-        "darkmagenta",
-        "darkolivegreen",
-        "darkorange",
-        "darkorchid",
-        "darkred",
-        "darksalmon",
-        "darkseagreen",
-        "darkslateblue",
-        "darkslategray",
-        "darkslategrey",
-        "darkturquoise",
-        "darkviolet",
-        "deeppink",
-        "deepskyblue",
-        "dimgray",
-        "dimgrey",
-        "dodgerblue",
-        "firebrick",
-        "floralwhite",
-        "forestgreen",
-        "fuchsia",
-        "gainsboro",
-        "ghostwhite",
-        "gold",
-        "goldenrod",
-        "gray",
-        "green",
-        "greenyellow",
-        "grey",
-        "honeydew",
-        "hotpink",
-        "indianred",
-        "indigo",
-        "ivory",
-        "khaki",
-        "lavender",
-        "lavenderblush",
-        "lawngreen",
-        "lemonchiffon",
-        "lightblue",
-        "lightcoral",
-        "lightcyan",
-        "lightgoldenrodyellow",
-        "lightgray",
-        "lightgreen",
-        "lightgrey",
-        "lightpink",
-        "lightsalmon",
-        "lightseagreen",
-        "lightskyblue",
-        "lightslategray",
-        "lightslategrey",
-        "lightsteelblue",
-        "lightyellow",
-        "lime",
-        "limegreen",
-        "linen",
-        "magenta",
-        "maroon",
-        "mediumaquamarine",
-        "mediumblue",
-        "mediumorchid",
-        "mediumpurple",
-        "mediumseagreen",
-        "mediumslateblue",
-        "mediumspringgreen",
-        "mediumturquoise",
-        "mediumvioletred",
-        "midnightblue",
-        "mintcream",
-        "mistyrose",
-        "moccasin",
-        "navajowhite",
-        "navy",
-        "oldlace",
-        "olive",
-        "olivedrab",
-        "orange",
-        "orangered",
-        "orchid",
-        "palegoldenrod",
-        "palegreen",
-        "paleturquoise",
-        "palevioletred",
-        "papayawhip",
-        "peachpuff",
-        "peru",
-        "pink",
-        "plum",
-        "powderblue",
-        "purple",
-        "red",
-        "rosybrown",
-        "royalblue",
-        "saddlebrown",
-        "salmon",
-        "sandybrown",
-        "seagreen",
-        "seashell",
-        "sienna",
-        "silver",
-        "skyblue",
-        "slateblue",
-        "slategray",
-        "slategrey",
-        "snow",
-        "springgreen",
-        "steelblue",
-        "tan",
-        "teal",
-        "thistle",
-        "tomato",
-        "turquoise",
-        "violet",
-        "wheat",
-        "white",
-        "whitesmoke",
-        "yellow",
-        "yellowgreen",
-
-        // Special color keywords
-        "transparent",
-        "currentColor",
-
-        // System colors
-        "ActiveBorder",
-        "ActiveCaption",
-        "AppWorkspace",
-        "Background",
-        "ButtonFace",
-        "ButtonHighlight",
-        "ButtonShadow",
-        "ButtonText",
-        "CaptionText",
-        "GrayText",
-        "Highlight",
-        "HighlightText",
-        "InactiveBorder",
-        "InactiveCaption",
-        "InactiveCaptionText",
-        "InfoBackground",
-        "InfoText",
-        "Menu",
-        "MenuText",
-        "Scrollbar",
-        "ThreeDDarkShadow",
-        "ThreeDFace",
-        "ThreeDHighlight",
-        "ThreeDLightShadow",
-        "ThreeDShadow",
-        "Window",
-        "WindowFrame",
-        "WindowText",
-
-        // Mozilla system color extensions
-        "-moz-ButtonDefault",
-        "-moz-ButtonHoverFace",
-        "-moz-ButtonHoverText",
-        "-moz-CellHighlight",
-        "-moz-CellHighlightText",
-        "-moz-Combobox",
-        "-moz-ComboboxText",
-        "-moz-Dialog",
-        "-moz-DialogText",
-        "-moz-dragtargetzone",
-        "-moz-EvenTreeRow",
-        "-moz-Field",
-        "-moz-FieldText",
-        "-moz-html-CellHighlight",
-        "-moz-html-CellHighlightText",
-        "-moz-mac-accentdarkestshadow",
-        "-moz-mac-accentdarkshadow",
-        "-moz-mac-accentface",
-        "-moz-mac-accentlightesthighlight",
-        "-moz-mac-accentlightshadow",
-        "-moz-mac-accentregularhighlight",
-        "-moz-mac-accentregularshadow",
-        "-moz-mac-chrome-active",
-        "-moz-mac-chrome-inactive",
-        "-moz-mac-focusring",
-        "-moz-mac-menuselect",
-        "-moz-mac-menushadow",
-        "-moz-mac-menutextselect",
-        "-moz-MenuHover",
-        "-moz-MenuHoverText",
-        "-moz-MenuBarText",
-        "-moz-MenuBarHoverText",
-        "-moz-nativehyperlinktext",
-        "-moz-OddTreeRow",
-        "-moz-win-communicationstext",
-        "-moz-win-mediatext",
-
-        // Mozilla color preference extensions
-        "-moz-activehyperlinktext",
-        "-moz-default-background-color", // FF 5.0
-        "-moz-default-color", // FF 5.0
-        "-moz-hyperlinktext",
-        "-moz-visitedhyperlinktext"
-    ],
-
-    "auto":
-    [
-        "auto"
-    ],
-
-    "none":
-    [
-        "none"
-    ],
-
-    "normal":
-    [
-        "normal"
-    ],
-
-    "captionSide":
-    [
-        "top",
-        "bottom",
-        "left",
-        "right"
-    ],
-
-    "emptyCells":
-    [
-        "show",
-        "hide",
-        "-moz-show-background"
-    ],
-
-    "alignItems":
-    [
-        "flex-start",
-        "flex-end",
-        "center",
-        "baseline",
-        "stretch"
-    ],
-
-    "alignSelf":
-    [
-        "auto",
-        "flex-start",
-        "flex-end",
-        "center",
-        "baseline",
-        "stretch"
-    ],
-
-    "flexBasis":
-    [
-        "initial",
-        "auto"
-    ],
-
-    "flexDirection":
-    [
-        "row",
-        "row-reverse",
-        "column",
-        "column-reverse"
-    ],
-
-    "justifyContent":
-    [
-        "flex-start",
-        "flex-end",
-        "center",
-        "space-between",
-        "space-around"
-    ],
-
-    "clear":
-    [
-        "left",
-        "right",
-        "both"
-    ],
+    // "color" is set in initPropertyData.
 
     "cursor":
     [
@@ -1675,7 +1203,7 @@ Css.cssKeywords =
         "help",
         "no-drop",
         "not-allowed",
-        "none", // FF 3.0
+        "none",
         "-moz-grab",
         "-moz-grabbing",
         "-moz-zoom-in",
@@ -1704,21 +1232,16 @@ Css.cssKeywords =
         "alias"
     ],
 
-    "boxModels": // FF 4.0
+    "boxModels":
     [
         "padding-box",
         "border-box",
         "content-box"
     ],
 
-    "direction":
-    [
-        "ltr",
-        "rtl"
-    ],
-
     "bgAttachment":
     [
+        "local",
         "scroll",
         "fixed"
     ],
@@ -1740,7 +1263,7 @@ Css.cssKeywords =
         "no-repeat"
     ],
 
-    "bgSize": // FF 4.0
+    "bgSize":
     [
         "auto",
         "cover",
@@ -1759,86 +1282,6 @@ Css.cssKeywords =
         "ridge",
         "inset",
         "outset",
-        "-moz-bg-inset",
-        "-moz-bg-outset",
-        "-moz-bg-solid"
-    ],
-
-    "borderCollapse":
-    [
-        "collapse",
-        "separate"
-    ],
-
-    "overflow":
-    [
-        "visible",
-        "hidden",
-        "scroll",
-        "auto",
-        "-moz-hidden-unscrollable"
-    ],
-
-    "listStyleType":
-    [
-        "none",
-        "disc",
-        "circle",
-        "square",
-        "decimal",
-        "decimal-leading-zero",
-        "lower-roman",
-        "upper-roman",
-        "lower-greek",
-        "lower-alpha",
-        "lower-latin",
-        "upper-alpha",
-        "upper-latin",
-        "armenian",
-        "georgian",
-        "hebrew",
-        "cjk-ideographic",
-        "hiragana",
-        "katakana",
-        "hiragana-iroha",
-        "katakana-iroha",
-        "-moz-arabic-indic",
-        "-moz-bengali",
-        "-moz-cjk-earthly-branch",
-        "-moz-cjk-heavenly-stem",
-        "-moz-devanagari",
-        "-moz-ethiopic-halehame",
-        "-moz-ethiopic-halehame-am",
-        "-moz-ethiopic-halehame-ti-er",
-        "-moz-ethiopic-halehame-ti-et",
-        "-moz-ethiopic-numeric",
-        "-moz-gujarati",
-        "-moz-gurmukhi",
-        "-moz-hangul",
-        "-moz-hangul-consonant",
-        "-moz-japanese-formal",
-        "-moz-japanese-informal",
-        "-moz-kannada",
-        "-moz-khmer",
-        "-moz-lao",
-        "-moz-malayalam",
-        "-moz-myanmar",
-        "-moz-oriya",
-        "-moz-persian",
-        "-moz-simp-chinese-formal",
-        "-moz-simp-chinese-informal",
-        "-moz-tamil",
-        "-moz-telugu",
-        "-moz-thai",
-        "-moz-trad-chinese-formal",
-        "-moz-trad-chinese-informal",
-        "-moz-urdu"
-    ],
-
-    "listStylePosition":
-    [
-        "inside",
-        "outside"
     ],
 
     "string":
@@ -1847,7 +1290,6 @@ Css.cssKeywords =
         "close-quote",
         "no-open-quote",
         "no-close-quote",
-        "url()",
         "attr()",
         "counter()",
         "counters()"
@@ -1866,29 +1308,22 @@ Css.cssKeywords =
         "small-caps"
     ],
 
+
     // Named font-weight values, worth completing in "font"
     "namedFontWeight":
     [
-        // Absolute keywords
         "normal",
         "bold",
-
-        // Relative keywords
         "bolder",
         "lighter"
     ],
 
     "fontWeight":
     [
-        // Absolute keywords
         "normal",
         "bold",
-
-        // Relative keywords
         "bolder",
         "lighter",
-
-        // Numeric values
         "100",
         "200",
         "300",
@@ -1914,18 +1349,6 @@ Css.cssKeywords =
         // Relative size keywords
         "smaller",
         "larger"
-    ],
-
-    "lineHeight":
-    [
-        "normal"
-    ],
-
-    "wordBreak":
-    [
-        "normal",
-        "break-all",
-        "keep-all"
     ],
 
     "fontFamily":
@@ -1973,131 +1396,13 @@ Css.cssKeywords =
         "-moz-field"
     ],
 
-    "display":
-    [
-        "block",
-        "none",
-        "inline",
-        "inline-block",
-        "list-item",
-        "flex",
-        "inline-flex",
-        "marker",
-        "run-in",
-        "compact",
-        "table",
-        "inline-table",
-        "table-row-group",
-        "table-column",
-        "table-column-group",
-        "table-header-group",
-        "table-footer-group",
-        "table-row",
-        "table-cell",
-        "table-caption",
-        "-moz-box",
-        "-moz-compact",
-        "-moz-deck",
-        "-moz-grid",
-        "-moz-grid-group",
-        "-moz-grid-line",
-        "-moz-groupbox",
-        "-moz-inline-box",
-        "-moz-inline-grid",
-        "-moz-inline-stack",
-        "-moz-marker",
-        "-moz-popup",
-        "-moz-stack"
-    ],
-
-    "elPosition":
-    [
-        "static",
-        "relative",
-        "absolute",
-        "fixed"
-    ],
-
-    "float":
-    [
-        "left",
-        "right",
-        "none"
-    ],
-
-    "textAlign":
-    [
-        "left",
-        "right",
-        "center",
-        "justify",
-        "start",
-        "end", // FF 3.6
-
-        "-moz-center",
-        "-moz-left",
-        "-moz-right"
-    ],
-
-    "tableLayout":
-    [
-        "fixed",
-        "auto"
-    ],
-
     "textDecoration":
     [
         "none",
         "underline",
         "overline",
         "line-through",
-        "blink",
         "-moz-anchor-decoration"
-    ],
-
-    "textTransform":
-    [
-        "capitalize",
-        "lowercase",
-        "uppercase",
-        "none"
-    ],
-
-    "unicodeBidi":
-    [
-        "normal",
-        "embed",
-        "bidi-override",
-        "-moz-isolate", // FF 10.0
-        "-moz-plaintext" // FF 10.0
-    ],
-
-    "visibility":
-    [
-        "visible",
-        "hidden",
-        "collapse"
-    ],
-
-    "whiteSpace":
-    [
-        "normal",
-        "pre",
-        "nowrap",
-        "pre-wrap", // FF 3.0
-        "pre-line" // FF 3.5
-    ],
-
-    "verticalAlign":
-    [
-        "baseline",
-        "sub",
-        "super",
-        "top",
-        "middle",
-        "bottom",
-        "text-top",
-        "text-bottom"
     ],
 
     "thickness":
@@ -2107,87 +1412,9 @@ Css.cssKeywords =
         "thick"
     ],
 
-    "shape":
-    [
-        "rect()"
-    ],
-
-    "userFocus":
-    [
-        "ignore",
-        "normal"
-    ],
-
-    "userInput":
-    [
-        "disabled",
-        "enabled"
-    ],
-
-    "mozUserModify":
-    [
-        "read-only",
-        "read-write",
-        "write-only"
-    ],
-
-    "userSelect":
-    [
-        "text",
-        "-moz-none",
-        "all",
-        "element"
-    ],
-
-    "mozBoxSizing":
-    [
-        "content-box",
-        "padding-box",
-        "border-box"
-    ],
-
-    "mozBoxAlign":
-    [
-        "start",
-        "center",
-        "end",
-        "baseline",
-        "stretch"
-    ],
-
-    "mozBoxDirection":
-    [
-        "normal",
-        "reverse"
-    ],
-
-    "mozBoxOrient":
-    [
-        "horizontal",
-        "vertical",
-        "inline-axis",
-        "block-axis"
-    ],
-
-    "mozBoxPack":
-    [
-        "start",
-        "center",
-        "end",
-        "justify"
-    ],
-
     "boxShadow":
     [
         "inset"
-    ],
-
-    "borderImageRepeat":
-    [
-        "stretch",
-        "round",
-        "repeat",
-        "space"
     ],
 
     "image":
@@ -2197,12 +1424,9 @@ Css.cssKeywords =
         "radial-gradient()",
         "repeating-linear-gradient()",
         "repeating-radial-gradient()",
-        "-moz-linear-gradient()",
-        "-moz-radial-gradient()",
-        "-moz-repeating-linear-gradient()",
-        "-moz-repeating-radial-gradient()",
         "-moz-image-rect()",
         "-moz-element()",
+        "none",
     ],
 
     "length":
@@ -2223,7 +1447,6 @@ Css.cssKeywords =
         "scaleY()",
         "scaleZ()",
         "scale3d()",
-        "scaleZ()",
         "skewX()",
         "skewY()",
         "translate()",
@@ -2375,198 +1598,10 @@ Css.cssKeywords =
         "\"zero\""
     ],
 
-    // FF 10.0
-    "transformStyle":
-    [
-        "preserve-3d",
-        "flat"
-    ],
-
-    // FF 4.0
-    "transitionProperty":
-    [
-        "none",
-        "all",
-        "background-color",
-        "background-image",
-        "background-position",
-        "background-size",
-        "border-color",
-        "border-radius",
-        "border-width",
-        "border-spacing",
-        "bottom",
-        "box-shadow",
-        "color",
-        "clip",
-        "fill",
-        "fill-opacity",
-        "flood-color",
-        "font-size",
-        "font-size-adjust",
-        "font-stretch",
-        "font-weight",
-        "height",
-        "left",
-        "letter-spacing",
-        "lighting-color",
-        "line-height",
-        "margin ",
-        "marker-offset",
-        "max-height",
-        "max-width",
-        "min-height",
-        "min-width",
-        "opacity",
-        "outline-color",
-        "outline-offset",
-        "outline-width",
-        "padding",
-        "right",
-        "stop-color",
-        "stop-opacity",
-        "stroke",
-        "stroke-dasharray",
-        "stroke-dashoffset",
-        "stroke-miterlimit",
-        "stroke-opacity",
-        "stroke-width",
-        "text-indent",
-        "text-shadow",
-        "top",
-        "transform-origin",
-        "transform",
-        "vertical-align",
-        "visibility",
-        "width",
-        "word-spacing",
-        "z-index",
-        "-moz-box-flex",
-        "-moz-column-count",
-        "-moz-column-gap",
-        "-moz-column-rule-color",
-        "-moz-column-rule-width",
-        "-moz-column-width",
-        "-moz-image-region",
-        "-moz-outline-radius"
-    ],
-
-    "timingFunction": // FF 4.0
-    [
-        "cubic-bezier()",
-        "ease",
-        "ease-in",
-        "ease-in-out",
-        "ease-out",
-        "linear",
-        "step-start",
-        "step-end",
-        "steps()"
-    ],
-
-    "mozTextDecorationLine": // FF 6.0
-    [
-        "underline",
-        "overline",
-        "line-through",
-        "none"
-    ],
-
-    "mozTextDecorationStyle": // FF 6.0
-    [
-        "solid",
-        "double",
-        "dotted",
-        "dashed",
-        "wavy"
-    ],
-
-    "mozHyphens": // FF 6.0
-    [
-        "none",
-        "manual",
-        "auto"
-    ],
-
-    // FF 7.0
     "textOverflow":
     [
        "clip",
        "ellipsis"
-    ],
-
-    // FF 3.0
-    "width":
-    [
-        "-moz-max-content",
-        "-moz-min-content",
-        "-moz-fit-content",
-        "-moz-available"
-    ],
-
-    "imeMode":
-    [
-        "auto",
-        "normal",
-        "active",
-        "inactive",
-        "disabled"
-    ],
-
-    // FF 3.0
-    "textRendering":
-    [
-        "auto",
-        "optimizeSpeed",
-        "optimizeLegibility",
-        "geometricPrecision"
-    ],
-
-    "wordWrap":
-    [
-        "normal",
-        "break-word"
-    ],
-
-    "pageBreak":
-    [
-        "auto",
-        "always",
-        "avoid",
-        "left",
-        "right"
-    ],
-
-    // start SVG specific
-
-    "alignmentBaseline":
-    [
-        "auto",
-        "baseline",
-        "before-edge",
-        "text-before-edge",
-        "middle",
-        "central",
-        "after-edge",
-        "text-after-edge",
-        "ideographic",
-        "alphabetic",
-        "hanging",
-        "mathematical"
-    ],
-
-    "baselineShift":
-    [
-        "baseline",
-        "sub",
-        "super"
-    ],
-
-    "colorInterpolation":
-    [
-        "auto",
-        "sRGB",
-        "linearRGB"
     ],
 
     "clipRule":
@@ -2574,124 +1609,79 @@ Css.cssKeywords =
         "nonzero",
         "evenodd"
     ],
-
-    "colorProfile":
-    [
-        "auto",
-        "sRGB"
-    ],
-
-    "colorRendering":
-    [
-        "auto",
-        "optimizeSpeed",
-        "optimizeQuality"
-    ],
-
-    "dominantBaseline":
-    [
-        "auto",
-        "use-script",
-        "no-change",
-        "reset-size",
-        "ideographic",
-        "alphabetic",
-        "hanging",
-        "mathematical",
-        "central",
-        "middle",
-        "text-after-edge",
-        "text-before-edge"
-    ],
-
-    "accumulate":
-    [
-        "accumulate"
-    ],
-
-    "fontStretch":
-    [
-        "normal",
-        "wider",
-        "narrower",
-        "ultra-condensed",
-        "extra-condensed",
-        "condensed",
-        "semi-condensed",
-        "semi-expanded",
-        "expanded",
-        "extra-expanded",
-        "ultra-expanded"
-    ],
-
-    "imageRendering":
-    [
-        "auto",
-        "optimizespeed",
-        "optimizequality",
-        "-moz-crisp-edges"
-    ],
-
-    "svgOverflow":
-    [
-        "visible",
-        "hidden",
-        "scroll"
-    ],
-
-    "pointerEvents":
-    [
-        "none",
-        "all",
-        "auto",
-        "visiblePainted",
-        "visibleFill",
-        "visibleStroke",
-        "visible",
-        "painted",
-        "fill",
-        "stroke"
-    ],
-
-    "shapeRendering":
-    [
-        "optimizeSpeed",
-        "crispEdges",
-        "geometricPrecision"
-    ],
-
-    "strokeLinecap":
-    [
-        "butt",
-        "round",
-        "square"
-    ],
-
-    "strokeLinejoin":
-    [
-        "miter",
-        "round",
-        "bevel"
-    ],
-
-    "writingMode":
-    [
-        "lr-tb",
-        "rl-tb",
-        "tb-rl",
-        "lr",
-        "rl",
-        "tb"
-    ],
-
-    "resize":
-    [
-        "none",
-        "both",
-        "horizontal",
-        "vertical"
-    ]
 };
+
+var extraImages = [
+    "linear-gradient()",
+    "repeating-linear-gradient()",
+    "radial-gradient()",
+    "repeating-radial-gradient()",
+];
+
+var animatableProperties = [
+    "background-color",
+    "background-image",
+    "background-position",
+    "background-size",
+    "border-color",
+    "border-radius",
+    "border-width",
+    "border-spacing",
+    "bottom",
+    "box-shadow",
+    "color",
+    "clip",
+    "fill",
+    "fill-opacity",
+    "flood-color",
+    "font-size",
+    "font-size-adjust",
+    "font-stretch",
+    "font-weight",
+    "height",
+    "left",
+    "letter-spacing",
+    "lighting-color",
+    "line-height",
+    "margin",
+    "marker-offset",
+    "max-height",
+    "max-width",
+    "min-height",
+    "min-width",
+    "opacity",
+    "outline-color",
+    "outline-offset",
+    "outline-width",
+    "padding",
+    "right",
+    "stop-color",
+    "stop-opacity",
+    "stroke",
+    "stroke-dasharray",
+    "stroke-dashoffset",
+    "stroke-miterlimit",
+    "stroke-opacity",
+    "stroke-width",
+    "text-indent",
+    "text-shadow",
+    "top",
+    "transform-origin",
+    "transform",
+    "vertical-align",
+    "visibility",
+    "width",
+    "word-spacing",
+    "z-index",
+    "-moz-box-flex",
+    "-moz-column-count",
+    "-moz-column-gap",
+    "-moz-column-rule-color",
+    "-moz-column-rule-width",
+    "-moz-column-width",
+    "-moz-image-region",
+    "-moz-outline-radius",
+];
 
 // Most common supported charsets according to http://en.wikipedia.org/wiki/Character_encoding
 Css.charsets =
@@ -2890,10 +1880,16 @@ Css.nonDeletableTags =
 };
 
 // lib/xml can't depend on lib/css, so inject the relevant function from here.
+var presentationalPropMap = null;
 Xml.getPresentationalSVGProperties = function()
 {
-    buildKeywordMap("svg");
-    return cssKeywordMap["svg"];
+    if (!presentationalPropMap)
+    {
+        presentationalPropMap = {};
+        for (let name of Css.getCSSPropertyNames("svg"))
+            presentationalPropMap[name] = Css.getCSSKeywordsByProperty("svg", name);
+    }
+    return presentationalPropMap;
 };
 
 // ********************************************************************************************* //

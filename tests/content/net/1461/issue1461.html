@@ -1,19 +1,33 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-</head>
-<body>
-<h1>Test for Issue #1461</h1>
-<ul>
-    <li>Open Firebug UI and select Net panel.</li>
-    <li>If the Net panel isn't enabled, enabled it and refresh this page.</li>
-    <li>Open the entry in Net panel and chech Response tab.</li>
-    <li>The tab should display HTML source of this page.</li>
-</ul>
-<p style="display:none;">
-�
-</p>
-</body>
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 1461: Failed to load source for sourceFile (FF 3.0.6 FireBug 1.3.2)</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=1461">Issue 1461</a>: Failed to load source for sourceFile (FF 3.0.6 FireBug 1.3.2)</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Net</em> panel</li>
+                    <li>Reload the page</li>
+                    <li>
+                        Expand the request for <em>issue1461.html</em><br/>
+                        <span class="ok">&rArr; There should be a <em>Response</em> tab.</span>
+                    </li>
+                    <li>Switch to the <em>Response</em> tab</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The <em>Response</em> tab should display the source of this page.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
 </html>

@@ -5,10 +5,12 @@ function runTest()
     var url = basePath + "script/4816/issue4816.html";
     FBTest.openNewTab(url, function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("script");
+        FBTest.sysout("issue4816.tab opened");
+
         FBTest.enableScriptPanel(function(win)
         {
+            FBTest.sysout("issue4816.script panel enabled");
+
             var tasks = new FBTest.TaskList();
             tasks.push(clickTestButton, win);
             tasks.push(openNewTab, url);
@@ -27,7 +29,7 @@ var debugContextId;
 
 function clickTestButton(callback, win)
 {
-    FBTest.waitForBreakInDebugger(null, 17, false, function()
+    FBTest.waitForBreakInDebugger(null, 18, false, function()
     {
         var panel = FBTest.getPanel("script");
         debugContextId = panel.panelNode.getAttribute("class");

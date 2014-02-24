@@ -1,40 +1,80 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/chrome/module",
+    "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/locale",
-    "firebug/firebug",
     "firebug/lib/dom",
+    "firebug/lib/events",
+    "firebug/chrome/module",
     "firebug/chrome/menu",
 ],
-function(Module, Obj, Locale, Firebug, Dom, Menu) {
+function(Firebug, FBTrace, Obj, Locale, Dom, Events, Module, Menu) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
-const MAX_HISTORY_MENU_ITEMS = 15;
+var MAX_HISTORY_MENU_ITEMS = 15;
+
+// Standard tracing output
+var Trace = FBTrace.to("DBG_HISTORY");
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 
 /**
- * @class Support for back and forward pattern for navigating within Firebug UI (panels).
+ * @module Support for back and forward navigation within Firebug UI. The logic allows to
+ * go back over selected (main) panels history as well as over location changes in a panel.
+ * The UI is composed from two buttons back and forward, which are presented in the main
+ * Firebug toolbar.
+ *
+ * In order to record the history of selected panels and locations, there are two
+ * events handled:
+ *
+ * 1) selectPanel: fired when a panel is selected
+ * 2) navigate: executed when panel navigation happens
  */
-Firebug.NavigationHistory = Obj.extend(Module,
+var NavigationHistory = Obj.extend(Module,
+/** @lends NavigationHistory */
 {
     dispatchName: "navigationHistory",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Extending Module
+    // Initialization
+
+    initialize: function()
+    {
+        Module.initialize.apply(this, arguments);
+
+        this.onSelectPanel = this.onSelectPanel.bind(this);
+
+        var panelBar = getPanelBar();
+        Events.addEventListener(panelBar, "selectPanel", this.onSelectPanel, false);
+    },
+
+    shutdown: function()
+    {
+        Module.shutdown.apply(this, arguments);
+
+        var panelBar = getPanelBar();
+        Events.removeEventListener(panelBar, "selectPanel", this.onSelectPanel, false);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context
 
     initContext: function(context, persistedState)
     {
         Module.initContext.apply(this, arguments);
 
-        // Initialize context members.
+        // Initialize context members. The history is stored within
+        // the current context (document).
         context.navigationHistory = [];
         context.navigationHistoryIndex = 0;
 
@@ -63,11 +103,8 @@ Firebug.NavigationHistory = Obj.extend(Module,
     {
         var currIndex = this.getCurrentIndex(context);
 
-        if (FBTrace.DBG_HISTORY)
-        {
-            FBTrace.sysout("history.onPopupShowing; " + currIndex + ", " +
-                context.getName(), context);
-        }
+        Trace.sysout("navigationHistory.onPopupShowing; " + currIndex + ", " +
+            context.getName(), context);
 
         Dom.eraseNode(popup);
 
@@ -90,11 +127,12 @@ Firebug.NavigationHistory = Obj.extend(Module,
         var tooltipCurrent = Locale.$STR("firebug.history.Stay on this panel");
         var tooltipForward = Locale.$STR("firebug.history.Go forward to this panel");
 
-        for (var i=end-1; i>=start; i--)
+        for (var i = end - 1; i >= start; i--)
         {
             var historyItem = list[i];
             var panelType = Firebug.getPanelType(historyItem.panelName);
             var label = Firebug.getPanelTitle(panelType);
+
             if (historyItem.location && historyItem.location.url)
                 label += " - " + historyItem.location.url;
 
@@ -145,8 +183,8 @@ Firebug.NavigationHistory = Obj.extend(Module,
     {
         var currIndex = this.getCurrentIndex(context);
 
-        if (FBTrace.DBG_HISTORY)
-            FBTrace.sysout("history.goBack; " + currIndex + ", " + context.getName(), context);
+        Trace.sysout("navigationHistory.goBack; " + currIndex + ", " +
+            context.getName(), context);
 
         this.gotoHistoryIndex(context, currIndex - 1);
     },
@@ -155,8 +193,8 @@ Firebug.NavigationHistory = Obj.extend(Module,
     {
         var currIndex = this.getCurrentIndex(context);
 
-        if (FBTrace.DBG_HISTORY)
-            FBTrace.sysout("history.goForward; " + currIndex + ", " + context.getName(), context);
+        Trace.sysout("navigationHistory.goForward; " + currIndex + ", " +
+            context.getName(), context);
 
         this.gotoHistoryIndex(context, currIndex + 1);
     },
@@ -228,71 +266,119 @@ Firebug.NavigationHistory = Obj.extend(Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // UI Listener
 
-    onPanelNavigate: function(location, panel)
+    onPanelNavigate: function(location, panel, panelName)
     {
-        var context = panel.context;
-        var currIndex = this.getCurrentIndex(context);
-
-        if (FBTrace.DBG_HISTORY)
-            FBTrace.sysout("history.onPanelNavigate; " + currIndex + ", " +
-                "Panel: " + (panel ? panel.name : "Unknown Panel") + ", " +
-                "Location: " + (location ? location.url : "No Location") + ", " +
-                context.getName());
-
-        // The panel must be always there
-        if (!panel)
+        // The "panel" argument can be null in case of disabled panel.
+        var panelName = (panel ? panel.name : panelName);
+        if (!panelName)
+        {
+            TraceError.sysout("navigationHistory.onPanelNavigate; ERROR no panel name!");
             return;
+        }
+
+        var url = (location ? location.href : "No Location");
+        var context = panel ? panel.context : Firebug.currentContext;
+        if (!context)
+            return;
+
+        var currIndex = this.getCurrentIndex(context);
+        var list = this.getHistory(context);
 
         // Ignore side panel navigation.
-        if (panel.parentPanel)
+        if (panel && panel.parentPanel)
+        {
+            Trace.sysout("navigationHistory.onPanelNavigate; ignore side panels");
             return;
+        }
 
         // The user is navigating using the history UI, this action doesn't affect
         // the history list.
         if (this.navInProgress)
+        {
+            Trace.sysout("navigationHistory.onPanelNavigate; navigation in progress");
             return;
-
-        var list = this.getHistory(context);
+        }
 
         // If the last item in the history is the same bail out.
         var lastHistoryItem = list.length ? list[list.length-1] : null;
-        if (lastHistoryItem && lastHistoryItem.panelName == panel.name &&
+        if (lastHistoryItem && lastHistoryItem.panelName == panelName &&
             lastHistoryItem.location == location)
-            return;
+        {
+            Trace.sysout("navigationHistory.onPanelNavigate; ignore the same navigations", {
+                lastHistoryItem: lastHistoryItem,
+                panelName: panelName,
+                location: location,
+            });
 
-        if (lastHistoryItem && lastHistoryItem.location && location &&
-            lastHistoryItem.location.url == location.url)
             return;
+        }
 
         // If the panel is the same, bail out.
         var currHistoryItem = list.length ? list[currIndex] : null;
-        if (currHistoryItem && currHistoryItem.panelName == panel.name &&
+        if (currHistoryItem && currHistoryItem.panelName == panelName &&
             currHistoryItem.location == location)
+        {
+            Trace.sysout("navigationHistory.onPanelNavigate; ignore the same panel navigation");
             return;
+        }
 
         // Remove forward history.
-        list.splice(currIndex+1, list.length-(currIndex+1));
+        list.splice(currIndex + 1, list.length - (currIndex + 1));
 
-        // New back history record.
-        list.push({panelName: panel.name, location: location});
-        context.navigationHistoryIndex = list.length-1;
+        // New history record.
+        list.push({panelName: panelName, location: location});
+        context.navigationHistoryIndex = list.length - 1;
 
-        if (FBTrace.DBG_HISTORY)
-            FBTrace.sysout("history.onPanelNavigate; New history record created " + currIndex +
-                ", " + panel.name + ", " + (location ? location.url : "No Location"), list);
+        Trace.sysout("navigationHistory.onPanelNavigate; New record created, total: " +
+            list.length + ", " + panelName + ", " + (location ? location.url : "No Location"),
+            list);
 
         // Update back and forward buttons in the UI.
         this.updateButtons(context);
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Chrome Listener
+
+    onSelectPanel: function(event)
+    {
+        var panelBar = getPanelBar();
+
+        var panel = panelBar.selectedPanel;
+        var tab = panelBar.selectedTab;
+        if (!tab)
+            return;
+
+        var panelName = tab.panelType.prototype.name;
+        var location = panel ? panel.location : null;
+
+        Trace.sysout("navigationHistory.onSelectPanel; name: " +
+            (panel ? panel.name : "unknown panel") + ", location: " +
+            (panel ? panel.location : "unknown location") + ", tab name: " +
+            (tab ? tab.panelType.prototype.name : "unknown tab name"));
+
+        this.onPanelNavigate(location, panel, panelName);
+    },
 });
+
+// ********************************************************************************************* //
+// Private Local Helpers
+
+function getPanelBar()
+{
+    return Firebug.chrome.getElementById("fbPanelBar1");
+}
 
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(Firebug.NavigationHistory);
-Firebug.registerUIListener(Firebug.NavigationHistory);
+Firebug.registerModule(NavigationHistory);
+Firebug.registerUIListener(NavigationHistory);
 
-return Firebug.NavigationHistory;
+// Expose for XUL UI
+Firebug.NavigationHistory = NavigationHistory;
+
+return NavigationHistory;
 
 // ********************************************************************************************* //
 });

@@ -110,17 +110,6 @@ DOMMemberProvider.prototype =
             {
                 name = properties[i];
 
-                // Ignore only global variables (properties of the |window| object).
-                if (Wrapper.shouldIgnore(name) && (object instanceof Window))
-                {
-                    if (FBTrace.DBG_DOM)
-                    {
-                        FBTrace.sysout("dom.getMembers: Wrapper.ignoreVars: " + name + ", " +
-                            level, object);
-                    }
-                    continue;
-                }
-
                 try
                 {
                     val = object[name];
@@ -258,8 +247,9 @@ DOMMemberProvider.prototype =
             var showEnum = Firebug.showEnumerableProperties;
             var showOwn = Firebug.showOwnProperties;
             FBTrace.sysout("dom.getMembers; Report: enum-only: " + showEnum +
-                ", own-only: " + showOwn,
+                ", own-only: " + showOwn + ", total members: " + members.length,
             {
+                members: members,
                 object: object,
                 ordinals: ordinals,
                 userProps: userProps,

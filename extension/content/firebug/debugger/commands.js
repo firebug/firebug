@@ -1,4 +1,6 @@
 /* See license.txt for terms of usage */
+/*jshint esnext:true, curly:false, unused:false, moz:true*/
+/*global define:1, Components:true, Firebug:true*/
 
 define([
     "firebug/lib/trace",
@@ -7,6 +9,8 @@ define([
     "firebug/debugger/breakpoints/breakpointStore"
 ],
 function(FBTrace, RDP, DebuggerLib, BreakpointStore) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -173,23 +177,29 @@ function getSource(context, args)
         var actor = args[0];
         if (!actor)
         {
-            var threadActor = DebuggerLib.getThreadActor(context.browser);
-            if (threadActor)
-                Firebug.Console.log(threadActor);
-            return "No actor specified";
+            context.activeThread.getSources(function(response)
+            {
+                FBTrace.sysout("commands.getSource(s):", response);
+
+                if (response.error)
+                    return Firebug.Console.log(response.error);
+
+                return Firebug.Console.log(response.sources);
+            });
         }
-
-        // xxxHonza: SourceFile object should be utilized here
-        var sourceClient = context.activeThread.source({actor: actor});
-        sourceClient.source(function(response)
+        else
         {
-            FBTrace.sysout("commands.getSource:", response);
+            var sourceClient = context.activeThread.source({actor: actor});
+            sourceClient.source(function(response)
+            {
+                FBTrace.sysout("commands.getSource:", response);
 
-            if (response.error)
-                return Firebug.Console.log(response.error);
+                if (response.error)
+                    return Firebug.Console.log(response.error);
 
-            return Firebug.Console.log(response.source);
-        });
+                return Firebug.Console.log(response.source);
+            });
+        }
     }
     catch (e)
     {
@@ -205,32 +215,32 @@ function getSource(context, args)
 Firebug.registerCommand("pauseGrip", {
     handler: pauseGrip.bind(this),
     description: "Helper command for accessing server side Grips. For debugging purposes only."
-})
+});
 
 Firebug.registerCommand("tabGrip", {
     handler: tabGrip.bind(this),
     description: "Helper command for accessing server side tab child Grips. For debugging purposes only."
-})
+});
 
 Firebug.registerCommand("threadPool", {
     handler: threadPool.bind(this),
     description: "Helper command for accessing server side thread pool. For debugging purposes only."
-})
+});
 
 Firebug.registerCommand("pausePool", {
     handler: pausePool.bind(this),
     description: "Helper command for accessing server side pause pool. For debugging purposes only."
-})
+});
 
 Firebug.registerCommand("breakpoints", {
     handler: threadBreakpoints.bind(this),
     description: "Helper command for accessing breakpoints on the server side. For debugging purposes only."
-})
+});
 
 Firebug.registerCommand("getSource", {
     handler: getSource.bind(this),
     description: "Helper command for getting source from the server side. For debugging purposes only."
-})
+});
 
 return {};
 

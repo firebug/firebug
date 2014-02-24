@@ -23,8 +23,8 @@ function runTest()
             {
                 FBTest.progress("Error request displayed");
 
-                var panelNode = FBTest.getPanel("net").panelNode;
-                var row = panelNode.querySelector(".netRow.category-html");
+                var panelNode = FBTest.getSelectedPanel().panelNode;
+                var row = panelNode.getElementsByClassName("category-html")[0];
                 FBTest.click(row);
 
                 var netInfoRow = row.nextSibling;
@@ -34,6 +34,7 @@ function runTest()
                 // causes the test to fail on timeout.
                 FBTest.testDone("issue4553.DONE");
             });
+
         });
     });
 }

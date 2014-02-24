@@ -61,6 +61,10 @@ var Locale = {};
  */
 Locale.$STR = function(name, bundle)
 {
+    // The empty string localizes to the empty string.
+    if (!name)
+        return "";
+
     var strKey = name.replace(" ", "_", "g");
 
     if (!PrefLoader.getPref("useDefaultLocale"))
@@ -75,7 +79,7 @@ Locale.$STR = function(name, bundle)
         catch (err)
         {
             if (FBTrace.DBG_LOCALE)
-                FBTrace.sysout("lib.getString FAILS '" + name + "'", err);
+                FBTrace.sysout("Locale.$STR FAILS, missing localized string for '" + name + "'", err);
         }
     }
 
@@ -88,8 +92,8 @@ Locale.$STR = function(name, bundle)
     }
     catch (err)
     {
-        if (FBTrace.DBG_LOCALE)
-            FBTrace.sysout("lib.getString (default) FAILS '" + name + "'", err);
+        if (FBTrace.DBG_LOCALE || FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Locale.$STR FAILS, missing default string for '" + name + "'", err);
     }
 
     // Don't panic now and use only the label after last dot.
@@ -117,7 +121,7 @@ Locale.$STRF = function(name, args, bundle)
         catch (err)
         {
             if (FBTrace.DBG_LOCALE)
-                FBTrace.sysout("lib.getString FAILS '" + name + "'", err);
+                FBTrace.sysout("Locale.$STRF FAILS, missing localized string for '" + name + "'", err);
         }
     }
 
@@ -130,8 +134,8 @@ Locale.$STRF = function(name, args, bundle)
     }
     catch (err)
     {
-        if (FBTrace.DBG_LOCALE)
-            FBTrace.sysout("lib.getString (default) FAILS '" + name + "'", err);
+        if (FBTrace.DBG_LOCALE || FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Locale.$STRF FAILS, missing default string for '" + name + "'", err);
     }
 
     // Don't panic now and use only the label after last dot.

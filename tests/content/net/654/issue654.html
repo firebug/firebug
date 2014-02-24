@@ -1,38 +1,46 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html>
 <html>
-<head>
-  <title>Test Case for Issue #654</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-</head>
-<body>
-
-<h1>Issue #654</h1>
-
-<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=654">Issue #654</a>
-- <span class="h3">IP address included on a Net line entry</span>.
-
-<br/>
-<i>Jan Odvarko, odvarko@gmail.com</i>
-</p>
-
-<ol>
-<li>Open Firebug, enable the Net panel and reload this page.</li>
-<li>Right click on the Net panel's header and pick the <i>Local IP</i> entry (to display additional column).</li>
-<li>Click the <span id="responseData" style="color:green">Execute Test</span> button.</li>
-<li>There should be two requests displayed in the Net panel (<i>issue654.html</i> and <i>issue654.php</i>).</li>
-<li>Both request should display <i>Remote IP</i> and <i>Local IP</i> together with port numbers.</li>
-</ol>
-
-<button id="testButton" onclick="executeTest()">Execute Test</button>
-
-<script type="text/javascript">
-function executeTest()
-{
-    var request = new XMLHttpRequest();
-    request.open("GET", "issue654.php", true);
-    request.send(null);
-}
-</script>
-
-</body>
+    <head>
+        <title>Issue 654: IP address included on a Net line entry</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function makeRequest()
+        {
+            var request = new XMLHttpRequest();
+            request.open("GET", "issue654.php", true);
+            request.send(null);
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=654">Issue 654</a>: IP address included on a Net line entry</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="makeRequest" onclick="makeRequest()">Make request</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Net</em> panel</li>
+                    <li>Reload the page</li>
+                    <li>Right-click the <em>Net</em> panel's header and check the <em>Local IP</em> entry</li>
+                    <li>Click the <em>Make request</em> button above</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        Three requests should be displayed inside the <em>Net</em> panel, one for
+                        <em>issue654.html</em>, one for <em>testcase.css</em> and one for
+                        <em>issue654.php</em>.
+                    </li>
+                    <li>Both requests should have a remote IP and a local IP plus port.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
 </html>

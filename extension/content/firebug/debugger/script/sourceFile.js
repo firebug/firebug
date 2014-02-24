@@ -38,8 +38,8 @@ function SourceFile(context, actor, href, isBlackBoxed)
     // The content type is set when 'source' packet is received (see onSourceLoaded).
     this.contentType = null;
 
-    // xxxHonza: remove
-    this.compilation_unit_type = "remote-script";
+    // xxxHonza: refactore the flag logic.
+    this.compilation_unit_type = "script_tag";
     this.callbacks = [];
 }
 
@@ -96,6 +96,7 @@ SourceFile.prototype =
         return false;
     },
 
+    // xxxHonza: This method should return a promise
     loadScriptLines: function(callback)
     {
         if (this.loaded)
@@ -172,8 +173,7 @@ SourceFile.prototype =
 
 SourceFile.getSourceFileByUrl = function(context, url)
 {
-    if (context.sourceFileMap)
-        return context.sourceFileMap[url];
+    return context.getSourceFile(url);
 };
 
 SourceFile.findScriptForFunctionInContext = function(context, fn)

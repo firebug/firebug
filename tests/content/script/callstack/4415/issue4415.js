@@ -3,11 +3,9 @@ function runTest()
     FBTest.sysout("issue4415.START");
     FBTest.openNewTab(basePath + "script/callstack/4415/issue4415.html", function(win)
     {
-        FBTest.openFirebug();
         FBTest.enableScriptPanel(function(win)
         {
-            var panel = FW.Firebug.chrome.selectPanel("script");
-            var stackPanel = FW.Firebug.chrome.selectSidePanel("callstack");
+            var stackPanel = FBTest.selectSidePanel("callstack");
 
             FBTest.waitForBreakInDebugger(FW.Firebug.chrome, 19, false, function(row)
             {

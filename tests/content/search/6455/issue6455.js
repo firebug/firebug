@@ -7,7 +7,7 @@ function runTest()
         FBTest.openFirebug();
         FBTest.selectPanel("cookies");
 
-        FBTestFireCookie.enableCookiePanel(function(win)
+        FBTest.enableCookiesPanel(function(win)
         {
             var testSuite = new FBTest.TaskList();
 

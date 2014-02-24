@@ -7,28 +7,13 @@
 }
 
 #fbToolbox {
-    -moz-appearance: none;
+    border-bottom: 1px solid #A0A0A0;
     background-color: rgb(240, 240, 240);
     background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
-    border-bottom: 1px solid #A0A0A0;
-}
-
-#fbPanelBar1 toolbarbutton {
-    font-size: 12.5px;
 }
 
 #fbCommandEditorHistoryButton[disabled="true"] {
     color: graytext;
-}
-
-#fbToolbarInner {
-    height: 31px;
-}
-
-#fbPanelSplitter > #fbPanelSplitterBox,
-#fbPanelBar2-tabBox,
-#fbCommandToolbar {
-    height: 32px;
 }
 
 #fbCommandArrow {
@@ -37,14 +22,6 @@
 
 #fbCommandBox {
     height: 21px;
-}
-
-.fbCommandLine {
-    padding-bottom: 2px;
-}
-
-#fbToggleCommandEditorBox {
-    margin-bottom: 1px;
 }
 
 panelTab {
@@ -124,12 +101,22 @@ panelTab:not([selected="true"]):hover {
 
 /*************************************************************************************************/
 /* Buttons */
-
+toolbarbutton,
 toolbarbutton[type=menu-button] > .toolbarbutton-menubutton-button {
-  padding: 6px;
+    padding: 2px 6px;
+}
+
+#fbPanelBar1 toolbarbutton {
+    font-size: 12.4px;
 }
 
 toolbarbutton[type=menu-button][open="true"]:not([disabled="true"]) > .toolbarbutton-menubutton-dropmarker {
     border-color: transparent;
     box-shadow: none;
+}
+
+#fbBreakOnNextButton,
+.toolbar-image-button {
+    width: 21px;
+    height: 21px;
 }

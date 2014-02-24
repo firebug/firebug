@@ -1,12 +1,8 @@
 function runTest()
 {
     FBTest.sysout("issue5009.START");
-
     FBTest.openNewTab(basePath + "script/watch/5009/issue5009.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("script");
-
         FBTest.enableScriptPanel(function(win)
         {
             var panel = FBTest.selectSidePanel("watches");
