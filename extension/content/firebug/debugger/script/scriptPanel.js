@@ -317,7 +317,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     showSourceLink: function(sourceLink)
     {
-        this.navigate(sourceLink);
+        // Show the source only if the target source file actually exists.
+        if (SourceFile.getSourceFileByUrl(this.context, sourceLink.href))
+            this.navigate(sourceLink);
     },
 
     showFunction: function(fn)
@@ -400,9 +402,55 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Location List
 
+    showThisCompilationUnit: function(compilationUnit)
+    {
+        if (compilationUnit.getURL().lastIndexOf("chrome://", 0) === 0)
+            return false;
+
+        if (compilationUnit.getKind() === CompilationUnit.EVAL && !this.showEvals)
+            return false;
+
+        if (compilationUnit.getKind() === CompilationUnit.BROWSER_GENERATED && !this.showEvents)
+            return false;
+
+        return true;
+    },
+
     getLocationList: function()
     {
-        return this.context.getAllCompilationUnits();
+        var allSources = this.context.getAllCompilationUnits();
+
+        if (!allSources.length)
+            return [];
+
+        var filter = Options.get("scriptsFilter");
+        this.showEvents = (filter == "all" || filter == "events");
+        this.showEvals = (filter == "all" || filter == "evals");
+
+        var list = [];
+        for (var i = 0; i < allSources.length; i++)
+        {
+            if (this.showThisCompilationUnit(allSources[i]))
+            {
+                list.push(allSources[i]);
+            }
+            else
+            {
+                Trace.sysout("scriptPanel.getLocationList; filtered " + allSources[i].getURL(),
+                    allSources[i]);
+            }
+        }
+
+        if (!list.length && allSources.length)
+            this.context.allScriptsWereFiltered = true;
+        else
+            delete this.context.allScriptsWereFiltered;
+
+        Trace.sysout("scriptPanel.getLocationList; enabledOnLoad: " +
+            this.context.onLoadWindowContent + " all:" + allSources.length + " filtered:" +
+            list.length + " allFiltered: " + this.context.allScriptsWereFiltered, list);
+
+        return list;
     },
 
     getDefaultCompilationUnit: function()
@@ -848,7 +896,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // Get only standard breakpoints. Breakpoints for errors or monitors, etc.
         // Are not displayed in the breakpoint column.
-        BreakpointStore.enumerateBreakpoints(url, function(bp)
+        // Do not get dynamic breakpoints either (second argument false).
+        BreakpointStore.enumerateBreakpoints(url, false, function(bp)
         {
             // xxxHonza: perhaps we should pass only line numbers to the ScriptView?
             breakpoints.push(bp);

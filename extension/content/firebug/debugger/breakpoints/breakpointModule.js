@@ -242,8 +242,14 @@ var BreakpointModule = Obj.extend(Firebug.Module,
         {
             var location = packet.frame.where;
             var bp = BreakpointStore.findBreakpoint(location.url, location.line - 1);
+
+            // xxxHonza: hack, breakpoints in dynamic scripts are using different URLs., fix me.
             if (!bp)
-                return false;
+            {
+                TraceError.sysout("breakpointModule.shouldBreakDebugger; " +
+                    "Paused on a breakpoint, but there is no such breakpoint.", location);
+                return true;
+            }
 
             // If there is normal disabled breakpoint, do not break.
             if (bp.isNormal() && bp.isDisabled())

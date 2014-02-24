@@ -10,9 +10,10 @@ define([
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/debuggerLib",
     "firebug/remoting/debuggerClient",
+    "arch/compilationunit",
 ],
 function (Firebug, FBTrace, Obj, Str, Tool, SourceFile, StackFrame, DebuggerLib,
-    DebuggerClient) {
+    DebuggerClient, CompilationUnit) {
 
 // ********************************************************************************************* //
 // Documentation
@@ -216,60 +217,75 @@ DynamicSourceCollector.prototype =
         if (script.url == "debugger eval code")
             return;
 
-        // Set a breakpoint at the first instruction. When the breakpoint hits we can
-        // see whether the script has been evaluated using eval().
-        // xxxHonza: as soon as |script.introductionKind| is available we don't need
-        // to use breakpoint to find the script-type (kind).
-        var offsets = script.getAllOffsets();
-        for (var p in offsets)
-        {
-            var firstOffset = offsets[p][0];
+        var dynamicTypesMap = {
+            "eval": CompilationUnit.EVAL,
+            "Function": CompilationUnit.EVAL,
+            "handler": CompilationUnit.BROWSER_GENERATED
+        };
 
-            Trace.sysout("sourceTool.onNewScript; set a breakpoint at: " + firstOffset +
-                ", url: " + script.url);
+        var type = script.source.introductionType;
 
-            script.setBreakpoint(firstOffset, this);
-            break;
-        }
+        var scriptType = dynamicTypesMap[type];
+        if (scriptType)
+            this.addDynamicScript(script, scriptType);
 
+        // Don't forget to execute the original logic.
         var dbg = DebuggerLib.getThreadDebugger(this.context);
         this.originalOnNewScript.apply(dbg, arguments);
-
-        sysoutScript("sourceTool.onNewScript; " + script.lineCount, script);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    hit: function(frame)
+    addDynamicScript: function(script, type)
     {
-        // We are collecting only dynamically evaluated scripts (using eval).
-        if (frame.type != "eval")
-            return;
+        // Dynamic scripts has different derived from URL of the parent script.
+        var url = script.source.url;
+        var sourceFile = this.context.getSourceFile(url);
 
-        var script = frame.script;
-        var url = script.url + "@eval" + Obj.getUniqueId();
+        // xxxHonza: we shouldn't create a new {@link SourceFile} for every new
+        // instance of the same dynamically evaluated script.
+        // Fix me and also getSourceFileByScript
+        //if (!sourceFile)
+        {
+            // xxxHonza: there should be only one place where instance of SourceFile is created.
+            var sourceFile = new SourceFile(this.context, null, url, false);
 
-        // xxxHonza: there should be only one place where instance of SourceFile is created.
-        var sourceFile = new SourceFile(this.context, null, url, false);
-        this.context.addSourceFile(sourceFile);
+            // xxxHonza: duplicated from {@link SourceFile}
+            var source = script.source.text.replace(/\r\n/gm, "\n");
+            sourceFile.loaded = true;
+            sourceFile.inProgress = false;
+            sourceFile.lines = Str.splitLines(source);
+            sourceFile.contentType = "text/javascript";
 
-        // xxxHonza: duplicated from {@link SourceFile}
-        var source = script.source.text.replace(/\r\n/gm, "\n");
-        sourceFile.loaded = true;
-        sourceFile.inProgress = false;
-        sourceFile.lines = Str.splitLines(source);
-        sourceFile.contentType = "text/javascript";
+            sourceFile.startLine = script.startLine;
+            sourceFile.nativeScript = script;
+            sourceFile.introductionUrl = script.url;
+            sourceFile.compilation_unit_type = type;
 
-        sourceFile.startLine = script.startLine;
-        sourceFile.nativeScript = script;
+            this.context.addSourceFile(sourceFile);
 
-        this.sourceTool.dispatch("newSource", [sourceFile]);
+            this.sourceTool.dispatch("newSource", [sourceFile]);
+        }
 
-        sysoutScript("sourceTool.hit; frame type: " + frame.type + ", " +
-            script.lineCount, script);
+        // xxxHonza: register existing breakpoints on the server side to break also
+        // in the newly created script.
+        // Interestingly this doesn't work for the first time the script is evaluated
+        // even if the breakpoint is set to the server side when the parent script
+        // is loaded.
+        // xxxHonza: this should be done by the backend. But backend doesn't support
+        // dynamic scripts yet. Make sure there is a platform bug reported (+ test case).
+        var threadActor = DebuggerLib.getThreadActor(this.context.browser);
+        var endLine = script.startLine + script.lineCount - 1;
+        for (var bp of threadActor.breakpointStore.findBreakpoints({url: script.source.url}))
+        {
+            Trace.sysout("dynamicSourceCollector.addDynamicScript; " + script.url + ", " +
+                bp.actor.scripts.length + ", " + 
+                bp.line + ", " + script.startLine + ", " + endLine);
 
-        // TODO remove the breakpoint.
-    }
+            if (bp.line >= script.startLine && bp.line <= endLine)
+                threadActor._setBreakpoint(bp);
+        }
+    },
 };
 
 // ********************************************************************************************* //
@@ -279,11 +295,10 @@ var originalBuildStackFrame = StackFrame.buildStackFrame;
 
 /**
  * StackFrame build decorator fixes information related to dynamic scripts.
- * 1) URL - dynamically evaluated scripts uses the same URL as the parent script,
- * i.e. the script which executed eval()
- * 2) Line - dynamically evaluated script uses the line with eval() statement
- * as the first line. We need to use this first line as an offset when a break
- * in the debugger happen.
+ * 1) URL - dynamically evaluated scripts uses different URLs derived from the parent
+ * script URL.
+ *
+ * xxxHonza: This can be remove as soon as RDP sends proper URLs dynamic scripts.
  */
 function buildStackFrame(frame, context)
 {
@@ -294,8 +309,10 @@ function buildStackFrame(frame, context)
         TraceError.sysout("stackFrame.buildStackFrame; ERROR wrong thread actor state!");
 
     //xxxHonza: rename: nativeFrame -> framePacket and jsdFrame -> nativeFrame
-    stackFrame.jsdFrame = threadActor.youngestFrame;
-    var sourceFile = getSourceFileByScript(context, stackFrame.jsdFrame.script);
+    var frameActor = threadActor._framePool.get(frame.actor);
+    stackFrame.jsdFrame = frameActor.frame;
+
+    var sourceFile = getSourceFileByScript(context, frameActor.frame.script);
     if (sourceFile)
     {
         // Use proper source file that corresponds to the current frame.
@@ -303,10 +320,9 @@ function buildStackFrame(frame, context)
 
         // Fix the starting line (subtract the parent offset).
         // See also: https://bugzilla.mozilla.org/show_bug.cgi?id=332176
-        stackFrame.line = frame.where.line - sourceFile.startLine + 1;
+        //stackFrame.line = frame.where.line - sourceFile.startLine + 1;
 
-        // Use proper (dynamically generated) URL. Dynamic scripts use the same
-        // URL as their parent scripts (scripts that called eval).
+        // Use proper (dynamically generated) URL.
         stackFrame.href = sourceFile.href;
     }
 
@@ -315,47 +331,6 @@ function buildStackFrame(frame, context)
 
 // Monkey patch the original function.
 StackFrame.buildStackFrame = buildStackFrame;
-
-// ********************************************************************************************* //
-// Tracing Helpers
-
-// xxxHonza: refactor or remove these tracing helpers
-function sysoutScript(msg, script)
-{
-    FBTrace.sysout(msg, convertScriptObject(script));
-}
-
-function convertScriptObject(script)
-{
-    var props = Obj.getPropertyNames(script);
-    var obj = {};
-
-    for (var p in props)
-        obj[props[p]] = script[props[p]];
-
-    var children = script.getChildScripts();
-
-    var result = [];
-    for (var i in children)
-        result.push(convertScriptObject(children[i]));
-
-    return {
-        script: obj,
-        childScripts: result,
-        url: script.url,
-        startLine: script.startLine,
-        lineCount: script.lineCount,
-        sourceStart: script.sourceStart,
-        sourceLength: script.sourceLength,
-        source: {
-            text: script.source.text,
-            url: script.source.url,
-            introductionKind: script.source.introductionKind,
-        },
-        snippet: script.source.text.slice(script.sourceStart, script.sourceStart +
-            script.sourceLength)
-    };
-}
 
 // ********************************************************************************************* //
 // Script Helpers

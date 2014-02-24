@@ -175,10 +175,15 @@ BreakpointPanel.prototype = Obj.extend(Panel,
             var unit = context.compilationUnits[url];
             var sourceFile = unit.sourceFile;
 
-            BreakpointStore.enumerateBreakpoints(url, function(bp)
+            BreakpointStore.enumerateBreakpoints(url, true, function(bp)
             {
                 self.getSourceLine(bp, unit.sourceFile);
-                breakpoints.push(bp);
+
+                // xxxHonza: optimize me
+                // There can be duplicities since dynamic breakpoint are returned for
+                // the parent script URL as well as for the (dynamic) URL they really belong to.
+                if (breakpoints.indexOf(bp) == -1)
+                    breakpoints.push(bp);
             });
 
             BreakpointStore.enumerateErrorBreakpoints(url, function(bp)
@@ -210,6 +215,14 @@ BreakpointPanel.prototype = Obj.extend(Panel,
     {
         var self = this;
         var line = bp.lineNo;
+
+        if (bp.href != sourceFile.href)
+        {
+            var name = StackFrame.guessFunctionName(bp.href, line + 1);
+            bp.setName(name);
+            bp.setSourceLine("");
+            return;
+        }
 
         // Getting source might be asynchronous in case the source is not yet
         // fetched from the server side.
@@ -338,6 +351,9 @@ BreakpointPanel.prototype = Obj.extend(Panel,
         // Remove the rest of all the other kinds of breakpoints (after refresh).
         // These can come from various modules and perhaps extensions, so use
         // the appropriate remove buttons.
+        // xxxHonza: if the breakpoint removal fails from some reason (breakpoint doesn't
+        // exist, etc.) the UI BP entry is not removed, and so the |buttons| array is never
+        // empty. This causes infinite recursion.
         var buttons = this.panelNode.getElementsByClassName("closeButton");
         while (buttons.length)
             this.click(buttons[0]);

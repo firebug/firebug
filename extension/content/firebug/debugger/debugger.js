@@ -49,7 +49,6 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         Firebug.registerTracePrefix("debuggerTool.", "DBG_DEBUGGERTOOL", false);
         Firebug.registerTracePrefix("sourceTool.", "DBG_SOURCETOOL", false);
         Firebug.registerTracePrefix("breakpointTool.", "DBG_BREAKPOINTTOOL", false);
-        Firebug.registerTracePrefix("sourceTool.", "DBG_SOURCETOOL", false);
 
         // Listen to the main client, which represents the connection to the server.
         // The main client object sends various events about attaching/detaching
@@ -75,11 +74,21 @@ Firebug.Debugger = Obj.extend(ActivableModule,
             tooltip = Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR(tooltip), shortcut]);
             Firebug.chrome.$(id).setAttribute("tooltiptext", tooltip);
         };
+
         setTooltip("fbRerunButton", "script.Rerun", "Shift+F8");
         setTooltip("fbContinueButton", "script.Continue", "F8");
         setTooltip("fbStepIntoButton", "script.Step_Into", "F11");
         setTooltip("fbStepOverButton", "script.Step_Over", "F10");
         setTooltip("fbStepOutButton", "script.Step_Out", "Shift+F11");
+    },
+
+    initializeUI: function()
+    {
+        ActivableModule.initializeUI.apply(this, arguments);
+
+        // TODO move to script.js
+        this.filterButton = Firebug.chrome.$("fbScriptFilterMenu");
+        this.filterMenuUpdate();
     },
 
     shutdown: function()
@@ -496,6 +505,7 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         var frame = context.stoppedFrame;
         if (!frame || !frame.scopes)
         {
+            //xxxHonza: Simon, I am seeing this a looot, is it a problem?
             TraceError.sysout("debugger.getCurrentFrameKeys; ERROR scopes: " +
                 (frame ? frame.scopes : "no stopped frame"));
             return;
@@ -559,23 +569,24 @@ Firebug.Debugger = Obj.extend(ActivableModule,
     {
         var menu = event.target;
         Options.set("scriptsFilter", menu.value);
+
         Firebug.Debugger.filterMenuUpdate();
     },
 
     menuFullLabel:
     {
         "static": Locale.$STR("ScriptsFilterStatic"),
-        evals: Locale.$STR("ScriptsFilterEval"),
-        events: Locale.$STR("ScriptsFilterEvent"),
-        all: Locale.$STR("ScriptsFilterAll"),
+        "evals": Locale.$STR("ScriptsFilterEval"),
+        "events": Locale.$STR("ScriptsFilterEvent"),
+        "all": Locale.$STR("ScriptsFilterAll"),
     },
 
     menuShortLabel:
     {
         "static": Locale.$STR("ScriptsFilterStaticShort"),
-        evals: Locale.$STR("ScriptsFilterEvalShort"),
-        events: Locale.$STR("ScriptsFilterEventShort"),
-        all: Locale.$STR("ScriptsFilterAllShort"),
+        "evals": Locale.$STR("ScriptsFilterEvalShort"),
+        "events": Locale.$STR("ScriptsFilterEventShort"),
+        "all": Locale.$STR("ScriptsFilterAllShort"),
     },
 
     onScriptFilterMenuPopupShowing: function(menu, context)
