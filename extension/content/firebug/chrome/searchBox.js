@@ -1,39 +1,96 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/chrome/module",
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/object",
     "firebug/lib/css",
     "firebug/lib/search",
     "firebug/lib/system",
     "firebug/lib/string",
     "firebug/lib/locale",
-    "firebug/lib/options"
+    "firebug/lib/options",
+    "firebug/lib/promise",
+    "firebug/chrome/module",
 ],
-function(Module, Obj, Firebug, Css, Search, System, Str, Locale, Options) {
+function(Firebug, Obj, Css, Search, System, Str, Locale, Options, Promise, Module) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Ci = Components.interfaces;
 
-const searchDelay = 150;
+// For smooth incremental searching (in case the user is typing quickly).
+var searchDelay = 150;
+
+// Tracing
+var TraceError = FBTrace.toError();
+var Trace = FBTrace.to("DBG_SEARCH");
 
 // ********************************************************************************************* //
 
 /**
  * @module Implements basic search box functionality. The box is displayed on the right side
  * of the Firebug's toolbar. Specific search capabilities depends on the current panel
- * and implemented in <code>panel.search</code> method. The search-box is automatically
- * available for panels that have <code>searchable<code> property set to true (set to
- * false by default).
+ * implemented in {@link Panel.search} method.
+ * The search-box is automatically available for panels that have {@link Panel.searchable}
+ * property set to true (false by default).
  */
-Firebug.Search = Obj.extend(Module,
+var SearchBox = Obj.extend(Module,
+/** @lends SearchBox */
 {
-    dispatchName: "search",
+    dispatchName: "searchBox",
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Module Implementation
+
+    internationalizeUI: function()
+    {
+        var sensitive = Firebug.chrome.$("fbSearchBoxIsSensitive");
+        sensitive.value = Locale.$STR("search.Case_Sensitive");
+        sensitive.setAttribute("tooltiptext", Locale.$STR("search.tip.Case_Sensitive"));
+
+        var notSensitive = Firebug.chrome.$("fbSearchBoxIsNotSensitive");
+        notSensitive.value = Locale.$STR("search.Case_Insensitive");
+        notSensitive.setAttribute("tooltiptext", Locale.$STR("search.tip.Case_Insensitive"));
+    },
+
+    shutdown: function()
+    {
+    },
+
+    showPanel: function(browser, panel)
+    {
+        // Manage visibility of the search-box according to the searchable flag.
+        var searchBox = Firebug.chrome.$("fbSearchBox");
+        searchBox.status = "noSearch";
+
+        Css.removeClass(searchBox, "fbSearchBox-attention");
+        Css.removeClass(searchBox, "fbSearchBox-autoSensitive");
+
+        if (panel)
+        {
+            searchBox.collapsed = !panel.searchable;
+            searchBox.updateOptions(panel.getSearchOptionsMenuItems());
+        }
+        else
+        {
+            searchBox.collapsed = false;
+        }
+
+        Trace.sysout("searchBox.showPanel; status: " + searchBox.status);
+
+        this.setPlaceholder();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Search Logic
+
+    /**
+     * Executed when the user focuses the search box by accel+f keyboard shortcut
+     * causing the search box to get keyboard focus.
+     */
     onSearchCommand: function(document)
     {
         var el = document.activeElement;
@@ -68,6 +125,7 @@ Firebug.Search = Obj.extend(Module,
     {
         var searchBox = Firebug.chrome.$("fbSearchBox");
         searchBox.value = text;
+
         this.update(context);
     },
 
@@ -79,18 +137,6 @@ Firebug.Search = Obj.extend(Module,
     searchPrev: function(context)
     {
         return this.update(context, true, true);
-    },
-
-    displayOnly: function(text, context)
-    {
-        var searchBox = Firebug.chrome.$("fbSearchBox");
-
-        if (text && text.length > 0)
-            Css.setClass(searchBox, "fbSearchBox-attention");
-        else
-            Css.removeClass(searchBox, "fbSearchBox-attention");
-
-        searchBox.value = text;
     },
 
     focus: function(context)
@@ -105,6 +151,17 @@ Firebug.Search = Obj.extend(Module,
         searchBox.select();
     },
 
+    /**
+     * Implements the main search logic, which is consequently distributed to the
+     * current panel.
+     *
+     * @param {TabContext} context The current Firebug context (document)
+     * @param {Boolean} immediate Set to true if the search should start synchronously.
+     * This field is used for search 'previous' and 'next', otherwise searching is always done
+     * on timeout so it doesn't slow down user typing within the search box (search
+     * result is updated as the user is typing).
+     * @param {Boolean} reverse Set to true if the search should be performed backwards.
+     */
     update: function(context, immediate, reverse)
     {
         var panel = Firebug.chrome.getSelectedPanel();
@@ -127,75 +184,107 @@ Firebug.Search = Obj.extend(Module,
             Css.removeClass(panelNode, "searching");
         }
 
-        if (Firebug.Search.isCaseSensitive(value))
+        if (SearchBox.isCaseSensitive(value))
             Css.setClass(searchBox, "fbSearchBox-autoSensitive");
         else
             Css.removeClass(searchBox, "fbSearchBox-autoSensitive");
 
-        if (FBTrace.DBG_SEARCH)
-        {
-            FBTrace.sysout("search Firebug.Search.isAutoSensitive(value): " +
-                Firebug.Search.isAutoSensitive(value) + " for " + value, searchBox);
-        }
+        Trace.sysout("searchBox.update; isAutoSensitive(value): " +
+            SearchBox.isAutoSensitive(value) + " for " + value, searchBox);
 
         // Cancel the previous search to keep typing smooth
+        // xxxHonza: perhaps we could also reject the previous in-progress promise?
         clearTimeout(panelNode.searchTimeout);
 
-        if (immediate)
+        var self = this;
+        var doSearch = function()
         {
-            var found = panel.search(value, reverse);
+            var result = panel.search(value, reverse);
             panel.searchText = value;
-            if (!found && value)
-               this.onNotFound();
 
-            if (value)
+            // It's not nice to use isPromise in general, but {@link Promise} as the return
+            // value of {@link Panel.search} method isn't mandatory for now.
+            if (isPromise(result))
             {
-                // Hides all nodes that didn't pass the filter
-                Css.setClass(panelNode, "searching");
+                // TODO: we can set the icon to a doc-loading spinner
+                // (or keep "searching" in place).
+                result.then(function(found)
+                {
+                    // TODO: remove the doc-loading icon if any.
+                    self.onResult(panel, found, immediate);
+
+                    // In case the promise is resolved synchronously, the return value
+                    // will be the real result value (not a promise).
+                    result = found;
+                });
             }
             else
             {
-                // Makes all nodes visible again
-                Css.removeClass(panelNode, "searching");
+                self.onResult(panel, result, immediate);
             }
 
-            return found;
+            return result;
+        };
+
+        if (immediate)
+            return doSearch();
+        else
+            panelNode.searchTimeout = setTimeout(doSearch, searchDelay);
+
+        Trace.sysout("searchBox.update; END");
+    },
+
+    onResult: function(panel, result, immediate)
+    {
+        Trace.sysout("searchBox.onResult; result: " + result, result);
+
+        var searchBox = Firebug.chrome.$("fbSearchBox");
+        var value = searchBox.value;
+
+        if (!result && value)
+        {
+            // For non-immediate (automatic) searches, ignore search failures if
+            // the panel tells us to. This is used e.g. for HTML panel selector
+            // searches, where even if a typed string (".cla", say) doesn't
+            // match anything, an extension of it (".class") still could.
+            var shouldIgnore = panel.shouldIgnoreIntermediateSearchFailure;
+            if (!immediate && shouldIgnore && shouldIgnore.call(panel, value))
+                result = true;
+            else
+                this.onNotFound();
+        }
+
+        this.updatePanelStyle(panel, value);
+
+        // The {@link Panel.search} method result value has three states:
+        // true: match has been found further in the current document
+        // false: match not found
+        // "wraparound": match has been found in the next document, or search started
+        //      from the beginning again.
+        if (typeof result == "string")
+            searchBox.status = result;
+        else
+            searchBox.status = (result ? "found" : "notfound");
+
+        Trace.sysout("searchBox.onResult; status: " + searchBox.status +
+            ", value: " + value + ", result: " + result);
+
+        return result;
+    },
+
+    updatePanelStyle: function(panel, value)
+    {
+        var panelNode = panel.panelNode;
+
+        if (value)
+        {
+            // Hides all nodes that didn't pass the filter
+            Css.setClass(panelNode, "searching");
         }
         else
         {
-            var sBox = this;
-            // After a delay, perform the search
-            panelNode.searchTimeout = setTimeout(function()
-            {
-                var found = panel.search(value, reverse);
-                panel.searchText = value;
-                if (!found && value)
-                {
-                    var shouldIgnore = panel.shouldIgnoreIntermediateSearchFailure;
-                    if (shouldIgnore && shouldIgnore.call(panel, value))
-                        found = true;
-                    else
-                        sBox.onNotFound();
-                }
-
-                if (value)
-                {
-                    // Hides all nodes that didn't pass the filter
-                    Css.setClass(panelNode, "searching");
-                }
-                else
-                {
-                    // Makes all nodes visible again
-                    Css.removeClass(panelNode, "searching");
-                }
-
-                searchBox.status = (found ? "found" : "notfound");
-                sBox.setPlaceholder();
-
-                if (FBTrace.DBG_SEARCH)
-                    FBTrace.sysout("search " + searchBox.status + " " + value);
-
-            }, searchDelay);
+            // Makes all nodes visible again
+            Css.removeClass(panelNode, "searching");
         }
     },
 
@@ -204,6 +293,9 @@ Firebug.Search = Obj.extend(Module,
         if (this.status != "notfound")
             System.beep();
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Search Options
 
     isCaseSensitive: function(text)
     {
@@ -217,7 +309,7 @@ Firebug.Search = Obj.extend(Module,
 
     getTestingRegex: function(text)
     {
-        var caseSensitive = Firebug.Search.isCaseSensitive(text);
+        var caseSensitive = SearchBox.isCaseSensitive(text);
 
         try
         {
@@ -299,53 +391,26 @@ Firebug.Search = Obj.extend(Module,
             searchBox.placeholder = Locale.$STRF("search.Placeholder", [title]);
         }
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // extends Module
-
-    internationalizeUI: function()
-    {
-        var sensitive = Firebug.chrome.$("fbSearchBoxIsSensitive");
-        sensitive.value = Locale.$STR("search.Case_Sensitive");
-        sensitive.setAttribute("tooltiptext", Locale.$STR("search.tip.Case_Sensitive"));
-
-        var notSensitive = Firebug.chrome.$("fbSearchBoxIsNotSensitive");
-        notSensitive.value = Locale.$STR("search.Case_Insensitive");
-        notSensitive.setAttribute("tooltiptext", Locale.$STR("search.tip.Case_Insensitive"));
-    },
-
-    shutdown: function()
-    {
-    },
-
-    showPanel: function(browser, panel)
-    {
-        // Manage visibility of the search-box according to the searchable flag.
-        var searchBox = Firebug.chrome.$("fbSearchBox");
-        searchBox.status = "noSearch";
-        Css.removeClass(searchBox, "fbSearchBox-attention");
-        Css.removeClass(searchBox, "fbSearchBox-autoSensitive");
-
-        if (panel)
-        {
-            searchBox.collapsed = !panel.searchable;
-            searchBox.updateOptions(panel.getSearchOptionsMenuItems());
-        }
-        else
-        {
-            searchBox.collapsed = false;
-        }
-
-        this.setPlaceholder();
-    }
 });
+
+// ********************************************************************************************* //
+// Helpers
+
+function isPromise(object)
+{
+    return object && typeof object.then == "function";
+}
 
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(Firebug.Search);
+Firebug.registerModule(SearchBox);
 
-return Firebug.Search;
+// xxxHonza: backward compatibility
+// Replace all Firebug.Search by SearchBox
+Firebug.Search = SearchBox;
+
+return SearchBox;
 
 // ********************************************************************************************* //
 });

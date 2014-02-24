@@ -871,7 +871,7 @@ function getOutsider(element, group, stepper)
     {
         next = stepper(next || element);
     }
-    while (Dom.isAncestor(next, group) || isGroupInsert(next, parentGroup));
+    while (next && (Dom.isAncestor(next, group) || isGroupInsert(next, parentGroup)));
 
     return next;
 }

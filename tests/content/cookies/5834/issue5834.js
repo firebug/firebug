@@ -5,7 +5,7 @@ function runTest()
     FBTest.openNewTab(basePath + "cookies/5834/issue5834.php", function(win)
     {
         FBTest.openFirebug();
-        FBTestFireCookie.enableCookiePanel(function(win)
+        FBTest.enableCookiesPanel(function(win)
         {
             FBTest.selectPanel("cookies");
 
@@ -53,7 +53,7 @@ function longURLEncoded(callback)
 function executeTest(cookieName, expected, callback)
 {
     var panelNode = FBTest.getSelectedPanel().panelNode;
-    var cookie = FBTestFireCookie.getCookieByName(panelNode, cookieName);
+    var cookie = FBTest.getCookieByName(panelNode, cookieName);
     var sizeCol = cookie.row.getElementsByClassName("cookieRawSizeCol").item(0);
 
     var config = {tagName: "table", classes: "sizeInfoTip"};

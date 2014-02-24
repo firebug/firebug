@@ -10,6 +10,10 @@ body {
     /* Aspect    0.547          0.547   0.547 */
     font-family: Lucida Grande, Tahoma, sans-serif;
     font-size: 11px;
+    /* Required, otherwise the extension "Webpage Snapshot - Snapilicious" (version 3.15)
+       breaks the panel display */
+    position: static;
+    -moz-control-character-visibility: visible;
 }
 
 h1 {

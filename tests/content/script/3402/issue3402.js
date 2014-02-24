@@ -4,7 +4,6 @@ function runTest()
 
     FBTest.openNewTab(basePath + "script/3402/issue3402.html", function(win)
     {
-        FBTest.openFirebug();
         FBTest.enableScriptPanel(function(win)
         {
             var fileName = basePath + "script/3402/domplate.js";
@@ -21,8 +20,6 @@ function runTest()
                     {
                         FBTest.removeBreakpoint(null, fileName, 1069, function(row)
                         {
-                            FBTest.ok(row.getAttribute("breakpoint") != "true",
-                                "The breakpoint must be removed by now");
                             FBTest.testDone("issue3402.DONE");
                         });
                     }, 500);

@@ -40,7 +40,7 @@ function runTest()
             {
                 cmdLine.value = "";
                 FBTest.typeCommand(";obj.ab");
-                FBTest.compare(";obj.abcdE", completionBox.value,
+                FBTest.compare("cdE", completionBox.value.substr(";obj.ab".length),
                     "Completion box should retain the exact prefix");
                 waitForOpen(function()
                 {

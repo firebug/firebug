@@ -45,6 +45,11 @@ window[chromehidden~="toolbar"] #fbToolbar {
     -moz-binding: url("firefox/bindings.xml#initializer");
     height: 270px;
     background-color: -moz-dialog;
+    font-size: 12px;
+}
+
+#mainPopupSet, #fbResumeBox {
+    font-size: initial;
 }
 
 /*************************************************************************************************/
@@ -62,6 +67,8 @@ textbox#fbCommandEditor {
 .fbCommandLineCompletionPanel {
     border: 1px solid #BEBEBE;
     border-radius: 5px;
+
+    font-size: 12px;
 
     /* Remove xul panel shadow */
     -moz-window-shadow: none !important;

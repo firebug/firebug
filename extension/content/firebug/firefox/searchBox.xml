@@ -9,7 +9,7 @@
 <!-- Searchbox is located in the main Firebug toolbar and can be used to search
     for a keyword within the current panel. -->
 <binding id="searchBox">
-    <content sizetopopup="none" align="center">
+    <content sizetopopup="none">
         <xul:textbox anonid="searchBox" flex="1" width="0"
             rows="1" label="search.Firebug_Search" class="fbsearch-textbox"
             onkeyup="onSearchBoxKeyUp(event, this);" aria-describedby="fbSearchBoxDescription">
@@ -25,7 +25,7 @@
             tooltiptext="search.tip.Next"
             role="menuitem"
             oncommand="searchNext();"/>
-        <xul:description anonid="fbSearchBoxDescription"  collapsed="true"/>
+        <xul:description anonid="fbSearchBoxDescription" collapsed="true"/>
         <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true"
             ignorekeys="true" role="presentation" type="arrow">
             <xul:vbox>
@@ -216,13 +216,13 @@
 
         <method name="searchNext">
             <body><![CDATA[
-                this.status = Firebug.Search.searchNext(Firebug.currentContext);
+                Firebug.Search.searchNext(Firebug.currentContext);
             ]]></body>
         </method>
 
         <method name="searchPrev">
             <body><![CDATA[
-                this.status = Firebug.Search.searchPrev(Firebug.currentContext);
+                Firebug.Search.searchPrev(Firebug.currentContext);
             ]]></body>
         </method>
 

@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #3503</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<h1>Issue #3503</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=3503">Issue #3503</a>
+- <span class="h3">Large arrays not printed in Windows</span>
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Click on the <code>Execute Test</code> button below.</li>
+<li>Check the Console panel.</li>
+<li>There should be a log containing: [undefined, undefined, (etc.), 2999999700 more...]</li>
+</ol>
+
+<button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+
+<script type="text/javascript">
+function onExecuteTest()
+{
+    var ar = [];
+    ar.length = 3e9;
+    console.log(ar);
+}
+</script>
+
+</body>
+</html>

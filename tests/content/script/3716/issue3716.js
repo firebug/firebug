@@ -3,7 +3,6 @@ function runTest()
     FBTest.sysout("issue3716.START");
     FBTest.openNewTab(basePath + "script/3716/issue3716.html", function(win)
     {
-        FBTest.openFirebug();
         FBTest.enableScriptPanel(function(win)
         {
             FW.Firebug.chrome.selectPanel("script");

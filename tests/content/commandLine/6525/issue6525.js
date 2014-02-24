@@ -5,7 +5,7 @@ function runTest()
     {
         FBTest.openFirebug();
 
-        FBTestFireCookie.enableCookiePanel();
+        FBTest.enableCookiesPanel();
         FBTest.enableConsolePanel();
         FBTest.enableNetPanel(function(win)
         {
@@ -44,7 +44,7 @@ function checkCookiesPanel(callback)
 {
     var panel = FBTest.selectPanel("cookies");
 
-    var row = FBTestFireCookie.getCookieRowByName(panel.panelNode, "TestCookieIssue6525");
+    var row = FBTest.getCookieRowByName(panel.panelNode, "TestCookieIssue6525");
     FBTest.executeContextMenuCommand(row, "fbUseInCommandLine", function()
     {
         FBTest.executeCommandAndVerify(callback, "$p.name", "\"TestCookieIssue6525\"",

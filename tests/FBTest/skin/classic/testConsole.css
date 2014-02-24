@@ -20,12 +20,12 @@ body {
 /* Toolbar buttons */
 
 #runAll {
-    list-style-image: url("chrome://fbtest/skin/runAll.png");
+    list-style-image: url("chrome://fbtest/skin/run.svg");
     -moz-image-region: rect(0px 16px 16px 0px);
 }
 
 #stopTest {
-    list-style-image: url("chrome://fbtest/skin/stop.png");
+    list-style-image: url("chrome://fbtest/skin/stop.svg");
 }
 
 #haltOnFailedTest {
@@ -33,8 +33,7 @@ body {
 }
 
 #refreshList {
-    list-style-image: url("chrome://browser/skin/Toolbar.png");
-    -moz-image-region: rect(0px 72px 19px 54px);
+    list-style-image: url("chrome://fbtest/skin/refresh.svg");
 }
 
 #noTestTimeout {
@@ -42,8 +41,7 @@ body {
 }
 
 #restartFirefox {
-    list-style-image: url("chrome://browser/skin/Toolbar.png");
-    -moz-image-region: rect(0px 324px 19px 306px);
+    list-style-image: url("chrome://fbtest/skin/restart.svg");
 }
 
 /************************************************************************************************/

@@ -92,11 +92,6 @@ FBTestApp.Test.prototype =
         this.group.update();
     },
 
-    onManualVerify: function(verifyMsg, instructions)
-    {
-        Css.removeClass(this.row, "running");
-    },
-
     getErrors: function(includeMessages)
     {
         if (!this.error || this.category == "fails")

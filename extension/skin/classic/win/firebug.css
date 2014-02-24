@@ -24,7 +24,7 @@
 }
 
 toolbarbutton {
-    padding: 2px 6px;
+    padding: 1px 6px;
 }
 
 .toolbar-text-button > .toolbarbutton-icon:not([src]),
@@ -255,15 +255,6 @@ panelTab[selected="true"] > panelTabMenu {
 .panelStatusSeparator {
     margin: 0;
     color: graytext;
-}
-
-.panelStatusLabel {
-    cursor: pointer;
-    color: #000000;
-}
-
-.panelStatusLabel > .toolbarbutton-icon {
-    margin: 0 !important;
 }
 
 /************************************************************************************************/

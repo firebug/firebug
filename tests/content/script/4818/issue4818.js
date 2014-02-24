@@ -4,7 +4,6 @@ function runTest()
 
     FBTest.openNewTab(basePath + "script/4818/issue4818.html", function(win)
     {
-        FBTest.selectPanel("script");
         FBTest.enableScriptPanel(function(win)
         {
             var chrome = FW.Firebug.chrome;
@@ -14,12 +13,12 @@ function runTest()
                 {
                     FBTest.compare("ReferenceError: v1 is not defined",
                         valueCol.textContent,
-                        "Verify the watch panel value");
+                        "Verify v1 value: " + valueCol.textContent);
 
                     FBTest.addWatchExpression(null, "v2", function(valueCol)
                     {
                         FBTest.compare("\"value2\"", valueCol.textContent,
-                            "Verify the watch panel value");
+                            "Verify v2 value: " + valueCol.textContent);
 
                         var doc = chrome.window.document;
                         var panelStatus = doc.getElementById("fbPanelStatus");

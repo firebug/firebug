@@ -32,12 +32,11 @@ Locale.registerStringBundle("chrome://firebug/locale/keys.properties");
 Locale.registerStringBundle("chrome://global-platform/locale/platformKeys.properties");
 Locale.registerStringBundle("chrome://global/locale/keys.properties");
 
-// JSD2 related new strings are in a separate bundle
-// They should be integrated/remoted at the end of JSD2 refactoring
-Locale.registerStringBundle("chrome://firebug/locale/firebug-jsd2.properties");
-
 Cu.import("resource://firebug/loader.js");
 Cu.import("resource://firebug/fbtrace.js");
+
+var servicesScope = {};
+Cu.import("resource://gre/modules/Services.jsm", servicesScope);
 
 const firstRunPage = "https://getfirebug.com/firstrun#Firebug ";
 
@@ -154,7 +153,11 @@ BrowserOverlay.prototype =
         var self = this;
         scriptSources.forEach(function(url)
         {
-            $script(self.doc, url);
+            servicesScope.Services.scriptloader.loadSubScript(url, self.doc);
+
+            // xxxHonza: This doesn't work since Firefox 28. From some reason the script
+            // isn't parsed when inserted into the second browser window. See issue 6731
+            // $script(self.doc, url);
         });
 
         // Create Firebug splitter element.
@@ -181,6 +184,12 @@ BrowserOverlay.prototype =
             FirebugLoader.dispatchToScopes("firebugFrameLoad", [self.win.Firebug]);
             callback && callback(self.win.Firebug);
         }, false);
+    },
+
+    stopFirebug: function()
+    {
+        this.unloadContextMenuOverlay();
+        BrowserCommands.resetDisabledKeys(this.win);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -341,8 +350,8 @@ BrowserOverlay.prototype =
             var label = Str.capitalize(pos);
 
             var item = $menuitem(this.doc, {
-                label: Locale.$STR("firebug.menu." + label),
-                tooltiptext: Locale.$STR("firebug.menu.tip." + label),
+                label: "firebug.menu." + label,
+                tooltiptext: "firebug.menu.tip." + label,
                 type: "radio",
                 oncommand: oncommand.replace("%pos%", pos),
                 checked: (currPos == pos)

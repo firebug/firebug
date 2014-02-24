@@ -1228,11 +1228,7 @@
             event.preventDefault();
         ]]></handler>
 
-        <handler event="keypress" keycode="VK_RETURN" modifiers="meta" preventdefault="true"><![CDATA[
-            Firebug.CommandLine.enter(Firebug.currentContext);
-        ]]></handler>
-
-        <handler event="keypress" keycode="VK_RETURN" modifiers="control" preventdefault="true"><![CDATA[
+        <handler event="keypress" keycode="VK_RETURN" modifiers="accel" preventdefault="true"><![CDATA[
             Firebug.CommandLine.enter(Firebug.currentContext);
         ]]></handler>
 

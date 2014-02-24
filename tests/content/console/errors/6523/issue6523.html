@@ -16,7 +16,7 @@ function onExecuteTest()
 
     frame.onload = function()
     {
-        frame.contentWindow.onExecuteTest();
+        frame.contentWindow.onExecuteTest2();
     }
 
     var parentNode = document.getElementById("frameContainer");
@@ -31,7 +31,9 @@ function onExecuteTest()
     <section id="description">
         <h3>Steps to reproduce</h3>
         <ol>
-            <li>Enable the Console panel and reload the page</li>
+            <li>Open Firebug</li>
+            <li>Enable the Console and Script panel
+            <li>Reload the page</li>
             <li>Check <i>Show Stack Trace with Errors</i> option</li>
             <li>Click the test button
                 <button id="testButton" onclick="onExecuteTest()">Execute</button>
@@ -39,10 +41,10 @@ function onExecuteTest()
             <li>There should be one error log in the Console panel: <code>Error: b</code><br/>
             Expand it and check the stack trace. It should be:<br/>
 <code>
-b()
-d()
-onExecuteTest()
-onclick()
+b(age=12, name="test")
+d(age=12, name="test")
+onExecuteTest2()
+onExecuteTest/frame.onload()
 </code>
             </li>
         </ol>

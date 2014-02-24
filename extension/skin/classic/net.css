@@ -1,9 +1,5 @@
 /* See license.txt for terms of usage */
 
-.panelNode-net {
-    overflow-x: hidden;
-}
-
 .netTable {
     width: 100%;
 }
@@ -247,9 +243,11 @@
     display: none;
     -moz-user-select: none;
     padding-right: 10px;
-    max-width: 100%;
+    padding-bottom: 2px;
+    max-width: calc(100% - 38px);
     background: #FFFFFF;
     z-index: 200;
+    text-overflow: ellipsis;
 }
 
 .netHrefCol:hover > .netFullHrefLabel {
@@ -688,12 +686,21 @@ body[resizingHtmlPreview="true"] .netInfoHtmlPreview {
 /* Request & Response Headers */
 
 .netHeadersViewSource {
-    color: #bdbdbd;
     margin-left: 200px;
+}
+
+.netPostParameterSort {
+    margin-left: 30px;
+}
+
+.netHeadersViewSource,
+.netPostParameterSort {
+    color: #bdbdbd;
     font-weight: normal;
 }
 
-.netHeadersViewSource:hover {
+.netHeadersViewSource:hover,
+.netPostParameterSort:hover {
     color: blue;
     cursor: pointer;
 }

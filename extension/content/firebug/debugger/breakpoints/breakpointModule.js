@@ -25,7 +25,11 @@ var Trace = FBTrace.to("DBG_BREAKPOINTMODULE");
 // ********************************************************************************************* //
 // Breakpoints
 
-Firebug.Breakpoint = Obj.extend(Firebug.Module,
+/**
+ * @module
+ */
+var BreakpointModule = Obj.extend(Firebug.Module,
+/** @lends BreakpointModule */
 {
     dispatchName: "BreakpointModule",
 
@@ -248,14 +252,20 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
             // Evaluate optional condition
             if (bp.condition)
             {
-                Trace.sysout("debuggerTool.paused; Evaluate breakpoint condition: " +
+                Trace.sysout("breakpointModule.paused; on conditional breakpoint: " +
                     bp.condition, bp);
 
                 // xxxHonza: the condition-eval could be done server-side
-                // see: https://bugzilla.mozilla.org/show_bug.cgi?id=812172 
-                tool.eval(context.currentFrame, bp.condition);
-                context.conditionalBreakpointEval = true;
-                return false;
+                // see: https://bugzilla.mozilla.org/show_bug.cgi?id=812172
+                //
+                // For now, Firebug modifies the server side BreakpointActor
+                // See: {@link module:firebug/debugger/actors/breakpointActor}
+                //
+                // tool.eval(context.currentFrame, bp.condition);
+                // context.conditionalBreakpointEval = true;
+                // return false;
+
+                return true;
             }
         }
 
@@ -266,7 +276,7 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
 
             var result = packet.why.frameFinished["return"];
 
-            Trace.sysout("debuggerTool.paused; Breakpoint condition evaluated: " +
+            Trace.sysout("breakpointModule.paused; Breakpoint condition evaluated: " +
                 result, result);
 
             // Resume debugger if the breakpoint condition evaluation is false
@@ -291,9 +301,11 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(Firebug.Breakpoint);
+Firebug.registerModule(BreakpointModule);
 
-return Firebug.Breakpoint;
+Firebug.Breakpoint = BreakpointModule;
+
+return BreakpointModule;
 
 // ********************************************************************************************* //
 });

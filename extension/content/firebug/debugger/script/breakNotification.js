@@ -33,8 +33,8 @@ var Trace = FBTrace.to("DBG_BREAKNOTIFICATION");
  *
  * @param doc the document to contain the notification
  * @param cause info object for the popup, with these optional fields:
- *   strings: title, message, attrName
- *   elements: target, relatedTarget: element
+ *   strings: message, attrName
+ *   elements: target
  *   objects: prevValue, newValue
  */
 function BreakNotification(cause)

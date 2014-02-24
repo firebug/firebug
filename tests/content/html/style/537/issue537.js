@@ -6,15 +6,9 @@ function runTest()
         FBTest.openFirebug();
         FBTest.selectPanel("html");
 
-        // Search for 'element1' within the HTML panel
-        FBTest.searchInHtmlPanel("element1", function(sel)
+        FBTest.selectElementInHtmlPanel("element1", function(sel)
         {
-            FBTest.sysout("issue537; selection:", sel);
-
-            // Click on the element to make sure it's selected.
-            var nodeLabelBox = FW.FBL.getAncestorByClass(sel.anchorNode, "nodeLabelBox");
-            var nodeTag = nodeLabelBox.querySelector(".nodeTag");
-            FBTest.mouseDown(nodeTag);
+            FBTest.progress("issue537; selection:", sel);
 
             var sidePanel = FBTest.selectSidePanel("css");
             var rules = sidePanel.panelNode.querySelectorAll(".cssRule");

@@ -50,7 +50,8 @@ ErrorMessageObj.prototype =
         var sourceFile = SourceFile.getSourceFileByUrl(this.context, this.href);
         if (!sourceFile)
         {
-            TraceError.sysout("errorMessageObj.getSourceLine; ERROR no source file!");
+            TraceError.sysout("errorMessageObj.getSourceLine; ERROR no source file! " +
+                this.href);
             return;
         }
 
@@ -89,12 +90,6 @@ ErrorMessageObj.prototype =
             this.lineNo = frame.line;
             this.trace = trace;
         }
-    },
-
-    correctSourcePoint: function(sourceName, lineNumber)
-    {
-        this.href = sourceName;
-        this.lineNo = lineNumber;
     },
 
     getId: function()

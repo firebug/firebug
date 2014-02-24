@@ -15,9 +15,10 @@ function runTest()
     FBTest.openNewTab(basePath + "script/3918/AsyncJSDPage.html", function(win)
     {
         FBTest.progress("opened tab for "+win.location);
-        FBTest.openFirebug();
-
+        FBTest.openFirebug(function()
+        {
             FBTest.progress("Script panels should be disabled: check it");
+
             // All panels must be disabled.
             checkIsDisabled(FW.FBL.$STR("Panel-script"), FW.Firebug.Debugger);
 
@@ -28,7 +29,7 @@ function runTest()
             {
                 enable(FW.FBL.$STR("Panel-script"), FW.Firebug.Debugger);
 
-                FBTest.reload(function ()
+                FBTest.reload(function()
                 {
                     FBTest.progress("reloaded, check isEnabled");
                     // All panels must be still enabled.
@@ -41,6 +42,7 @@ function runTest()
             {
                 FBTest.sysout("exception", err);
             }
+        });
     });
 }
 

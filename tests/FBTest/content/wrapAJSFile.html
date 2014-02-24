@@ -1,41 +1,42 @@
 <html>
 <head>
 <title>Firebug Test Page HTML Wrapper</title>
-<script type="application/x-javascript" src="chrome://fbtest/content/FBTestFirebug.js"></script>
-<script type="application/x-javascript" src="chrome://fbtest/content/FBTestMutation.js"></script>
-<script type="application/x-javascript" src="chrome://fbtest/content/FBTestSelection.js"></script>
-<script type="application/x-javascript" src="chrome://fbtest/content/FBTestTooltip.js"></script>
-<script type="application/x-javascript" src="chrome://fbtest/content/FBTestContextMenu.js"></script>
-<script type="application/x-javascript" src="chrome://fbtest/content/FBTestCookies.js"></script>
-<script type="application/x-javascript" src="chrome://fbtest/content/FBTestDebugger.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/core.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/system.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/events.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/browser.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/firebugUI.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/contextMenu.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/firebugPanels.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/search.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/breakpoints.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/commandLine.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/consolePanel.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/cssPanel.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/domPanel.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/htmlPanel.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/inspector.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/scriptPanel.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/selectorPanel.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/watchPanel.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/cookiesPanel.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/mutationRecognizer.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/mutationEventFilter.js"></script>
+
+<script type="application/x-javascript" src="chrome://fbtest/content/api/selectionController.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/tooltipController.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/contextMenuController.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/api/debuggerController.js"></script>
+
 <script type="application/x-javascript" src="chrome://fbtest/content/jsdiff.js"></script>
-<script type="application/x-javascript">
-// XPCOM
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
 
-// Backward compatibility
-FBTest.Firebug = FBTest;
-FBTestFirebug = FBTest;
-
-try
-{
-    // Helper shortcuts
-    window.FW = FBTest.FirebugWindow;   // Set by test harness
-    window.basePath = FBTest.getHTTPURLBase();
-    window.baseLocalPath = FBTest.getLocalURLBase();
-}
-catch (e)
-{
-    FBTrace.sysout("FBTest; EXCEPTION " + e, e);
-}
-</script>
 __TestIncludeURLs__
+
 <script type="application/x-javascript" src="__TestDriverURL__"></script>
+
 <style>
 body {
-  background-color: white;
+    background-color: white;
 }
 </style>
 </head>

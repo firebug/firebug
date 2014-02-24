@@ -4,11 +4,7 @@ function runTest()
 
     FBTest.openNewTab(basePath + "script/breakpoints/4889/issue4889.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableScriptPanel();
-        FBTest.selectPanel("console");
-
-        FBTest.enableConsolePanel(function(win)
+        FBTest.enablePanels(["console", "script"], function(win)
         {
             var config = {tagName: "div", classes: "logRow logRow-errorMessage", counter: 2};
             FBTest.waitForDisplayedElement("console", config, function(row)

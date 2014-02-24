@@ -96,6 +96,7 @@ SourceFile.prototype =
         return false;
     },
 
+    // xxxHonza: This method should return a promise
     loadScriptLines: function(callback)
     {
         if (this.loaded)
@@ -178,7 +179,7 @@ SourceFile.getSourceFileByUrl = function(context, url)
 
 SourceFile.findScriptForFunctionInContext = function(context, fn)
 {
-    var dbgGlobal = DebuggerLib.getDebuggerDebuggeeGlobalForContext(context);
+    var dbgGlobal = DebuggerLib.getThreadDebuggeeGlobalForContext(context);
     if (!dbgGlobal)
     {
         Trace.sysout("sourceFile.findScriptForFunctionInContext; no debugger");

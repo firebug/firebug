@@ -15,11 +15,11 @@
     </vbox>
 
     <keyset id="mainkeyset">
-        <key oncommand="exportFirebug();window.close();" key='W' modifiers='accel'/>
-        <key oncommand="doFirefoxCommand('Browser:Reload')" keycode='VK_F5'/>
-        <key oncommand="doFirefoxCommand('Browser:Reload')" key='r' modifiers='accel'/>
-        <key oncommand="doFirefoxCommand('Browser:ReloadSkipCache')" keycode='VK_F5' modifiers='accel'/>
-        <key oncommand="doFirefoxCommand('Browser:ReloadSkipCache')" key='r' modifiers='accel,shift'/>
+        <key oncommand="exportFirebug();window.close();" key="W" modifiers="accel"/>
+        <key oncommand="doFirefoxCommand('Browser:Reload')" keycode="VK_F5"/>
+        <key oncommand="doFirefoxCommand('Browser:Reload')" key="r" modifiers="accel"/>
+        <key oncommand="doFirefoxCommand('Browser:ReloadSkipCache')" keycode="VK_F5" modifiers="accel"/>
+        <key oncommand="doFirefoxCommand('Browser:ReloadSkipCache')" key="r" modifiers="accel,shift"/>
     </keyset>
 
     <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
@@ -78,5 +78,4 @@
             fbc.onUndetach();
         }
     </script>
-
 </window>

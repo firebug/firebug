@@ -566,7 +566,7 @@ DomplateTag.prototype =
             {
                 var val = this.props[name];
                 var arg = generateArg(val, path, args);
-                blocks.push('node.', name, ' = ', arg, ';\n');
+                blocks.push("node.", name, " = ", arg, ";\n");
             }
         }
 

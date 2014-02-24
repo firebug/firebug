@@ -72,10 +72,6 @@
     border-spacing: 0;
 }
 
-.panelNode-computed {
-    padding-top: 5px;
-}
-
 .computedStylesGroup > .computedStyleTable {
     display: none;
 }

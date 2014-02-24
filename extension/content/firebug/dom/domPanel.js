@@ -17,6 +17,7 @@ define([
     "firebug/lib/deprecated",
     "firebug/chrome/rep",
     "firebug/chrome/reps",
+    "firebug/chrome/searchBox",
     "firebug/dom/domBasePanel",
     "firebug/dom/domModule",
     "firebug/dom/domPanelTree",
@@ -25,7 +26,7 @@ define([
     "firebug/dom/toggleBranch",
 ],
 function(Firebug, FBTrace, Obj, Arr, Events, Dom, Css, Search, Domplate, Locale, Persist,
-    Deprecated, Rep, FirebugReps, DOMBasePanel, DOMModule, DomPanelTree, DomProvider,
+    Deprecated, Rep, FirebugReps, SearchBox, DOMBasePanel, DOMModule, DomPanelTree, DomProvider,
     DOMMemberProvider, ToggleBranch) {
 
 // ********************************************************************************************* //
@@ -499,12 +500,8 @@ DOMPanel.prototype = Obj.extend(BasePanel,
         var row;
         if (this.currentSearch && text === this.currentSearch.text)
         {
-            // xxxsz: 'Firebug.Search' is used here instead of 'Search' because we need to refer to
-            // 'firebug/chrome/searchBox' and not to 'firebug/lib/search'
-            // TODO: Rework 'searchBox.js', so it doesn't inject itself into the global 'Firebug'
-            // scope anymore
             row = this.currentSearch.findNext(true, undefined, reverse,
-                Firebug.Search.isCaseSensitive(text));
+                SearchBox.isCaseSensitive(text));
         }
         else
         {
@@ -515,9 +512,7 @@ DOMPanel.prototype = Obj.extend(BasePanel,
 
             this.currentSearch = new Search.TextSearch(this.panelNode, findRow);
 
-            // xxxsz: 'Firebug.Search' is used here instead of 'Search' because we need to refer to
-            // 'firebug/chrome/searchBox' and not to 'firebug/lib/search'
-            row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
+            row = this.currentSearch.find(text, reverse, SearchBox.isCaseSensitive(text));
         }
 
         if (row)

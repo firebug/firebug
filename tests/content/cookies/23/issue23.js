@@ -10,14 +10,14 @@ function runTest()
 
     FBTest.openNewTab(basePath + "cookies/23/issue23.php", function(win)
     {
-        FBTestFireCookie.enableCookiePanel(function(win)
+        FBTest.enableCookiesPanel(function(win)
         {
             var panelNode = FBTest.selectPanel("cookies").panelNode;
-            var cookie = FBTestFireCookie.getCookieByName(panelNode, "TestCookie23");
+            var cookie = FBTest.getCookieByName(panelNode, "TestCookie23");
 
             editCookie(cookie);
 
-            cookie = FBTestFireCookie.getCookieByName(panelNode, "TestCookie23");
+            cookie = FBTest.getCookieByName(panelNode, "TestCookie23");
             FBTest.compare("ValueCookie23-modified", cookie.cookie.value, "Check new cookie value");
             FBTest.testDone("cookies.test.issue23; DONE");
         });
@@ -37,7 +37,7 @@ function editCookie(cookie)
 
     // Open editCookie.xul dialog and edit the value.
     FBTest.sysout("cookies.test.issue23; let's edit an existing cookie");
-    return FBTestFireCookie.editCookie(cookie, function(dialog) {
+    return FBTest.editCookie(cookie, function(dialog) {
         dialog.EditCookie.valueNode.value = cookie.cookie.value + "-modified";
         dialog.EditCookie.onOK();
     });

@@ -18,6 +18,11 @@
     <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
     <script type="application/x-javascript" src="chrome://global/content/findBar.js"/>
 
+    <!-- Initialize Firebug for moduleConfig.js -->
+    <script type="application/x-javascript">
+        this.Firebug = {};
+    </script>
+
     <!-- Firebug -->
     <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/legacy.js"/>
@@ -58,7 +63,7 @@
         <!-- Bar with testList.html URL (e.g. chrome://firebug/content/testList.html -->
         <toolbar id="testListUrlBar" class="testURLBar fbInternational" align="center"
             autocompletesearch="FBTestHistory" disablePicker="false"
-            coollapsed="false" label="fbtest.urlbar.label.Test List"
+            collapsed="false" label="fbtest.urlbar.label.Test List"
             barTooltiptext="fbtest.urlbar.tooltip.Test_List_URL"
             pickerTooltiptext="fbtest.cmd.tip.Browse For Test List"/>
 

@@ -12,12 +12,12 @@ function runTest()
         //FBTest.openFirebug(true);
 
         // Open Firebug UI and enable Net panel.
-        FBTestFireCookie.enableCookiePanel(function(win)
+        FBTest.enableCookiesPanel(function(win)
         {
             // Make sure the Cookie panel's UI is there.
             var panelNode = FBTest.selectPanel("cookies").panelNode;
 
-            var cookieRow = FBTestFireCookie.getCookieRowByName(panelNode, "TestCookieInfo");
+            var cookieRow = FBTest.getCookieRowByName(panelNode, "TestCookieInfo");
             if (FBTest.ok(cookieRow, "There must be a cookieRow for the 'TestcookieInfo' cookie."))
             {
                 // Check displayed values.

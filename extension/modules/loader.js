@@ -71,7 +71,16 @@ var FirebugLoader =
     startup: function()
     {
         // allow already started bootstrapped firebug extensions to register themselves
-        var XPIProviderBP = Cu.import("resource://gre/modules/XPIProvider.jsm", {});
+        var XPIProviderBP;
+        try
+        {
+            XPIProviderBP = Cu.import("resource://gre/modules/addons/XPIProvider.jsm", {});
+        }
+        catch (err)
+        {
+            XPIProviderBP = Cu.import("resource://gre/modules/XPIProvider.jsm", {});
+        }
+
         var bootstrapScopes = XPIProviderBP.XPIProvider.bootstrapScopes;
 
         for (var id in bootstrapScopes)
@@ -126,7 +135,7 @@ var FirebugLoader =
             }
         });
 
-        win.Firebug.browserOverlay.unloadContextMenuOverlay(win);
+        win.Firebug.browserOverlay.stopFirebug();
 
         delete win.Firebug;
         delete win.FBTrace;
