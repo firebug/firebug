@@ -409,7 +409,17 @@ var TraceConsole =
             ADDON_UPGRADE   : 7,
             ADDON_DOWNGRADE : 8
         };
-        var XPIProviderBP = Cu["import"]("resource://gre/modules/XPIProvider.jsm");
+
+        var XPIProviderBP;
+        try
+        {
+            XPIProviderBP = Cu.import("resource://gre/modules/addons/XPIProvider.jsm", {});
+        }
+        catch (err)
+        {
+            XPIProviderBP = Cu.import("resource://gre/modules/XPIProvider.jsm", {});
+        }
+
         var id = "firebug@software.joehewitt.com";
         var XPIProvider = XPIProviderBP.XPIProvider;
         var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
