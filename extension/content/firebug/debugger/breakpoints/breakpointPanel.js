@@ -320,20 +320,7 @@ BreakpointPanel.prototype = Obj.extend(Panel,
 
     clearAllBreakpoints: function(context)
     {
-        this.noRefresh = true;
-
-        try
-        {
-            // Remove regular JSD breakpoints
-            Firebug.Debugger.clearAllBreakpoints(context);
-        }
-        catch (exc)
-        {
-            TraceError.sysout("breakpointPanel.clearAllBreakpoints; EXCEPTION " + exc, exc);
-        }
-
-        this.noRefresh = false;
-        this.refresh();
+        TraceError.sysout("breakpointPanel.clearAllBreakpoints;");
 
         // Remove the rest of all the other kinds of breakpoints (after refresh).
         // These can come from various modules and perhaps extensions, so use
