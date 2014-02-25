@@ -10,6 +10,13 @@
 // Context Menu API
 
 /**
+ * Offset
+ * @typedef {Object} Offset
+ * @property {Number} x - X coordinate of the offset
+ * @property {Number} y - Y coordinate of the offset
+ */
+
+/**
  * Opens context menu for target element and executes specified command.
  * Context menu listener is registered through ContextMenuController object, which ensures
  * that the listener is removed at the end of the test even in cases where the context menu
@@ -20,8 +27,9 @@
  *      menu item, that should be executed
  * @param {Function} callback Function called as soon as the element is selected.
  * @param {Function} errorCallback Function called in case of an error
+ * @param {Offset} [offset] Offset for clicking relative to the target element
  */
-this.executeContextMenuCommand = function(target, menuItemIdentifier, callback, errorCallback)
+this.executeContextMenuCommand = function(target, menuItemIdentifier, callback, errorCallback, offset)
 {
     var contextMenu = ContextMenuController.getContextMenu(target);
 
@@ -99,9 +107,11 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback, 
     // Wait till the menu is displayed.
     ContextMenuController.addListener(target, "popupshown", onPopupShown);
 
+
     // Right click on the target element.
     var eventDetails = {type: "contextmenu", button: 2};
-    this.synthesizeMouse(target, 2, 2, eventDetails);
+    offset = offset || {x: 2, y: 2};
+    this.synthesizeMouse(target, offset.x, offset.y, eventDetails);
 };
 
 // ********************************************************************************************* //
