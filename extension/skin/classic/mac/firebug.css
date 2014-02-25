@@ -258,6 +258,10 @@
     filter: url(resource://firebugui/filters.svg#brightenedGrayscale);
 }
 
+#fbToggleSidePanelsBox2 {
+    padding-bottom: 0;
+}
+
 /********************************************************************************************/
 /* Quick Info Box */
 
