@@ -444,7 +444,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             return "";
         var userTyped = this.textBox.value;
         var value = this.completionBase.pre + this.completionBase.expr + completion;
-        return userTyped + value.substr(userTyped.length);
+        var whitespace = new Array(userTyped.length + 1).join(" ");
+        return whitespace + value.substr(userTyped.length);
     };
 
     /**
@@ -614,7 +615,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
     this.setTabWarning = function()
     {
-        this.completionBox.value = this.textBox.value + "    " +
+        var whitespace = new Array(this.textBox.value.length + 1).join(" ");
+        this.completionBox.value = whitespace + "    " +
             Locale.$STR("firebug.completion.empty");
 
         this.tabWarning = true;
