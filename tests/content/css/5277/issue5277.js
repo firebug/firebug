@@ -25,19 +25,11 @@ function runTest()
                 FBTest.compare("@import \"issue5277.css\" screen and (min-width: 500px);",
                     rule.textContent, "The @import rule must contain the the media query");
 
-<<<<<<< HEAD
-            // Resize browser window, so the media query applies
-            // and we can make a screenshot of the <div>
-            FBTest.setBrowserWindowSize(600 + border, win.outerHeight);
-            var elementDisplayLargeWindow = FBTest.getImageDataFromNode(
-                win.document.getElementById(id));
-=======
                 // Resize browser window, so the media query applies
                 // and we can make a screenshot of the <div>
-                FBTest.setBrowerWindowSize(600 + border, win.outerHeight);
+                FBTest.setBrowserWindowSize(600 + border, win.outerHeight);
                 var elementDisplayLargeWindow = FBTest.getImageDataFromNode(
                     win.document.getElementById(id));
->>>>>>> Part 1: Call FBTest.openFirebug() asynchronously
 
                 FBTest.synthesizeMouse(rule.getElementsByClassName("cssMediaQuery").item(0));
                 var editor = panel.panelNode.querySelector(".textEditorInner");
@@ -56,13 +48,8 @@ function runTest()
                         FBTest.getImageDataFromNode(win.document.getElementById(id)),
                         "The div must be blue now");
 
-<<<<<<< HEAD
-                // Resize browser window, so the media query applies again
-                FBTest.setBrowserWindowSize(900 + border, win.outerHeight);
-=======
                     // Resize browser window, so the media query applies again
-                    FBTest.setBrowerWindowSize(900 + border, win.outerHeight);
->>>>>>> Part 1: Call FBTest.openFirebug() asynchronously
+                    FBTest.setBrowserWindowSize(900 + border, win.outerHeight);
 
                     FBTest.compare(elementDisplayLargeWindow,
                         FBTest.getImageDataFromNode(win.document.getElementById(id)),
