@@ -537,7 +537,7 @@ var BreakpointStore = Obj.extend(Module,
             var bps = [];
             var urls = this.getBreakpointURLs();
             for (var i = 0; i < urls.length; i++)
-                bps.push(this.enumerateBreakpoints(urls[i], cb));
+                bps.push(this.enumerateBreakpoints(urls[i], dynamic, cb));
 
             return bps;
         }

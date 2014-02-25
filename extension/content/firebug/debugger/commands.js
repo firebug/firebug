@@ -138,7 +138,7 @@ function threadBreakpoints(context, args)
         // is trying to display instances of {@link Breakpoint} using
         // {@link BreakpointRep}
         var result = {};
-        BreakpointStore.enumerateBreakpoints(null, function(bp)
+        BreakpointStore.enumerateBreakpoints(null, true, function(bp)
         {
             var newBp = {};
             for (var p in bp)
