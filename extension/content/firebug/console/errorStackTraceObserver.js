@@ -1,22 +1,23 @@
 /* See license.txt for terms of usage */
+/*global define:1*/
 
 define([
     "firebug/firebug",
     "firebug/lib/object",
     "firebug/lib/trace",
     "firebug/lib/options",
+    "firebug/chrome/module",
+    "firebug/chrome/tabWatcher",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/stack/stackTrace",
+    "firebug/remoting/debuggerClient",
 ],
-function(Firebug, Obj, FBTrace, Options, DebuggerLib, StackFrame, StackTrace) {
+function(Firebug, Obj, FBTrace, Options, Module, TabWatcher, DebuggerLib, StackFrame, StackTrace,
+    DebuggerClient) {
 
 // ********************************************************************************************* //
 // Constants
-
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cu = Components.utils;
 
 var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_ERRORLOG");
@@ -26,12 +27,10 @@ var Trace = FBTrace.to("DBG_ERRORLOG");
 
 /**
  * @module Uses JSD2 Debugger to observe errors and store stack traces for them.
- * The final stack trace info is stored into Firebug.errorStackTrace variable.
- * (just like JSD1 did).
  *
- * Since onFrameEnter/onFramePop are handled observing can causes performance penalty.
+ * Causes some additional performance penalty, especially when exceptions are involved.
  */
-var ErrorStackTraceObserver = Obj.extend(Firebug.Module,
+var ErrorStackTraceObserver = Obj.extend(Module,
 /** @lends ErrorStackTraceObserver */
 {
     dispatchName: "ErrorStackTraceObserver",
@@ -39,20 +38,14 @@ var ErrorStackTraceObserver = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Module
 
-    initContext: function(context)
+    initialize: function()
     {
-        Firebug.Module.initContext.apply(this, arguments);
-
-        var enabled = Options.get("showStackTrace");
-        if (enabled)
-            this.startObserving(context);
+        DebuggerClient.addListener(this);
     },
 
-    destroyContext: function(context)
+    shutdown: function()
     {
-        Firebug.Module.destroyContext.apply(this, arguments);
-
-        this.stopObserving(context);
+        DebuggerClient.removeListener(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -60,33 +53,40 @@ var ErrorStackTraceObserver = Obj.extend(Firebug.Module,
 
     updateOption: function(name, value)
     {
-        // xxxHonza: we shouldn't use global Firebug.currentContext
-        var context = Firebug.currentContext;
-        if (!context)
-            return;
-
         if (name == "showStackTrace")
-        {
-            if (value)
-                this.startObserving(context);
-            else
-                this.stopObserving(context);
-        }
+            TabWatcher.iterateContexts(this.updateObservation.bind(this));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // JSD2
+
+    updateObservation: function(context)
+    {
+        var start = context.isPanelEnabled("script") && context.activeThread &&
+            Options.get("showStackTrace");
+
+        if (start)
+            this.startObserving(context);
+        else
+            this.stopObserving(context);
+    },
+
+    onThreadAttached: function(context)
+    {
+        this.updateObservation(context);
+    },
+
+    onThreadDetached: function(context)
+    {
+        this.stopObserving(context);
+    },
 
     startObserving: function(context)
     {
         Trace.sysout("errorStackTraceObserver.startObserving; " + context.getName());
 
         if (context.errorStackTraceDbg)
-        {
-            TraceError.sysout("errorStackTraceObserver.startObserving; " +
-                "stack trace debugger already exists!");
             return;
-        }
 
         var dbg = DebuggerLib.makeDebuggerForContext(context);
         context.errorStackTraceDbg = dbg;

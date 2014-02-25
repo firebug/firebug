@@ -10,28 +10,6 @@
 // Constants
 
 // ********************************************************************************************* //
-// Debugger API
-
-/**
- * Wait until the debugger has been activated, after enabling the Script panel.
- *
- * @param {Object} callback The callback executed when the debugger has been activated.
- */
-this.waitForDebuggerActivation = function(callback)
-{
-    // xxxHonza: only one console test is using this method.
-    FBTrace.sysout("waitForDebuggerActivation; ERROR must be fixed/removed for JSD2");
-
-    // Add a function to be executed after we have gone back to the event loop
-    // and activated the debugger.
-    // (Despite the appearance, this shouldn't be a race condition.)
-    setTimeout(function()
-    {
-        callback();
-    }, 0);
-};
-
-// ********************************************************************************************* //
 // Toolbar buttons
 
 /**

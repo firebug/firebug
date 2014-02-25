@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6708: Add a shortcut for editing the selected HTML panel element</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #test {
+            width: 100px;
+            height: 100px;
+            background: #8C8CFF linear-gradient(-45deg, #788CFF, #B4C8FF);
+        }
+
+        #test > p {
+            line-height: 100px;
+            padding: 0;
+            text-align: center;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6708">Issue 6708</a>: Add a shortcut for editing the selected HTML panel element</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="test" class="a b c">
+                    <p>Test</p>
+                </div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel</li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> (<code>#test</code>) above</li>
+                    <li>Press <kbd>Ctrl</kbd>/<kbd>&#8984;</kbd> + <kbd>E</kbd></li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The <em>HTML</em> panel should switch to the Edit Mode</li>
+                    <li>The code inside the editor should be:
+                    <code>
+&lt;div class="a b c" id="test"&gt;
+                    &lt;p&gt;Test&lt;/p&gt;
+                &lt;/div&gt;</code>
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

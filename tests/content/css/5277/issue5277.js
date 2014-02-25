@@ -9,7 +9,7 @@ function runTest()
 
         // Resize browser window, so the media query doesn't apply
         // and we can make a screenshot of the <div>
-        FBTest.setBrowerWindowSize(300 + border, win.outerHeight);
+        FBTest.setBrowserWindowSize(300 + border, win.outerHeight);
         var elementDisplaySmallWindow = FBTest.getImageDataFromNode(
             win.document.getElementById(id));
 
@@ -27,7 +27,7 @@ function runTest()
 
             // Resize browser window, so the media query applies
             // and we can make a screenshot of the <div>
-            FBTest.setBrowerWindowSize(600 + border, win.outerHeight);
+            FBTest.setBrowserWindowSize(600 + border, win.outerHeight);
             var elementDisplayLargeWindow = FBTest.getImageDataFromNode(
                 win.document.getElementById(id));
 
@@ -49,7 +49,7 @@ function runTest()
                     "The div must be blue now");
 
                 // Resize browser window, so the media query applies again
-                FBTest.setBrowerWindowSize(900 + border, win.outerHeight);
+                FBTest.setBrowserWindowSize(900 + border, win.outerHeight);
 
                 FBTest.compare(elementDisplayLargeWindow,
                     FBTest.getImageDataFromNode(win.document.getElementById(id)),

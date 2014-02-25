@@ -7,15 +7,9 @@ function runTest()
         FBTest.openFirebug();
         FBTest.selectPanel("html");
 
-        // Search for 'placeholder' within the HTML panel
-        FBTest.searchInHtmlPanel(elementID, function(sel)
+        FBTest.selectElementInHtmlPanel(elementID, function(sel)
         {
-            FBTest.sysout("issue2495; selection:", sel);
-
-            // Click on the element to make sure it's selected.
-            var nodeLabelBox = FW.FBL.getAncestorByClass(sel.anchorNode, "nodeLabelBox");
-            var nodeTag = nodeLabelBox.getElementsByClassName("nodeTag").item(0);
-            FBTest.mouseDown(nodeTag);
+            FBTest.progress("issue2495; selection:", sel);
 
             var sidePanel = FBTest.selectSidePanel("css");
             var rules = sidePanel.panelNode.getElementsByClassName("cssRule");

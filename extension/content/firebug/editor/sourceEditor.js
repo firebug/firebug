@@ -620,7 +620,7 @@ SourceEditor.prototype =
 
     tab: function()
     {
-        this.editorObject.execCommand("defaultTab");
+        this.editorObject.execCommand("indentMore");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

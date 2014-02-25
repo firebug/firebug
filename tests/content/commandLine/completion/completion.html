@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Command Line: auto-completion</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1>Command Line: auto-completion</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h2><a href="http://code.google.com/p/fbug/issues/detail?id=2934">Issue 2934</a>: 1.6a7 console and auto-complete (needs &quot;window.&quot; prefix)</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>
+                        Type <code>doc</code> into the Command Line and then press <code class="key">Tab</code><br/>
+                        <span class="ok">&rArr; The Command Line should auto-complete the text to <code>document</code>.</span>
+                    </li>
+                    <li>
+                        Type <code>.</code> into the Command Line and then press <code class="key">Backspace</code><br/>
+                        <span class="ok">&rArr; The Command Line should contain <code>document</code>.</span>
+                    </li>
+                    <li>
+                        Press <code class="key">Enter</code><br/>
+                        <span class="ok">&rArr; The Command Line should be empty.</span>
+                    </li>
+                    <li>
+                        Press <code class="key">&uarr;</code><br/>
+                        <span class="ok">&rArr; The Command Line should contain <code>document</code> again.</span>
+                    </li>
+                    <li>
+                        Press <code class="key">&darr;</code><br/>
+                        <span class="ok">&rArr; The Command Line should be empty again.</span>
+                    </li>
+                    <li>
+                        Press <code class="key">&uarr;</code><br/>
+                        <span class="ok">&rArr; The Command Line should contain <code>document</code> again.</span>
+                    </li>
+                    <li>
+                        Press <code class="key">Escape</code><br/>
+                        <span class="ok">&rArr; The Command Line should be empty again.</span>
+                    </li>
+                    <li>
+                        Type <code>document.id.</code> into the Command Line and then press <code class="key">Tab</code><br/>
+                        <span class="ok">&rArr; The Command Line should contain <code>document.id.</code>.</span>
+                    </li>
+                    <li>
+                        Press <code class="key">Enter</code>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Basic Command Line auto-completion features should work.</li>
+                </ul>
+
+                <h2><a href="http://code.google.com/p/fbug/issues/detail?id=3598">Issue 3598</a>: Commandline completion when defining objects/strings</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>
+                        Type the following texts into the Command Line, press <code class="key">Tab</code> followed by
+                        <code class="key">Enter</code> to clear the Command Line.<br/>
+                        <code>[{w
+a = [{w
+a = [{w
+a = "w
+"w</code>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>None of these should auto-complete <code>window</code>.</li>
+                </ul>
+
+                <h2><a href="http://code.google.com/p/fbug/issues/detail?id=3592">Issue 3592</a>: commandline completion should recognize regular expressions</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>
+                        Type the following texts into the Command Line, press <code class="key">Tab</code> followed by
+                        <code class="key">Enter</code> to clear the Command Line.<br/>
+                        <code>/hi
+/hi/i</code>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>None of these should auto-complete.</li>
+                </ul>
+
+                <h2><a href="http://code.google.com/p/fbug/issues/detail?id=3600">Issue 3600</a>: Commandline completion rotates suggestions unnecessarily</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Execute <code>aaaaaBBB = 1; aaaaaCCC = 2; aaaaaD = 3;</code> in the Command Line.</li>
+                    <li>
+                        Type <code>aa</code> into the Command Line and then press <code class="key">Tab</code><br/>
+                        <span class="ok">&rArr; The Command Line should contain <code>aaaD</code>.</span>
+                    </li>
+                    <li>
+                        Press <code class="key">Escape</code><br/>
+                        <span class="ok">&rArr; The Command Line should contain <code>aa</code> with <code>aaaD</code> as completion suggestion.</span>
+                    </li>
+                    <li>
+                        Press <code class="key">Escape</code> again<br/>
+                        <span class="ok">&rArr; The Completion List Popup should be closed</span><br/>
+                        <span class="ok">&rArr; The Command Line should still contain <code>aa</code> with <code>aaaD</code> as completion suggestion.</span>
+                    </li>
+                    <li>
+                        Press <code class="key">Escape</code> again<br/>
+                        <span class="ok">&rArr; The Command Line should still contain <code>aa</code>, but there shouldn't be a completion suggestion.</span>
+                    </li>
+                    <li>
+                        Type <code>aa</code> into the Command Line<br/>
+                        <span class="ok">&rArr; The Command Line should not have any completion suggestion.</span>
+                    </li>
+                    <li>
+                        Press <code class="key">Escape</code> again<br/>
+                        <span class="ok">&rArr; The Command Line should be empty again.</span>
+                    </li>
+                    <li>
+                        Type <code>aa</code> into the Command Line and then press <code class="key">&uarr;</code> followed by <code>Tab</code><br/>
+                        <span class="ok">&rArr; The Command Line should contain <code>aaaaaBBB</code>.</span>
+                    </li>
+                    <li>
+                        Press <code class="key">Enter</code>
+                    </li>
+                    <li>
+                        Type <code>aa</code> into the Command Line and then press <code class="key">&darr;</code> followed by <code>Tab</code><br/>
+                        <span class="ok">&rArr; The Command Line should contain <code>aaaaaBBB</code>.</span>
+                    </li>
+                    <li>
+                        Press <code class="key">&darr;</code><br/>
+                        <span class"ok">&rArr; The Command Line should be empty again.</span>
+                    </li>
+                    <li>
+                        Type <code>aa</code> into the Command Line and then press <code class="key">&rarr;</code> followed by <code>Tab</code><br/>
+                        <span class="ok">&rArr; The Command Line should contain <code>aaaaaD</code>.</span>
+                    </li>
+                    <li>
+                        Press <code class="key">Enter</code>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>None of these should auto-complete.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

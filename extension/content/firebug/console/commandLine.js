@@ -667,7 +667,6 @@ var CommandLine = Obj.extend(Module,
         switch (event.keyCode)
         {
             case KeyEvent.DOM_VK_RETURN:
-            case KeyEvent.DOM_VK_ENTER:
                 event.preventDefault();
 
                 if (!event.metaKey && !event.shiftKey)
