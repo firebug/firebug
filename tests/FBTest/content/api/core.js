@@ -145,25 +145,27 @@ this.progress = function(msg)
  */
 this.testDone = function(message)
 {
-    FBTest.sysout("FBTestFirebug.testDone; start test done timeout");
+    FBTest.sysout("FBTestFirebug.testDone; Cleaning...");
 
     // Clean up now so, annotations are cleared and Firebug is not activated for the
     // next activated tab that would coincidentally come from the same domain. 
-    this.setToKnownState();
-
-    var self = this;
-    var test = FBTestApp.TestRunner.currentTest;
-    setTimeout(function cleanUpLater()
+    this.setToKnownState(() =>
     {
-        self.closeFirebug();
-        self.cleanUpTestTabs();
+        var test = FBTestApp.TestRunner.currentTest;
 
-        FBTest.sysout("FBTestFirebug.testDone; after timeout");
+        // Make sure the current stack is gone.
+        setTimeout(() =>
+        {
+            this.closeFirebug();
+            this.cleanUpTestTabs();
 
-        if (message)
-            FBTest.progress(message);
+            if (message)
+                FBTest.progress(message);
 
-        FBTestApp.TestRunner.testDone(false, test);
+            FBTest.sysout("FBTestFirebug.testDone; DONE");
+
+            FBTestApp.TestRunner.testDone(false, test);
+        });
     });
 };
 
@@ -232,7 +234,7 @@ this.onFailure = function(msg)
 /**
  * This function is automatically called before every test sequence.
  */
-this.setToKnownState = function()
+this.setToKnownState = function(callback)
 {
     FBTest.sysout("FBTestFirebug setToKnownState");
 
@@ -248,11 +250,6 @@ this.setToKnownState = function()
     if (Firebug.isDetached())
         Firebug.toggleDetachBar();
 
-    // First clear all breakpoints and consequently the reset all options that
-    // clears the breakpoints storage.
-    Firebug.Debugger.clearAllBreakpoints(null);
-    Firebug.resetAllOptions(false);
-
     // Console preview is hidden by default
     if (this.isConsolePreviewVisible())
         this.clickConsolePreviewButton();
@@ -263,6 +260,15 @@ this.setToKnownState = function()
     this.setSidePanelWidth(350);
 
     this.clearSearchField();
+
+    // First clear all breakpoints and consequently reset all options that
+    // clears the breakpoints storage.
+    this.removeAllBreakpoints(function()
+    {
+        Firebug.resetAllOptions(false);
+
+        callback();
+    });
 
     // xxxHonza: xxxJJB how clear the persisted panel state?
 };
