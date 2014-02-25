@@ -127,7 +127,7 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
 
     onRemoveBreakpoint: function(bp)
     {
-        this.removeBreakpoint(bp, (response) =>
+        this.removeBreakpoint(bp.href, bp.lineNo, (response) =>
         {
             this.dispatch("onBreakpointRemoved", [this.context, bp]);
 
