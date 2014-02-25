@@ -80,7 +80,7 @@ this.isFirebugActive = function()
     return (suspension == "suspended") ? false : true;
 };
 
-this.setBrowerWindowSize = function(width, height)
+this.setBrowserWindowSize = function(width, height)
 {
     var tabbrowser = FBTestFirebug.getBrowser();
     var currTab = tabbrowser.selectedTab;

@@ -11,13 +11,14 @@ define([
     "firebug/chrome/firefox",
     "firebug/chrome/tabWatcher",
     "firebug/chrome/activableModule",
+    "firebug/debugger/breakpoints/breakpointStore",
     "firebug/debugger/debuggerHalter",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/clients/clientCache",
     "firebug/remoting/debuggerClient",
 ],
 function(Firebug, FBTrace, Obj, Locale, Options, Firefox, TabWatcher, ActivableModule,
-    DebuggerHalter, DebuggerLib, ClientCache, DebuggerClient) {
+    BreakpointStore, DebuggerHalter, DebuggerLib, ClientCache, DebuggerClient) {
 
 "use strict";
 
@@ -299,19 +300,24 @@ Firebug.Debugger = Obj.extend(ActivableModule,
     {
     },
 
-    clearAllBreakpoints: function(context)
+    clearAllBreakpoints: function(context, callback)
+    {
+        // xxxHonza: at some point we might want to remove only breakpoints created
+        // for given context. This must be supported by the {@link BreakpointStore}
+
+        // Remove all breakpoints from all contexts.
+        BreakpointStore.removeAllBreakpoints(callback);
+    },
+
+    enableAllBreakpoints: function(context, callback)
     {
     },
 
-    enableAllBreakpoints: function(context)
+    disableAllBreakpoints: function(context, callback)
     {
     },
 
-    disableAllBreakpoints: function(context)
-    {
-    },
-
-    getBreakpointCount: function(context)
+    getBreakpointCount: function(context, callback)
     {
     },
 

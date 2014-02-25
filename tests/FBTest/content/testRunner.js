@@ -480,18 +480,19 @@ FBTestApp.TestRunner = Obj.extend(new Firebug.Listener(),
         try
         {
             // Initialize test environment.
-            win.FBTest.setToKnownState();
-
-            // Execute test's entry point.
-            if (win.runTest)
-                win.runTest();
-            else
-                throw new Error("FBTest: no runTest() function in "+win.location);
+            win.FBTest.setToKnownState(function()
+            {
+                // Execute test's entry point.
+                if (win.runTest)
+                    win.runTest();
+                else
+                    throw new Error("FBTest: no runTest() function in " + win.location);
+            });
         }
         catch (exc)
         {
-            FBTestApp.FBTest.sysout("runTest FAILS "+exc, exc);
-            FBTestApp.FBTest.ok(false, "runTest FAILS "+exc);
+            FBTestApp.FBTest.sysout("runTest FAILS " + exc, exc);
+            FBTestApp.FBTest.ok(false, "runTest FAILS " + exc);
             FBTestApp.TestRunner.cleanUp();
 
             FBTestApp.TestRunner.testDone(true);
@@ -508,11 +509,12 @@ FBTestApp.TestRunner = Obj.extend(new Firebug.Listener(),
             FBTestApp.TestRunner.clearTestTimeout();
 
             // Clean-up test environment.
-            FBTestApp.FBTest.setToKnownState();
+            // Done already in FBTest.testDone()
+            //FBTestApp.FBTest.setToKnownState();
 
             // Since the test finished, the test frame must be set to about:blank so,
             // the current test window is unloaded and proper clean up code executed
-            // (eg. registered MutationRecognizers)
+            // (e.g. registered MutationRecognizers)
             Firebug.chrome.$("testFrame").contentWindow.location = "about:blank";
         }
         catch (e)

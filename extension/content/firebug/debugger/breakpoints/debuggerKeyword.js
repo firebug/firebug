@@ -82,7 +82,7 @@ var DebuggerKeyword = Obj.extend(Module,
         // that caused the break in the first place.
         context.breakingCause =
         {
-            title: Locale.$STR("debugger keyword"),
+            title: Locale.$STR("firebug.bon.title.debugger_keyword"),
             skipActionTooltip: Locale.$STR("firebug.bon.tooltip.disableDebuggerKeyword2"),
             message: Locale.$STR("firebug.bon.cause.disableDebuggerKeyword2"),
             skipAction: function disableDebuggerKeywordSkipper()

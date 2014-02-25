@@ -91,15 +91,20 @@ var BreakpointStore = Obj.extend(Module,
 
     resetAllOptions: function()
     {
+        this.clear();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Breakpoint Store
+
+    clear: function()
+    {
         // xxxHonza: remove also on the server side.
         // xxxsz: The storage needs to be cleared immediately, otherwise different storages
         //   can get in conflict with each other (FBTest lib/storage/storageService.js fails)
         this.storage.clear(true);
         this.breakpoints = {};
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Breakpoint Store
 
     /**
      * Load breakpoints from the associated storage (see initialize).
@@ -343,6 +348,36 @@ var BreakpointStore = Obj.extend(Module,
         return removedBp;
     },
 
+    /**
+     * Removes all breakpoints. The removal is asynchronous since it requires
+     * communication with the backend.
+     *
+     * @param {TabContext} context Context for which breakpoints should be removed. Set to null
+     * if all brakpoints (for all contexts) should be removed
+     * @param {Function} callback Executed when all breakpoints (for all contexts)
+     * are removed.
+     */
+    removeAllBreakpoints: function(callback)
+    {
+        var bps = this.getBreakpoints();
+
+        Trace.sysout("breakpointStore.removeAllBreakpoints; (" + bps.length + ")", bps);
+
+        // First clear the local (client) storage.
+        this.clear();
+
+        // Individual listeneres need to return a promise that is resolved
+        // as soon as brekpoints are removed on the backend.
+        // When all promises are resolved the callback passed into this method
+        // is executed.
+        var promises = this.dispatch("onRemoveAllBreakpoints", [bps]);
+        Promise.all(promises).then(function()
+        {
+            if (callback)
+                callback();
+        });
+    },
+
     findBreakpoint: function(url, lineNo, type)
     {
         type = type || BP_NORMAL;
@@ -550,7 +585,22 @@ var BreakpointStore = Obj.extend(Module,
             for (var url in this.breakpoints)
                 this.enumerateBreakpoints(url, callback);
         }
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getBreakpointsForContext: function(context)
+    {
+        var result = [];
+
+        for (var url in context.compilationUnits)
+        {
+            var bps = this.getBreakpoints(url);
+            result.push.apply(result, bps);
+        }
+
+        return result;
+    },
 });
 
 // ********************************************************************************************* //

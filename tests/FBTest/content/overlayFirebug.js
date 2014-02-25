@@ -30,6 +30,9 @@ var getPref = PrefLoader.getPref;
 
 Cu.import("resource://firebug/fbtrace.js");
 
+var Locale = Cu.import("resource://firebug/locale.js").Locale;
+Locale.registerStringBundle("chrome://fbtest/locale/fbtest.properties");
+
 // ********************************************************************************************* //
 
 this.onLoad = function()
@@ -86,7 +89,7 @@ this.onFirebugMenuShowing = function(event)
             }),
             $menuitem(doc, {
                 id: "menu_openTestConsole",
-                label: "Open Test Console",
+                label: "fbtest.Open_Test_Console",
                 command: "cmd_openTestConsole",
                 insertbefore: "menu_firebug_aboutSeparator",
                 key: "key_openTestConsole"
@@ -99,7 +102,7 @@ this.onFirebugMenuShowing = function(event)
             $menuitem(doc, {
                 id: "FirebugMenu_Options_alwaysOpenTestConsole",
                 type: "checkbox",
-                label: "Always Open Test Console",
+                label: "fbtest.Always_Open_Test_Console",
                 oncommand: "FBTestFirebugOverlay.onToggleOption(this)",
                 insertbefore: "menu_firebug_optionsSeparator",
                 option: "alwaysOpenTestConsole"

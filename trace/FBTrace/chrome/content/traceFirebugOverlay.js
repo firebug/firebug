@@ -24,6 +24,10 @@ top.FBTraceFirebugOverlay = FBTraceFirebugOverlay;
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
+var Cu = Components.utils;
+
+var Locale = Cu.import("resource://firebug/locale.js").Locale;
+Locale.registerStringBundle("chrome://fbtrace/locale/firebug-tracing.properties");
 
 this.initialize = function()
 {

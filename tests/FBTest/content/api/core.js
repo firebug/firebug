@@ -145,25 +145,27 @@ this.progress = function(msg)
  */
 this.testDone = function(message)
 {
-    FBTest.sysout("FBTestFirebug.testDone; start test done timeout");
+    FBTest.sysout("FBTestFirebug.testDone; Cleaning...");
 
     // Clean up now so, annotations are cleared and Firebug is not activated for the
     // next activated tab that would coincidentally come from the same domain. 
-    this.setToKnownState();
-
-    var self = this;
-    var test = FBTestApp.TestRunner.currentTest;
-    setTimeout(function cleanUpLater()
+    this.setToKnownState(() =>
     {
-        self.closeFirebug();
-        self.cleanUpTestTabs();
+        var test = FBTestApp.TestRunner.currentTest;
 
-        FBTest.sysout("FBTestFirebug.testDone; after timeout");
+        // Make sure the current stack is gone.
+        setTimeout(() =>
+        {
+            this.closeFirebug();
+            this.cleanUpTestTabs();
 
-        if (message)
-            FBTest.progress(message);
+            if (message)
+                FBTest.progress(message);
 
-        FBTestApp.TestRunner.testDone(false, test);
+            FBTest.sysout("FBTestFirebug.testDone; DONE");
+
+            FBTestApp.TestRunner.testDone(false, test);
+        });
     });
 };
 
@@ -232,7 +234,7 @@ this.onFailure = function(msg)
 /**
  * This function is automatically called before every test sequence.
  */
-this.setToKnownState = function()
+this.setToKnownState = function(callback)
 {
     FBTest.sysout("FBTestFirebug setToKnownState");
 
@@ -241,28 +243,34 @@ this.setToKnownState = function()
     // 2) Net panel filter is not reset (the preference is, but the UI isn't)
 
     var Firebug = FBTest.FirebugWindow.Firebug;
-    Firebug.PanelActivation.toggleAll("off");  // These should be done with button presses not API calls.
-    Firebug.PanelActivation.toggleAll("none");
-    Firebug.PanelActivation.clearAnnotations(true);
-
-    if (Firebug.isDetached())
-        Firebug.toggleDetachBar();
-
-    // First clear all breakpoints and consequently the reset all options that
-    // clears the breakpoints storage.
-    Firebug.Debugger.clearAllBreakpoints(null);
-    Firebug.resetAllOptions(false);
 
     // Console preview is hidden by default
     if (this.isConsolePreviewVisible())
         this.clickConsolePreviewButton();
 
     // Use default Firebug height and side panel width
-    this.setBrowerWindowSize(1024, 768);
+    this.setBrowserWindowSize(1024, 768);
     this.setFirebugBarHeight(270);
     this.setSidePanelWidth(350);
 
     this.clearSearchField();
+
+    // First clear all breakpoints and then perform deactivation.
+    this.removeAllBreakpoints(function()
+    {
+        // These should be done with button presses not API calls.
+        Firebug.PanelActivation.toggleAll("off");
+        Firebug.PanelActivation.toggleAll("none");
+        Firebug.PanelActivation.clearAnnotations(true);
+
+        if (Firebug.isDetached())
+            Firebug.toggleDetachBar();
+
+        // Reset all options that also clears the breakpoints storage.
+        Firebug.resetAllOptions(false);
+
+        callback();
+    });
 
     // xxxHonza: xxxJJB how clear the persisted panel state?
 };
