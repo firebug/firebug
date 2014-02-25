@@ -20,7 +20,7 @@
  *      menu item, that should be executed
  * @param {Function} callback Function called as soon as the element is selected.
  */
-this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
+this.executeContextMenuCommand = function(target, menuItemIdentifier, callback, errorCallback)
 {
     var contextMenu = ContextMenuController.getContextMenu(target);
 
@@ -52,12 +52,12 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
                 }
             }
 
-            self.ok(menuItem, "'" + menuItemId + "' item must be available in the context menu.");
-
             // If the menu item isn't available close the context menu and bail out.
-            if (!menuItem)
+            if (!self.ok(menuItem, "'" + menuItemId + "' item must be available in the context menu."))
             {
                 contextMenu.hidePopup();
+                if (errorCallback)
+                    errorCallback();
                 return;
             }
 
