@@ -139,6 +139,14 @@ this.progress = function(msg)
 };
 
 /**
+ * Executed by the framework at the beginning of each test.
+ */
+this.testStart = function(test)
+{
+    FBTest.sysout("FBTestFirebug.testStart; " + test.path + " - " + test.desc, test);
+};
+
+/**
  * Finishes current test and prints info message (if any) to the status bar.
  *
  * All test tabs are removed from the browser.

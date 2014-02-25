@@ -474,14 +474,18 @@ FBTestApp.TestRunner = Obj.extend(new Firebug.Listener(),
             return;
         }
 
+        var currentTest = FBTestApp.TestRunner.currentTest;
+
         // Initialize start time.
-        FBTestApp.TestRunner.currentTest.start = (new Date()).getTime();
+        currentTest.start = (new Date()).getTime();
 
         try
         {
             // Initialize test environment.
             win.FBTest.setToKnownState(function()
             {
+                win.FBTest.testStart(currentTest);
+
                 // Execute test's entry point.
                 if (win.runTest)
                     win.runTest();
