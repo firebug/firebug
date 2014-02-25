@@ -243,12 +243,6 @@ this.setToKnownState = function(callback)
     // 2) Net panel filter is not reset (the preference is, but the UI isn't)
 
     var Firebug = FBTest.FirebugWindow.Firebug;
-    Firebug.PanelActivation.toggleAll("off");  // These should be done with button presses not API calls.
-    Firebug.PanelActivation.toggleAll("none");
-    Firebug.PanelActivation.clearAnnotations(true);
-
-    if (Firebug.isDetached())
-        Firebug.toggleDetachBar();
 
     // Console preview is hidden by default
     if (this.isConsolePreviewVisible())
@@ -261,10 +255,18 @@ this.setToKnownState = function(callback)
 
     this.clearSearchField();
 
-    // First clear all breakpoints and consequently reset all options that
-    // clears the breakpoints storage.
+    // First clear all breakpoints and then perform deactivation.
     this.removeAllBreakpoints(function()
     {
+        // These should be done with button presses not API calls.
+        Firebug.PanelActivation.toggleAll("off");
+        Firebug.PanelActivation.toggleAll("none");
+        Firebug.PanelActivation.clearAnnotations(true);
+
+        if (Firebug.isDetached())
+            Firebug.toggleDetachBar();
+
+        // Reset all options that also clears the breakpoints storage.
         Firebug.resetAllOptions(false);
 
         callback();

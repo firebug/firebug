@@ -292,8 +292,11 @@ Firebug.Debugger = Obj.extend(ActivableModule,
 
     clearAllBreakpoints: function(context, callback)
     {
+        // xxxHonza: at some point we might want to remove only breakpoints created
+        // for given context. This must be supported by the {@link BreakpointStore}
+
         // Remove all breakpoints from all contexts.
-        BreakpointStore.removeAllBreakpoints(context, callback);
+        BreakpointStore.removeAllBreakpoints(callback);
     },
 
     enableAllBreakpoints: function(context, callback)

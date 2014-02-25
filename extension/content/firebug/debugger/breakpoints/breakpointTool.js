@@ -158,6 +158,8 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
 
     onRemoveAllBreakpoints: function(bps)
     {
+        Trace.sysout("breakpointTool.onRemoveAllBreakpoints; (" + bps.length + ")", bps);
+
         var deferred = this.context.defer();
 
         this.removeBreakpoints(bps, () =>
@@ -473,7 +475,8 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         // breakpoint at the line.
         if (BreakpointStore.hasAnyBreakpoint(url, lineNumber))
         {
-            Trace.sysout("breakpointTool.removeBreakpoint; No breakpoint in the store!");
+            Trace.sysout("breakpointTool.removeBreakpoint; Can't remove BP it's still " +
+                "in the store! " + url + " (" + lineNumber + ")");
 
             // xxxHonza: the callback expects a packet as an argument, it should not.
             if (callback)
@@ -512,7 +515,8 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
     {
         if (bps.length == 0)
         {
-            callback();
+            if (callback)
+                callback();
             return;
         }
 
@@ -525,7 +529,7 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
                     response.message, response);
             }
 
-            this.removeBreakpoints(bps.slice(1));
+            this.removeBreakpoints(bps.slice(1), callback);
         });
     },
 

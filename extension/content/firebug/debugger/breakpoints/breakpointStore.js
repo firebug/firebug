@@ -91,15 +91,20 @@ var BreakpointStore = Obj.extend(Module,
 
     resetAllOptions: function()
     {
+        this.clear();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Breakpoint Store
+
+    clear: function()
+    {
         // xxxHonza: remove also on the server side.
         // xxxsz: The storage needs to be cleared immediately, otherwise different storages
         //   can get in conflict with each other (FBTest lib/storage/storageService.js fails)
         this.storage.clear(true);
         this.breakpoints = {};
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Breakpoint Store
 
     /**
      * Load breakpoints from the associated storage (see initialize).
@@ -352,16 +357,14 @@ var BreakpointStore = Obj.extend(Module,
      * @param {Function} callback Executed when all breakpoints (for all contexts)
      * are removed.
      */
-    removeAllBreakpoints: function(context, callback)
+    removeAllBreakpoints: function(callback)
     {
-        var bps;
+        var bps = this.getBreakpoints();
 
-        // If context is provided all breakpoints from the context are removed,
-        // otherwise all existing breakpoints are removed.
-        if (context)
-            bps = this.getBreakpointsForContext(context);
-        else
-            bps = this.getBreakpoints();
+        Trace.sysout("breakpointStore.removeAllBreakpoints; (" + bps.length + ")", bps);
+
+        // First clear the local (client) storage.
+        this.clear();
 
         // Individual listeneres need to return a promise that is resolved
         // as soon as brekpoints are removed on the backend.
