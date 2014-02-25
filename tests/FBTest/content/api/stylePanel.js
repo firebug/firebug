@@ -34,7 +34,7 @@ this.getCSSProp = function(selector, propName, callback)
         }
     }
 
-    if (!FBTest.ok(selectorNode, "Rule with selector '" + selector + "' must exist"))
+    if (!this.ok(selectorNode, "Rule with selector '" + selector + "' must exist"))
     {
         callback(null);
         return;
@@ -53,7 +53,7 @@ this.getCSSProp = function(selector, propName, callback)
         }
     }
 
-    if (!FBTest.ok(propNameNode, "Property '" + propName + "' must exist within '" + selector +
+    if (!this.ok(propNameNode, "Property '" + propName + "' must exist within '" + selector +
         "' rule"))
     {
         callback(null);
