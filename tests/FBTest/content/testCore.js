@@ -18,11 +18,6 @@ var FBTestApp =
         var args = window.arguments[0];
         window.initWithParams(args);
 
-        // Register strings so, Firebug's localization APIs can be used. This also
-        // must be done before namespaces are initialized.
-        if (Firebug.registerStringBundle)
-            Firebug.registerStringBundle("chrome://fbtest/locale/fbtest.properties");
-
         // Set the Firebug window now. In case of a new window we have to wait
         // till all namespaces are initialized.
         FBTestApp.FBTest.FirebugWindow = args.firebugWindow;
