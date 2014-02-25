@@ -249,7 +249,7 @@ this.setToKnownState = function(callback)
         this.clickConsolePreviewButton();
 
     // Use default Firebug height and side panel width
-    this.setBrowerWindowSize(1024, 768);
+    this.setBrowserWindowSize(1024, 768);
     this.setFirebugBarHeight(270);
     this.setSidePanelWidth(350);
 
