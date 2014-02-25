@@ -19,6 +19,7 @@
  * @param {String or Object} menuItemIdentifier ID or object holding the label of the
  *      menu item, that should be executed
  * @param {Function} callback Function called as soon as the element is selected.
+ * @param {Function} errorCallback Function called in case of an error
  */
 this.executeContextMenuCommand = function(target, menuItemIdentifier, callback, errorCallback)
 {
