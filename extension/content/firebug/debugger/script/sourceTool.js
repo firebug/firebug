@@ -220,7 +220,7 @@ DynamicSourceCollector.prototype =
         var dynamicTypesMap = {
             "eval": CompilationUnit.EVAL,
             "Function": CompilationUnit.EVAL,
-            "handler": CompilationUnit.BROWSER_GENERATED
+            "eventHandler": CompilationUnit.BROWSER_GENERATED
         };
 
         var type = script.source.introductionType;
@@ -241,6 +241,8 @@ DynamicSourceCollector.prototype =
         // Dynamic scripts has different derived from URL of the parent script.
         var url = script.source.url;
         var sourceFile = this.context.getSourceFile(url);
+
+        Trace.sysout("dynamicSourceCollector.addDynamicScript; " + url + ", " + type);
 
         // xxxHonza: we shouldn't create a new {@link SourceFile} for every new
         // instance of the same dynamically evaluated script.
