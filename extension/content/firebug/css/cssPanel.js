@@ -1438,18 +1438,13 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         }
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Options
+
     updateOption: function(name, value)
     {
         if (name == "expandShorthandProps" || name == "colorDisplay")
             this.refresh();
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    getLocationList: function()
-    {
-        var styleSheets = Css.getAllStyleSheets(this.context);
-        return styleSheets;
     },
 
     getOptionsMenuItems: function()
@@ -1472,6 +1467,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
         return items;
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context Menu
 
     getContextMenuItems: function(style, target)
     {
@@ -1812,6 +1810,15 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         }
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Location List
+
+    getLocationList: function()
+    {
+        var styleSheets = Css.getAllStyleSheets(this.context);
+        return styleSheets;
+    },
+
     getDefaultLocation: function()
     {
         // Note: We can't do makeDefaultStyleSheet here, because that could be
@@ -1829,7 +1836,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         catch (exc)
         {
             if (FBTrace.DBG_LOCATIONS)
-                FBTrace.sysout("css.getDefaultLocation FAILS "+exc, exc);
+                FBTrace.sysout("css.getDefaultLocation FAILS " + exc, exc);
         }
     },
 
@@ -1844,11 +1851,13 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         var instance = Css.getInstanceForStyleSheet(styleSheet);
 
         var baseDescription = Url.splitURLBase(url);
-        if (instance) {
-          baseDescription.name = baseDescription.name + " #" + (instance + 1);
-        }
+        if (instance)
+            baseDescription.name = baseDescription.name + " #" + (instance + 1);
+
         return baseDescription;
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getSourceLink: function(target, rule)
     {
@@ -1893,6 +1902,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             return ruleLine.line;
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Search
+
     search: function(text, reverse)
     {
         var curDoc = this.searchCurrentDoc(!Firebug.searchGlobal, text, reverse);
@@ -1901,25 +1913,25 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             return this.searchOtherDocs(text, reverse) ||
                 this.searchCurrentDoc(true, text, reverse);
         }
+
         return curDoc;
     },
 
     searchOtherDocs: function(text, reverse)
     {
         var scanRE = SearchBox.getTestingRegex(text);
-        function scanDoc(styleSheet) {
+        function scanDoc(styleSheet)
+        {
             // we don't care about reverse here as we are just looking for existence,
             // if we do have a result we will handle the reverse logic on display
             for (var i = 0; i < styleSheet.cssRules.length; i++)
             {
                 if (scanRE.test(styleSheet.cssRules[i].cssText))
-                {
                     return true;
-                }
             }
         }
 
-        if (this.navigateToNextDocument(scanDoc, reverse))
+        if (this.navigateToNextDocument(scanDoc, reverse, this.location))
         {
             // firefox findService can't find nodes immediatly after insertion
             // xxxHonza: the timeout has been increased to 100 since search across
@@ -2015,6 +2027,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 "searchUseRegularExpression", "search.tip.Use_Regular_Expression")
         ];
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getStyleDeclaration: function(cssSelector)
     {
@@ -2892,11 +2906,13 @@ StyleSheetEditor.prototype = domplate(BaseEditor,
     tag: DIV({"class": "styleSheetEditor fullPanelEditor"}),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     onEditorInitialize: function()
     {
         this.editor.addEventListener(SourceEditor.Events.textChange,
             this.onEditorTextChangeListener);
     },
+
     getValue: function()
     {
         return this.editor.getText();
