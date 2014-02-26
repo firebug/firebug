@@ -214,6 +214,24 @@ DynamicSourceCollector.prototype =
 
     onNewScript: function(script)
     {
+        var type = script.source.introductionType;
+
+        if (Trace.active)
+        {
+            Trace.sysout("dynamicSourceCollector.onNewScript; " + script.url + ", " + type,
+            {
+                startLine: script.startLine,
+                lineCount: script.lineCount,
+                sourceStart: script.sourceStart,
+                sourceLength: script.sourceLength,
+                staticLevel: script.staticLevel,
+                text: script.source.text,
+                sourceURL: script.source.url,
+                element: script.source.element,
+                elementAttributeName: script.source.elementAttributeName,
+            });
+        }
+
         if (script.url == "debugger eval code")
             return;
 
@@ -222,8 +240,6 @@ DynamicSourceCollector.prototype =
             "Function": CompilationUnit.EVAL,
             "eventHandler": CompilationUnit.BROWSER_GENERATED
         };
-
-        var type = script.source.introductionType;
 
         var scriptType = dynamicTypesMap[type];
         if (scriptType)
