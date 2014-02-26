@@ -454,6 +454,18 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Events.dispatch(this.fbListeners, "onUpdateScriptLocation", [this, sourceLink]);
     },
 
+    /**
+     * Always return {@link CompilationUnit} instance.
+     */
+    normalizeLocation: function(object)
+    {
+        if (object instanceof CompilationUnit)
+            return object;
+
+        if (object instanceof SourceLink)
+            return this.context.getCompilationUnit(object.href);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getCurrentURL: function()
@@ -467,11 +479,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     getCompilationUnit: function()
     {
-        if (this.location instanceof CompilationUnit)
-            return this.location;
-
-        if (this.location instanceof SourceLink)
-            return this.context.getCompilationUnit(this.location.href);
+        return this.normalizeLocation(this.location);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

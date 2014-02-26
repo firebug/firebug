@@ -215,6 +215,11 @@ CompilationUnit.prototype._removeBreakpoint = function(breakpoint)
     }
 };
 
+CompilationUnit.prototype.toString = function()
+{
+    return "[compilation-unit] " + this.url;
+};
+
 // ********************************************************************************************* //
 // CommonJS
 
