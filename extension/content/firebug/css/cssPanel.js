@@ -29,6 +29,7 @@ define([
     "firebug/lib/trace",
     "firebug/css/cssPanelUpdater",
     "firebug/lib/wrapper",
+    "firebug/lib/promise",
     "firebug/editor/baseEditor",
     "firebug/editor/editor",
     "firebug/editor/inlineEditor",
@@ -38,7 +39,7 @@ define([
 ],
 function(Panel, Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom,
     Win, Search, Str, Arr, Xml, Persist, System, Menu, Options, CSSAutoCompleter, CSSModule,
-    CSSInfoTip, SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper, BaseEditor, Editor,
+    CSSInfoTip, SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper, Promise, BaseEditor, Editor,
     InlineEditor, SourceEditor, SearchBox) {
 
 // ********************************************************************************************* //
@@ -1933,12 +1934,19 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
         if (this.navigateToNextDocument(scanDoc, reverse, this.location))
         {
+            var deferred = Promise.defer();
+
             // firefox findService can't find nodes immediatly after insertion
             // xxxHonza: the timeout has been increased to 100 since search across
             // multiple documents didn't work sometimes.
             // Of course, it would be great to get rid of the timeout.
-            setTimeout(Obj.bind(this.searchCurrentDoc, this), 100, true, text, reverse);
-            return "wraparound";
+            setTimeout(() =>
+            {
+                var result = this.searchCurrentDoc(true, text, reverse);
+                deferred.resolve(result);
+            }, 100);
+
+            return deferred.promise;
         }
     },
 
@@ -1954,8 +1962,20 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             return false;
         }
 
+        var wraparound = false;
+
         if (this.currentSearch && text == this.currentSearch.text)
         {
+            var locationHref = Css.getURLForStyleSheet(this.location);
+            if (this.currentSearch.href != locationHref)
+            {
+                // If true, we reached the original document this search started in.
+                wraparound = (locationHref == this.currentSearch.originalHref);
+
+                // Remember the current search URL.
+                this.currentSearch.href = locationHref;
+            }
+
             row = this.currentSearch.findNext(wrapSearch, false, reverse,
                 SearchBox.isCaseSensitive(text));
         }
@@ -1984,13 +2004,17 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             }
             else
             {
-                var findRow = function(node) {
+                var findRow = function(node)
+                {
                     return node.nodeType == Node.ELEMENT_NODE ? node : node.parentNode;
                 };
 
                 this.currentSearch = new Search.TextSearch(this.panelNode, findRow);
                 row = this.currentSearch.find(text, reverse, SearchBox.isCaseSensitive(text));
             }
+
+            this.currentSearch.originalHref = Css.getURLForStyleSheet(this.location);
+            this.currentSearch.href = this.currentSearch.originalHref;
         }
 
         if (row)
@@ -2005,8 +2029,14 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             Dom.scrollIntoCenterView(row, this.panelNode);
             this.highlightNode(row.parentNode);
 
+            // If end of the current document has been reached the |currentSearch.wrapped|
+            // is set to true. Ignore it if next document has been navigated.
+            var localWraparound = this.currentSearch.wrapped;
+            if (this.currentSearch.href != this.currentSearch.originalHref)
+                localWraparound = false;
+
             Events.dispatch(this.fbListeners, "onCSSSearchMatchFound", [this, text, row]);
-            return this.currentSearch.wrapped ? "wraparound" : true;
+            return (wraparound || localWraparound) ? "wraparound" : true;
         }
         else
         {
