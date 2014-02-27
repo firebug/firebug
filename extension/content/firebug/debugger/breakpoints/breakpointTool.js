@@ -497,6 +497,10 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         {
             TraceError.sysout("breakpointTool.removeBreakpoint; ERROR removing " +
                 "non existing breakpoint. " + url + ", " + lineNumber);
+
+            // Make sure to execute the callback even if an error happened.
+            if (callback)
+                callback();
         }
     },
 
