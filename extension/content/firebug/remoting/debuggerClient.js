@@ -13,6 +13,8 @@ define([
 ],
 function(Firebug, FBTrace, Obj, Options, Events, TabWatcher, Firefox, Win, TabClient) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
@@ -220,6 +222,8 @@ var DebuggerClient = Obj.extend(Firebug.Module,
         // Check if there is already a client object created for this tab browser.
         if (this.tabMap.has(browser))
             return this.getTabClient(browser);
+
+        Trace.sysout("debuggerClient.attachTab;");
 
         // There is one instance of {@link TabClient} per Firefox tab.
         var tab = new TabClient(browser, this.client);
