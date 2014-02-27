@@ -9,10 +9,7 @@ function runTest()
     FBTest.openNewTab(testPageURL, function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enableAllPanels();
-
-            // Reload afeter enable panels.
-            FBTest.reload(function()
+            FBTest.enableScriptPanel(function()
             {
                 var tasks = new FBTest.TaskList();
                 tasks.push(waitForDetachedFirebug);
@@ -21,7 +18,7 @@ function runTest()
 
                 tasks.run(function() {
                     FBTest.testDone("openInNewWindow.DONE");
-                })
+                });
             });
         });
     });

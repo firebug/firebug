@@ -8,8 +8,6 @@ function runTest()
     FBTest.openNewTab(basePath + "firebug/2613/issue2613.html", function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enableAllPanels();
-
             // The reload functions will be called three times. Once for each panel.
             var testSuite = [];
             testSuite.push(function(callback) {
