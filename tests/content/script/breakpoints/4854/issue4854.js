@@ -12,8 +12,7 @@ function runTest()
                 classes: "netRow category-xhr hasHeaders loaded"
             };
 
-            var panel = FBTest.selectPanel("net");
-            panel.clear();
+            FBTest.getSelectedPanel().clear();
 
             FBTest.waitForDisplayedElement("net", options, function(row)
             {

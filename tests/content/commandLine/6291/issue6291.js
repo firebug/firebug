@@ -5,8 +5,8 @@ function runTest()
     FBTest.openNewTab(basePath + "commandLine/6291/issue6291.html", function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enablePanels(["script", "console"], function() {
-                var panelNode = FBTest.selectPanel("console").panelNode;
+            FBTest.enablePanels(["console", "script"], function() {
+                var panelNode = FBTest.getSelectedPanel().panelNode;
                 var tasks = new FBTest.TaskList();
 
                 // 3

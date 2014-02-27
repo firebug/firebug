@@ -5,7 +5,7 @@ function runTest()
     {
         FBTest.enablePanels(["console", "script"], function(win)
         {
-            var panel = FBTest.getPanel("console");
+            var panel = FBTest.getSelectedPanel();
             FBTest.clearConsole();
 
             var config = {tagName: "tr", classes: "profileRow", counter: 2};

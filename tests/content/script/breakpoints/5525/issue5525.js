@@ -8,7 +8,7 @@ function runTest()
             var text = "var test = undefinedVariable;";
             FBTest.waitForDisplayedText("console", text, function()
             {
-                var panel = FBTest.getPanel("console");
+                var panel = FBTest.getSelectedPanel();
                 var row = panel.panelNode.getElementsByClassName("logRow-errorMessage")[0];
 
                 // Verify displayed text.

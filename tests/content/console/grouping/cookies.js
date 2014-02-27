@@ -6,9 +6,7 @@ function runTest()
     FBTest.openNewTab(basePath + "console/grouping/cookies.php", function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enablePanels(["cookies", "console"], function() {
-                FBTest.selectPanel("console");
-
+            FBTest.enablePanels(["console", "cookies"], function() {
                 FBTest.clearConsole();
 
                 var config = {

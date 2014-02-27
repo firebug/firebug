@@ -10,8 +10,6 @@ function runTest()
             FBTest.setPref("showSlowJSDMessage", false);
 
             FBTest.enablePanels(["script", "console"], function() {
-                FBTest.selectPanel("script");
-
                 FBTest.waitForBreakInDebugger(null, 10, true, function()
                 {
                     FBTest.waitForDebuggerResume(function ()

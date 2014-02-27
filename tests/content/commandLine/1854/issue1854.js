@@ -7,10 +7,8 @@ function runTest()
         // Step 1: Open Firebug
         FBTest.openFirebug(function() {
             // Step 2: Enable the Script and the Console panel
-            FBTest.enablePanels(["script", "console"], function() {
-                // Step 3: Switch to the Console panel
-                FBTest.selectPanel("console");
-
+            // Step 3: Switch to the Console panel
+            FBTest.enablePanels(["console", "script"], function() {
                 // Step 4: Reload the page
                 FBTest.reload(function() {
                     // Asynchronously wait for result in the Console panel.

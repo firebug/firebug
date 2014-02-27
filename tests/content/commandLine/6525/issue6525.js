@@ -4,9 +4,7 @@ function runTest()
     FBTest.openNewTab(basePath + "commandLine/6525/issue6525.php", function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enablePanels(["cookies", "console", "net"], function() {
-                FBTest.selectPanel("net");
-
+            FBTest.enablePanels(["net", "cookies", "console"], function() {
                 var taskList = new FBTest.TaskList();
                 taskList.push(checkNetPanel);
                 taskList.push(checkCookiesPanel);

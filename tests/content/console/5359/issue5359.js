@@ -4,8 +4,8 @@ function runTest()
     FBTest.openNewTab(basePath + "console/5359/issue5359.html", function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enablePanels(["script", "console"], function() {
-                var panelNode = FBTest.selectPanel("console").panelNode;
+            FBTest.enablePanels(["console", "script"], function() {
+                var panelNode = FBTest.getSelectedPanel().panelNode;
                 FBTest.clearConsole();
 
                 var config = {tagName: "tr", classes: "profileRow", counter: 2};

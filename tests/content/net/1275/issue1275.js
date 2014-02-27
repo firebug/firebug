@@ -9,9 +9,7 @@ function runTest()
         FBTest.sysout("issue1275.START");
 
         FBTest.openFirebug(function() {
-            FBTest.enablePanels(["cookies", "net"], function() {
-                FBTest.selectPanel("net");
-
+            FBTest.enablePanels(["net", "cookies"], function() {
                 FBTest.clearCache();
 
                 // Reload test page.

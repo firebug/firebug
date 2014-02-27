@@ -4,9 +4,7 @@ function runTest()
     FBTest.openNewTab(basePath + "console/breakOnError/breakOnError.html", function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enablePanels(["script", "console"], function() {
-                FBTest.selectPanel("console");
-
+            FBTest.enablePanels(["console", "script"], function() {
                 FBTest.waitForBreakInDebugger(null, 28, false, function(row)
                 {
                     // Resume debugger.

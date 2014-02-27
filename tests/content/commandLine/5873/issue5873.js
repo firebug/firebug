@@ -5,9 +5,7 @@ function runTest()
     FBTest.openNewTab(basePath + "commandLine/5873/issue5873.html", function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enablePanels(["script", "console"], function() {
-                FBTest.selectPanel("console");
-
+            FBTest.enablePanels(["console", "script"], function() {
                 var doc = FW.Firebug.chrome.window.document;
                 var cmdLine = doc.getElementById("fbCommandLine");
                 var completionBox = doc.getElementById("fbCommandLineCompletion");

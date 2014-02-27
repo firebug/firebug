@@ -5,9 +5,7 @@ function runTest()
     {
         // Open Firebug UI and enable Net panel.
         FBTest.openFirebug(function() {
-            FBTest.enablePanels(["console", "net"], function() {
-                FBTest.selectPanel("net");
-
+            FBTest.enablePanels(["net", "console"], function() {
                 // Enable XHR spy.
                 var prefOrigValue = FBTest.getPref("showXMLHttpRequests");
                 FBTest.setPref("showXMLHttpRequests", true);

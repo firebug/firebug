@@ -5,8 +5,7 @@ function runTest()
     FBTest.sysout("testErrors.START");
     FBTest.openNewTab(basePath + "console/testErrors.html", function(win)
     {
-        FBTest.enablePanels(["script", "console"], function() {
-            FBTest.selectPanel("console");
+        FBTest.enablePanels(["console", "script"], function() {
             fireTest(win, 0);
         });
     });
