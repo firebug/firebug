@@ -516,6 +516,8 @@ var ErrorMessageUpdater = Obj.extend(Module,
     updateErrorBreakpoints: function(context, bp, isSet)
     {
         var panel = context.getPanel("console");
+        if (!panel)
+            return;
 
         // Iterate all error messages (see firebug/console/errorMessageRep template)
         // in the Console panel and update associated breakpoint UI.

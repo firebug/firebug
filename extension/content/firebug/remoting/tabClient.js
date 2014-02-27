@@ -12,6 +12,8 @@ define([
 ],
 function(Firebug, FBTrace, Obj, Win, TabWatcher, EventSource, Firefox, DebuggerLib) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
@@ -56,11 +58,30 @@ TabClient.prototype = Obj.extend(new EventSource(),
 {
     dispatchName: "TabClient",
 
-    tabClient: null,
-    activeThread: null,
-    threadActor: null,
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    // Set to true if a browser tab is attached.
     tabAttached: false,
+
+    // Set to true if tab attach process is in progress
+    attachTabInProgress: true,
+
+    // Set to true if backend thread is attached.
     threadAttached: false,
+
+    // Set to true if detach sequence is in progress. 
+    detachInProgress: false,
+
+    // Reference to the built-in {@link TabClient} object associated with
+    // the wrapped browser tab.
+    tabClient: null,
+
+    // Reference to the built-in {@link ThreadClient} object, set after thread attach
+    // process has been done.
+    activeThread: null,
+
+    // Actor ID of the attached thread client.
+    threadActor: null,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Public API
@@ -79,8 +100,19 @@ TabClient.prototype = Obj.extend(new EventSource(),
         if (this.tabAttached)
             return;
 
+        // We can't initiate the attach process when detaching is currently in progress.
+        if (this.detachInProgress)
+        {
+            TraceError.sysout("tabClient.attach; ERROR Can't attach, detaching in progress!");
+            return;
+        }
+
         this.attachCallback = callback;
-        this.tabAttached = true;
+
+        // Attaching Firebug to the current tab is now in progress.
+        // The 'this.tabAttached' flag will be set to true as soon as the entire
+        // process is done.
+        this.attachTabInProgress = true;
 
         // Step I. get list of all available tabs (happens asynchronously).
         this.client.listTabs(this.onListTabs.bind(this));
@@ -90,11 +122,12 @@ TabClient.prototype = Obj.extend(new EventSource(),
     {
         Trace.sysout("tabClient.detach; " + getWinLocation(this.window));
 
-        if (!this.tabAttached)
-            return;
-
         this.detachCallback = callback;
         this.tabAttached = false;
+        this.attachTabInProgress = false;
+
+        // We started the detach process.
+        this.detachInProgress = true;
 
         this.detachTab();
     },
@@ -110,9 +143,9 @@ TabClient.prototype = Obj.extend(new EventSource(),
                 response.message, response);
         }
 
-        // If the tab object has been detached in just after 'listTabs' has been send
-        // Just ignore rest of the attach sequence.
-        if (!this.tabAttached)
+        // If the tab has been detached after 'this.listTabs' has been sent ignore
+        // the rest of attach sequence.
+        if (!this.attachTabInProgress)
             return;
 
         // The response contains list of all tab and global actors registered
@@ -162,20 +195,28 @@ TabClient.prototype = Obj.extend(new EventSource(),
     {
         Trace.sysout("tabClient.onTabAttached; " + getWinLocation(this.window));
 
-        if (!this.tabAttached)
+        // Just like in 'this.onListTabs', if the tab has been detached in the middle
+        // of the attach process, ignore the rest of the sequence.
+        if (!this.attachTabInProgress)
         {
-            TraceError.sysout("ERROR: tab already detached!");
+            TraceError.sysout("tabClient.onTabAttached; ERROR: tab already detached!");
             return;
         }
 
+        // No client object passed in, that's a weird problem.
         if (!tabClient)
         {
-            TraceError.sysout("ERROR: No tab client! " + response.error, response);
+            TraceError.sysout("tabClient.onTabAttached; ERROR: No tab client! " +
+                response.error, response);
             return;
         }
 
         this.threadActor = response.threadActor;
         this.tabClient = tabClient;
+
+        // The attach process is done, update flags.
+        this.attachTabInProgress = false;
+        this.tabAttached = true;
 
         // Execute attach callback if any is provided.
         this.executeCallback(this.attachCallback, [tabClient, this.threadActor]);
@@ -183,13 +224,24 @@ TabClient.prototype = Obj.extend(new EventSource(),
 
         var browser = Firefox.getBrowserForWindow(this.window);
         this.dispatch("onTabAttached", [browser]);
+
+        // If 'attachThread' has been executed in the middle of the tab-attach process
+        // let's start the thread-attach process now.
+        if (this.autoAttachThread)
+        {
+            this.autoAttachThread = false;
+
+            if (!this.threadAttached)
+                this.attachThread();
+        }
     },
 
     detachTab: function()
     {
         Trace.sysout("tabClient.detachTab;");
 
-        this.tabClient.detach(this.onTabDetached.bind(this));
+        if (this.tabClient)
+            this.tabClient.detach(this.onTabDetached.bind(this));
     },
 
     onTabDetached: function(response)
@@ -204,6 +256,7 @@ TabClient.prototype = Obj.extend(new EventSource(),
         this.dispatch("onTabDetached", [browser]);
 
         this.tabClient = null;
+        this.detachInProgress = false;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -212,6 +265,16 @@ TabClient.prototype = Obj.extend(new EventSource(),
     attachThread: function()
     {
         Trace.sysout("tabClient.attachThread; " + getWinLocation(this.window));
+
+        // If the tab-attach sequence is currently in progress we need to wait
+        // and attach the tread as soon as it's done.
+        if (this.attachTabInProgress)
+        {
+            Trace.sysout("tabClient.attachThread; Will attch thread as soon as tab is attached.");
+
+            this.autoAttachThread = true;
+            return;
+        }
 
         if (this.threadAttached)
         {

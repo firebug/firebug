@@ -14,27 +14,38 @@
 
 /**
  * Open/close Firebug UI. If forceOpen is true, Firebug is only opened if closed.
+ * The method is asynchronous since it involves attaching to the backend that happens
+ * over RDP.
+ *
  * @param {Boolean} forceOpen Set to true if Firebug should stay opened.
+ * @param {Object} target The target window for keyboard event
+ * @param {Function} callback Executed when Firebug is connected to the backend
+ * (attached to the current browser tab)
  */
 this.pressToggleFirebug = function(forceOpen, target, callback)
 {
-    var isOpen = this.isFirebugOpen();
+    var open = this.isFirebugOpen();
+    var attached = this.isFirebugAttached();
 
-    FBTest.sysout("pressToggleFirebug; forceOpen: " + forceOpen + ", is open: " + isOpen);
+    FBTest.sysout("pressToggleFirebug; forceOpen: " + forceOpen + ", is open: " + open +
+        ", is attached: " + attached);
 
     // Don't close if it's open and should stay open.
-    if (forceOpen && isOpen)
+    if (forceOpen && open)
     {
-        FBTest.sysout("pressToggleFirebug; bail out");
-        callback();
-        return;
+        if (attached)
+        {
+            callback();
+            return;
+        }
+    }
+    else
+    {
+        // Toggle visibility
+        FBTest.sendKey("F12", target);
     }
 
     FBTest.waitForTabAttach(callback);
-
-    FBTest.sendKey("F12", target);
-
-    this.isFirebugOpen();
 };
 
 /**
@@ -60,7 +71,10 @@ this.shutdownFirebug = function()
 };
 
 /**
- * Returns true if Firebug is currently opened; false otherwise.
+ * Returns true if Firebug UI is currently opened; false otherwise. This method doesn't
+ * check if Firebug is connected to the backend. Use 'isFirebugAttached' instead if 
+ * it's what you need. Firebug connects to the back end immediately after opening for
+ * the first time, but it happens asynchronously.
  */
 this.isFirebugOpen = function()
 {
@@ -230,6 +244,18 @@ this.OneShotHandler = function(eventTarget, eventName, onEvent, capturing)
 };
 
 // ********************************************************************************************* //
+// Backend
+
+/**
+ * Returns true if Firebug is attached to the backend tab actor. This process starts
+ * immediately after Firebug UI is opened and {@link TabContext} instance created for
+ * the current page. The attach process is asynchronous (happens over RDP).
+ */
+this.isFirebugAttached = function()
+{
+    var browser = FBTest.getCurrentTabBrowser();
+    return FW.Firebug.DebuggerClient.isTabAttached(browser);
+}
 
 this.waitForTabAttach = function(callback)
 {
@@ -239,19 +265,20 @@ this.waitForTabAttach = function(callback)
         return;
     }
 
-    // The tab might be already attached (e.g. if the page is just reloaded).
-    // Execute the callback directly in such case.
-    var browser = FBTestFirebug.getCurrentTabBrowser();
-    var attached = FW.Firebug.DebuggerClient.isTabAttached(browser);
-    if (attached)
+    // If Firebug is already attached to a tab execute the callback directly and bail out.
+    if (FBTest.isFirebugAttached())
     {
         callback();
+        return;
     }
+
+    var browser = FBTestFirebug.getCurrentTabBrowser();
 
     var listener =
     {
         onTabAttached: function()
         {
+            //xxxHonza: what if an existing tab is attached and not the test one?
             FBTest.sysout("waitForTabAttach; On tab attached");
 
             DebuggerController.removeListener(browser, listener);
