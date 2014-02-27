@@ -164,6 +164,7 @@ this.disableAllPanels = function()
  */
 this.enableAllPanels = function()
 {
+    // xxxsz: This function should be made asynchronous
     FW.FBL.$("cmd_firebug_enablePanels").doCommand();
 };
 
