@@ -6,23 +6,16 @@ function runTest()
         FBTest.openFirebug();
         var panel = FBTest.selectPanel("html");
 
-        // Search for 'myElement' within the HTML panel, which
-        // automatically expands the tree.
-        FBTest.searchInHtmlPanel("myElement", function(sel)
+        FBTest.selectElementInHtmlPanel("myElement", function(sel)
         {
-            FBTest.progress("before0");
-            FBTest.sysout("issue2978; Selection:", sel);
+            FBTest.progress("issue2978; Selection:", sel);
 
-            var nodeLabelBox = FW.FBL.getAncestorByClass(sel.anchorNode, "nodeLabelBox");
-            var nodeTag = nodeLabelBox.querySelector(".nodeTag");
-
-            FBTest.progress("before");
+            var nodeTag = sel.getElementsByClassName("nodeTag")[0];
 
             // Reset clipboard content and execute "Copy CSS Path" command.
             FBTest.clearClipboard();
             FBTest.executeContextMenuCommand(nodeTag, "fbCopyCSSPath", function()
             {
-                FBTest.progress("adf");
                 var expected = "html body div.myClass span#myElement";
                 FBTest.waitForClipboard(expected, function(cssPath)
                 {
