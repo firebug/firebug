@@ -1,17 +1,16 @@
 function runTest()
 {
-    FBTest.sysout("console.dir.START");
-
     FBTest.openNewTab(basePath + "console/api/dir.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
-        {
-            var tasks = new FBTest.TaskList();
-            tasks.push(test1, win);
-            tasks.push(test2, win);
-            tasks.run(function() {
-                FBTest.testDone("console.dir.DONE");
+        FBTest.openFirebug(function() {
+            FBTest.enableConsolePanel(function(win)
+            {
+                var tasks = new FBTest.TaskList();
+                tasks.push(test1, win);
+                tasks.push(test2, win);
+                tasks.run(function() {
+                    FBTest.testDone("console.dir.DONE");
+                });
             });
         });
     });

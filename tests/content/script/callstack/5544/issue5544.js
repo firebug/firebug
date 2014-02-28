@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue5544.START");
     FBTest.setPref("showStackTrace", true);
 
     FBTest.openNewTab(basePath + "script/callstack/5544/issue5544.html", function(win)

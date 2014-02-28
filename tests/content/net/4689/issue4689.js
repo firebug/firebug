@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4689.START");
     FBTest.openNewTab(basePath + "net/4689/issue4689.html", function()
     {
         //FBTest.clearConsole();
@@ -54,7 +53,6 @@ function testConsolPanel(callback)
 {
     FBTest.enableConsolePanel(function(win)
     {
-        FBTest.selectPanel("console");
         FBTest.waitForDisplayedElement("console", null, function(row)
         {
             var  panel = FBTest.selectPanel("console");

@@ -1,33 +1,33 @@
 var testProp = "0123456789012345678901234567890123456789012345678901234567890123456789";
 function runTest()
 {
-    FBTest.sysout("issue3029.START");
     FBTest.openNewTab(basePath + "console/3029/issue3029.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
-        {
-            var panel = FW.Firebug.chrome.selectPanel("console");
-            onTextDisplayed(panel, "myProperty", function(elt)
+        FBTest.openFirebug(function() {
+            FBTest.enableConsolePanel(function(win)
             {
-                // Expand the property (the label must be clicked).
+                var panel = FW.Firebug.chrome.selectPanel("console");
+                onTextDisplayed(panel, "myProperty", function(elt)
+                {
+                    // Expand the property (the label must be clicked).
 
-                var label = FW.FBL.getAncestorByClass(elt, "memberLabel");
-                if (!label)
-                    FBTest.sysout("issue3029: no label "+elt, elt);
+                    var label = FW.FBL.getAncestorByClass(elt, "memberLabel");
+                    if (!label)
+                        FBTest.sysout("issue3029: no label "+elt, elt);
 
-                FBTest.click(label);
+                    FBTest.click(label);
 
-                var row = FW.FBL.getAncestorByClass(elt, "memberRow");
-                var value = row.querySelector(".memberValueCell");
-                FBTest.compare("\"" + testProp + "\"",
-                    value.textContent, "Full value must be displayed now.");
+                    var row = FW.FBL.getAncestorByClass(elt, "memberRow");
+                    var value = row.querySelector(".memberValueCell");
+                    FBTest.compare("\"" + testProp + "\"",
+                        value.textContent, "Full value must be displayed now.");
 
-                FBTest.testDone("issue3029.DONE");
+                    FBTest.testDone("issue3029.DONE");
+                });
+
+                // Execute test.
+                FBTest.click(win.document.getElementById("testButton"));
             });
-
-            // Execute test.
-            FBTest.click(win.document.getElementById("testButton"));
         });
     });
 }

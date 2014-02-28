@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("cookieInfo.START");
     var bcookieRowser = FBTest.FirebugWindow;
 
     FBTest.openNewTab(basePath + "cookies/general/cookieInfo.php", function(win)

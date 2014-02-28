@@ -4,7 +4,6 @@ window.FBTestTimeout = 25000;
 // FBTest entry point
 function runTest()
 {
-    FBTest.sysout("search; START");
     FBTest.openNewTab(basePath + "search/scriptVictim.htm", function(win)
     {
         FBTest.enableScriptPanel(function(win)

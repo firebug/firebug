@@ -4,7 +4,6 @@
 // 4) Verify UI in the Console panel.
 function runTest()
 {
-    FBTest.sysout("issue3503.START");
     FBTest.openNewTab(basePath + "console/3503/issue3503.html", function(win)
     {
         FBTest.sysout("issue3503; Test page loaded.");

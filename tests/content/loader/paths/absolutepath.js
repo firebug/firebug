@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("absolutepath.START;");
     FBTest.progress("using baseLocalPath: " + baseLocalPath);
 
     var baseUrl = baseLocalPath + "loader/paths/";

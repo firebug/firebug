@@ -1,21 +1,17 @@
 function runTest()
 {
-    FBTest.sysout("issue6525.START");
     FBTest.openNewTab(basePath + "commandLine/6525/issue6525.php", function(win)
     {
-        FBTest.openFirebug();
+        FBTest.openFirebug(function() {
+            FBTest.enablePanels(["net", "cookies", "console"], function() {
+                var taskList = new FBTest.TaskList();
+                taskList.push(checkNetPanel);
+                taskList.push(checkCookiesPanel);
 
-        FBTest.enableCookiesPanel();
-        FBTest.enableConsolePanel();
-        FBTest.enableNetPanel(function(win)
-        {
-            var taskList = new FBTest.TaskList();
-            taskList.push(checkNetPanel);
-            taskList.push(checkCookiesPanel);
-
-            taskList.run(function()
-            {
-                FBTest.testDone("issue6525.DONE");
+                taskList.run(function()
+                {
+                    FBTest.testDone("issue6525.DONE");
+                });
             });
         });
     });

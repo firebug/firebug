@@ -1,50 +1,45 @@
 function runTest()
 {
-    FBTest.sysout("issue6547.START");
-
     FBTest.openNewTab(basePath + "cookies/6547/issue6547.php", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("net");
-
-        FBTest.enableCookiesPanel();
-        FBTest.enableNetPanel(function(win)
-        {
-            var options =
-            {
-                tagName: "tr",
-                classes: "netRow category-html hasHeaders loaded"
-            };
-
-            FBTest.waitForDisplayedElement("net", options, function(row)
-            {
-                var panelNode = FBTest.selectPanel("net").panelNode;
-
-                FBTest.click(row);
-                FBTest.expandElements(panelNode, "netInfoCookiesTab");
-
-                var selector = ".netInfoReceivedCookies .cookieRow";
-                var rows = panelNode.querySelectorAll(selector);
-
-                var resultMap =
+        FBTest.openFirebug(function() {
+            FBTest.enablePanels(["net", "cookies"], function() {
+                var options =
                 {
-                    issue6547_zero: "0ms",
-                    issue6547_pos:  "1d 10h 17m 36s",
-                    issue6547_neg:  "-1d 10h 17m 36s",
+                    tagName: "tr",
+                    classes: "netRow category-html hasHeaders loaded"
                 };
 
-                for (var i = 0; i < rows.length; i++)
+                FBTest.waitForDisplayedElement("net", options, function(row)
                 {
-                    var row = rows[i];
+                    var panelNode = FBTest.selectPanel("net").panelNode;
 
-                    var cookieName = row.querySelector(".cookieNameLabel").textContent;
-                    var expResult = resultMap[cookieName];
-                    var result = row.querySelector(".cookieMaxAgeLabel").textContent;
+                    FBTest.click(row);
+                    FBTest.expandElements(panelNode, "netInfoCookiesTab");
 
-                    FBTest.compare(expResult, result, "Max age must be " + expResult);
-                }
+                    var selector = ".netInfoReceivedCookies .cookieRow";
+                    var rows = panelNode.querySelectorAll(selector);
 
-                FBTest.testDone("issue6547.DONE");
+                    var resultMap =
+                    {
+                        issue6547_zero: "0ms",
+                        issue6547_pos:  "1d 10h 17m 36s",
+                        issue6547_neg:  "-1d 10h 17m 36s",
+                    };
+
+                    for (var i = 0; i < rows.length; i++)
+                    {
+                        var row = rows[i];
+
+                        var cookieName = row.querySelector(".cookieNameLabel").textContent;
+                        var expResult = resultMap[cookieName];
+                        var result = row.querySelector(".cookieMaxAgeLabel").textContent;
+
+                        FBTest.compare(expResult, result, "Max age must be " + expResult);
+                    }
+
+                    FBTest.testDone("issue6547.DONE");
+                });
             });
         });
     });

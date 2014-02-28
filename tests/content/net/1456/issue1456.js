@@ -4,7 +4,6 @@ function runTest()
 {
     var startTime = new Date().getTime();
 
-    FBTest.sysout("issue1456.START");
     var responseText = "$('tb').shake();\n$('tb').value='Some Response';\n";
 
     FBTest.openNewTab(basePath + "net/1456/issue1456.htm", function(win)

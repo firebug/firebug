@@ -1,27 +1,25 @@
 function runTest()
 {
-    FBTest.sysout("issue1189.START");
-
     FBTest.openNewTab(basePath + "html/style/1189/issue1189.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("css");
-        var panel = FBTest.selectSidePanel("css");
+        FBTest.openFirebug(function() {
+            var panel = FBTest.selectPanel("css");
 
-        var tests = [];
-        tests.push(function(callback)
-        {
-            shorthandPropOverwritesShorthandProp(panel, callback);
-        });
+            var tests = [];
+            tests.push(function(callback)
+            {
+                shorthandPropOverwritesShorthandProp(panel, callback);
+            });
 
-        tests.push(function(callback)
-        {
-            shorthandPropOverwritesSingleValueProp(panel, callback);
-        });
+            tests.push(function(callback)
+            {
+                shorthandPropOverwritesSingleValueProp(panel, callback);
+            });
 
-        FBTestFirebug.runTestSuite(tests, function()
-        {
-            FBTest.testDone("issue1189.DONE");
+            FBTestFirebug.runTestSuite(tests, function()
+            {
+                FBTest.testDone("issue1189.DONE");
+            });
         });
     });
 }

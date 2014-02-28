@@ -1,23 +1,22 @@
 function runTest()
 {
-    FBTest.sysout("issue5834.START");
-
     FBTest.openNewTab(basePath + "cookies/5834/issue5834.php", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableCookiesPanel(function(win)
-        {
-            FBTest.selectPanel("cookies");
-
-            var tests = [];
-            tests.push(short);
-            tests.push(shortURLEncoded);
-            tests.push(long);
-            tests.push(longURLEncoded);
-
-            FBTest.runTestSuite(tests, function()
+        FBTest.openFirebug(function() {
+            FBTest.enableCookiesPanel(function(win)
             {
-                FBTest.testDone("issue5834; DONE");
+                FBTest.selectPanel("cookies");
+
+                var tests = [];
+                tests.push(short);
+                tests.push(shortURLEncoded);
+                tests.push(long);
+                tests.push(longURLEncoded);
+
+                FBTest.runTestSuite(tests, function()
+                {
+                    FBTest.testDone("issue5834; DONE");
+                });
             });
         });
     });

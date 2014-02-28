@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("exampleScript1.START");
-
     // 1) Load test case page
     FBTest.openNewTab(basePath + "examples/exampleScript1.html", function(win)
     {

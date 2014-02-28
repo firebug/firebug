@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4839.START");
-
     FBTest.openNewTab(basePath + "script/stepping/4839/issue4839.html", function(win)
     {
         FBTest.selectPanel("script");

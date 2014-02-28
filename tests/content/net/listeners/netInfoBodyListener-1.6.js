@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("netInfoBodyListener.START");
     var NetInfoBody = FW.Firebug.NetMonitor.NetInfoBody;
     FBTest.openNewTab(basePath + "net/listeners/netInfoBodyListener-1.6.html", function(win)
     {

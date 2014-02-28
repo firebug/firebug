@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("testErrors.START");
     FBTest.openNewTab(basePath + "console/testErrors.html", function(win)
     {
         FBTest.selectPanel("console");

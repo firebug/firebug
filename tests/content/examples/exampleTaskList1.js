@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("examples.tasklist.START");
-
     // Create a task list object.
     var tasks = new FBTest.TaskList();
 

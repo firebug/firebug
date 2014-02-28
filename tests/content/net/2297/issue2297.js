@@ -8,44 +8,37 @@
 
 function runTest()
 {
-    FBTest.sysout("issue2297.START");
-
     // Enable showing network errors, the original value is reverted.
     var prefOrigValue = FBTest.getPref("showNetworkErrors");
     FBTest.setPref("showNetworkErrors", true);
 
     FBTest.openNewTab(basePath + "net/2297/issue2297.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableAllPanels();
-        FBTest.selectPanel("console");
+        FBTest.openFirebug(function() {
+            FBTest.enablePanels(["console", "net"], function()
+            {
+                var config = {tagName: "div", classes: "logRow logRow-error"};
+                FBTest.waitForDisplayedElement("console", config, function(element)
+                {
+                    // Verify error log in the console.
+                    var expectedResult = "\"NetworkError: 404 Not Found - " + basePath +
+                        "net/2297/" + "non-existing-script.js\"";
+                    var message = element.getElementsByClassName("objectBox")[0];
+                    FBTest.compare(expectedResult, message.textContent,
+                        "There must be a Network Error with proper URL");
 
-        // Create listener for mutation events.
-        var doc = FBTest.getPanelDocument();
-        var recognizer = new MutationRecognizer(doc.defaultView, "div",
-            {"class": "logRow logRow-error"});
+                    // Verify status bar text
+                    var firebugButton = FW.top.document.getElementById("firebug-error-label");
+                    var errorCount = firebugButton.getAttribute("value");
+                    FBTest.compare(1, errorCount, "There must be 1 Error displayed in the status bar");
 
-        // Wait for an error log in the Console panel.
-        recognizer.onRecognize(function (element)
-        {
-            // Verify error log in the console.
-            var expectedResult = "\"NetworkError: 404 Not Found - " + basePath +
-                "net/2297/" + "non-existing-script.js\"";
-            var message = element.getElementsByClassName("objectBox")[0];
-            FBTest.compare(expectedResult, message.textContent,
-                "There must be a Network Error with proper URL");
+                    FBTest.setPref("showNetworkErrors", prefOrigValue);
+                    FBTest.testDone("issue2297; end");
+                });
 
-            // Verify status bar text
-            var firebugButton = FW.top.document.getElementById("firebug-error-label");
-            var errorCount = firebugButton.getAttribute("value");
-            FBTest.compare(1, errorCount, "There must be 1 Error displayed in the status bar");
-
-            FBTest.setPref("showNetworkErrors", prefOrigValue);
-            FBTest.testDone("issue2297; end");
+                // Reload the page to get an error in the console.
+                FBTest.reload();
+            });
         });
-
-        // Reload the page to get an error in the console.
-        FBTest.reload();
     });
 }
-

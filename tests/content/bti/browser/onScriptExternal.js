@@ -12,8 +12,10 @@ function runTest()
     var browser = new FW.Firebug.BTI.Browser(); // TODO
     var url = FBTest.getHTTPURLBase()+"bti/browser/testExternalScript.html";
     var scriptUrl = FBTest.getHTTPURLBase()+"bti/browser/simpleExternal.js";
-    browser.addEventListener("onScript", function(compilationUnit){
-        FBTest.compare(compilationUnit.getURL(), scriptUrl, "URL of newly loaded script should be " +scriptUrl);
+    browser.addEventListener("onScript", function(compilationUnit)
+    {
+        FBTest.compare(compilationUnit.getURL(), scriptUrl,
+            "URL of newly loaded script should be " + scriptUrl);
         FBTest.testDone("done test #onScriptExternal()");
     });
     FBTest.progress("onScriptExternal, open test page "+url);

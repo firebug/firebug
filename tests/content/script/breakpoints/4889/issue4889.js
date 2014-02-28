@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4889.START");
-
     FBTest.openNewTab(basePath + "script/breakpoints/4889/issue4889.html", function(win)
     {
         FBTest.enablePanels(["console", "script"], function(win)

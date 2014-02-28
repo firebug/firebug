@@ -2,7 +2,6 @@ window.FBTestTimeout = 15000;
 
 function runTest()
 {
-    FBTest.sysout("issue1867.START");
     FBTest.openNewTab(basePath + "net/1867/issue1867.html", function(win)
     {
         FBTest.closeFirebug();
