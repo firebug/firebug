@@ -62,7 +62,7 @@ function runTest()
                 tasks.push(testCompletion, input1, input1 + "ument1|");
                 tasks.push(testCompletion, "myobj.prop|;", "myobj.prop2|;", true);
                 tasks.push(testCompletion, "document.get|elementbyi;", "document.getElementById|;");
-                tasks.push(testCompletion, "|document.gete", "\t|document.gete");
+                tasks.push(testCompletion, "|document.gete", "  |document.gete");
                 tasks.push(testSelectionIndent);
                 tasks.run(function()
                 {
