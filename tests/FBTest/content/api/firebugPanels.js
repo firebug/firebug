@@ -188,6 +188,8 @@ this.enablePanels = function(panelNames, callback)
         method = FBTestFirebug.enableNetPanel;
     else if (name === "console")
         method = FBTestFirebug.enableConsolePanel;
+    else if (name === "cookies")
+        method = FBTestFirebug.enableCookiesPanel;
 
     if (!method)
     {
