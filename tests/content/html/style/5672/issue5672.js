@@ -3,41 +3,42 @@ function runTest()
     FBTest.openNewTab(basePath + "html/style/5672/issue5672.html", function(win)
     {
         // 1. Open Firebug
-        FBTest.openFirebug();
-
-        // 2. Switch to the HTML panel and there to the Style side panel
-        var panel = FBTest.selectPanel("css");
-
-        // Required to avoid line breaking the value of the 'background' property,
-        // which causes problems hitting the right target when calling the context menu
-        FBTest.setSidePanelWidth(550);
-
-        // 3. Inspect the blue <div> with the Firebug logo
-        FBTest.selectElementInHtmlPanel("element", function(node)
+        FBTest.openFirebug(function()
         {
+            // 2. Switch to the HTML panel and there to the Style side panel
+            var panel = FBTest.selectPanel("css");
 
-            FBTest.getCSSProp("#element", "background", function(prop) {
-                var propValue = prop.getElementsByClassName("cssPropValue")[0];
+            // Required to avoid line breaking the value of the 'background' property,
+            // which causes problems hitting the right target when calling the context menu
+            FBTest.setSidePanelWidth(550);
 
-                var tests = [];
-                tests.push(function(callback)
-                {
-                    copyColor(propValue, callback);
-                });
+            // 3. Inspect the blue <div> with the Firebug logo
+            FBTest.selectElementInHtmlPanel("element", function(node)
+            {
 
-                tests.push(function(callback)
-                {
-                    copyImageURL(propValue, callback);
-                });
+                FBTest.getCSSProp("#element", "background", function(prop) {
+                    var propValue = prop.getElementsByClassName("cssPropValue")[0];
 
-                tests.push(function(callback)
-                {
-                    openImageInNewTab(propValue, callback);
-                });
+                    var tests = [];
+                    tests.push(function(callback)
+                    {
+                        copyColor(propValue, callback);
+                    });
 
-                FBTestFirebug.runTestSuite(tests, function()
-                {
-                    FBTest.testDone("issue5672.DONE");
+                    tests.push(function(callback)
+                    {
+                        copyImageURL(propValue, callback);
+                    });
+
+                    tests.push(function(callback)
+                    {
+                        openImageInNewTab(propValue, callback);
+                    });
+
+                    FBTestFirebug.runTestSuite(tests, function()
+                    {
+                        FBTest.testDone("issue5672.DONE");
+                    });
                 });
             });
         });
