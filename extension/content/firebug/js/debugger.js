@@ -67,6 +67,10 @@ const reTooMuchRecursion = /too\smuch\srecursion/;
 
 var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebuggerService);
 
+var comparator = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
+var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+var Fx27 = (comparator.compare(appInfo.version, "27.0*") >= 0);
+
 // ************************************************************************************************
 
 Firebug.Debugger = Obj.extend(ActivableModule,
@@ -2711,8 +2715,11 @@ Firebug.Debugger = Obj.extend(ActivableModule,
 
         // xxxHonza: do not pause the debugger (see issue 6086).
 
+        var paused;
+
         // can be called multiple times.
-        //var paused = FBS.pause(this.debuggerName);
+        if (Fx27)
+            paused = FBS.pause(this.debuggerName);
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +
@@ -2722,8 +2729,11 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         // Firebug is activated on another tab.
         // The start-button should somehow reflect that JSD can be still active (even if
         // Firebug is suspended for the current tab).
-        //if (!paused)  // then we failed to suspend, undo
-        //    return true;
+        if (Fx27)
+        {
+            if (!paused)  // then we failed to suspend, undo
+                return true;
+        }
 
         return false;
     },
@@ -2733,11 +2743,16 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         if (!Firebug.Debugger.isAlwaysEnabled())
             return;
 
-        //var unpaused = FBS.unPause();
+        var unpaused;
+
+        if (Fx27)
+            unpaused = FBS.unPause();
 
         if (FBTrace.DBG_ACTIVATION)
+        {
             FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +
                 Firebug.Debugger.isAlwaysEnabled());
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

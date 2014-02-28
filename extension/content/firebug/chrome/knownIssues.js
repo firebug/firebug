@@ -16,9 +16,10 @@ define([
     "firebug/chrome/panelActivation",
     "firebug/lib/events",
     "firebug/lib/css",
+    "firebug/lib/xpcom",
 ],
 function(Firebug, Module, Rep, FBTrace, Obj, Options, Dom, Firefox, Domplate, Locale, FirebugReps,
-    Win, PanelActivation, Events, Css) {
+    Win, PanelActivation, Events, Css, Xpcom) {
 
 "use strict";
 
@@ -31,6 +32,10 @@ var Ci = Components.interfaces;
 var {domplate, SPAN, P, DIV, BUTTON, TABLE, TR, TD, TBODY} = Domplate;
 
 var slowJSDBugUrl = "https://bugzilla.mozilla.org/show_bug.cgi?id=815603";
+
+var comparator = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
+var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+var Fx27 = (comparator.compare(appInfo.version, "27.0*") >= 0);
 
 // ********************************************************************************************* //
 // Domplate
@@ -117,6 +122,11 @@ var KnownIssues = Obj.extend(Module,
 
     showSlowJSDMessage: function(context)
     {
+        // The bug 815603 landed in Fx27, so do not display the warning anymore
+        // (see also issue 7193)
+        if (Fx27)
+            return;
+
         // Do not display twice for this context
         if (!context || !context.showSlowJSDMessage)
             return;
@@ -149,6 +159,11 @@ var KnownIssues = Obj.extend(Module,
      */
     showDisabledPanelBox: function(panelName, parentNode)
     {
+        // The bug 815603 landed in Fx27, so do not display the warning anymore
+        // (see also issue 7193)
+        if (Fx27)
+            return;
+
         if (panelName != "script")
             return;
 
