@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("dynScriptLoad.START");
     FBTest.openNewTab(basePath + "script/dynamicScriptEval/test1.html", function(win)
     {
         FBTest.openFirebug(function() {

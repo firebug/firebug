@@ -1,7 +1,6 @@
 var testProp = "0123456789012345678901234567890123456789012345678901234567890123456789";
 function runTest()
 {
-    FBTest.sysout("issue3029.START");
     FBTest.openNewTab(basePath + "console/3029/issue3029.html", function(win)
     {
         FBTest.openFirebug(function() {

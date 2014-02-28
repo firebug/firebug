@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue5416.START");
     FBTest.setPref("commandLineShowCompleterPopup", true);
     FBTest.openNewTab(basePath + "console/completion/5416/issue5416.html", function(win)
     {

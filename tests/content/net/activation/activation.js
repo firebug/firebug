@@ -10,8 +10,6 @@ var tab2 = null;
 
 function runTest()
 {
-    FBTest.sysout("activation.START");
-
     // Open two tabs one after another, open Firebug on both and select Net panel.
     tab1 = FBTest.openNewTab(basePath + "net/activation/activation1.html", function(win) {
         FBTest.progress("Opened new tab at "+win.location);

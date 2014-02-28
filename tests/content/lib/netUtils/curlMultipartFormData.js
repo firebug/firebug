@@ -21,8 +21,6 @@ var panel;
 
 function runTest()
 {
-    FBTest.sysout("curlMultiPartFormData.START");
-
     FBTest.setPref("net.curlAddCompressedArgument", false);
 
     FBTest.openNewTab(basePath + "lib/netUtils/curlMultipartFormData.html", function(win)

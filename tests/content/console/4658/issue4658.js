@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4658.START");
     FBTest.setPref("preferJSDSourceLinks", true);
     FBTest.openNewTab(basePath + "console/4658/issue4658.html", function(win)
     {

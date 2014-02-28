@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("groupGrouping.START");
-
     FBTest.openNewTab(basePath + "console/grouping/groups.html", function(win)
     {
         FBTest.openFirebug(function() {

@@ -1,7 +1,6 @@
 // Test entry point.
 function runTest()
 {
-    FBTest.sysout("issue1425.START");
     FBTest.clearCache();
 
     FBTest.openNewTab(basePath + "script/1425/issue1425.html", function(win)

@@ -2,7 +2,6 @@ var FF3p6OrLess = FBTest.compareFirefoxVersion("3.6.*") <= 0;
 
 function runTest()
 {
-    FBTest.sysout("testErrors.START");
     FBTest.openNewTab(basePath + "console/testErrors.html", function(win)
     {
         FBTest.enablePanels(["console", "script"], function() {

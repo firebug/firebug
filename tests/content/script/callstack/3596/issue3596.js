@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue3596.START");
     FBTest.openNewTab(basePath + "script/callstack/3596/issue3596.html", function(win)
     {
         FBTest.enableScriptPanel(function(win)

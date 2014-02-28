@@ -4,7 +4,6 @@ const BP_BREAKONREMOVE = 3;
 
 function runTest()
 {
-    FBTest.sysout("html.breakpoints; START");
     FBTest.setPref("filterSystemURLs", true);
 
     FBTest.openNewTab(basePath + "html/breakpoints/breakOnElement.html", function(win)

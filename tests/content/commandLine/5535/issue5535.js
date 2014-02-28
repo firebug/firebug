@@ -3,7 +3,6 @@ var fileName = "index.js";
 
 function runTest()
 {
-    FBTest.sysout("issue5535.START");
     FBTest.openNewTab(testPageURL, function(win)
     {
         FBTest.openFirebug(function() {

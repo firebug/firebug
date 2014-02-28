@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue2948.START");
-
     FBTest.openNewTab(basePath + "memory/memoryLeak/memory.html", function(win)
     {
         FBTest.openFirebug(function() {

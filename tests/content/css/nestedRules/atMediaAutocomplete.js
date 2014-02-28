@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("atMediaAutocomplete.START");
-
     FBTest.openNewTab(basePath + "css/nestedRules/atMediaAutocomplete.html", function(win)
     {
         FBTest.openFirebug(function() {

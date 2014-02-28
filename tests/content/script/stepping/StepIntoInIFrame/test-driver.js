@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("StepIntoInIFrame.START");
-
     FBTest.openNewTab(basePath + "script/stepping/StepIntoInIFrame/test.html", function(win)
     {
         FBTest.selectPanel("script");

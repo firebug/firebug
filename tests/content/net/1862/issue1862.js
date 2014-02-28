@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue1862.START");
     FBTest.openNewTab(basePath + "net/1862/issue1862.html", function()
     {
         // Open Firebug UI and enable Net panel.

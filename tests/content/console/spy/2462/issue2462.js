@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue2462.START");
     FBTest.openNewTab(basePath + "console/spy/2462/issue2462.html", function(win)
     {
         FBTest.enableConsolePanel(function()

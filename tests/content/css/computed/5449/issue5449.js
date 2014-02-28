@@ -7,8 +7,6 @@ const infoTipTypes = {
 
 function runTest()
 {
-    FBTest.sysout("issue5449.START");
-
     FBTest.openNewTab(basePath + "css/computed/5449/issue5449.html", function(win)
     {
         FBTest.openFirebug(function() {

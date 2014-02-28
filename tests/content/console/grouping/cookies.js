@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("cookiesGrouping.START");
     FBTest.setPref("cookies.logEvents", true);
 
     FBTest.openNewTab(basePath + "console/grouping/cookies.php", function(win)

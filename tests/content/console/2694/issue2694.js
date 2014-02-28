@@ -4,8 +4,6 @@
 // 3. The Console panel scroll position must be at the bottom.
 function runTest()
 {
-    FBTest.sysout("issue2694.START");
-
     // Step 1.
     FBTest.openNewTab(basePath + "console/2694/issue2694.html", function(win)
     {

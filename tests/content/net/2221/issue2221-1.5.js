@@ -7,7 +7,6 @@
 var panel = null;
 function runTest()
 {
-    FBTest.sysout("issue2221.START");
     FBTest.openNewTab(basePath + "net/2221/issue2221.html", function(win)
     {
         FBTest.enableNetPanel(function(win)

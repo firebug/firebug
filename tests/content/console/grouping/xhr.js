@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("xhrGrouping.START");
-
     FBTest.openNewTab(basePath + "console/grouping/xhr.html", function(win)
     {
         FBTest.openFirebug(function() {

@@ -1,7 +1,6 @@
 // Test entry point.
 function runTest()
 {
-    FBTest.sysout("openOnLocalPage.START");
     FBTest.openNewTab(basePath + "firebug/openOnLocalPage.html", function(win)
     {
         // Open Firebug UI and reload the page.

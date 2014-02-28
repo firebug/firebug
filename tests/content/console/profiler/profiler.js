@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("profiler.START");
     FBTest.openNewTab(basePath + "console/profiler/profiler.html", function(win)
     {
         FBTest.enablePanels(["console", "script"], function(win)

@@ -6,7 +6,6 @@
  */
 function runTest()
 {
-    FBTest.sysout("openDisableEnableReload.START");
     FBTest.disableAllPanels();
 
     FBTest.setPref("activateSameOrigin", false);

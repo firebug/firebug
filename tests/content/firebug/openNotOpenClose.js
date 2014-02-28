@@ -5,7 +5,6 @@ function runTest()
     else
         FBTest.ok(false, "No Firebug Window");
 
-    FBTest.sysout("openNotOpenClose; START");
     FBTest.openNewTab(basePath + "firebug/NeverOpenFirebugOnThisPage.html", function(win)
     {
         FBTest.sysout("onNewPage starts");

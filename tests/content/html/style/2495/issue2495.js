@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue2495.START");
     FBTest.openNewTab(basePath + "html/style/2495/issue2495.html", function(win)
     {
         var elementID = "element";

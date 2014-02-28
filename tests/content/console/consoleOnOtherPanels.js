@@ -11,7 +11,6 @@
  */
 function runTest()
 {
-    FBTest.sysout("consoleOnOtherPanels.START");
     FBTest.openNewTab(basePath + "console/consoleOnOtherPanels.html", function(win)
     {
         FBTest.openFirebug(function() {

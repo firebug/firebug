@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("atMediaStyleEditing.START");
-
     FBTest.openNewTab(basePath + "css/nestedRules/atMediaStyleEditing.html", function(win)
     {
         FBTest.openFirebug(function() {

@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue369.jsonViewer.START");
-
     FBTest.openNewTab(basePath + "net/369/issue369.1.6.htm", function(win)
     {
         FBTest.openFirebug(function() {

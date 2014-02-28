@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("refreshHaltedDebugger.START");
-
     // 1) Open test page
     FBTest.openNewTab(basePath + "script/refreshHaltedDebugger.html", function(win)
     {

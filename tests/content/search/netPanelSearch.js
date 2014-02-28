@@ -1,7 +1,6 @@
 // FBTest entry point
 function runTest()
 {
-    FBTest.sysout("search; START");
     FBTest.clearCache();
     FBTest.openNewTab(basePath + "search/netVictim.htm", function(win)
     {

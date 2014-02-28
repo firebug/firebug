@@ -3,7 +3,6 @@
  */
 function runTest()
 {
-    FBTest.sysout("console.table.START");
     FBTest.openNewTab(basePath + "console/api/table.html", function(win)
     {
         FBTest.openFirebug(function() {

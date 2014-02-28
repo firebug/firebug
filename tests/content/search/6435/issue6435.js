@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue6435.START");
-
     FBTest.setPref("showDOMProps", false);
 
     FBTest.openNewTab(basePath + "search/6435/issue6435.html", function()

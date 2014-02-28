@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("console.profile.START");
     FBTest.progress("profile start");
     FBTest.openNewTab(basePath + "console/api/profile.html", function(win)
     {

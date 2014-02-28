@@ -6,7 +6,6 @@
  */
 function runTest()
 {
-    FBTest.sysout("storage.START");
     FBTest.openNewTab(basePath + "dom/storage/storage.html", function(win)
     {
         FBTest.openFirebug(function() {

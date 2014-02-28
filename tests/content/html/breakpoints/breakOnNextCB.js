@@ -1,8 +1,6 @@
 function runTest()
 {
-    FBTest.sysout("html.breakpoints.CB; START");
     FBTest.setPref("filterSystemURLs", false);
-
 
     FBTest.openNewTab(basePath + "html/breakpoints/breakOnNext.html", function(win)
     {

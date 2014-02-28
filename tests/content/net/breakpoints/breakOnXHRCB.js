@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("breakOnXHRCB.START");
     FBTest.setPref("filterSystemURLs", false);
 
     FBTest.openNewTab(basePath + "net/breakpoints/breakOnXHR.html", function(win)

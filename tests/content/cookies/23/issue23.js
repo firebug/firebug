@@ -2,8 +2,6 @@ var currentBaseURI = null;
 
 function runTest()
 {
-    FBTest.sysout("cookies.test.issue23; START");
-
     currentBaseURI = FW.FBL.makeURI(basePath);
 
     FBTest.clearCache();

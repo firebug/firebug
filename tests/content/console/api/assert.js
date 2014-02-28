@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("console.assert.START");
-
     FBTest.openNewTab(basePath + "console/api/assert.html", function(win)
     {
         FBTest.openFirebug(function() {

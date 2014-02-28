@@ -5,7 +5,6 @@ var detachedWindow;
 
 function runTest()
 {
-    FBTest.sysout("changeUILocation.START");
     FBTest.openNewTab(testPageURL, function(win)
     {
         // TODO: open detached Firebug via Firebug icon context menu

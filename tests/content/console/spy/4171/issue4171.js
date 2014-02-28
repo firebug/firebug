@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4171.START");
     FBTest.setPref("showXMLHttpRequests", true);
     FBTest.openNewTab(basePath + "console/spy/4171/issue4171.html", function(win)
     {

@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("exampleScript2.START");
-
     FBTest.openNewTab(basePath + "examples/exampleScript2.html", function(win)
     {
         FBTest.enableScriptPanel(function(win)

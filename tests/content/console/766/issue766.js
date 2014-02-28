@@ -4,7 +4,6 @@
 // 4) Verify UI in the Console panel.
 function runTest()
 {
-    FBTest.sysout("issue766.START");
     FBTest.openNewTab(basePath + "console/766/issue766.html", function(win)
     {
         FBTest.openFirebug(function() {

@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue5834.START");
-
     FBTest.openNewTab(basePath + "cookies/5834/issue5834.php", function(win)
     {
         FBTest.openFirebug(function() {

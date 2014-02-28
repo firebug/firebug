@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue6481.START");
     FBTest.setPref("showClosures", true);
 
     FBTest.openNewTab(basePath + "dom/6481/issue6481.html", function()

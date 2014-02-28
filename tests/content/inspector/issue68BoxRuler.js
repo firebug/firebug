@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue68BoxRuler.START");
-
     FBTest.openNewTab(basePath + "inspector/InspectorTestIframe.htm?url=Issue68BoxRulerExpected.htm", function(win)
     {
         var actualImage, expectedImage,

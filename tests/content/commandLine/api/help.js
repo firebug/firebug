@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("commandline.help.START");
     FBTest.openNewTab(basePath + "commandLine/api/help.html", function(win)
     {
         FBTest.openFirebug(function() {

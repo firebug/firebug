@@ -56,7 +56,6 @@ function runTest()
         "fcPerm",
     ];
 
-    FBTest.sysout("issue6300.START");
     FBTest.openNewTab(basePath + "firebug/6300/issue6300.html", function(win)
     {
         FBTest.openFirebug(function() {

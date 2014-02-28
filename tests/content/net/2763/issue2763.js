@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue2763.START");
-
     // Load test case page
     FBTest.openNewTab(basePath + "net/2763/issue2763.html", function(win)
     {

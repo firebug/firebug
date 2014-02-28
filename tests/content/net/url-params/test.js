@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("UrlParams.START");
     FBTest.openNewTab(basePath + "net/url-params/test.html", function(win)
     {
         FBTest.openFirebug(function() {

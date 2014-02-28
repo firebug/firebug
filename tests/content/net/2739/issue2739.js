@@ -1,8 +1,6 @@
 // Test entry point.
 function runTest()
 {
-    FBTest.sysout("issue2739.START");
-
     // Disable XHR spy for this test.
     FBTest.setPref("showXMLHttpRequests", false);
 

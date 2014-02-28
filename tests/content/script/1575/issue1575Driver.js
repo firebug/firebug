@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue1575.START");
     FBTest.openNewTab(basePath + "script/1575/issue1575.htm", function(win)
     {
         FBTest.progress("issue1575 opens " + win.location);

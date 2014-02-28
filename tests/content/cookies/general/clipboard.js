@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("cookies.general.cookieClipboard.START");
-
     FBTest.setPref("cookies.filterByPath", false);
 
     FBTest.openNewTab(basePath + "cookies/general/clipboard.php", function(win)

@@ -5,7 +5,6 @@ var detachedWindow;
 
 function runTest()
 {
-    FBTest.sysout("openInNewWindow.START");
     FBTest.openNewTab(testPageURL, function(win)
     {
         FBTest.openFirebug(function() {

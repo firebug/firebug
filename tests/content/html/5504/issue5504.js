@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue5504.START");
-
     FBTest.openNewTab(basePath + "html/5504/issue5504.html", function(win)
     {
         FBTest.openFirebug(function() {

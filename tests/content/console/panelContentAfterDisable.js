@@ -5,7 +5,6 @@
  */
 function runTest()
 {
-    FBTest.sysout("panelContentAfterDisable.START");
     FBTest.openNewTab(basePath + "firebug/OpenFirebugOnThisPage.html", function(win)
     {
         FBTest.openFirebug(function() {

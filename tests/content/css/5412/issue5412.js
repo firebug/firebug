@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue5412.START");
-
     function done()
     {
         FBTest.testDone("issue5412.DONE");

@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("simpleLogs.START");
     FBTest.openNewTab(basePath + "console/grouping/simpleLogs.html", function(win)
     {
         FBTest.openFirebug(function() {

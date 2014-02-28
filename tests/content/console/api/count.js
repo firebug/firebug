@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("console.count.START");
     FBTest.openNewTab(basePath + "console/api/count.html", function(win)
     {
         FBTest.openFirebug(function() {

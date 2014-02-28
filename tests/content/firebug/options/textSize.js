@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("textSize.START");
     FBTest.openNewTab(basePath + "firebug/options/textSize.html", function(win)
     {
         FBTest.openFirebug(function() {

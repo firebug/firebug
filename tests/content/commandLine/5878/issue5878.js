@@ -1,7 +1,6 @@
 function runTest()
 {
     var basePath5878 = basePath + "commandLine/5878/";
-    FBTest.sysout("include.START");
     FBTest.openNewTab(basePath5878 + "issue5878.html", function(win)
     {
         FBTest.openFirebug(function() {

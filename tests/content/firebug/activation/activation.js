@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("activation.START");
-
     FBTest.enableAllPanels();
 
     // Use the existing tab as the "no Firebug tab"

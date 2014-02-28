@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("profilerGrouping.START");
     FBTest.openNewTab(basePath + "console/grouping/profiler.html", function(win)
     {
         FBTest.openFirebug(function() {

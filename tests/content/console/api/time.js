@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("console.time.START");
     FBTest.openNewTab(basePath + "console/api/time.html", function(win)
     {
         FBTest.openFirebug(function() {

@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("arrayDisplay.START");
     FBTest.openNewTab(basePath + "console/reps/arrayDisplay.html", function(win)
     {
         FBTest.openFirebug(function() {

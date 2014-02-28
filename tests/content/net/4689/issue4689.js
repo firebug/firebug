@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4689.START");
     FBTest.openNewTab(basePath + "net/4689/issue4689.html", function()
     {
         //FBTest.clearConsole();

@@ -4,7 +4,6 @@ function runTest()
     var fileName = "index.js";
     var lineNo = 5;
 
-    FBTest.sysout("issue1483.START");
     FBTest.openNewTab(basePath + "script/1483/issue1483.html", function(win)
     {
         FBTest.clearCache();

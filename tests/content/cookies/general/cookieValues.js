@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("escapedAndUnescapedCookieValues; START");
-
     FBTest.openNewTab(basePath + "cookies/general/cookieValues.php", function(win)
     {
         // 1. Open Firebug

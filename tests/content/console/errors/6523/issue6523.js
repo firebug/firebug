@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue6523.START");
     FBTest.setPref("showStackTrace", true);
 
     FBTest.openNewTab(basePath + "console/errors/6523/issue6523.html", function(win)

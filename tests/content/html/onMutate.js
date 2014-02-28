@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("html.breakpoints; START");
-
     FBTest.openNewTab(basePath + "html/onMutate.html", function(win)
     {
         FBTest.openFirebug(function() {

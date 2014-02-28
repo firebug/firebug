@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4509.START");
     FBTest.openNewTab(basePath + "script/stepping/4509/issue4509.html", function(win)
     {
         FBTest.enablePanels("script", "console", function()
@@ -10,7 +9,7 @@ function runTest()
             tasks.push(testViaCtrlClick);
 
             // xxxHonza: sending middle click event breaks the test-harness.
-            // All the following test from script/watch group fails 
+            // All the following test from script/watch group fails
             //tasks.push(testViaMiddleClick);
 
             tasks.run(function()

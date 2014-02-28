@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue5277.START");
-
     FBTest.openNewTab(basePath + "css/5277/issue5277.html", function(win)
     {
         var id = "element1";

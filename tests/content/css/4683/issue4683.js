@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4683.START");
     FBTest.setFirebugBarHeight(450);
 
     FBTest.openNewTab(basePath + "css/4683/issue4683.html", function(win)

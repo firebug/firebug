@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("console.dir.START");
-
     FBTest.openNewTab(basePath + "console/api/dir.html", function(win)
     {
         FBTest.openFirebug(function() {

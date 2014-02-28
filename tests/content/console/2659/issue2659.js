@@ -7,8 +7,6 @@
 // 7) Verify number of logs (must be == 2)
 function runTest()
 {
-    FBTest.sysout("issue2659.START");
-
     FBTest.openNewTab(basePath + "console/2659/issue2659.html", function(win)
     {
         FBTest.openFirebug(function() {

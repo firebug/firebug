@@ -2,8 +2,6 @@ var supportedVersion = FBTest.compareFirefoxVersion("15*") >= 0;
 
 function runTest()
 {
-    FBTest.sysout("issue2558.START");
-
     // A bug needed for this feature has been fixed in Firefox 15
     // https://bugzilla.mozilla.org/show_bug.cgi?id=746601
     if (!supportedVersion)

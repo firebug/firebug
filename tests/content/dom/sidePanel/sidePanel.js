@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("sidePanel.START");
     FBTest.openNewTab(basePath + "dom/sidePanel/sidePanel.html", function(win)
     {
         FBTest.openFirebug(function() {

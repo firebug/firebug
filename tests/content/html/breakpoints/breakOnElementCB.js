@@ -4,7 +4,6 @@ const BP_BREAKONREMOVE = 3;
 
 function runTest()
 {
-    FBTest.sysout("html.breakpoints.CB; START");
     FBTest.setPref("filterSystemURLs", false);
 
     var doNotFilter = FBTest.getPref("filterSystemURLs");

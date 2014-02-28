@@ -6,7 +6,6 @@
  */
 function runTest()
 {
-    FBTest.sysout("selectedPanelAfterReopen.START");
     FBTest.openNewTab(basePath + "firebug/OpenFirebugOnThisPage.html", function(win)
     {
         FBTest.openFirebug(function() {

@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue5672.START");
-
     FBTest.openNewTab(basePath + "html/style/5672/issue5672.html", function(win)
     {
         // 1. Open Firebug
@@ -31,7 +29,7 @@ function runTest()
                 {
                     copyImageURL(propValue, callback);
                 });
-                
+
                 tests.push(function(callback)
                 {
                     openImageInNewTab(propValue, callback);

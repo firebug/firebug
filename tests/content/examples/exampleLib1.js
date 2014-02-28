@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("exampleLib1.START");
-
     var element = document.createElement("div");
     element.appendChild(document.createTextNode("some text"));
 

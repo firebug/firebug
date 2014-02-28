@@ -8,7 +8,6 @@
 
 function runTest()
 {
-    FBTest.sysout("activeContextAfterReload.START");
     FBTest.openNewTab(basePath + "firebug/OpenFirebugOnThisPage.html", function(win)
     {
         FBTest.openFirebug(function() {

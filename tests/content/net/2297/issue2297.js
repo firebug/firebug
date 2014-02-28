@@ -8,8 +8,6 @@
 
 function runTest()
 {
-    FBTest.sysout("issue2297.START");
-
     // Enable showing network errors, the original value is reverted.
     var prefOrigValue = FBTest.getPref("showNetworkErrors");
     FBTest.setPref("showNetworkErrors", true);

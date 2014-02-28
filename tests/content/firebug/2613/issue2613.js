@@ -4,7 +4,6 @@
 // 4) Verify content of each selected panel after reload.
 function runTest()
 {
-    FBTest.sysout("issue2613.START");
     FBTest.openNewTab(basePath + "firebug/2613/issue2613.html", function(win)
     {
         FBTest.openFirebug(function() {

@@ -3,7 +3,6 @@ var expectedValue2 = /style="color:\s*green"/;
 
 function runTest()
 {
-    FBTest.sysout("attributes.START");
     FBTest.openNewTab(basePath + "dom/attributes/attributes.html", function(win)
     {
         FBTest.openFirebug(function() {

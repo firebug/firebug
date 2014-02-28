@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("breakOnError.START");
     FBTest.openNewTab(basePath + "console/breakOnError/breakOnError.html", function(win)
     {
         FBTest.openFirebug(function() {

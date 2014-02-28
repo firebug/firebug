@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue1299.START");
-
     var pageURI = basePath + "net/1299/issue1299.html";
     var scriptURI = basePath + "net/1299/issue1299.js";
 

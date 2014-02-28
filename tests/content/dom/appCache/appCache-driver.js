@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("appCache.START");
     FBTest.openNewTab(basePath + "dom/appCache/appCache.html", function(win)
     {
         FBTest.openFirebug(function() {

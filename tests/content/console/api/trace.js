@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("console.trace.START");
     FBTest.openNewTab(basePath + "console/api/trace.html", function(win)
     {
         function compareFrames(callback, list)

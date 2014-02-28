@@ -2,7 +2,6 @@ var testWindow;
 
 function runTest()
 {
-    FBTest.sysout("console.group.START");
     FBTest.openNewTab(basePath + "console/api/group.html", function(win)
     {
         FBTest.openFirebug(function() {

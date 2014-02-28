@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("generateCurlCommand.START");
-
     var HOST = FW.FBL.makeURI(basePath).host;
     var REQUEST_URL = basePath + "lib/netUtils/server.php";
     var REFERRER_URL = basePath + "lib/netUtils/generateCurlCommand.html";
