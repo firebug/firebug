@@ -7,7 +7,8 @@ function runTest()
     FBTest.openNewTab(basePath + "net/1275/issue1275.htm", function(win)
     {
         FBTest.openFirebug(function() {
-            FBTest.enablePanels(["net", "cookies"], function() {
+            FBTest.enablePanels(["net", "console"], function()
+            {
                 FBTest.clearCache();
 
                 // Reload test page.
@@ -16,15 +17,15 @@ function runTest()
                     onRequestDisplayed("tr", "netRow category-xhr hasHeaders loaded", function(row)
                     {
                         // Verify Net panel response
-                        var panel = FBTest.getPanel("net");
+                        var panel = FBTest.getSelectedPanel();
                         FBTest.click(row);
                         verifyResponse(panel);
 
                         // Verify Console panel response
-                        panel = FBTest.getPanel("console");
-                        var spyLogRow = FW.FBL.getElementByClass(panel.panelNode, "logRow",
-                            "logRow-spy", "loaded");
-                        var xhr = FW.FBL.getElementByClass(spyLogRow, "spyTitleCol", "spyCol");
+                        panel = FBTest.selectPanel("console");
+                        var spyLogRow = panel.panelNode.
+                            getElementsByClassName("logRow logRow-spy loaded")[0];
+                        var xhr = spyLogRow.getElementsByClassName("spyTitleCol spyCol")[0];
                         FBTest.click(xhr);
                         verifyResponse(panel);
 
