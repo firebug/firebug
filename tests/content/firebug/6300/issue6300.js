@@ -58,34 +58,36 @@ function runTest()
 
     FBTest.openNewTab(basePath + "firebug/6300/issue6300.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.enableAllPanels();
-
-            FBTest.reload(function()
+        FBTest.openFirebug(function()
+        {
+            FBTest.enablePanels(["console", "script", "net", "cookies"], function()
             {
-                var tasks = new FBTest.TaskList();
-
-                // Iterate from the first panel
-                tasks.push(verifyButtonVisibility, "console", consoleButtons);
-                tasks.push(verifyButtonVisibility, "html", htmlButtons);
-                tasks.push(verifyButtonVisibility, "stylesheet", cssButtons);
-                tasks.push(verifyButtonVisibility, "script", scriptButtons);
-                tasks.push(verifyButtonVisibility, "dom", domButtons);
-                tasks.push(verifyButtonVisibility, "net", netButtons);
-                tasks.push(verifyButtonVisibility, "cookies", cookiesButtons);
-
-                // ... and back
-                tasks.push(verifyButtonVisibility, "cookies", cookiesButtons);
-                tasks.push(verifyButtonVisibility, "net", netButtons);
-                tasks.push(verifyButtonVisibility, "dom", domButtons);
-                tasks.push(verifyButtonVisibility, "script", scriptButtons);
-                tasks.push(verifyButtonVisibility, "stylesheet", cssButtons);
-                tasks.push(verifyButtonVisibility, "html", htmlButtons);
-                tasks.push(verifyButtonVisibility, "console", consoleButtons);
-
-                tasks.run(function()
+                FBTest.reload(function()
                 {
-                    FBTest.testDone("issue6300.DONE");
+                    var tasks = new FBTest.TaskList();
+    
+                    // Iterate from the first panel
+                    tasks.push(verifyButtonVisibility, "console", consoleButtons);
+                    tasks.push(verifyButtonVisibility, "html", htmlButtons);
+                    tasks.push(verifyButtonVisibility, "stylesheet", cssButtons);
+                    tasks.push(verifyButtonVisibility, "script", scriptButtons);
+                    tasks.push(verifyButtonVisibility, "dom", domButtons);
+                    tasks.push(verifyButtonVisibility, "net", netButtons);
+                    tasks.push(verifyButtonVisibility, "cookies", cookiesButtons);
+    
+                    // ... and back
+                    tasks.push(verifyButtonVisibility, "cookies", cookiesButtons);
+                    tasks.push(verifyButtonVisibility, "net", netButtons);
+                    tasks.push(verifyButtonVisibility, "dom", domButtons);
+                    tasks.push(verifyButtonVisibility, "script", scriptButtons);
+                    tasks.push(verifyButtonVisibility, "stylesheet", cssButtons);
+                    tasks.push(verifyButtonVisibility, "html", htmlButtons);
+                    tasks.push(verifyButtonVisibility, "console", consoleButtons);
+    
+                    tasks.run(function()
+                    {
+                        FBTest.testDone("issue6300.DONE");
+                    });
                 });
             });
         });
