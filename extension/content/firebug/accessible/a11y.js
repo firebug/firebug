@@ -1281,7 +1281,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
                 break;
 
             case Node.ATTRIBUTE_NODE:
-                elem = node.ownerElement;
+                elem = match.ownerElement;
                 matchFeedback += Locale.$STRF("a11y.updates.match found in attribute",
                     [match.match[0], node.name, node.value, elem.nodeName,
                         Xpath.getElementTreeXPath(elem)]);
