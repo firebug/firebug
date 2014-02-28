@@ -72,7 +72,7 @@ this.shutdownFirebug = function()
 
 /**
  * Returns true if Firebug UI is currently opened; false otherwise. This method doesn't
- * check if Firebug is connected to the backend. Use 'isFirebugAttached' instead if 
+ * check if Firebug is connected to the backend. Use 'isFirebugAttached' instead if
  * it's what you need. Firebug connects to the back end immediately after opening for
  * the first time, but it happens asynchronously.
  */
@@ -133,13 +133,17 @@ this.isInBrowser = function()
 /**
  * Detach Firebug into a new separate window.
  */
-this.detachFirebug = function()
+this.detachFirebug = function(callback)
 {
     if (FW.Firebug.isDetached())
-        return null;
+    {
+        callback(null);
+        return;
+    }
 
-    this.openFirebug();
-    return FW.Firebug.detachBar(FW.Firebug.currentContext);
+    this.openFirebug(function() {
+        callback(FW.Firebug.detachBar(FW.Firebug.currentContext));
+    });
 };
 
 /**

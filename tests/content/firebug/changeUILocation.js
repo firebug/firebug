@@ -81,17 +81,19 @@ function runTest()
 
 function waitForDetachedFirebug(callback)
 {
-    detachedWindow = FBTest.detachFirebug();
-    if (!FBTest.ok(detachedWindow, "Firebug is detaching..."))
+    FBTest.detachFirebug(function(detachedWindow)
     {
-        FBTest.testDone("openInNewWindow.FAILED");
-        return;
-    }
+        if (!FBTest.ok(detachedWindow, "Firebug is detaching..."))
+        {
+            FBTest.testDone("openInNewWindow.FAILED");
+            return;
+        }
 
-    FBTest.OneShotHandler(detachedWindow, "load", function(event)
-    {
-        FBTest.progress("Firebug detached in a new window.");
-        callback();
+        FBTest.OneShotHandler(detachedWindow, "load", function(event)
+        {
+            FBTest.progress("Firebug detached in a new window.");
+            callback();
+        });
     });
 }
 
