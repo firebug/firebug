@@ -410,9 +410,6 @@ this.expandElements = function(panelNode, className) // className, className, ..
  * specified panel. A DOM node representing the UI is passed into the callback as
  * the only parameter.
  *
- * If 'config.onlyMutations' is set to true, the method is always waiting for changes
- * and ignoring the fact that the nodes might be already displayed.
- *
  * @param {String} panelName Name of the panel that shows the result.
  * @param {WaitForDisplayedElementConfig} config Requirements, which must be fulfilled to trigger
  *     the callback function
