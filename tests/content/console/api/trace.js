@@ -30,6 +30,7 @@ function runTest()
                     {
                         FBTest.enableScriptPanel(function(win)
                         {
+                            FBTest.clearConsole();
                             compareFrames(function()
                             {
                                 FBTest.testDone("console.trace.DONE");
@@ -42,7 +43,6 @@ function runTest()
                                 ["onclick", ["event=click", "clientX=0,", "clientY=0"], "onclick", 2],
                             ]);
 
-                            FBTest.clearConsole();
                             FBTest.click(win.document.getElementById("testButton"));
                         });
                     }, [
