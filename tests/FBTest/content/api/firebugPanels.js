@@ -452,7 +452,7 @@ this.waitForDisplayedElement = function(panelName, config, callback)
 
         if (config.id)
         {
-            var node = panelNode.getElementById(config.id);
+            var node = panelNode.ownerDocument.getElementById(config.id);
             if (node)
             {
                 setTimeout(function()
