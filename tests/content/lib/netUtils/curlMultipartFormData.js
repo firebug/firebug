@@ -58,17 +58,25 @@ function onLoadResponseAndCompare()
 
     var generatedCurlCommand = FW.Firebug.NetMonitor.Utils.generateCurlCommand(file);
 
-    var result = replaceUserAgentHeader(replaceBoundaries(generatedCurlCommand));
+    var result = replaceUserAgentHeader(replaceBoundaries(removeDoNotTrackHeader(
+        generatedCurlCommand)));
 
     FBTest.compare(EXPECTED_RESULT, result, "Should be a valid multipart/form-data request");
 
     FBTest.testDone("curlMultiPartFormData.DONE");
 }
 
+// ********************************************************************************************* //
+// Helpers
 
 function replaceUserAgentHeader(generatedCurlCommand)
 {
     return generatedCurlCommand.replace(/(-H 'User-Agent: ).+?(')/i, "$1" + CURL_USER_AGENT + "$2");
+}
+
+function removeDoNotTrackHeader(str)
+{
+    return str.replace(/(-H 'DNT: 1')\s/i, "");
 }
 
 function replaceBoundaries(generatedCurlCommand)
