@@ -13,17 +13,20 @@ function runTest()
                     FBTest.testDone("breakOnNext.DONE");
                 });
 
-                FBTest.clickBreakOnNextButton();
-                FBTest.progress("activated break on next");
-                var testButton = win.document.getElementById("testButton");
-                testButton.addEventListener('click', function verifyClick()
+                win.setTimeout(function()
                 {
-                    FBTest.progress("testButton was clicked");
-                    testButton.removeEventListener('click', verifyClick, true);
-                }, true);
+                    FBTest.progress("activated break on next");
+                    var testButton = win.document.getElementById("testButton");
+                    testButton.addEventListener('click', function verifyClick()
+                    {
+                        FBTest.progress("testButton was clicked");
+                        testButton.removeEventListener('click', verifyClick, true);
+                    }, true);
 
-                FBTest.progress("now click the testButton");
-                FBTest.click(testButton);
+                    FBTest.progress("now click the testButton");
+                    FBTest.click(testButton);
+                }, 200);
+                FBTest.clickBreakOnNextButton();
             });
         });
     });
