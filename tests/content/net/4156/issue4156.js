@@ -45,7 +45,8 @@ function clickToolbarButton(buttonID, ctrlKey)
     FBTest.sysout("Click toolbar button " + buttonID, button);
 
     var eventDetails = {ctrlKey: ctrlKey};
-    FBTest.synthesizeMouse(button, 2, 2, eventDetails);
+    // Offset should better be calculated to avoid problems in relation with different OS themes
+    FBTest.synthesizeMouse(button, 4, 4, eventDetails);
 }
 
 function verifyNetPanelDisplay(enabledFilters, displayedRequests)
