@@ -473,6 +473,7 @@ var BreakpointStore = Obj.extend(Module,
 
     getBreakpoints: function(url)
     {
+        Trace.sysout("BreakpointStore.getBreakpoints; url = " + url);
         if (url)
             return this.breakpoints[url] || [];
 
@@ -481,6 +482,7 @@ var BreakpointStore = Obj.extend(Module,
         for (var i = 0; i < urls.length; i++)
             bps.push.apply(bps, this.breakpoints[urls[i]] || []);
 
+        Trace.sysout("BreakpointStore.getBreakpointURLs; bps", bps);
         return bps;
     },
 

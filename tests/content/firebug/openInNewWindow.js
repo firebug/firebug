@@ -43,7 +43,7 @@ function waitForDetachedFirebug(callback)
 
 function setBreakpointReloadAndWaitForBreak(callback)
 {
-    FBTest.waitForBreakInDebugger(null, lineNo, true, function()
+    FBTest.waitForBreakInDebugger(null, lineNo, false, function()
     {
         FBTest.progress("The first break happened");
         callback();

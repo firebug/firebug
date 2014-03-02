@@ -1539,6 +1539,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!this.location)
         {
             this.location = this.getDefaultLocation();
+            Trace.sysout("scriptPanel.newSource; this.location.getURL() = " +
+                this.location.getURL());
             this.updateLocation(this.location);
             Firebug.chrome.syncLocationList();
         }

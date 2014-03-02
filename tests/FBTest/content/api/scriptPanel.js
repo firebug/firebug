@@ -272,6 +272,17 @@ this.selectSourceLine = function(url, lineNo, category, chrome, callback)
         url = panel.getObjectLocation(panel.location);
     }
 
+    if (!url.startsWith("http"))
+    {
+        if (!FW.Firebug.currentContext)
+        {
+            FBTest.ok(FW.Firebug.currentContext, "There is a current context");
+            throw "";
+        }
+        var docLocation = FW.Firebug.currentContext.window.location.href;
+        url = new URL(url, docLocation).href;
+    }
+
     var sourceLink = new FBTest.FirebugWindow.FBL.SourceLink(url, lineNo, category);
     if (chrome)
         chrome.select(sourceLink);
