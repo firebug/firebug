@@ -118,8 +118,28 @@ ProfilerEngine.prototype =
         {
             script.initialized = true;
 
-            if (!script.funcName)
-                script.funcName = frame.callee && frame.callee.displayName;
+            if (!script.funcName && frame.callee)
+            {
+                var displayNameDescriptor;
+
+                try
+                {
+                    displayNameDescriptor = frame.callee.getOwnPropertyDescriptor("displayName");
+                }
+                catch (ex)
+                {
+                    // Calling getOwnPropertyDescriptor with displayName might throw
+                    // with "permission denied" errors for some functions.
+                    Trace.sysout("ProfilerEngine.onEnterFrame; getting displayNameDescriptor " +
+                        "threw an exception.", ex);
+                }
+
+                if (displayNameDescriptor && typeof displayNameDescriptor.value === "string" &&
+                    displayNameDescriptor.value)
+                    script.funcName = displayNameDescriptor.value;
+                else
+                    script.funcName = frame.callee.displayName;
+            }
 
             if (typeof(script.callCount) == "undefined")
                 script.callCount = 0;
