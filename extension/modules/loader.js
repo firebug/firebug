@@ -71,6 +71,8 @@ var FirebugLoader =
     startup: function()
     {
         // allow already started bootstrapped firebug extensions to register themselves
+        // xxxHonza: The try-catch statement can be removed as soon as Firefox 30 (Fx30)
+        // is the minimum required version (see also issue 7208).
         var XPIProviderBP;
         try
         {

@@ -96,7 +96,8 @@ var BrowserCommands =
                 var {attr, key, modifiers} = getShortcutInfo(shortcut);
 
                 // Disable existing global shortcuts
-                self.disableExistingShortcuts.call(self, node, attr, key, modifiers);
+                self.disableExistingShortcuts.call(self, doc.documentElement, attr, key,
+                    modifiers);
             }
         }
 
