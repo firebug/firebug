@@ -238,7 +238,8 @@ DynamicSourceCollector.prototype =
         var dynamicTypesMap = {
             "eval": CompilationUnit.EVAL,
             "Function": CompilationUnit.EVAL,
-            "eventHandler": CompilationUnit.BROWSER_GENERATED
+            "eventHandler": CompilationUnit.BROWSER_GENERATED,
+            "scriptElement": CompilationUnit.EVAL
         };
 
         var scriptType = dynamicTypesMap[type];
