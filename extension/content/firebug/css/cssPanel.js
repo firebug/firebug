@@ -182,7 +182,7 @@ var CSSKeyframesRuleTag = domplate(CSSDomplateBase,
     tag:
         DIV({"class": "cssRule focusRow cssKeyframesRule", _repObject: "$rule.rule"},
             DIV({"class": "cssHead focusRow", role : "listitem"},
-                SPAN({"class": "cssRuleName"}, "@-moz-keyframes"),
+                SPAN({"class": "cssRuleName"}, "@keyframes"),
                 SPAN({"class": "separator"}, " "),
                 SPAN({"class": "cssKeyframesRuleName", $editable: "$rule|isEditable"},
                 "$rule.rule.name"),
@@ -194,7 +194,7 @@ var CSSKeyframesRuleTag = domplate(CSSDomplateBase,
                 )
             ),
             DIV({role:"presentation"},
-            "}")
+                "}")
         )
 });
 
