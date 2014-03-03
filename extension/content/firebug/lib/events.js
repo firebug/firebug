@@ -81,7 +81,7 @@ Events.dispatch = function(listeners, name, args)
                 try
                 {
                     var result = listener[name].apply(listener, args);
-                    if (result != "undefined")
+                    if (typeof result != "undefined")
                         results.push(result);
                 }
                 catch (exc)
