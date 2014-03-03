@@ -2272,6 +2272,22 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
             var saveSuccess = (rule.conditionText == value);
             this.box.setAttribute("saveSuccess", saveSuccess);
         }
+        else if (((window.CSSKeyframesRule && rule instanceof window.CSSKeyframesRule) ||
+            rule instanceof window.MozCSSKeyframesRule))
+        {
+            target.textContent = value;
+            
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @keyframes rule name: " +
+                    previousValue + "->" + value);
+            }
+            
+            rule.name = value;
+            
+            var saveSuccess = (rule.name == value);
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
         else if (((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
             rule instanceof window.MozCSSKeyframeRule) &&
             Css.hasClass(target, "cssKeyText"))
@@ -2280,7 +2296,7 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
 
             if (FBTrace.DBG_CSS)
             {
-                FBTrace.sysout("CSSEditor.saveEdit: @-moz-keyframe rule key: " +
+                FBTrace.sysout("CSSEditor.saveEdit: @keyframe rule key: " +
                     previousValue + "->" + value);
             }
 
