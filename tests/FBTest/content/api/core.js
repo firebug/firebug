@@ -147,9 +147,15 @@ this.testStart = function(test)
 };
 
 /**
- * Finishes current test and prints info message (if any) to the status bar.
+ * Finishes current test and prints also an info message to the status bar. The method
+ * performs clean up (closes all browser tabs opened as part of the test,
+ * removes all breakpoints, etc.)
  *
- * All test tabs are removed from the browser.
+ * The method is asynchronous and the test that executed it should not perform
+ * any further actions.
+ *
+ * @param {String} [message] A custom message for tracing. If not provided default
+ * message will be generated automatically.
  */
 this.testDone = function(message)
 {
@@ -167,8 +173,15 @@ this.testDone = function(message)
             this.closeFirebug();
             this.cleanUpTestTabs();
 
-            if (message)
-                FBTest.progress(message);
+            if (!message)
+            {
+                // Compose default message for the tracing
+                var path = test.path;
+                var index = path.lastIndexOf("/");
+                message = path.substr(index + 1) + " DONE";
+            }
+
+            FBTest.progress(message);
 
             FBTest.sysout("FBTestFirebug.testDone; DONE");
 
