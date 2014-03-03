@@ -181,7 +181,7 @@ var CSSKeyframesRuleTag = domplate(CSSDomplateBase,
     tag:
         DIV({"class": "cssRule focusRow cssKeyframesRule", _repObject: "$rule.rule"},
             DIV({"class": "cssHead focusRow", role : "listitem"},
-                SPAN({"class": "cssRuleName"}, "@-moz-keyframes"),
+                SPAN({"class": "cssRuleName"}, "@keyframes"),
                 SPAN({"class": "separator"}, " "),
                 SPAN({"class": "cssKeyframesRuleName", $editable: "$rule|isEditable"},
                 "$rule.rule.name"),
@@ -193,7 +193,7 @@ var CSSKeyframesRuleTag = domplate(CSSDomplateBase,
                 )
             ),
             DIV({role:"presentation"},
-            "}")
+                "}")
         )
 });
 
@@ -808,8 +808,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                         isNotEditable: true
                     });
                 }
-                else if ((window.CSSKeyframesRule && rule instanceof window.CSSKeyframesRule) ||
-                    rule instanceof window.MozCSSKeyframesRule)
+                else if (rule instanceof (window.CSSKeyframesRule || window.MozCSSKeyframesRule))
                 {
                     rules.push({
                         tag: CSSKeyframesRuleTag.tag,
@@ -818,8 +817,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                         isSystemSheet: isSystemSheet
                     });
                 }
-                else if ((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
-                    rule instanceof window.MozCSSKeyframeRule)
+                else if (rule instanceof (window.CSSKeyframeRule || window.MozCSSKeyframeRule))
                 {
                     props = this.parseCSSProps(rule.style);
                     this.sortProperties(props);
@@ -2167,8 +2165,7 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
         var rule = Firebug.getRepObject(cssRule);
 
         if (rule instanceof window.CSSStyleRule ||
-                ((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
-                    rule instanceof window.MozCSSKeyframeRule) &&
+                (rule instanceof (window.CSSKeyframeRule || window.MozCSSKeyframeRule)) &&
                 !Css.hasClass(target, "cssKeyText") ||
             rule instanceof window.Element)
         {
@@ -2264,6 +2261,22 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
             var saveSuccess = (rule.conditionText == value);
             this.box.setAttribute("saveSuccess", saveSuccess);
         }
+        else if (((window.CSSKeyframesRule && rule instanceof window.CSSKeyframesRule) ||
+            rule instanceof window.MozCSSKeyframesRule))
+        {
+            target.textContent = value;
+            
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @keyframes rule name: " +
+                    previousValue + "->" + value);
+            }
+            
+            rule.name = value;
+            
+            var saveSuccess = (rule.name == value);
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
         else if (((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
             rule instanceof window.MozCSSKeyframeRule) &&
             Css.hasClass(target, "cssKeyText"))
@@ -2272,7 +2285,7 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
 
             if (FBTrace.DBG_CSS)
             {
-                FBTrace.sysout("CSSEditor.saveEdit: @-moz-keyframe rule key: " +
+                FBTrace.sysout("CSSEditor.saveEdit: @keyframe rule key: " +
                     previousValue + "->" + value);
             }
 
