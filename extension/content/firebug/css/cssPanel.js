@@ -29,7 +29,6 @@ define([
     "firebug/lib/trace",
     "firebug/css/cssPanelUpdater",
     "firebug/lib/wrapper",
-    "firebug/lib/promise",
     "firebug/editor/baseEditor",
     "firebug/editor/editor",
     "firebug/editor/inlineEditor",
@@ -39,7 +38,7 @@ define([
 ],
 function(Panel, Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom,
     Win, Search, Str, Arr, Xml, Persist, System, Menu, Options, CSSAutoCompleter, CSSModule,
-    CSSInfoTip, SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper, Promise, BaseEditor, Editor,
+    CSSInfoTip, SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper, BaseEditor, Editor,
     InlineEditor, SourceEditor, SearchBox) {
 
 // ********************************************************************************************* //
@@ -1934,19 +1933,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
         if (this.navigateToNextDocument(scanDoc, reverse, this.location))
         {
-            var deferred = Promise.defer();
+            // Force panel reflow, to make sure all nodes are immediatelly
+            // available for the search and we can avoid any weird timeouts.
+            this.panelNode.offsetHeight;
 
-            // firefox findService can't find nodes immediatly after insertion
-            // xxxHonza: the timeout has been increased to 100 since search across
-            // multiple documents didn't work sometimes.
-            // Of course, it would be great to get rid of the timeout.
-            setTimeout(() =>
-            {
-                var result = this.searchCurrentDoc(true, text, reverse);
-                deferred.resolve(result);
-            }, 100);
-
-            return deferred.promise;
+            // Now we should be able to synchronously search within the panel.
+            return this.searchCurrentDoc(true, text, reverse);
         }
     },
 
