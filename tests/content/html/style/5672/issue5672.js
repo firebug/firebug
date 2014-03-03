@@ -65,9 +65,7 @@ function copyColor(propValue, callback)
                     "Color value must be properly copied to the clipboard");
                 callback();
             });
-        }, function() {
-            callback();
-        }, offset);
+        }, callback, offset);
 
         // Hide the info tip by moving mouse over the CSS prop name,
         // otherwise it could block the mouse-move over the next CSS value.
@@ -99,9 +97,7 @@ function copyImageURL(propValue, callback)
                     "Image URL must be properly copied to the clipboard");
                 callback();
             });
-        }, function() {
-            callback();
-        }, offset);
+        }, callback, offset);
 
         // Hide the info tip by moving mouse over the CSS prop name,
         // otherwise it could block the mouse-move over the next CSS value.
@@ -130,9 +126,7 @@ function openImageInNewTab(propValue, callback)
             FBTest.compare(expected, browser.documentURI.spec, "URL of the image must be correct");
 
             callback();
-        }, function() {
-            callback();
-        }, offset);
+        }, callback, offset);
 
         // Hide the info tip by moving mouse over the CSS prop name,
         // otherwise it could block the mouse-move over the next CSS value.
