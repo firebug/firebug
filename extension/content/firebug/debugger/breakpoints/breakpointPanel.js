@@ -322,9 +322,11 @@ BreakpointPanel.prototype = Obj.extend(Panel,
     {
         TraceError.sysout("breakpointPanel.clearAllBreakpoints;");
 
-        // Remove the rest of all the other kinds of breakpoints (after refresh).
-        // These can come from various modules and perhaps extensions, so use
-        // the appropriate remove buttons.
+        // Remove all breakpoints. Note that some can come from various modules and
+        // perhaps also various extensions, so use the appropriate remove buttons for now.
+        // xxxHonza: we should dispatch a message that would be properly handled by
+        // all modules that provided the breakpoints (see also "getBreakpoints" event).
+        // See also issue 7227
         var buttons = this.panelNode.getElementsByClassName("closeButton");
         while (buttons.length)
             this.click(buttons[0]);
