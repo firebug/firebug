@@ -353,7 +353,7 @@ var BreakpointStore = Obj.extend(Module,
      * communication with the backend.
      *
      * @param {TabContext} context Context for which breakpoints should be removed. Set to null
-     * if all brakpoints (for all contexts) should be removed
+     * if all breakpoints (for all contexts) should be removed
      * @param {Function} callback Executed when all breakpoints (for all contexts)
      * are removed.
      */
@@ -366,8 +366,8 @@ var BreakpointStore = Obj.extend(Module,
         // First clear the local (client) storage.
         this.clear();
 
-        // Individual listeneres need to return a promise that is resolved
-        // as soon as brekpoints are removed on the backend.
+        // Individual listeners need to return a promise that is resolved
+        // as soon as breakpoints are removed on the backend.
         // When all promises are resolved the callback passed into this method
         // is executed.
         var promises = this.dispatch("onRemoveAllBreakpoints", [bps]);
