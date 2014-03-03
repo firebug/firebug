@@ -809,8 +809,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                         isNotEditable: true
                     });
                 }
-                else if ((window.CSSKeyframesRule && rule instanceof window.CSSKeyframesRule) ||
-                    rule instanceof window.MozCSSKeyframesRule)
+                else if (rule instanceof (window.CSSKeyframesRule || window.MozCSSKeyframesRule))
                 {
                     rules.push({
                         tag: CSSKeyframesRuleTag.tag,
@@ -819,8 +818,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                         isSystemSheet: isSystemSheet
                     });
                 }
-                else if ((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
-                    rule instanceof window.MozCSSKeyframeRule)
+                else if (rule instanceof (window.CSSKeyframeRule || window.MozCSSKeyframeRule))
                 {
                     props = this.parseCSSProps(rule.style);
                     this.sortProperties(props);
@@ -2175,8 +2173,7 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
         var rule = Firebug.getRepObject(cssRule);
 
         if (rule instanceof window.CSSStyleRule ||
-                ((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
-                    rule instanceof window.MozCSSKeyframeRule) &&
+                (rule instanceof (window.CSSKeyframeRule || window.MozCSSKeyframeRule)) &&
                 !Css.hasClass(target, "cssKeyText") ||
             rule instanceof window.Element)
         {
