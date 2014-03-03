@@ -8,8 +8,6 @@
 */
 function runTest()
 {
-    FBTest.sysout("issueXXXX.START");
-
     FBTest.openNewTab(basePath + "category/XXXX/issueXXXX.html", function(win)
     {
         FBTest.openFirebug(function() {
