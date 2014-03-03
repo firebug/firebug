@@ -81,7 +81,11 @@ Events.dispatch = function(listeners, name, args)
                 try
                 {
                     var result = listener[name].apply(listener, args);
-                    if (result)
+
+                    // Store all valid results into the result array. The only invalid
+                    // type is undefined (null, 0 can be treated as valid results in some
+                    // cases).
+                    if (typeof result != "undefined")
                         results.push(result);
                 }
                 catch (exc)
