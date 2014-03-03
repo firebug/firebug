@@ -12,7 +12,6 @@ function isEmpty(obj) {
 
 function testConsoleError()
 {
-
     FBTest.testDone("issue1601.DONE");
 }
 
@@ -21,8 +20,10 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/1601/consoleLogErrorObject.html", function(win)
     {
-        if (!FBTest.isFirebugOpen())
-            FBTest.openFirebug();
-        FBTest.enableConsolePanel(testConsoleError());
+        FBTest.openFirebug(function() {
+            FBTest.enableConsolePanel(function() {
+                testConsoleError();
+            });
+        });
     });
 }

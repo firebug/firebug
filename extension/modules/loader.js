@@ -71,7 +71,18 @@ var FirebugLoader =
     startup: function()
     {
         // allow already started bootstrapped firebug extensions to register themselves
-        var XPIProviderBP = Cu.import("resource://gre/modules/XPIProvider.jsm", {});
+        // xxxHonza: The try-catch statement can be removed as soon as Firefox 30 (Fx30)
+        // is the minimum required version (see also issue 7208).
+        var XPIProviderBP;
+        try
+        {
+            XPIProviderBP = Cu.import("resource://gre/modules/addons/XPIProvider.jsm", {});
+        }
+        catch (err)
+        {
+            XPIProviderBP = Cu.import("resource://gre/modules/XPIProvider.jsm", {});
+        }
+
         var bootstrapScopes = XPIProviderBP.XPIProvider.bootstrapScopes;
 
         for (var id in bootstrapScopes)

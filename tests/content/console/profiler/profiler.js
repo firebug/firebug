@@ -1,11 +1,10 @@
 function runTest()
 {
-    FBTest.sysout("profiler.START");
     FBTest.openNewTab(basePath + "console/profiler/profiler.html", function(win)
     {
         FBTest.enablePanels(["console", "script"], function(win)
         {
-            var panel = FBTest.getPanel("console");
+            var panel = FBTest.getSelectedPanel();
             FBTest.clearConsole();
 
             var config = {tagName: "tr", classes: "profileRow", counter: 2};

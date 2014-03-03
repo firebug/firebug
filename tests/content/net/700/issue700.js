@@ -5,8 +5,6 @@ var htmlResponse = "<html><head/><body>" + bodyContent + "</body></html>";
 // Test entry point.
 function runTest()
 {
-    FBTest.sysout("issue700.START");
-
     FBTest.openNewTab(basePath + "net/700/issue700.html", function(win)
     {
         FBTest.enableNetPanel(function(win)

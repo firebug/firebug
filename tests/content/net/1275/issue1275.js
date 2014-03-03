@@ -6,38 +6,36 @@ function runTest()
 
     FBTest.openNewTab(basePath + "net/1275/issue1275.htm", function(win)
     {
-        FBTest.sysout("issue1275.START");
-
-        // Open Firebug UI and enable Net panel.
-        FBTest.openFirebug();
-        FBTest.enableNetPanel();
-        FBTest.enableConsolePanel();
-        FBTest.clearCache();
-        FBTest.selectPanel("net");
-
-        // Reload test page.
-        FBTest.reload(function()
-        {
-            onRequestDisplayed("tr", "netRow category-xhr hasHeaders loaded", function(row)
+        FBTest.openFirebug(function() {
+            FBTest.enablePanels(["net", "console"], function()
             {
-                // Verify Net panel response
-                var panel = FBTest.getPanel("net");
-                FBTest.click(row);
-                verifyResponse(panel);
+                FBTest.clearCache();
 
-                // Verify Console panel response
-                panel = FBTest.getPanel("console");
-                var spyLogRow = FW.FBL.getElementByClass(panel.panelNode, "logRow",
-                    "logRow-spy", "loaded");
-                var xhr = FW.FBL.getElementByClass(spyLogRow, "spyTitleCol", "spyCol");
-                FBTest.click(xhr);
-                verifyResponse(panel);
+                // Reload test page.
+                FBTest.reload(function()
+                {
+                    onRequestDisplayed("tr", "netRow category-xhr hasHeaders loaded", function(row)
+                    {
+                        // Verify Net panel response
+                        var panel = FBTest.getSelectedPanel();
+                        FBTest.click(row);
+                        verifyResponse(panel);
 
-                FBTest.setPref("showXMLHttpRequests", prefOrigValue);
-                FBTest.testDone("issue1275.DONE");
+                        // Verify Console panel response
+                        panel = FBTest.selectPanel("console");
+                        var spyLogRow = panel.panelNode.
+                            getElementsByClassName("logRow logRow-spy loaded")[0];
+                        var xhr = spyLogRow.getElementsByClassName("spyTitleCol spyCol")[0];
+                        FBTest.click(xhr);
+                        verifyResponse(panel);
+
+                        FBTest.setPref("showXMLHttpRequests", prefOrigValue);
+                        FBTest.testDone("issue1275.DONE");
+                    });
+
+                    FBTest.click(win.document.getElementById("testButton"));
+                });
             });
-
-            FBTest.click(win.document.getElementById("testButton"));
         });
     })
 }

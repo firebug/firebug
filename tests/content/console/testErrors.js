@@ -2,17 +2,10 @@ var FF3p6OrLess = FBTest.compareFirefoxVersion("3.6.*") <= 0;
 
 function runTest()
 {
-    FBTest.sysout("testErrors.START");
     FBTest.openNewTab(basePath + "console/testErrors.html", function(win)
     {
-        FBTest.selectPanel("console");
-        FBTest.enableScriptPanel(function(win) // causes reload
-        {
-            FBTest.enableConsolePanel(function(win) // causes reload
-            {
-                 FBTest.selectPanel("console");
-                 fireTest(win, 0);
-            });
+        FBTest.enablePanels(["console", "script"], function() {
+            fireTest(win, 0);
         });
     });
 }

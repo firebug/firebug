@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4724.START");
-
     var url = basePath + "script/4724/issue4724.html";
     FBTest.openNewTab(url, function(win)
     {

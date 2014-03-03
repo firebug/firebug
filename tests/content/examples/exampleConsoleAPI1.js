@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("examples.console.START");
     FBTest.openNewTab(basePath + "examples/exampleConsoleAPI1.html", function(win)
     {
         FBTest.enableConsolePanel(function(win)

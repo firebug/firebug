@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue2440.START");
-
     FBTest.openNewTab(basePath + "html/style/2440/issue2440.html", function(win)
     {
     	function test0(callback)
@@ -16,16 +14,17 @@ function runTest()
     	    executeTest("frameElement", frameElement, callback);
     	}
 
-        FBTest.openFirebug();
-        FBTest.selectPanel("html");
+        FBTest.openFirebug(function() {
+            FBTest.selectPanel("html");
 
-        var tests = [];
-        tests.push(test0);
-        tests.push(test1);
+            var tests = [];
+            tests.push(test0);
+            tests.push(test1);
 
-        FBTest.runTestSuite(tests, function()
-        {
-            FBTest.testDone("issue2440; DONE");
+            FBTest.runTestSuite(tests, function()
+            {
+                FBTest.testDone("issue2440; DONE");
+            });
         });
     });
 }

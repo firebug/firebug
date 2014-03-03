@@ -130,5 +130,10 @@ this.waitForDisplayedBreakpoint = function(chrome, url, lineNo, callback)
     });
 };
 
+this.removeAllBreakpoints = function(callback)
+{
+    FW.Firebug.Debugger.clearAllBreakpoints(null, callback);
+}
+
 // ********************************************************************************************* //
 }).apply(FBTest);

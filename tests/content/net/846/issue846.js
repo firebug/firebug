@@ -2,8 +2,6 @@ window.FBTestTimeout = 15000;
 
 function runTest()
 {
-    FBTest.sysout("issue846.START");
-
     FBTest.openNewTab(basePath + "net/846/Issue846.htm", function(win)
     {
         // Disable XHR spy.

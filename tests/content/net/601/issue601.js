@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue601.START");
-
     // must be set to false in this test, but the original value is reverted.
     var prefOrigValue = FBTest.getPref("showXMLHttpRequests");
     FBTest.setPref("showXMLHttpRequests", false);

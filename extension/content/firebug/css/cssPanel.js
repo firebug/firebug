@@ -181,7 +181,7 @@ var CSSKeyframesRuleTag = domplate(CSSDomplateBase,
     tag:
         DIV({"class": "cssRule focusRow cssKeyframesRule", _repObject: "$rule.rule"},
             DIV({"class": "cssHead focusRow", role : "listitem"},
-                SPAN({"class": "cssRuleName"}, "@-moz-keyframes"),
+                SPAN({"class": "cssRuleName"}, "@keyframes"),
                 SPAN({"class": "separator"}, " "),
                 SPAN({"class": "cssKeyframesRuleName", $editable: "$rule|isEditable"},
                 "$rule.rule.name"),
@@ -193,7 +193,7 @@ var CSSKeyframesRuleTag = domplate(CSSDomplateBase,
                 )
             ),
             DIV({role:"presentation"},
-            "}")
+                "}")
         )
 });
 
@@ -808,8 +808,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                         isNotEditable: true
                     });
                 }
-                else if ((window.CSSKeyframesRule && rule instanceof window.CSSKeyframesRule) ||
-                    rule instanceof window.MozCSSKeyframesRule)
+                else if (rule instanceof (window.CSSKeyframesRule || window.MozCSSKeyframesRule))
                 {
                     rules.push({
                         tag: CSSKeyframesRuleTag.tag,
@@ -818,8 +817,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                         isSystemSheet: isSystemSheet
                     });
                 }
-                else if ((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
-                    rule instanceof window.MozCSSKeyframeRule)
+                else if (rule instanceof (window.CSSKeyframeRule || window.MozCSSKeyframeRule))
                 {
                     props = this.parseCSSProps(rule.style);
                     this.sortProperties(props);
@@ -1438,18 +1436,13 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         }
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Options
+
     updateOption: function(name, value)
     {
         if (name == "expandShorthandProps" || name == "colorDisplay")
             this.refresh();
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    getLocationList: function()
-    {
-        var styleSheets = Css.getAllStyleSheets(this.context);
-        return styleSheets;
     },
 
     getOptionsMenuItems: function()
@@ -1472,6 +1465,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
         return items;
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context Menu
 
     getContextMenuItems: function(style, target)
     {
@@ -1812,6 +1808,15 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         }
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Location List
+
+    getLocationList: function()
+    {
+        var styleSheets = Css.getAllStyleSheets(this.context);
+        return styleSheets;
+    },
+
     getDefaultLocation: function()
     {
         // Note: We can't do makeDefaultStyleSheet here, because that could be
@@ -1829,7 +1834,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         catch (exc)
         {
             if (FBTrace.DBG_LOCATIONS)
-                FBTrace.sysout("css.getDefaultLocation FAILS "+exc, exc);
+                FBTrace.sysout("css.getDefaultLocation FAILS " + exc, exc);
         }
     },
 
@@ -1844,11 +1849,13 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         var instance = Css.getInstanceForStyleSheet(styleSheet);
 
         var baseDescription = Url.splitURLBase(url);
-        if (instance) {
-          baseDescription.name = baseDescription.name + " #" + (instance + 1);
-        }
+        if (instance)
+            baseDescription.name = baseDescription.name + " #" + (instance + 1);
+
         return baseDescription;
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getSourceLink: function(target, rule)
     {
@@ -1893,6 +1900,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             return ruleLine.line;
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Search
+
     search: function(text, reverse)
     {
         var curDoc = this.searchCurrentDoc(!Firebug.searchGlobal, text, reverse);
@@ -1901,32 +1911,32 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             return this.searchOtherDocs(text, reverse) ||
                 this.searchCurrentDoc(true, text, reverse);
         }
+
         return curDoc;
     },
 
     searchOtherDocs: function(text, reverse)
     {
         var scanRE = SearchBox.getTestingRegex(text);
-        function scanDoc(styleSheet) {
+        function scanDoc(styleSheet)
+        {
             // we don't care about reverse here as we are just looking for existence,
             // if we do have a result we will handle the reverse logic on display
             for (var i = 0; i < styleSheet.cssRules.length; i++)
             {
                 if (scanRE.test(styleSheet.cssRules[i].cssText))
-                {
                     return true;
-                }
             }
         }
 
-        if (this.navigateToNextDocument(scanDoc, reverse))
+        if (this.navigateToNextDocument(scanDoc, reverse, this.location))
         {
-            // firefox findService can't find nodes immediatly after insertion
-            // xxxHonza: the timeout has been increased to 100 since search across
-            // multiple documents didn't work sometimes.
-            // Of course, it would be great to get rid of the timeout.
-            setTimeout(Obj.bind(this.searchCurrentDoc, this), 100, true, text, reverse);
-            return "wraparound";
+            // Force panel reflow, to make sure all nodes are immediatelly
+            // available for the search and we can avoid any weird timeouts.
+            this.panelNode.offsetHeight;
+
+            // Now we should be able to synchronously search within the panel.
+            return this.searchCurrentDoc(true, text, reverse);
         }
     },
 
@@ -1942,8 +1952,20 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             return false;
         }
 
+        var wraparound = false;
+
         if (this.currentSearch && text == this.currentSearch.text)
         {
+            var locationHref = Css.getURLForStyleSheet(this.location);
+            if (this.currentSearch.href != locationHref)
+            {
+                // If true, we reached the original document this search started in.
+                wraparound = (locationHref == this.currentSearch.originalHref);
+
+                // Remember the current search URL.
+                this.currentSearch.href = locationHref;
+            }
+
             row = this.currentSearch.findNext(wrapSearch, false, reverse,
                 SearchBox.isCaseSensitive(text));
         }
@@ -1972,13 +1994,17 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             }
             else
             {
-                var findRow = function(node) {
+                var findRow = function(node)
+                {
                     return node.nodeType == Node.ELEMENT_NODE ? node : node.parentNode;
                 };
 
                 this.currentSearch = new Search.TextSearch(this.panelNode, findRow);
                 row = this.currentSearch.find(text, reverse, SearchBox.isCaseSensitive(text));
             }
+
+            this.currentSearch.originalHref = Css.getURLForStyleSheet(this.location);
+            this.currentSearch.href = this.currentSearch.originalHref;
         }
 
         if (row)
@@ -1993,8 +2019,14 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             Dom.scrollIntoCenterView(row, this.panelNode);
             this.highlightNode(row.parentNode);
 
+            // If end of the current document has been reached the |currentSearch.wrapped|
+            // is set to true. Ignore it if next document has been navigated.
+            var localWraparound = this.currentSearch.wrapped;
+            if (this.currentSearch.href != this.currentSearch.originalHref)
+                localWraparound = false;
+
             Events.dispatch(this.fbListeners, "onCSSSearchMatchFound", [this, text, row]);
-            return this.currentSearch.wrapped ? "wraparound" : true;
+            return (wraparound || localWraparound) ? "wraparound" : true;
         }
         else
         {
@@ -2015,6 +2047,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 "searchUseRegularExpression", "search.tip.Use_Regular_Expression")
         ];
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getStyleDeclaration: function(cssSelector)
     {
@@ -2131,8 +2165,7 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
         var rule = Firebug.getRepObject(cssRule);
 
         if (rule instanceof window.CSSStyleRule ||
-                ((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
-                    rule instanceof window.MozCSSKeyframeRule) &&
+                (rule instanceof (window.CSSKeyframeRule || window.MozCSSKeyframeRule)) &&
                 !Css.hasClass(target, "cssKeyText") ||
             rule instanceof window.Element)
         {
@@ -2228,6 +2261,22 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
             var saveSuccess = (rule.conditionText == value);
             this.box.setAttribute("saveSuccess", saveSuccess);
         }
+        else if (((window.CSSKeyframesRule && rule instanceof window.CSSKeyframesRule) ||
+            rule instanceof window.MozCSSKeyframesRule))
+        {
+            target.textContent = value;
+            
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @keyframes rule name: " +
+                    previousValue + "->" + value);
+            }
+            
+            rule.name = value;
+            
+            var saveSuccess = (rule.name == value);
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
         else if (((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
             rule instanceof window.MozCSSKeyframeRule) &&
             Css.hasClass(target, "cssKeyText"))
@@ -2236,7 +2285,7 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
 
             if (FBTrace.DBG_CSS)
             {
-                FBTrace.sysout("CSSEditor.saveEdit: @-moz-keyframe rule key: " +
+                FBTrace.sysout("CSSEditor.saveEdit: @keyframe rule key: " +
                     previousValue + "->" + value);
             }
 
@@ -2892,11 +2941,13 @@ StyleSheetEditor.prototype = domplate(BaseEditor,
     tag: DIV({"class": "styleSheetEditor fullPanelEditor"}),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     onEditorInitialize: function()
     {
         this.editor.addEventListener(SourceEditor.Events.textChange,
             this.onEditorTextChangeListener);
     },
+
     getValue: function()
     {
         return this.editor.getText();

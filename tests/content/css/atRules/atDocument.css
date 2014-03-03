@@ -1,0 +1,9 @@
+@-moz-document url(https://getfirebug.com/),
+          url-prefix(https://getfirebug.com/tests/),
+          domain(getfirebug.com),
+          regexp("https:.*")
+{
+    #notExisting {
+        color: green;
+    }
+}

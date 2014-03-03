@@ -127,30 +127,27 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
 
     onRemoveBreakpoint: function(bp)
     {
-        var self = this;
-        this.removeBreakpoint(bp.href, bp.lineNo, function(response, bpClient)
+        this.removeBreakpoint(bp.href, bp.lineNo, (response) =>
         {
-            self.dispatch("onBreakpointRemoved", [self.context, bp]);
+            this.dispatch("onBreakpointRemoved", [this.context, bp]);
 
-            Firebug.dispatchEvent(self.context.browser, "onBreakpointRemoved", [bp]);
+            Firebug.dispatchEvent(this.context.browser, "onBreakpointRemoved", [bp]);
         });
     },
 
     onEnableBreakpoint: function(bp)
     {
-        var self = this;
-        this.enableBreakpoint(bp.href, bp.lineNo, function(response, bpClient)
+        this.enableBreakpoint(bp.href, bp.lineNo, (response, bpClient) =>
         {
-            self.dispatch("onBreakpointEnabled", [self.context, bp]);
+            this.dispatch("onBreakpointEnabled", [this.context, bp]);
         });
     },
 
     onDisableBreakpoint: function(bp)
     {
-        var self = this;
-        this.disableBreakpoint(bp.href, bp.lineNo, function(response, bpClient)
+        this.disableBreakpoint(bp.href, bp.lineNo, (response, bpClient) =>
         {
-            self.dispatch("onBreakpointDisabled", [self.context, bp]);
+            this.dispatch("onBreakpointDisabled", [this.context, bp]);
         });
     },
 
@@ -159,6 +156,19 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         this.dispatch("onBreakpointModified", [this.context, bp]);
     },
 
+    onRemoveAllBreakpoints: function(bps)
+    {
+        Trace.sysout("breakpointTool.onRemoveAllBreakpoints; (" + bps.length + ")", bps);
+
+        var deferred = this.context.defer();
+
+        this.removeBreakpoints(bps, () =>
+        {
+            deferred.resolve();
+        });
+
+        return deferred.promise;
+    },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // SourceTool
 
@@ -453,6 +463,8 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
 
     removeBreakpoint: function(url, lineNumber, callback)
     {
+        Trace.sysout("breakpointTool.removeBreakpoint; " + url + " (" + lineNumber + ")");
+
         if (!this.context.activeThread)
         {
             TraceError.sysout("breakpointTool.removeBreakpoint; Can't remove breakpoints.");
@@ -463,6 +475,9 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         // breakpoint at the line.
         if (BreakpointStore.hasAnyBreakpoint(url, lineNumber))
         {
+            Trace.sysout("breakpointTool.removeBreakpoint; Can't remove BP it's still " +
+                "in the store! " + url + " (" + lineNumber + ")");
+
             // xxxHonza: the callback expects a packet as an argument, it should not.
             if (callback)
                 callback({});
@@ -472,6 +487,8 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         // We need to get the breakpoint client object for this context. The client
         // knows how to remove the breakpoint on the server side.
         var client = this.removeBreakpointClient(url, lineNumber);
+        Trace.sysout("breakpointTool.removeBreakpoint; client: " + client, client);
+
         if (client)
         {
             client.remove(callback);
@@ -480,7 +497,44 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         {
             TraceError.sysout("breakpointTool.removeBreakpoint; ERROR removing " +
                 "non existing breakpoint. " + url + ", " + lineNumber);
+
+            // Make sure to execute the callback even if an error happened.
+            if (callback)
+                callback();
         }
+    },
+
+    /**
+     * Removes specified breakpoints. The removal is done asynchronously breakpoint
+     * by breakpoint. The next breakpoint is removed as soon as there is a confirmation
+     * from the backend that the previous one has been removed.
+     *
+     * @param {Array} bps Array of breakpoints to be removed. Every item in the array
+     * should specify breakpoint location [{href: "", lineNo: 0}]
+     * @param {Function} callback A function executed as soon as all breakpoints are removed.
+     * The removal happens asynchronously since it requires communication with the backend
+     * over RDP.
+     */
+    removeBreakpoints: function(bps, callback)
+    {
+        if (bps.length == 0)
+        {
+            if (callback)
+                callback();
+            return;
+        }
+
+        var bp = bps[0];
+        this.removeBreakpoint(bp.href, bp.lineNo, (response) =>
+        {
+            if (response.error)
+            {
+                TraceError.sysout("breakpointTool.removeBreakpoints; ERROR " +
+                    response.message, response);
+            }
+
+            this.removeBreakpoints(bps.slice(1), callback);
+        });
     },
 
     getBreakpointClient: function(url, lineNumber)

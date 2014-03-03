@@ -1,48 +1,47 @@
 function runTest()
 {
-    FBTest.sysout("issue537.START");
     FBTest.openNewTab(basePath + "html/style/537/issue537.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("html");
-
-        FBTest.selectElementInHtmlPanel("element1", function(sel)
-        {
-            FBTest.progress("issue537; selection:", sel);
-
-            var sidePanel = FBTest.selectSidePanel("css");
-            var rules = sidePanel.panelNode.querySelectorAll(".cssRule");
-            var pseudoElementRules = [];
-
-            for (var i=0; i<rules.length; i++)
+        FBTest.openFirebug(function() {
+            FBTest.selectPanel("html");
+            FBTest.selectElementInHtmlPanel("element1", function(sel)
             {
-                var selector = rules[i].querySelector(".cssSelector").innerHTML;
-                if (isPseudoElementSelector(selector))
-                    pseudoElementRules.push(rules[i]);
-            }
-            // Four pseudo-element rules must be shown inside the Style side panel
-            FBTest.compare(4, pseudoElementRules.length, "There must be four pseudo-element rules.");
+                FBTest.progress("issue537; selection:", sel);
 
-            for (var i=0; i<pseudoElementRules.length; i++)
-            {
-                var selector = pseudoElementRules[i].querySelector(".cssSelector").innerHTML;
-                if (selector == "#element1:before" || selector == "#element1:after")
+                var sidePanel = FBTest.selectSidePanel("css");
+                var rules = sidePanel.panelNode.querySelectorAll(".cssRule");
+                var pseudoElementRules = [];
+
+                for (var i=0; i<rules.length; i++)
                 {
-                    var propNames = pseudoElementRules[i].querySelectorAll(".cssPropName");
-                    // :before and :after must have a property 'content'
-                    var containsContent = false;
-                    for (var j=0; j<propNames.length; j++)
-                    {
-                        if (propNames[j].innerHTML == "content")
-                        {
-                            containsContent = true;
-                            break;
-                        }
-                    }
-                    FBTest.ok(containsContent, "'" + selector + "' must contain a property 'content'");
+                    var selector = rules[i].querySelector(".cssSelector").innerHTML;
+                    if (isPseudoElementSelector(selector))
+                        pseudoElementRules.push(rules[i]);
                 }
-            }
-            FBTest.testDone("issue537.DONE");
+                // Four pseudo-element rules must be shown inside the Style side panel
+                FBTest.compare(4, pseudoElementRules.length, "There must be four pseudo-element rules.");
+
+                for (var i=0; i<pseudoElementRules.length; i++)
+                {
+                    var selector = pseudoElementRules[i].querySelector(".cssSelector").innerHTML;
+                    if (selector == "#element1:before" || selector == "#element1:after")
+                    {
+                        var propNames = pseudoElementRules[i].querySelectorAll(".cssPropName");
+                        // :before and :after must have a property 'content'
+                        var containsContent = false;
+                        for (var j=0; j<propNames.length; j++)
+                        {
+                            if (propNames[j].innerHTML == "content")
+                            {
+                                containsContent = true;
+                                break;
+                            }
+                        }
+                        FBTest.ok(containsContent, "'" + selector + "' must contain a property 'content'");
+                    }
+                }
+                FBTest.testDone("issue537.DONE");
+            });
         });
     });
 }

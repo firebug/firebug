@@ -454,6 +454,21 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Events.dispatch(this.fbListeners, "onUpdateScriptLocation", [this, sourceLink]);
     },
 
+    /**
+     * Always return {@link CompilationUnit} instance. The method should always return
+     * an object that is also used within the location list (built in getLocationList method).
+     */
+    normalizeLocation: function(object)
+    {
+        if (object instanceof CompilationUnit)
+            return object;
+
+        if (object instanceof SourceLink)
+            return this.context.getCompilationUnit(object.href);
+
+        TraceError.sysout("scriptPanel.normalizeLocation; Unknown location! ", object);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getCurrentURL: function()
@@ -467,11 +482,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     getCompilationUnit: function()
     {
-        if (this.location instanceof CompilationUnit)
-            return this.location;
-
-        if (this.location instanceof SourceLink)
-            return this.context.getCompilationUnit(this.location.href);
+        return this.normalizeLocation(this.location);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1531,6 +1542,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!this.location)
         {
             this.location = this.getDefaultLocation();
+            Trace.sysout("scriptPanel.newSource; this.location.getURL() = " +
+                this.location.getURL());
             this.updateLocation(this.location);
             Firebug.chrome.syncLocationList();
         }

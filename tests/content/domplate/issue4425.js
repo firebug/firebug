@@ -4,8 +4,6 @@ with (FW.FBL)
 
 function runTest()
 {
-    FBTest.sysout("issue4425.START");
-
     var template1 = domplate(
     {
         tag:

@@ -7,8 +7,6 @@
  */
 function runTest()
 {
-    FBTest.sysout("debuggerKeyword.START");
-
     // Load test case page
     FBTest.openNewTab(basePath + "script/debuggerKeyword/testPage.html", function(testWindow)
     {

@@ -26,10 +26,12 @@ function runTest()
 
         with (FBTest.FirebugWindow.FBL) { with (FBTest.FirebugWindow)
         {
-            function ArrayIterator(array) {
+            function ArrayIterator(array)
+            {
                 var index = -1;
 
-                this.next = function() {
+                this.next = function()
+                {
                     if (++index >= array.length)
                         $break();
                     return array[index];
@@ -43,17 +45,18 @@ function runTest()
             var iterTag = domplate({
                 tag: FOR("test", "$test|testIter", rowTag.tag),
 
-                testIter: function() {
+                testIter: function()
+                {
                     // Need a custom iterator here as we are in a different window
                     return new ArrayIterator([ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]);
                 }
             });
 
-            function checkResults(count) {
+            function checkResults(count)
+            {
                 FBTest.compare(count, rows.length, "Row Count");
-                for (var i = 0; i < rows.length; i++) {
+                for (var i = 0; i < rows.length; i++)
                     FBTest.compare(i%11, rows[i].firstChild.firstChild.testProp, "Row property");
-                }
             }
 
             var table = win.document.createElement("table");

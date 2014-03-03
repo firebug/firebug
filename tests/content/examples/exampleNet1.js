@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("exampleNet1.START");
     FBTest.openNewTab(basePath + "examples/exampleNet1.html", function(win)
     {
         FBTest.enableNetPanel(function(win)

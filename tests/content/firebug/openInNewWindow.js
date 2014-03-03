@@ -5,46 +5,45 @@ var detachedWindow;
 
 function runTest()
 {
-    FBTest.sysout("openInNewWindow.START");
     FBTest.openNewTab(testPageURL, function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableAllPanels();
+        FBTest.openFirebug(function() {
+            FBTest.enableScriptPanel(function()
+            {
+                var tasks = new FBTest.TaskList();
+                tasks.push(waitForDetachedFirebug);
+                tasks.push(setBreakpointReloadAndWaitForBreak);
+                tasks.push(reloadAgainAndWaitForBreak);
 
-        // Reload afeter enable panels.
-        FBTest.reload(function()
-        {
-            var tasks = new FBTest.TaskList();
-            tasks.push(waitForDetachedFirebug);
-            tasks.push(setBreakpointReloadAndWaitForBreak);
-            tasks.push(reloadAgainAndWaitForBreak);
-
-            tasks.run(function() {
-                FBTest.testDone("openInNewWindow.DONE");
-            })
+                tasks.run(function() {
+                    FBTest.testDone("openInNewWindow.DONE");
+                });
+            });
         });
     });
 };
 
 function waitForDetachedFirebug(callback)
 {
-    detachedWindow = FBTest.detachFirebug();
-    if (!FBTest.ok(detachedWindow, "Firebug is detaching..."))
+    FBTest.detachFirebug(function(detachedWindow)
     {
-        FBTest.testDone("openInNewWindow.FAILED");
-        return;
-    }
+        if (!FBTest.ok(detachedWindow, "Firebug is detaching..."))
+        {
+            FBTest.testDone("openInNewWindow.FAILED");
+            return;
+        }
 
-    FBTest.OneShotHandler(detachedWindow, "load", function(event)
-    {
-        FBTest.progress("Firebug detached in a new window.");
-        callback();
+        FBTest.OneShotHandler(detachedWindow, "load", function(event)
+        {
+            FBTest.progress("Firebug detached in a new window.");
+            callback();
+        });
     });
 }
 
 function setBreakpointReloadAndWaitForBreak(callback)
 {
-    FBTest.waitForBreakInDebugger(null, lineNo, true, function()
+    FBTest.waitForBreakInDebugger(null, lineNo, false, function()
     {
         FBTest.progress("The first break happened");
         callback();

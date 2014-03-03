@@ -4,15 +4,12 @@ function runTest()
     var fileName = "index.js";
     var lineNo = 5;
 
-    FBTest.sysout("issue1483.START");
     FBTest.openNewTab(basePath + "script/1483/issue1483.html", function(win)
     {
         FBTest.clearCache();
         FBTest.enablePanels(["script", "console"], function ()
         {
-            FBTest.progress("issue1483.script panel enabled");
-
-            var panel = FW.Firebug.chrome.selectPanel("script");
+            var panel = FBTest.getSelectedPanel();
             FBTest.compare("script", panel.name, "The Script panel should be selected");
 
             var found = FBTest.selectPanelLocationByName(panel, fileName);

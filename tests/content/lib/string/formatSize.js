@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("formatSize.START");
-
     var decimalMark = (0.1).toLocaleString().match(/\D/);
 
     var testValues = [
