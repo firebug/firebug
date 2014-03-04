@@ -12,7 +12,7 @@ function(Firebug, InlineEditor) {
 // TextDataEditor
 
 /**
- * TextDataEditor deals with text of comments and cdata nodes
+ * TextDataEditor deals with text of comments and CData nodes
  */
 function TextDataEditor(doc)
 {
@@ -27,7 +27,7 @@ TextDataEditor.prototype = domplate(InlineEditor.prototype,
         if (!node)
             return;
 
-        target.data = value;
+        target.textContent = value;
         node.data = value;
     }
 });
