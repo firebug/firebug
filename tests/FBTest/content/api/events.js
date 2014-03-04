@@ -143,8 +143,12 @@ this.synthesizeMouse = function(node, offsetX, offsetY, event, win)
 
     FBTest.sysout("synthesizeMouse; rect", rectCollection);
 
-    if (!FBTest.ok(rect, "Mouse event must be synthesized"))
+    // Log the message only in case of a failure.
+    if (!rect)
+    {
+        FBTest.ok(rect, "Mouse event must be synthesized");
         return;
+    }
 
     var frameOffset = getFrameOffset(node);
 
