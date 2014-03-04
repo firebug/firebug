@@ -20,16 +20,11 @@ const COMPOSITION_ATTR_SELECTEDCONVERTEDTEXT = 0x05;
 
 this.clearSearchField = function(callback)
 {
-    // FIX ME: characters should be sent into the search box individually
-    // (using key events) to simulate incremental search.
+    // Clear the search field by clicking on the icon at the left
     var searchBox = FW.Firebug.chrome.$("fbSearchBox");
-    searchBox.value = "";
-
-    var doc = searchBox.ownerDocument;
-    doc.defaultView.focus();
-    FBTest.focus(searchBox);
-
-    FBTest.sendKey("RETURN", "fbSearchBox");
+    var searchBoxText = FW.FBL.domUtils.getChildrenForNode(searchBox, true)[0];
+    var searchIcon = searchBoxText.getElementsByClassName("fbsearch-icon")[0];
+    FBTest.click(searchIcon);
 
     if (callback)
     {
@@ -56,8 +51,11 @@ this.setSearchFieldText = function(searchText, callback)
         doc.defaultView.focus();
         FBTest.focus(searchBox);
 
-        // Send text into the input box.
-        FBTest.synthesizeText(searchText, doc.defaultView);
+        // Send text into the input box
+        // xxxsz: FBTest.synthesizeText() doesn't work when FBTest.clearSearchField() is called
+        // before it
+        // FBTest.synthesizeText(searchText, doc.defaultView);
+        sendString(searchText, doc.defaultView);
         FBTest.sendKey("RETURN", "fbSearchBox");
 
         if (callback)
@@ -183,13 +181,14 @@ this.searchInHtmlPanel = function(searchText, callback)
     FBTest.sendKey("RETURN", "fbSearchBox");
 };
 
+// xxxsz: This is broken when called multiple times. See also setSearchFieldText().
 this.synthesizeText = function(str, win)
 {
     synthesizeText({
         composition: {
             string: str,
             clauses: [
-                { length: str.length, attr: COMPOSITION_ATTR_RAWINPUT }
+                { length: str.length, attr: COMPOSITION_ATTR_CONVERTEDTEXT }
             ]
         },
         caret: { start: str.length, length: 0 }
