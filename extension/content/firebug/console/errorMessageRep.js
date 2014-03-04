@@ -21,10 +21,10 @@ define([
     "firebug/lib/events",
     "firebug/chrome/panelActivation",
 ],
-function(Firebug, Module, Rep, FBTrace, Domplate, Errors, ErrorMessageObj, FirebugReps, Locale, Url, Str,
-    SourceLink, Dom, Css, Obj, Menu, System, Events, PanelActivation) {
+function(Firebug, Module, Rep, FBTrace, Domplate, Errors, ErrorMessageObj, FirebugReps,
+    Locale, Url, Str, SourceLink, Dom, Css, Obj, Menu, System, Events, PanelActivation) {
 
-"use strict"
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -361,11 +361,14 @@ var ErrorMessage = domplate(Rep,
             error.href,
             "Line " +  error.lineNo
         ];
+
         System.copyToClipboard(message.join(Str.lineBreak()));
     },
 
     breakOnThisError: function(error, context)
     {
+        Trace.sysout("errorMessageRep.breakOnThisError; ", error);
+
         var url = Url.normalizeURL(error.href);
         var compilationUnit = context.getCompilationUnit(url);
         if (!compilationUnit)
@@ -509,19 +512,35 @@ var ErrorMessageUpdater = Obj.extend(Module,
      * creating/removing a breakpoint. Existence of an error-breakpoint is indicated
      * by displaying a red circle before the error description.
      * This method updates the UI if a breakpoint is created/removed.
+     * Note that Error messages can be also displayed in the Watch panel (issue 7220).
      *
      * @param {Object} bp Breakpoint instance.
      * @param {Object} isSet If true, an error breakpoint has been added, otherwise false.
      */
     updateErrorBreakpoints: function(context, bp, isSet)
     {
-        var panel = context.getPanel("console");
-        if (!panel)
+        var messages = [];
+
+        //xxxHonza: we could also use context.invalidatePanels("watches") to
+        // update the Watches panel, but this is faster.
+        var panels = ["console", "watches"];
+        for (var name of panels)
+        {
+            var panel = context.getPanel(name);
+            if (!panel)
+                continue;
+
+            var nodes = panel.panelNode.getElementsByClassName("objectBox-errorMessage");
+            messages.push.apply(messages, nodes);
+        }
+
+        if (!messages.length)
             return;
+
+        Trace.sysout("errorMessageRep.updateErrorBreakpoints; " + messages.length, messages);
 
         // Iterate all error messages (see firebug/console/errorMessageRep template)
         // in the Console panel and update associated breakpoint UI.
-        var messages = panel.panelNode.getElementsByClassName("objectBox-errorMessage");
         for (var i=0; i<messages.length; i++)
         {
             var message = messages[i];
