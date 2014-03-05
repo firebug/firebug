@@ -1,63 +1,62 @@
 var basePath5358 = basePath+"html/5358/";
 function runTest()
 {
-    FBTest.sysout("issue5358.START");
-
     FBTest.openNewTab(basePath5358 + "issue5358.html", function(win)
     {
-        FBTest.openFirebug();
-        var panel = FBTest.selectPanel("html");
-        if (FBTest.ok(panel, "Firebug must be opened and switched to HTML panel now."))
-        {
-            // ***********************************************************************************//
-            // HTML
-
-            // Test functionality must be placed here
-            var tasks = new FBTest.TaskList();
-            tasks.push(copyAndPasteContent, "onlyCell", "fbPasteReplaceOuter",
-                '<td id="middleCell">Foo!</td>');
-            tasks.push(copyAndPasteContent, "middleCell", "fbPasteReplaceInner",
-                '<b id="boldMiddleCell">Middle</b>');
-            tasks.push(copyAndPasteContent, "middleRow", "fbPasteFirstChild",
-                '<td id="leftCell">Left</td>');
-            tasks.push(copyAndPasteContent, "middleRow", "fbPasteLastChild",
-                '<td id="rightCell">Right</td>');
-            tasks.push(copyAndPasteContent, "middleRow", "fbPasteBefore",
-                '<tr id="topRow"><td colspan="3" id="topCell">Top</td></tr>');
-            tasks.push(copyAndPasteContent, "middleRow", "fbPasteAfter",
-                '<tr id="bottomRow"><td colspan="3" id="bottomCell">Bottom</td></tr>');
-
-            tasks.push(checkTableContent);
-
-            // check that the "Replace Node", "Before" and "After" items are disabled
-            tasks.push(checkDisabledItemsOnRootElement);
-
-
-            // ***********************************************************************************//
-            // XML
-
-            tasks.push(FBTest.openURL.bind(FBTest, basePath5358 + "issue5358_xml.html"));
-
-
-            // set the new context baseWindow
-            tasks.push(setBaseWindow);
-            // run the tests:
-            tasks.push(copyAndPasteXMLContent, "onlyContent", "fbPasteReplaceOuter",
-                '<item id="3">Item Number</item>');
-            tasks.push(copyAndPasteXMLContent, "3", "fbPasteReplaceInner", "3");
-            tasks.push(copyAndPasteXMLContent, "root", "fbPasteFirstChild",
-                '<item id="2">2</item>');
-            tasks.push(copyAndPasteXMLContent, "root", "fbPasteLastChild", '<item id="4">4</item>');
-            tasks.push(copyAndPasteXMLContent, "2", "fbPasteBefore", '<item id="1">1</item>');
-            tasks.push(copyAndPasteXMLContent, "4", "fbPasteAfter", '<item id="5">5</item>');
-
-            tasks.push(checkXMLContent);
-
-            tasks.run(function()
+        FBTest.openFirebug(function() {
+            var panel = FBTest.selectPanel("html");
+            if (FBTest.ok(panel, "Firebug must be opened and switched to HTML panel now."))
             {
-                FBTest.testDone("issue5358.DONE");
-            });
-        }
+                // ***********************************************************************************//
+                // HTML
+
+                // Test functionality must be placed here
+                var tasks = new FBTest.TaskList();
+                tasks.push(copyAndPasteContent, "onlyCell", "fbPasteReplaceOuter",
+                    '<td id="middleCell">Foo!</td>');
+                tasks.push(copyAndPasteContent, "middleCell", "fbPasteReplaceInner",
+                    '<b id="boldMiddleCell">Middle</b>');
+                tasks.push(copyAndPasteContent, "middleRow", "fbPasteFirstChild",
+                    '<td id="leftCell">Left</td>');
+                tasks.push(copyAndPasteContent, "middleRow", "fbPasteLastChild",
+                    '<td id="rightCell">Right</td>');
+                tasks.push(copyAndPasteContent, "middleRow", "fbPasteBefore",
+                    '<tr id="topRow"><td colspan="3" id="topCell">Top</td></tr>');
+                tasks.push(copyAndPasteContent, "middleRow", "fbPasteAfter",
+                    '<tr id="bottomRow"><td colspan="3" id="bottomCell">Bottom</td></tr>');
+
+                tasks.push(checkTableContent);
+
+                // check that the "Replace Node", "Before" and "After" items are disabled
+                tasks.push(checkDisabledItemsOnRootElement);
+
+
+                // ***********************************************************************************//
+                // XML
+
+                tasks.push(FBTest.openURL.bind(FBTest, basePath5358 + "issue5358_xml.html"));
+
+
+                // set the new context baseWindow
+                tasks.push(setBaseWindow);
+                // run the tests:
+                tasks.push(copyAndPasteXMLContent, "onlyContent", "fbPasteReplaceOuter",
+                    '<item id="3">Item Number</item>');
+                tasks.push(copyAndPasteXMLContent, "3", "fbPasteReplaceInner", "3");
+                tasks.push(copyAndPasteXMLContent, "root", "fbPasteFirstChild",
+                    '<item id="2">2</item>');
+                tasks.push(copyAndPasteXMLContent, "root", "fbPasteLastChild", '<item id="4">4</item>');
+                tasks.push(copyAndPasteXMLContent, "2", "fbPasteBefore", '<item id="1">1</item>');
+                tasks.push(copyAndPasteXMLContent, "4", "fbPasteAfter", '<item id="5">5</item>');
+
+                tasks.push(checkXMLContent);
+
+                tasks.run(function()
+                {
+                    FBTest.testDone("issue5358.DONE");
+                });
+            }
+        });
     });
 }
 

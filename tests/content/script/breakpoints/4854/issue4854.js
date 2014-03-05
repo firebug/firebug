@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4854.START");
-
     FBTest.openNewTab(basePath + "script/breakpoints/4854/issue4854.html", function(win)
     {
         FBTest.enablePanels(["net", "script"], function(win)
@@ -12,8 +10,7 @@ function runTest()
                 classes: "netRow category-xhr hasHeaders loaded"
             };
 
-            var panel = FBTest.selectPanel("net");
-            panel.clear();
+            FBTest.getSelectedPanel().clear();
 
             FBTest.waitForDisplayedElement("net", options, function(row)
             {

@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4153.START");
     FBTest.openNewTab(basePath + "firebug/4153/issue4153.html", function (win)
     {
         detachFirebug(function (win)
@@ -22,18 +21,20 @@ function runTest()
 
 function detachFirebug(callback)
 {
-    var detachedWindow = FBTest.detachFirebug();
-    if (FBTest.ok(detachedWindow, "Firebug is detaching ....."))
+    FBTest.detachFirebug(function(detachedWindow)
     {
-        FBTest.OneShotHandler(detachedWindow, "load", function (event)
+        if (FBTest.ok(detachedWindow, "Firebug is detaching ....."))
         {
-            FBTest.progress("Firebug detached in a new window.");
-            setTimeout(function ()
+            FBTest.OneShotHandler(detachedWindow, "load", function (event)
             {
-                callback(detachedWindow);
+                FBTest.progress("Firebug detached in a new window.");
+                setTimeout(function ()
+                {
+                    callback(detachedWindow);
+                });
             });
-        });
-    }
+        }
+    });
 }
 
 function toggleDetachBar(callback)

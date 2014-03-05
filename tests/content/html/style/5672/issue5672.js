@@ -1,45 +1,44 @@
 function runTest()
 {
-    FBTest.sysout("issue5672.START");
-
     FBTest.openNewTab(basePath + "html/style/5672/issue5672.html", function(win)
     {
         // 1. Open Firebug
-        FBTest.openFirebug();
-
-        // 2. Switch to the HTML panel and there to the Style side panel
-        var panel = FBTest.selectPanel("css");
-
-        // Required to avoid line breaking the value of the 'background' property,
-        // which causes problems hitting the right target when calling the context menu
-        FBTest.setSidePanelWidth(550);
-
-        // 3. Inspect the blue <div> with the Firebug logo
-        FBTest.selectElementInHtmlPanel("element", function(node)
+        FBTest.openFirebug(function()
         {
+            // 2. Switch to the HTML panel and there to the Style side panel
+            var panel = FBTest.selectPanel("css");
 
-            FBTest.getCSSProp("#element", "background", function(prop) {
-                var propValue = prop.getElementsByClassName("cssPropValue")[0];
+            // Required to avoid line breaking the value of the 'background' property,
+            // which causes problems hitting the right target when calling the context menu
+            FBTest.setSidePanelWidth(550);
 
-                var tests = [];
-                tests.push(function(callback)
-                {
-                    copyColor(propValue, callback);
-                });
+            // 3. Inspect the blue <div> with the Firebug logo
+            FBTest.selectElementInHtmlPanel("element", function(node)
+            {
 
-                tests.push(function(callback)
-                {
-                    copyImageURL(propValue, callback);
-                });
-                
-                tests.push(function(callback)
-                {
-                    openImageInNewTab(propValue, callback);
-                });
+                FBTest.getCSSProp("#element", "background", function(prop) {
+                    var propValue = prop.getElementsByClassName("cssPropValue")[0];
 
-                FBTestFirebug.runTestSuite(tests, function()
-                {
-                    FBTest.testDone("issue5672.DONE");
+                    var tests = [];
+                    tests.push(function(callback)
+                    {
+                        copyColor(propValue, callback);
+                    });
+
+                    tests.push(function(callback)
+                    {
+                        copyImageURL(propValue, callback);
+                    });
+
+                    tests.push(function(callback)
+                    {
+                        openImageInNewTab(propValue, callback);
+                    });
+
+                    FBTestFirebug.runTestSuite(tests, function()
+                    {
+                        FBTest.testDone("issue5672.DONE");
+                    });
                 });
             });
         });
@@ -66,9 +65,7 @@ function copyColor(propValue, callback)
                     "Color value must be properly copied to the clipboard");
                 callback();
             });
-        }, function() {
-            callback();
-        }, offset);
+        }, callback, offset);
 
         // Hide the info tip by moving mouse over the CSS prop name,
         // otherwise it could block the mouse-move over the next CSS value.
@@ -100,9 +97,7 @@ function copyImageURL(propValue, callback)
                     "Image URL must be properly copied to the clipboard");
                 callback();
             });
-        }, function() {
-            callback();
-        }, offset);
+        }, callback, offset);
 
         // Hide the info tip by moving mouse over the CSS prop name,
         // otherwise it could block the mouse-move over the next CSS value.
@@ -131,9 +126,7 @@ function openImageInNewTab(propValue, callback)
             FBTest.compare(expected, browser.documentURI.spec, "URL of the image must be correct");
 
             callback();
-        }, function() {
-            callback();
-        }, offset);
+        }, callback, offset);
 
         // Hide the info tip by moving mouse over the CSS prop name,
         // otherwise it could block the mouse-move over the next CSS value.

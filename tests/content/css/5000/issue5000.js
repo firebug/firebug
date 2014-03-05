@@ -1,35 +1,34 @@
 function runTest()
 {
-    FBTest.sysout("issue5000.START");
-
     FBTest.openNewTab(basePath + "css/5000/issue5000.html", function(win)
     {
-        FBTest.openFirebug();
-        var panel = FBTest.selectPanel("stylesheet");
-        var id = "element1";
+        FBTest.openFirebug(function() {
+            var panel = FBTest.selectPanel("stylesheet");
+            var id = "element1";
 
-        FBTest.selectPanelLocationByName(panel, "issue5000.html");
+            FBTest.selectPanelLocationByName(panel, "issue5000.html");
 
-        FBTest.searchInCssPanel("#" + id, function(node)
-        {
-            var elementDisplayBefore = FBTest.getImageDataFromNode(win.document.getElementById(id));
-            FBTest.executeContextMenuCommand(node, "fbDeleteRuleDeclaration", function()
+            FBTest.searchInCssPanel("#" + id, function(node)
             {
-                var selectors = panel.panelNode.getElementsByClassName("cssSelector");
-                var ruleDeleted = true;
-
-                for (var i=0; ruleDeleted && i<selectors.length; i++)
+                var elementDisplayBefore = FBTest.getImageDataFromNode(win.document.getElementById(id));
+                FBTest.executeContextMenuCommand(node, "fbDeleteRuleDeclaration", function()
                 {
-                    if (selectors[i] == "#" + id)
-                        ruleDeleted = false;
-                }
+                    var selectors = panel.panelNode.getElementsByClassName("cssSelector");
+                    var ruleDeleted = true;
 
-                FBTest.ok(ruleDeleted, "The rule '#" + id + "' should be deleted");
+                    for (var i=0; ruleDeleted && i<selectors.length; i++)
+                    {
+                        if (selectors[i] == "#" + id)
+                            ruleDeleted = false;
+                    }
 
-                var elementDisplayNow = FBTest.getImageDataFromNode(win.document.getElementById(id));
-                FBTest.ok(elementDisplayBefore != elementDisplayNow, "The styles of the deleted rule shouldn't affect the element anymore");
+                    FBTest.ok(ruleDeleted, "The rule '#" + id + "' should be deleted");
 
-                FBTest.testDone("issue5000.DONE");
+                    var elementDisplayNow = FBTest.getImageDataFromNode(win.document.getElementById(id));
+                    FBTest.ok(elementDisplayBefore != elementDisplayNow, "The styles of the deleted rule shouldn't affect the element anymore");
+
+                    FBTest.testDone("issue5000.DONE");
+                });
             });
         });
     });

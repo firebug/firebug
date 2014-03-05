@@ -2,7 +2,6 @@ window.FBTestTimeout = 15000;
 
 function runTest()
 {
-    FBTest.sysout("issue1468.START");
     FBTest.openNewTab(basePath + "net/1468/issue1468.html", function(win)
     {
         FBTest.enableNetPanel(function(win)

@@ -69,7 +69,10 @@ Events.dispatch = function(listeners, name, args)
             if (!listener)
             {
                 if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("Events.dispatch ERROR " + i + " " + name + " to null listener.");
+                {
+                    FBTrace.sysout("Events.dispatch ERROR " + i + " " + name +
+                        " to null listener.");
+                }
                 continue;
             }
 
@@ -78,10 +81,14 @@ Events.dispatch = function(listeners, name, args)
                 try
                 {
                     var result = listener[name].apply(listener, args);
-                    if (typeof(result) != "undefined")
+
+                    // Store all valid results into the result array. The only invalid
+                    // type is undefined (null, 0 can be treated as valid results in some
+                    // cases).
+                    if (typeof result != "undefined")
                         results.push(result);
                 }
-                catch(exc)
+                catch (exc)
                 {
                     if (FBTrace.DBG_ERRORS)
                     {
@@ -92,9 +99,12 @@ Events.dispatch = function(listeners, name, args)
                         }
 
                         var culprit = listeners[i] ? listeners[i].dispatchName : null;
-                        var loc = (exc.fileName ? exc.fileName + ":" + exc.lineNumber : "<unknown>");
+                        var loc = (exc.fileName ? exc.fileName + ":" +
+                            exc.lineNumber : "<unknown>");
+
                         FBTrace.sysout("EXCEPTION in Events.dispatch " +
-                            (culprit ? culprit + "." : "") + name + ": " + exc + " in " + loc, exc);
+                            (culprit ? culprit + "." : "") + name + ": " +
+                            exc + " in " + loc, exc);
                     }
                 }
             }
@@ -106,8 +116,10 @@ Events.dispatch = function(listeners, name, args)
         }
 
         if (FBTrace.DBG_DISPATCH)
-            FBTrace.sysout("Events.dispatch " + name + " to " + listeners.length + " listeners, " +
-                noMethods.length + " had no such method", noMethods);
+        {
+            FBTrace.sysout("Events.dispatch " + name + " to " + listeners.length +
+                " listeners, " + noMethods.length + " had no such method", noMethods);
+        }
     }
     catch (exc)
     {
@@ -116,7 +128,7 @@ Events.dispatch = function(listeners, name, args)
             if (exc.stack)
             {
                 var stack = exc.stack;
-                exc.stack = stack.split('\n');
+                exc.stack = stack.split("\n");
             }
 
             var culprit = listeners[i] ? listeners[i].dispatchName : null;

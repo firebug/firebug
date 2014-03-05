@@ -13,22 +13,21 @@ function viralActivation()
         var isFirebugOpen = FBTest.isFirebugOpen();
         FBTest.ok(!isFirebugOpen, "Firebug starts closed");
 
-        FBTest.openFirebug();
+        FBTest.openFirebug(function() {
+            var isFirebugOpen = FBTest.isFirebugOpen();
+            FBTest.ok(isFirebugOpen, "Firebug now open");
 
-        var isFirebugOpen = FBTest.isFirebugOpen();
-        FBTest.ok(isFirebugOpen, "Firebug now open");
+            if (FBTest.FirebugWindow.Firebug.currentContext)
+            {
+                var contextName = FBTest.FirebugWindow.Firebug.currentContext.getName();
+                FBTest.ok(true, "chromeWindow.Firebug.currentContext "+contextName);
+                FBTest.ok(contextName == viralActivationURL, "Firebug.currentContext set to "+viralActivationURL);
+            }
+            else
+                FBTest.ok(false, "no Firebug.currentContext");
 
-        if (FBTest.FirebugWindow.Firebug.currentContext)
-        {
-            var contextName = FBTest.FirebugWindow.Firebug.currentContext.getName();
-            FBTest.ok(true, "chromeWindow.Firebug.currentContext "+contextName);
-            FBTest.ok(contextName == viralActivationURL, "Firebug.currentContext set to "+viralActivationURL);
-        }
-        else
-            FBTest.ok(false, "no Firebug.currentContext");
-
-        sameTabOpen(win, path);
-
+            sameTabOpen(win, path);
+        });
     });
 }
 

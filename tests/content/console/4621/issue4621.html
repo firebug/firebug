@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4621: Multiple filters selectable in Console panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        window.addEventListener("DOMContentLoaded", function() {
+            console.log("log");
+            console.info("info");
+            console.warn("warning");
+            console.error("error");
+        }, false);
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4621">Issue 4621</a>: Multiple filters selectable in Console panel</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>
+                        Reload the page<br/>
+                        <span class="ok">&rArr; There should be four log messages inside the
+                        console, one normal log message, one info message, one warning and one
+                        error.</span>
+                    </li>
+                    <li>Click the <em>Info</em> filter button</li>
+                    <li>Hold down <kbd>Ctrl</kbd> and click the <em>Warnings</em> filter button</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>&rArr; The <em>Info</em> and the <em>Warnings</em> filter button should be pressed</li>
+                    <li>&rArr; Only the info and the warning should be displayed inside the console.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

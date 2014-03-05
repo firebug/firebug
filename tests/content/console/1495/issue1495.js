@@ -1,8 +1,6 @@
 // Test entry point.
 function runTest()
 {
-    FBTest.sysout("issue1495.START");
-
     var prefOrigValue = FBTest.getPref("showXMLHttpRequests");
     FBTest.setPref("showXMLHttpRequests", true);
 

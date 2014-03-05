@@ -1,22 +1,21 @@
 function runTest()
 {
-    FBTest.sysout("issue5956.START");
-
     FBTest.openNewTab(basePath + "css/5956/issue5956.html", function(win)
     {
-        FBTest.openFirebug();
-        var panel = FBTest.selectPanel("stylesheet");
+        FBTest.openFirebug(function() {
+            var panel = FBTest.selectPanel("stylesheet");
 
-        FBTest.selectPanelLocationByName(panel, "issue5956.html");
+            FBTest.selectPanelLocationByName(panel, "issue5956.html");
 
-        var tests = [];
-        tests.push(propDeclaration);
-        tests.push(propName);
-        tests.push(propValue);
+            var tests = [];
+            tests.push(propDeclaration);
+            tests.push(propName);
+            tests.push(propValue);
 
-        FBTest.runTestSuite(tests, function()
-        {
-            FBTest.testDone("issue5956; DONE");
+            FBTest.runTestSuite(tests, function()
+            {
+                FBTest.testDone("issue5956; DONE");
+            });
         });
     });
 }

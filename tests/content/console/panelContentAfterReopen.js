@@ -7,7 +7,6 @@
  */
 function runTest()
 {
-    FBTest.sysout("panelContentAfterReopen.START");
     FBTest.openNewTab(basePath + "console/panelContentAfterReopen.html", function(win)
     {
         // Open Firebug UI and enable console panel.

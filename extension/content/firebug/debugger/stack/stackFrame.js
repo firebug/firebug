@@ -302,8 +302,12 @@ StackFrame.resumeShowStackTrace = function(){}
 
 // ********************************************************************************************* //
 
-// functionName@fileName:lineNo
-var reErrorStackLine = /^(.*)@(.*):(\d*)$/;
+// Firefox 30 introduced also column number in the URL (see Bug 762556)
+// functionName@fileName:lineNo:columnNo
+// xxxHonza: at some point we might want to utilize the column number as well.
+// The regular expression can be simplified to expect both (:line:column) as soon
+// as Firefox 30 (Fx30) is the minimum required version.
+var reErrorStackLine = /^(.*)@(.*?):(\d*)(?::(\d*))?$/
 
 StackFrame.parseToStackFrame = function(line, context)
 {

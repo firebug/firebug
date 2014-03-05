@@ -1,36 +1,35 @@
 function runTest()
 {
-    FBTest.sysout("issue6708.START");
-
     FBTest.openNewTab(basePath + "html/6708/issue6708.html", function(win)
     {
         // 1. Open Firebug
-        FBTest.openFirebug();
-
-        // 2. Switch to the HTML panel
-        var panel = FBTest.selectPanel("html");
-
-        // 3. Inspect the blue <div>
-        FBTest.selectElementInHtmlPanel("test", function(element)
+        FBTest.openFirebug(function()
         {
-            FBTest.synthesizeMouse(panel.panelNode);
+            // 2. Switch to the HTML panel
+            var panel = FBTest.selectPanel("html");
 
-            // 4. Press Ctrl/⌘ + E
-            FBTest.sendShortcut("e", {accelKey: true});
-
-            var editor = panel.localEditors.html;
-
-            if (FBTest.ok(editor, "Edit Mode must be enabled"))
+            // 3. Inspect the blue <div>
+            FBTest.selectElementInHtmlPanel("test", function(element)
             {
-                FBTest.compare(/<div class="a b c" id="test">\n\s+<p>Test<\/p>\n\s+<\/div>/,
-                    editor.getValue(),
-                    "Content of the editor must correspond to the selected element");
+                FBTest.synthesizeMouse(panel.panelNode);
 
-                // Stop Edit Mode
-                FBTest.clickToolbarButton(null, "fbToggleHTMLEditing");
+                // 4. Press Ctrl/⌘ + E
+                FBTest.sendShortcut("e", {accelKey: true});
 
-                FBTest.testDone("issue6708.DONE");
-            }
+                var editor = panel.localEditors.html;
+
+                if (FBTest.ok(editor, "Edit Mode must be enabled"))
+                {
+                    FBTest.compare(/<div class="a b c" id="test">\n\s+<p>Test<\/p>\n\s+<\/div>/,
+                        editor.getValue(),
+                        "Content of the editor must correspond to the selected element");
+
+                    // Stop Edit Mode
+                    FBTest.clickToolbarButton(null, "fbToggleHTMLEditing");
+
+                    FBTest.testDone("issue6708.DONE");
+                }
+            });
         });
     });
 }

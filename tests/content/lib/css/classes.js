@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("cssClasses.START");
-
     var element = document.createElement("div");
 
     // Test I.

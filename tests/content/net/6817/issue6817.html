@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6817: Copy as cURL: fix multipart request</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        iframe {
+            width: 200px;
+            height: 30px;
+            border: none;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6817">Issue 6817</a>: Copy as cURL: fix multipart request</h1>
+        </header>
+        <div>
+            <section id="content">
+                <iframe src="issue6817-iframe.html"></iframe>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Net</em> panel</li>
+                    <li>
+                        Click the <em>Send request</em> button above<br/>
+                        <span class="ok">&rArr; A request to <em>issue6817.php</em> should be shown</span>
+                    </li>
+                    <li>Right-click the request and choose <em>Copy as cURL</em> from the context menu</li>
+                    <li>Paste the text from the clipboard into a text editor</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        The clipboard data should contain a cURL command with the <code>-data-binary</code> parameter.
+                        The parameter should contain the multipart/form-data payload without binary data.
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

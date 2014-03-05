@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("relativepath.START;");
     FBTest.progress("using baseLocalPath: " + baseLocalPath);
 
     // Compute relative path and construct module loader.

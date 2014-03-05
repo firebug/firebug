@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("cookies.test.breakOnNext; START");
-
     FBTest.openNewTab(basePath + "cookies/general/breakOnNext.php", function(win)
     {
         FBTest.enableCookiesPanel(function(win)

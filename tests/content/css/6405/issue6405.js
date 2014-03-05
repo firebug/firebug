@@ -1,21 +1,20 @@
 function runTest()
 {
-    FBTest.sysout("issue6405.START");
-
     FBTest.openNewTab(basePath + "css/6405/issue6405.html", function(win)
     {
-        FBTest.openFirebug();
-        var panel = FBTest.selectPanel("stylesheet");
+        FBTest.openFirebug(function() {
+            var panel = FBTest.selectPanel("stylesheet");
 
-        FBTest.selectPanelLocationByName(panel, "issue6405.html");
+            FBTest.selectPanelLocationByName(panel, "issue6405.html");
 
-        var tests = [];
-        tests.push(testFontFaceRule);
-        tests.push(testStyleRule);
+            var tests = [];
+            tests.push(testFontFaceRule);
+            tests.push(testStyleRule);
 
-        FBTest.runTestSuite(tests, function()
-        {
-            FBTest.testDone("issue6405; DONE");
+            FBTest.runTestSuite(tests, function()
+            {
+                FBTest.testDone("issue6405; DONE");
+            });
         });
     });
 }

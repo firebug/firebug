@@ -13,6 +13,8 @@ define([
     "firebug/html/htmlLib",
     "firebug/html/htmlModule",
     "firebug/html/htmlReps",
+    "firebug/html/textDataEditor",
+    "firebug/html/textNodeEditor",
     "firebug/lib/events",
     "firebug/debugger/script/sourceLink",
     "firebug/lib/css",
@@ -37,9 +39,9 @@ define([
     "firebug/html/layout"
 ],
 function(Firebug, FBTrace, Panel, Obj, Domplate, Locale, AttributeEditor, HTMLEditor, HTMLLib,
-    HTMLModule, HTMLReps, Events, SourceLink, Css, Dom, Win, Options, Str, Xml, Arr, Persist,
-    Menu, Url, CSSModule, CSSInfoTip, CSSSelectorEditor, BaseEditor, Editor, InlineEditor,
-    SearchBox) {
+    HTMLModule, HTMLReps, TextDataEditor, TextNodeEditor, Events, SourceLink, Css, Dom, Win,
+    Options, Str, Xml, Arr, Persist, Menu, Url, CSSModule, CSSInfoTip, CSSSelectorEditor,
+    BaseEditor, Editor, InlineEditor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -2017,124 +2019,6 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             Locale.$STR("html.Break On Mutate"));
     }
 });
-
-// ********************************************************************************************* //
-
-
-// ********************************************************************************************* //
-// TextDataEditor
-
-/**
- * TextDataEditor deals with text of comments and cdata nodes
- */
-function TextDataEditor(doc)
-{
-    this.initializeInline(doc);
-}
-
-TextDataEditor.prototype = domplate(InlineEditor.prototype,
-{
-    saveEdit: function(target, value, previousValue)
-    {
-        var node = Firebug.getRepObject(target);
-        if (!node)
-            return;
-
-        target.data = value;
-        node.data = value;
-    }
-});
-
-// ********************************************************************************************* //
-// TextNodeEditor
-
-/**
- * TextNodeEditor deals with text nodes that do and do not have sibling elements. If
- * there are no sibling elements, the parent is known as a TextElement. In other cases
- * we keep track of their position via a range (this is in part because as people type
- * html, the range will keep track of the text nodes and elements that the user
- * is creating as they type, and this range could be in the middle of the parent
- * elements children).
- */
-function TextNodeEditor(doc)
-{
-    this.initializeInline(doc);
-}
-
-TextNodeEditor.prototype = domplate(InlineEditor.prototype,
-{
-    getInitialValue: function(target, value)
-    {
-        // The text displayed within the HTML panel can be shortened if the 'Show Full Text'
-        // option is false, so get the original textContent from the associated page element
-        // (issue 2183).
-        var repObject = Firebug.getRepObject(target);
-        if (repObject)
-            return repObject.textContent;
-
-        return value;
-    },
-
-    beginEditing: function(target, value)
-    {
-        var node = Firebug.getRepObject(target);
-        if (!node || node instanceof window.Element)
-            return;
-
-        var document = node.ownerDocument;
-        this.range = document.createRange();
-        this.range.setStartBefore(node);
-        this.range.setEndAfter(node);
-    },
-
-    endEditing: function(target, value, cancel)
-    {
-        if (this.range)
-        {
-            this.range.detach();
-            delete this.range;
-        }
-
-        // Remove empty groups by default
-        return true;
-    },
-
-    saveEdit: function(target, value, previousValue)
-    {
-        var node = Firebug.getRepObject(target);
-        if (!node)
-            return;
-
-        value = Str.unescapeForTextNode(value || "");
-        target.textContent = value;
-
-        if (node instanceof window.Element)
-        {
-            if (Xml.isElementMathML(node) || Xml.isElementSVG(node))
-                node.textContent = value;
-            else
-                node.innerHTML = value;
-        }
-        else
-        {
-            try
-            {
-                var documentFragment = this.range.createContextualFragment(value);
-                var cnl = documentFragment.childNodes.length;
-                this.range.deleteContents();
-                this.range.insertNode(documentFragment);
-                var r = this.range, sc = r.startContainer, so = r.startOffset;
-                this.range.setEnd(sc,so+cnl);
-            }
-            catch (e)
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("TextNodeEditor.saveEdit; EXCEPTION " + e, e);
-            }
-        }
-    }
-});
-
 // ********************************************************************************************* //
 // Editors
 

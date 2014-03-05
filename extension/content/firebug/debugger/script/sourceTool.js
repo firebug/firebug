@@ -214,24 +214,6 @@ DynamicSourceCollector.prototype =
 
     onNewScript: function(script)
     {
-        var type = script.source.introductionType;
-
-        if (Trace.active)
-        {
-            Trace.sysout("dynamicSourceCollector.onNewScript; " + script.url + ", " + type,
-            {
-                startLine: script.startLine,
-                lineCount: script.lineCount,
-                sourceStart: script.sourceStart,
-                sourceLength: script.sourceLength,
-                staticLevel: script.staticLevel,
-                text: script.source.text,
-                sourceURL: script.source.url,
-                element: script.source.element,
-                elementAttributeName: script.source.elementAttributeName,
-            });
-        }
-
         if (script.url == "debugger eval code")
             return;
 
@@ -239,9 +221,12 @@ DynamicSourceCollector.prototype =
             "eval": CompilationUnit.EVAL,
             "Function": CompilationUnit.EVAL,
             "eventHandler": CompilationUnit.BROWSER_GENERATED,
-            "scriptElement": CompilationUnit.EVAL
+            "scriptElement": CompilationUnit.EVAL,
+            "setTimeout": CompilationUnit.EVAL,
+            "setInterval": CompilationUnit.EVAL
         };
 
+        var type = script.source.introductionType;
         var scriptType = dynamicTypesMap[type];
         if (scriptType)
             this.addDynamicScript(script, scriptType);
@@ -259,7 +244,24 @@ DynamicSourceCollector.prototype =
         var url = script.source.url;
         var sourceFile = this.context.getSourceFile(url);
 
-        Trace.sysout("dynamicSourceCollector.addDynamicScript; " + url + ", " + type);
+        if (Trace.active)
+        {
+            var element = script.source.element;
+            element = element.unsafeDereference();
+
+            Trace.sysout("dynamicSourceCollector.addDynamicScript; " + script.url + ", " + type,
+            {
+                startLine: script.startLine,
+                lineCount: script.lineCount,
+                sourceStart: script.sourceStart,
+                sourceLength: script.sourceLength,
+                staticLevel: script.staticLevel,
+                text: script.source.text,
+                sourceURL: script.source.url,
+                element: element,
+                elementAttributeName: script.source.elementAttributeName,
+            });
+        }
 
         // xxxHonza: we shouldn't create a new {@link SourceFile} for every new
         // instance of the same dynamically evaluated script.

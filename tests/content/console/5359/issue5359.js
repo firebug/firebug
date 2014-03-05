@@ -1,22 +1,17 @@
 function runTest()
 {
-    FBTest.sysout("issue5359.START");
     FBTest.openNewTab(basePath + "console/5359/issue5359.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableScriptPanel(function(win)
-        {
-            FBTest.enableConsolePanel(function(win)
-            {
-                var panel = FBTest.selectPanel("console");
+        FBTest.openFirebug(function() {
+            FBTest.enablePanels(["console", "script"], function() {
+                var panelNode = FBTest.getSelectedPanel().panelNode;
                 FBTest.clearConsole();
 
                 var config = {tagName: "tr", classes: "profileRow", counter: 2};
                 FBTest.waitForDisplayedElement("console", config, function()
                 {
 
-                    var panelNode = FBTest.getPanel("console").panelNode;
-                    var row = panel.panelNode.querySelector(".logRow.logRow-profile");
+                    var row = panelNode.querySelector(".logRow.logRow-profile");
 
                     var profileRows = row.getElementsByClassName("profileRow");
                     FBTest.compare(3, profileRows.length,

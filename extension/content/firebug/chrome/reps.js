@@ -1663,13 +1663,11 @@ FirebugReps.CSSRule = domplate(Rep,
         {
             return "CSSCharsetRule";
         }
-        else if ((window.CSSKeyframesRule && rule instanceof window.CSSKeyframesRule) ||
-            rule instanceof window.MozCSSKeyframesRule)
+        else if (rule instanceof (window.CSSKeyframesRule || window.MozCSSKeyframesRule))
         {
             return "CSSKeyframesRule";
         }
-        else if ((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
-            rule instanceof window.MozCSSKeyframeRule)
+        else if (rule instanceof (window.CSSKeyframeRule || window.MozCSSKeyframeRule))
         {
             return "CSSKeyframeRule";
         }
@@ -1716,13 +1714,11 @@ FirebugReps.CSSRule = domplate(Rep,
         {
             return rule.encoding;
         }
-        else if ((window.CSSKeyframesRule && rule instanceof window.CSSKeyframesRule) ||
-            rule instanceof window.MozCSSKeyframesRule)
+        else if (rule instanceof (window.CSSKeyframesRule || window.MozCSSKeyframesRule))
         {
             return rule.name;
         }
-        else if ((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
-            rule instanceof window.MozCSSKeyframeRule)
+        else if (rule instanceof (window.CSSKeyframeRule || window.MozCSSKeyframeRule))
         {
             return rule.keyText;
         }

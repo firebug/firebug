@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("shortcuts.firebug.START");
     FBTest.openNewTab(basePath + "shortcuts/firebug.html", function(win)
     {
         FBTest.ok(!FBTest.isFirebugActive(), "Firebug must be suspended");

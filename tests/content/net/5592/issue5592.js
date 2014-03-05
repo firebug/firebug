@@ -2,10 +2,6 @@
 // It's automatically executed by Firebug test harness (FBTest).
 function runTest()
 {
-    // Just a log into the Firebug tracing console (FBTrace). You need to set
-    // 'TESTCASE' option to see logs made through FBTest.sysout.
-    FBTest.sysout("issue5592.START");
-
     // Open a new tab with the test page. 'basePath' variable is provided
     // by test harness.
     FBTest.openNewTab(basePath + "net/5592/issue5592.html", function(win)

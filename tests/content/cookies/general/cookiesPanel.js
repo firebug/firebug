@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("cookiesPanel.START");
-
     FBTest.openNewTab(basePath + "cookies/general/cookiesPanel.html", function(win)
     {
         FBTest.openFirebug(true);

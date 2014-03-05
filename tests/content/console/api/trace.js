@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("console.trace.START");
     FBTest.openNewTab(basePath + "console/api/trace.html", function(win)
     {
         function compareFrames(callback, list)
@@ -22,48 +21,49 @@ function runTest()
             });
         }
 
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
-        {
-            compareFrames(function()
+        FBTest.openFirebug(function() {
+            FBTest.enableConsolePanel(function(win)
             {
                 compareFrames(function()
                 {
-                    FBTest.enableScriptPanel(function(win)
+                    compareFrames(function()
                     {
-                        compareFrames(function()
+                        FBTest.enableScriptPanel(function(win)
                         {
-                            FBTest.testDone("console.trace.DONE");
-                        }, [
-                            ["actualTrace", ["arg1=1,", "arg2=2,", "arg3=undefined"], "trace.html", 101],
-                            ["rec", ["left=0"], "trace.html", 96],
-                            ["rec", ["left=1"], "trace.html", 94],
-                            ["rec", ["left=2"], "trace.html", 94],
-                            ["onExecuteTest", [], "trace.html", 88],
-                            ["onclick", ["event=click", "clientX=0,", "clientY=0"], "onclick", 2],
-                        ]);
+                            FBTest.clearConsole();
+                            compareFrames(function()
+                            {
+                                FBTest.testDone("console.trace.DONE");
+                            }, [
+                                ["actualTrace", ["arg1=1,", "arg2=2,", "arg3=undefined"], "trace.html", 101],
+                                ["rec", ["left=0"], "trace.html", 96],
+                                ["rec", ["left=1"], "trace.html", 94],
+                                ["rec", ["left=2"], "trace.html", 94],
+                                ["onExecuteTest", [], "trace.html", 88],
+                                ["onclick", ["event=click", "clientX=0,", "clientY=0"], "onclick", 2],
+                            ]);
 
-                        FBTest.clearConsole();
-                        FBTest.click(win.document.getElementById("testButton"));
-                    });
+                            FBTest.click(win.document.getElementById("testButton"));
+                        });
+                    }, [
+                        ["strictTrace", [], "trace.html", 107],
+                        ["onclick", [], "trace.html", 1],
+                    ]);
+
+                    FBTest.clearConsole();
+                    FBTest.click(win.document.getElementById("strictButton"));
                 }, [
-                    ["strictTrace", [], "trace.html", 107],
+                    ["actualTrace", ["arg1=1,", "arg2=2,", "arg3=undefined"], "trace.html", 101],
+                    ["rec", ["left=0"], "trace.html", 96],
+                    ["rec", [], "trace.html", 94],
+                    ["rec", [], "trace.html", 94],
+                    ["onExecuteTest", [], "trace.html", 88],
                     ["onclick", [], "trace.html", 1],
                 ]);
 
                 FBTest.clearConsole();
-                FBTest.click(win.document.getElementById("strictButton"));
-            }, [
-                ["actualTrace", ["arg1=1,", "arg2=2,", "arg3=undefined"], "trace.html", 101],
-                ["rec", ["left=0"], "trace.html", 96],
-                ["rec", [], "trace.html", 94],
-                ["rec", [], "trace.html", 94],
-                ["onExecuteTest", [], "trace.html", 88],
-                ["onclick", [], "trace.html", 1],
-            ]);
-
-            FBTest.clearConsole();
-            FBTest.click(win.document.getElementById("testButton"));
+                FBTest.click(win.document.getElementById("testButton"));
+            });
         });
     });
 }

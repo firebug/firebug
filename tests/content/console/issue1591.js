@@ -34,8 +34,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/issue1591.html", function(win)
     {
-        if (!FBTest.isFirebugOpen())
-            FBTest.openFirebug();
-        FBTest.enableConsolePanel(testCommandLineForError);
+        FBTest.openFirebug(function() {
+            FBTest.enableConsolePanel(testCommandLineForError);
+        });
     });
 }

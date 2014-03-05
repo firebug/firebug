@@ -19,6 +19,9 @@ function(FBTrace, Arr, Url, Options, Xml, Http, Xpath, Win) {
 var Ci = Components.interfaces;
 var Cc = Components.classes;
 
+var TraceError = FBTrace.toError();
+var Trace = FBTrace.to("DBG_CSS");
+
 // ********************************************************************************************* //
 // Module Implementation
 
@@ -398,8 +401,7 @@ Css.readBoxStyles = function(style)
     for (var styleName in styleNames)
         styles[styleNames[styleName]] = parseInt(style.getPropertyCSSValue(styleName).cssText) || 0;
 
-    if (FBTrace.DBG_INSPECT)
-        FBTrace.sysout("readBoxStyles ", styles);
+    Trace.sysout("css.readBoxStyles;", styles);
 
     return styles;
 };
@@ -556,11 +558,11 @@ Css.obscure = function(elt, obscured)
 
 Css.setClassTimed = function(elt, name, context, timeout)
 {
-    if (FBTrace.DBG_HTML || FBTrace.DBG_SOURCEFILES)
+    if (Trace.active)
     {
-        FBTrace.sysout("css.setClassTimed elt.__setClassTimeout: "+elt.__setClassTimeout+
-                " Xml.isVisible(elt): "+Xml.isVisible(elt)+
-                " elt.__invisibleAtSetPoint: "+elt.__invisibleAtSetPoint);
+        Trace.sysout("css.setClassTimed; elt.__setClassTimeout: " + elt.__setClassTimeout +
+            " Xml.isVisible(elt): " + Xml.isVisible(elt) +
+            " elt.__invisibleAtSetPoint: " + elt.__invisibleAtSetPoint);
     }
 
     if (!timeout)
@@ -615,8 +617,7 @@ Css.safeGetCSSRules = function(styleSheet)
     }
     catch (e)
     {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("safeGetCSSRules "+e, e);
+        TraceError.sysout("css.safeGetCSSRules; EXCEPTION " + e, e);
     }
 
     return null;
@@ -632,8 +633,7 @@ Css.isValidStylesheet = function(styleSheet)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_CSS)
-            FBTrace.sysout("isValidStylesheet " + exc, exc);
+        TraceError.sysout("css.isValidStylesheet; EXCEPTION " + exc, exc);
     }
 
     return false;
@@ -689,8 +689,7 @@ Css.addStyleSheet = function(doc, style)
     }
     else
     {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("css.addStyleSheet; ERROR to append a stylesheet");
+        TraceError.sysout("css.addStyleSheet; ERROR to append a stylesheet");
     }
 };
 
@@ -758,14 +757,12 @@ Css.createStyleSheetMap = function(context)
             }
             catch (err)
             {
-                //if (FBTrace.DBG_ERRORS)
-                //    FBTrace.sysout("css.createStyleSheetMap; EXCEPTION " + err, err);
+                //TraceError.sysout("css.createStyleSheetMap; EXCEPTION " + err, err);
             }
         }
     });
 
-    if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
-        FBTrace.sysout("css.createStyleSheetMap for "+context.getName(), context.styleSheetMap);
+    Trace.sysout("css.createStyleSheetMap; for " + context.getName(), context.styleSheetMap);
 
     return context.styleSheetMap;
 };
@@ -799,11 +796,10 @@ Css.getAllStyleSheets = function(context)
                     addSheet(rule.styleSheet);
             }
         }
-        catch(e)
+        catch (e)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("getAllStyleSheets sheet.cssRules FAILS for "+
-                    (sheet?sheet.href:"null sheet")+e, e);
+            TraceError.sysout("css.getAllStyleSheets; sheet.cssRules FAILS for " +
+                (sheet ? sheet.href : "null sheet") + e, e);
         }
     }
 
@@ -834,9 +830,9 @@ Css.getURLForStyleSheet = function(styleSheet)
 Css.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 {
     // ownerDocument is an optional hint for performance
-    if (FBTrace.DBG_CSS)
+    if (Trace.active)
     {
-        FBTrace.sysout("getInstanceForStyleSheet href:" + styleSheet.href + " mediaText:" +
+        Trace.sysout("css.getInstanceForStyleSheet; href:" + styleSheet.href + " mediaText:" +
             styleSheet.media.mediaText + " path to ownerNode" +
             (styleSheet.ownerNode && Xpath.getElementXPath(styleSheet.ownerNode)), ownerDocument);
     }
@@ -853,9 +849,9 @@ Css.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
     {
         var curSheet = styleSheets[i];
 
-        if (FBTrace.DBG_CSS)
+        if (Trace.active)
         {
-            FBTrace.sysout("getInstanceForStyleSheet: compare href " + i +
+            Trace.sysout("css.getInstanceForStyleSheet; compare href " + i +
                 " " + curSheet.href + " " + curSheet.media.mediaText + " " +
                 (curSheet.ownerNode && Xpath.getElementXPath(curSheet.ownerNode)));
         }

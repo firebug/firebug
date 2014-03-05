@@ -8,7 +8,8 @@
 function runTest()
 {
     var browser = new FW.Firebug.BTI.Browser(); // TODO
-    browser.addEventListener("onDisconnect", function(aBrowser){
+    browser.addEventListener("onDisconnect", function(aBrowser)
+    {
         FBTest.ok(browser == aBrowser, "Disconnect call back is for wrong browser");
         FBTest.testDone("done test #onDisconnect()");
     });

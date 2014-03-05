@@ -215,6 +215,11 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         // rather dispatch a message to an object that is created for every context?
         TabWatcher.iterateContexts(function(context)
         {
+            // Attach to the current thread. If the tab-attach sequence (that must happen
+            // before) is currently in progress the {@link TabClient} object sets a flag
+            // and will attach the thread as soon as the tab is attached.
+            // If there is no instance of {@link TabClient} for the current browser,
+            // the tab-attach sequence didn't started yet.
             var tab = DebuggerClient.getTabClient(context.browser);
             if (tab)
                 tab.attachThread();

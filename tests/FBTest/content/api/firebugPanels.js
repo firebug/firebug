@@ -164,6 +164,7 @@ this.disableAllPanels = function()
  */
 this.enableAllPanels = function()
 {
+    // xxxsz: This function should be made asynchronous
     FW.FBL.$("cmd_firebug_enablePanels").doCommand();
 };
 
@@ -187,6 +188,8 @@ this.enablePanels = function(panelNames, callback)
         method = FBTestFirebug.enableNetPanel;
     else if (name === "console")
         method = FBTestFirebug.enableConsolePanel;
+    else if (name === "cookies")
+        method = FBTestFirebug.enableCookiesPanel;
 
     if (!method)
     {
@@ -391,16 +394,25 @@ this.expandElements = function(panelNode, className) // className, className, ..
 };
 
 /**
+ * Wait for displayed element config
+ * @typedef {Object} WaitForDisplayedElementConfig
+ * @property {String} tagName - Name of the element tag
+ * @property {String} id - ID of the element
+ * @property {String} classes - Space-separated list of classes the element contains
+ * @property {Object} attributes - Attributes the element contains (name/value pairs)
+ * @property {Number} counter - Number of elements
+ * @property {Boolean} onlyMutations - If true, only check for changes, otherwise also already
+ *     displayed elements are considered
+ */
+
+/**
  * Executes passed callback as soon as an expected element is displayed within the
  * specified panel. A DOM node representing the UI is passed into the callback as
  * the only parameter.
  *
- * If 'config.onlyMutations' is set to true, the method is always waiting for changes
- * and ignoring the fact that the nodes might be already displayed.
- *
  * @param {String} panelName Name of the panel that shows the result.
- * @param {Object} config Requirements, which must be fulfilled to trigger the callback function
- *     (can include "tagName", "id", "classes", "attributes", "counter" and "onlyMutations")
+ * @param {WaitForDisplayedElementConfig} config Requirements, which must be fulfilled to trigger
+ *     the callback function
  * @param {Function} callback A callback function with one parameter.
  */
 this.waitForDisplayedElement = function(panelName, config, callback)
@@ -440,7 +452,7 @@ this.waitForDisplayedElement = function(panelName, config, callback)
 
         if (config.id)
         {
-            var node = panelNode.getElementById(config.id);
+            var node = panelNode.ownerDocument.getElementById(config.id);
             if (node)
             {
                 setTimeout(function()
