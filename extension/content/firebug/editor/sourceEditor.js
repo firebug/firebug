@@ -29,7 +29,6 @@ var Cu = Components.utils;
 // Note that panel.html runs in content scope with restricted (no chrome) privileges.
 var codeMirrorSrc = "chrome://firebug/content/editor/codemirror/codemirror.js";
 var showHintSrc = "chrome://firebug/content/editor/codemirror/addon/show-hint.js";
-var searchSrc = "chrome://firebug/content/editor/codemirror/addon/search/search.js";
 var searchCursorSrc = "chrome://firebug/content/editor/codemirror/addon/search/searchcursor.js";
 var jsModeSrc = "chrome://firebug/content/editor/codemirror/mode/javascript.js";
 var htmlMixedModeSrc = "chrome://firebug/content/editor/codemirror/mode/htmlmixed.js";
@@ -243,7 +242,6 @@ SourceEditor.prototype =
 
         loader.addScript(doc, "cm", codeMirrorSrc);
         loader.addScript(doc, "cm-showhint", showHintSrc);
-        loader.addScript(doc, "cm-search", searchSrc);
         loader.addScript(doc, "cm-searchcursor", searchCursorSrc);
         loader.addScript(doc, "cm-js", jsModeSrc);
         loader.addScript(doc, "cm-xml", xmlModeSrc);
