@@ -41,7 +41,7 @@ define([
 function(Firebug, FBTrace, Panel, Obj, Domplate, Locale, AttributeEditor, HTMLEditor, HTMLLib,
     HTMLModule, HTMLReps, TextDataEditor, TextNodeEditor, Events, SourceLink, Css, Dom, Win,
     Options, Str, Xml, Arr, Persist, Menu, Url, CSSModule, CSSInfoTip, CSSSelectorEditor,
-    BaseEditor, Editor, InlineEditor) {
+    BaseEditor, Editor, InlineEditor, SearchBox, InsideOutBox, Inspector) {
 
 // ********************************************************************************************* //
 // Constants
@@ -132,8 +132,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             this.select(next.repObject);
 
-            if (Firebug.Inspector.inspecting)
-                Firebug.Inspector.inspectNode(next.repObject);
+            if (Inspector.inspecting)
+                Inspector.inspectNode(next.repObject);
         }
     },
 
@@ -145,8 +145,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             this.select(previous.repObject);
 
-            if (Firebug.Inspector.inspecting)
-                Firebug.Inspector.inspectNode(previous.repObject);
+            if (Inspector.inspecting)
+                Inspector.inspectNode(previous.repObject);
         }
     },
 
@@ -183,7 +183,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 this.selectNext();
         }
 
-        Firebug.Inspector.highlightObject(this.selection, this.context);
+        Inspector.highlightObject(this.selection, this.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -298,7 +298,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         HTMLModule.deleteNode(node, this.context);
 
-        Firebug.Inspector.highlightObject(this.selection, this.context);
+        Inspector.highlightObject(this.selection, this.context);
     },
 
     toggleAll: function(event, node)
@@ -612,7 +612,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.highlightMutation(objectNodeBox, objectNodeBox, "mutated");
         }
 
-        Firebug.Inspector.repaint();
+        Inspector.repaint();
     },
 
     mutateText: function(target, parent, textValue)
@@ -1399,7 +1399,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     initializeNode: function(oldPanelNode)
     {
         if (!this.ioBox)
-            this.ioBox = new Firebug.InsideOutBox(this, this.panelNode);
+            this.ioBox = new InsideOutBox(this, this.panelNode);
 
         Events.addEventListener(this.panelNode, "click", this.onClick, false);
         Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
@@ -1554,7 +1554,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             if (this.ioBox)
                 this.ioBox.destroy();
 
-            this.ioBox = new Firebug.InsideOutBox(this, this.panelNode);
+            this.ioBox = new InsideOutBox(this, this.panelNode);
             this.ioBox.select(this.selection, true, true);
         }
     },
@@ -1615,7 +1615,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 }
             }
         }
-        else if (Firebug.Inspector.inspecting)
+        else if (Inspector.inspecting)
         {
             this.ioBox.highlight(object);
         }
