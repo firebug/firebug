@@ -416,6 +416,9 @@ function rgbToHex(value)
 
 Firebug.registerModule(QuickInfoBox);
 
+// Allow to access the quick info box within the XUL (see issue 7231)
+Firebug.QuickInfoBox = QuickInfoBox;
+
 return QuickInfoBox;
 
 // ********************************************************************************************* //
