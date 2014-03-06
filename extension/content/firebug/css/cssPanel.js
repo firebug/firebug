@@ -1473,7 +1473,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         return items;
     },
 
-    getContextMenuItems: function(style, target)
+    getContextMenuItems: function(style, target, context, x, y)
     {
         var items = [];
 
