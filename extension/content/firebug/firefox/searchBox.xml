@@ -98,6 +98,8 @@
                     "searchBox");
                 searchBox.setAttribute("active-search", !!val);
                 searchBox.value = val;
+                searchBox.selectionStart = searchBox.value.length;
+                searchBox.selectionEnd = searchBox.value.length;
             ]]></xbl:setter>
         </property>
 

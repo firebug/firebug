@@ -1376,7 +1376,7 @@ var FirebugChrome =
         if (popup.id != "fbContextMenu")
             return;
 
-        var target = win.document.popupNode;
+        var target = popup.triggerNode;
         var panel = target ? Firebug.getElementPanel(target) : null;
 
         // The event must be on our chrome not inside the panel.
@@ -1430,7 +1430,8 @@ var FirebugChrome =
         // 1. Add the custom menu items from the realRep
         if (realObject && realRep)
         {
-            var items = realRep.getContextMenuItems(realObject, target, Firebug.currentContext);
+            var items = realRep.getContextMenuItems(realObject, target, Firebug.currentContext,
+                lastMouseDownPosition.clientX, lastMouseDownPosition.clientY);
             if (items)
                 Menu.createMenuItems(popup, items);
         }
@@ -1438,7 +1439,8 @@ var FirebugChrome =
         // 2. Add the custom menu items from the original rep
         if (object && rep && rep != realRep)
         {
-            var items = rep.getContextMenuItems(object, target, Firebug.currentContext);
+            var items = rep.getContextMenuItems(object, target, Firebug.currentContext,
+                lastMouseDownPosition.clientX, lastMouseDownPosition.clientY);
             if (items)
                 Menu.createMenuItems(popup, items);
         }
@@ -1446,7 +1448,8 @@ var FirebugChrome =
         // 3. Add the custom menu items from the panel
         if (panel)
         {
-            var items = panel.getContextMenuItems(realObject, target);
+            var items = panel.getContextMenuItems(realObject, target, null,
+                lastMouseDownPosition.clientX, lastMouseDownPosition.clientY);
             if (items)
                 Menu.createMenuItems(popup, items);
         }
@@ -1991,13 +1994,21 @@ function onPanelClick(event)
     }
 }
 
-var lastMouseDownPosition = {x: -1000, y: -1000};
+var lastMouseDownPosition = {
+    screenX: -1000,
+    screenY: -1000,
+    clientX: -1000,
+    clientY: -1000,
+};
+
 function onPanelMouseDown(event)
 {
-    if (Events.isLeftClick(event))
+    if (Events.isLeftClick(event) || Events.isRightClick(event))
     {
-        lastMouseDownPosition.x = event.screenX;
-        lastMouseDownPosition.y = event.screenY;
+        lastMouseDownPosition.screenX = event.screenX;
+        lastMouseDownPosition.screenY = event.screenY;
+        lastMouseDownPosition.clientX = event.clientX;
+        lastMouseDownPosition.clientY = event.clientY;
     }
     else if (Events.isMiddleClick(event, true) && Events.isControlAlt(event))
     {
@@ -2041,8 +2052,8 @@ function onPanelMouseUp(event)
 
                 if (selectedRange.collapsed)
                 {
-                    var distance = Math.abs(event.screenX - lastMouseDownPosition.x) +
-                        Math.abs(event.screenY - lastMouseDownPosition.y);
+                    var distance = Math.abs(event.screenX - lastMouseDownPosition.screenX) +
+                        Math.abs(event.screenY - lastMouseDownPosition.screenY);
 
                     // If mouse has moved far enough, set selection at that point
                     if (distance > 3 || Css.hasClass(event.target, "inlineExpander"))

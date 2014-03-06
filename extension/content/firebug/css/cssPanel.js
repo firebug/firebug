@@ -1469,7 +1469,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Context Menu
 
-    getContextMenuItems: function(style, target)
+    getContextMenuItems: function(style, target, context, x, y)
     {
         var items = [];
 
@@ -1534,33 +1534,53 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         var propValue = Dom.getAncestorByClass(target, "cssPropValue");
         if (propValue)
         {
-            if (this.infoTipType == "color")
+            var propNameNode = prop.getElementsByClassName("cssPropName")[0];
+            var propName = propNameNode.textContent.toLowerCase();
+            var styleRule = Firebug.getRepObject(prop);
+            var text = this.getCSSText(styleRule, propName);
+            var caretPosition = prop.ownerDocument.caretPositionFromPoint(x, y); 
+            var cssValueInfo = this.getCSSValueInfo(propName, text, caretPosition.offset);
+
+            switch (cssValueInfo.type)
             {
-                items.push(
+                case "rgb":
+                case "hsl":
+                case "colorKeyword":
+                    items.push(
+                        {
+                            id: "fbCopyColor",
+                            label: "CopyColor",
+                            tooltiptext: "css.tip.Copy_Color",
+                            command: Obj.bindFixed(System.copyToClipboard, System, cssValueInfo.value)
+                        }
+                    );
+                    break;
+            
+                case "url":
+                    if (Css.isImageProperty(propName))
                     {
-                        id: "fbCopyColor",
-                        label: "CopyColor",
-                        tooltiptext: "css.tip.Copy_Color",
-                        command: Obj.bindFixed(System.copyToClipboard, System, this.infoTipObject)
+                        var prop = Dom.getAncestorByClass(target, "cssProp");
+                        var rule = Firebug.getRepObject(prop);
+                        var baseURL = this.getStylesheetURL(rule, true);
+                        var relURL = CSSModule.parseURLValue(cssValueInfo.value);
+                        var absURL = Url.isDataURL(relURL) ? relURL : Url.absoluteURL(relURL, baseURL);
+            
+                        items.push(
+                            {
+                                id: "fbCopyImageLocation",
+                                label: "CopyImageLocation",
+                                tooltiptext: "css.tip.Copy_Image_Location",
+                                command: Obj.bindFixed(System.copyToClipboard, System, absURL)
+                            },
+                            {
+                                id: "fbOpenImageInNewTab",
+                                label: "OpenImageInNewTab",
+                                tooltiptext: "css.tip.Open_Image_In_New_Tab",
+                                command: Obj.bindFixed(Win.openNewTab, Win, absURL)
+                            }
+                        );
                     }
-                );
-            }
-            else if (this.infoTipType == "image")
-            {
-                items.push(
-                    {
-                        id: "fbCopyImageLocation",
-                        label: "CopyImageLocation",
-                        tooltiptext: "css.tip.Copy_Image_Location",
-                        command: Obj.bindFixed(System.copyToClipboard, System, this.infoTipObject)
-                    },
-                    {
-                        id: "fbOpenImageInNewTab",
-                        label: "OpenImageInNewTab",
-                        tooltiptext: "css.tip.Open_Image_In_New_Tab",
-                        command: Obj.bindFixed(Win.openNewTab, Win, this.infoTipObject)
-                    }
-                );
+                    break;
             }
         }
 
@@ -1671,6 +1691,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
     browseObject: function(object)
     {
+        // xxxsz: This doesn't work in case infotips are disabled.
+        // So instead of relying on this.infoTipType being set the type should be determined
+        // dynamically
         if (this.infoTipType == "image")
         {
             Win.openNewTab(this.infoTipObject);
@@ -1687,72 +1710,33 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             var styleRule = Firebug.getRepObject(prop);
             var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
             var propName = propNameNode.textContent.toLowerCase();
-            var priority = styleRule.style.getPropertyPriority(propName);
-            var value = (Options.get("colorDisplay") === "authored" &&
-                    styleRule.style.getAuthoredPropertyValue) ?
-                styleRule.style.getAuthoredPropertyValue(propName) :
-                    styleRule.style.getPropertyValue(propName);
-            var text = value + (priority ? " !" + priority : "");
+            var text = this.getCSSText(styleRule, propName);
+            var cssValueInfo = this.getCSSValueInfo(propName, text, rangeOffset);
 
-            if (text != "")
-            {
-                text = formatColor(text);
-            }
-            else
-            {
-                var disabledMap = this.getDisabledMap(this.context);
-                var disabledProps = disabledMap.get(styleRule);
-                if (disabledProps)
-                {
-                    for (var i = 0, len = disabledProps.length; i < len; ++i)
-                    {
-                        if (disabledProps[i].name == propName)
-                        {
-                            priority = disabledProps[i].important;
-                            text = disabledProps[i].value + (priority ? " !" + priority : "");
-                            break;
-                        }
-                    }
-                }
-            }
-
-            var cssValue;
-            if (propName == "font" || propName == "font-family")
-            {
-                if (text.charAt(rangeOffset) == ",")
-                    return;
-
-                cssValue = CSSModule.parseCSSFontFamilyValue(text, rangeOffset, propName);
-            }
-            else
-            {
-                cssValue = CSSModule.parseCSSValue(text, rangeOffset);
-            }
-
-            if (!cssValue)
+            if (!cssValueInfo)
                 return false;
 
-            if (cssValue.value === "currentcolor")
+            if (cssValueInfo.value === "currentcolor")
             {
-                cssValue.value = this.getCurrentColor();
-                if (cssValue.value === "")
+                cssValueInfo.value = this.getCurrentColor();
+                if (cssValueInfo.value === "")
                     return false;
             }
 
-            if (cssValue.value == this.infoTipValue)
+            if (cssValueInfo.value == this.infoTipValue)
                 return true;
 
-            this.infoTipValue = cssValue.value;
+            this.infoTipValue = cssValueInfo.value;
 
-            switch (cssValue.type)
+            switch (cssValueInfo.type)
             {
                 case "rgb":
                 case "hsl":
                 case "gradient":
                 case "colorKeyword":
                     this.infoTipType = "color";
-                    this.infoTipObject = cssValue.value;
-                    return CSSInfoTip.populateColorInfoTip(infoTip, cssValue.value);
+                    this.infoTipObject = cssValueInfo.value;
+                    return CSSInfoTip.populateColorInfoTip(infoTip, cssValueInfo.value);
 
                 case "url":
                     if (Css.isImageProperty(propName))
@@ -1760,7 +1744,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                         var prop = Dom.getAncestorByClass(target, "cssProp");
                         var rule = Firebug.getRepObject(prop);
                         var baseURL = this.getStylesheetURL(rule, true);
-                        var relURL = CSSModule.parseURLValue(cssValue.value);
+                        var relURL = CSSModule.parseURLValue(cssValueInfo.value);
                         var absURL = Url.isDataURL(relURL) ? relURL : Url.absoluteURL(relURL, baseURL);
                         var repeat = CSSModule.parseRepeatValue(text);
 
@@ -1772,7 +1756,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                     break;
 
                 case "fontFamily":
-                    return CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
+                    return CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValueInfo.value);
             }
 
             delete this.infoTipType;
@@ -2125,6 +2109,50 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         // xxxsz: repObject should be used instead
         var propValue = prop.getElementsByClassName("cssPropValue")[0];
         System.copyToClipboard(propValue.textContent);
+    },
+
+    getCSSText: function(styleRule, propName)
+    {
+        var value = (Options.get("colorDisplay") === "authored" &&
+                styleRule.style.getAuthoredPropertyValue) ?
+            styleRule.style.getAuthoredPropertyValue(propName) : styleRule.style.getPropertyValue(propName);
+        var priority = styleRule.style.getPropertyPriority(propName);
+        var text = value + (priority ? " !" + priority : "");
+
+        if (text != "")
+            return formatColor(text);
+
+        var disabledMap = this.getDisabledMap(this.context);
+        var disabledProps = disabledMap.get(styleRule);
+        if (disabledProps)
+        {
+            for (var i = 0, len = disabledProps.length; i < len; ++i)
+            {
+                if (disabledProps[i].name == propName)
+                {
+                    priority = disabledProps[i].important;
+                    return disabledProps[i].value + (priority ? " !" + priority : "");
+                }
+            }
+        }
+    },
+
+    getCSSValueInfo: function(propName, text, rangeOffset)
+    {
+        var cssValue;
+        if (propName == "font" || propName == "font-family")
+        {
+            if (text.charAt(rangeOffset) == ",")
+                return;
+
+            cssValue = CSSModule.parseCSSFontFamilyValue(text, rangeOffset, propName);
+        }
+        else
+        {
+            cssValue = CSSModule.parseCSSValue(text, rangeOffset);
+        }
+
+        return cssValue;
     }
 });
 
