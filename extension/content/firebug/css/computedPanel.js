@@ -628,6 +628,8 @@ CSSComputedPanel.prototype = Obj.extend(Panel,
     showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
     {
         var propValue = Dom.getAncestorByClass(target, "stylePropValue");
+        // xxxsz: This code is duplicated from CSSStyleSheetPanel. We should centralize the code somewhere,
+        // so it can be reused here
         if (propValue)
         {
             var propInfo = Firebug.getRepObject(target);
