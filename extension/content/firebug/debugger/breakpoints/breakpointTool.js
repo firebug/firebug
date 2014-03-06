@@ -528,8 +528,9 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             //    "non existing breakpoint. " + url + ", " + lineNumber);
 
             // Execute the callback in any case, so the UI can be updated.
+            // xxxHonza: the callback expects a packet as an argument, it should not.
             if (callback)
-                callback();
+                callback({});
         }
     },
 

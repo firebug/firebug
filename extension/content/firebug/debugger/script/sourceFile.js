@@ -1,19 +1,22 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/firebug",
     "firebug/lib/trace",
-    "firebug/lib/string",
     "firebug/lib/events",
-    "firebug/debugger/script/sourceLink",
+    "firebug/lib/string",
     "firebug/debugger/debuggerLib",
+    "firebug/debugger/script/sourceLink",
 ],
-function(FBTrace, Str, Events, SourceLink, DebuggerLib) {
+function(Firebug, FBTrace, Events, Str, DebuggerLib, SourceLink) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var  Cc = Components.classes;
+var Ci = Components.interfaces;
 
 var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_SOURCEFILE");
@@ -22,8 +25,8 @@ var Trace = FBTrace.to("DBG_SOURCEFILE");
 // Source File
 
 /**
- * SourceFile instance is created for every compilation unit (i.e. a script created
- * on the back end). The instance is created by {@link SourceTool} every time a "newSource"
+ * SourceFile instance is created for every compilation unit (i.e. a source created
+ * at the back end). The instance is created by {@link SourceTool} every time a "newSource"
  * or the initial "sources" packet is received.
  */
 function SourceFile(context, actor, href, isBlackBoxed)
@@ -41,6 +44,10 @@ function SourceFile(context, actor, href, isBlackBoxed)
     // xxxHonza: refactore the flag logic.
     this.compilation_unit_type = "script_tag";
     this.callbacks = [];
+
+    // xxxHonza: will be also generated through //#sourceURL directive
+    // (see also issue 7201)
+    this.displayName = href;
 }
 
 SourceFile.prototype =
@@ -165,6 +172,11 @@ SourceFile.prototype =
 
         // Fire also global notification.
         Events.dispatch(Firebug.modules, "onSourceLoaded", [this]);
+    },
+
+    getDisplayName: function()
+    {
+        return this.displayName;
     }
 }
 

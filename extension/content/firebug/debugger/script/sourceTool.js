@@ -5,6 +5,7 @@ define([
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/string",
+    "firebug/lib/xpath",
     "firebug/chrome/tool",
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/debugger/breakpoints/breakpointTool",
@@ -14,7 +15,7 @@ define([
     "firebug/remoting/debuggerClient",
     "arch/compilationunit",
 ],
-function (Firebug, FBTrace, Obj, Str, Tool, BreakpointStore, BreakpointTool, SourceFile,
+function (Firebug, FBTrace, Obj, Str, Xpath, Tool, BreakpointStore, BreakpointTool, SourceFile,
     StackFrame, DebuggerLib, DebuggerClient, CompilationUnit) {
 
 // ********************************************************************************************* //
@@ -333,6 +334,7 @@ DynamicSourceCollector.prototype =
         // Dynamic scripts use unique URL that is composed from script's location
         // such as line and column number.
         var url = computeDynamicUrl(script);
+        var displayName = computeDisplayName(script);
 
         // Tracing should not log the script object itself. Firefox is taking huge
         // amount of memory in case of bigger web applications (since kept in the memory).
@@ -342,8 +344,12 @@ DynamicSourceCollector.prototype =
             if (element)
                 element = element.unsafeDereference();
 
-            Trace.sysout("sourceTool.addDynamicScript; " + script.url + ", " + type,
+            var introType = script.source.introductionType;
+            Trace.sysout("sourceTool.addDynamicScript; " + script.url + ", " + introType,
             {
+                introductionType: introType,
+                introductionScript: script.source.introductionScript,
+                introductionOffset: script.source.introductionOffset,
                 startLine: script.startLine,
                 lineCount: script.lineCount,
                 sourceStart: script.sourceStart,
@@ -376,14 +382,12 @@ DynamicSourceCollector.prototype =
             sourceFile.startLine = script.startLine;
             sourceFile.introductionUrl = script.url;
             sourceFile.compilation_unit_type = type;
+            sourceFile.displayName = displayName;
 
             // xxxHonza: compilation_unit_type should be used
             sourceFile.dynamic = true;
 
             this.context.addSourceFile(sourceFile);
-
-            Trace.sysout("sourceTool.addDynamicScript; Register SourceFile for: " +
-                url, sourceFile);
         }
 
         // Register new script object in the source file object, before "newSource" event.
@@ -541,16 +545,53 @@ function computeDynamicUrl(script)
     var url = script.source.url;
     var type = script.source.introductionType;
 
-    var element = script.source.element;
-    if (element)
-        element = element.unsafeDereference();
-
     // xxxHonza: TODO, make sure to generate unique URLs in all cases
     switch (type)
     {
     case "eventHandler":
+        var id = getElementId(script);
+        return url + " " + id + " > eventHandler";
+    case "scriptElement":
+    case "eval":
+    case "Function":
+        // xxxHonza: TODO
+        return url;
+    }
+
+    return url;
+}
+
+function getElementId(script)
+{
+    var element = script.source.element;
+    if (element)
+        element = element.unsafeDereference();
+
+    var id = element.getAttribute("id");
+    if (id)
+        return id + " " + attrName;
+
+    var attrName = script.source.elementAttributeName;
+    return Xpath.getElementTreeXPath(element) + " " + attrName;
+}
+
+function computeDisplayName(script)
+{
+    // xxxHonza: use script.displayURL if available, see also
+    // Sebastian's comment #7 issue 7201
+    var url = script.source.url;
+    var element = script.source.element;
+    if (element)
+        element = element.unsafeDereference();
+
+    var type = script.source.introductionType;
+    switch (type)
+    {
+    case "eventHandler":
+        var label = element.textContent;
+        var attrName = script.source.elementAttributeName;
         var id = element.getAttribute("id");
-        return url + " " + (id ? id : Obj.getUniqueId()) + " > eventHandler";
+        return url + " " + (id ? id + " " : "") + attrName + " " + label;
     }
 
     return url;

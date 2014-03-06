@@ -479,7 +479,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     getObjectLocation: function(compilationUnit)
     {
-        return compilationUnit.getURL();
+        var url = compilationUnit.getURL();
+        var sourceFile = this.context.getSourceFile(url);
+        return sourceFile.getDisplayName();
     },
 
     updateLocation: function(object)
