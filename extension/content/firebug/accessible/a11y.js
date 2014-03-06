@@ -1665,7 +1665,6 @@ Firebug.A11yModel = Obj.extend(Module,
                 }
                 //these context menu options are likely to destroy current focus
                 panelA11y.reFocusId = Xpath.getElementXPath(event.target);
-                document.popupNode = node;
                 Firebug.chrome.$("fbContextMenu").openPopup(node, "overlap", 0,0,true);
                 Events.cancelEvent(event); //no need for default handlers anymore
             }
@@ -2327,7 +2326,6 @@ Firebug.A11yModel = Obj.extend(Module,
             var y = event.pageY;
             if (y >= event.target.clientHeight)
                y = node.offsetTop;
-            Firebug.chrome.window.document.popupNode = node;
             Firebug.chrome.$("fbContextMenu").openPopup(node.ownerDocument.body, "overlap", x, y,
                 true);
             Events.cancelEvent(event);

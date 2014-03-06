@@ -1485,7 +1485,7 @@ var FirebugChrome =
         if (popup.id != "fbContextMenu")
             return;
 
-        var target = win.document.popupNode;
+        var target = popup.triggerNode;
         var panel = target ? Firebug.getElementPanel(target) : null;
 
         // The event must be on our chrome not inside the panel.
