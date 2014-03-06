@@ -50,11 +50,12 @@ this.setBreakpoint = function(chrome, url, lineNo, attributes, callback)
             {
                 FBTest.sysout("setBreakpoint; breakpoint created");
 
+                // The source view may have been rebuilt, refetch the row.
+                var row = FBTest.getSourceLineNode(lineNo, chrome);
                 callback(row);
             });
 
-            var lineNode = FBTest.getSourceLineNode(lineNo, chrome);
-            var target = lineNode.querySelector(".CodeMirror-linenumber");
+            var target = row.querySelector(".CodeMirror-linenumber");
             FBTest.synthesizeMouse(target, 2, 2, {type: "mousedown"});
         }
     });
