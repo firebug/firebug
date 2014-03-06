@@ -292,7 +292,7 @@ this.selectSourceLine = function(url, lineNo, category, chrome, callback)
     if (!callback)
         return;
 
-    var tries = 5;
+    var tries = 50;
     var checking = setInterval(function checkScrolling()
     {
         var row = FBTest.getSourceLineNode(lineNo, chrome);
