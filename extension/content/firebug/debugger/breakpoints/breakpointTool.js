@@ -179,12 +179,19 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         // Get all breakpoints (including dynamic breakpoints) that belong to the
         // newly created source.
         var url = sourceFile.getURL();
-        var bps = BreakpointStore.getBreakpoints(url, true);
+        var bps = BreakpointStore.getBreakpoints(url/*, true*/);
 
         // Filter out those breakpoints that have been already set on the backend
         // (i.e. there is a corresponding client object already).
         var filtered = bps.filter((bp) =>
         {
+            // xxxHonza: Do not try to create server side breakpoint actors for
+            // dynamic breakpoints. This is an optimization, it would fail anyway.
+            // We should avoid leaking dynamic-script related code from
+            // firebug/debugger/script/sourceTool module, let's fix this later.
+            if (bp.dynamicHandler)
+                return;
+
             return !this.getBreakpointClient(bp.href, bp.lineNo);
         });
 
@@ -219,7 +226,7 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             // breakpoints are set on the server and response packets received).
             //BreakpointStore.save(url);
 
-            Trace.sysout("breakpointTool.newSource; breakpoints initialized", arguments);
+            Trace.sysout("breakpointTool.newSource; breakpoints initialized " + url, arguments);
         });
     },
 
@@ -432,8 +439,17 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         }
 
         // ... otherwise we need to interrupt the thread first.
+        // It can happens that the debugger will pause before the "interrupt" packet
+        // is processed by the server side. In such case the packet passed into the
+        // following callback wouldn't be "interrupted", but different type (e.g. "paused")
+        // So, do not resume if this happens (see the condition within the callback).
+        // You can also observe this by seeing:
+        // debuggerTool.paused; ERROR no frame, type: alreadyPaused
+        // xxxHonza: this should solve most of the cases, but still, what if the other
+        // component also calls interrupt?
         thread.interrupt(function(packet)
         {
+            FBTrace.sysout("packet ", packet)
             if (packet.error)
             {
                 TraceError.sysout("BreakpointTool.setBreakpoints; Can't set breakpoints: " +
@@ -456,6 +472,10 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
                 }
                 else
                 {
+                    // Do not resume if the debugger wasn't interrupted by this method.
+                    if (packet.type != "interrupted")
+                        return;
+
                     // At this point, all 'setBreakpoint' packets have been generated (the first
                     // on already sent) and they are waiting in a queue. The resume packet will
                     // be received as soon as the last response for 'setBreakpoint' is received.
@@ -499,8 +519,13 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         }
         else
         {
-            TraceError.sysout("breakpointTool.removeBreakpoint; ERROR removing " +
-                "non existing breakpoint. " + url + ", " + lineNumber);
+            // xxxHonza: Don't display the error message. It can happen
+            // that dynamic breakpoint (a breakpoint in dynamically created script)
+            // is being removed. Such breakpoint doesn't have corresponding
+            // {@link BreakpointClient} for now. 
+            //
+            //TraceError.sysout("breakpointTool.removeBreakpoint; ERROR removing " +
+            //    "non existing breakpoint. " + url + ", " + lineNumber);
 
             // Execute the callback in any case, so the UI can be updated.
             if (callback)
