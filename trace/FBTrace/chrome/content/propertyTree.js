@@ -25,36 +25,37 @@ var PropertyTree = domplate(Tree,
         if (!level)
             level = 0;
 
+        var members = [];
         try
         {
-            var members = [];
-
             // Special case for Map() instance (from some reason instanceof Map doesn't work).
             if (typeof (object.forEach) == "function")
             {
                 var self = this;
-                object.forEach(function(value, name)
+                object.forEach(function(value, key)
                 {
                     try
                     {
-                        members.push(self.createMember("dom", name, value, level));
+                        members.push(self.createMember("dom", String(key), value, level));
                     }
                     catch (e)
                     {
                     }
                 });
-
-                return members;
             }
-
-            for (var p in object)
+            else
             {
-                try
+                var props = getProperties(object);
+                for (var i = 0; i < props.length; i++)
                 {
-                    members.push(this.createMember("dom", p, object[p], level));
-                }
-                catch (e)
-                {
+                    var p = props[i];
+                    try
+                    {
+                        members.push(this.createMember("dom", p, object[p], level));
+                    }
+                    catch (e)
+                    {
+                    }
                 }
             }
         }
@@ -66,6 +67,36 @@ var PropertyTree = domplate(Tree,
         return members;
     }
 });
+
+// ********************************************************************************************* //
+// Helpers
+
+// Create a list of all properties of an object, except those from Object.prototype.
+function getProperties(obj)
+{
+    var props = [];
+    var cur = obj;
+    var alreadySeen = new Set();
+    while (cur && (cur === obj || !isObjectPrototype(cur)))
+    {
+        Object.getOwnPropertyNames(cur).forEach(function(name)
+        {
+            if (!alreadySeen.has(name))
+            {
+                alreadySeen.add(name);
+                props.push(name);
+            }
+        });
+        cur = Object.getPrototypeOf(cur);
+    }
+    return props;
+}
+
+function isObjectPrototype(obj)
+{
+    // Use duck-typing because the object probably comes from a different global.
+    return !Object.getPrototypeOf(obj) && "hasOwnProperty" in obj;
+}
 
 // ********************************************************************************************* //
 // Registration
