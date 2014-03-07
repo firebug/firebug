@@ -146,7 +146,7 @@ function isSourceLineVisible(lineNo)
  * @param {Object} chrome Current Firebug's chrome object (e.g. FW.Firebug.chrome)
  * @param {Number} lineNo Expected source line number where the break should happen.
  * @param {boolean} breakpoint Set to true if breakpoint should be displayed in the UI.
- * @param {Object} callback Handeler that should be called when break happens.
+ * @param {Object} callback Handler that should be called when break happens.
  */
 this.waitForBreakInDebugger = function(chrome, lineNo, breakpoint, callback)
 {
@@ -389,6 +389,33 @@ FBTest.waitForThreadAttach = function(callback)
     };
 
     DebuggerController.addListener(browser, listener);
+}
+
+// ********************************************************************************************* //
+// Stepping
+
+this.stepOver = function(targetLine, callback)
+{
+    var chrome = FW.Firebug.chrome;
+
+    FBTest.waitForBreakInDebugger(chrome, targetLine, false, callback);
+    FBTest.clickStepOverButton(chrome);
+}
+
+this.stepOut = function(targetLine, callback)
+{
+    var chrome = FW.Firebug.chrome;
+
+    FBTest.waitForBreakInDebugger(chrome, targetLine, false, callback);
+    FBTest.clickStepOutButton(chrome);
+}
+
+this.stepInto = function(targetLine, callback)
+{
+    var chrome = FW.Firebug.chrome;
+
+    FBTest.waitForBreakInDebugger(chrome, targetLine, false, callback);
+    FBTest.clickStepIntoButton(chrome);
 }
 
 // ********************************************************************************************* //

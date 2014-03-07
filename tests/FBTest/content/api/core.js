@@ -276,6 +276,8 @@ this.setToKnownState = function(callback)
 
     this.clearSearchField();
 
+    this.clearCache();
+
     // First clear all breakpoints and then perform deactivation.
     this.removeAllBreakpoints(function()
     {
