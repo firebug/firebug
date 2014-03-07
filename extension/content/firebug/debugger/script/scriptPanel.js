@@ -479,9 +479,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     getObjectLocation: function(compilationUnit)
     {
-        var url = compilationUnit.getURL();
-        var sourceFile = this.context.getSourceFile(url);
-        return sourceFile.getDisplayName();
+        return compilationUnit.getURL();
     },
 
     updateLocation: function(object)
@@ -1682,6 +1680,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             self.infoTipExpr = "";
         }
 
+        return;
         // If the evaluate fails, then we report an error and don't show the infotip.
         CommandLine.evaluate(expr, this.context, null, this.context.getCurrentGlobal(),
             success, failure, {noStateChange: true});

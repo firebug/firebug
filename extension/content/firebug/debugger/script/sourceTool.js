@@ -5,6 +5,7 @@ define([
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/string",
+    "firebug/lib/url",
     "firebug/lib/xpath",
     "firebug/chrome/tool",
     "firebug/debugger/breakpoints/breakpointStore",
@@ -15,8 +16,8 @@ define([
     "firebug/remoting/debuggerClient",
     "arch/compilationunit",
 ],
-function (Firebug, FBTrace, Obj, Str, Xpath, Tool, BreakpointStore, BreakpointTool, SourceFile,
-    StackFrame, DebuggerLib, DebuggerClient, CompilationUnit) {
+function (Firebug, FBTrace, Obj, Str, Url, Xpath, Tool, BreakpointStore, BreakpointTool,
+    SourceFile, StackFrame, DebuggerLib, DebuggerClient, CompilationUnit) {
 
 // ********************************************************************************************* //
 // Documentation
@@ -171,7 +172,8 @@ SourceTool.prototype = Obj.extend(new Tool(),
         // in 'ThreadClient'.
         if (this.context.activeThread.actor != response.from)
         {
-            Trace.sysout("sourceTool.newSource; coming from different thread");
+            Trace.sysout("sourceTool.newSource; coming from different thread " +
+                response.source.url, response);
             return;
         }
 
@@ -298,7 +300,8 @@ DynamicSourceCollector.prototype =
             return;
 
         var dbg = DebuggerLib.getThreadDebugger(this.context);
-        dbg.onNewScript = this.originalOnNewScript;
+        if (dbg)
+            dbg.onNewScript = this.originalOnNewScript;
 
         this.originalOnNewScript = null;
     },
@@ -307,8 +310,10 @@ DynamicSourceCollector.prototype =
 
     onNewScript: function(script)
     {
+        var dbg = DebuggerLib.getThreadDebugger(this.context);
+
         if (script.url == "debugger eval code")
-            return;
+            return this.originalOnNewScript.apply(dbg, arguments);
 
         var dynamicTypesMap = {
             "eval": CompilationUnit.EVAL,
@@ -319,13 +324,21 @@ DynamicSourceCollector.prototype =
             "setInterval": CompilationUnit.EVAL
         };
 
-        var type = script.source.introductionType;
-        var scriptType = dynamicTypesMap[type];
+        var introType = script.source.introductionType;
+        var scriptType = dynamicTypesMap[introType];
         if (scriptType)
+        {
             this.addDynamicScript(script, scriptType);
+        }
+        else
+        {
+            FBTrace.sysout("sourceTool.onNewScript; (non dynamic) " + script.url + ", " +
+                introType, script);
+            FBTrace.sysout("sourceTool.onNewSource; (non dynamic) " + script.source.url + ", " +
+                introType, script.source);
+        }
 
         // Don't forget to execute the original logic.
-        var dbg = DebuggerLib.getThreadDebugger(this.context);
         this.originalOnNewScript.apply(dbg, arguments);
     },
 
@@ -334,10 +347,9 @@ DynamicSourceCollector.prototype =
         // Dynamic scripts use unique URL that is composed from script's location
         // such as line and column number.
         var url = computeDynamicUrl(script);
-        var displayName = computeDisplayName(script);
 
-        // Tracing should not log the script object itself. Firefox is taking huge
-        // amount of memory in case of bigger web applications (since kept in the memory).
+        // Tracing logs the script object itself and it can take a lot of memory
+        // in case of bigger dynamic web applications.
         if (Trace.active)
         {
             var element = script.source.element;
@@ -345,23 +357,11 @@ DynamicSourceCollector.prototype =
                 element = element.unsafeDereference();
 
             var introType = script.source.introductionType;
-            Trace.sysout("sourceTool.addDynamicScript; " + script.url + ", " + introType,
-            {
-                introductionType: introType,
-                introductionScript: script.source.introductionScript,
-                introductionOffset: script.source.introductionOffset,
-                startLine: script.startLine,
-                lineCount: script.lineCount,
-                sourceStart: script.sourceStart,
-                sourceLength: script.sourceLength,
-                staticLevel: script.staticLevel,
-                text: script.source.text,
-                scriptURL: script.url,
-                sourceURL: script.source.url,
-                dynamicURL: url,
-                element: element,
-                elementAttributeName: script.source.elementAttributeName,
-            });
+
+            Trace.sysout("sourceTool.addDynamicScript; " + script.url + ", " +
+                introType, script);
+            Trace.sysout("sourceTool.addDynamicSource; " + script.source.url + ", " +
+                introType, script.source);
         }
 
         // Get an existing instance of {@link SourceFile} by URL. We don't want to create
@@ -380,9 +380,7 @@ DynamicSourceCollector.prototype =
             sourceFile.lines = Str.splitLines(source);
             sourceFile.contentType = "text/javascript";
             sourceFile.startLine = script.startLine;
-            sourceFile.introductionUrl = script.url;
             sourceFile.compilation_unit_type = type;
-            sourceFile.displayName = displayName;
 
             // xxxHonza: compilation_unit_type should be used
             sourceFile.dynamic = true;
@@ -531,7 +529,7 @@ function getSourceFileByScript(context, script)
         for (var parentScript of source.scripts)
         {
             var childScripts = parentScript.getChildScripts();
-            for (var chidScript of childScripts)
+            for (var childScript of childScripts)
             {
                 if (childScript == script)
                     return source;
@@ -542,19 +540,47 @@ function getSourceFileByScript(context, script)
 
 function computeDynamicUrl(script)
 {
-    var url = script.source.url;
-    var type = script.source.introductionType;
+    // If //# sourceURL is provided just use it. Use introduction URL as the
+    // base URL if sourceURL is relative.
+    // xxxHonza: displayURL for Functions is set asynchronously, why?.
+    var displayURL = script.source.displayURL;
+    if (displayURL)
+    {
+        if (Url.isAbsoluteUrl(displayURL))
+            return displayURL;
 
-    // xxxHonza: TODO, make sure to generate unique URLs in all cases
+        var introScript = script.source.introductionScript.url;
+        return Url.normalizeURL(introScript + "/" + displayURL);
+    }
+
+    // Compute unique URL from location information. We don't want to use any
+    // random numbers or counters since breakpoints derive URLs too and they
+    // should be persistent.
+    // xxxHonza: It might still happen that a lot of breakpoints could stay in
+    // the {@link BreakpointStore} using invalid location that changed during
+    // development. These dead breakpoints could slow down the BreakpointStore.
+    // Additional auto clean logic might be needed, something like:
+    // If an URL is not loaded within a week or two, remove all breakpoints
+    // associated with that URL.
+    var url = script.source.url;
+    var element = script.source.element;
+    if (element)
+        element = element.unsafeDereference();
+
+    var id = getElementId(script);
+
+    var type = script.source.introductionType;
     switch (type)
     {
     case "eventHandler":
-        var id = getElementId(script);
-        return url + " " + id + " > eventHandler";
+        return url + id + " " + element.textContent;
+
     case "scriptElement":
+        return url;
+
     case "eval":
     case "Function":
-        // xxxHonza: TODO
+        // xxxHonza: TODO These URLs are already unique, but will be removed (see Bug 977255)
         return url;
     }
 
@@ -564,37 +590,19 @@ function computeDynamicUrl(script)
 function getElementId(script)
 {
     var element = script.source.element;
+    if (!element)
+        return "";
+
     if (element)
         element = element.unsafeDereference();
+
+    var attrName = script.source.elementAttributeName;
 
     var id = element.getAttribute("id");
     if (id)
-        return id + " " + attrName;
+        return "/" + id + " " + attrName;
 
-    var attrName = script.source.elementAttributeName;
     return Xpath.getElementTreeXPath(element) + " " + attrName;
-}
-
-function computeDisplayName(script)
-{
-    // xxxHonza: use script.displayURL if available, see also
-    // Sebastian's comment #7 issue 7201
-    var url = script.source.url;
-    var element = script.source.element;
-    if (element)
-        element = element.unsafeDereference();
-
-    var type = script.source.introductionType;
-    switch (type)
-    {
-    case "eventHandler":
-        var label = element.textContent;
-        var attrName = script.source.elementAttributeName;
-        var id = element.getAttribute("id");
-        return url + " " + (id ? id + " " : "") + attrName + " " + label;
-    }
-
-    return url;
 }
 
 // ********************************************************************************************* //

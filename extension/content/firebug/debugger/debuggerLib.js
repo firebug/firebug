@@ -211,7 +211,8 @@ DebuggerLib.getThreadActor = function(browser)
 DebuggerLib.getThreadDebugger = function(context)
 {
     var threadActor = this.getThreadActor(context.browser);
-    return threadActor.dbg;
+    if (threadActor)
+        return threadActor.dbg;
 };
 
 /**

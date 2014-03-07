@@ -324,6 +324,11 @@ Url.getBaseURL = function(win)
     return base ? base.href : win.location.href;
 };
 
+Url.isAbsoluteUrl = function(url)
+{
+    return (/^(?:[a-z]+:)?\/\//i.test(url))
+}
+
 Url.absoluteURL = function(url, baseURL)
 {
     // Replace "/./" with "/" using regular expressions (don't use string since /./

@@ -44,10 +44,6 @@ function SourceFile(context, actor, href, isBlackBoxed)
     // xxxHonza: refactore the flag logic.
     this.compilation_unit_type = "script_tag";
     this.callbacks = [];
-
-    // xxxHonza: will be also generated through //#sourceURL directive
-    // (see also issue 7201)
-    this.displayName = href;
 }
 
 SourceFile.prototype =
@@ -173,11 +169,6 @@ SourceFile.prototype =
         // Fire also global notification.
         Events.dispatch(Firebug.modules, "onSourceLoaded", [this]);
     },
-
-    getDisplayName: function()
-    {
-        return this.displayName;
-    }
 }
 
 // ********************************************************************************************* //
