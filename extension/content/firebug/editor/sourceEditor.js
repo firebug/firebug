@@ -165,24 +165,25 @@ SourceEditor.prototype =
 
         // Unwrap Firebug content view (panel.html). This view is running in
         // content mode with no chrome privileges.
-        var view = Wrapper.getContentView(doc.defaultView);
+        var contentView = Wrapper.getContentView(doc.defaultView);
+        this.contentView = contentView;
 
-        Trace.sysout("sourceEditor.onInit; " + view.CodeMirror);
+        Trace.sysout("sourceEditor.onInit; " + contentView.CodeMirror);
 
         config = Obj.extend(SourceEditor.DefaultConfig, config);
 
         // The config object passed to the view must be content-accessible.
         // CodeMirror writes to it, so make sure properties are writable (we
-        // cannot use plain cloneIntoContentScope).
-        var newConfig = Cu.createObjectIn(view);
+        // cannot use plain cloneIntoCMScope).
+        var newConfig = Cu.createObjectIn(contentView);
         for (var prop in config)
-            newConfig[prop] = Wrapper.cloneIntoContentScope(view, config[prop]);
+            newConfig[prop] = Wrapper.cloneIntoContentScope(contentView, config[prop]);
         Cu.makeObjectPropsNormal(newConfig);
 
         var self = this;
 
         // Create editor;
-        this.editorObject = view.CodeMirror(function(view)
+        this.editorObject = contentView.CodeMirror(function(view)
         {
             Trace.sysout("sourceEditor.onEditorCreate;");
 
@@ -556,7 +557,12 @@ SourceEditor.prototype =
 
     cloneIntoCMScope: function(obj)
     {
-        return Wrapper.cloneIntoContentScope(this.view, obj);
+        return Wrapper.cloneIntoContentScope(this.contentView, obj);
+    },
+
+    getCodeMirrorSingleton: function()
+    {
+        return this.contentView.CodeMirror;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -596,12 +602,11 @@ SourceEditor.prototype =
 
     autoComplete: function(hintFunction)
     {
-        var doc = this.view.ownerDocument;
-        var view = Wrapper.getContentView(doc.defaultView);
         var clone = this.cloneIntoCMScope.bind(this);
-        var contentHintFunction = function()
+        var self = this;
+        var contentHintFunction = function(editor)
         {
-            var ret = hintFunction.apply(this, arguments);
+            var ret = hintFunction(self, editor);
             if (!ret)
                 return;
             return clone({
@@ -613,7 +618,7 @@ SourceEditor.prototype =
                 to: clone(ret.to)
             });
         };
-        view.CodeMirror.showHint(this.editorObject, contentHintFunction);
+        this.getCodeMirrorSingleton().showHint(this.editorObject, contentHintFunction);
     },
 
     tab: function()
@@ -931,6 +936,60 @@ SourceEditor.prototype =
         {
             this.removeGutterMarker(bpGutter, currentLine++);
         });
+    },
+
+    getCodeMirrorStateForBreakpointLine: function(lineNo)
+    {
+        // Let's assume the breakpoint breaks at around the start of this line.
+        // Start by searching for the next non-comment, non-whitespace CodeMirror
+        // token, which holds the most relevant parse state.
+        // ({line: lineNo, ch: 0} is one step behind apparently.)
+        // We limit ourselves to 500 tokens of look-ahead as a precaution, though
+        // it's probably unnecessary).
+        var editor = this.editorObject;
+        var ch = 1, line = lineNo;
+        var token;
+        for (var steps = 0; steps < 500; steps++)
+        {
+            token = editor.getTokenAt(this.cloneIntoCMScope({line: line, ch: ch}));
+            if (!token.end || (token.string.trim() && token.type !== "comment"))
+                break;
+
+            if (token.end >= ch)
+            {
+                ch = token.end + 1;
+            }
+            else
+            {
+                ch = 1;
+                line++;
+            }
+        }
+
+        if (steps == 500)
+            TraceError.sysout("getCodeMirrorStateForBreakpointLine; too much look-ahead");
+
+        var cm = this.getCodeMirrorSingleton();
+        return cm.innerMode(editor.getMode(), token.state).state;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getSurroundingVariablesFromCodeMirrorState: function(state)
+    {
+        var list = [];
+        if (!state || !state.localVars)
+            return list;
+        var addVars = function(vars)
+        {
+            for (var v = vars; v; v = v.next)
+                list.push(v.name);
+        };
+        addVars(state.localVars);
+        addVars(state.globalVars);
+        for (var c = state.context; c && c.vars; c = c.prev)
+            addVars(c.vars);
+        return list;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

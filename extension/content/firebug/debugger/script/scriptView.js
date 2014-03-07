@@ -484,11 +484,6 @@ ScriptView.prototype = Obj.extend(new EventSource(),
         this.dispatch("onViewportChange", [event.from, event.to]);
     },
 
-    getLineIndex: function(target)
-    {
-        return this.editor.getLineIndex(target);
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // InfoTip
 
@@ -539,9 +534,19 @@ ScriptView.prototype = Obj.extend(new EventSource(),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    getLineIndex: function(target)
+    {
+        return this.editor.getLineIndex(target);
+    },
+
     getSelectedText: function()
     {
         return this.editor.getSelectedText();
+    },
+
+    getInternalEditor: function()
+    {
+        return this.editor;
     },
 });
 

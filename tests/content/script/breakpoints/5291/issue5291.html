@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5291: Breakpoint condition auto-completion should use variables in scope</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function wrapper(anArgument)
+        {
+            if (1 == 2)
+            {
+                var hoistedVar;
+            }
+            function unrelated(dummy1)
+            {
+                function dummy2() {}
+                var dummy3;
+                return 1;
+            }
+            (function outerFunction()
+            {
+                // (the weird formatting is for testing off-by-ones, don't change it.)
+                function innerFunction(dummy4) { function dummy5() {} }
+                var notFoundYet = eval("debugger"); // <= this line
+                function notFoundYetEither() {}
+            })();
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5291">Issue 5291</a>:
+                Breakpoint condition auto-completion should use variables in scope</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug, and enable the <em>Script</em> panel.</li>
+                    <li>Set a breakpoint on line 24 of issue5291.html.</li>
+                    <li>Right-click on the breakpoint to open the conditional breakpoint editor.</li>
+                    <li>
+                        Verify the following auto-completions:
+                        <ul>
+                            <li>"anArg" -&gt; "anArgument"</li>
+                            <li>"unrel" -&gt; "unrelated"</li>
+                            <li>"dumm" -&gt; ""</li>
+                            <li>"innerF" -&gt; "innerFunction"</li>
+                            <li>"outerF" -&gt; "outerFunction"</li>
+                            <li>"hois" -&gt; "hoistedVar"</li>
+                            <li>"notFound" -&gt; ""</li>
+                            <li>"wind" -&gt; "window"</li>
+                            <li>"window.doc" -&gt; "window.document"</li>
+                        </ul>
+                    </li>
+                </ol>
+                <h3>Expected results</h3>
+                <ul>
+                    <li>It should be possible to auto-complete variables from within the current scope.</li>
+                    <li>Global variables and property accesses should auto-complete as usual.</li>
+                    <li>There is no support (yet) for auto-completing local variables that occur
+                    after the breakpoint.</li>
+                </ul>
+            </section>
+            <footer>Simon Lindholm, simon.lindholm10@gmail.com</footer>
+        </div>
+    </body>
+</html>

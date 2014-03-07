@@ -1037,7 +1037,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // initialized, but it should never happen at this moment.
         this.scrollTop = this.scriptView.getScrollInfo().top;
 
-        Firebug.Editor.startEditing(target, condition, null, null, this);
+        Editor.startEditing(target, condition, null, null, this);
     },
 
     onSetBreakpointCondition: function(bp, value, cancel)
@@ -1065,7 +1065,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         if (!this.conditionEditor)
         {
-            this.conditionEditor = new BreakpointConditionEditor(this.document);
+            var sourceEditor = this.scriptView.getInternalEditor();
+            this.conditionEditor = new BreakpointConditionEditor(this.document, sourceEditor);
             this.conditionEditor.callback = this.onSetBreakpointCondition.bind(this);
         }
 
@@ -1122,7 +1123,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // Remove breakpoint from the UI.
         this.scriptView.removeBreakpoint(bp);
-        if (this.scriptView.editor && this.scriptView.editor.debugLocation == bp.lineNo)
+        var editor = this.scriptView.getInternalEditor();
+        if (editor && editor.debugLocation == bp.lineNo)
             this.scriptView.setDebugLocation(bp.lineNo, true);
     },
 
@@ -1729,7 +1731,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         var self = this;
         var currentLine = from;
-        var editor = this.scriptView.editor.editorObject;
+        var editor = this.scriptView.getInternalEditor().editorObject;
 
         Trace.sysout("scriptPanel.markExecutableLines; from: " + from + ", to: " + to);
 

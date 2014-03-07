@@ -19,23 +19,25 @@ function runTest()
                 FBTest.getCSSProp("#element", "background", function(prop) {
                     var propValue = prop.getElementsByClassName("cssPropValue")[0];
 
-                    var tests = [];
-                    tests.push(function(callback)
-                    {
-                        copyColor(propValue, callback);
-                    });
+                    var tests = new FBTest.TaskList();
 
-                    tests.push(function(callback)
-                    {
-                        copyImageURL(propValue, callback);
-                    });
+                    // 4. Inside the Style side panel right-click on the color value 'background' property
+                    //    inside the '#element' rule
+                    // 5. Click the 'Copy Color' menu item
+                    tests.push(executeTest, propValue, {x: 360, y: 5}, "fbCopyColor", "#8c8cff",
+                        verifyCopyColor);
 
-                    tests.push(function(callback)
-                    {
-                        openImageInNewTab(propValue, callback);
-                    });
+                    // 7. Right-click on the image value (url(firebug.png)) of the 'background' property
+                    // 8. Click the 'Copy Image Location' menu item
+                    tests.push(executeTest, propValue, {x: 10, y: 5}, "fbCopyImageLocation",
+                        basePath + "html/style/5672/firebug.png", verifyCopyImageLocation);
 
-                    FBTestFirebug.runTestSuite(tests, function()
+                    // 10. Right-click on the image value (url(firebug.png)) of the 'background' property
+                    // 11. Click the 'Open Image In New Tab' menu item
+                    tests.push(executeTest, propValue, {x: 10, y: 5}, "fbOpenImageInNewTab",
+                        basePath + "html/style/5672/firebug.png", verifyOpenImageInNewTab);
+
+                    tests.run(function()
                     {
                         FBTest.testDone("issue5672.DONE");
                     });
@@ -45,96 +47,52 @@ function runTest()
     });
 }
 
-function copyColor(propValue, callback)
+
+function executeTest(callback, propValue, offset, contextMenuItemID, expected,
+    contextMenuCallback)
 {
-    var offset = {x: 380, y: 2};
-    var config = {tagName: "div", classes: "infoTipColorBox"};
-    FBTest.waitForDisplayedElement("css", config, function (infoTip)
+    FBTest.executeContextMenuCommand(propValue, contextMenuItemID, () =>
     {
-        var expected = "#8c8cff";
-
-        // 4. Inside the Style side panel right-click on the color value 'background' property
-        //    inside the '#element' rule
-        // 5. Click the 'Copy Color' menu item
-        FBTest.executeContextMenuCommand(propValue, "fbCopyColor", function() {
-            FBTest.waitForClipboard(expected, function(cssPath)
-            {
-                // 6. Paste the clipboard content into a text editor
-                var clipboardText = FBTest.getClipboardText();
-                FBTest.compare(expected, clipboardText,
-                    "Color value must be properly copied to the clipboard");
-                callback();
-            });
-        }, callback, offset);
-
-        // Hide the info tip by moving mouse over the CSS prop name,
-        // otherwise it could block the mouse-move over the next CSS value.
-        // (fixex failure on Mac).
-        FBTest.mouseOver(FBTest.getSelectedPanel().panelNode, 0, 0);
-    });
-
-    // xxxsz: By hovering the value the infotip is shown. This is required, because the infotip
-    // currently gets the type of the hovered property value, which is reused by the context menu
-    FBTest.mouseOver(propValue, offset.x, offset.y);
+        FBTrace.sysout("asdf");
+        contextMenuCallback(expected, callback);
+    }, callback, offset);
 }
 
-function copyImageURL(propValue, callback)
+function verifyCopyColor(expected, callback)
 {
-    var offset = {x: 2, y: 2};
-    var config = {tagName: "div", classes: "infoTipImageBox"};
-    FBTest.waitForDisplayedElement("css", config, function (infoTip)
+    FBTest.waitForClipboard(expected, (cssPath) =>
     {
-        var expected = basePath + "html/style/5672/firebug.png";
-
-        // 7. Right-click on the image value (url(firebug.png)) of the 'background' property
-        // 8. Click the 'Copy Image Location' menu item
-        FBTest.executeContextMenuCommand(propValue, "fbCopyImageLocation", function() {
-            FBTest.waitForClipboard(expected, function(cssPath)
-            {
-                // 9. Paste the clipboard content into a text editor
-                var clipboardText = FBTest.getClipboardText();
-                FBTest.compare(expected, clipboardText,
-                    "Image URL must be properly copied to the clipboard");
-                callback();
-            });
-        }, callback, offset);
-
-        // Hide the info tip by moving mouse over the CSS prop name,
-        // otherwise it could block the mouse-move over the next CSS value.
-        // (fixex failure on Mac).
-        FBTest.mouseOver(FBTest.getSelectedPanel().panelNode, 0, 0);
+        // 6. Paste the clipboard content into a text editor
+        var clipboardText = FBTest.getClipboardText();
+        FBTest.compare(expected, clipboardText,
+            "Color value must be properly copied to the clipboard");
+        callback();
     });
-
-    // xxxsz: By hovering the value the infotip is shown. This is required, because the infotip
-    // currently gets the type of the hovered property value, which is reused by the context menu
-    FBTest.mouseOver(propValue, offset.x, offset.y);
 }
 
-function openImageInNewTab(propValue, callback)
+function verifyCopyImageLocation(expected, callback)
 {
-    var offset = {x: 2, y: 2};
-    var config = {tagName: "div", classes: "infoTipImageBox"};
-    FBTest.waitForDisplayedElement("css", config, function (infoTip)
+    FBTest.waitForClipboard(expected, (cssPath) =>
     {
-        var expected = basePath + "html/style/5672/firebug.png";
-
-        // 10. Right-click on the image value (url(firebug.png)) of the 'background' property
-        // 11. Click the 'Open Image In New Tab' menu item
-        FBTest.executeContextMenuCommand(propValue, "fbOpenImageInNewTab", function() {
-            // xxxsz: New browser tab isn't opened for some reason
-            var browser = FBTest.getCurrentTabBrowser();
-            FBTest.compare(expected, browser.documentURI.spec, "URL of the image must be correct");
-
-            callback();
-        }, callback, offset);
-
-        // Hide the info tip by moving mouse over the CSS prop name,
-        // otherwise it could block the mouse-move over the next CSS value.
-        // (fixex failure on Mac).
-        FBTest.mouseOver(propValue, offset.x, offset.y);
+        // 9. Paste the clipboard content into a text editor
+        var clipboardText = FBTest.getClipboardText();
+        FBTest.compare(expected, clipboardText,
+            "Image URL must be properly copied to the clipboard");
+        callback();
     });
+}
 
-    // xxxsz: By hovering the value the infotip is shown. This is required, because the infotip
-    // currently gets the type of the hovered property value, which is reused by the context menu
-    FBTest.mouseOver(propValue, offset.x, offset.y);
+function verifyOpenImageInNewTab(expected, callback)
+{
+    var tabBrowser = FBTest.getBrowser();
+    FBTrace.sysout("browser", tabBrowser);
+    var tab = tabBrowser.mCurrentTab;
+    var browser = tab.linkedBrowser;
+    if (FBTest.compare(expected, browser.documentURI.spec, "URL of the image must be correct"))
+    {
+        // Close the tab again
+        tabBrowser.removeTab(tab);
+    }
+
+    callback();
 }

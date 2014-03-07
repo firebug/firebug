@@ -108,9 +108,13 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback, 
     ContextMenuController.addListener(target, "popupshown", onPopupShown);
 
 
-    // Right click on the target element.
-    var eventDetails = {type: "contextmenu", button: 2};
+    // Simulate right-click on the target element
     offset = offset || {x: 2, y: 2};
+    var eventDetails = {type: "mousedown", button: 2};
+    this.synthesizeMouse(target, offset.x, offset.y, eventDetails);
+    eventDetails = {type: "mouseup", button: 2};
+    this.synthesizeMouse(target, offset.x, offset.y, eventDetails);
+    eventDetails = {type: "contextmenu", button: 2};
     this.synthesizeMouse(target, offset.x, offset.y, eventDetails);
 };
 
