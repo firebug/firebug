@@ -14,7 +14,12 @@ function runTest()
 
                 FBTest.waitForDisplayedElement("net", config, function(row)
                 {
-                    FBTest.executeContextMenuCommand(row, "fbCopyAsCurl", verifyCopiedCURL);
+                    function executeContextMenuCommand()
+                    {
+                        FBTest.executeContextMenuCommand(row, "fbCopyAsCurl");
+                    }
+
+                    verifyCopiedCURL(executeContextMenuCommand);
                 });
 
                 FBTest.click(button);
@@ -23,12 +28,12 @@ function runTest()
     });
 }
 
-function verifyCopiedCURL()
+function verifyCopiedCURL(executeContextMenuCommand)
 {
     var expected = new RegExp("curl \'" + basePath + "net\/6616\/issue6616.php\'" +
         " -X POST( -H \'.*?\')+");
 
-    FBTest.waitForClipboard(expected, function(text)
+    FBTest.waitForClipboard(expected, executeContextMenuCommand, (text) =>
     {
         FBTest.compare(expected, text, "Proper cURL must be copied");
         FBTest.testDone("issue6616.DONE");

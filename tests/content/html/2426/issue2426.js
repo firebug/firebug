@@ -16,18 +16,18 @@ function runTest()
                     var nodeLabelBox = FW.FBL.getAncestorByClass(sel.anchorNode, "nodeLabelBox");
                     var nodeTag = nodeLabelBox.querySelector(".nodeTag");
 
-                    // Reset clipboard content and execute "Copy XPath" command.
-                    FBTest.clearClipboard();
-                    FBTest.executeContextMenuCommand(nodeTag, "fbCopyXPath", function()
+                    function executeContextMenuCommand()
                     {
-                        var expectedXPath = "/html/body/soap-env:envelope/soap-env:header/soap-env:body/" +
-                            "tns:getresponse/tns:header/header:messageid";
-                        FBTest.waitForClipboard(expectedXPath, function(xPath)
-                        {
-                            FBTest.compare(expectedXPath, xPath,
-                                "XPath must be properly copied into the clipboard");
-                            FBTest.testDone("issue2426.DONE");
-                        });
+                        FBTest.executeContextMenuCommand(nodeTag, "fbCopyXPath");
+                    }
+
+                    var expectedXPath = "/html/body/soap-env:envelope/soap-env:header/soap-env:body/" +
+                        "tns:getresponse/tns:header/header:messageid";
+                    FBTest.waitForClipboard(expectedXPath, executeContextMenuCommand, function(xPath)
+                    {
+                        FBTest.compare(expectedXPath, xPath,
+                            "XPath must be properly copied into the clipboard");
+                        FBTest.testDone("issue2426.DONE");
                     });
                 })
             });

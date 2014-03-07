@@ -51,17 +51,19 @@ function runTest()
 // allow the next registered task to be started.
 function executeAndVerify(callback, target, actionID, expected)
 {
-    // Open context menu on the specified target.
-    FBTest.executeContextMenuCommand(target, actionID, function()
+    function executeContextMenuCommand()
     {
-        // Data can be copyied into the clipboard asynchronously,
-        // so wait till they are available.
-        FBTest.waitForClipboard(expected, function(text)
-        {
-            // Verify data in the clipboard
-            FBTest.compare(expected, text,
-                "Proper data must be in the clipboard. Current: " + text);
-            callback();
-        });
+        // Open context menu on the specified target
+        FBTest.executeContextMenuCommand(target, actionID);
+    }
+
+    // Data can be copyied into the clipboard asynchronously,
+    // so wait till they are available.
+    FBTest.waitForClipboard(expected, executeContextMenuCommand, (text) =>
+    {
+        // Verify data in the clipboard
+        FBTest.compare(expected, text,
+            "Proper data must be in the clipboard. Current: " + text);
+        callback();
     });
 }

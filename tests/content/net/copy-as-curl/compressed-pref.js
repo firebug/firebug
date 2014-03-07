@@ -52,29 +52,31 @@ function runTest()
 function executeAndVerify(expectedResult, commandId, netRow, callback)
 {
     // Open context menu on the specified target.
-    FBTest.executeContextMenuCommand(netRow, commandId, function ()
+    function executeContextMenuCommand()
     {
-        // Data can be copyied into the clipboard asynchronously,
-        // so wait till they are available.
-        FBTest.waitForClipboard(expectedResult, function (clipboardText)
+        FBTest.executeContextMenuCommand(netRow, commandId);
+    }
+
+    // Data can be copyied into the clipboard asynchronously,
+    // so wait till they are available.
+    FBTest.waitForClipboard(expectedResult, executeContextMenuCommand, function (clipboardText)
+    {
+        function replaceUserAgentHeader(str)
         {
-            function replaceUserAgentHeader(str)
-            {
-                var replaceWithStr = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:22.0) Gecko/20100101 Firefox/22.0";
-                return str.replace(/(-H 'User-Agent: ).+?(')/i, "$1" + replaceWithStr + "$2");
-            }
+            var replaceWithStr = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:22.0) Gecko/20100101 Firefox/22.0";
+            return str.replace(/(-H 'User-Agent: ).+?(')/i, "$1" + replaceWithStr + "$2");
+        }
 
-            // Make sure the optional DNT header is not in the actual result (see issue 7068).
-            function removeDNTHeader(str)
-            {
-                return str.replace(/(-H 'DNT: 1')\s/i, "");
-            }
+        // Make sure the optional DNT header is not in the actual result (see issue 7068).
+        function removeDNTHeader(str)
+        {
+            return str.replace(/(-H 'DNT: 1')\s/i, "");
+        }
 
-            var actualResult = replaceUserAgentHeader(removeDNTHeader(clipboardText));
+        var actualResult = replaceUserAgentHeader(removeDNTHeader(clipboardText));
 
-            FBTest.compare(expectedResult, actualResult, "Proper data must be in the clipboard.");
+        FBTest.compare(expectedResult, actualResult, "Proper data must be in the clipboard.");
 
-            callback();
-        });
+        callback();
     });
 }

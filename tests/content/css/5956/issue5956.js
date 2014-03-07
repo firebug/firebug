@@ -50,12 +50,15 @@ function executeTest(contextMenuItemID, expectedValue, message, callback)
         var rule = FW.FBL.getAncestorByClass(node, "cssRule");
         var prop = rule.getElementsByClassName("cssProp").item(0);
 
-        FBTest.waitForClipboard(expectedValue, function(copiedValue)
+        function executeContextMenuCommand()
+        {
+            FBTest.executeContextMenuCommand(prop, contextMenuItemID);
+        }
+
+        FBTest.waitForClipboard(expectedValue, executeContextMenuCommand, function(copiedValue)
         {
             FBTest.compare(expectedValue, copiedValue, message);
             callback();
         });
-
-        FBTest.executeContextMenuCommand(prop, contextMenuItemID);
     });
 }
