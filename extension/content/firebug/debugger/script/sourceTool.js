@@ -8,6 +8,7 @@ define([
     "firebug/lib/url",
     "firebug/lib/xpath",
     "firebug/chrome/tool",
+    "firebug/debugger/actors/breakpointActor",
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/debugger/breakpoints/breakpointTool",
     "firebug/debugger/script/sourceFile",
@@ -16,8 +17,10 @@ define([
     "firebug/remoting/debuggerClient",
     "arch/compilationunit",
 ],
-function (Firebug, FBTrace, Obj, Str, Url, Xpath, Tool, BreakpointStore, BreakpointTool,
-    SourceFile, StackFrame, DebuggerLib, DebuggerClient, CompilationUnit) {
+function (Firebug, FBTrace, Obj, Str, Url, Xpath, Tool, BreakpointActor, BreakpointStore,
+    BreakpointTool, SourceFile, StackFrame, DebuggerLib, DebuggerClient, CompilationUnit) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Documentation
@@ -201,7 +204,7 @@ SourceTool.prototype = Obj.extend(new Tool(),
             return;
         }
 
-        bp.params.dynamicHandler = new BreakpointHitHandler(this.context, bp.href, bp.lineNo);
+        bp.params.dynamicHandler = new BreakpointHitHandler(this.context, bp);
 
         // Set the breakpoint in all scripts associated with the same URL
         // as the breakpoint.
@@ -426,35 +429,41 @@ DynamicSourceCollector.prototype =
 
 // xxxHonza: what if we used the BreakpointActor object here on the client side?
 // It could safe a lot of the code.
-function BreakpointHitHandler(context, href, lineNo)
+function BreakpointHitHandler(context, bp)
 {
     this.context = context;
-    this.href = href;
-    this.lineNo = lineNo;
+    this.bp = bp;
 }
 
 BreakpointHitHandler.prototype =
 {
     hit: function(frame)
     {
+        if (this.bp && this.bp.condition)
+        {
+            // Copied from firebug/debugger/actors/breakpointActor
+            if (!BreakpointActor.evalCondition(frame, this.bp))
+                return;
+        }
+
         var threadActor = DebuggerLib.getThreadActor(this.context.browser);
 
         var {url} = threadActor.synchronize(
             threadActor.sources.getOriginalLocation({
-                url: this.href,
-                line: this.lineNo,
+                url: this.bp.href,
+                line: this.bp.lineNo,
                 column: 0
             })
         );
 
-        if (threadActor.sources.isBlackBoxed(this.href) || frame.onStep)
+        if (threadActor.sources.isBlackBoxed(this.bp.href) || frame.onStep)
         {
             Trace.sysout("sourceTool.hit; can't pause");
             return undefined;
         }
 
         Trace.sysout("sourceTool.hit; Dynamic breakpoint hit! " +
-            this.href + ", " + this.lineNo, frame);
+            this.bp.href + ", " + this.bp.lineNo, frame);
 
         // Send "pause" packet with a new "dynamic-breakpoint" type.
         // The debugging will start as usual within {@link DebuggerTool#paused} method.
@@ -488,7 +497,7 @@ function buildStackFrame(frame, context)
     var frameActor = threadActor._framePool.get(frame.actor);
     stackFrame.jsdFrame = frameActor.frame;
 
-    sourceFile = getSourceFileByScript(context, frameActor.frame.script);
+    var sourceFile = getSourceFileByScript(context, frameActor.frame.script);
     if (!sourceFile)
         return stackFrame;
 
