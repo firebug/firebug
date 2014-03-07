@@ -8,7 +8,6 @@ define([
     "firebug/lib/url",
     "firebug/lib/xpath",
     "firebug/chrome/tool",
-    "firebug/debugger/actors/breakpointActor",
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/debugger/breakpoints/breakpointTool",
     "firebug/debugger/script/sourceFile",
@@ -17,7 +16,7 @@ define([
     "firebug/remoting/debuggerClient",
     "arch/compilationunit",
 ],
-function (Firebug, FBTrace, Obj, Str, Url, Xpath, Tool, BreakpointActor, BreakpointStore,
+function (Firebug, FBTrace, Obj, Str, Url, Xpath, Tool, BreakpointStore,
     BreakpointTool, SourceFile, StackFrame, DebuggerLib, DebuggerClient, CompilationUnit) {
 
 "use strict";
@@ -294,6 +293,7 @@ DynamicSourceCollector.prototype =
 
         // Monkey patch the current debugger.
         this.originalOnNewScript = dbg.onNewScript;
+
         dbg.onNewScript = this.onNewScript.bind(this);
     },
 
@@ -335,15 +335,17 @@ DynamicSourceCollector.prototype =
         }
         else
         {
-            FBTrace.sysout("sourceTool.onNewScript; (non dynamic) " + script.url + ", " +
+            Trace.sysout("sourceTool.onNewScript; (non dynamic) " + script.url + ", " +
                 introType, script);
-            FBTrace.sysout("sourceTool.onNewSource; (non dynamic) " + script.source.url + ", " +
+            Trace.sysout("sourceTool.onNewSource; (non dynamic) " + script.source.url + ", " +
                 introType, script.source);
         }
 
         // Don't forget to execute the original logic.
         this.originalOnNewScript.apply(dbg, arguments);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     addDynamicScript: function(script, type)
     {
@@ -442,7 +444,7 @@ BreakpointHitHandler.prototype =
         if (this.bp && this.bp.condition)
         {
             // Copied from firebug/debugger/actors/breakpointActor
-            if (!BreakpointActor.evalCondition(frame, this.bp))
+            if (!evalCondition(frame, this.bp))
                 return;
         }
 
@@ -612,6 +614,29 @@ function getElementId(script)
         return "/" + id + " " + attrName;
 
     return Xpath.getElementTreeXPath(element) + " " + attrName;
+}
+
+// xxxHonza: copied from BreakpointActor
+function evalCondition(frame, bp)
+{
+    try
+    {
+        var result = frame.eval(bp.condition);
+
+        if (result.hasOwnProperty("return"))
+        {
+            result = result["return"];
+
+            if (typeof(result) == "object")
+                return DebuggerLib.unwrapDebuggeeValue(result);
+            else
+                return result;
+        }
+    }
+    catch (e)
+    {
+        TraceError.sysout("breakpointActor.evalCondition; EXCEPTION " + e, e);
+    }
 }
 
 // ********************************************************************************************* //

@@ -84,11 +84,7 @@ function evalCondition(frame, bp)
 // ********************************************************************************************* //
 // Registration
 
-// xxxHonza: expose evalCondition for dynamic breakpoints. Will be removed as soon
-// as RDP supports dynamic scripts. See firebug/debugger/script/sourceTool module.
-return {
-    evalCondition: evalCondition
-};
+return {};
 
 // ********************************************************************************************* //
 });
