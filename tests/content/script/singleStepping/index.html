@@ -20,10 +20,11 @@
 <h1>Test Single Stepping</h1>
 <ol>
 <li>selectFile index.html</li>
-<li>click breakOnNext, then button: should land on line 2 of index.html/event</li>
+<li>click breakOnNext, then button: should land on line 1 in inline event handler (clicker)</li>
 <li>click stepInto: should land on line 14 of index.html</li>
 <li>click stepOver: should land on line 15 of index.html</li>
-<li>click stepOut: should land on line 2 of index.html/event</li>
+<li>click stepOver second time: should show return value</li>
+<li>click stepOut: should land on line 1 of the inline event handler (clicker)</li>
 </ol>
   <div id="head">
       <h3>fib script test<h3>
