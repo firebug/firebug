@@ -189,7 +189,7 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             // dynamic breakpoints. This is an optimization, it would fail anyway.
             // We should avoid leaking dynamic-script related code from
             // firebug/debugger/script/sourceTool module, let's fix this later.
-            if (bp.dynamicHandler)
+            if (bp.params.dynamicHandler)
                 return;
 
             return !this.getBreakpointClient(bp.href, bp.lineNo);

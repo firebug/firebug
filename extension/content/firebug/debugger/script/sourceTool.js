@@ -201,7 +201,7 @@ SourceTool.prototype = Obj.extend(new Tool(),
             return;
         }
 
-        bp.dynamicHandler = new BreakpointHitHandler(this.context, bp.href, bp.lineNo);
+        bp.params.dynamicHandler = new BreakpointHitHandler(this.context, bp.href, bp.lineNo);
 
         // Set the breakpoint in all scripts associated with the same URL
         // as the breakpoint.
@@ -218,8 +218,8 @@ SourceTool.prototype = Obj.extend(new Tool(),
                 if (offsets.length > 0)
                 {
                     // Clear first to avoid duplicities.
-                    script.clearBreakpoint(bp.dynamicHandler);
-                    script.setBreakpoint(offsets[0], bp.dynamicHandler);
+                    script.clearBreakpoint(bp.params.dynamicHandler);
+                    script.setBreakpoint(offsets[0], bp.params.dynamicHandler);
                 }
             }
         }
@@ -234,7 +234,7 @@ SourceTool.prototype = Obj.extend(new Tool(),
         if (!sourceFile || !sourceFile.dynamic)
             return;
 
-        if (!bp.dynamicHandler)
+        if (!bp.params.dynamicHandler)
         {
             TraceError.sysout("sourceTool.onRemoveBreakpoint; No hit handler!");
             return;
@@ -259,7 +259,7 @@ SourceTool.prototype = Obj.extend(new Tool(),
             {
                 var offsets = script.getLineOffsets(bp.lineNo + parentScript.startLine);
                 if (offsets.length > 0)
-                    script.clearBreakpoint(bp.dynamicHandler);
+                    script.clearBreakpoint(bp.params.dynamicHandler);
             }
         }
     },
@@ -389,7 +389,7 @@ DynamicSourceCollector.prototype =
         }
 
         // Register new script object in the source file object, before "newSource" event.
-        // This way bp.dynamicHandler is set for dynamic breakpoints and filtered
+        // This way bp.params.dynamicHandler is set for dynamic breakpoints and filtered
         // out during standard breakpoint initialization within:
         // {@link BreakpointTool.newSource}.
         this.registerScript(sourceFile, script);
