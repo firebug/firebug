@@ -53,7 +53,6 @@ function executeTest(callback, propValue, offset, contextMenuItemID, expected,
 {
     FBTest.executeContextMenuCommand(propValue, contextMenuItemID, () =>
     {
-        FBTrace.sysout("asdf");
         contextMenuCallback(expected, callback);
     }, callback, offset);
 }
@@ -85,7 +84,6 @@ function verifyCopyImageLocation(expected, callback)
 function verifyOpenImageInNewTab(expected, callback)
 {
     var tabBrowser = FBTest.getBrowser();
-    FBTrace.sysout("browser", tabBrowser);
     var tab = tabBrowser.mCurrentTab;
     var browser = tab.linkedBrowser;
     if (FBTest.compare(expected, browser.documentURI.spec, "URL of the image must be correct"))
