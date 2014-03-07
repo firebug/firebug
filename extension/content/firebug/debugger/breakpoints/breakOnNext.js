@@ -23,15 +23,28 @@ var Trace = FBTrace.to("DBG_BREAKONNEXT");
 // ********************************************************************************************* //
 // Break On Next
 
+/**
+ * @module Implements core logic for BON (Break On Next JS execution) feature. Instances
+ * of the {@link Panel} object can customize this feature using the following API.
+ * 
+ * {@link Panel.supportsBreakOnNext}
+ * {@link Panel.breakOnNext}
+ * {@link Panel.shouldBreakOnNext}
+ * {@link Panel.getBreakOnNextTooltip}
+ */
 var BreakOnNext = Obj.extend(Module,
-/** @lends BreakOnNext **/
+/** @lends BreakOnNext */
 {
     dispatchName: "BreakOnNext",
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
+
     initContext: function(context)
     {
+        // Add listener for "shouldResumeDebugger", to check that we step into
+        // an executable line.
         var tool = context.getTool("debugger");
-        // Add listener for "shouldResumeDebugger", to check that we step into an executable line.
         tool.addListener(this);
     },
 
@@ -41,6 +54,8 @@ var BreakOnNext = Obj.extend(Module,
         tool.removeListener(this);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Break On Next Implementation
 
     /**
      * If enabled = true, enable the onEnterFrame callback for BreakOnNext.
@@ -51,19 +66,21 @@ var BreakOnNext = Obj.extend(Module,
      */
     breakOnNext: function(context, enabled)
     {
-        var breakOnNextActivated = !!context.breakOnNextActivated;
         // Don't continue if we don't change the state of Break On Next.
+        var breakOnNextActivated = !!context.breakOnNextActivated;
         if (enabled === breakOnNextActivated)
             return;
 
-        Trace.sysout("BreakOnNext.breakOnNext; enabled = " + enabled);
+        Trace.sysout("breakOnNext.breakOnNext; enabled = " + enabled);
+
         if (enabled)
         {
             // If it doesn't exist, create one.
             if (!context.breakOnNextDebugger)
                 context.breakOnNextDebugger = DebuggerLib.makeDebuggerForContext(context);
 
-            // Bind the "onEnterFrame" event, so we break on the next instruction being evaluated.
+            // Bind the "onEnterFrame" event, so we break on the next
+            // instruction being evaluated.
             context.breakOnNextDebugger.onEnterFrame = onEnterFrame.bind(null, context);
         }
         else if (context.breakOnNextDebugger)
@@ -73,7 +90,9 @@ var BreakOnNext = Obj.extend(Module,
             DebuggerLib.destroyDebuggerForContext(context, context.breakOnNextDebugger);
             context.breakOnNextDebugger = null;
         }
-        // Change the "breakOnNextActivated" property, so the button of the script panel is updated.
+
+        // Change the "breakOnNextActivated" property, so the button of the
+        // script panel is updated.
         context.breakOnNextActivated = enabled;
     },
 
@@ -84,23 +103,35 @@ var BreakOnNext = Obj.extend(Module,
     {
         if (!context.breakOnNextActivated)
             return;
-        Trace.sysout("BreakOnNext.shouldResumeDebugger;");
+
+        Trace.sysout("breakOnNext.shouldResumeDebugger;");
+
         var location = {
             url: context.currentFrame.getURL(),
             line: context.currentFrame.getLineNumber()
         };
+
+        // In case of an event handler break even if the line isn't executable.
+        // xxxHonza: is this Firebug or platform bug?
+        var nativeFrame = DebuggerLib.getCurrentFrame(context);
+        if (isFrameInlineEvent(nativeFrame))
+        {
+            Trace.sysout("breakOnNext.shouldResumeDebugger; hit inline event handler.");
+            return false;
+        }
+
         // Don't break if the current line is not executable. Currently, the debugger might break on
         // a function definition when stepping from an inline event handler into a function.
         // See also https://bugzilla.mozilla.org/show_bug.cgi?id=969816
         if (!DebuggerLib.isExecutableLine(context, location))
         {
-            Trace.sysout("BreakOnNext.shouldResumeDebugger; hit a non-executable line => step in");
+            Trace.sysout("breakOnNext.shouldResumeDebugger; hit a non-executable line => step in");
             context.resumeLimit = {type: "step"};
             return true;
         }
         else
         {
-            Trace.sysout("BreakOnNext.shouldResumeDebugger; disable Break On Next");
+            Trace.sysout("breakOnNext.shouldResumeDebugger; disable Break On Next");
             // We hit an executable line. Don't break on the next instruction anymore.
             BreakOnNext.breakOnNext(context, false);
             return false;
@@ -108,24 +139,14 @@ var BreakOnNext = Obj.extend(Module,
     }
 });
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Helpers
 
 function onEnterFrame(context, frame)
 {
-    // Note: for inline event handler, frame.type also equals to "call".
     if (frame.type === "call")
     {
-        Trace.sysout("BreakOnNext.onEnterFrame; triggering BreakOnNext");
-
-        // If we are in an "inline" event, don't break. Let the debugger continue until we are 
-        // on an executable line.
-        if (isFrameInlineEvent(frame))
-        {
-            Trace.sysout("BreakOnNext.onEnterFrame; hit an inline event handler. " +
-                "Wait for the next frame");
-            return;
-        }
+        Trace.sysout("breakOnNext.onEnterFrame; triggering BreakOnNext");
 
         DebuggerHalter.breakNow(context);
     }
@@ -163,4 +184,6 @@ function isFrameInlineEvent(frame)
 Firebug.registerModule(BreakOnNext);
 
 return BreakOnNext;
+
+// ********************************************************************************************* //
 });
