@@ -114,9 +114,7 @@ ProfilerEngine.prototype =
             script.initialized = true;
 
             if (!script.funcName && frame.callee)
-            {
-                script.funcName = getFunctionDisplayName(frame);
-            }
+                script.funcName = getFunctionDisplayName(frame.callee);
 
             if (typeof(script.callCount) == "undefined")
                 script.callCount = 0;
@@ -191,13 +189,20 @@ ProfilerEngine.prototype =
 // ********************************************************************************************* //
 // Helpers
 
-function getFunctionDisplayName(frame)
+function getFunctionDisplayName(callee)
 {
     var displayNameDescriptor;
 
     try
     {
-        displayNameDescriptor = frame.callee.getOwnPropertyDescriptor("displayName");
+        displayNameDescriptor = callee.getOwnPropertyDescriptor("displayName");
+
+        var isValidDisplayName = displayNameDescriptor &&
+            typeof displayNameDescriptor.value === "string" &&
+            displayNameDescriptor.value;
+
+        if (isValidDisplayName)
+            return displayNameDescriptor.value;
     }
     catch (ex)
     {
@@ -207,11 +212,7 @@ function getFunctionDisplayName(frame)
             "threw an exception.", ex);
     }
 
-    if (displayNameDescriptor && typeof displayNameDescriptor.value === "string" &&
-        displayNameDescriptor.value)
-        return displayNameDescriptor.value;
-    else
-        return frame.callee.displayName;
+    return frame.callee.displayName;
 }
 
 // ********************************************************************************************* //
