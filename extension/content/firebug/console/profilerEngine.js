@@ -1,20 +1,15 @@
 /* See license.txt for terms of usage */
+/*jshint esnext:true, curly:false, evil:true, forin:false*/
+/*global define:true */
 
 define([
     "firebug/lib/trace",
-    "firebug/lib/url",
-    "firebug/lib/string",
-    "firebug/debugger/stack/stackFrame",
     "firebug/debugger/debuggerLib",
 ],
-function(FBTrace, Url, Str, StackFrame, DebuggerLib) {
+function(FBTrace, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
-
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cu = Components.utils;
 
 var Trace = FBTrace.to("DBG_PROFILER");
 var TraceError = FBTrace.toError();
@@ -27,7 +22,7 @@ var TraceError = FBTrace.toError();
  */
 function ProfilerEngine(context)
 {
-    this.context = context
+    this.context = context;
 }
 
 /**
@@ -120,25 +115,7 @@ ProfilerEngine.prototype =
 
             if (!script.funcName && frame.callee)
             {
-                var displayNameDescriptor;
-
-                try
-                {
-                    displayNameDescriptor = frame.callee.getOwnPropertyDescriptor("displayName");
-                }
-                catch (ex)
-                {
-                    // Calling getOwnPropertyDescriptor with displayName might throw
-                    // with "permission denied" errors for some functions.
-                    Trace.sysout("ProfilerEngine.onEnterFrame; getting displayNameDescriptor " +
-                        "threw an exception.", ex);
-                }
-
-                if (displayNameDescriptor && typeof displayNameDescriptor.value === "string" &&
-                    displayNameDescriptor.value)
-                    script.funcName = displayNameDescriptor.value;
-                else
-                    script.funcName = frame.callee.displayName;
+                script.funcName = getFunctionDisplayName(frame);
             }
 
             if (typeof(script.callCount) == "undefined")
@@ -210,6 +187,32 @@ ProfilerEngine.prototype =
         return win.performance.timing.navigationStart + now;
     },
 };
+
+// ********************************************************************************************* //
+// Helpers
+
+function getFunctionDisplayName(frame)
+{
+    var displayNameDescriptor;
+
+    try
+    {
+        displayNameDescriptor = frame.callee.getOwnPropertyDescriptor("displayName");
+    }
+    catch (ex)
+    {
+        // Calling getOwnPropertyDescriptor with displayName might throw
+        // with "permission denied" errors for some functions.
+        Trace.sysout("ProfilerEngine.onEnterFrame; getting displayNameDescriptor " +
+            "threw an exception.", ex);
+    }
+
+    if (displayNameDescriptor && typeof displayNameDescriptor.value === "string" &&
+        displayNameDescriptor.value)
+        return displayNameDescriptor.value;
+    else
+        return frame.callee.displayName;
+}
 
 // ********************************************************************************************* //
 // Registration
