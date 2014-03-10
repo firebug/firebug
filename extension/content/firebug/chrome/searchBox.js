@@ -172,6 +172,8 @@ var SearchBox = Obj.extend(Module,
         var panelNode = panel.panelNode;
 
         var value = searchBox.value;
+        if (!value)
+            return;
 
         this.addToHistory(value);
 
