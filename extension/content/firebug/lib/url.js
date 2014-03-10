@@ -324,6 +324,18 @@ Url.getBaseURL = function(win)
     return base ? base.href : win.location.href;
 };
 
+/**
+ * Returns true if the URL is absolute otherwise false, see the following
+ * examples:
+ *
+ * 1) http://example.com -> true
+ * 2) //myserver/index.html -> true
+ * 3) index.html -> false
+ * 4) /index.html -> false
+ *
+ * @param {String} URL
+ * @returns {Boolean} True if the URL is absolute.
+ */
 Url.isAbsoluteUrl = function(url)
 {
     return (/^(?:[a-z]+:)?\/\//i.test(url))
