@@ -8,6 +8,7 @@ define([
     "firebug/lib/url",
     "firebug/lib/xpath",
     "firebug/chrome/tool",
+    "firebug/console/errorStackTraceObserver",
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/debugger/breakpoints/breakpointTool",
     "firebug/debugger/script/sourceFile",
@@ -16,7 +17,7 @@ define([
     "firebug/remoting/debuggerClient",
     "arch/compilationunit",
 ],
-function (Firebug, FBTrace, Obj, Str, Url, Xpath, Tool, BreakpointStore,
+function (Firebug, FBTrace, Obj, Str, Url, Xpath, Tool, ErrorStackTraceObserver, BreakpointStore,
     BreakpointTool, SourceFile, StackFrame, DebuggerLib, DebuggerClient, CompilationUnit) {
 
 "use strict";
@@ -46,6 +47,15 @@ function (Firebug, FBTrace, Obj, Str, Url, Xpath, Tool, BreakpointStore,
 
 var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_SOURCETOOL");
+
+var dynamicTypesMap = {
+    "eval": CompilationUnit.EVAL,
+    "Function": CompilationUnit.EVAL,
+    "eventHandler": CompilationUnit.BROWSER_GENERATED,
+    "scriptElement": CompilationUnit.EVAL,
+    //"setTimeout": CompilationUnit.EVAL,
+    //"setInterval": CompilationUnit.EVAL
+};
 
 // ********************************************************************************************* //
 // Source Tool
@@ -318,15 +328,6 @@ DynamicSourceCollector.prototype =
         if (script.url == "debugger eval code")
             return this.originalOnNewScript.apply(dbg, arguments);
 
-        var dynamicTypesMap = {
-            "eval": CompilationUnit.EVAL,
-            "Function": CompilationUnit.EVAL,
-            "eventHandler": CompilationUnit.BROWSER_GENERATED,
-            "scriptElement": CompilationUnit.EVAL,
-            "setTimeout": CompilationUnit.EVAL,
-            "setInterval": CompilationUnit.EVAL
-        };
-
         var introType = script.source.introductionType;
         var scriptType = dynamicTypesMap[introType];
         if (scriptType)
@@ -521,6 +522,24 @@ function buildStackFrame(frame, context)
 
 // Monkey patch the original function.
 StackFrame.buildStackFrame = buildStackFrame;
+
+// ********************************************************************************************* //
+// ErrorStackTraceObserver
+
+/**
+ * Monkey path the {@link ErrorStackTraceObserver} that is responsible for collecting
+ * error stack traces. We need to provide correct stacks (remap URLs) for errors too.
+ */
+var originalGetSourceFile = ErrorStackTraceObserver.getSourceFile;
+ErrorStackTraceObserver.getSourceFile = function(context, script)
+{
+    var introType = script.source.introductionType;
+    var scriptType = dynamicTypesMap[introType];
+    if (scriptType)
+        return getSourceFileByScript(context, script);
+
+    return originalGetSourceFile.apply(ErrorStackTraceObserver, arguments);
+}
 
 // ********************************************************************************************* //
 // Script Helpers

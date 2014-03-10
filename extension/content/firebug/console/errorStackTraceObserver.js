@@ -88,10 +88,16 @@ var ErrorStackTraceObserver = Obj.extend(Module,
         if (context.errorStackTraceDbg)
             return;
 
-        var dbg = DebuggerLib.makeDebuggerForContext(context);
+        // We want to use the same debugger used by the backend and by {@SourceTool}
+        // object that collects dynamic scripts and computes unique URLs for them.
+        // Stack trace observer needs to use these dynamic URLs to show the right
+        // location of an error/exception.
+        var dbg = DebuggerLib.getThreadDebugger(context);
         context.errorStackTraceDbg = dbg;
+
         this.clearState(context);
 
+        this.originalExceptionUnwind = dbg.onExceptionUnwind;
         dbg.onExceptionUnwind = this.onExceptionUnwind.bind(this, context);
     },
 
@@ -104,18 +110,21 @@ var ErrorStackTraceObserver = Obj.extend(Module,
 
         try
         {
-            DebuggerLib.destroyDebuggerForContext(context, context.errorStackTraceDbg);
+            //DebuggerLib.destroyDebuggerForContext(context, context.errorStackTraceDbg);
         }
         catch (err)
         {
             TraceError.sysout("errorStackTraceObserver.stopObserving; EXCEPTION " + err, err);
         }
+
         context.errorStackTraceDbg = null;
         context.errorStackTraceState = null;
     },
 
-    clearState: function(context) {
+    clearState: function(context)
+    {
         Trace.sysout("errorStackTraceObserver.clearState");
+
         context.errorStackTraceState = {
             olderFrame: null,
             scripts: [],
@@ -140,7 +149,7 @@ var ErrorStackTraceObserver = Obj.extend(Module,
         for (var i = 0; i < state.scripts.length; i++)
         {
             var script = state.scripts[i];
-            var sourceFile = context.sourceFileMap[script.url];
+            var sourceFile = this.getSourceFile(context, script)
             if (!sourceFile)
                 sourceFile = {href: script.url};
 
@@ -158,11 +167,21 @@ var ErrorStackTraceObserver = Obj.extend(Module,
         this.clearState(context);
     },
 
+    getSourceFile: function(context, script)
+    {
+        return context.sourceFileMap[script.url];
+    },
+
     onExceptionUnwind: function(context, frame, value)
     {
         // https://bugzilla.mozilla.org/show_bug.cgi?id=974254
         if (frame.script && frame.script.url === "self-hosted")
+        {
+            if (this.originalExceptionUnwind)
+                return this.originalExceptionUnwind.apply(context.errorStackTraceDbg, arguments);
+
             return;
+        }
 
         var frameName = frame.callee && frame.callee.displayName;
         Trace.sysout("errorStackTraceObserver.onExceptionUnwind " + frameName, arguments);
@@ -188,6 +207,9 @@ var ErrorStackTraceObserver = Obj.extend(Module,
 
         if (state.olderFrame === null)
             this.createStackTrace(context);
+
+        if (this.originalExceptionUnwind)
+            return this.originalExceptionUnwind.apply(context.errorStackTraceDbg, arguments);
     },
 });
 

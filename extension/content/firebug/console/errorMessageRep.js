@@ -255,16 +255,11 @@ var ErrorMessage = domplate(Rep,
 
     getSourceType: function(error)
     {
-        // Errors occurring inside of HTML event handlers look like "foo.html (line 1)"
-        // so let's try to skip those
         if (error.source)
             return "syntax";
         else if (error.category == "css")
             return "show";
         else if (!error.href || !error.lineNo)
-            return "none";
-        // Why do we have that at all?
-        else if (error.lineNo == 1 && Url.getFileExtension(error.href) != "js")
             return "none";
         else
             return "show";

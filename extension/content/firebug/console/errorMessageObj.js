@@ -57,11 +57,10 @@ ErrorMessageObj.prototype =
 
         this.sourceLoading = true;
 
-        var self = this;
-        sourceFile.getLine(this.lineNo - 1, function(line)
+        return sourceFile.getLine(this.lineNo - 1, (line) =>
         {
-            self.sourceLoading = false;
-            self.source = line;
+            this.sourceLoading = false;
+            this.source = line;
 
             if (callback)
                 callback(line);
