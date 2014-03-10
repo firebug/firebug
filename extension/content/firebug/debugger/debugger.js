@@ -75,7 +75,10 @@ Firebug.Debugger = Obj.extend(ActivableModule,
             tooltip = Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR(tooltip), shortcut]);
             Firebug.chrome.$(id).setAttribute("tooltiptext", tooltip);
         };
-        setTooltip("fbRerunButton", "script.Rerun", "Shift+F8");
+
+        // Commented until Debugger.Frame.prototype.replaceCall is implemented. 
+        // See issue 6789 + bugzilla #976708.
+        // setTooltip("fbRerunButton", "script.Rerun", "Shift+F8");
         setTooltip("fbContinueButton", "script.Continue", "F8");
         setTooltip("fbStepIntoButton", "script.Step_Into", "F11");
         setTooltip("fbStepOverButton", "script.Step_Over", "F10");
