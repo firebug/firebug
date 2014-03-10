@@ -444,7 +444,7 @@ BreakpointHitHandler.prototype =
         if (this.bp && this.bp.condition)
         {
             // Copied from firebug/debugger/actors/breakpointActor
-            if (!evalCondition(frame, this.bp))
+            if (!DebuggerLib.evalBreakpointCondition(frame, this.bp))
                 return;
         }
 
@@ -614,29 +614,6 @@ function getElementId(script)
         return "/" + id + " " + attrName;
 
     return Xpath.getElementTreeXPath(element) + " " + attrName;
-}
-
-// xxxHonza: copied from BreakpointActor
-function evalCondition(frame, bp)
-{
-    try
-    {
-        var result = frame.eval(bp.condition);
-
-        if (result.hasOwnProperty("return"))
-        {
-            result = result["return"];
-
-            if (typeof(result) == "object")
-                return DebuggerLib.unwrapDebuggeeValue(result);
-            else
-                return result;
-        }
-    }
-    catch (e)
-    {
-        TraceError.sysout("breakpointActor.evalCondition; EXCEPTION " + e, e);
-    }
 }
 
 // ********************************************************************************************* //
