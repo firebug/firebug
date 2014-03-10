@@ -191,11 +191,10 @@ ProfilerEngine.prototype =
 
 function getFunctionDisplayName(callee)
 {
-    var displayNameDescriptor;
 
     try
     {
-        displayNameDescriptor = callee.getOwnPropertyDescriptor("displayName");
+        var displayNameDescriptor = callee.getOwnPropertyDescriptor("displayName");
 
         var isValidDisplayName = displayNameDescriptor &&
             typeof displayNameDescriptor.value === "string" &&
@@ -212,7 +211,7 @@ function getFunctionDisplayName(callee)
             "threw an exception.", ex);
     }
 
-    return frame.callee.displayName;
+    return callee.displayName;
 }
 
 // ********************************************************************************************* //
