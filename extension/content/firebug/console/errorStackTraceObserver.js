@@ -85,39 +85,38 @@ var ErrorStackTraceObserver = Obj.extend(Module,
     {
         Trace.sysout("errorStackTraceObserver.startObserving; " + context.getName());
 
-        if (context.errorStackTraceDbg)
+        if (context.errorStackTraceHook)
             return;
 
-        // We want to use the same debugger used by the backend and by {@SourceTool}
-        // object that collects dynamic scripts and computes unique URLs for them.
-        // Stack trace observer needs to use these dynamic URLs to show the right
-        // location of an error/exception.
+        // We want to set up an onExceptionUnwind hook for capturing stacks, but we need to use
+        // the same debugger used by the backend. This is for two reasons:
+        // - It's more performant. Issue 7169 measured a 10% overhead of an enabled debugger,
+        //  even when it was completely passive.
+        // - {@SourceTool} need scripts to come from the right debugger to be able to correlate
+        //  them with locations. (Comparing URLs are not enough in some cases, object identity
+        //  is needed.)
+        // The backend already uses onExceptionUnwind, though, and can change it at any time
+        // without prior notice. So to make the override work we also set up of a getter+setter
+        // pair on the debugger object (not its prototype!) as a sort of proxy around the real
+        // hook, and forward any calls to both our hook and what has currently been set by the
+        // setter.
+
         var dbg = DebuggerLib.getThreadDebugger(context);
-        context.errorStackTraceDbg = dbg;
+        context.errorStackTraceHook =
+            hookExceptionUnwind(dbg, this.onExceptionUnwind.bind(this, context));
 
         this.clearState(context);
-
-        this.originalExceptionUnwind = dbg.onExceptionUnwind;
-        dbg.onExceptionUnwind = this.onExceptionUnwind.bind(this, context);
     },
 
     stopObserving: function(context)
     {
         Trace.sysout("errorStackTraceObserver.stopObserving; " + context.getName());
 
-        if (!context.errorStackTraceDbg)
+        if (!context.errorStackTraceHook)
             return;
 
-        try
-        {
-            //DebuggerLib.destroyDebuggerForContext(context, context.errorStackTraceDbg);
-        }
-        catch (err)
-        {
-            TraceError.sysout("errorStackTraceObserver.stopObserving; EXCEPTION " + err, err);
-        }
-
-        context.errorStackTraceDbg = null;
+        context.errorStackTraceHook.detach();
+        context.errorStackTraceHook = null;
         context.errorStackTraceState = null;
     },
 
@@ -149,7 +148,7 @@ var ErrorStackTraceObserver = Obj.extend(Module,
         for (var i = 0; i < state.scripts.length; i++)
         {
             var script = state.scripts[i];
-            var sourceFile = this.getSourceFile(context, script)
+            var sourceFile = this.getSourceFile(context, script);
             if (!sourceFile)
                 sourceFile = {href: script.url};
 
@@ -176,12 +175,7 @@ var ErrorStackTraceObserver = Obj.extend(Module,
     {
         // https://bugzilla.mozilla.org/show_bug.cgi?id=974254
         if (frame.script && frame.script.url === "self-hosted")
-        {
-            if (this.originalExceptionUnwind)
-                return this.originalExceptionUnwind.apply(context.errorStackTraceDbg, arguments);
-
             return;
-        }
 
         var frameName = frame.callee && frame.callee.displayName;
         Trace.sysout("errorStackTraceObserver.onExceptionUnwind " + frameName, arguments);
@@ -207,9 +201,6 @@ var ErrorStackTraceObserver = Obj.extend(Module,
 
         if (state.olderFrame === null)
             this.createStackTrace(context);
-
-        if (this.originalExceptionUnwind)
-            return this.originalExceptionUnwind.apply(context.errorStackTraceDbg, arguments);
     },
 });
 
@@ -234,6 +225,42 @@ function copyArguments(frame)
     }
 
     return args;
+}
+
+// Hook into onExceptionUnwind without it being noticable to the backend, by setting up
+// a getter and a setter on the object itself. See startObserving for details.
+function hookExceptionUnwind(dbg, callback)
+{
+    if (dbg.hasOwnProperty("onExceptionUnwind"))
+    {
+        TraceError.sysout("errorStackTraceObserver.hookExceptionUnwind FAILS, already hooked");
+        return;
+    }
+
+    var proto = Object.getPrototypeOf(dbg);
+    var desc = Object.getOwnPropertyDescriptor(proto, "onExceptionUnwind");
+
+    var threadHook = desc.get.call(dbg);
+    Object.defineProperty(dbg, "onExceptionUnwind", {
+        set: (hook) => { threadHook = hook; },
+        get: () => threadHook,
+        configurable: true
+    });
+    desc.set.call(dbg, function()
+    {
+        callback.apply(this, arguments);
+        if (threadHook)
+            return threadHook.apply(this, arguments);
+        return undefined;
+    });
+
+    return {
+        detach: function()
+        {
+            desc.set.call(dbg, threadHook);
+            delete dbg.onExceptionUnwind;
+        }
+    };
 }
 
 // ********************************************************************************************* //
