@@ -1288,6 +1288,7 @@ FirebugReps.Element = domplate(Rep,
 
         items.push(
         {
+            id: "fbCopyNode",
             label: Locale.$STRF("html.Copy_Node", [type]),
             tooltiptext: Locale.$STRF("html.tip.Copy_Node", [type]),
             command: Obj.bindFixed(this.copyHTML, this, elt),
@@ -1298,6 +1299,7 @@ FirebugReps.Element = domplate(Rep,
         {
             items.push(
             {
+                id: "fbCopyInnerHTML",
                 label: "CopyInnerHTML",
                 tooltiptext: "html.tip.Copy_innerHTML",
                 command: Obj.bindFixed(this.copyInnerHTML, this, elt)
@@ -1393,6 +1395,7 @@ FirebugReps.Element = domplate(Rep,
             items = items.concat([
                 "-",
                 {
+                    id: "fbOpenInNewTab",
                     label: "OpenInTab",
                     tooltiptext: "firebug.tip.Open_In_Tab",
                     command: Obj.bindFixed(this.browseObject, this, elt, context)
@@ -1404,6 +1407,7 @@ FirebugReps.Element = domplate(Rep,
         {
             items = items.concat([
                 {
+                    id: "fbReloadFrame",
                     label: "html.menu.Reload_Frame",
                     tooltiptext: "html.menu.tip.Reload_Frame",
                     command: Obj.bindFixed(this.reloadFrame, this, elt)
