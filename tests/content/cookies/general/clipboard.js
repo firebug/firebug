@@ -21,14 +21,17 @@ function runTest()
             // Helper shortcut
             var CookieRow = FW.Firebug.CookieModule.CookieReps.CookieRow;
 
-            // Copy & Paste
-            CookieRow.onCopy(originalCookie);
-
             // Expected clipboard value
             var clipboardValue = "CopyPasteCookie=Test+Cookie+Value; expires=Wed, " +
-                "14 Aug 2019 10:25:57 GMT; path=/dir; domain=legoas";
+                "18 May 2033 03:33:20 GMT; path=/dir; domain=" + win.location.host;
 
-            FBTest.waitForClipboard(clipboardValue, function()
+            function copyCookie()
+            {
+                // Copy & Paste
+                CookieRow.onCopy(originalCookie);
+            }
+
+            FBTest.waitForClipboard(clipboardValue, copyCookie, function()
             {
                 CookieRow.onPaste(null);
 

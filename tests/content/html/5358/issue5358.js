@@ -65,10 +65,13 @@ function copyAndPasteContent(callback, target, menuId, contentToPaste)
 {
     FBTest.selectElementInHtmlPanel(target, function(nodeBox)
     {
-        FBTest.setClipboardText(contentToPaste);
+        function copy()
+        {
+            FBTest.setClipboardText(contentToPaste);
+        }
 
         // The clipboard content might be set asynchronously on some machines.
-        FBTest.waitForClipboard(contentToPaste, function()
+        FBTest.waitForClipboard(contentToPaste, copy, function()
         {
             FBTest.executeContextMenuCommand(nodeBox, menuId, callback);
         });

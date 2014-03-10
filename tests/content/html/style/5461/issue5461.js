@@ -11,33 +11,33 @@ function runTest()
                 FBTest.synthesizeMouse(panel.panelNode);
                 FBTest.sendShortcut("a", {accelKey: true});
 
-                // Reset clipboard content
-                FBTest.setClipboardText("issue5461");
-                FBTest.waitForClipboard("issue5461", function()
+                function copy()
                 {
-                    var expected = new RegExp("#element\\s+\\{[\\r\\n]{1,2}"+
-                        "\\s+background:\\s+-moz-linear-gradient\\(135deg, #788cff, #b4c8ff\\) repeat "+
-                        "scroll 0 0 #8c8cff;[\\r\\n]{1,2}"+
-                        "\\s+height:\\s+100px;[\\r\\n]{1,2}"+
-                        "\\s+width:\\s+100px;[\\r\\n]{1,2}"+
-                        "\\}[\\r\\n]{1,2}"+
-                        "\\*\\s+\{[\\r\\n]{1,2}"+
-                        "\\s+position: relative;[\\r\\n]{1,2}"+
-                        "\\}[\\r\\n]{1,2}"+
-                        "body\\s+\\\{[\\r\\n]{1,2}"+
-                        "\\s+font-family:\\s+\\\"Trebuchet MS\\\",Helvetica,sans-serif;[\\r\\n]{1,2}"+
-                        "\\s+font-size:\\s+0.9em;[\\r\\n]{1,2}"+
-                        "\\}");
+                    FBTest.setClipboardText("issue5461");
+                }
 
-                    FBTest.waitForClipboard(expected, function(cssDecl)
-                    {
-                        FBTest.compare(expected, cssDecl,
-                            "CSS declaration must be properly copied into the clipboard");
-                        FBTest.testDone("issue5461.DONE");
-                    });
+                var expected = new RegExp("#element\\s+\\{[\\r\\n]{1,2}"+
+                    "\\s+background:\\s+-moz-linear-gradient\\(135deg, #788cff, #b4c8ff\\) repeat "+
+                    "scroll 0 0 #8c8cff;[\\r\\n]{1,2}"+
+                    "\\s+height:\\s+100px;[\\r\\n]{1,2}"+
+                    "\\s+width:\\s+100px;[\\r\\n]{1,2}"+
+                    "\\}[\\r\\n]{1,2}"+
+                    "\\*\\s+\{[\\r\\n]{1,2}"+
+                    "\\s+position: relative;[\\r\\n]{1,2}"+
+                    "\\}[\\r\\n]{1,2}"+
+                    "body\\s+\\\{[\\r\\n]{1,2}"+
+                    "\\s+font-family:\\s+\\\"Trebuchet MS\\\",Helvetica,sans-serif;[\\r\\n]{1,2}"+
+                    "\\s+font-size:\\s+0.9em;[\\r\\n]{1,2}"+
+                    "\\}");
 
-                    FBTest.sendShortcut("c", {accelKey: true});
+                FBTest.waitForClipboard(expected, copy, function(cssDecl)
+                {
+                    FBTest.compare(expected, cssDecl,
+                        "CSS declaration must be properly copied into the clipboard");
+                    FBTest.testDone("issue5461.DONE");
                 });
+
+                FBTest.sendShortcut("c", {accelKey: true});
             });
         });
     });

@@ -124,8 +124,8 @@ this.getClipboardText = function()
         trans.addDataFlavor("text/unicode");
         clipboard.getData(trans, Ci.nsIClipboard.kGlobalClipboard);
 
-        var str = new Object();
-        var strLength = new Object();
+        var str = {};
+        var strLength = {};
         trans.getTransferData("text/unicode", str, strLength);
         str = str.value.QueryInterface(Ci.nsISupportsString);
         return str.data.substring(0, strLength.value / 2);
@@ -141,23 +141,49 @@ this.getClipboardText = function()
 
 /**
  * Wait till the an expected text is available in the clipboard.
+ * The method regularly checks the clipboard and re-executes the copying function multiple times
+ * in case the clipboard doesn't contain the text.
  *
- * @param {Object} expected The text that should appear in the clipboard. Can be also
+ * @param {String|RegExp} expected - Text that should appear in the clipboard. Can also be
  *      a regular expression.
- * @param {Object} callback A callback executed when the text is sucessfully set or
- *      on timeout. The method regularly checks the clipboard for 5 sec.
+ * @param {Function} copyingFunction - Function that causes the text to be copied to the clipboard
+ * @param {Function} callback - Callback function executed when the text is successfully set or
+ *      on timeout.
  */
-this.waitForClipboard = function(expected, callback)
+this.waitForClipboard = function(expected, copyingFunction, callback)
 {
-    var timeout = 250;
-    var counter = 20;
+    var checkTimeout = 50;
+    var copyCounter = 5;
+    var checks = 10;
+    var checkCounter = 0;
+    var text = "";
     var self = this;
 
+    // Execute the copying function and check the clipboard
+    function executeAndVerifyClipboard()
+    {
+        copyCounter--;
+
+        if (copyCounter > 0)
+        {
+            copyingFunction();
+
+            checkCounter = checks;
+            setTimeout(checkClipboard, checkTimeout);
+        }
+        else
+        {
+            callback(text);
+        }
+    }
+
+    // Check the clipboard for the expected text. Repeat the check after a while
+    // if the clipboard doesn't contain the text.
     function checkClipboard()
     {
-        counter--;
+        checkCounter--;
 
-        var text = self.getClipboardText();
+        text = self.getClipboardText();
 
         var result;
         if (expected instanceof RegExp)
@@ -165,16 +191,54 @@ this.waitForClipboard = function(expected, callback)
         else
             result = (text == expected);
 
+        // If the text is set, execute the callback. If we tried N times without result,
+        // execute the copying function again and check again. Otherwise, try again later.
+        if (result)
+            callback(text);
+        else if (checkCounter === 0)
+            executeAndVerifyClipboard();
+        else
+            setTimeout(checkClipboard, checkTimeout);
+    }
+    
+    executeAndVerifyClipboard();
+};
+
+this.waitForClipboard2 = function(expected, copyingFunction, callback)
+{
+    var timeout = 250;
+    var counter = 20;
+    var self = this;
+    
+    function executeAndVerifyClipboard()
+    {
+        copyingFunction();
+        
+        // Start checking clipboard on timeout
+        setTimeout(checkClipboard, timeout);
+    }
+    
+    function checkClipboard()
+    {
+        counter--;
+        copyingFunction();
+        var text = self.getClipboardText();
+        
+        var result;
+        if (expected instanceof RegExp)
+            result = text ? text.match(expected) : false;
+            else
+                result = (text == expected);
+        
         // If the text is set or we tried N times, execute the callback.
         // Otherwise, try again later.
         if (result || counter <= 0)
             callback(text);
         else
-            setTimeout(checkClipboard, timeout);
+            executeAndVerifyClipboard();
     }
-
-    // Start checking clipboard on timeout.
-    setTimeout(checkClipboard, timeout);
+    
+    executeAndVerifyClipboard();
 };
 
 // ********************************************************************************************* //

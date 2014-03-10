@@ -44,11 +44,19 @@
                         <span class="ok">&rArr; A request to <em>issue6616.php</em> should be shown</span>
                     </li>
                     <li>Right-click the request and choose <em>Copy as cURL</em> from the context menu</li>
-                    <li>Paste the text from the clipboard into a text editor</li>
+                    <li>
+                        Paste the text from the clipboard into a text editor<br/>
+                        <span class="ok">&rArr; The clipboard data should contain a valid cURL command.</span>
+                    </li>
+                    <li>Set the preference <code>extensions.firebug.net.curlAddCompressedArgument</code> to <code>true</code></li>
+                    <li>
+                        Repeat steps 4 and 5
+                        <span class="ok">&rArr; The cURL command should contain the <code>--compressed</code> argument.</span>
+                    </li>
                 </ol>
                 <h3>Expected result</h3>
                 <ul>
-                    <li>The clipboard data should contain a valid cURL command.</li>
+                    <li>A valid cURL command should be copied to the clipboard.</li>
                 </ul>
             </section>
             <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>

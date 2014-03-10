@@ -2,6 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "net/6616/issue6616.html", function(win)
     {
+        var originalPrefValue = FBTest.getPref("net.curlAddCompressedArgument");
+
         FBTest.openFirebug(function() {
             FBTest.enableNetPanel(function(win)
             {
@@ -14,7 +16,25 @@ function runTest()
 
                 FBTest.waitForDisplayedElement("net", config, function(row)
                 {
-                    FBTest.executeContextMenuCommand(row, "fbCopyAsCurl", verifyCopiedCURL);
+                    function executeContextMenuCommand()
+                    {
+                        FBTest.executeContextMenuCommand(row, "fbCopyAsCurl");
+                    }
+
+                    var tasks = new FBTest.TaskList();
+
+                    tasks.push(verifyCopiedCURL, executeContextMenuCommand, false,
+                        new RegExp("curl \'" + basePath + "net\/6616\/issue6616.php\' -X " +
+                            "POST( -H \'.*?\')+$"));
+                    tasks.push(verifyCopiedCURL, executeContextMenuCommand, true,
+                        new RegExp("curl \'" + basePath + "net\/6616\/issue6616.php\' -X " +
+                            "POST( -H \'.*?\')+ --compressed$"));
+
+                    tasks.run(function ()
+                    {
+                        FBTest.setPref("net.curlAddCompressedArgument", originalPrefValue);
+                        FBTest.testDone();
+                    });
                 });
 
                 FBTest.click(button);
@@ -23,14 +43,13 @@ function runTest()
     });
 }
 
-function verifyCopiedCURL()
+function verifyCopiedCURL(callback, executeContextMenuCommand, compressed, expected)
 {
-    var expected = new RegExp("curl \'" + basePath + "net\/6616\/issue6616.php\'" +
-        " -X POST( -H \'.*?\')+");
-
-    FBTest.waitForClipboard(expected, function(text)
+    FBTest.setPref("net.curlAddCompressedArgument", compressed);
+    FBTest.waitForClipboard(expected, executeContextMenuCommand, (text) =>
     {
         FBTest.compare(expected, text, "Proper cURL must be copied");
-        FBTest.testDone("issue6616.DONE");
+
+        callback();
     });
 }

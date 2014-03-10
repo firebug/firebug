@@ -14,18 +14,23 @@ function runTest()
                 FBTest.waitForDisplayedElement("console", options, function(row)
                 {
                     var panel = FBTest.selectPanel("console");
-                    var requests = panel.panelNode.getElementsByClassName("logRow logRow-spy error loaded");
+                    var requests = panel.panelNode.getElementsByClassName(
+                        "logRow logRow-spy error loaded");
                     FBTest.compare(2, requests.length, "There must be 2 requests");
 
-                    FBTest.executeContextMenuCommand(requests[0].getElementsByClassName("spyTitle")[0],
-                        "fbSpyCopyLocation", function()
+                    function executeContextMenuCommand()
                     {
-                        var expected = /path1$/;
-                        FBTest.waitForClipboard(expected, function(text)
-                        {
-                            FBTest.compare(expected, text, "Proper URL must be copied. Current: " + text);
-                            FBTest.testDone("issue4738.DONE");
-                        });
+                        FBTest.executeContextMenuCommand(
+                            requests[0].getElementsByClassName("spyTitle")[0],
+                            "fbSpyCopyLocation");
+                    }
+
+                    var expected = /path1$/;
+                    FBTest.waitForClipboard(expected, executeContextMenuCommand, function(text)
+                    {
+                        FBTest.compare(expected, text, "Proper URL must be copied. Current: " +
+                            text);
+                        FBTest.testDone("issue4738.DONE");
                     });
                 });
 

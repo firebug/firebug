@@ -377,8 +377,11 @@
                                     </hbox>
 
                                     <hbox id="fbDebuggerButtons" collapsed="true" class="noTabStop">
+                                        <!-- Commented until Debugger.Frame.prototype.replaceCall is implemented. 
+                                             See issue 6789 + bugzilla #976708.
                                         <toolbarbutton id="fbRerunButton" command="cmd_firebug_rerun"
                                             class="toolbar-image-button" />
+                                        -->
                                         <toolbarbutton id="fbContinueButton" command="cmd_firebug_resumeExecution"
                                             class="toolbar-image-button" />
                                         <toolbarbutton id="fbStepIntoButton" command="cmd_firebug_stepInto"

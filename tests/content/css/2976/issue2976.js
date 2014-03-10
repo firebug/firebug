@@ -9,21 +9,21 @@ function runTest()
 
                 FBTest.selectElementInHtmlPanel("myElement", function(node)
                 {
-                    // Reset clipboard content
-                    FBTest.clearClipboard();
-
                     var stylePanel = FW.Firebug.chrome.selectSidePanel("css");
-                    var cssSelector = stylePanel.panelNode.querySelector(".cssSelector");
-                    FBTest.executeContextMenuCommand(cssSelector, "fbCopyStyleDeclaration", function()
+                    var cssSelector = stylePanel.panelNode.getElementsByClassName("cssSelector")[0];
+
+                    function executeContextMenuCommand()
                     {
-                        var expected = new RegExp("background-color: LightYellow;\\s*" +
-                            "color: red !important;\\s*font-weight: bold;");
-                        FBTest.waitForClipboard(expected, function(cssDecl)
-                        {
-                            FBTest.compare(expected, cssDecl,
-                                "CSS declaration must be properly copied into the clipboard");
-                            FBTest.testDone("issue2976.DONE");
-                        });
+                        FBTest.executeContextMenuCommand(cssSelector, "fbCopyStyleDeclaration");
+                    }
+
+                    var expected = new RegExp("background-color: LightYellow;\\s*" +
+                        "color: red !important;\\s*font-weight: bold;");
+                    FBTest.waitForClipboard(expected, executeContextMenuCommand, function(text)
+                    {
+                        FBTest.compare(expected, text,
+                            "CSS declaration must be properly copied into the clipboard");
+                        FBTest.testDone("issue2976.DONE");
                     });
                 })
             });

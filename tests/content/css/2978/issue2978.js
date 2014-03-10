@@ -10,18 +10,18 @@ function runTest()
 
                 var nodeTag = sel.getElementsByClassName("nodeTag")[0];
 
-                // Reset clipboard content and execute "Copy CSS Path" command.
-                FBTest.clearClipboard();
-                FBTest.executeContextMenuCommand(nodeTag, "fbCopyCSSPath", function()
+                function executeContextMenuCommand()
                 {
-                    var expected = "html body div.myClass span#myElement";
-                    FBTest.waitForClipboard(expected, function(cssPath)
-                    {
-                        var cssPath = FBTest.getClipboardText();
-                        FBTest.compare(expected, cssPath,
-                            "CSS path must be properly copied into the clipboard");
-                        FBTest.testDone("issue2978.DONE");
-                    });
+                    FBTest.executeContextMenuCommand(nodeTag, "fbCopyCSSPath");
+                }
+
+                var expected = "html body div.myClass span#myElement";
+                FBTest.waitForClipboard(expected, executeContextMenuCommand, function(cssPath)
+                {
+                    var cssPath = FBTest.getClipboardText();
+                    FBTest.compare(expected, cssPath,
+                        "CSS path must be properly copied into the clipboard");
+                    FBTest.testDone("issue2978.DONE");
                 });
             });
         });
