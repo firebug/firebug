@@ -31,17 +31,17 @@ function runTest()
                 }
 
                 var sourceBox = row.getElementsByClassName("objectLink-sourceLink")[0];
-                if (FBTest.ok(node, "Source line must be there"))
+                if (FBTest.ok(sourceBox, "Source line must be there"))
                 {
-                    var expected = /\s*onclick\s*\(line\s*2\)\s*/;
+                    var expected = /\s*test onclick Exec\s*\(line\s*1\)\s*/;
                     FBTest.compare(expected, sourceBox.textContent, "The source must match: " +
                         sourceBox.textContent);
                 }
 
-                FBTest.testDone("issue5544.DONE");
+                FBTest.testDone();
             });
 
-            FBTest.click(win.document.getElementById("testButton"));
+            FBTest.click(win.document.getElementById("test"));
         });
     });
 }
