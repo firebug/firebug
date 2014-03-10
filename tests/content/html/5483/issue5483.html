@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5483: Issue summary</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #element {
+            width: 100px;
+            height: 100px;
+            background: #8C8CFF center no-repeat;
+            line-height: 100px;
+            text-align: center;
+        }
+
+        #image {
+            margin: auto;
+            vertical-align: middle;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5483">Issue 5483</a>: Issue summary</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element">
+                    <img id="image" src="firebug.png" alt="Firebug logo" />
+                </div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel</li>
+                    <li>Inspect the Firebug logo (<code>#image</code>) inside the blue <code>&lt;div&gt;</code></li>
+                    <li>Hover the image URL inside the panel</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>An infotip should be shown displaying the Firebug logo and its dimensions.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>
