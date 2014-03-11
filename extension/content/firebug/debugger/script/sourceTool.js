@@ -523,9 +523,7 @@ function buildStackFrame(frame, context)
         // var script = document.createElement("script");
         // script.textContent = source;
         // document.body.appendChild(scriptTag);
-        // xxxHonza: file a bug
-        // The problem seems to be that 'textContent-scriptElement' uses startLine 0
-        // All the other dynamic scripts (not their child scripts) are using 1.
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=982153
         if (script.source.introductionType == "scriptElement")
         {
             var element = DebuggerLib.unwrapDebuggeeValue(script.source.element);
