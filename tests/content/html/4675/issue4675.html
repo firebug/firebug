@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4675: Expanding all tags via context menu option shouldn't expand script, style and link tags</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #rule {
+            color: green;
+        }
+        </style>
+        <script type="text/javascript">
+        var test = "Hello Firebug user!";
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4675">Issue 4675</a>: Expanding all tags via context menu option shouldn't expand script, style and link tags</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel</li>
+                    <li>
+                        Right-click the <code>&lt;html&gt;</code> tag and choose
+                        <em>Expand/Contract All</em> from the context menu
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        All elements should be expanded within the <em>HTML</em> panel except the
+                        <code>&lt;script&gt;</code>, <code>&lt;style&gt;</code> and
+                        <code>&lt;link&gt;</code> tags.
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

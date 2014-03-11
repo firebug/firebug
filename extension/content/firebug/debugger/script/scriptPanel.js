@@ -676,6 +676,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         Trace.sysout("scriptPanel.search; " + text + ", reverse: " + reverse);
 
+        // Ignore empty searches, but keep the current selection.
+        if (!text)
+            return;
+
         // Check if the search is for a line number.
         var m = /^[^\\]?#(\d*)$/.exec(text);
         if (m)
