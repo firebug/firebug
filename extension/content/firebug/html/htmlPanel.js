@@ -1842,12 +1842,14 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
                 items.push(
                     {
+                        id: "fbEditAttribute",
                         label: Locale.$STRF("EditAttribute", [attrName]),
                         tooltiptext: Locale.$STRF("html.tip.Edit_Attribute", [attrName]),
                         nol10n: true,
                         command: Obj.bindFixed(this.editAttribute, this, node, attrName)
                     },
                     {
+                        id: "fbDeleteAttribute",
                         label: Locale.$STRF("DeleteAttribute", [attrName]),
                         tooltiptext: Locale.$STRF("html.tip.Delete_Attribute", [attrName]),
                         nol10n: true,
@@ -1873,6 +1875,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
                 items.push("-",
                 {
+                    id: "fbEditNode",
                     label: Locale.$STRF("html.Edit_Node", [type]),
                     tooltiptext: Locale.$STRF("html.tip.Edit_Node", [type]),
                     nol10n: true,
@@ -1883,6 +1886,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 if (!Css.nonDeletableTags.hasOwnProperty(node.localName))
                 {
                     items.push({
+                        id: "fbDeleteElement",
                         label: "DeleteElement",
                         tooltiptext: "html.Delete_Element",
                         acceltext: Locale.getFormattedKey(window, null, null, "VK_DELETE"),
@@ -1898,6 +1902,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 items.push(
                     "-",
                     {
+                        id: "fbExpandContractAll",
                         label: "html.label.Expand/Contract_All",
                         tooltiptext: "html.tip.Expand/Contract_All",
                         acceltext: Locale.getFormattedKey(window, null, "*"),
@@ -1912,12 +1917,14 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             items.push(
                 "-",
                 {
+                    id: "fbEditNode",
                     label: Locale.$STRF("html.Edit_Node", [nodeLabel]),
                     tooltiptext: Locale.$STRF("html.tip.Edit_Node", [nodeLabel]),
                     nol10n: true,
                     command: Obj.bindFixed(this.editNode, this, node)
                 },
                 {
+                    id: "fbDeleteNode",
                     label: "DeleteNode",
                     tooltiptext: "html.Delete_Node",
                     command: Obj.bindFixed(this.deleteNode, this, node)
