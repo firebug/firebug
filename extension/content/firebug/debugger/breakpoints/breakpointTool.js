@@ -5,10 +5,11 @@ define([
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/chrome/tool",
+    "firebug/debugger/debuggerLib",
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/remoting/debuggerClient",
 ],
-function (Firebug, FBTrace, Obj, Tool, BreakpointStore, DebuggerClient) {
+function (Firebug, FBTrace, Obj, Tool, DebuggerLib, BreakpointStore, DebuggerClient) {
 
 // ********************************************************************************************* //
 // Constants
@@ -256,8 +257,18 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             return;
         }
 
-        Trace.sysout("breakpointTool.setBreakpoint; " + url + " (" + lineNumber + ") " +
-            "thread state: " + thread.state);
+        if (Trace.active)
+        {
+            Trace.sysout("breakpointTool.setBreakpoint; " + url + " (" + lineNumber + ") " +
+                "thread client state: " + thread.state);
+
+            // xxxHonza: I have experienced a problem where the client side state
+            // was set to "paused", but the server side still failed to set a breakpoint
+            // due to debugger not being in pause state.
+            var threadActor = DebuggerLib.getThreadActor(this.context.browser);
+            Trace.sysout("breakpointTool.setBreakpoint; thread actor state: " +
+                threadActor.state);
+        }
 
         // Do not create two server side breakpoints at the same line.
         var bpClient = this.getBreakpointClient(url, lineNumber);

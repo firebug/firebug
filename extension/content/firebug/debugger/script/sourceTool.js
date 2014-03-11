@@ -53,8 +53,8 @@ var dynamicTypesMap = {
     "Function": CompilationUnit.EVAL,
     "eventHandler": CompilationUnit.BROWSER_GENERATED,
     "scriptElement": CompilationUnit.EVAL,
-    //"setTimeout": CompilationUnit.EVAL,
-    //"setInterval": CompilationUnit.EVAL
+    "setTimeout": CompilationUnit.EVAL,
+    "setInterval": CompilationUnit.EVAL
 };
 
 // ********************************************************************************************* //
@@ -488,8 +488,6 @@ var originalBuildStackFrame = StackFrame.buildStackFrame;
  */
 function buildStackFrame(frame, context)
 {
-    Trace.sysout("sourceTool.buildStackFrame;", frame);
-
     var stackFrame = originalBuildStackFrame(frame, context);
 
     var threadActor = DebuggerLib.getThreadActor(context.browser);
@@ -503,8 +501,6 @@ function buildStackFrame(frame, context)
     var sourceFile = getSourceFileByScript(context, frameActor.frame.script);
     if (!sourceFile)
         return stackFrame;
-
-    Trace.sysout("sourceTool.buildStackFrame; SourceFile", sourceFile);
 
     if (sourceFile)
     {
