@@ -146,14 +146,8 @@ SourceTool.prototype = Obj.extend(new Tool(),
             return;
         }
 
-        if (!this.context.sourceFileMap)
-        {
-            TraceError.sysout("sourceTool.addScript; ERROR Source File Map is NULL", script);
-            return;
-        }
-
         // xxxHonza: Ignore inner scripts for now
-        if (this.context.sourceFileMap[script.url])
+        if (this.context.getSourceFile(script.url))
         {
             Trace.sysout("sourceTool.addScript; A script ignored: " + script.url, script);
             return;
@@ -500,7 +494,14 @@ function buildStackFrame(frame, context)
 
     var sourceFile = getSourceFileByScript(context, frameActor.frame.script);
     if (!sourceFile)
+    {
+        // Useful log, but appearing too much in the tracing console.
+        // Trace.sysout("sourceTool.buildStackFrame; no dynamic script for: " +
+        //     stackFrame.href + " (" + stackFrame.line + ")",
+        //     frameActor.frame.script);
+
         return stackFrame;
+    }
 
     if (sourceFile)
     {
@@ -511,7 +512,8 @@ function buildStackFrame(frame, context)
         stackFrame.href = sourceFile.href;
     }
 
-    Trace.sysout("sourceTool.buildStackFrame; New stack frame", stackFrame);
+    Trace.sysout("sourceTool.buildStackFrame; New frame: " + stackFrame.href +
+        " (" + stackFrame.line + ")", stackFrame);
 
     return stackFrame;
 }
@@ -545,23 +547,32 @@ function getSourceFileByScript(context, script)
 {
     for (var url in context.sourceFileMap)
     {
-        var source = context.sourceFileMap[url];
+        var source = context.getSourceFile(url);
         if (!source.scripts)
             continue;
 
-        if (source.scripts.indexOf(script) != -1)
+        // Walk the tree
+        if (hasChildScript(source.scripts, script))
             return source;
-
-        for (var parentScript of source.scripts)
-        {
-            var childScripts = parentScript.getChildScripts();
-            for (var childScript of childScripts)
-            {
-                if (childScript == script)
-                    return source;
-            }
-        }
     }
+}
+
+function hasChildScript(scripts, script)
+{
+    if (scripts.indexOf(script) != -1)
+        return true;
+
+    for (var parentScript of scripts)
+    {
+        var childScripts = parentScript.getChildScripts();
+        if (!childScripts.length)
+            continue;
+
+        if (hasChildScript(childScripts, script))
+            return true;
+    }
+
+    return false;
 }
 
 function computeDynamicUrl(script)
