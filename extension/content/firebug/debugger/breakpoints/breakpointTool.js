@@ -460,7 +460,6 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         // component also calls interrupt?
         thread.interrupt(function(packet)
         {
-            FBTrace.sysout("packet ", packet)
             if (packet.error)
             {
                 TraceError.sysout("BreakpointTool.setBreakpoints; Can't set breakpoints: " +
@@ -473,20 +472,24 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             {
                 Trace.sysout("breakpointTool.doSetBreakpoints; done", arguments);
 
-                // If interrupt happened at the moment when the thread has already been
-                // paused, after we checked |thread.paused| (e.g. breakpoints in onload scripts),
-                // do not resume. See also issue 7118
                 if (packet.why.type == "alreadyPaused")
                 {
+                    // If interrupt happened at the moment when the thread has already been
+                    // paused, after we checked |thread.paused| (e.g. breakpoints in onload scripts),
+                    // do not resume. See also issue 7118
+                    if (cb)
+                        cb();
+                }
+                else if (packet.why.type != "interrupted")
+                {
+                    // In this case, do not resume since the debugger wasn't interrupted
+                    // by this method. It could have been e.g. a breakpoint hit and we
+                    // do want to keep the debugger paused.
                     if (cb)
                         cb();
                 }
                 else
                 {
-                    // Do not resume if the debugger wasn't interrupted by this method.
-                    if (packet.type != "interrupted")
-                        return;
-
                     // At this point, all 'setBreakpoint' packets have been generated (the first
                     // on already sent) and they are waiting in a queue. The resume packet will
                     // be received as soon as the last response for 'setBreakpoint' is received.
