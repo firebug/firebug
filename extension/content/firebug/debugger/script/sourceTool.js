@@ -326,7 +326,14 @@ DynamicSourceCollector.prototype =
         var scriptType = dynamicTypesMap[introType];
         if (scriptType)
         {
-            this.addDynamicScript(script, scriptType);
+            try
+            {
+                this.addDynamicScript(script, scriptType);
+            }
+            catch (err)
+            {
+                TraceError.sysout("sourceToo.onNewScript; ERROR " + err, err);
+            }
         }
         else
         {
@@ -492,13 +499,13 @@ function buildStackFrame(frame, context)
     var frameActor = threadActor._framePool.get(frame.actor);
     stackFrame.jsdFrame = frameActor.frame;
 
-    var sourceFile = getSourceFileByScript(context, frameActor.frame.script);
+    var script = frameActor.frame.script;
+    var sourceFile = getSourceFileByScript(context, script);
     if (!sourceFile)
     {
         // Useful log, but appearing too much in the tracing console.
-        // Trace.sysout("sourceTool.buildStackFrame; no dynamic script for: " +
-        //     stackFrame.href + " (" + stackFrame.line + ")",
-        //     frameActor.frame.script);
+        Trace.sysout("sourceTool.buildStackFrame; no dynamic script for: " +
+             stackFrame.href + " (" + stackFrame.line + ")", script);
 
         return stackFrame;
     }
@@ -510,6 +517,26 @@ function buildStackFrame(frame, context)
 
         // Use proper (dynamically generated) URL.
         stackFrame.href = sourceFile.href;
+
+        // xxxHonza: line numbers seem to be wrong for 'scriptElement' scripts,
+        // but only for those that are injected into the page using textContent
+        // var script = document.createElement("script");
+        // script.textContent = source;
+        // document.body.appendChild(scriptTag);
+        // xxxHonza: file a bug
+        // The problem seems to be that 'textContent-scriptElement' uses startLine 0
+        // All the other dynamic scripts (not their child scripts) are using 1.
+        if (script.source.introductionType == "scriptElement")
+        {
+            var element = DebuggerLib.unwrapDebuggeeValue(script.source.element);
+            var src = element.getAttribute("src");
+            if (!src)
+            {
+                Trace.sysout("sourceToo.buildStackFrame; Adjusting line number + 1", script);
+
+                stackFrame.line += 1;
+            }
+        }
     }
 
     Trace.sysout("sourceTool.buildStackFrame; New frame: " + stackFrame.href +
@@ -586,8 +613,15 @@ function computeDynamicUrl(script)
         if (Url.isAbsoluteUrl(displayURL))
             return displayURL;
 
-        var introScript = script.source.introductionScript.url;
-        return Url.normalizeURL(introScript + "/" + displayURL);
+        var introScript = script.source.introductionScript;
+        if (!introScript)
+        {
+            TraceError.sysout("sourceTool.computeDynamicUrl; ERROR No introductionScript: " +
+                script.source.url);
+            return Url.normalizeURL(script.source.url + "/" + displayURL);displayURL;
+        }
+
+        return Url.normalizeURL(introScript.url + "/" + displayURL);
     }
 
     // Compute unique URL from location information. We don't want to use any
