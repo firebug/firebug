@@ -182,7 +182,7 @@ var ErrorStackTraceObserver = Obj.extend(Module,
         if (frame.script && frame.script.url === "debugger eval code")
             return;
 
-        var frameName = frame.callee && frame.callee.displayName;
+        var frameName = frame && frame.callee && frame.callee.displayName;
         Trace.sysout("errorStackTraceObserver.onExceptionUnwind " + frameName +
             ", " + frame.script.url, arguments);
 
