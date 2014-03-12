@@ -340,13 +340,15 @@ var FirebugChrome =
 
     updateOption: function(name, value)
     {
-        // xxxHonza: I think we should distribute updateOption also to all panels
-        // in all contexts.
-        if (panelBar1 && panelBar1.selectedPanel)
-            panelBar1.selectedPanel.updateOption(name, value);
-
-        if (panelBar2 && panelBar2.selectedPanel)
-            panelBar2.selectedPanel.updateOption(name, value);
+        // Distributed 'updateOption' to all panels (main + side) in all
+        // existing contexts.
+        Firebug.TabWatcher.iterateContexts(function(context)
+        {
+            context.eachPanelInContext(function(panel)
+            {
+                panel.updateOption(name, value);
+            });
+        });
 
         if (name == "textSize")
             this.applyTextSize(value);
