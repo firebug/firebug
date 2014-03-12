@@ -178,12 +178,12 @@ BreakpointPanel.prototype = Obj.extend(Panel,
             var url = sourceFile.getURL();
 
             // When extracting breakpoints for the current page make sure to remove
-            // document fragment from the URL. Also pass true for 'dynamic' argument
+            // URL fragment. Also pass true for 'dynamic' argument
             // into enumerate methods so, all breakpoints for this page are displayed
             // in the breakpoint panel.
             // 1) There can be dynamic breakpoints for dynamic script with special
             // URL suffix.
-            // 2) There can be breakpoints using document fragment (see issue 7251).
+            // 2) There can be breakpoints using URL fragment (see issue 7251).
             url = Url.normalizeURL(url);
 
             BreakpointStore.enumerateBreakpoints(url, true, function(bp)

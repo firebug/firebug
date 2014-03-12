@@ -215,7 +215,7 @@ TabContext.prototype =
 
     getSourceFile: function(href)
     {
-        // SourceFile URL should not use document fragment (issue 7251)
+        // SourceFile should not use URL fragment (issue 7251)
         // href = Url.normalizeURL(href);
         return this.sourceFileMap[href];
     },
@@ -242,7 +242,7 @@ TabContext.prototype =
 
     getCompilationUnit: function(url)
     {
-        // SourceFile URL should not use document fragment (issue 7251)
+        // SourceFile should not use URL fragment (issue 7251)
         //url = Url.normalizeURL(url);
         return this.compilationUnits[url];
     },

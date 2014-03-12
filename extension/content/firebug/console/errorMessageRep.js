@@ -142,7 +142,7 @@ var ErrorMessage = domplate(Rep,
     hasErrorBreak: function(error)
     {
         var url = error.href;
-        // SourceFile URL should not use document fragment (issue 7251)
+        // SourceFile should not use URL fragment (issue 7251)
         //var url = Url.normalizeURL(error.href);
 
         var line = error.lineNo - 1;
@@ -366,7 +366,7 @@ var ErrorMessage = domplate(Rep,
     breakOnThisError: function(error, context)
     {
         var url = error.href;
-        // SourceFile URL should not use document fragment (issue 7251)
+        // SourceFile should not use URL fragment (issue 7251)
         //var url = Url.normalizeURL(error.href);
 
         Trace.sysout("errorMessageRep.breakOnThisError; " + url, error);

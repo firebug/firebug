@@ -35,7 +35,7 @@ function SourceFile(context, actor, href, isBlackBoxed)
     this.context = context;
     this.actor = actor;
 
-    // SourceFile URL should not use document fragment (issue 7251)
+    // SourceFile should not use URL fragment (issue 7251)
     //this.href = Url.normalizeURL(href);
     this.href = href;
 
