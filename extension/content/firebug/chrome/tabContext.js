@@ -170,12 +170,6 @@ TabContext.prototype =
 
     addSourceFile: function(sourceFile)
     {
-        if (!this.sourceFileMap)
-        {
-            FBTrace.sysout("tabContext.addSourceFile; ERROR no source map!");
-            return;
-        }
-
         this.sourceFileMap[sourceFile.href] = sourceFile;
         sourceFile.context = this;
 
@@ -187,12 +181,12 @@ TabContext.prototype =
             kind = CompilationUnit.EVAL;
 
         var url = sourceFile.href;
-        if (FBTrace.DBG_COMPILATION_UNITS)
-            FBTrace.sysout("onCompilationUnit " + url, [this, url, kind] );
 
-         var compilationUnit = new CompilationUnit(url, this);
-         compilationUnit.kind = kind;
-         this.compilationUnits[url] = compilationUnit;
+        Trace.sysout("tabContext.addSourceFile; " + url, [this, url, kind]);
+
+        var compilationUnit = new CompilationUnit(url, this);
+        compilationUnit.kind = kind;
+        this.compilationUnits[url] = compilationUnit;
 
         //Firebug.connection.dispatch("onCompilationUnit", [this, url, kind]);
 
@@ -210,9 +204,8 @@ TabContext.prototype =
 
     removeSourceFile: function(sourceFile)
     {
-        if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("tabContext.removeSourceFile " + sourceFile.href + " in context " +
-                sourceFile.context.getName());
+        Trace.sysout("tabContext.removeSourceFile; " + sourceFile.href + " in context " +
+            sourceFile.context.getName());
 
         delete this.sourceFileMap[sourceFile.href];
         delete sourceFile.context;
@@ -237,7 +230,7 @@ TabContext.prototype =
     {
         for (var url in this.sourceFileMap)
         {
-            var sourceFile = this.sourceFileMap;
+            var sourceFile = this.sourceFileMap[url];
             var result = callback(sourceFile);
             if (result)
                 return result;
@@ -362,7 +355,8 @@ TabContext.prototype =
 
         if (panelType && !panelType.prototype)
         {
-            FBTrace.sysout("tabContext.getPanel no prototype " + panelType, panelType);
+            TraceError.sysout("tabContext.getPanelType; ERROR no prototype " +
+                panelType, panelType);
             return null;
         }
 

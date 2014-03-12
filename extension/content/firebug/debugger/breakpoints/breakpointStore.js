@@ -596,11 +596,12 @@ var BreakpointStore = Obj.extend(Module,
     {
         var result = [];
 
-        for (var url in context.compilationUnits)
+        context.enumerateSourceFiles(function(sourceFile)
         {
+            var url = sourceFile.getURL();
             var bps = this.getBreakpoints(url);
             result.push.apply(result, bps);
-        }
+        });
 
         return result;
     },

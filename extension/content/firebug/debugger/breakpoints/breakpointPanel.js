@@ -173,10 +173,9 @@ BreakpointPanel.prototype = Obj.extend(Panel,
 
         var self = this;
 
-        for (var url in context.compilationUnits)
+        context.enumerateSourceFiles(function(sourceFile)
         {
-            var unit = context.compilationUnits[url];
-            var sourceFile = unit.sourceFile;
+            var url = sourceFile.getURL();
 
             // When extracting breakpoints for the current page make sure to remove
             // document fragment from the URL. Also pass true for 'dynamic' argument
@@ -189,7 +188,7 @@ BreakpointPanel.prototype = Obj.extend(Panel,
 
             BreakpointStore.enumerateBreakpoints(url, true, function(bp)
             {
-                self.getSourceLine(bp, unit.sourceFile);
+                self.getSourceLine(bp, sourceFile);
 
                 // xxxHonza: optimize me
                 // There can be duplicities since dynamic breakpoint are returned for
@@ -213,7 +212,7 @@ BreakpointPanel.prototype = Obj.extend(Panel,
                 if (monitors.indexOf(bp) == -1)
                     monitors.push(bp);
             });
-        }
+        });
 
         var result = {
             breakpoints: breakpoints,
