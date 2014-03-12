@@ -343,8 +343,28 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
     {
         Trace.sysout("debuggerTool.resume; limit: " + (limit ? limit.type: "no type"), limit);
 
+        // If the debugger paused on an exception and the user wants
+        // to resume (not step, but resume completely by clicking
+        // the Resume button), switch off the BON flag and resume
+        // As soon as the resume is done update the flag again.
+        // See also issue 7245
+        var breakOnErrorModified = false;
+        if (this.context.currentPacket.why.type == "exception")
+        {
+            breakOnErrorModified = true;
+            this.context.activeThread._pauseOnExceptions = false;
+        }
+
         // xxxHonza: do not use _doResume. Use stepping methods instead.
-        return this.context.activeThread._doResume(limit, callback);
+        return this.context.activeThread._doResume(limit, (response) =>
+        {
+            // Update BON flag if necessary.
+            if (breakOnErrorModified)
+                this.updateBreakOnErrors();
+
+            if (callback)
+                callback();
+        });
     },
 
     stepOver: function(callback)
@@ -353,7 +373,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
 
         // The callback must be passed into the stepping functions, otherwise there is
         // an exception.
-        return this.context.activeThread.stepOver(function()
+        return this.context.activeThread.stepOver(function(response)
         {
             if (callback)
                 callback();
@@ -364,7 +384,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
     {
         Trace.sysout("debuggerTool.stepInto");
 
-        return this.context.activeThread.stepIn(function()
+        return this.context.activeThread.stepIn(function(response)
         {
             if (callback)
                 callback();
@@ -375,7 +395,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
     {
         Trace.sysout("debuggerTool.stepOut");
 
-        return this.context.activeThread.stepOut(function()
+        return this.context.activeThread.stepOut(function(response)
         {
             if (callback)
                 callback();
