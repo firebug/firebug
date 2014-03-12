@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4663: Aborted requests show NaN MB in the size info tip</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function sendRequest()
+        {
+            var request = new XMLHttpRequest();
+            request.open("POST", "issue4663.php", true);
+            request.send();
+            request.abort();
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4663">Issue 4663</a>: Aborted requests show NaN MB in the size info tip</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="sendRequest" onclick="sendRequest()">Send request</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Net</em> panel</li>
+                    <li>
+                        Click the <em>Send request</em> button above<br/>
+                        <span class="ok">
+                            &rArr; An XMLHttpRequest should be displayed within the
+                            <em>Net</em> panel.
+                        </span>
+                    </li>
+                    <li>Hover its entry in the <em>Size</em> column</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        There must be an infotip shown displaying <code>0 B</code> for the
+                        response and post body as well as the total received size.
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>
