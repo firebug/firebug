@@ -408,32 +408,34 @@ Url.absoluteURLWithDots = function(url, baseURL)
 /**
  * xxxHonza: This gets called a lot, any performance improvement welcome.
  */
-var reChromeCase = /chrome:\/\/([^\/]*)\/(.*?)$/;
 Url.normalizeURL = function(url)
 {
     if (!url)
         return "";
 
-    // Replace one or more characters that are not forward-slash followed by /.., by space.
-    if (url.length < 255) // guard against monsters.
-    {
-        // Replace one or more characters that are not forward-slash followed by /.., by space.
-        url = url.replace(/[^\/]+\/\.\.\//, "", "g");
-        // Issue 1496, avoid #
-        url = url.replace(/#.*/,"");
-        // For script tags inserted dynamically sometimes the script.fileName is bogus
+    // Guard against monsters.
+    if (url.length > 255)
+        return url;
+
+    // Normalize path traversals (a/b/../c -> a/c).
+    while (url.contains("/../") && url[0] != "/")
+        url = url.replace(/[^\/]+\/\.\.\//g, "");
+
+    // Issue 1496, avoid #
+    url = url.replace(/#.*/, "");
+
+    // For script tags inserted dynamically sometimes the script.fileName is bogus
+    if (url.contains("->"))
         url = url.replace(/[^\s]*\s->\s/, "");
 
-        if (Str.hasPrefix(url, "chrome:"))
+    if (url.startsWith("chrome:"))
+    {
+        var m = /^chrome:\/\/([^\/]*)\/(.*?)$/.exec(url);
+        if (m)
         {
-            var m = reChromeCase.exec(url);  // 1 is package name, 2 is path
-            if (m)
-            {
-                url = "chrome://" + m[1].toLowerCase() + "/" + m[2];
-            }
+            url = "chrome://" + m[1].toLowerCase() + "/" + m[2];
         }
     }
-
     return url;
 };
 
