@@ -175,16 +175,18 @@ var ErrorStackTraceObserver = Obj.extend(Module,
 
     onExceptionUnwind: function(context, frame, value)
     {
+        var frameUrl = frame.script && frame.script.url;
+
         // https://bugzilla.mozilla.org/show_bug.cgi?id=974254
-        if (frame.script && frame.script.url === "self-hosted")
+        if (frameUrl === "self-hosted")
             return;
 
-        if (frame.script && frame.script.url === "debugger eval code")
+        if (frameUrl === "debugger eval code")
             return;
 
-        var frameName = frame && frame.callee && frame.callee.displayName;
+        var frameName = frame.callee && frame.callee.displayName;
         Trace.sysout("errorStackTraceObserver.onExceptionUnwind " + frameName +
-            ", " + frame.script.url, arguments);
+            ", " + frameUrl, arguments);
 
         // If the previous unwind frame didn't have this frame as its parent frame,
         // it represents another exception which was swallowed by the page, or a
