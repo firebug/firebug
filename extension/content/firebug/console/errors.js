@@ -458,7 +458,7 @@ var Errors = Firebug.Errors = Obj.extend(Module,
                 }
                 else
                 {
-                    if (context.sourceFileMap && context.getSourceFile(url))
+                    if (context.getSourceFile(url))
                     {
                         if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
                             FBTrace.sysout("findContextByURL found match in sourceFileMap");

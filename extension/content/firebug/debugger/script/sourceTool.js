@@ -571,16 +571,17 @@ ErrorStackTraceObserver.getSourceFile = function(context, script)
 // xxxHonza: optimize the source lookup (there can be a lot of scripts).
 function getSourceFileByScript(context, script)
 {
-    for (var url in context.sourceFileMap)
+    var result = context.enumerateSourceFiles(function(source)
     {
-        var source = context.getSourceFile(url);
         if (!source.scripts)
-            continue;
+            return;
 
         // Walk the tree
         if (hasChildScript(source.scripts, script))
             return source;
-    }
+    });
+
+    return result;
 }
 
 function hasChildScript(scripts, script)
