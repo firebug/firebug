@@ -421,9 +421,6 @@ Url.normalizeURL = function(url)
         url = url.replace(/[^\/]+\/\.\.\//, "", "g");
         // Issue 1496, avoid #
         url = url.replace(/#.*/,"");
-        // For some reason, JSDS reports file URLs like "file:/" instead of "file:///", so they
-        // don't match up with the URLs we get back from the DOM
-        url = url.replace(/file:\/([^\/])/g, "file:///$1");
         // For script tags inserted dynamically sometimes the script.fileName is bogus
         url = url.replace(/[^\s]*\s->\s/, "");
 
