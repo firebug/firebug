@@ -118,6 +118,7 @@ function checkDisabledItemsOnRootElement(callback)
 
 function checkTableContent(callback)
 {
+    // Do the querySelectorAll to check whether the elements are placed in the right order.
     var childrenOk = FW.Firebug.currentContext.window.document.querySelectorAll(
         "#table > tbody > #topRow:nth-child(1) > #topCell, "+
         "#table > tbody > #middleRow:nth-child(2) > #leftCell, "+
@@ -136,7 +137,14 @@ function checkTableContent(callback)
 
 function checkXMLContent(callback)
 {
-    var childrenOk = FW.Firebug.currentContext.baseWindow.document.querySelectorAll(
+    // Hack: remove the style element that will trouble the querySelectorAll below.
+    var doc = FW.Firebug.currentContext.baseWindow.document;
+    var style = doc.querySelector("style");
+    if (style)
+        style.remove();
+
+    // Do the querySelectorAll to check whether the elements are placed in the right order.
+    var childrenOk = doc.querySelectorAll(
         "root > item[id='1']:nth-child(1), "+
         "root > item[id='2']:nth-child(2), "+
         "root > item[id='3']:nth-child(3), "+
