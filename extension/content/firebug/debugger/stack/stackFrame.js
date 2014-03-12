@@ -197,7 +197,7 @@ StackFrame.buildStackFrame = function(frame, context)
         return;
     }
 
-    var sourceFile = context.sourceFileMap[frame.where.url];
+    var sourceFile = context.getSourceFile(frame.where.url);
     if (!sourceFile)
         sourceFile = {href: frame.where.url};
 

@@ -141,7 +141,10 @@ var ErrorMessage = domplate(Rep,
 
     hasErrorBreak: function(error)
     {
-        var url = Url.normalizeURL(error.href);
+        var url = error.href;
+        // SourceFile URL should not use document fragment (issue 7251)
+        //var url = Url.normalizeURL(error.href);
+
         var line = error.lineNo - 1;
         return Errors.hasErrorBreakpoint(url, line);
     },
@@ -362,14 +365,17 @@ var ErrorMessage = domplate(Rep,
 
     breakOnThisError: function(error, context)
     {
-        Trace.sysout("errorMessageRep.breakOnThisError; ", error);
+        var url = error.href;
+        // SourceFile URL should not use document fragment (issue 7251)
+        //var url = Url.normalizeURL(error.href);
 
-        var url = Url.normalizeURL(error.href);
+        Trace.sysout("errorMessageRep.breakOnThisError; " + url, error);
+
         var compilationUnit = context.getCompilationUnit(url);
         if (!compilationUnit)
         {
-            TraceError.sysout("reps.breakOnThisError has no source file for error.href: " +
-                error.href + "  error:" + error, context);
+            TraceError.sysout("errorMessageRep.breakOnThisError; ERROR No source file!",
+                context);
             return;
         }
 

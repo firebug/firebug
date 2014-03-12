@@ -546,11 +546,11 @@ var BreakpointStore = Obj.extend(Module,
         }
     },
 
-    enumerateErrorBreakpoints: function(url, callback)
+    enumerateErrorBreakpoints: function(url, dynamic, callback)
     {
         if (url)
         {
-            var urlBreakpoints = this.getBreakpoints(url);
+            var urlBreakpoints = this.getBreakpoints(url, dynamic);
             if (urlBreakpoints)
             {
                 for (var i=0; i<urlBreakpoints.length; ++i)
@@ -568,11 +568,11 @@ var BreakpointStore = Obj.extend(Module,
         }
     },
 
-    enumerateMonitors: function(url, callback)
+    enumerateMonitors: function(url, dynamic, callback)
     {
         if (url)
         {
-            var urlBreakpoints = this.getBreakpoints(url);
+            var urlBreakpoints = this.getBreakpoints(url, dynamic);
             if (urlBreakpoints)
             {
                 for (var i=0; i<urlBreakpoints.length; ++i)

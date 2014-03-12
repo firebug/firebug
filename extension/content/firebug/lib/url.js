@@ -12,10 +12,10 @@ function (FBTrace, Str, Options) {
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
-const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 
 // ********************************************************************************************* //
 // Implementation
@@ -387,13 +387,17 @@ Url.absoluteURLWithDots = function(url, baseURL)
     var head = m[1];
     var tail = m[3];
     if (url.substr(0, 2) == "//")
+    {
         return m[2] + url;
+    }
     else if (url[0] == "/")
     {
         return head + url;
     }
     else if (tail[tail.length-1] == "/")
+    {
         return B_head + url;
+    }
     else
     {
         var parts = tail.split("/");
@@ -401,11 +405,15 @@ Url.absoluteURLWithDots = function(url, baseURL)
     }
 };
 
+/**
+ * xxxHonza: This gets called a lot, any performance improvement welcome.
+ */
 var reChromeCase = /chrome:\/\/([^\/]*)\/(.*?)$/;
-Url.normalizeURL = function(url)  // this gets called a lot, any performance improvement welcome
+Url.normalizeURL = function(url)
 {
     if (!url)
         return "";
+
     // Replace one or more characters that are not forward-slash followed by /.., by space.
     if (url.length < 255) // guard against monsters.
     {
@@ -424,10 +432,11 @@ Url.normalizeURL = function(url)  // this gets called a lot, any performance imp
             var m = reChromeCase.exec(url);  // 1 is package name, 2 is path
             if (m)
             {
-                url = "chrome://"+m[1].toLowerCase()+"/"+m[2];
+                url = "chrome://" + m[1].toLowerCase() + "/" + m[2];
             }
         }
     }
+
     return url;
 };
 

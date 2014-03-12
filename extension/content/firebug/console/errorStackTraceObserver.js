@@ -16,6 +16,8 @@ define([
 function(Firebug, Obj, FBTrace, Options, Module, TabWatcher, DebuggerLib, StackFrame, StackTrace,
     DebuggerClient) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
@@ -168,7 +170,7 @@ var ErrorStackTraceObserver = Obj.extend(Module,
 
     getSourceFile: function(context, script)
     {
-        return context.sourceFileMap[script.url];
+        return context.getSourceFile(script.url);
     },
 
     onExceptionUnwind: function(context, frame, value)
@@ -177,8 +179,12 @@ var ErrorStackTraceObserver = Obj.extend(Module,
         if (frame.script && frame.script.url === "self-hosted")
             return;
 
+        if (frame.script && frame.script.url === "debugger eval code")
+            return;
+
         var frameName = frame.callee && frame.callee.displayName;
-        Trace.sysout("errorStackTraceObserver.onExceptionUnwind " + frameName, arguments);
+        Trace.sysout("errorStackTraceObserver.onExceptionUnwind " + frameName +
+            ", " + frame.script.url, arguments);
 
         // If the previous unwind frame didn't have this frame as its parent frame,
         // it represents another exception which was swallowed by the page, or a
@@ -227,7 +233,7 @@ function copyArguments(frame)
     return args;
 }
 
-// Hook into onExceptionUnwind without it being noticable to the backend, by setting up
+// Hook into onExceptionUnwind without it being noticeable to the backend, by setting up
 // a getter and a setter on the object itself. See startObserving for details.
 function hookExceptionUnwind(dbg, callback)
 {
@@ -246,6 +252,7 @@ function hookExceptionUnwind(dbg, callback)
         get: () => threadHook,
         configurable: true
     });
+
     desc.set.call(dbg, function()
     {
         callback.apply(this, arguments);

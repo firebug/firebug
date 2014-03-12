@@ -1401,7 +1401,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             {
                 var sourceLink = object;
 
-                var sourceFile = this.context.sourceFileMap[sourceLink.href];
+                var sourceFile = this.context.getSourceFile(sourceLink.href);
                 if (sourceFile)
                 {
                     Dom.clearNode(this.panelNode);  // replace rendered stylesheets

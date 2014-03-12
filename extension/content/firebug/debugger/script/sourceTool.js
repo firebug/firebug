@@ -142,7 +142,8 @@ SourceTool.prototype = Obj.extend(new Tool(),
         // created e.g. as the user is evaluating expressions in the watch window.
         if (DebuggerLib.isFrameLocationEval(script.url))
         {
-            Trace.sysout("sourceTool.addScript; A script ignored " + script.type);
+            Trace.sysout("sourceTool.addScript; A script ignored " + script.type +
+                ", " + script.url, script);
             return;
         }
 

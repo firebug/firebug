@@ -5,17 +5,18 @@ define([
     "firebug/lib/trace",
     "firebug/lib/events",
     "firebug/lib/string",
+    "firebug/lib/url",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/script/sourceLink",
 ],
-function(Firebug, FBTrace, Events, Str, DebuggerLib, SourceLink) {
+function(Firebug, FBTrace, Events, Str, Url, DebuggerLib, SourceLink) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-var  Cc = Components.classes;
+var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 var TraceError = FBTrace.toError();
@@ -33,6 +34,9 @@ function SourceFile(context, actor, href, isBlackBoxed)
 {
     this.context = context;
     this.actor = actor;
+
+    // SourceFile URL should not use document fragment (issue 7251)
+    //this.href = Url.normalizeURL(href);
     this.href = href;
 
     // xxxHonza: this field should be utilized by issue 4885.
@@ -41,7 +45,7 @@ function SourceFile(context, actor, href, isBlackBoxed)
     // The content type is set when 'source' packet is received (see onSourceLoaded).
     this.contentType = null;
 
-    // xxxHonza: refactore the flag logic.
+    // xxxHonza: refactor the flag logic.
     this.compilation_unit_type = "script_tag";
     this.callbacks = [];
 }
