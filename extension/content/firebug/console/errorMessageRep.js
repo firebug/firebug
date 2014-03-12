@@ -42,7 +42,7 @@ var Trace = FBTrace.to("DBG_ERRORLOG");
 
 /**
  * @domplate Domplate template used to represent Error logs in the UI. Registered as Firebug rep.
- * This template is used for {@ErrorMessageObj} instances.
+ * This template is used for {@link ErrorMessageObj} instances.
  */
 var ErrorMessage = domplate(Rep,
 /** @lends ErrorMessage */
