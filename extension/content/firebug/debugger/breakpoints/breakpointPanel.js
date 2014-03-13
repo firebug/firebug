@@ -160,11 +160,11 @@ BreakpointPanel.prototype = Obj.extend(Panel,
         Events.dispatch(this.fbListeners, "onBreakRowsRefreshed", [this, this.panelNode]);
     },
 
-    // xxxHonza: this function is also responsible for setting the breakpoint name
-    // it should be done just once and probably somewhere else.
-    // Note that breakpoint name can be generated from the source and the source
+    // xxxHonza: This function is also responsible for setting the breakpoint name.
+    // It should be done just once and probably somewhere else.
+    // Note that the breakpoint name can be generated from the source and the source
     // (especially in case of dynamically created scripts) doesn't have to be immediately
-    // available. Since the methods does always set the name it's auto-updated in the panel.
+    // available. Since the methods always set the name, it's auto-updated in the panel.
     extractBreakpoints: function(context)
     {
         var breakpoints = [];
@@ -177,23 +177,21 @@ BreakpointPanel.prototype = Obj.extend(Panel,
         {
             var url = sourceFile.getURL();
 
-            // When extracting breakpoints for the current page make sure to remove
-            // URL fragment. Also pass true for 'dynamic' argument
-            // into enumerate methods so, all breakpoints for this page are displayed
-            // in the breakpoint panel.
-            // 1) There can be dynamic breakpoints for dynamic script with special
-            // URL suffix.
-            // 2) There can be breakpoints using URL fragment (see issue 7251).
+            // When extracting breakpoints for the current page make sure to remove the
+            // URL fragment. Also pass 'true' for the 'dynamic' argument into enumeration methods,
+            // so all breakpoints for this page are displayed in the Breakpoints panel.
+            // 1) There can be dynamic breakpoints for dynamic scripts with special URL suffix.
+            // 2) There can be breakpoints using a document fragment (see issue 7251).
             url = Url.normalizeURL(url);
 
-            // xxxHonza: we might want to introduce an |options| argument
+            // xxxHonza: We might want to introduce an 'options' argument
             // for all the enumeration methods.
             BreakpointStore.enumerateBreakpoints(url, true, function(bp)
             {
                 self.getSourceLine(bp, sourceFile);
 
                 // xxxHonza: optimize me
-                // There can be duplicities since dynamic breakpoint are returned for
+                // There can be duplicates since dynamic breakpoints are returned for
                 // the parent script URL as well as for the (dynamic) URL they really belong to.
                 if (breakpoints.indexOf(bp) == -1)
                     breakpoints.push(bp);
