@@ -31,7 +31,7 @@ function(Firebug, FBTrace, Locale, Options, Str, Url, Wrapper, FirebugReps, Tabl
 // Constants
 
 var TraceError = FBTrace.toError();
-var Trace = FBTrace.to("DBG_ERRORLOG");
+var Trace = FBTrace.to("DBG_CONSOLE");
 
 // ********************************************************************************************* //
 

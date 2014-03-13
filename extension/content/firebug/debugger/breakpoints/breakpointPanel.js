@@ -186,6 +186,8 @@ BreakpointPanel.prototype = Obj.extend(Panel,
             // 2) There can be breakpoints using URL fragment (see issue 7251).
             url = Url.normalizeURL(url);
 
+            // xxxHonza: we might want to introduce an |options| argument
+            // for all the enumeration methods.
             BreakpointStore.enumerateBreakpoints(url, true, function(bp)
             {
                 self.getSourceLine(bp, sourceFile);
