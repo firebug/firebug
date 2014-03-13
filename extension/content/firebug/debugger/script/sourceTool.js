@@ -180,7 +180,8 @@ SourceTool.prototype = Obj.extend(new Tool(),
         if (this.context.activeThread.actor != response.from)
         {
             Trace.sysout("sourceTool.newSource; coming from different thread " +
-                response.source.url, response);
+                response.source.url + ", " + this.context.activeThread.actor + " != " +
+                response.from, response);
             return;
         }
 
@@ -612,8 +613,9 @@ function computeDynamicUrl(script)
         var introScript = script.source.introductionScript;
         if (!introScript)
         {
-            TraceError.sysout("sourceTool.computeDynamicUrl; ERROR No introductionScript: " +
-                script.source.url);
+            // xxxHonza: hide this, scriptElement scripts don't have introductionScript.
+            //TraceError.sysout("sourceTool.computeDynamicUrl; ERROR No introductionScript: " +
+            //    script.source.url);
             return Url.normalizeURL(script.source.url + "/" + displayURL);displayURL;
         }
 
@@ -645,7 +647,8 @@ function computeDynamicUrl(script)
     case "scriptElement":
         // xxxHonza: how else we could identify a <script> based Script if ID attribute
         // is not set and the xpath is like script[2]?
-        return url + id;
+        // xxxHonza: how to distinguish between sriptElement static and dynamic?
+        return url/* + id*/;
 
     case "eval":
     case "Function":
