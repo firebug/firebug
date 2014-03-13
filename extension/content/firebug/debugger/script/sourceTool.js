@@ -325,6 +325,18 @@ DynamicSourceCollector.prototype =
             return this.originalOnNewScript.apply(dbg, arguments);
 
         var introType = script.source.introductionType;
+
+        // xxxHonza: ugh, I don't know how to distinguish between static scriptElement
+        // scripts and those who are dynamically created.
+        // Let's watch this: https://bugzilla.mozilla.org/show_bug.cgi?id=978657#c18
+        if (introType == "scriptElement" && script.startLine > 1)
+        {
+            Trace.sysout("sourceTool.onNewScript; Looks like dynamic script, but it isn't",
+                script);
+
+            return this.originalOnNewScript.apply(dbg, arguments);
+        }
+
         var scriptType = dynamicTypesMap[introType];
         if (scriptType)
         {
@@ -647,8 +659,7 @@ function computeDynamicUrl(script)
     case "scriptElement":
         // xxxHonza: how else we could identify a <script> based Script if ID attribute
         // is not set and the xpath is like script[2]?
-        // xxxHonza: how to distinguish between sriptElement static and dynamic?
-        return url/* + id*/;
+        return url + id;
 
     case "eval":
     case "Function":
