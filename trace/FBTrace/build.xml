@@ -65,6 +65,7 @@
         <copy todir="${build.dir}/modules">
             <fileset dir="modules">
                <include name="**/*.js"/>
+               <include name="**/*.jsm"/>
             </fileset>
         </copy>
 
