@@ -40,8 +40,8 @@ var {domplate, DIV, SPAN, TD, TR, TABLE, TBODY, P, A} = Domplate;
 
 var reAllowedCss = /^(-moz-)?(background|border|color|font|line|margin|padding|text)/;
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -1091,8 +1091,11 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
         if (type != "exception")
             return;
 
-        if (!this.shouldBreakOnNext())
+        if (!this.shouldBreakOnNext() && !Options.get("breakOnExceptions"))
+        {
+            Trace.sysout("consolePanel.onDebuggerPaused; Break on error not active.");
             return;
+        }
 
         // Reset the break-on-next-error flag after an exception break happens.
         // xxxHonza: this is how the other BON implementations work, but we could reconsider it.
@@ -1148,8 +1151,12 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
 
         // If 'break on exceptions' is set don't resume the debugger, the user wants
         // to break and see where it happens.
-        if (Options.get("breakOnExceptions"))
-            return false;
+        if (!Options.get("breakOnExceptions"))
+        {
+            Trace.sysout("consolePanel.shouldResumeDebugger; Do not break, " +
+                "breakOnExceptions == false");
+            return true;
+        }
 
         if (BreakpointStore.isBreakpointDisabled(exc.fileName, exc.lineNumber - 1))
         {
@@ -1157,10 +1164,11 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
             return true;
         }
 
-        if (!context.breakingCause)
+        // This is to avoid repeated break-on-error in every frame when an error happens.
+        var preview = packet.why.exception.preview;
+        if (preview.lineNumber != packet.frame.where.line)
         {
-            // This is to avoid repeated break-on-error in every frame when an error happens.
-            Trace.sysout("context.breakingCause; No breaking cause, resume debugger");
+            Trace.sysout("consolePanel.shouldResumeDebugger; Do not break, we did already");
             return true;
         }
 
