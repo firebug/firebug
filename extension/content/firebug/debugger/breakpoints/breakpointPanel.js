@@ -181,7 +181,7 @@ BreakpointPanel.prototype = Obj.extend(Panel,
             // URL fragment. Also pass 'true' for the 'dynamic' argument into enumeration methods,
             // so all breakpoints for this page are displayed in the Breakpoints panel.
             // 1) There can be dynamic breakpoints for dynamic scripts with special URL suffix.
-            // 2) There can be breakpoints using a document fragment (see issue 7251).
+            // 2) There can be breakpoints using a URL fragment (see issue 7251).
             url = Url.normalizeURL(url);
 
             // xxxHonza: We might want to introduce an 'options' argument
