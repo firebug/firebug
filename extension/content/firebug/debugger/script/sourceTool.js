@@ -338,10 +338,8 @@ DynamicSourceCollector.prototype =
         }
         else
         {
-            Trace.sysout("sourceTool.onNewScript; (non dynamic) " + script.url + ", " +
+            Trace.sysout("sourceTool.onNewScript; (non dynamic) " + script.source.url + ", " +
                 introType, script);
-            Trace.sysout("sourceTool.onNewSource; (non dynamic) " + script.source.url + ", " +
-                introType, script.source);
         }
 
         // Don't forget to execute the original logic.
@@ -366,10 +364,8 @@ DynamicSourceCollector.prototype =
 
             var introType = script.source.introductionType;
 
-            Trace.sysout("sourceTool.addDynamicScript; " + script.url + ", " +
+            Trace.sysout("sourceTool.addDynamicScript; " + script.source.url + ", " +
                 introType, script);
-            Trace.sysout("sourceTool.addDynamicSource; " + script.source.url + ", " +
-                introType, script.source);
         }
 
         // Get an existing instance of {@link SourceFile} by URL. We don't want to create
@@ -647,7 +643,9 @@ function computeDynamicUrl(script)
         return url + id + " " + element.textContent;
 
     case "scriptElement":
-        return url;
+        // xxxHonza: how else we could identify a <script> based Script if ID attribute
+        // is not set and the xpath is like script[2]?
+        return url + id;
 
     case "eval":
     case "Function":
@@ -667,7 +665,7 @@ function getElementId(script)
     if (element)
         element = element.unsafeDereference();
 
-    var attrName = script.source.elementAttributeName;
+    var attrName = script.source.elementAttributeName || "";
 
     var id = element.getAttribute("id");
     if (id)

@@ -47,7 +47,7 @@ function runTest()
                             "netInfoCachedResponseHeadersBody");
                         if (FBTest.ok(headersBody, "Cached response headers must exist"))
                         {
-                            FBTest.compare(/Cache-Control\s*max-age=10, public/,
+                            FBTest.compare(/Cache-Control\s*max-age=10,\s*public/,
                                 headersBody.textContent, "'Cache-Control' header must exist");
                         }
                     }

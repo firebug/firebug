@@ -1,29 +1,37 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/chrome/reps",
+    "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/lib/locale",
-    "firebug/lib/wrapper",
-    "firebug/lib/url",
-    "firebug/lib/string",
-    "firebug/debugger/stack/stackFrame",
-    "firebug/debugger/stack/stackTrace",
-    "firebug/console/errors",
-    "firebug/trace/debug",
-    "firebug/console/console",
     "firebug/lib/options",
-    "firebug/debugger/debuggerLib",
+    "firebug/lib/string",
+    "firebug/lib/url",
+    "firebug/lib/wrapper",
+    "firebug/chrome/reps",
+    "firebug/chrome/tableRep",
+    "firebug/console/console",
+    "firebug/console/errors",
     "firebug/console/errorMessageObj",
     "firebug/console/commands/profiler",
-    "firebug/chrome/tableRep",
+    "firebug/debugger/stack/stackFrame",
+    "firebug/debugger/stack/stackTrace",
+    "firebug/debugger/debuggerLib",
     "firebug/dom/domBaseTree",
+    "firebug/trace/debug",
 ],
-function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, StackTrace,
-    Errors, Debug, Console, Options, DebuggerLib, ErrorMessageObj, Profiler,
-    TableRep, DomBaseTree) {
+function(Firebug, FBTrace, Locale, Options, Str, Url, Wrapper, FirebugReps, TableRep,
+    Console, Errors, ErrorMessageObj, Profiler, StackFrame, StackTrace, DebuggerLib,
+    DomBaseTree, Debug) {
 
 // Note: since we are using .caller and .arguments for stack walking, we can not use strict mode.
 //"use strict";
+
+// ********************************************************************************************* //
+// Constants
+
+var TraceError = FBTrace.toError();
+var Trace = FBTrace.to("DBG_CONSOLE");
 
 // ********************************************************************************************* //
 
@@ -76,6 +84,7 @@ function createFirebugConsole(context, win)
             var rest = [];
             for (var i = 1; i < arguments.length; i++)
                 rest.push(arguments[i]);
+
             return logAssert("assert", rest);
         }
 
@@ -169,6 +178,7 @@ function createFirebugConsole(context, win)
             if (!strKey)
                 return Console.getDefaultReturnValue();
         }
+
         var id = emptyKey + " " + strKey;
 
         if (!context.frameCounters)
@@ -236,6 +246,7 @@ function createFirebugConsole(context, win)
 
             delete this.timeCounters[key];
         }
+
         return diff;
     };
 
@@ -243,14 +254,14 @@ function createFirebugConsole(context, win)
     {
         label = label || "";
 
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleExposed.timeStamp; " + label);
+        Trace.sysout("consoleExposed.timeStamp; " + label);
 
         var now = new Date();
         Firebug.NetMonitor.addTimeStamp(context, now.getTime(), label);
 
         var formattedTime = now.getHours() + ":" + now.getMinutes() + ":" +
             now.getSeconds() + "." + now.getMilliseconds();
+
         return logFormatted([formattedTime, label], "timeStamp");
     };
 
@@ -333,20 +344,19 @@ function createFirebugConsole(context, win)
         if (msg && msg.stack)
         {
             trace = StackTrace.parseToStackTrace(msg.stack, context);
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("logAssert trace from msg.stack", trace);
+
+            Trace.sysout("logAssert trace from msg.stack", trace);
         }
         else
         {
             trace = getJSDUserStack();
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
+
+            Trace.sysout("logAssert trace from getJSDUserStack", trace);
 
             if (!trace)
             {
                 trace = getComponentsUserStack();
-                if (FBTrace.DBG_CONSOLE)
-                    FBTrace.sysout("logAssert trace from getComponentsUserStack", trace);
+                Trace.sysout("logAssert trace from getComponentsUserStack", trace);
             }
         }
 
@@ -383,10 +393,10 @@ function createFirebugConsole(context, win)
         var frame = Components.stack;
         var userURL = null;
 
-        if (FBTrace.DBG_CONSOLE)
+        if (Trace.active)
         {
             userURL = win.location.href.toString();
-            FBTrace.sysout("consoleExposed.getComponentsStackDump initial stack for userURL " +
+            Trace.sysout("consoleExposed.getComponentsStackDump initial stack for userURL " +
                 userURL, frame);
         }
 
@@ -394,9 +404,9 @@ function createFirebugConsole(context, win)
         while (frame && Url.isSystemURL(frame.filename))
             frame = frame.caller;
 
-        if (FBTrace.DBG_CONSOLE)
+        if (Trace.active)
         {
-            FBTrace.sysout("consoleExposed.getComponentsStackDump final stack for userURL " +
+            Trace.sysout("consoleExposed.getComponentsStackDump final stack for userURL " +
                 userURL, frame);
         }
 
@@ -406,10 +416,12 @@ function createFirebugConsole(context, win)
     function getStackLink()
     {
         var sourceLink = StackFrame.getFrameSourceLink(getComponentsStackDump());
+
         // xxxFlorent: should be reverted if we integrate 
         // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
         if (sourceLink && DebuggerLib.isFrameLocationEval(sourceLink.href))
             return null;
+
         return sourceLink;
     }
 
@@ -477,6 +489,7 @@ function createFirebugConsole(context, win)
                             var argValues = Array.prototype.slice.call(func.arguments);
                             var argNames =
                                 StackFrame.guessFunctionArgNamesFromSource(String(func));
+
                             if (argNames && argNames.length === func.length)
                             {
                                 for (var i = 0; i < func.length; i++)
@@ -484,7 +497,10 @@ function createFirebugConsole(context, win)
                             }
                         }
                     }
-                    catch (exc) {} // strict mode etc.
+                    catch (exc)
+                    {
+                        // strict mode etc.
+                    }
                 }
 
                 var sframe = new StackFrame({href: fileName},
