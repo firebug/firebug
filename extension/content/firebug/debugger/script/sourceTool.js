@@ -643,7 +643,9 @@ function computeDynamicUrl(script)
         return url + id + " " + element.textContent;
 
     case "scriptElement":
-        return url;
+        // xxxHonza: how else we could identify a <script> based Script if ID attribute
+        // is not set and the xpath is like script[2]?
+        return url + id;
 
     case "eval":
     case "Function":
@@ -663,7 +665,7 @@ function getElementId(script)
     if (element)
         element = element.unsafeDereference();
 
-    var attrName = script.source.elementAttributeName;
+    var attrName = script.source.elementAttributeName || "";
 
     var id = element.getAttribute("id");
     if (id)
