@@ -48,12 +48,13 @@ Firebug.CommandEditor = Obj.extend(Module,
             mode: "javascript",
             lineNumbers: true,
             readOnly: false,
-            gutters: [],
+            gutters: []
         };
 
         // Custom shortcuts for source editor
         config.extraKeys = {
             "Ctrl-Enter": this.onExecute.bind(this),
+            "Cmd-Enter": this.onExecute.bind(this),
             "Esc": this.onEscape.bind(this),
             "Ctrl-Space": this.autoComplete.bind(this, true),
             "Tab": this.onTab.bind(this)
