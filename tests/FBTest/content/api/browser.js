@@ -105,7 +105,7 @@ function waitForWindowLoad(browser, callback)
             FBTest.sysout("waitForWindowLoad; window loaded " + win.location.href);
 
             // This is a workaround for missing wrappedJSObject property,
-            // if the test case comes from http (and not from chrome)
+            // if the test case comes from HTTP (and not from chrome)
             // xxxHonza: this is rather a hack, it should be removed if possible.
             //if (!win.wrappedJSObject)
             //    win.wrappedJSObject = win;
@@ -117,7 +117,7 @@ function waitForWindowLoad(browser, callback)
             // xxxHonza: remove 'load' and 'MozAfterPaint' listeners when the test
             // finishes before the window is actually loaded.
             // Use refreshHaltedDebugger test as an example. (breaks during the page load
-            // and immediatelly calls testDone)
+            // and immediately calls testDone)
             if (!win)
                 FBTrace.sysout("waitForWindowLoad: ERROR no window!");
 
@@ -152,8 +152,8 @@ function waitForWindowLoad(browser, callback)
             painted = true;
         }
 
-        // Execute callback after 100ms timout (the inspector tests need it for now),
-        // but this shoud be set to 0.
+        // Execute callback after 100ms timeout (the inspector tests need it for now),
+        // but this should be set to 0.
         if (loaded && painted)
             setTimeout(executeCallback, 100);
     }

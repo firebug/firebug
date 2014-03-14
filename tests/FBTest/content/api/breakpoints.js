@@ -68,6 +68,33 @@ this.setBreakpoint = function(chrome, url, lineNo, attributes, callback)
     });
 };
 
+/**
+ * Wait till specific breakpoint is set (response from the backend received)
+ *
+ * @param {String} url URL of the breakpoint we are waiting for.
+ * @param {Number} lineNo Line number where the breakpoint should be set.
+ * @param {Function} callback Executed when the breakpoint is set.
+ */
+this.waitForBreakpoint = function(url, lineNo, callback)
+{
+    var browser = FBTest.getCurrentTabBrowser();
+
+    var listener =
+    {
+        onBreakpointAdded: function(bp)
+        {
+            if (bp.lineNo+1 != lineNo || bp.href != url)
+                return;
+
+            DebuggerController.removeListener(browser, listener);
+
+            callback();
+        }
+    };
+
+    DebuggerController.addListener(browser, listener);
+}
+
 this.removeBreakpoint = function(chrome, url, lineNo, callback)
 {
     if (!callback)

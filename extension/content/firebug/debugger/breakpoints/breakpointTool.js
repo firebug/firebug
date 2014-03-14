@@ -123,6 +123,8 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             // the UI is properly (and asynchronously) updated everywhere.
             self.dispatch("onBreakpointAdded", [self.context, bp]);
 
+            Firebug.dispatchEvent(self.context.browser, "onBreakpointAdded", [bp]);
+
             // The info about the original line should not be needed any more.
             delete bp.params.originLineNo;
         });

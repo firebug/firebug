@@ -82,7 +82,8 @@ EventHandler.prototype =
 
         try
         {
-            this.listener[type](event);
+            var args = event.detail.args;
+            this.listener[type].apply(this.listener, args);
         }
         catch (err)
         {
