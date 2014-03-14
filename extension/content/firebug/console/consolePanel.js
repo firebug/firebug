@@ -1164,8 +1164,17 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
             return true;
         }
 
-        // This is to avoid repeated break-on-error in every frame when an error happens.
         var preview = packet.why.exception.preview;
+        if (!preview)
+        {
+            TraceError.sysout("consolePanel.shouldResumeDebugger; ERROR preview info isn't" +
+                "available for the exception: " + , packet);
+            return false;
+        }
+
+        // This is to avoid repeated break-on-error in every frame when an error happens.
+        // Break only if the original location of the exception is the same as the
+        // location of the current frame.
         if (preview.lineNumber != packet.frame.where.line)
         {
             Trace.sysout("consolePanel.shouldResumeDebugger; Do not break, we did already");
