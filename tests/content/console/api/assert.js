@@ -2,7 +2,7 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/api/assert.html", function(win)
     {
-        FBTest.enablePanels(["console", "script"], function(win)
+        FBTest.enablePanels(["console"], function(win)
         {
             FBTest.setPref("filterSystemURLs", true);
 

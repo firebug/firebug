@@ -2,7 +2,7 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/api/error.html", function(win)
     {
-        FBTest.enablePanels(["console", "script"], function(win)
+        FBTest.enablePanels(["console"], function(win)
         {
             var config = {tagName: "div", classes: "logRow logRow-errorMessage"};
             FBTest.waitForDisplayedElement("console", config, function(row)
