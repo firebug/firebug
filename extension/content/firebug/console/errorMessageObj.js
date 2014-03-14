@@ -45,6 +45,7 @@ function ErrorMessageObj(message, href, lineNo, source, category, context,
 }
 
 ErrorMessageObj.prototype =
+/** @lends ErrorMessageObj */
 {
     getSourceLine: function(callback)
     {
@@ -54,21 +55,8 @@ ErrorMessageObj.prototype =
         var sourceFile = SourceFile.getSourceFileByUrl(this.context, this.href);
         if (!sourceFile)
         {
-            if (this.sourceLoading)
-                return;
-
-            this.sourceLoading = true;
-
-            SourceProvider.getSourceLine(this.context, this.href, this.lineNo, (line) =>
-            {
-                this.source = line
-                this.sourceLoaded = true;
-                this.sourceLoading = false;
-
-                if (callback)
-                    callback(line);
-            });
-
+            TraceError.sysout("errorMessageObj.getSourceLine; ERROR no source file! " +
+                this.href);
             return;
         }
 
@@ -119,11 +107,15 @@ ErrorMessageObj.prototype =
 // ********************************************************************************************* //
 // Helper Source Provider
 
+// xxxHonza: we might want to use tge {@link SourceProvider} if the following bug is fixed:
+// https://bugzilla.mozilla.org/show_bug.cgi?id=915433
+
 /**
  * Helper source provider used to display source line for errors in case when
  * the Script panel is disabled.
  */
 var SourceProvider =
+/** @lends SourceProvider */
 {
     getSourceLine: function(context, url, lineNo, callback)
     {

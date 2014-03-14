@@ -331,8 +331,8 @@ DynamicSourceCollector.prototype =
         // Let's watch this: https://bugzilla.mozilla.org/show_bug.cgi?id=978657#c18
         if (introType == "scriptElement" && script.startLine > 1)
         {
-            Trace.sysout("sourceTool.onNewScript; Looks like dynamic script, but it isn't",
-                script);
+            Trace.sysout("sourceTool.onNewScript; Looks like dynamic script, " +
+                "but it isn't: " + script.url, script);
 
             return this.originalOnNewScript.apply(dbg, arguments);
         }
