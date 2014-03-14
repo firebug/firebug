@@ -1168,7 +1168,7 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
         if (!preview)
         {
             TraceError.sysout("consolePanel.shouldResumeDebugger; ERROR preview info isn't" +
-                "available for the exception: " + , packet);
+                "available for the exception", packet);
             return false;
         }
 
