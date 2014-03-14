@@ -258,7 +258,11 @@ var ErrorMessage = domplate(Rep,
 
     getSourceType: function(error)
     {
-        if (error.source)
+        var hasScriptPanel = PanelActivation.isPanelEnabled("script");
+
+        if (!hasScriptPanel)
+            return "none";
+        else if (error.source)
             return "syntax";
         else if (error.category == "css")
             return "show";
