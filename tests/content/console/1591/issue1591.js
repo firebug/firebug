@@ -32,7 +32,7 @@ function testCommandLineForError()
 // Test entry point.
 function runTest()
 {
-    FBTest.openNewTab(basePath + "console/issue1591.html", function(win)
+    FBTest.openNewTab(basePath + "console/1591/issue1591.html", function(win)
     {
         FBTest.openFirebug(function() {
             FBTest.enableConsolePanel(testCommandLineForError);
