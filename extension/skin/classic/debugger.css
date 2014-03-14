@@ -220,9 +220,7 @@
 /* Notification */
 
 .notificationBox {
-    position: fixed;
-    z-index: 2147483647;
-    padding: 0 50px;
+    padding: 0;
     left: 0;
     right: 0;
     top: 0;
@@ -232,13 +230,13 @@
 .notificationTable {
     border: 1px solid lightgray;
     border-top: none;
+    border-left: none;
+    border-right: none;
     background: rgb(255, 255, 225);
     font-family: Lucida Grande,Tahoma,sans-serif;
     font-size: 12px;
     color: #000000;
     width: 100%;
-    box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.4);
-    border-radius: 0 0 3px 3px;
     padding: 2px 0;
     pointer-events: auto;
 }

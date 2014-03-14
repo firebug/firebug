@@ -273,6 +273,9 @@ BreakNotification.prototype = domplate(Rep,
         this.box = this.tag.append(this.cause, parentNode, this);
         this.box.repObject = this;
 
+        // Make sure the notification box is at the top.
+        parentNode.insertBefore(this.box, this.box.previousSibling);
+
         // Appends the HTML targets dynamically. In case they are null, it breaks
         // click events.
         // xxxHonza: this problem would deserve clarification.
