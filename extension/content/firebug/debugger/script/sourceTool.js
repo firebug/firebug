@@ -180,7 +180,8 @@ SourceTool.prototype = Obj.extend(new Tool(),
         if (this.context.activeThread.actor != response.from)
         {
             Trace.sysout("sourceTool.newSource; coming from different thread " +
-                response.source.url, response);
+                response.source.url + ", " + this.context.activeThread.actor + " != " +
+                response.from, response);
             return;
         }
 
@@ -324,6 +325,18 @@ DynamicSourceCollector.prototype =
             return this.originalOnNewScript.apply(dbg, arguments);
 
         var introType = script.source.introductionType;
+
+        // xxxHonza: ugh, I don't know how to distinguish between static scriptElement
+        // scripts and those who are dynamically created.
+        // Let's watch this: https://bugzilla.mozilla.org/show_bug.cgi?id=978657#c18
+        if (introType == "scriptElement" && script.startLine > 1)
+        {
+            Trace.sysout("sourceTool.onNewScript; Looks like dynamic script, but it isn't",
+                script);
+
+            return this.originalOnNewScript.apply(dbg, arguments);
+        }
+
         var scriptType = dynamicTypesMap[introType];
         if (scriptType)
         {
@@ -612,8 +625,9 @@ function computeDynamicUrl(script)
         var introScript = script.source.introductionScript;
         if (!introScript)
         {
-            TraceError.sysout("sourceTool.computeDynamicUrl; ERROR No introductionScript: " +
-                script.source.url);
+            // xxxHonza: hide this, scriptElement scripts don't have introductionScript.
+            //TraceError.sysout("sourceTool.computeDynamicUrl; ERROR No introductionScript: " +
+            //    script.source.url);
             return Url.normalizeURL(script.source.url + "/" + displayURL);displayURL;
         }
 
