@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/arr",
+    "firebug/lib/array",
     "firebug/lib/object",
     "firebug/lib/events",
     "firebug/lib/css",
