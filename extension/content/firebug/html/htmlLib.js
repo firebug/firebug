@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/lib/array",
     "firebug/lib/object",
     "firebug/lib/events",
     "firebug/lib/css",
@@ -10,7 +11,7 @@ define([
     "firebug/lib/xpath",
     "firebug/lib/string",
 ],
-function(Obj, Events, Css, Dom, Search, Xml, Xpath, Str) {
+function(Arr, Obj, Events, Css, Dom, Search, Xml, Xpath, Str) {
 
 // ********************************************************************************************* //
 // Constants
@@ -64,7 +65,7 @@ var HTMLLib =
                 for (var i = 0, len = nodes.length; i < len; ++i)
                     nodeSet.add(nodes[i]);
 
-                var frames = doc.getElementsByTagName("iframe");
+                var frames = doc.querySelectorAll("frame, iframe");
                 for (var i = 0, len = frames.length; i < len; ++i)
                 {
                     var fr = frames[i];
@@ -225,7 +226,7 @@ var HTMLLib =
             }
             else if (node.nodeType == Node.ATTRIBUTE_NODE)
             {
-                checkOrder = [{name: "nodeName", isValue: false}, {name: "nodeValue", isValue: true}];
+                checkOrder = [{name: "nodeName", isValue: false}, {name: "value", isValue: true}];
                 if (reverse)
                     checkOrder.reverse();
             }
@@ -457,7 +458,8 @@ var HTMLLib =
                     if (!prevNode)
                         prevNode = walker[0].root;
 
-                    while ((prevNode.nodeName || "").toUpperCase() == "IFRAME")
+                    var tagName = (prevNode.nodeName || "").toUpperCase();
+                    while (["FRAME", "IFRAME"].indexOf(tagName) !== -1)
                     {
                         createWalker(prevNode.contentDocument.documentElement);
                         prevNode = getLastAncestor();
@@ -493,13 +495,15 @@ var HTMLLib =
             }
             else
             {
+                var tagName = (currentNode.nodeName || "").toUpperCase();
+
                 // First check attributes
                 var attrs = currentNode.attributes || [];
                 if (attrIndex < attrs.length)
                 {
                     attrIndex++;
                 }
-                else if ((currentNode.nodeName || "").toUpperCase() == "IFRAME")
+                else if (["FRAME", "IFRAME"].indexOf(tagName) !== -1)
                 {
                     // Attributes have completed, check for iframe contents
                     createWalker(currentNode.contentDocument.documentElement);
