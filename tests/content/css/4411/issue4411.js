@@ -59,40 +59,37 @@ function hsla(callback)
 
 function executeTest(elementID, expectedValue, callback)
 {
-    FBTest.searchInCssPanel(elementID, function(node)
+    var node = FBTest.getStyleRulesBySelector(elementID)[0];
+
+    // Need to scroll the panel a bit, so that the background prop is visible (issue 4727)
+    var panel = FW.FBL.getAncestorByClass(node, "panelNode");
+    panel.scrollTop += 20;
+
+    var rule = FW.FBL.getAncestorByClass(node, "cssRule");
+    var propValue = rule.getElementsByClassName("cssPropValue").item(0);
+    var propName = rule.getElementsByClassName("cssPropName").item(0);
+
+    var config = {tagName: "div", classes: "infoTipColorBox"};
+    FBTest.waitForDisplayedElement("stylesheet", config, function (infoTip)
     {
-        FBTest.sysout("issue4411; selection: ", node);
+        var infoTipActive = infoTip.parentNode.getAttribute("active");
 
-        // Need to scroll the panel a bit, so that the background prop is visible (issue 4727)
-        var panel = FW.FBL.getAncestorByClass(node, "panelNode");
-        panel.scrollTop += 20;
-
-        var rule = FW.FBL.getAncestorByClass(node, "cssRule");
-        var propValue = rule.getElementsByClassName("cssPropValue").item(0);
-        var propName = rule.getElementsByClassName("cssPropName").item(0);
-
-        var config = {tagName: "div", classes: "infoTipColorBox"};
-        FBTest.waitForDisplayedElement("stylesheet", config, function (infoTip)
+        if (FBTest.ok(infoTipActive,
+            "There must be a color infotip shown hovering the value of the 'color' property " +
+            "of '" + elementID + "'."))
         {
-            var infoTipActive = infoTip.parentNode.getAttribute("active");
+            FBTest.compare(expectedValue, infoTip.firstChild.style.backgroundColor,
+                "The infotip must contain the same color as specified in the " +
+                "rule '" + elementID + "'.");
+        }
 
-            if (FBTest.ok(infoTipActive,
-                "There must be a color infotip shown hovering the value of the 'color' property " +
-                "of '" + elementID + "'."))
-            {
-                FBTest.compare(expectedValue, infoTip.firstChild.style.backgroundColor,
-                    "The infotip must contain the same color as specified in the " +
-                    "rule '" + elementID + "'.");
-            }
+        // Hide the info tip by moving mouse over the CSS prop name,
+        // otherwise it could block the mouse-move over the next CSS value.
+        // (fixex failure on Mac).
+        FBTest.mouseOver(propName);
 
-            // Hide the info tip by moving mouse over the CSS prop name,
-            // otherwise it could block the mouse-move over the next CSS value.
-            // (fixex failure on Mac).
-            FBTest.mouseOver(propName);
-
-            callback();
-        });
-
-        FBTest.mouseOver(propValue);
+        callback();
     });
+
+    FBTest.mouseOver(propValue);
 }
