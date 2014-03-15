@@ -22,19 +22,15 @@ function runTest()
 
                         FBTest.waitForBreakpoint(url, 11, function()
                         {
-                            var config = {tagName: "div", classes: "breakpoint"};
-                            FBTest.waitForDisplayedElement("script", config, function(element)
+                            // Asynchronously wait for break in debugger.
+                            FBTest.waitForBreakInDebugger(null, 11, false, function(row)
                             {
-                                // Asynchronously wait for break in debugger.
-                                FBTest.waitForBreakInDebugger(null, 11, false, function(row)
-                                {
-                                    FBTest.clickContinueButton();
-                                    FBTest.testDone();
-                                });
-
-                                // Step 6: Click the 'Show output' button
-                                FBTest.clickContentButton(win, "showOutput");
+                                FBTest.clickContinueButton();
+                                FBTest.testDone();
                             });
+
+                            // Step 6: Click the 'Show output' button
+                            FBTest.clickContentButton(win, "showOutput");
                         });
                     });
 
