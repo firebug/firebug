@@ -9,13 +9,6 @@ function(FBTrace, Tree, Domplate) {
 with (Domplate) {
 
 // ********************************************************************************************* //
-// Constants
-
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cu = Components.utils;
-
-// ********************************************************************************************* //
 // PropertyTree Implementation
 
 var PropertyTree = domplate(Tree,

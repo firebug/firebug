@@ -14,13 +14,6 @@ function(FBTrace, Events, Reps, Css, Str, Obj, Domplate, Dom) {
 with (Domplate) {
 
 // ********************************************************************************************* //
-// Constants
-
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cu = Components.utils;
-
-// ********************************************************************************************* //
 // Domplate helpers - Tree (domplate widget)
 
 /**
@@ -154,7 +147,6 @@ var Tree = domplate(Reps.Rep,
     {
         var rep = Reps.getRep(value);
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
-        var valueType = typeof(value);
 
         var hasChildren = this.hasMembers(value);
 
