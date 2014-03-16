@@ -25,6 +25,7 @@ define([
     "firebug/chrome/searchBox",
     "firebug/chrome/window",
     "firebug/css/autoCompleter",
+    "firebug/css/cssDirtyListener",
     "firebug/css/cssModule",
     "firebug/css/cssPanelUpdater",
     "firebug/css/cssReps",
@@ -38,8 +39,8 @@ define([
 ],
 function(Firebug, FBTrace, Arr, Css, Dom, Domplate, Events, Locale, Obj, Options, Persist, Search,
     Str, System, Url, Wrapper, Xml, Menu, Panel, FirebugReps, SearchBox, Win, CSSAutoCompleter,
-    CSSModule, CSSPanelUpdater, CSSReps, CSSRuleEditor, StyleSheetEditor, BaseEditor, Editor,
-    InlineEditor, SourceLink) {
+    CSSDirtyListener, CSSModule, CSSPanelUpdater, CSSReps, CSSRuleEditor, StyleSheetEditor,
+    BaseEditor, Editor, InlineEditor, SourceLink) {
 
 // ********************************************************************************************* //
 // Constants
@@ -289,7 +290,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
     startSourceEditing: function(styleSheet, context)
     {
-        if (Firebug.CSSDirtyListener.isDirty(styleSheet, context))
+        if (CSSDirtyListener.isDirty(styleSheet, context))
         {
             var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"].
                 getService(Ci.nsIPromptService);
@@ -2417,59 +2418,6 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
         return {value: "#" + expr, selection: [offset+1, offsetEnd+1]};
     }
 });
-
-// ********************************************************************************************* //
-
-Firebug.CSSDirtyListener = function(context)
-{
-};
-
-Firebug.CSSDirtyListener.isDirty = function(styleSheet, context)
-{
-    return (styleSheet.fbDirty == true);
-};
-
-Firebug.CSSDirtyListener.prototype =
-{
-    markSheetDirty: function(styleSheet)
-    {
-        if (!styleSheet && FBTrace.DBG_ERRORS)
-        {
-            FBTrace.sysout("css; CSSDirtyListener markSheetDirty; styleSheet == NULL");
-            return;
-        }
-
-        styleSheet.fbDirty = true;
-
-        if (FBTrace.DBG_CSS)
-            FBTrace.sysout("CSSDirtyListener markSheetDirty " + styleSheet.href, styleSheet);
-    },
-
-    onCSSInsertRule: function(styleSheet, cssText, ruleIndex)
-    {
-        this.markSheetDirty(styleSheet);
-    },
-
-    onCSSDeleteRule: function(styleSheet, ruleIndex)
-    {
-        this.markSheetDirty(styleSheet);
-    },
-
-    onCSSSetProperty: function(style, propName, propValue, propPriority, prevValue,
-        prevPriority, rule, baseText)
-    {
-        var styleSheet = rule.parentStyleSheet;
-        if (styleSheet)
-            this.markSheetDirty(styleSheet);
-    },
-
-    onCSSRemoveProperty: function(style, propName, prevValue, prevPriority, rule, baseText)
-    {
-        var styleSheet = rule.parentStyleSheet;
-        if (styleSheet)
-            this.markSheetDirty(styleSheet);
-    }
-};
 
 // ********************************************************************************************* //
 // Local Helpers

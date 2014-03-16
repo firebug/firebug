@@ -8,9 +8,10 @@ define([
     "firebug/lib/options",
     "firebug/lib/xpcom",
     "firebug/chrome/module",
+    "firebug/css/cssDirtyListener",
     "firebug/editor/editorSelector"
 ],
-function(Firebug, Css, Events, Obj, Options, Xpcom, Module, EditorSelector) {
+function(Firebug, Css, Events, Obj, Options, Xpcom, Module, CSSDirtyListener, EditorSelector) {
 
 // ********************************************************************************************* //
 // Constants
@@ -62,7 +63,7 @@ Firebug.CSSModule = Obj.extend(Module, Firebug.EditorSelector,
 
     initContext: function(context)
     {
-        context.dirtyListener = new Firebug.CSSDirtyListener(context);
+        context.dirtyListener = new CSSDirtyListener(context);
         this.addListener(context.dirtyListener);
     },
 
