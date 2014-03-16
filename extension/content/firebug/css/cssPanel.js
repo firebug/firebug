@@ -2,355 +2,54 @@
 /*global define:1, Components:1*/
 
 define([
-    "firebug/chrome/panel",
-    "firebug/lib/object",
     "firebug/firebug",
-    "firebug/lib/domplate",
-    "firebug/chrome/reps",
-    "firebug/lib/locale",
-    "firebug/lib/events",
-    "firebug/lib/url",
-    "firebug/debugger/script/sourceLink",
+    "firebug/lib/trace",
+    "firebug/lib/array",
     "firebug/lib/css",
     "firebug/lib/dom",
-    "firebug/chrome/window",
+    "firebug/lib/domplate",
+    "firebug/lib/events",
+    "firebug/lib/locale",
+    "firebug/lib/object",
+    "firebug/lib/options",
+    "firebug/lib/persist",
     "firebug/lib/search",
     "firebug/lib/string",
-    "firebug/lib/array",
-    "firebug/lib/xml",
-    "firebug/lib/persist",
     "firebug/lib/system",
+    "firebug/lib/url",
+    "firebug/lib/wrapper",
+    "firebug/lib/xml",
     "firebug/chrome/menu",
-    "firebug/lib/options",
+    "firebug/chrome/panel",
+    "firebug/chrome/reps",
+    "firebug/chrome/searchBox",
+    "firebug/chrome/window",
     "firebug/css/autoCompleter",
     "firebug/css/cssModule",
+    "firebug/css/cssPanelUpdater",
     "firebug/css/cssReps",
     "firebug/css/selectorEditor",
-    "firebug/lib/trace",
-    "firebug/css/cssPanelUpdater",
-    "firebug/lib/wrapper",
     "firebug/editor/baseEditor",
     "firebug/editor/editor",
     "firebug/editor/inlineEditor",
     "firebug/editor/sourceEditor",
-    "firebug/chrome/searchBox",
+    "firebug/debugger/script/sourceLink",
     "firebug/css/cssPanelMutationObserver",
 ],
-function(Panel, Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom,
-    Win, Search, Str, Arr, Xml, Persist, System, Menu, Options, CSSAutoCompleter, CSSModule,
-    CSSInfoTip, SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper, BaseEditor, Editor,
-    InlineEditor, SourceEditor, SearchBox) {
+function(Firebug, FBTrace, Arr, Css, Dom, Domplate, Events, Locale, Obj, Options, Persist, Search,
+    Str, System, Url, Wrapper, Xml, Menu, Panel, FirebugReps, SearchBox, Win, CSSAutoCompleter,
+    CSSModule, CSSPanelUpdater, CSSReps, SelectorEditor, BaseEditor, Editor, InlineEditor,
+    SourceEditor, SourceLink) {
 
 // ********************************************************************************************* //
 // Constants
 
-var {domplate, FOR, TAG, DIV, SPAN, A, TEXTAREA} = Domplate;
+var {domplate, FOR, DIV, TEXTAREA} = Domplate;
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-var CSSDomplateBase =
-{
-    isEditable: function(rule)
-    {
-        return !rule.isSystemSheet && !rule.isNotEditable;
-    },
-
-    isSelectorEditable: function(rule)
-    {
-        return rule.isSelectorEditable && this.isEditable(rule);
-    },
-
-    getPropertyValue: function(prop)
-    {
-        // Disabled, see http://code.google.com/p/fbug/issues/detail?id=5880
-        /*
-        var limit = Options.get("stringCropLength");
-        */
-        var limit = 0;
-        if (limit > 0)
-            return Str.cropString(prop.value, limit);
-        return prop.value;
-    }
-};
-
-var CSSPropTag = domplate(CSSDomplateBase,
-{
-    tag:
-        DIV({"class": "cssProp focusRow", $disabledStyle: "$prop.disabled",
-            $editGroup: "$rule|isEditable",
-            $cssOverridden: "$prop.overridden",
-            role: "option"},
-
-            // Use spaces for indent to make "copy to clipboard" nice.
-            SPAN({"class": "cssPropIndent"}, "&nbsp;&nbsp;&nbsp;&nbsp;"),
-            SPAN({"class": "cssPropName", $editable: "$rule|isEditable"},
-                "$prop.name"
-            ),
-
-            // Use a space here, so that "copy to clipboard" has it (issue 3266).
-            SPAN({"class": "cssColon"}, ": "),
-            SPAN({"class": "cssPropValue", $editable: "$rule|isEditable"},
-                "$prop|getPropertyValue$prop.important"
-            ),
-            SPAN({"class": "cssSemi"}, ";")
-        )
-});
-
-var CSSRuleTag =
-    TAG("$rule.tag", {rule: "$rule"});
-
-var CSSImportRuleTag = domplate(CSSDomplateBase,
-{
-    tag:
-        DIV({"class": "cssRule insertInto focusRow importRule", _repObject: "$rule.rule"},
-        "@import &quot;",
-        A({"class": "objectLink", _repObject: "$rule.rule.styleSheet"}, "$rule.rule.href"),
-        "&quot;",
-        SPAN({"class": "separator"}, "$rule.rule|getSeparator"),
-        SPAN({"class": "cssMediaQuery", $editable: "$rule|isEditable"},
-            "$rule.rule.media.mediaText"),
-        ";"
-    ),
-
-    getSeparator: function(rule)
-    {
-        return rule.media.mediaText == "" ? "" : " ";
-    }
-});
-
-var CSSCharsetRuleTag = domplate(CSSDomplateBase,
-{
-    tag:
-        DIV({"class": "cssRule focusRow cssCharsetRule", _repObject: "$rule.rule"},
-            SPAN({"class": "cssRuleName"}, "@charset"),
-            "&nbsp;&quot;",
-            SPAN({"class": "cssRuleValue", $editable: "$rule|isEditable"}, "$rule.rule.encoding"),
-            "&quot;;"
-        )
-});
-
-var CSSMediaRuleTag = domplate(CSSDomplateBase,
-{
-    tag:
-        DIV({"class": "cssRule focusRow cssMediaRule", _repObject: "$rule.rule"},
-            DIV({"class": "cssHead focusRow", role : "listitem"},
-                SPAN({"class": "cssRuleName"}, "@media"),
-                SPAN({"class": "separator"}, " "),
-                SPAN({"class": "cssMediaRuleCondition", $editable: "$rule|isEditable"},
-                    "$rule.rule.conditionText"),
-                SPAN(" {")
-            ),
-            DIV({"class": "cssRulesListBox", role: "listbox"},
-                FOR("subRule", "$rule.subRules",
-                    TAG("$subRule.tag", {rule: "$subRule"})
-                )
-            ),
-            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
-                role:"presentation"},
-                "}")
-        )
-});
-
-var CSSSupportsRuleTag = domplate(CSSDomplateBase,
-{
-    tag:
-        DIV({"class": "cssRule focusRow cssSupportsRule", _repObject: "$rule.rule"},
-            DIV({"class": "cssHead focusRow", role : "listitem"},
-                SPAN({"class": "cssRuleName"}, "@supports"),
-                SPAN({"class": "separator"}, " "),
-                SPAN({"class": "cssSupportsRuleCondition", $editable: "$rule|isEditable"},
-                "$rule.rule.conditionText"),
-                SPAN(" {")
-            ),
-            DIV({"class": "cssRulesListBox", role: "listbox"},
-                FOR("subRule", "$rule.subRules",
-                    TAG("$subRule.tag", {rule: "$subRule"})
-                )
-            ),
-            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
-                role:"presentation"},
-            "}")
-        )
-});
-
-var CSSKeyframesRuleTag = domplate(CSSDomplateBase,
-{
-    tag:
-        DIV({"class": "cssRule focusRow cssKeyframesRule", _repObject: "$rule.rule"},
-            DIV({"class": "cssHead focusRow", role : "listitem"},
-                SPAN({"class": "cssRuleName"}, "@keyframes"),
-                SPAN({"class": "separator"}, " "),
-                SPAN({"class": "cssKeyframesRuleName", $editable: "$rule|isEditable"},
-                "$rule.rule.name"),
-                SPAN(" {")
-            ),
-            DIV({"class": "cssRulesListBox", role: "listbox"},
-                FOR("subRule", "$rule.subRules",
-                    TAG("$subRule.tag", {rule: "$subRule"})
-                )
-            ),
-            DIV({role:"presentation"},
-                "}")
-        )
-});
-
-var CSSKeyframeRuleTag = domplate(CSSDomplateBase,
-{
-    tag:
-        DIV({"class": "cssRule",
-                $cssEditableRule: "$rule|isEditable",
-                $insertInto: "$rule|isEditable",
-                $editGroup: "$rule|isSelectorEditable",
-                _repObject: "$rule.rule",
-                role: "presentation"},
-            DIV({"class": "cssHead focusRow", role: "listitem"},
-                SPAN({"class": "cssKeyText", $editable: "$rule|isEditable"},
-                    "$rule.rule.keyText"),
-                " {"
-            ),
-            DIV({role: "group"},
-                DIV({"class": "cssPropertyListBox", _rule: "$rule", role: "listbox"},
-                    FOR("prop", "$rule.props",
-                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
-                    )
-                )
-            ),
-            DIV({$editable: "$rule|isEditable", $insertBefore: "$rule|isEditable",
-                role:"presentation"},
-                "}"
-            )
-        )
-});
-
-var CSSNamespaceRuleTag = domplate(CSSDomplateBase,
-{
-    tag:
-        DIV({"class": "cssRule focusRow cssNamespaceRule", _repObject: "$rule.rule"},
-            SPAN({"class": "cssRuleName"}, "@namespace"),
-            SPAN({"class": "separator"}, "$rule.prefix|getSeparator"),
-            SPAN({"class": "cssNamespacePrefix", $editable: "$rule|isEditable"}, "$rule.prefix"),
-            "&nbsp;&quot;",
-            SPAN({"class": "cssNamespaceName", $editable: "$rule|isEditable"}, "$rule.name"),
-            "&quot;;"
-        ),
-
-    getSeparator: function(prefix)
-    {
-        return prefix == "" ? "" : " ";
-    }
-});
-
-var CSSFontFaceRuleTag = domplate(CSSDomplateBase,
-{
-    tag:
-        DIV({"class": "cssRule cssFontFaceRule",
-            $cssEditableRule: "$rule|isEditable",
-            $insertInto: "$rule|isEditable",
-            _repObject: "$rule.rule",
-            role : 'presentation'},
-            DIV({"class": "cssHead focusRow", role : "listitem"}, "@font-face {"),
-            DIV({role : "group"},
-                DIV({"class": "cssPropertyListBox", role: "listbox"},
-                    FOR("prop", "$rule.props",
-                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
-                    )
-                )
-            ),
-            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
-                role:"presentation"},
-                "}"
-            )
-        )
-});
-
-var CSSPageRuleTag = domplate(CSSDomplateBase,
-{
-    tag:
-        DIV({"class": "cssRule focusRow cssPageRule", _repObject: "$rule.rule"},
-            DIV({"class": "cssHead focusRow", role : "listitem"},
-                SPAN({"class": "cssRuleName"}, "@page"),
-                SPAN({"class": "separator"}, "$rule.selectorText|getSeparator"),
-                SPAN({"class": "cssPageRuleSelector", $editable: "$rule|isEditable"},
-                    "$rule.selectorText|getSelectorText"),
-                SPAN(" {")
-            ),
-            DIV({role : "group"},
-                DIV({"class": "cssPropertyListBox", role: "listbox"},
-                    FOR("prop", "$rule.props",
-                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
-                    )
-                )
-            ),
-            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
-                role:"presentation"},
-                "}")
-        ),
-
-    getSeparator: function(selector)
-    {
-        return (!selector || selector == "") ? "" : " ";
-    },
-
-    getSelectorText: function(selector)
-    {
-        return selector || "";
-    }
-});
-
-var CSSDocumentRuleTag = domplate(CSSDomplateBase,
-{
-    tag:
-        DIV({"class": "cssRule focusRow cssDocumentRule", _repObject: "$rule.rule"},
-            DIV({"class": "cssHead focusRow", role : "listitem"},
-                SPAN({"class": "cssRuleName"}, "@-moz-document"),
-                SPAN({"class": "separator"}, " "),
-                SPAN({"class": "cssDocumentRuleCondition", $editable: "$rule|isEditable"},
-                "$rule.rule.conditionText"),
-                SPAN(" {")
-            ),
-            DIV({"class": "cssRulesListBox", role: "listbox"},
-                FOR("subRule", "$rule.subRules",
-                    TAG("$subRule.tag", {rule: "$subRule"})
-                )
-            ),
-            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
-                role:"presentation"},
-            "}")
-        )
-});
-
-var CSSStyleRuleTag = domplate(CSSDomplateBase,
-{
-    tag:
-        DIV({"class": "cssRule",
-            $cssEditableRule: "$rule|isEditable",
-            $insertInto: "$rule|isEditable",
-            $editGroup: "$rule|isSelectorEditable",
-            _repObject: "$rule.rule",
-            role: "presentation"},
-            DIV({"class": "cssHead focusRow", role: "listitem"},
-                SPAN({"class": "cssSelector", $editable: "$rule|isSelectorEditable"},
-                    "$rule.selector"),
-                " {"
-            ),
-            DIV({role: "group"},
-                DIV({"class": "cssPropertyListBox", _rule: "$rule", role: "listbox"},
-                    FOR("prop", "$rule.props",
-                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
-                    )
-                )
-            ),
-            DIV({$editable: "$rule|isEditable", $insertBefore: "$rule|isEditable",
-                role:"presentation"},
-                "}"
-            )
-        )
-});
-
-Firebug.CSSStyleRuleTag = CSSStyleRuleTag;
 
 // ********************************************************************************************* //
 // CSSStyleSheetPanel (CSS Panel)
@@ -379,7 +78,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         tag:
             DIV({"class": "cssSheet insertInto a11yCSSView"},
                 FOR("rule", "$rules",
-                    CSSRuleTag
+                    CSSReps.CSSRuleTag
                 ),
                 DIV({"class": "cssSheet editable insertBefore"}, ""
                 )
@@ -741,7 +440,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 {
                     props = this.getRuleProperties(context, rule);
                     rules.push({
-                        tag: CSSStyleRuleTag.tag,
+                        tag: CSSReps.CSSStyleRuleTag.tag,
                         rule: rule,
                         selector: rule.selectorText.replace(/ :/g, " *:"), // (issue 3683)
                         props: props,
@@ -752,7 +451,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 else if (window.CSSSupportsRule && rule instanceof window.CSSSupportsRule)
                 {
                     rules.push({
-                        tag: CSSSupportsRuleTag.tag,
+                        tag: CSSReps.CSSSupportsRuleTag.tag,
                         rule: rule,
                         subRules: createRules(Css.safeGetCSSRules(rule)),
                         isSystemSheet: isSystemSheet
@@ -760,16 +459,16 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 }
                 else if (rule instanceof window.CSSImportRule)
                 {
-                    rules.push({tag: CSSImportRuleTag.tag, rule: rule});
+                    rules.push({tag: CSSReps.CSSImportRuleTag.tag, rule: rule});
                 }
                 else if (rule instanceof window.CSSCharsetRule)
                 {
-                    rules.push({tag: CSSCharsetRuleTag.tag, rule: rule});
+                    rules.push({tag: CSSReps.CSSCharsetRuleTag.tag, rule: rule});
                 }
                 else if (rule instanceof window.CSSMediaRule)
                 {
                     rules.push({
-                        tag: CSSMediaRuleTag.tag,
+                        tag: CSSReps.CSSMediaRuleTag.tag,
                         rule: rule,
                         subRules: createRules(Css.safeGetCSSRules(rule)),
                         isSystemSheet: isSystemSheet
@@ -778,7 +477,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 else if (rule instanceof window.CSSMozDocumentRule)
                 {
                     rules.push({
-                        tag: CSSDocumentRuleTag.tag,
+                        tag: CSSReps.CSSDocumentRuleTag.tag,
                         rule: rule,
                         subRules: createRules(Css.safeGetCSSRules(rule)),
                         isSystemSheet: isSystemSheet
@@ -789,7 +488,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                     props = this.parseCSSProps(rule.style);
                     this.sortProperties(props);
                     rules.push({
-                        tag: CSSFontFaceRuleTag.tag,
+                        tag: CSSReps.CSSFontFaceRuleTag.tag,
                         rule: rule,
                         props: props,
                         isSystemSheet: isSystemSheet,
@@ -801,7 +500,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                     props = this.parseCSSProps(rule.style);
                     this.sortProperties(props);
                     rules.push({
-                        tag: CSSPageRuleTag.tag,
+                        tag: CSSReps.CSSPageRuleTag.tag,
                         rule: rule,
                         props: props,
                         isSystemSheet: isSystemSheet,
@@ -811,7 +510,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 else if (rule instanceof (window.CSSKeyframesRule || window.MozCSSKeyframesRule))
                 {
                     rules.push({
-                        tag: CSSKeyframesRuleTag.tag,
+                        tag: CSSReps.CSSKeyframesRuleTag.tag,
                         rule: rule,
                         subRules: createRules(Css.safeGetCSSRules(rule)),
                         isSystemSheet: isSystemSheet
@@ -822,7 +521,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                     props = this.parseCSSProps(rule.style);
                     this.sortProperties(props);
                     rules.push({
-                        tag: CSSKeyframeRuleTag.tag,
+                        tag: CSSReps.CSSKeyframeRuleTag.tag,
                         rule: rule,
                         props: props,
                         isSystemSheet: isSystemSheet
@@ -839,7 +538,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                     var namespace = rule.cssText.match(reNamespace);
                     var prefix = namespace[2] || "";
                     var name = namespace[3];
-                    rules.push({tag: CSSNamespaceRuleTag.tag, rule: rule, prefix: prefix,
+                    rules.push({tag: CSSReps.CSSNamespaceRuleTag.tag, rule: rule, prefix: prefix,
                         name: name, isNotEditable: true});
                 }
                 else
@@ -1736,7 +1435,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 case "colorKeyword":
                     this.infoTipType = "color";
                     this.infoTipObject = cssValueInfo.value;
-                    return CSSInfoTip.populateColorInfoTip(infoTip, cssValueInfo.value);
+                    return CSSReps.CSSInfoTip.populateColorInfoTip(infoTip, cssValueInfo.value);
 
                 case "url":
                     if (Css.isImageProperty(propName))
@@ -1751,12 +1450,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                         this.infoTipType = "image";
                         this.infoTipObject = absURL;
 
-                        return CSSInfoTip.populateImageInfoTip(infoTip, absURL, repeat);
+                        return CSSReps.CSSInfoTip.populateImageInfoTip(infoTip, absURL, repeat);
                     }
                     break;
 
                 case "fontFamily":
-                    return CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValueInfo.value);
+                    return CSSReps.CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValueInfo.value);
             }
 
             delete this.infoTipType;
@@ -2179,9 +1878,9 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
         var emptyProp = {name: "", value: "", important: ""};
 
         if (insertWhere == "before")
-            return CSSPropTag.tag.insertBefore({prop: emptyProp, rule: rule}, target);
+            return CSSReps.CSSPropTag.tag.insertBefore({prop: emptyProp, rule: rule}, target);
         else
-            return CSSPropTag.tag.insertAfter({prop: emptyProp, rule: rule}, target);
+            return CSSReps.CSSPropTag.tag.insertAfter({prop: emptyProp, rule: rule}, target);
     },
 
     saveEdit: function(target, value, previousValue)
@@ -2218,7 +1917,7 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
                 }
                 else if (Dom.getAncestorByClass(target, "cssPropValue"))
                 {
-                    target.textContent = CSSDomplateBase.getPropertyValue({value: value});
+                    target.textContent = CSSReps.CSSDomplateBase.getPropertyValue({value: value});
 
                     propName = Dom.getChildByClass(prop, "cssPropName").textContent;
 
@@ -2739,9 +2438,9 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
         };
 
         if (insertWhere == "before")
-            return CSSStyleRuleTag.tag.insertBefore({rule: emptyRule}, target);
+            return CSSReps.CSSStyleRuleTag.tag.insertBefore({rule: emptyRule}, target);
         else
-            return CSSStyleRuleTag.tag.insertAfter({rule: emptyRule}, target);
+            return CSSReps.CSSStyleRuleTag.tag.insertAfter({rule: emptyRule}, target);
     },
 
     beginEditing: function()
