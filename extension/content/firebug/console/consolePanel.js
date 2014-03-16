@@ -1103,6 +1103,11 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
         // is avoided by reseting of the flag.
         this.breakOnNext(false)
 
+        // At this point, the BON flag is reset and can't be used anymore in |shouldResumeDebugger|.
+        // So add a custom flag in packet.why so we know that the debugger is paused because of
+        // either the Console's "Break On Next" or the Script's "Break On Exceptions" option.
+        packet.why.fbPauseDueToBONError = true;
+
         // Get the exception object.
         var exc = DebuggerLib.getObject(context, packet.why.exception.actor);
         if (!exc)
@@ -1149,12 +1154,13 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
         if (!exc)
             return false;
 
-        // If 'break on exceptions' is set don't resume the debugger, the user wants
-        // to break and see where it happens.
-        if (!Options.get("breakOnExceptions"))
+        // If 'Break On Exceptions' or 'Break On All Errors' are not set, ignore (return true).
+        // Otherwise, don't resume the debugger. The user wants to break and see
+        // where the error happens.
+        if (!packet.why.fbPauseDueToBONError)
         {
             Trace.sysout("consolePanel.shouldResumeDebugger; Do not break, " +
-                "breakOnExceptions == false");
+                "packet.why.fbPauseDueToBONError == false");
             return true;
         }
 
