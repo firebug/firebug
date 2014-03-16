@@ -40,7 +40,7 @@ define([
 ],
 function(Firebug, FBTrace, Panel, Obj, Domplate, Locale, AttributeEditor, HTMLEditor, HTMLLib,
     HTMLModule, HTMLReps, TextDataEditor, TextNodeEditor, Events, SourceLink, Css, Dom, Win,
-    Options, Str, Xml, Arr, Persist, Menu, Url, CSSModule, CSSReps, CSSSelectorEditor,
+    Options, Str, Xml, Arr, Persist, Menu, Url, CSSModule, CSSInfoTip, CSSSelectorEditor,
     BaseEditor, Editor, InlineEditor, SearchBox, InsideOutBox, Inspector) {
 
 // ********************************************************************************************* //
@@ -1958,7 +1958,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     return true;
 
                 this.infoTipURL = url;
-                return CSSReps.CSSInfoTip.populateImageInfoTip(infoTip, url);
+                return CSSInfoTip.populateImageInfoTip(infoTip, url);
             }
         }
     },

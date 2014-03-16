@@ -41,7 +41,7 @@ define([
 ],
 function(Obj, Firebug, Firefox, Domplate, Xpcom, Locale,
     Events, Options, Url, SourceLink, Http, Css, Dom, Win, Search, Str,
-    Arr, System, Menu, NetUtils, NetProgress, CSSReps, ConditionEditor, TimeInfoTip,
+    Arr, System, Menu, NetUtils, NetProgress, CSSInfoTip, ConditionEditor, TimeInfoTip,
     PanelNotification, ActivablePanel, SearchBox) {
 
 // ********************************************************************************************* //
@@ -719,7 +719,7 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
                     return true;
 
                 this.infoTipURL = infoTipURL;
-                return CSSReps.CSSInfoTip.populateImageInfoTip(infoTip, row.repObject.href);
+                return CSSInfoTip.populateImageInfoTip(infoTip, row.repObject.href);
             }
         }
 

@@ -22,11 +22,10 @@ define([
     "firebug/css/cssPanel",
     "firebug/chrome/menu",
     "firebug/css/loadHandler",
-    "firebug/css/cssReps",
 ],
 function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url, Arr,
     SourceLink, Dom, Css, Xpath, Str, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu,
-    LoadHandler, CSSReps) {
+    LoadHandler) {
 
 // ********************************************************************************************* //
 // Constants
@@ -105,7 +104,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
         ruleTag:
             DIV({"class": "cssElementRuleContainer"},
-                TAG(CSSReps.CSSStyleRuleTag.tag, {rule: "$rule"}),
+                TAG(Firebug.CSSStyleRuleTag.tag, {rule: "$rule"}),
                 TAG(FirebugReps.SourceLink.tag, {object: "$rule.sourceLink"})
             ),
 

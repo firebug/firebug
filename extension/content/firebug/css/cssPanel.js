@@ -22,6 +22,7 @@ define([
     "firebug/lib/system",
     "firebug/chrome/menu",
     "firebug/lib/options",
+    "firebug/css/autoCompleter",
     "firebug/css/cssModule",
     "firebug/css/cssReps",
     "firebug/css/selectorEditor",
@@ -33,25 +34,323 @@ define([
     "firebug/editor/inlineEditor",
     "firebug/editor/sourceEditor",
     "firebug/chrome/searchBox",
-    "firebug/css/cssEditor",
     "firebug/css/cssPanelMutationObserver",
 ],
 function(Panel, Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom,
-    Win, Search, Str, Arr, Xml, Persist, System, Menu, Options, CSSModule,
-    CSSReps, SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper, BaseEditor, Editor,
-    InlineEditor, SourceEditor, SearchBox, CSSEditor) {
+    Win, Search, Str, Arr, Xml, Persist, System, Menu, Options, CSSAutoCompleter, CSSModule,
+    CSSInfoTip, SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper, BaseEditor, Editor,
+    InlineEditor, SourceEditor, SearchBox) {
 
 // ********************************************************************************************* //
 // Constants
 
-var {domplate, FOR, DIV, TEXTAREA} = Domplate;
+var {domplate, FOR, TAG, DIV, SPAN, A, TEXTAREA} = Domplate;
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+var CSSDomplateBase =
+{
+    isEditable: function(rule)
+    {
+        return !rule.isSystemSheet && !rule.isNotEditable;
+    },
 
+    isSelectorEditable: function(rule)
+    {
+        return rule.isSelectorEditable && this.isEditable(rule);
+    },
+
+    getPropertyValue: function(prop)
+    {
+        // Disabled, see http://code.google.com/p/fbug/issues/detail?id=5880
+        /*
+        var limit = Options.get("stringCropLength");
+        */
+        var limit = 0;
+        if (limit > 0)
+            return Str.cropString(prop.value, limit);
+        return prop.value;
+    }
+};
+
+var CSSPropTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssProp focusRow", $disabledStyle: "$prop.disabled",
+            $editGroup: "$rule|isEditable",
+            $cssOverridden: "$prop.overridden",
+            role: "option"},
+
+            // Use spaces for indent to make "copy to clipboard" nice.
+            SPAN({"class": "cssPropIndent"}, "&nbsp;&nbsp;&nbsp;&nbsp;"),
+            SPAN({"class": "cssPropName", $editable: "$rule|isEditable"},
+                "$prop.name"
+            ),
+
+            // Use a space here, so that "copy to clipboard" has it (issue 3266).
+            SPAN({"class": "cssColon"}, ": "),
+            SPAN({"class": "cssPropValue", $editable: "$rule|isEditable"},
+                "$prop|getPropertyValue$prop.important"
+            ),
+            SPAN({"class": "cssSemi"}, ";")
+        )
+});
+
+var CSSRuleTag =
+    TAG("$rule.tag", {rule: "$rule"});
+
+var CSSImportRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule insertInto focusRow importRule", _repObject: "$rule.rule"},
+        "@import &quot;",
+        A({"class": "objectLink", _repObject: "$rule.rule.styleSheet"}, "$rule.rule.href"),
+        "&quot;",
+        SPAN({"class": "separator"}, "$rule.rule|getSeparator"),
+        SPAN({"class": "cssMediaQuery", $editable: "$rule|isEditable"},
+            "$rule.rule.media.mediaText"),
+        ";"
+    ),
+
+    getSeparator: function(rule)
+    {
+        return rule.media.mediaText == "" ? "" : " ";
+    }
+});
+
+var CSSCharsetRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssCharsetRule", _repObject: "$rule.rule"},
+            SPAN({"class": "cssRuleName"}, "@charset"),
+            "&nbsp;&quot;",
+            SPAN({"class": "cssRuleValue", $editable: "$rule|isEditable"}, "$rule.rule.encoding"),
+            "&quot;;"
+        )
+});
+
+var CSSMediaRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssMediaRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"},
+                SPAN({"class": "cssRuleName"}, "@media"),
+                SPAN({"class": "separator"}, " "),
+                SPAN({"class": "cssMediaRuleCondition", $editable: "$rule|isEditable"},
+                    "$rule.rule.conditionText"),
+                SPAN(" {")
+            ),
+            DIV({"class": "cssRulesListBox", role: "listbox"},
+                FOR("subRule", "$rule.subRules",
+                    TAG("$subRule.tag", {rule: "$subRule"})
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+                "}")
+        )
+});
+
+var CSSSupportsRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssSupportsRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"},
+                SPAN({"class": "cssRuleName"}, "@supports"),
+                SPAN({"class": "separator"}, " "),
+                SPAN({"class": "cssSupportsRuleCondition", $editable: "$rule|isEditable"},
+                "$rule.rule.conditionText"),
+                SPAN(" {")
+            ),
+            DIV({"class": "cssRulesListBox", role: "listbox"},
+                FOR("subRule", "$rule.subRules",
+                    TAG("$subRule.tag", {rule: "$subRule"})
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+            "}")
+        )
+});
+
+var CSSKeyframesRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssKeyframesRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"},
+                SPAN({"class": "cssRuleName"}, "@keyframes"),
+                SPAN({"class": "separator"}, " "),
+                SPAN({"class": "cssKeyframesRuleName", $editable: "$rule|isEditable"},
+                "$rule.rule.name"),
+                SPAN(" {")
+            ),
+            DIV({"class": "cssRulesListBox", role: "listbox"},
+                FOR("subRule", "$rule.subRules",
+                    TAG("$subRule.tag", {rule: "$subRule"})
+                )
+            ),
+            DIV({role:"presentation"},
+                "}")
+        )
+});
+
+var CSSKeyframeRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule",
+                $cssEditableRule: "$rule|isEditable",
+                $insertInto: "$rule|isEditable",
+                $editGroup: "$rule|isSelectorEditable",
+                _repObject: "$rule.rule",
+                role: "presentation"},
+            DIV({"class": "cssHead focusRow", role: "listitem"},
+                SPAN({"class": "cssKeyText", $editable: "$rule|isEditable"},
+                    "$rule.rule.keyText"),
+                " {"
+            ),
+            DIV({role: "group"},
+                DIV({"class": "cssPropertyListBox", _rule: "$rule", role: "listbox"},
+                    FOR("prop", "$rule.props",
+                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
+                    )
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore: "$rule|isEditable",
+                role:"presentation"},
+                "}"
+            )
+        )
+});
+
+var CSSNamespaceRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssNamespaceRule", _repObject: "$rule.rule"},
+            SPAN({"class": "cssRuleName"}, "@namespace"),
+            SPAN({"class": "separator"}, "$rule.prefix|getSeparator"),
+            SPAN({"class": "cssNamespacePrefix", $editable: "$rule|isEditable"}, "$rule.prefix"),
+            "&nbsp;&quot;",
+            SPAN({"class": "cssNamespaceName", $editable: "$rule|isEditable"}, "$rule.name"),
+            "&quot;;"
+        ),
+
+    getSeparator: function(prefix)
+    {
+        return prefix == "" ? "" : " ";
+    }
+});
+
+var CSSFontFaceRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule cssFontFaceRule",
+            $cssEditableRule: "$rule|isEditable",
+            $insertInto: "$rule|isEditable",
+            _repObject: "$rule.rule",
+            role : 'presentation'},
+            DIV({"class": "cssHead focusRow", role : "listitem"}, "@font-face {"),
+            DIV({role : "group"},
+                DIV({"class": "cssPropertyListBox", role: "listbox"},
+                    FOR("prop", "$rule.props",
+                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
+                    )
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+                "}"
+            )
+        )
+});
+
+var CSSPageRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssPageRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"},
+                SPAN({"class": "cssRuleName"}, "@page"),
+                SPAN({"class": "separator"}, "$rule.selectorText|getSeparator"),
+                SPAN({"class": "cssPageRuleSelector", $editable: "$rule|isEditable"},
+                    "$rule.selectorText|getSelectorText"),
+                SPAN(" {")
+            ),
+            DIV({role : "group"},
+                DIV({"class": "cssPropertyListBox", role: "listbox"},
+                    FOR("prop", "$rule.props",
+                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
+                    )
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+                "}")
+        ),
+
+    getSeparator: function(selector)
+    {
+        return (!selector || selector == "") ? "" : " ";
+    },
+
+    getSelectorText: function(selector)
+    {
+        return selector || "";
+    }
+});
+
+var CSSDocumentRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssDocumentRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"},
+                SPAN({"class": "cssRuleName"}, "@-moz-document"),
+                SPAN({"class": "separator"}, " "),
+                SPAN({"class": "cssDocumentRuleCondition", $editable: "$rule|isEditable"},
+                "$rule.rule.conditionText"),
+                SPAN(" {")
+            ),
+            DIV({"class": "cssRulesListBox", role: "listbox"},
+                FOR("subRule", "$rule.subRules",
+                    TAG("$subRule.tag", {rule: "$subRule"})
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+            "}")
+        )
+});
+
+var CSSStyleRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule",
+            $cssEditableRule: "$rule|isEditable",
+            $insertInto: "$rule|isEditable",
+            $editGroup: "$rule|isSelectorEditable",
+            _repObject: "$rule.rule",
+            role: "presentation"},
+            DIV({"class": "cssHead focusRow", role: "listitem"},
+                SPAN({"class": "cssSelector", $editable: "$rule|isSelectorEditable"},
+                    "$rule.selector"),
+                " {"
+            ),
+            DIV({role: "group"},
+                DIV({"class": "cssPropertyListBox", _rule: "$rule", role: "listbox"},
+                    FOR("prop", "$rule.props",
+                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
+                    )
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore: "$rule|isEditable",
+                role:"presentation"},
+                "}"
+            )
+        )
+});
+
+Firebug.CSSStyleRuleTag = CSSStyleRuleTag;
 
 // ********************************************************************************************* //
 // CSSStyleSheetPanel (CSS Panel)
@@ -80,7 +379,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         tag:
             DIV({"class": "cssSheet insertInto a11yCSSView"},
                 FOR("rule", "$rules",
-                    CSSReps.CSSRuleTag
+                    CSSRuleTag
                 ),
                 DIV({"class": "cssSheet editable insertBefore"}, ""
                 )
@@ -442,7 +741,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 {
                     props = this.getRuleProperties(context, rule);
                     rules.push({
-                        tag: CSSReps.CSSStyleRuleTag.tag,
+                        tag: CSSStyleRuleTag.tag,
                         rule: rule,
                         selector: rule.selectorText.replace(/ :/g, " *:"), // (issue 3683)
                         props: props,
@@ -453,7 +752,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 else if (window.CSSSupportsRule && rule instanceof window.CSSSupportsRule)
                 {
                     rules.push({
-                        tag: CSSReps.CSSSupportsRuleTag.tag,
+                        tag: CSSSupportsRuleTag.tag,
                         rule: rule,
                         subRules: createRules(Css.safeGetCSSRules(rule)),
                         isSystemSheet: isSystemSheet
@@ -461,16 +760,16 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 }
                 else if (rule instanceof window.CSSImportRule)
                 {
-                    rules.push({tag: CSSReps.CSSImportRuleTag.tag, rule: rule});
+                    rules.push({tag: CSSImportRuleTag.tag, rule: rule});
                 }
                 else if (rule instanceof window.CSSCharsetRule)
                 {
-                    rules.push({tag: CSSReps.CSSCharsetRuleTag.tag, rule: rule});
+                    rules.push({tag: CSSCharsetRuleTag.tag, rule: rule});
                 }
                 else if (rule instanceof window.CSSMediaRule)
                 {
                     rules.push({
-                        tag: CSSReps.CSSMediaRuleTag.tag,
+                        tag: CSSMediaRuleTag.tag,
                         rule: rule,
                         subRules: createRules(Css.safeGetCSSRules(rule)),
                         isSystemSheet: isSystemSheet
@@ -479,7 +778,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 else if (rule instanceof window.CSSMozDocumentRule)
                 {
                     rules.push({
-                        tag: CSSReps.CSSDocumentRuleTag.tag,
+                        tag: CSSDocumentRuleTag.tag,
                         rule: rule,
                         subRules: createRules(Css.safeGetCSSRules(rule)),
                         isSystemSheet: isSystemSheet
@@ -490,7 +789,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                     props = this.parseCSSProps(rule.style);
                     this.sortProperties(props);
                     rules.push({
-                        tag: CSSReps.CSSFontFaceRuleTag.tag,
+                        tag: CSSFontFaceRuleTag.tag,
                         rule: rule,
                         props: props,
                         isSystemSheet: isSystemSheet,
@@ -502,7 +801,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                     props = this.parseCSSProps(rule.style);
                     this.sortProperties(props);
                     rules.push({
-                        tag: CSSReps.CSSPageRuleTag.tag,
+                        tag: CSSPageRuleTag.tag,
                         rule: rule,
                         props: props,
                         isSystemSheet: isSystemSheet,
@@ -512,7 +811,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 else if (rule instanceof (window.CSSKeyframesRule || window.MozCSSKeyframesRule))
                 {
                     rules.push({
-                        tag: CSSReps.CSSKeyframesRuleTag.tag,
+                        tag: CSSKeyframesRuleTag.tag,
                         rule: rule,
                         subRules: createRules(Css.safeGetCSSRules(rule)),
                         isSystemSheet: isSystemSheet
@@ -523,7 +822,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                     props = this.parseCSSProps(rule.style);
                     this.sortProperties(props);
                     rules.push({
-                        tag: CSSReps.CSSKeyframeRuleTag.tag,
+                        tag: CSSKeyframeRuleTag.tag,
                         rule: rule,
                         props: props,
                         isSystemSheet: isSystemSheet
@@ -540,7 +839,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                     var namespace = rule.cssText.match(reNamespace);
                     var prefix = namespace[2] || "";
                     var name = namespace[3];
-                    rules.push({tag: CSSReps.CSSNamespaceRuleTag.tag, rule: rule, prefix: prefix,
+                    rules.push({tag: CSSNamespaceRuleTag.tag, rule: rule, prefix: prefix,
                         name: name, isNotEditable: true});
                 }
                 else
@@ -1437,7 +1736,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 case "colorKeyword":
                     this.infoTipType = "color";
                     this.infoTipObject = cssValueInfo.value;
-                    return CSSReps.CSSInfoTip.populateColorInfoTip(infoTip, cssValueInfo.value);
+                    return CSSInfoTip.populateColorInfoTip(infoTip, cssValueInfo.value);
 
                 case "url":
                     if (Css.isImageProperty(propName))
@@ -1452,12 +1751,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                         this.infoTipType = "image";
                         this.infoTipObject = absURL;
 
-                        return CSSReps.CSSInfoTip.populateImageInfoTip(infoTip, absURL, repeat);
+                        return CSSInfoTip.populateImageInfoTip(infoTip, absURL, repeat);
                     }
                     break;
 
                 case "fontFamily":
-                    return CSSReps.CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValueInfo.value);
+                    return CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValueInfo.value);
             }
 
             delete this.infoTipType;
@@ -1858,6 +2157,569 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 });
 
 // ********************************************************************************************* //
+// CSSEditor
+
+function CSSEditor(doc)
+{
+    this.initializeInline(doc);
+}
+
+CSSEditor.prototype = domplate(InlineEditor.prototype,
+{
+    insertNewRow: function(target, insertWhere)
+    {
+        var rule = Firebug.getRepObject(target);
+        if (!rule)
+        {
+            if (FBTrace.DBG_CSS)
+                FBTrace.sysout("CSSEditor.insertNewRow; ERROR There is no CSS rule", target);
+            return;
+        }
+
+        var emptyProp = {name: "", value: "", important: ""};
+
+        if (insertWhere == "before")
+            return CSSPropTag.tag.insertBefore({prop: emptyProp, rule: rule}, target);
+        else
+            return CSSPropTag.tag.insertAfter({prop: emptyProp, rule: rule}, target);
+    },
+
+    saveEdit: function(target, value, previousValue)
+    {
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("CSSEditor.saveEdit", arguments);
+
+        var cssRule = Dom.getAncestorByClass(target, "cssRule");
+        var rule = Firebug.getRepObject(cssRule);
+
+        if (rule instanceof window.CSSStyleRule ||
+                (rule instanceof (window.CSSKeyframeRule || window.MozCSSKeyframeRule)) &&
+                !Css.hasClass(target, "cssKeyText") ||
+            rule instanceof window.Element)
+        {
+            var prop = Dom.getAncestorByClass(target, "cssProp");
+
+            if (prop)
+            {
+                var propName = Dom.getChildByClass(prop, "cssPropName").textContent;
+                // If the property was previously disabled, remove it from the "disabled"
+                // map. (We will then proceed to enable the property.)
+                if (prop && prop.classList.contains("disabledStyle"))
+                {
+                    prop.classList.remove("disabledStyle");
+
+                    this.panel.removeDisabledProperty(rule, propName);
+                }
+
+                if (Css.hasClass(target, "cssPropName"))
+                {
+                    // Actual saving is done in endEditing, see the comment there.
+                    target.textContent = value;
+                }
+                else if (Dom.getAncestorByClass(target, "cssPropValue"))
+                {
+                    target.textContent = CSSDomplateBase.getPropertyValue({value: value});
+
+                    propName = Dom.getChildByClass(prop, "cssPropName").textContent;
+
+                    if (FBTrace.DBG_CSS)
+                    {
+                        FBTrace.sysout("CSSEditor.saveEdit \"" + propName + "\" = \"" +
+                            value + "\"");
+                       // FBTrace.sysout("CSSEditor.saveEdit BEFORE style:",style);
+                    }
+
+                    if (value && value != "null")
+                    {
+                        var parsedValue = parsePriority(value);
+                        CSSModule.setProperty(rule, propName, parsedValue.value,
+                            parsedValue.priority);
+                    }
+                    else if (previousValue && previousValue != "null")
+                    {
+                        CSSModule.removeProperty(rule, propName);
+                    }
+                }
+
+                if (value)
+                {
+                    var saveSuccess = false;
+                    if (Css.hasClass(target, "cssPropName"))
+                    {
+                        var propName = value.replace(/-./g, function(match)
+                        {
+                            return match[1].toUpperCase();
+                        });
+
+                        if (propName in rule.style || propName == "float")
+                            saveSuccess = "almost";
+                    }
+                    else
+                    {
+                        saveSuccess = !!rule.style.getPropertyValue(propName);
+                    }
+
+                    this.box.setAttribute("saveSuccess", saveSuccess);
+                }
+                else
+                {
+                    this.box.removeAttribute("saveSuccess");
+                }
+            }
+        }
+        else if (window.CSSSupportsRule && rule instanceof window.CSSSupportsRule &&
+            Css.hasClass(target, "cssSupportsRuleCondition"))
+        {
+            target.textContent = value;
+
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @supports rule condition: " +
+                    previousValue + "->" + value);
+            }
+
+            try
+            {
+                rule.conditionText = value;
+            }
+            catch (e)
+            {
+            }
+
+            var saveSuccess = (rule.conditionText == value);
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
+        else if (((window.CSSKeyframesRule && rule instanceof window.CSSKeyframesRule) ||
+            rule instanceof window.MozCSSKeyframesRule))
+        {
+            target.textContent = value;
+            
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @keyframes rule name: " +
+                    previousValue + "->" + value);
+            }
+            
+            rule.name = value;
+            
+            var saveSuccess = (rule.name == value);
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
+        else if (((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
+            rule instanceof window.MozCSSKeyframeRule) &&
+            Css.hasClass(target, "cssKeyText"))
+        {
+            target.textContent = value;
+
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @keyframe rule key: " +
+                    previousValue + "->" + value);
+            }
+
+            rule.keyText = value;
+
+            var saveSuccess = (rule.keyText == value || rule.keyText == Css.keyframeKeys[value]);
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
+        else if (rule instanceof window.CSSMozDocumentRule &&
+                Css.hasClass(target, "cssDocumentRuleCondition"))
+        {
+            target.textContent = value;
+
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @-moz-document rule condition: " +
+                        previousValue + "->" + value);
+            }
+
+            try
+            {
+                rule.conditionText = value;
+            }
+            catch (e)
+            {
+            }
+
+            var saveSuccess = (rule.conditionText == value);
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
+        else if (rule instanceof window.CSSImportRule && Css.hasClass(target, "cssMediaQuery"))
+        {
+            target.textContent = value;
+
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @import media query: " +
+                    previousValue + "->" + value);
+            }
+
+            rule.media.mediaText = value;
+
+            // Workaround to apply the media query changes
+            rule.parentStyleSheet.disabled = true;
+            rule.parentStyleSheet.disabled = false;
+
+            var row = Dom.getAncestorByClass(target, "importRule");
+            row.getElementsByClassName("separator").item(0).textContent =
+                value == "" ? "" : String.fromCharCode(160);
+
+            var saveSuccess = rule.media.mediaText != "not all" || value == "not all";
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
+        else if (rule instanceof window.CSSMediaRule &&
+            Css.hasClass(target, "cssMediaRuleCondition"))
+        {
+            target.textContent = value;
+
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @media rule condition: " +
+                    previousValue + "->" + value);
+            }
+
+            rule.conditionText = value;
+
+            var saveSuccess = (rule.conditionText == value);
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
+        else if (rule instanceof window.CSSCharsetRule)
+        {
+            target.textContent = value;
+
+            if (FBTrace.DBG_CSS)
+                FBTrace.sysout("CSSEditor.saveEdit: @charset: " + previousValue + "->" + value);
+
+            rule.encoding = value;
+        }
+
+        Firebug.Inspector.repaint();
+
+        this.panel.markChange(this.panel.name == "stylesheet");
+
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("CSSEditor.saveEdit (ending) " + this.panel.name, value);
+    },
+
+    beginEditing: function(target, value)
+    {
+        var row = Dom.getAncestorByClass(target, "cssProp");
+        this.initialValue = value;
+        this.initiallyDisabled = (row && row.classList.contains("disabledStyle"));
+    },
+
+    endEditing: function(target, value, cancel)
+    {
+        if (!cancel && target.classList.contains("cssPropName"))
+        {
+            // Save changed property names here instead of in saveEdit, because otherwise
+            // unrelated properties might get discarded (see issue 5204).
+            var previous = this.initialValue;
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.endEditing: renaming property " + previous + " -> " +
+                    value);
+            }
+
+            var cssRule = Dom.getAncestorByClass(target, "cssRule");
+            var rule = Firebug.getRepObject(cssRule);
+            var baseText = rule.style ? rule.style.cssText : rule.cssText;
+            var prop = Dom.getAncestorByClass(target, "cssProp");
+            var propValue = Dom.getChildByClass(prop, "cssPropValue").textContent;
+            var parsedValue = parsePriority(propValue);
+
+            if (previous)
+                CSSModule.removeProperty(rule, previous);
+            if (propValue)
+                CSSModule.setProperty(rule, value, parsedValue.value, parsedValue.priority);
+
+            Events.dispatch(CSSModule.fbListeners, "onCSSPropertyNameChanged", [rule, value,
+                    previous, baseText]);
+
+            Firebug.Inspector.repaint();
+            this.panel.markChange(this.panel.name == "stylesheet");
+        }
+        return true;
+    },
+
+    cancelEditing: function(target, value)
+    {
+        if (this.initiallyDisabled)
+        {
+            // Disable the property again.
+            var row = Dom.getAncestorByClass(target, "cssProp");
+            if (row && !row.classList.contains("disabledStyle"))
+                this.panel.disablePropertyRow(row);
+        }
+    },
+
+    advanceToNext: function(target, charCode)
+    {
+        if (charCode == 58 /*":"*/ && Css.hasClass(target, "cssPropName"))
+        {
+            return true;
+        }
+        else if (charCode == 59 /*";"*/ && Css.hasClass(target, "cssPropValue"))
+        {
+            var cssValue = CSSModule.parseCSSValue(this.input.value, this.input.selectionStart);
+            // Simple test, if we are inside a string (see issue 4543)
+            var isValueInString = (cssValue.value.indexOf("\"") != -1);
+
+            return !isValueInString;
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getAutoCompleteRange: function(value, offset)
+    {
+        if (!Css.hasClass(this.target, "cssPropValue"))
+            return {start: 0, end: value.length};
+
+        var propRow = Dom.getAncestorByClass(this.target, "cssProp");
+        var propName = Dom.getChildByClass(propRow, "cssPropName").textContent.toLowerCase();
+        return CSSAutoCompleter.getPropertyRange(propName, value, offset);
+    },
+
+    getAutoCompleteList: function(preExpr, expr, postExpr, range, cycle, context, out)
+    {
+        if (Dom.getAncestorByClass(this.target, "importRule"))
+        {
+            return [];
+        }
+        else if (Dom.getAncestorByClass(this.target, "cssCharsetRule"))
+        {
+            return Css.charsets;
+        }
+        else if (Css.hasClass(this.target, "cssPropName"))
+        {
+            var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
+            return CSSAutoCompleter.autoCompletePropertyName(nodeType, expr, cycle, out);
+        }
+        else if (Dom.getAncestorByClass(this.target, "cssDocumentRule") &&
+                !Css.hasClass(this.target, "cssPropValue"))
+        {
+            return Css.documentConditions;
+        }
+        else if (Dom.getAncestorByClass(this.target, "cssKeyframesRule") &&
+            !Css.hasClass(this.target, "cssPropValue"))
+        {
+            return Object.getOwnPropertyNames(Css.keyframeKeys);
+        }
+        else if (Dom.getAncestorByClass(this.target, "cssMediaRule") &&
+            !Css.hasClass(this.target, "cssPropValue"))
+        {
+            return Css.mediaTypes;
+        }
+        else
+        {
+            var row = Dom.getAncestorByClass(this.target, "cssProp");
+            var propName = Dom.getChildByClass(row, "cssPropName").textContent;
+            var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
+
+            return CSSAutoCompleter.autoCompletePropertyValue(nodeType, propName,
+                preExpr, expr, postExpr, range, cycle, context, out);
+        }
+    },
+
+    getAutoCompletePropSeparator: function(range, expr, prefixOf)
+    {
+        if (!Css.hasClass(this.target, "cssPropValue"))
+            return null;
+
+        var row = Dom.getAncestorByClass(this.target, "cssProp");
+        var propName = Dom.getChildByClass(row, "cssPropName").textContent;
+        return CSSAutoCompleter.getValuePropSeparator(propName, range);
+    },
+
+    autoCompleteAdjustSelection: function(value, offset)
+    {
+        if (offset >= 2 && value.substr(offset-2, 2) === "()")
+            return offset-1;
+        return offset;
+    },
+
+    doIncrementValue: function(value, amt, offset, offsetEnd)
+    {
+        var propName = null;
+        if (Css.hasClass(this.target, "cssPropValue"))
+        {
+            var propRow = Dom.getAncestorByClass(this.target, "cssProp");
+            propName = Dom.getChildByClass(propRow, "cssPropName").textContent;
+        }
+
+        var range = CSSModule.parseCSSValue(value, offset);
+        var type = (range && range.type) || "";
+        var expr = (range ? value.substring(range.start, range.end) : "");
+
+        var completion = null, selection, info;
+        if (type === "int")
+        {
+            if (propName === "opacity")
+            {
+                info = {minValue: 0, maxValue: 1};
+                amt /= 100;
+            }
+
+            if (expr === "0" && value.lastIndexOf("(", offset) === -1 &&
+                !Css.unitlessProperties.hasOwnProperty(propName))
+            {
+                // 0 is a length, and incrementing it normally will result in an
+                // invalid value 1 or -1.  Thus, guess at a unit to add.
+                var unitM = /\d([a-z]{1,4})/.exec(value);
+                expr += (unitM ? unitM[1] : "px");
+            }
+
+            var newValue = this.incrementExpr(expr, amt, info);
+            if (newValue !== null)
+            {
+                completion = newValue;
+                selection = [0, completion.length];
+            }
+        }
+        else if (type === "rgb" && expr.charAt(0) === "#")
+        {
+            var offsetIntoExpr = offset - range.start;
+            var offsetEndIntoExpr = offsetEnd - range.start;
+
+            // Increment a hex color.
+            var res = this.incrementHexColor(expr, amt, offsetIntoExpr, offsetEndIntoExpr);
+            if (res)
+            {
+                completion = res.value;
+                selection = res.selection;
+            }
+        }
+        else
+        {
+            if (type === "rgb" || type === "hsl")
+            {
+                info = {};
+                var part = value.substring(range.start, offset).split(",").length - 1;
+                if (part === 3) // alpha
+                {
+                    info.minValue = 0;
+                    info.maxValue = 1;
+                    amt /= 100;
+                }
+                else if (type === "rgb") // rgb color
+                {
+                    info.minValue = 0;
+                    info.maxValue = 255;
+                    if (Math.abs(amt) < 1)
+                        amt = (amt < 0 ? -1 : 1);
+                }
+                else if (part !== 0) // hsl percentage
+                {
+                    info.minValue = 0;
+                    info.maxValue = 100;
+
+                    // If the selection is at the end of a percentage sign, select
+                    // the previous number. This would have been less hacky if
+                    // parseCSSValue parsed functions recursively.
+                    if (value.charAt(offset-1) === "%")
+                        --offset;
+                }
+            }
+
+            return InlineEditor.prototype.doIncrementValue
+                .call(this, value, amt, offset, offsetEnd, info);
+        }
+
+        if (completion === null)
+            return;
+
+        var preExpr = value.substr(0, range.start);
+        var postExpr = value.substr(range.end);
+
+        return {
+            value: preExpr + completion + postExpr,
+            start: range.start + selection[0],
+            end: range.start + selection[1]
+        };
+    },
+
+    incrementHexColor: function(expr, amt, offset, offsetEnd)
+    {
+        // Return early if no part of the expression is selected.
+        if (offsetEnd > expr.length && offset >= expr.length)
+            return;
+        if (offset < 1 && offsetEnd <= 1)
+            return;
+
+        // Ignore the leading #.
+        expr = expr.substr(1);
+        --offset;
+        --offsetEnd;
+
+        // Clamp the selection to within the actual value.
+        offset = Math.max(offset, 0);
+        offsetEnd = Math.min(offsetEnd, expr.length);
+        offsetEnd = Math.max(offsetEnd, offset);
+
+        // Normalize #ABC -> #AABBCC.
+        if (expr.length === 3)
+        {
+            expr = expr.charAt(0) + expr.charAt(0) +
+                   expr.charAt(1) + expr.charAt(1) +
+                   expr.charAt(2) + expr.charAt(2);
+            offset *= 2;
+            offsetEnd *= 2;
+        }
+        if (expr.length !== 6)
+            return;
+
+        if (offset === offsetEnd)
+        {
+            // There is only a single cursor position. Increment an adjacent
+            // color, preferably one to the left.
+            if (offset === 0)
+                offsetEnd = 1;
+            else
+                offset = offsetEnd - 1;
+        }
+
+        // Make the selection cover entire parts.
+        offset -= offset%2;
+        offsetEnd += offsetEnd%2;
+
+        // Remap the increments from [0.1, 1, 10, 100] to [1, 1, 16, 64].
+        if (-1 < amt && amt < 1)
+            amt = (amt < 0 ? -1 : 1);
+        if (Math.abs(amt) === 10)
+            amt = (amt < 0 ? -16 : 16);
+        if (Math.abs(amt) === 100)
+            amt = (amt < 0 ? -64 : 64);
+
+        var isUpper = (expr.toUpperCase() === expr);
+
+        for (var pos = offset; pos < offsetEnd; pos += 2)
+        {
+            // Increment the part in [pos, pos+2).
+            var mid = expr.substr(pos, 2);
+            var value = parseInt(mid, 16);
+            if (isNaN(value))
+                return;
+
+            mid = Math.min(Math.max(value - amt, 0), 255).toString(16);
+            while (mid.length < 2)
+                mid = "0" + mid;
+
+            // Make the incremented part upper-case if the original value can be
+            // seen as such (this should happen even for, say, #444444, because
+            // upper-case hex-colors are the default). Otherwise, the lower-case
+            // result from .toString is used.
+            if (isUpper)
+                mid = mid.toUpperCase();
+
+            expr = expr.substr(0, pos) + mid + expr.substr(pos+2);
+        }
+
+        return {value: "#" + expr, selection: [offset+1, offsetEnd+1]};
+    }
+});
+
+// ********************************************************************************************* //
 // CSSRuleEditor
 
 function CSSRuleEditor(doc)
@@ -1877,9 +2739,9 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
         };
 
         if (insertWhere == "before")
-            return CSSReps.CSSStyleRuleTag.tag.insertBefore({rule: emptyRule}, target);
+            return CSSStyleRuleTag.tag.insertBefore({rule: emptyRule}, target);
         else
-            return CSSReps.CSSStyleRuleTag.tag.insertAfter({rule: emptyRule}, target);
+            return CSSStyleRuleTag.tag.insertAfter({rule: emptyRule}, target);
     },
 
     beginEditing: function()
