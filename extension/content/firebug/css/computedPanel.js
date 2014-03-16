@@ -22,7 +22,7 @@ define([
     "firebug/css/loadHandler",
 ],
 function(Panel, Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, Arr, SourceLink, Menu,
-    Options, Str, Persist, CSSModule, CSSInfoTip, LoadHandler) {
+    Options, Str, Persist, CSSModule, CSSReps, LoadHandler) {
 
 "use strict";
 
@@ -671,7 +671,7 @@ CSSComputedPanel.prototype = Obj.extend(Panel,
                 case "colorKeyword":
                     this.infoTipType = "color";
                     this.infoTipObject = cssValue.value;
-                    return CSSInfoTip.populateColorInfoTip(infoTip, cssValue.value);
+                    return CSSReps.CSSInfoTip.populateColorInfoTip(infoTip, cssValue.value);
 
                 case "url":
                     if (Css.isImageProperty(prop))
@@ -686,12 +686,12 @@ CSSComputedPanel.prototype = Obj.extend(Panel,
                         this.infoTipType = "image";
                         this.infoTipObject = absURL;
 
-                        return CSSInfoTip.populateImageInfoTip(infoTip, absURL, repeat);
+                        return CSSReps.CSSInfoTip.populateImageInfoTip(infoTip, absURL, repeat);
                     }
                     break;
 
                 case "fontFamily":
-                    return CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
+                    return CSSReps.CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
             }
 
             delete this.infoTipType;
