@@ -86,12 +86,7 @@ this.searchInScriptPanel = function(searchText, callback)
 
     FBTest.waitForDisplayedElement("script", config, function(element)
     {
-        // Wait till CodeMirror-highlightedLine is removed.
-        var attributes = {"class": "CodeMirror-highlightedLine"}
-        var doc = FBTestFirebug.getPanelDocument();
-        var recognizer = new MutationRecognizer(doc.defaultView, config.tagName,
-            null, null, attributes);
-        recognizer.onRecognizeAsync(callback);
+        waitForLineUnhighlight(callback);
     });
 
     // Set search string into the search box.
@@ -105,6 +100,23 @@ this.searchInScriptPanel = function(searchText, callback)
     // press enter instead (asynchronously).
     FBTest.sendKey("RETURN", "fbSearchBox");
 };
+
+function waitForLineUnhighlight(callback)
+{
+    var browser = FBTest.getCurrentTabBrowser();
+
+    var listener =
+    {
+        onLineUnhighlight: function(line)
+        {
+            DebuggerController.removeListener(browser, listener);
+
+            callback(line + 1);
+        }
+    };
+
+    DebuggerController.addListener(browser, listener);
+}
 
 /**
  * Executes search within the CSS panel.

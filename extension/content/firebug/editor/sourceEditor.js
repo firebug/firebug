@@ -161,6 +161,8 @@ SourceEditor.prototype =
 
     onInit: function(parentNode, config, callback)
     {
+        this.parentNode = parentNode;
+
         var doc = parentNode.ownerDocument;
 
         // Unwrap Firebug content view (panel.html). This view is running in
@@ -1180,6 +1182,9 @@ LineHighlighter.prototype =
 
         // Do not forget to delete the highlighter.
         this.editor.highlighter = null;
+
+        var panel = Firebug.getElementPanel(this.editor.parentNode);
+        Firebug.dispatchEvent(panel.context.browser, "onLineUnhighlight", [this.line]);
     },
 
     cancel: function()
