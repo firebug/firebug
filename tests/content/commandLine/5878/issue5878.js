@@ -66,7 +66,7 @@ function runTest()
                     "objectBox-number");
                 tasks.run(function()
                 {
-                    FBTest.testDone("include.DONE");
+                    FBTest.testDone();
                 });
             });
         });

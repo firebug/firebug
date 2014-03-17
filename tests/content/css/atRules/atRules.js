@@ -14,7 +14,7 @@ function runTest()
 
             FBTest.runTestSuite(tests, function()
             {
-                FBTest.testDone("atRules; DONE");
+                FBTest.testDone();
             });
         });
     });

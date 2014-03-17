@@ -21,7 +21,7 @@ function runTest()
                 FBTest.waitForDisplayedElement("net", options, function(row)
                 {
                     FBTest.progress("exampleNet1; two entries displayed");
-                    FBTest.testDone("exampleNet1.DONE");
+                    FBTest.testDone();
                 });
             });
 

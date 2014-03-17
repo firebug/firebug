@@ -14,7 +14,7 @@ function runTest()
                 // for 5 sec at most, which is enough to repro the problem.
                 var timeoutID = setTimeout(function() {
                     FBTest.progress("Test finished on timeout.");
-                    FBTest.testDone("issue2763.DONE");
+                    FBTest.testDone();
                 }, 5000);
 
                 // Wait for the only request that should be displayed in the Net panel.
@@ -23,7 +23,7 @@ function runTest()
                     clearTimeout(timeoutID);
 
                     // Finish test, if Firefox hasn't crashed by now, all is OK.
-                    FBTest.testDone("issue2763.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test by clicking on the 'Execute Test' button.

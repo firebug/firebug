@@ -38,7 +38,7 @@ function runTest()
 
                 tasks.run(function()
                 {
-                    FBTest.testDone("storage.DONE");
+                    FBTest.testDone();
                 });
             });
         });

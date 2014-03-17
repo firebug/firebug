@@ -27,7 +27,7 @@ function runTest()
                     {
                         FBTest.compare(expectedXPath, xPath,
                             "XPath must be properly copied into the clipboard");
-                        FBTest.testDone("issue2426.DONE");
+                        FBTest.testDone();
                     });
                 })
             });

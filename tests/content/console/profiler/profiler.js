@@ -31,7 +31,7 @@ function runTest()
                 FBTest.compare(177, profileRows[0].childNodes[1].textContent,
                     "The 'fib' function was called exactly 177 times.");
 
-                FBTest.testDone("profiler.DONE");
+                FBTest.testDone();
             });
 
             var chrome = FW.Firebug.chrome;

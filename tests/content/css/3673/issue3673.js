@@ -13,7 +13,7 @@ function runTest()
                 var warning = panel.panelNode.querySelector(".warning");
                 FBTest.ok(warning, "The text must be still there...");
 
-                FBTest.testDone("issue3673.DONE");
+                FBTest.testDone();
             });
         });
     });

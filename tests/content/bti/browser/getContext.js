@@ -20,6 +20,6 @@ function runTest()
             var candidate = browser.getContext(context.getId());
             FBTest.ok(candidate == context, "Contexts should be identical");
         }
-        FBTest.testDone("done test #getContext(id)");
+        FBTest.testDone();
     });
 }

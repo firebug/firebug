@@ -37,7 +37,7 @@ function runTest()
                         "There must be two 'Hello Firebug user!' messages logged to the console.");
 
                     FBTest.clickContinueButton();
-                    FBTest.testDone("issue4845.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.sendShortcut("VK_F8", {shiftKey: true});

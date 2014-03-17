@@ -41,7 +41,7 @@ function runTest()
 
                 // Finish test
                 FBTest.setPref("showXMLHttpRequests", prefOrigValue);
-                FBTest.testDone("issue846.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("Button"));

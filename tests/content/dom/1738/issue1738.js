@@ -21,7 +21,7 @@ function runTest()
                     FBTest.click(editor.parentNode);
                 }
 
-                FBTest.testDone("issue1738.DONE");
+                FBTest.testDone();
             });
 
             FBTest.selectPanel("dom");

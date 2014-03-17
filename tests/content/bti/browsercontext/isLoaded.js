@@ -14,13 +14,13 @@ function runTest()
     {
         FBTest.compare(context.getURL(), url, "URL of newly created context should be " + url);
         FBTest.ok(!context.isLoaded(), "Context should no be loaded when created");
-        FBTest.testDone("done test #isLoaded()");
+        FBTest.testDone();
     });
     browser.addEventListener("onContextLoaded", function(context)
     {
         FBTest.compare(context.getURL(), url, "URL of loaded context should be " + url);
         FBTest.ok(context.isLoaded(), "Context should be loaded after load notification");
-        FBTest.testDone("done test #isLoaded()");
+        FBTest.testDone();
     });
     FBTest.progress("isLoaded, open test page "+ url);
     FBTest.openNewTab(url, function(win)

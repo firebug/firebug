@@ -59,7 +59,7 @@ function runTest()
                     });
                 }
 
-                FBTest.testDone("atMediaAutocomplete.DONE");
+                FBTest.testDone();
             }
         });
     });

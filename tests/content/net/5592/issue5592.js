@@ -34,7 +34,7 @@ function runTest()
                 // Run both async tasks
                 tasks.run(function()
                 {
-                    FBTest.testDone("issue5592.DONE");
+                    FBTest.testDone();
                 });
             });
 

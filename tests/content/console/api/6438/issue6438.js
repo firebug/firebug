@@ -16,7 +16,7 @@ function runTest()
                     // Test whether the message is displayed correctly
                     FBTest.compare(expected, row.textContent, "Message must be displayed correctly");
 
-                    FBTest.testDone("issue6438.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.reload();

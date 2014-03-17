@@ -21,6 +21,6 @@ function runTest()
             FBTest.compare(context.getURL(), url, "The URL should be " + url);
         else
             FBTest.ok(context, "missing new browser context");
-        FBTest.testDone("done test #getContexts()");
+        FBTest.testDone();
     });
 }

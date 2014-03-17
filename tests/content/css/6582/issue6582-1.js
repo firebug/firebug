@@ -22,7 +22,7 @@ function runTest()
                     "The current CSS file name must be correct");
             }
 
-            FBTest.testDone("issue6582.DONE");
+            FBTest.testDone();
         });
     });
 }

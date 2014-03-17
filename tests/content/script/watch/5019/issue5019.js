@@ -32,7 +32,7 @@ function runTest()
                                 var expected = /200\s*helloworld\s*true\s*/;
                                 FBTest.compare(expected, row.textContent,
                                     "The proper message must be displayed.");
-                                FBTest.testDone("issue5019.DONE");
+                                FBTest.testDone();
                             });
                         });
                     });

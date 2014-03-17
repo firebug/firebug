@@ -25,7 +25,7 @@ function runTest()
                     FBTest.compare("data1", label.textContent, "The root label must be displayed");
                 }
 
-                FBTest.testDone("issue4439; end");
+                FBTest.testDone();
             });
 
             // Execute Test

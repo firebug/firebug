@@ -10,7 +10,7 @@ function runTest()
                 tasks.push(verifyLogs, win, 51, "", "testButton2", "Verify not grouped logs");
 
                 tasks.run(function() {
-                    FBTest.testDone("simpleLogs.DONE");
+                    FBTest.testDone();
                 });
             });
         });

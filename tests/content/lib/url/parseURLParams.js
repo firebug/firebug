@@ -45,5 +45,5 @@ function runTest()
         }
     }
 
-    FBTest.testDone("parseURLParams.DONE");
+    FBTest.testDone();
 }

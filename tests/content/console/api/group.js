@@ -14,7 +14,7 @@ function runTest()
                 tests.push(clear);
                 tests.push(test2);
                 FBTest.runTestSuite(tests, function() {
-                    FBTest.testDone("console.group.DONE");
+                    FBTest.testDone();
                 });
             });
         });

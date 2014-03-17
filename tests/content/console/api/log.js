@@ -10,7 +10,7 @@ function runTest()
                 {
                     var expected = /This is a test log\s*/;
                     FBTest.compare(expected, row.textContent, "The proper message must be displayed.");
-                    FBTest.testDone("console.log.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test implemented on the test page.

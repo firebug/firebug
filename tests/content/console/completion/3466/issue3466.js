@@ -15,7 +15,7 @@ function runTest()
                 FBTest.compare("dir(", cmdLine.value,
                     "Expected value must be in the command line now: " + cmdLine.value);
 
-                FBTest.testDone("issue3466.DONE");
+                FBTest.testDone();
             });
         });
     });

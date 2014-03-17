@@ -32,7 +32,7 @@ function runTest()
             tasks.wrapAndPush(FBTest.clickContinueButton);
             tasks.run(function()
             {
-                FBTest.testDone("issue6855.DONE");
+                FBTest.testDone();
             });
         });
     });

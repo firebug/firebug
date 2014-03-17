@@ -22,7 +22,7 @@ function runTest()
                 FBTest.compare(/^\[undefined.*2999999700.*\]$/, log.textContent,
                     "The array must show 300 copies of 'undefined' and a count 2999999700");
 
-                FBTest.testDone("issue3503; DONE");
+                FBTest.testDone();
             });
 
             // Run test implemented on the page.

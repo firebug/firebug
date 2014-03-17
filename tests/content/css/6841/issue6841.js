@@ -56,7 +56,7 @@ function runTest()
                 tasks.push(testCompletion, "font", "cal", "cal");
                 tasks.run(function()
                 {
-                    FBTest.testDone("issue6841.DONE");
+                    FBTest.testDone();
                 }, 0);
             });
         });

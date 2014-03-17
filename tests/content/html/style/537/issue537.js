@@ -40,7 +40,7 @@ function runTest()
                         FBTest.ok(containsContent, "'" + selector + "' must contain a property 'content'");
                     }
                 }
-                FBTest.testDone("issue537.DONE");
+                FBTest.testDone();
             });
         });
     });

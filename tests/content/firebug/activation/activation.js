@@ -61,7 +61,7 @@ function runTest()
                         FBTest.compare(pageWithFirebug, FW.Firebug.currentContext.getName(),
                             "The context should be '" + pageWithFirebug + "'");
 
-                        FBTest.testDone("activation.DONE");
+                        FBTest.testDone();
                     });
                 });
             });

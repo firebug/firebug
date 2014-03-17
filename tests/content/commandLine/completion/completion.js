@@ -106,7 +106,7 @@ function runTest()
 
                 FBTest.sendKey("RETURN", "fbCommandLine");
 
-                FBTest.testDone("issue2934.DONE");
+                FBTest.testDone();
             });
         });
     });

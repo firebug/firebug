@@ -44,7 +44,7 @@ function runTest()
                 }
 
                 // Finish test
-                FBTest.testDone("issue4889.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("callFirstFunction"));

@@ -27,7 +27,7 @@ function runTest()
                 win.getComputedStyle(searchFieldIcon, null).backgroundImage,
                 "Search Field icon must be normal again");
 
-            FBTest.testDone("issue4603.DONE");
+            FBTest.testDone();
         });
     });
 }

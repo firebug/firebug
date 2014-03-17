@@ -66,7 +66,7 @@ function runTest()
                 tasks.push(testSelectionIndent);
                 tasks.run(function()
                 {
-                    FBTest.testDone("issue55.DONE");
+                    FBTest.testDone();
                 }, 0);
             });
         });

@@ -32,5 +32,5 @@ function runTest()
         FBTest.compare(absolute, FW.FBL.absoluteURL(relative, testBaseURL), "For base "+testBaseURL+" relative url: "+relative+" = "+absolute);
     }
 
-    FBTest.testDone("absoluteURL.DONE");
+    FBTest.testDone();
 }

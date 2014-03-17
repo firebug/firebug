@@ -19,7 +19,7 @@ function runTest()
                         FBTest.progress("Click continue button");
 
                         FBTest.clickContinueButton();
-                        FBTest.testDone("issue3985.DONE");
+                        FBTest.testDone();
                     });
 
                     FBTest.waitForDisplayedBreakpoint(null, url, 3, function(row)

@@ -37,7 +37,7 @@ function onRunTest(window)
     // Select first tab, execute XHR and verify. Once it's done do the same for the other tab.
     selectTabAndVerify(tab1, function() {
         selectTabAndVerify(tab2, function() {
-            FBTest.testDone("activation.DONE");
+            FBTest.testDone();
         });
     });
 }

@@ -23,7 +23,7 @@ function runTest()
 
                         FBTest.waitForBreakInDebugger(null, 16, false, function()
                         {
-                            FBTest.testDone("issue6432.DONE");
+                            FBTest.testDone();
                         });
 
                         // Click the 'Change property value' button on the page

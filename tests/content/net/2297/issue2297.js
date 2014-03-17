@@ -33,7 +33,7 @@ function runTest()
                     FBTest.compare(1, errorCount, "There must be 1 Error displayed in the status bar");
 
                     FBTest.setPref("showNetworkErrors", prefOrigValue);
-                    FBTest.testDone("issue2297; end");
+                    FBTest.testDone();
                 });
 
                 // Reload the page to get an error in the console.

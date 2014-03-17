@@ -16,7 +16,7 @@ function runTest()
                         "background-repeat, background-attachment, background-position."
                 );
 
-                FBTest.testDone("issue4180.DONE");
+                FBTest.testDone();
             });
         });
     });

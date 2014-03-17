@@ -9,7 +9,7 @@ function runTest()
                 FBTest.waitForDisplayedElement("console", config, function(row)
                 {
                     FBTest.compare("XDM Console message", row.textContent, "check the console logs");
-                    FBTest.testDone("issue6778.DONE");
+                    FBTest.testDone();
                 });
             });
         });

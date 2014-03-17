@@ -30,7 +30,7 @@ function runTest()
                 FBTest.synthesizeKey("VK_UP", null, win);
                 FBTest.compare("2", cmdLine.value, "The Command Line must display '2' after re-calling the previous command from the history.");
 
-                FBTest.testDone("issue4218.DONE");
+                FBTest.testDone();
             });
         });
     });

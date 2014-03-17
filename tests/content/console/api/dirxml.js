@@ -10,7 +10,7 @@ function runTest()
                 {
                     var xml = /\s*<div\s*id=\"content\"\s*style=\"display:\s*none;\"><span>a<\/span><span><span>b<\/span><\/span><\/div>/;
                     FBTest.compare(xml, row.textContent, "XML must be properly displayed.");
-                    FBTest.testDone("console.dirxml.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test implemented on the test page.

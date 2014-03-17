@@ -33,7 +33,7 @@ function runTest()
                 var line1143 = panel.scriptView.editor.editorObject.getLine(1142);
                 FBTest.compare(source1143, line1143, "The source code at line 1143 verified.");
 
-                FBTest.testDone("issue1425.DONE");
+                FBTest.testDone();
             });
         });
     });

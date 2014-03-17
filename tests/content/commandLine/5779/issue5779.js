@@ -30,7 +30,7 @@ function runTest()
                     "span", "objectBox-array");
 
                 tasks.run(function() {
-                    FBTest.testDone("issue5779.DONE");
+                    FBTest.testDone();
                 });
             });
         });

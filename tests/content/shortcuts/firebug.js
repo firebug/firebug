@@ -21,6 +21,6 @@ function runTest()
         FBTest.compare("inBrowser", FBTest.getFirebugPlacement(), "Firebug must be inBrowser");
         FBTest.ok(!FBTest.isFirebugActive(), "Firebug must be suspended");
 
-        FBTest.testDone("shortcuts.firebug.DONE");
+        FBTest.testDone();
     });
 }

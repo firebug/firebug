@@ -7,7 +7,7 @@ function runTest()
             var hiddenNodes = panel.panelNode.getElementsByClassName("nodeHidden");
             FBTest.compare(0, hiddenNodes.length, "All nodes must be expanded");
 
-            FBTest.testDone("issue4670.DONE");
+            FBTest.testDone();
         });
     });
 }

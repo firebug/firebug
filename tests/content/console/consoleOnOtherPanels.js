@@ -19,7 +19,7 @@ function runTest()
             tasks.push(disableConsole);
 
             tasks.run(function() {
-                FBTest.testDone("consoleOnOtherPanels.DONE");
+                FBTest.testDone();
             });
         });
     });

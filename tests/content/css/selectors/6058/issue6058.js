@@ -31,7 +31,7 @@ function runTest()
             tasks.push(test, "#wo", "#world");
             tasks.run(function() {
                 FBTest.synthesizeKey("VK_ESCAPE", null, win);
-                FBTest.testDone("issue6058.DONE");
+                FBTest.testDone();
             }, 0);
         });
     });

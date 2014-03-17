@@ -27,7 +27,7 @@ function runTest()
                 FBTest.compare(expectedText, text,
                     "Firebug should cache even files coming directly from Firefox cache.");
 
-                FBTest.testDone("issue1299.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

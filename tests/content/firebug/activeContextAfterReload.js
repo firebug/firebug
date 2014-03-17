@@ -18,7 +18,7 @@ function runTest()
                 FBTest.progress("reloaded");
                 FBTest.ok(FW.Firebug.currentContext, "The current context must not be null");
                 FBTest.ok(FW.Firebug.currentContext.browser.showFirebug, "The browser should have showFirebug set")
-                FBTest.testDone("activeContextAfterReload.DONE");
+                FBTest.testDone();
             });
         });
     });

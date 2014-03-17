@@ -21,7 +21,7 @@ function runTest()
                 tasks.push(fuzzIncrements, text, "hsla(3,30%,9%,0", false, 1395508803);
 
                 tasks.run(function() {
-                    FBTest.testDone("issue5177.DONE");
+                    FBTest.testDone();
                 });
             });
         });

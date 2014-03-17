@@ -18,7 +18,7 @@ function runTest()
             tasks.push(testClearOfflinePermission, win);
 
             tasks.run(function() {
-                FBTest.testDone("appCache.DONE");
+                FBTest.testDone();
             });
         });
     });

@@ -33,7 +33,7 @@ function runTest()
             }
 
             FBTest.ok(removed, "Posted file must *not* be locked.");
-            FBTest.testDone("issue1867.DONE");
+            FBTest.testDone();
         }, true);
 
         // Submit the form.

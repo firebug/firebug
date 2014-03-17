@@ -23,7 +23,7 @@ function runTest()
                     FBTest.ok(typeof(window.a) == "undefined",
                         "There must not be a new global");
 
-                    FBTest.testDone("issue3421.DONE");
+                    FBTest.testDone();
                 });
             });
         });

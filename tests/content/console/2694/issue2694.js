@@ -12,7 +12,7 @@ function runTest()
             {
                 executeSetOfCommands(40, function() {
                     FBTest.ok(isScrolledToBottom(), "The Console panel must be scrolled to the bottom.");
-                    FBTest.testDone("issue2694; DONE");
+                    FBTest.testDone();
                 });
             });
         });

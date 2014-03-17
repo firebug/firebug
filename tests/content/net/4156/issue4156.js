@@ -29,7 +29,7 @@ function runTest()
                 verifyNetPanelDisplay(["fbNetFilter-all"],
                     ["issue4156.html", "testcase.css", "issue4156-test.js", "firebug.png"]);
 
-                FBTest.testDone("issue4156.DONE");
+                FBTest.testDone();
             });
         });
     });

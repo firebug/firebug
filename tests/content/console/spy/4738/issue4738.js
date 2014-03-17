@@ -30,7 +30,7 @@ function runTest()
                     {
                         FBTest.compare(expected, text, "Proper URL must be copied. Current: " +
                             text);
-                        FBTest.testDone("issue4738.DONE");
+                        FBTest.testDone();
                     });
                 });
 

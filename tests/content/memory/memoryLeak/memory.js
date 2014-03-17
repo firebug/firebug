@@ -10,7 +10,7 @@ function runTest()
 
             // Run them all.
             tasks.run(function() {
-                FBTest.testDone("issue2948.DONE");
+                FBTest.testDone();
             });
         });
     });

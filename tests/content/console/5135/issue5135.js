@@ -18,7 +18,7 @@ function runTest()
                     var expected = "message origin=" + origin +", data=test\u00A0\u00BB\u00A0Window iframe.html";
                     FBTest.compare(expected, row.textContent,
                         "The proper message must be displayed. " + row.textContent);
-                    FBTest.testDone("issue5135.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test implemented on the test page.

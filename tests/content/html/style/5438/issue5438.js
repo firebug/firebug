@@ -31,7 +31,7 @@ function runTest()
                                 }
                             }
 
-                            FBTest.testDone("issue5438.DONE");
+                            FBTest.testDone();
                         });
                         break;
                     }

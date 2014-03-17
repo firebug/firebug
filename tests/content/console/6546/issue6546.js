@@ -15,7 +15,7 @@ function runTest()
                 FBTest.compare("textbox-input", doc.activeElement.className,
                     "Command Line must be focused");
 
-                FBTest.testDone("issue6546.DONE");
+                FBTest.testDone();
             });
         });
     });

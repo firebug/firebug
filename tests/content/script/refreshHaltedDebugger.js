@@ -20,7 +20,7 @@ function runTest()
                     {
                         FBTest.progress("refreshHaltedDebugger; Halted on debugger keyword II.");
                         FBTest.clickContinueButton(chrome);
-                        FBTest.testDone("refreshHaltedDebugger; DONE");
+                        FBTest.testDone();
                     });
 
                     // If the debugger is resumed before refresh, the test passes.

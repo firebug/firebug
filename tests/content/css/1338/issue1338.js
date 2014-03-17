@@ -54,7 +54,7 @@ function runTest()
                 FBTest.sendShortcut("VK_PAGE_UP", {shiftKey: true});
                 FBTest.compare("7em", editor.value, "Must be incremented to 7em");
 
-                FBTest.testDone("issue1338.DONE");
+                FBTest.testDone();
             });
         });
     });

@@ -62,7 +62,7 @@ function runTest()
                     FBTest.compare("Arial", editor.value.substring(editor.selectionStart, editor.selectionEnd), "The selection must extend up to the comma");
                 }
 
-                FBTest.testDone("issue3303.DONE");
+                FBTest.testDone();
             });
         });
     });

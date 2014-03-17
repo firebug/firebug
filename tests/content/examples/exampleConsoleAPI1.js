@@ -10,7 +10,7 @@ function runTest()
                 FBTest.compare(/Hello World!\s*/, row.textContent,
                     "The proper message must be displayed.");
 
-                FBTest.testDone("examples.console.DONE");
+                FBTest.testDone();
             });
 
             // Execute test implemented on the test page.

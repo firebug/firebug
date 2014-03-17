@@ -10,7 +10,7 @@ function runTest()
             FBTest.waitForBreakInDebugger(null, 11, true, function()
             {
                 FBTest.clickContinueButton();
-                FBTest.testDone("issue3716.DONE");
+                FBTest.testDone();
             });
 
             // Set a breakpoint and reload the page to trigger it.

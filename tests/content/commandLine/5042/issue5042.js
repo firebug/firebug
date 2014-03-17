@@ -23,7 +23,7 @@ function runTest()
                         "Command Line must not be focused anymore");
                 }
 
-                FBTest.testDone("issue5042.DONE");
+                FBTest.testDone();
             });
         });
     });

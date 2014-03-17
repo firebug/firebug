@@ -2,7 +2,7 @@ function runTest()
 {
     function done()
     {
-        FBTest.testDone("issue5412.DONE");
+        FBTest.testDone();
     }
 
     FBTest.openNewTab(basePath + "css/5412/issue5412.html", function(win)

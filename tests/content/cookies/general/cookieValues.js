@@ -51,7 +51,7 @@ function runTest()
                         "Escaped value of the cookie in detailed info must be correct");
 
                     // Finish test
-                    FBTest.testDone("escapedAndUnescapedCookieValues; DONE");
+                    FBTest.testDone();
                 });
             });
         });

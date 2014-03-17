@@ -48,7 +48,7 @@ function runTest()
                             }
                         }
 
-                        FBTest.testDone("issue654.DONE");
+                        FBTest.testDone();
                     });
 
                     // 5. Click the "Make request" button

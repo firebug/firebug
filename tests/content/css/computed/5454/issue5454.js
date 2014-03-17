@@ -67,7 +67,7 @@ function runTest()
                     "Part of the 'Background' group must be visible at the top of the panel");
             }
 
-            FBTest.testDone("issue5454.DONE");
+            FBTest.testDone();
         });
     });
 }

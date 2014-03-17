@@ -28,5 +28,5 @@ function runTest()
     FBTest.ok(!FW.FBL.hasClass(element, "test1 test3"), "The element must not have class 'test1 test3'");
     FBTest.ok(FW.FBL.hasClass(element, "test0 test2 test4"), "The element must have class 'test0 test2 test4'");
 
-    FBTest.testDone("cssClasses.DONE");
+    FBTest.testDone();
 }

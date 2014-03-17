@@ -15,7 +15,7 @@ function runTest()
                 var tab = FBTest.getSelectedPanelTab();
                 var label = tab.getAttribute("label");
                 FBTest.compare(FW.FBL.$STR("Panel-net"), label, "Net panel must be selected now");
-                FBTest.testDone("selectedPanelAfterReopen.DONE");
+                FBTest.testDone();
             });
         });
     });

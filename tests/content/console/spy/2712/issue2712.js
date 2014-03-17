@@ -12,7 +12,7 @@ function runTest()
                 {
                     FBTest.ok(!FW.FBL.hasClass(row, "error"),
                         "The request must not be marked as 'aborted'.");
-                    FBTest.testDone("issue2712.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test on the test page.

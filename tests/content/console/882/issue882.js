@@ -31,7 +31,7 @@ function runTest()
                             "The proper source link must be displayed: " + sourceLink.textContent);
                     }
 
-                    FBTest.testDone("issue882.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("createLog"));

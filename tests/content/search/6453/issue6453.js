@@ -14,7 +14,7 @@ function runTest()
 
                 testSuite.run(function()
                 {
-                    FBTest.testDone("issue6453.DONE");
+                    FBTest.testDone();
                 });
             });
         });

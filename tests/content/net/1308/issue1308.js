@@ -49,5 +49,5 @@ function checkCopyLocationWithParametersAction(request)
     FBTest.compare(expected, actual, "Verify that the copied URL is properly encoded.");
 
     // Finish test
-    FBTest.testDone("issue1308.DONE");
+    FBTest.testDone();
 }

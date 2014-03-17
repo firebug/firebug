@@ -29,7 +29,7 @@ function runTest()
                     "amount: 4.31520", "div", "logRow-log");
 
                 tasks.run(function() {
-                    FBTest.testDone("issue6439.DONE");
+                    FBTest.testDone();
                 });
             });
         });

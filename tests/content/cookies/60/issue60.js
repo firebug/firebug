@@ -20,7 +20,7 @@ function runTest()
             var cookie = FBTest.getCookieByName(panelNode, "TestCookie60%5Buser%5D");
             FBTest.ok(cookie == null, "Cookie name must not be escaped");
 
-            FBTest.testDone("cookies.test.issue60; DONE");
+            FBTest.testDone();
         });
     });
 };

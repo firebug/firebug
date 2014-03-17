@@ -26,7 +26,7 @@ function runTest()
                        FBTest.compare("url(\"chrome://firebug/skin/errorColumnIndicator.svg\")",
                            backgroundImage, "The right part of the error indicator must be shown as an arrow");
 
-                       FBTest.testDone("issue3042.DONE");
+                       FBTest.testDone();
                     }
                 });
             });

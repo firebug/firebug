@@ -44,7 +44,7 @@ function runTest()
                             (expResult ? "" : "not ") + "be marked as deleted.");
                     }
 
-                    FBTest.testDone("issue6570.DONE");
+                    FBTest.testDone();
                 });
             });
         });

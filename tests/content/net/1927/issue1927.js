@@ -19,7 +19,7 @@ function runTest()
                                 setTimeout(function()
                                 {
                                     verifyNetResponse();
-                                    FBTest.testDone("issue1927.DONE");
+                                    FBTest.testDone();
                                 }, 500);
                             });
                         });

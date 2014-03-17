@@ -41,7 +41,7 @@ function runTest()
                     profileRows[1].childNodes[8].textContent,
                     "The source link must be correct.");
 
-                FBTest.testDone("console.profile.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

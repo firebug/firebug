@@ -28,6 +28,6 @@ function runTest()
         {
             FBTest.ok(context, "missing new browser context");
         }
-        FBTest.testDone("done test #getFocusContext()");
+        FBTest.testDone();
     });
 }

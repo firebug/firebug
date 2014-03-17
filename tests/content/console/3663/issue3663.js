@@ -10,7 +10,7 @@ function runTest()
                 {
                     var expected = /\s*\[\"a1\"\,\s*\[\.\.\.\]\,\s*\"b1\"\]\s*/;
                     FBTest.compare(expected, row.textContent, "The log must match");
-                    FBTest.testDone("issue3663.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("testButton"));

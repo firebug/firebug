@@ -11,7 +11,7 @@ function runTest()
             tasks.push(checkQuotesInStyle, panel, win);
 
             tasks.run(function() {
-                FBTest.testDone("issue4542.DONE");
+                FBTest.testDone();
             });
         });
     });

@@ -33,7 +33,7 @@ function runTest()
 
                 tasks.run(function() {
                     FBTest.synthesizeKey("VK_ESCAPE", null, win);
-                    FBTest.testDone("issue5469.DONE");
+                    FBTest.testDone();
                 }, 0);
             });
         });

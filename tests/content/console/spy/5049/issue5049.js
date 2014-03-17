@@ -35,7 +35,7 @@ function runTest()
                             times[1].textContent);
                     }
 
-                    FBTest.testDone("issue5049.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test implemented on the test page.

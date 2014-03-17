@@ -30,7 +30,7 @@ function runTest()
                             "Content-Length header exists");
                     }
 
-                    FBTest.testDone("issue5007.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementsByTagName("button").item(0));

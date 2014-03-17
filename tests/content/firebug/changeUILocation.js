@@ -73,7 +73,7 @@ function runTest()
 
             tasks.run(function()
             {
-                FBTest.testDone("changeUILocation.DONE");
+                FBTest.testDone();
             }, 400);
         });
     });
@@ -85,7 +85,7 @@ function waitForDetachedFirebug(callback)
     {
         if (!FBTest.ok(detachedWindow, "Firebug is detaching..."))
         {
-            FBTest.testDone("openInNewWindow.FAILED");
+            FBTest.testDone();
             return;
         }
 

@@ -74,7 +74,7 @@ function runTest()
                 tasks.run(function()
                 {
                     cmdLine.value = "";
-                    FBTest.testDone("issue5493.DONE");
+                    FBTest.testDone();
                 }, 0);
             });
         });

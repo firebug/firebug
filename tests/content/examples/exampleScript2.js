@@ -14,7 +14,7 @@ function runTest()
                 FBTest.waitForBreakInDebugger(chrome, lineNo, true, function(row)
                 {
                     FBTest.clickContinueButton();
-                    FBTest.testDone("exampleScript2.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test script on the page.

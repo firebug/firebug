@@ -24,7 +24,7 @@ function runTest()
                     {
                         breakOnMutation(win, function()
                         {
-                            FBTest.testDone("issue5136.DONE");
+                            FBTest.testDone();
                         });
                     });
                 });

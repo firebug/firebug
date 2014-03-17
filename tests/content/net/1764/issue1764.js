@@ -44,7 +44,7 @@ function runTest()
                                             // Step 8.
                                             verifyNetPanel("Step 8");
                                             nextStep(function() {
-                                                FBTest.testDone("issue1764.DONE");
+                                                FBTest.testDone();
                                             });
                                         });
                                     });

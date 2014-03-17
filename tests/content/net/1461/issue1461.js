@@ -32,7 +32,7 @@ function runTest()
                     "\\(FF 3\\.0\\.6 FireBug 1\\.3\\.2\\)<\\/title>");
                 FBTest.compare(partOfThePageSource, responseBody.textContent, "Proper response must be there");
 
-                FBTest.testDone("issue1461.DONE");
+                FBTest.testDone();
             });
 
             // 3. Reload the page

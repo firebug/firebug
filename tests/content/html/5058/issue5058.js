@@ -14,7 +14,7 @@ function runTest()
                 var expected = "<div id=\"inspectMe\">Inspect Me!</div>";
                 FBTest.compare(expected, editor.getValue(), "The markup must be displayed now");
 
-                FBTest.testDone("issue5058.DONE");
+                FBTest.testDone();
             });
         });
     });

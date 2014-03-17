@@ -12,7 +12,7 @@ function isEmpty(obj) {
 
 function testConsoleError()
 {
-    FBTest.testDone("issue1601.DONE");
+    FBTest.testDone();
 }
 
 // Test entry point.

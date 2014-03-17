@@ -39,7 +39,7 @@ function runTest()
                     var cmdLine = doc.getElementById("fbCommandLine");
                     cmdLine.value = "";
 
-                    FBTest.testDone("index.DONE");
+                    FBTest.testDone();
                 });
             });
         });

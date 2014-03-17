@@ -49,7 +49,7 @@ function runTest()
                     FBTest.compare("init", (log ? log.textContent : ""),
                         "there must be one log in the console.");
 
-                    FBTest.testDone("issue1483.DONE");
+                    FBTest.testDone();
                 });
             });
         });

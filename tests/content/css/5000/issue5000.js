@@ -27,7 +27,7 @@ function runTest()
                     var elementDisplayNow = FBTest.getImageDataFromNode(win.document.getElementById(id));
                     FBTest.ok(elementDisplayBefore != elementDisplayNow, "The styles of the deleted rule shouldn't affect the element anymore");
 
-                    FBTest.testDone("issue5000.DONE");
+                    FBTest.testDone();
                 });
             });
         });
