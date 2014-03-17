@@ -425,38 +425,12 @@ function createFirebugConsole(context, win)
         return sourceLink;
     }
 
-    function removeChromeFrames(trace)
-    {
-        var frames = trace ? trace.frames : null;
-        if (!frames || !frames.length)
-            return null;
-
-        var filteredFrames = [];
-        for (var i = 0; i < frames.length; i++)
-        {
-            var href = frames[i].href;
-            if (href.startsWith("chrome:") || href.startsWith("resource:"))
-                continue;
-
-            // xxxFlorent: should be reverted if we integrate
-            // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
-            if (DebuggerLib.isFrameLocationEval(href))
-                continue;
-
-            filteredFrames.push(frames[i]);
-        }
-
-        trace.frames = filteredFrames;
-
-        return trace;
-    }
-
     function getJSDUserStack()
     {
         if (!Firebug.Debugger.isAlwaysEnabled())
             return null;
         var trace = Firebug.Debugger.getCurrentStackTrace(context);
-        return removeChromeFrames(trace);
+        return StackFrame.removeChromeFrames(trace);
     }
 
     function getComponentsUserStack()
@@ -532,7 +506,7 @@ function createFirebugConsole(context, win)
             }
         }
 
-        return removeChromeFrames(trace);
+        return StackFrame.removeChromeFrames(trace);
     }
 
     function getStackFrameId(inputFrame)
