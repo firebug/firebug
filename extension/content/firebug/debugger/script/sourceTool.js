@@ -328,7 +328,7 @@ DynamicSourceCollector.prototype =
 
         // xxxHonza: ugh, I don't know how to distinguish between static scriptElement
         // scripts and those who are dynamically created.
-        // Let's watch this: https://bugzilla.mozilla.org/show_bug.cgi?id=978657#c18
+        // Bug: https://bugzilla.mozilla.org/show_bug.cgi?id=983297
         if (introType == "scriptElement" && script.startLine > 1)
         {
             Trace.sysout("sourceTool.onNewScript; Looks like dynamic script, " +
