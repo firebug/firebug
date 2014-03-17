@@ -2,8 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/api/cd.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.clearCache();
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var tasks = new FBTest.TaskList();
@@ -24,8 +24,9 @@ function runTest()
 
                 tasks.push(testErrorInfo);
 
-                tasks.run(function() {
-                    FBTest.testDone("commandline.cd.DONE");
+                tasks.run(function()
+                {
+                    FBTest.testDone();
                 });
             });
         });
@@ -36,12 +37,17 @@ function testErrorInfo(callback)
 {
     var panelNode = FBTest.getPanel("console").panelNode;
     var row = panelNode.querySelector(".logRow-errorMessage");
+    var frames = row.getElementsByClassName("objectBox-stackFrame");
+
     FBTest.click(row.querySelector(".subLogRow"));
-    FBTest.compare(1, row.getElementsByClassName("objectBox-stackFrame").length,
+
+    FBTest.compare(1, frames.length,
         "there should be exactly one element in the stack trace");
     FBTest.compare("cd(undefined)", row.querySelector(".errorSourceCode").textContent,
         "the source of the error should be : \"cd(undefined)\"");
+
     // xxxFlorent: TODO ?: check the result of clicking the source link
     FBTest.clearConsole();
+
     callback();
 }
