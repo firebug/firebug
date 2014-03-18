@@ -14,5 +14,5 @@ function runTest()
     FBTest.compare("Expected", "Expected", "Compare test (positive)");
     //FBTest.compare("Expected", "Actual", "Compare test (negative)");
 
-    FBTest.testDone("exampleTest.DONE");
+    FBTest.testDone();
 }

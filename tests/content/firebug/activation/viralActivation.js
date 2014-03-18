@@ -57,7 +57,7 @@ function sameTabOpen(win, path)
 
             var suspension = FW.Firebug.getSuspended();
             FBTest.compare(null, suspension, "Firebug is not suspended on "+browser.currentURI.spec);
-            FBTest.testDone("viralActivation: 1/4 completed");
+            FBTest.testDone();
         });
 
     }

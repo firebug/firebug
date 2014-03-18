@@ -16,7 +16,7 @@ function runTest()
         FBTest.ok(context.exists(), "Context should exist when created");
         browser.disconnect();
         FBTest.ok(!context.exists(), "Context should not exist when disconnected");
-        FBTest.testDone("done test #exists()");
+        FBTest.testDone();
     });
     FBTest.progress("exists, open test page "+url);
     FBTest.openNewTab(url, function(win)

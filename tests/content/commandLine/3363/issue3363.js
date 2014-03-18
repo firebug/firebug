@@ -31,7 +31,7 @@ function runTest()
                         }
                     }
 
-                    FBTest.testDone("issue3363.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("createLogGroups"));

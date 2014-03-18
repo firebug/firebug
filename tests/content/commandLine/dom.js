@@ -69,7 +69,7 @@ function runTest()
 
                 // Run all tasks.
                 taskList.run(function() {
-                    FBTest.testDone("commandline.dom.DONE");
+                    FBTest.testDone();
                 })
             });
         });

@@ -9,7 +9,7 @@ function runTest()
 
         tasks.run(function()
         {
-            FBTest.testDone("issue4689.DONE");
+            FBTest.testDone();
         });
     })
 }

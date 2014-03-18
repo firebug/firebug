@@ -54,7 +54,7 @@ function runTest()
                         "The div must be green now");
                 }
             }
-            FBTest.testDone("issue5277.DONE");
+            FBTest.testDone();
         });
     });
 }

@@ -47,7 +47,7 @@ function waitForResponse(panel)
 function onVerifyResponses()
 {
     verifyResponses();
-    FBTest.testDone("issue2696.DONE");
+    FBTest.testDone();
 }
 
 function verifyResponses(netRow)

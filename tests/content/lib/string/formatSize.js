@@ -47,5 +47,5 @@ function runTest()
         FBTest.compare(value.expected, FW.FBL.formatSize(value.value), msg);
     }
 
-    FBTest.testDone("formatSize.DONE");
+    FBTest.testDone();
 }

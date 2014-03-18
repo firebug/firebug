@@ -15,7 +15,7 @@ function runTest()
                 FBTest.compare("div#test.a.b.c", elementPathItem.label,
                     "The label of the node inside the Element Path must be 'div#test.a.b.c'");
 
-                FBTest.testDone("issue6744.DONE");
+                FBTest.testDone();
             });
         });
     });

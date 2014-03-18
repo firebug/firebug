@@ -22,7 +22,7 @@ function runTest()
                     FBTest.compare("\"" + testProp + "\"",
                         value.textContent, "Full value must be displayed now.");
 
-                    FBTest.testDone("issue3029.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test.

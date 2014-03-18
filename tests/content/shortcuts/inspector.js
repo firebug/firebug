@@ -16,6 +16,6 @@ function runTest()
         FBTest.ok(FBTest.isFirebugActive(), "Firebug must be active");
         FBTest.ok(!FBTest.isInspectorActive(), "HTML Inspector must be deactivated");
 
-        FBTest.testDone("shortcuts.firebug.DONE");
+        FBTest.testDone();
     });
 }

@@ -14,7 +14,7 @@ function runTest()
                     // Catch the second style update
                     waitForCssRules(function()
                     {
-                        FBTest.testDone("issue4893.DONE");
+                        FBTest.testDone();
                     });
                 });
             });

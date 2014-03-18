@@ -12,7 +12,7 @@ function runTest()
                     var panel = FBTest.selectPanel("stylesheet");
                     FBTest.compare(0, getNumberOfRules(panel), "There must be no CSS rule");
 
-                    FBTest.testDone("issue4040.DONE");
+                    FBTest.testDone();
                 });
             });
         });

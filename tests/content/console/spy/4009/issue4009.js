@@ -18,7 +18,7 @@ function runTest()
                     var rows = console.panelNode.querySelectorAll(".logRow.logRow-spy.loaded");
                     FBTest.compare(4, rows.length, "There must be 4 entries in the Console panel");
 
-                    FBTest.testDone("issue4009.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("testButton"));

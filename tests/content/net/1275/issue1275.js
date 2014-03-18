@@ -30,7 +30,7 @@ function runTest()
                         verifyResponse(panel);
 
                         FBTest.setPref("showXMLHttpRequests", prefOrigValue);
-                        FBTest.testDone("issue1275.DONE");
+                        FBTest.testDone();
                     });
 
                     FBTest.click(win.document.getElementById("testButton"));

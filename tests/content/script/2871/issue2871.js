@@ -25,7 +25,7 @@ function runTest()
                     FBTest.compare(expected, valueCol.textContent,
                         "Verify the result value");
 
-                    FBTest.testDone("issue2871.DONE");
+                    FBTest.testDone();
                 })
             })
         });

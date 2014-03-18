@@ -36,7 +36,7 @@ function runTest()
                                     FBTest.compare(FW.FBL.$STR("firebug.reps.optimizedAway"), value.textContent,
                                         "The value must match");
 
-                                    FBTest.testDone("issue6481.DONE");
+                                    FBTest.testDone();
                                 }, true);
 
                             }, true);

@@ -10,7 +10,7 @@ function runTest()
                 var panel = FBTest.selectSidePanel("computed");
                 FBTest.compare(100, panel.panelNode.scrollTop, "Panel must be scrolled down 100 pixels");
 
-                FBTest.testDone("issue5451.DONE");
+                FBTest.testDone();
             });
         });
     });

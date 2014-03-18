@@ -8,7 +8,7 @@ function runTest()
 
             // xxxHonza TODO:
 
-            FBTest.testDone("cookies.test.breakOnNext; DONE");
+            FBTest.testDone();
         });
     });
 };

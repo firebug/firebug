@@ -25,7 +25,7 @@ function runTest()
                 tests.push(test3);
 
                 FBTest.runTestSuite(tests, function() {
-                    FBTest.testDone("issue2122; DONE");
+                    FBTest.testDone();
                 });
             });
         });

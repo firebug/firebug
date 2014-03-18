@@ -16,7 +16,7 @@ function runTest()
                     "The namespace rule must be correct");
             }
 
-            FBTest.testDone("issue5430.DONE");
+            FBTest.testDone();
         });
     });
 }

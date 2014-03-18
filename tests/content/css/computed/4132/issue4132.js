@@ -17,7 +17,7 @@ function runTest()
 
                 FBTest.ok(computedStyles.length > 0, "There should be user agent styles shown.");
 
-                FBTest.testDone("issue4132.DONE");
+                FBTest.testDone();
             });
         });
     });

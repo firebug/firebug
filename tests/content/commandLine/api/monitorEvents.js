@@ -24,7 +24,7 @@ function runTest()
                      /^keyup\s+charCode=\d+,\s+keyCode=\d+$/]);
 
                 taskList.run(function() {
-                    FBTest.testDone("monitorEvents.DONE");
+                    FBTest.testDone();
                 });
             });
         });

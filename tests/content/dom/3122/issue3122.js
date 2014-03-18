@@ -16,7 +16,7 @@ function runTest()
 
                     // Resume debugger, test done.
                     FBTest.clickContinueButton();
-                    FBTest.testDone("issue3122; DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("testButton"));

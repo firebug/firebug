@@ -9,6 +9,6 @@ function runTest()
     {
         FBTest.sysout("onNewPage starts");
         FBTest.ok(!FBTest.isFirebugOpen(), "Firebug should be closed");
-        FBTest.testDone("openNotOpenClose.DONE");
+        FBTest.testDone();
     });
 }

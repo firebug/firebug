@@ -28,7 +28,7 @@ function runTest()
 
     FBTest.compare("temp1 topArg", parentNode.textContent, "The content must match.");
 
-    FBTest.testDone("issue4425.DONE");
+    FBTest.testDone();
 }
 
 // ********************************************************************************************* //

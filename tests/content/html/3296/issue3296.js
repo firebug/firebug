@@ -19,7 +19,7 @@ function runTest()
                             attribute.getElementsByClassName("nodeValue").item(0).textContent,
                             "The value of the 'action' attribute must be '"+actionValue+"'")
                     }
-                    FBTest.testDone("issue3296.DONE");
+                    FBTest.testDone();
                 });
             });
         });

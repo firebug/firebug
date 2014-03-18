@@ -13,7 +13,7 @@ function runTest()
 
             cookie = FBTest.getCookieByName(panelNode, "TestCookie34");
             FBTest.compare("ValueCookie34-modified", cookie.cookie.value, "Check new cookie value");
-            FBTest.testDone("cookies.test.issue34; DONE");
+            FBTest.testDone();
         });
     });
 };

@@ -50,7 +50,7 @@ function runTest()
                     }
                 }
 
-                FBTest.testDone("issue4826.DONE");
+                FBTest.testDone();
             });
         });
     });

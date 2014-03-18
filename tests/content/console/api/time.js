@@ -19,7 +19,7 @@ function runTest()
                     FBTest.ok(elapsed > 0 && elapsed < 2000, "The elapsed time should be within " +
                         "this range.");
 
-                    FBTest.testDone("console.time.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test implemented on the test page.

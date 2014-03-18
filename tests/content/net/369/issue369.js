@@ -51,7 +51,7 @@ function verifyContent()
         FBTest.ok(textContent, domTable.textContent, "JSON data must be properly displayed.");
     }
 
-    FBTest.testDone("issue369.jsonViewer.DONE");
+    FBTest.testDone();
 }
 
 // ************************************************************************************************

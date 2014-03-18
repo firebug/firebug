@@ -20,7 +20,7 @@ function runTest()
                             "Response text must match.");
                     }
 
-                    FBTest.testDone("issue2868.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test implemented on the test page.

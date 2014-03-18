@@ -31,7 +31,7 @@ function runTest()
                     FBTest.compare(/png;base64/, editor.value, "Semicolon must be entered");
                 }
 
-                FBTest.testDone("issue4543.DONE");
+                FBTest.testDone();
             });
 
             // xxxsz: Needs to be executed after the first test

@@ -13,7 +13,7 @@ function runTest()
 
             FBTest.runTestSuite(tests, function()
             {
-                FBTest.testDone("issue6405; DONE");
+                FBTest.testDone();
             });
         });
     });

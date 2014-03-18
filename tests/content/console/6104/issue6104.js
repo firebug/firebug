@@ -11,7 +11,7 @@ function runTest()
                     var expected = /DOMTokenList\[\"test1\"\, \"test2\"\]/;
                     FBTest.compare(expected, row.textContent, "The log must match");
 
-                    FBTest.testDone("issue6104.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.executeCommand("$('#testdiv').classList");

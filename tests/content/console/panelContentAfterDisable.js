@@ -20,7 +20,7 @@ function runTest()
             FBTest.ok(splitter.collapsed, "Splitter must be hidden");
             FBTest.ok(sidePanel.collapsed, "Large command line must be hidden");
 
-            FBTest.testDone("panelContentAfterDisable.DONE");
+            FBTest.testDone();
         });
     });
 }

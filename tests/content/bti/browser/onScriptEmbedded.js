@@ -14,7 +14,7 @@ function runTest()
     browser.addEventListener("onScript", function(compilationUnit)
     {
         FBTest.compare(compilationUnit.getURL(), url, "URL of newly loaded script should be " + url);
-        FBTest.testDone("done test #onScriptEmbedded()");
+        FBTest.testDone();
     });
     FBTest.progress("onScriptEmbedded, open test page "+url);
     FBTest.openNewTab(url, function(win)

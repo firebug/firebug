@@ -46,7 +46,7 @@ function runTest()
                     checkIsEnabled(FW.FBL.$STR("Panel-net"), FW.Firebug.NetMonitor);
                     checkIsEnabled(FW.FBL.$STR("Panel-console"), FW.Firebug.Console);
 
-                    FBTest.testDone("openDisableEnableReload.DONE");
+                    FBTest.testDone();
                 });
             });
         });

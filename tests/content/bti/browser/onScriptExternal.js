@@ -16,7 +16,7 @@ function runTest()
     {
         FBTest.compare(compilationUnit.getURL(), scriptUrl,
             "URL of newly loaded script should be " + scriptUrl);
-        FBTest.testDone("done test #onScriptExternal()");
+        FBTest.testDone();
     });
     FBTest.progress("onScriptExternal, open test page "+url);
     FBTest.openNewTab(url, function(win)

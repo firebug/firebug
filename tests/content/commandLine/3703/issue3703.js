@@ -10,7 +10,7 @@ function runTest()
                 FBTest.waitForDisplayedElement("console", config, function(row)
                 {
                     FBTest.compare(/<li>/, row.textContent, "The result must be one 'li' element");
-                    FBTest.testDone("issue3703.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.clickToolbarButton(null, "fbConsoleClear");

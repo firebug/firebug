@@ -23,7 +23,7 @@ function runTest()
                     FBTest.compare("", rows[0].textContent, "The log counter must be empty");
                     FBTest.compare("", rows[1].textContent, "The log counter must be empty");
 
-                    FBTest.testDone("xhrGrouping.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("testButton"));

@@ -301,7 +301,7 @@ function runTest()
 
                 // Run!
                 taskList.run(function() {
-                    FBTest.testDone("issue5873.DONE");
+                    FBTest.testDone();
                 }, 0)
             });
         });

@@ -15,7 +15,7 @@ function runTest()
 
                     FBTest.ok(!button.disabled, "Profile button should not be disabled");
 
-                    FBTest.testDone("issue4384.DONE");
+                    FBTest.testDone();
                 }
                 var mutationObserver = new MutationObserver(onMutationObserve);
                 mutationObserver.observe(button, {attributes: true});

@@ -11,7 +11,7 @@ function runTest()
     browser.addEventListener("onDisconnect", function(aBrowser)
     {
         FBTest.ok(browser == aBrowser, "Disconnect call back is for wrong browser");
-        FBTest.testDone("done test #onDisconnect()");
+        FBTest.testDone();
     });
     FBTest.progress("onDisconnect, disconnecting");
     browser.disconnect();

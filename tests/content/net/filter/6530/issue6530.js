@@ -45,5 +45,5 @@ function checkNetPanelUI()
     }
 
     FW.Firebug.NetMonitor.onToggleFilter(FW.Firebug.currentContext, "all");
-    FBTest.testDone("issue6530.DONE");
+    FBTest.testDone();
 }

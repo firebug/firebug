@@ -15,7 +15,7 @@ function runTest()
                     {
                         FBTest.ok(true, "Tips for the Command Line must be shown");
 
-                        FBTest.testDone("commandline.help.DONE");
+                        FBTest.testDone();
                     });
                 });
 

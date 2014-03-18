@@ -73,7 +73,7 @@ function runTest()
                         if (runs++)
                             return;
                         FBTest.ok(false, "The completion popup should be opened.");
-                        FBTest.testDone("issue3660.DONE");
+                        FBTest.testDone();
                     }, 1000);
                 }
 
@@ -216,7 +216,7 @@ function runTest()
 
                 tasks.run(function()
                 {
-                    FBTest.testDone("issue3660.DONE");
+                    FBTest.testDone();
                 }, 0);
             });
         });

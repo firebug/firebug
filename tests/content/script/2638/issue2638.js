@@ -9,7 +9,7 @@ function runTest()
             var breakpointAttributes = {condition: "i == 5"};
             FBTest.setBreakpoint(null, url, 10, breakpointAttributes, function(row)
             {
-                FBTest.testDone("issue2638.DONE");
+                FBTest.testDone();
             });
         });
     });

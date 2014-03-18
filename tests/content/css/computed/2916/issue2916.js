@@ -68,7 +68,7 @@ function runTest()
                     }
                 }
 
-                FBTest.testDone("issue2916.DONE");
+                FBTest.testDone();
             });
         });
     });

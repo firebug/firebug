@@ -28,7 +28,7 @@ function runTest()
 
                     FW.FBL.$("cmd_firebug_normalTextSize").doCommand();
 
-                    FBTest.testDone("textSize.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test implemented on the test page.

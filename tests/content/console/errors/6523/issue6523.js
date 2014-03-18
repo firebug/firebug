@@ -37,7 +37,7 @@ function runTest()
                             "The function name must be correct " + frames[3].textContent);
                     }
 
-                    FBTest.testDone("issue6523.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.clickContentButton(win, "testButton");

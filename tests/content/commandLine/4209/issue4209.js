@@ -12,7 +12,7 @@ function runTest()
                     FBTest.compare(/Object\s*{\s*obj={...}}/, row.textContent,
                         "The result must match");
 
-                    FBTest.testDone("issue4209.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.clickToolbarButton(null, "fbConsoleClear");

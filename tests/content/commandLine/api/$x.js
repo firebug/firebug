@@ -35,7 +35,7 @@ function runTest()
                     "objectBox objectBox-string");
 
                 taskList.run(function() {
-                    FBTest.testDone("$x.DONE");
+                    FBTest.testDone();
                 });
             });
         });

@@ -14,7 +14,7 @@ function runTest()
                     "2", "span", "objectBox objectBox-number");
 
                 taskList.run(function() {
-                    FBTest.testDone("$_.DONE");
+                    FBTest.testDone();
                 });
             });
         });

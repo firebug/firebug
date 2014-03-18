@@ -25,7 +25,7 @@ function runTest()
 
                 FBTest.compare("", cmdLine.value, "Content of Command Line must be empty");
 
-                FBTest.testDone("issue4453.DONE");
+                FBTest.testDone();
             });
         });
     });

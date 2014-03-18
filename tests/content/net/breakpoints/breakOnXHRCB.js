@@ -27,7 +27,7 @@ function runTest()
 
                 FBTest.runTestSuite(testSuite, function()
                 {
-                    FBTest.testDone("breakOnXHRCB.DONE");
+                    FBTest.testDone();
                 });
             });
         });

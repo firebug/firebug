@@ -37,7 +37,7 @@ function runTest()
                         FBTest.compare(/^Loram(?!.*\.\.\.)/, win.document.getElementById("paragraph").textContent,
                             "Node contents on page must not be cropped and contain 'Loram'");
 
-                        FBTest.testDone("issue2183.DONE");
+                        FBTest.testDone();
                     });
 
                     FBTest.sendKey("HOME", editor);

@@ -101,7 +101,7 @@ function runTest()
                             else
                             {
                                 FBTest.compare(wanted, tc, "The edited element must get visibly selected afterwards.");
-                                FBTest.testDone("issue5506.DONE");
+                                FBTest.testDone();
                             }
                         }
                         testSel();

@@ -26,7 +26,7 @@ function runTest()
                     var cascadedGroups = panelNode.querySelectorAll(".logGroupBody > .logRow-group");
                     FBTest.compare(1, cascadedGroups.length, "There must be one cascaded group");
 
-                    FBTest.testDone("groupGrouping.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("testButton"));

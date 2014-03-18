@@ -43,7 +43,7 @@ function runTest()
                         FBTest.compare(expected[i].link, sourceLink.textContent,
                             "The proper source link must be displayed. " + sourceLink.textContent);
                     }
-                    FBTest.testDone("issue5945.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.reload();

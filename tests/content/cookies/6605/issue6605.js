@@ -27,7 +27,7 @@ function runTest()
                     var value = cookie.row.getElementsByClassName("cookieValueCol")[0];
                     FBTest.compare(" ", value.textContent, "Value must still be a space character");
 
-                    FBTest.testDone("issue6605.DONE");
+                    FBTest.testDone();
                 });
             });
         });

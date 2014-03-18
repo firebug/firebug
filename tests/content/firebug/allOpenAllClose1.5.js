@@ -88,7 +88,7 @@ function alsoOpened(win)
 
 
 
-    FBTest.testDone("allOpenAllClose.DONE");
+    FBTest.testDone();
 }
 
 //------------------------------------------------------------------------

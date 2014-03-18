@@ -25,7 +25,7 @@ function runTest()
                 FBTest.compare("margin-right", editor.value,
                     "Must autocomplete to 'margin-right'");
 
-                FBTest.testDone("issue3671.DONE");
+                FBTest.testDone();
             });
         });
     });

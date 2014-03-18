@@ -18,7 +18,7 @@ function runTest()
                     {
                         FBTest.removeBreakpoint(null, fileName, 1069, function(row)
                         {
-                            FBTest.testDone("issue3402.DONE");
+                            FBTest.testDone();
                         });
                     }, 500);
                 }, 500);

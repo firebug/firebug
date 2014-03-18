@@ -12,7 +12,7 @@ function runTest()
                 var notExpandedNodes = panel.panelNode.querySelectorAll(".containerNodeBox:not(.open)");
                 FBTest.ok(notExpandedNodes.length == 0, "All nodes must be expanded");
 
-                FBTest.testDone("issue4669.DONE");
+                FBTest.testDone();
             });
         });
     });

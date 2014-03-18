@@ -17,7 +17,7 @@ function runTest()
             {
                 FBTest.setPref("colorDisplay", colorDisplayOrigValue);
                 FBTest.setPref("expandShorthandProps", expandShorthandPropsOrigValue);
-                FBTest.testDone("issue5507; DONE");
+                FBTest.testDone();
             });
         });
     });

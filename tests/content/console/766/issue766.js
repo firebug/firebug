@@ -39,7 +39,7 @@ function runTest()
                     FBTest.compare(values[0].textContent, "\"test1\"", "There value must be == 'test1'");
                     FBTest.compare(values[1].textContent, "\"test2\"", "There value must be == 'test2'");
 
-                    FBTest.testDone("issue766; DONE");
+                    FBTest.testDone();
                 });
 
                 // Run test implemented on the page.

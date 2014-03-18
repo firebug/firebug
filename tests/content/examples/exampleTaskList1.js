@@ -29,6 +29,6 @@ function runTest()
 
     // Run all.
     tasks.run(function() {
-        FBTest.testDone("examples.tasklist.DONE");
+        FBTest.testDone();
     });
 }

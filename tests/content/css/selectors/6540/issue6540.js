@@ -17,7 +17,7 @@ function runTest()
                             {
                                 clickAndVerify(win, "changeText", 0, "There must be no <div>s listed",
                                     function () {
-                                        FBTest.testDone("issue6540.DONE");
+                                        FBTest.testDone();
                                     }
                                 );
                             }
@@ -26,7 +26,7 @@ function runTest()
                 }
                 else
                 {
-                    FBTest.testDone("issue6540.DONE");
+                    FBTest.testDone();
                 }
             });
         });
@@ -47,7 +47,7 @@ function clickAndVerify(win, id, expected, msg, callback)
         if (FBTest.compare(expected, divs.length, msg))
             callback();
         else
-            FBTest.testDone("issue6540.DONE");
+            FBTest.testDone();
     });
 
     var button = win.document.getElementById(id);

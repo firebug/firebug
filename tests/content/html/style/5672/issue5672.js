@@ -41,7 +41,7 @@ function runTest()
 
                     tests.run(function()
                     {
-                        FBTest.testDone("issue5672.DONE");
+                        FBTest.testDone();
                     });
                 });
             });

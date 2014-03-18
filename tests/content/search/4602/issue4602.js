@@ -25,7 +25,7 @@ function runTest()
                     "The value inside the search field much match the selection.");
             }
 
-            FBTest.testDone("issue4602.DONE");
+            FBTest.testDone();
         });
     });
 }

@@ -29,7 +29,7 @@ function runTest(request)
                 }
 
                 // Finish test
-                FBTest.testDone("issue372.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

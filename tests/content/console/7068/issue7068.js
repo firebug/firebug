@@ -30,7 +30,7 @@ function runTest()
                                 (node) => node.textContent).join(",");
                             FBTest.compare("log from the main window,log from the iframe", loggedInFB,
                                 "Two logs should have appeared in the Firebug Console");
-                            FBTest.testDone("issue7068.DONE");
+                            FBTest.testDone();
                         });
                     });
                 });

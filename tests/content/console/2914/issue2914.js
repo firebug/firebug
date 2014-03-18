@@ -28,7 +28,7 @@ function runTest()
                     traceNode.textContent,
                     "The stack trace must be properly displayed.");
 
-                FBTest.testDone("issue2914.DONE");
+                FBTest.testDone();
             });
         });
     });

@@ -24,7 +24,7 @@ function runTest()
                             if (FBTest.ok(result, "Result must exist"))
                                 FBTest.compare(20, result.textContent, "Result must be correct");
 
-                            FBTest.testDone("issue5033.DONE");
+                            FBTest.testDone();
                         });
                     });
 

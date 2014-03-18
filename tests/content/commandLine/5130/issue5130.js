@@ -16,7 +16,7 @@ function runTest()
                     "div", "logRow logRow-dir");
 
                 tasks.run(function() {
-                    FBTest.testDone("issue5130.DONE");
+                    FBTest.testDone();
                 });
             });
         });

@@ -21,7 +21,7 @@ function runTest()
 
             // Run test suite.
             FBTest.runTestSuite(testSuite, function() {
-                FBTest.testDone("issue2613; DONE");
+                FBTest.testDone();
             });
         });
     });

@@ -25,7 +25,7 @@ function runTest()
 
             // Start all async tasks.
             taskList.run(function() {
-                FBTest.testDone("debuggerKeyword.DONE");
+                FBTest.testDone();
             });
         });
     });
@@ -94,7 +94,7 @@ function clickDisableButton(callback)
     var button = panel.panelNode.querySelector(".notificationButton.skipButton");
     if (!FBTest.ok(button, "There must be a balloon with 'Disable' button."))
     {
-        FBTest.testDone("debuggerKeyword.FAIL");
+        FBTest.testDone();
 
         // Will fail on timeout since the callback will never be executed.
         return;

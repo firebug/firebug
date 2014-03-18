@@ -17,7 +17,7 @@ function runTest()
                 FBTest.compare("document.getElementById(ab)", cmdLine.value,
                     "Content of Command Line must be: document.getElementById(ab)");
 
-                FBTest.testDone("issue3709.DONE");
+                FBTest.testDone();
             });
         });
     });

@@ -36,5 +36,5 @@ function checkHTMLPreview()
     var body = htmlPreview.contentDocument.getElementsByTagName("body")[0];
     FBTest.sysout("body", body);
     FBTest.compare(bodyContent, body.innerHTML, "HTML preview verified.");
-    FBTest.testDone("issue700.DONE");
+    FBTest.testDone();
 }

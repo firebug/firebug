@@ -16,7 +16,7 @@ function runTest()
                     FBTest.compare(/quack\s*/, rows[0].textContent, "The first log must say: quack");
                     FBTest.compare(/meow!!\s*/, rows[1].textContent, "The second log must say: meow!!");
 
-                    FBTest.testDone("dynScriptLoad.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.clearConsole();

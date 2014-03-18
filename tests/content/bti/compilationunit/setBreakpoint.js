@@ -17,7 +17,7 @@ function runTest()
         FBTest.ok(FW.Firebug.BTI.Breakpoint.INSTALLED === breakpoint.getState(),
             "breakpoint should be installed");
         FBTest.ok(1 == breakpoint.getLineNumber(), "breakpoint should be on line 1");
-        FBTest.testDone("done test #setBreakpoint()");
+        FBTest.testDone();
     });
     browser.addEventListener("onContextCreated", function(context)
     {

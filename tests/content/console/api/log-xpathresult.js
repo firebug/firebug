@@ -17,7 +17,7 @@ function runTest()
                     var array = row.querySelector(".objectBox-array.hasTwisty");
                     FBTest.ok(array, "The array must be expandable");
 
-                    FBTest.testDone("console.log-xpathresult.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("testButton"));

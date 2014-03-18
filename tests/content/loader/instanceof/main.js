@@ -49,7 +49,7 @@ function runTest()
         FBTest.ok((Reps.XW_instanceOf(FW.FBL, window, window.Window)),
             "The window is an Reps.XW_instanceOf window.Window");
 
-        FBTest.testDone("instanceof.DONE");
+        FBTest.testDone();
     });
 }
 

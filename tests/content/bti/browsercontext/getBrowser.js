@@ -13,7 +13,7 @@ function runTest()
     {
         FBTest.compare(context.getURL(), url, "URL of newly created context should be " +url);
         FBTest.ok(context.getBrowser() == browser, "Context should refer to its browser");
-        FBTest.testDone("done test #getBrowser()");
+        FBTest.testDone();
     });
     FBTest.progress("getBrowser, open test page "+url);
     FBTest.openNewTab(url, function(win)
