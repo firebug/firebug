@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/5506/issue5506.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
             FBTest.selectElementInHtmlPanel("test2", function(node)
             {

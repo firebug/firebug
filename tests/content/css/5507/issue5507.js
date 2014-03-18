@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/5507/issue5507.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             // Save the current value of the "colorDisplay" and "expandShorthandProps" preferences,
             // so we can revert it after the test is finished
             var colorDisplayOrigValue = FBTest.getPref("colorDisplay");

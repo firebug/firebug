@@ -14,7 +14,8 @@ function runTest()
 
     FBTest.openNewTab(basePath + "net/2297/issue2297.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enablePanels(["console", "net"], function()
             {
                 var config = {tagName: "div", classes: "logRow logRow-error"};

@@ -11,7 +11,8 @@ function runTest()
 
         FBTest.openURL(basePath + "inspector/InspectorTestIframe.htm?url=Issue68FrameActual.htm", function(win)
         {
-            FBTest.openFirebug(function() {
+            FBTest.openFirebug(function()
+            {
                 ifr = win.document.getElementById("testIframe");
 
                 var target = ifr.contentDocument.getElementById("testTarget1");

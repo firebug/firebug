@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/api/log.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var config = {tagName: "div", classes: "logRow logRow-log"};

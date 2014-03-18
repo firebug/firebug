@@ -7,7 +7,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "firebug/OpenFirebugOnThisPage.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("console");
             FW.Firebug.Console.setDefaultState(true);
             FW.Firebug.Console.setDefaultState(false);

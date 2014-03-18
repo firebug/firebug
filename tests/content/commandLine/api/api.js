@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/api/api.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.clearCache();
             FBTest.enableConsolePanel(function(win)
             {
@@ -62,7 +63,8 @@ function runTest()
                     "a", "objectLink objectLink-function");
 
                 // Run all expressions step by step.
-                tasks.run(function() {
+                tasks.run(function()
+                {
                     FBTest.testDone();
                 });
             });

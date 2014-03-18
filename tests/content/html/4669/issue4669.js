@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/4669/issue4669.xml", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("html");
             FBTest.selectElementInHtmlPanel(win.document.documentElement, function(node)
             {

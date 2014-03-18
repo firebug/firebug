@@ -4,7 +4,8 @@ function runTest()
     FBTest.openNewTab(basePath + "script/refreshHaltedDebugger.html", function(win)
     {
         // 2) Open Firebug and enable the Script panel.
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableScriptPanel(function()
             {
                 FBTest.selectPanel("script");
@@ -27,7 +28,8 @@ function runTest()
                     //FBTest.clickContinueButton(chrome);
 
                     // 4) Reload page and wait for another break.
-                    FBTest.reload(function(win) {
+                    FBTest.reload(function(win)
+                    {
                         executeTest(win);
                     });
                 });
@@ -43,7 +45,8 @@ function executeTest(win)
 {
     FBTest.progress("refreshHaltedDebugger; Execute Test.");
 
-    setTimeout(function() {
+    setTimeout(function()
+    {
         FBTest.click(win.document.getElementById("testButton"));
     }, 10);
 }

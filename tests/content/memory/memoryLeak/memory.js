@@ -2,14 +2,16 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "memory/memoryLeak/memory.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             // Define individual async tasks.
             var tasks = new FBTest.TaskList();
             for (var i=0; i<14; i++)
                 tasks.push(openPopup, win);
 
             // Run them all.
-            tasks.run(function() {
+            tasks.run(function()
+            {
                 FBTest.testDone();
             });
         });

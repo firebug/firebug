@@ -2,13 +2,15 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "firebug/4040/issue4040.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("stylesheet");
             FBTest.compare(1, getNumberOfRules(panel), "There must be one CSS rule");
 
             FBTest.openNewTab("about:blank", function(win)
             {
-                FBTest.openFirebug(function () {
+                FBTest.openFirebug(function()
+                {
                     var panel = FBTest.selectPanel("stylesheet");
                     FBTest.compare(0, getNumberOfRules(panel), "There must be no CSS rule");
 

@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "dom/1738/issue1738.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.waitForDOMProperty("_testProperty", function(row)
             {
                 var propLabel = row.getElementsByClassName("memberLabel")[0];

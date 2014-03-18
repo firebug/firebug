@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/breakpoints/5316/issue5316.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableScriptPanel(function()
             {
                 var chrome = FW.Firebug.chrome;

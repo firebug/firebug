@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/4391/issue4391.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var contentView = FW.FBL.getContentView(win);

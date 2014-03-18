@@ -3,7 +3,8 @@ function runTest()
     var basePath6422 = basePath + "commandLine/6422/";
     FBTest.openNewTab(basePath6422 + "issue6422.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var tasks = new FBTest.TaskList();

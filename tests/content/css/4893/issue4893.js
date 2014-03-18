@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/4893/issue4893.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("stylesheet");
 
             // Catch the first page load and Style panel update.

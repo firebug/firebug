@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/api/6439/issue6439.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var tasks = new FBTest.TaskList();
@@ -28,7 +29,8 @@ function runTest()
                 tasks.push(FBTest.executeCommandAndVerify, "console.log('amount: %.5f', " + float + ")",
                     "amount: 4.31520", "div", "logRow-log");
 
-                tasks.run(function() {
+                tasks.run(function()
+                {
                     FBTest.testDone();
                 });
             });

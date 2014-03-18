@@ -4,7 +4,8 @@ function runTest()
 
     FBTest.openNewTab(basePath + "console/spy/2712/issue2712.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 // Wait for request being displayed in the Console panel.

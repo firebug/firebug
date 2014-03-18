@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/2976/issue2976.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableNetPanel(function(win)
             {
                 FW.Firebug.chrome.selectPanel("html");

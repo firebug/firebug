@@ -3,8 +3,10 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/6291/issue6291.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.enablePanels(["console", "script"], function() {
+        FBTest.openFirebug(function()
+        {
+            FBTest.enablePanels(["console", "script"], function()
+            {
                 var panelNode = FBTest.getSelectedPanel().panelNode;
                 var tasks = new FBTest.TaskList();
 
@@ -122,7 +124,8 @@ function click(callback, node)
     node.ownerDocument.defaultView.setTimeout(function()
     {
         FBTest.click(node);
-    }, 0)
+    }, 0);
+
     callback();
 }
 

@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/dom.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var taskList = new FBTest.TaskList();
@@ -68,7 +69,8 @@ function runTest()
                     "a", "objectLink objectLink-element");
 
                 // Run all tasks.
-                taskList.run(function() {
+                taskList.run(function()
+                {
                     FBTest.testDone();
                 })
             });

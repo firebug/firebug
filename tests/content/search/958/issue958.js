@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "search/958/issue958.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("console");
 
             var searchField = FW.Firebug.chrome.$("fbSearchBox");

@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/3709/issue3709.htm", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var panel = FW.Firebug.chrome.selectPanel("console");

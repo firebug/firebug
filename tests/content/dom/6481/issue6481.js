@@ -4,7 +4,8 @@ function runTest()
 
     FBTest.openNewTab(basePath + "dom/6481/issue6481.html", function()
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableScriptPanel(function(win)
             {
                 var panel = FBTest.selectPanel("dom");

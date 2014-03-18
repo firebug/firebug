@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "script/dynamicScriptEval/test1.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enablePanels(["console", "script"], function()
             {
                 var config = {tagName: "div", classes: "logRow logRow-log", counter: 2};

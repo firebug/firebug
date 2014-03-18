@@ -4,7 +4,8 @@
  * Author: Rob Campbell, Mozilla Corp., Mar 20, 2009
  */
 
-function isEmpty(obj) {
+function isEmpty(obj)
+{
     if (obj)
         return obj.length == 0;
     return true;
@@ -34,7 +35,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/1591/issue1591.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(testCommandLineForError);
         });
     });

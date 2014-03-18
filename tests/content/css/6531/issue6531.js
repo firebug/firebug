@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/6531/issue6531.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("stylesheet");
 
             var locationButtons = FW.Firebug.chrome.$("fbLocationButtons");

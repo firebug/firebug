@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "net/4156/issue4156.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableNetPanel(function(win)
             {
                 FBTest.progress("Test setting multiple filters");

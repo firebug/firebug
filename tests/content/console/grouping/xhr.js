@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/grouping/xhr.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 FBTest.clearConsole();

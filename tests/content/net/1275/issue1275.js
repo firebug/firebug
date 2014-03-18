@@ -6,7 +6,8 @@ function runTest()
 
     FBTest.openNewTab(basePath + "net/1275/issue1275.htm", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enablePanels(["net", "console"], function()
             {
                 FBTest.clearCache();

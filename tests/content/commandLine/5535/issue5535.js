@@ -5,7 +5,8 @@ function runTest()
 {
     FBTest.openNewTab(testPageURL, function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function()
             {
                 var tasks = new FBTest.TaskList();

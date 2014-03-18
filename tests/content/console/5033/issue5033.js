@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/5033/issue5033.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enablePanels(["script", "console"], function()
             {
                 FBTest.waitForBreakInDebugger(null, 10, true, function()

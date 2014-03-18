@@ -11,8 +11,10 @@ function runTest()
 
     FBTest.openNewTab(basePath + "console/2328/issue2328.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.enableConsolePanel(function() {
+        FBTest.openFirebug(function()
+        {
+            FBTest.enableConsolePanel(function()
+            {
                 // Create listener for mutation events.
                 var doc = FBTest.getPanelDocument();
                 var recognizer = new MutationRecognizer(doc.defaultView, "div",

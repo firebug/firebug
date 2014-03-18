@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/nestedRules/atMediaStyleEditing.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("stylesheet");
 
             FBTest.selectPanelLocationByName(panel, "atMediaStyleEditing.html");
@@ -27,6 +28,7 @@ function runTest()
                     }
                 }
             }
+
             FBTest.compare(2, atMediaRuleCount, "Two @media rules must be shown");
 
             // Try manipulating the properties inside the '@media all' rule
@@ -46,7 +48,8 @@ function runTest()
                     var csElement = win.getComputedStyle(element);
 
                     // Wait a bit until the new style gets applied
-                    setTimeout(function() {
+                    setTimeout(function()
+                    {
                         FBTest.compare(
                             "-moz-linear-gradient(135deg, rgb(255, 140, 120), rgb(255, 200, 180))",
                             csElement.backgroundImage, "Element display must be correct");
@@ -67,7 +70,6 @@ function runTest()
                         FBTest.testDone();
                     }, 500);
                 }
-
             }
         });
     });

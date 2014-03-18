@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "net/4382/issue4382.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var tests = [];
             tests.push(function(callback)
             {

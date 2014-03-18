@@ -11,7 +11,8 @@ function runTest()
 
     FBTest.openNewTab(basePath + "script/2871/issue2871-b.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableScriptPanel(function(win)
             {
                 // Create a new breakpoint

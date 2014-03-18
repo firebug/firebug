@@ -2,14 +2,16 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/grouping/simpleLogs.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var tasks = new FBTest.TaskList();
                 tasks.push(verifyLogs, win, 12, 2, "testButton1", "Verify grouped logs");
                 tasks.push(verifyLogs, win, 51, "", "testButton2", "Verify not grouped logs");
 
-                tasks.run(function() {
+                tasks.run(function()
+                {
                     FBTest.testDone();
                 });
             });

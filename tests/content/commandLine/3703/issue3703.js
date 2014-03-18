@@ -2,8 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/3703/issue3703.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.selectPanel("console");
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var config = {tagName: "a", classes: "objectLink objectLink-element"};

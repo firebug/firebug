@@ -4,7 +4,8 @@ function runTest()
     {
         var originalPrefValue = FBTest.getPref("net.curlAddCompressedArgument");
 
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableNetPanel(function(win)
             {
                 var button = win.document.getElementById("sendRequest");

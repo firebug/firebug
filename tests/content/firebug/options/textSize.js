@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "firebug/options/textSize.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var config = {tagName: "div", classes: "logRow logRow-log"};

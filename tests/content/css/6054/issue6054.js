@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/6054/issue6054.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             // Should better be set via the menu
             FBTest.setPref("colorDisplay", "hex");
 
@@ -25,7 +26,6 @@ function runTest()
                         "Rule must be copied with colors in hexadecimal format");
                     FBTest.testDone();
                 });
-
             });
         });
     });

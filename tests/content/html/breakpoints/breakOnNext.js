@@ -4,7 +4,8 @@ function runTest()
 
     FBTest.openNewTab(basePath + "html/breakpoints/breakOnNext.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableScriptPanel(function()
             {
                 var doNotFilter = FBTest.getPref("filterSystemURLs");
@@ -14,20 +15,25 @@ function runTest()
 
                 // A suite of asynchronous tests.
                 var testSuite = [];
-                testSuite.push(function(callback) {
+                testSuite.push(function(callback)
+                {
                     breakOnMutation(win, "breakOnAttrModified", 41, callback);
                 });
-                testSuite.push(function(callback) {
+                testSuite.push(function(callback)
+                {
                     breakOnMutation(win, "breakOnNodeInserted", 52, callback);
                 });
-                testSuite.push(function(callback) {
+                testSuite.push(function(callback)
+                {
                     breakOnMutation(win, "breakOnNodeRemoved", 58, callback);
                 });
-                testSuite.push(function(callback) {
+                testSuite.push(function(callback)
+                {
                     breakOnMutation(win, "breakOnTextModified", 47, callback);
                 });
 
-                FBTest.runTestSuite(testSuite, function() {
+                FBTest.runTestSuite(testSuite, function()
+                {
                     FBTest.testDone();
                 });
             });

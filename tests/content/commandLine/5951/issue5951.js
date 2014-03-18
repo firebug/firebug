@@ -2,9 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/5951/issue5951.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.clearCache();
-
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var expression = "document.getElementsByTagName('span')";

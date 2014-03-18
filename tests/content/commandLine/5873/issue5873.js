@@ -3,8 +3,10 @@ function runTest()
     FBTest.setPref("commandLineShowCompleterPopup", true);
     FBTest.openNewTab(basePath + "commandLine/5873/issue5873.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.enablePanels(["console", "script"], function() {
+        FBTest.openFirebug(function()
+        {
+            FBTest.enablePanels(["console", "script"], function()
+            {
                 var doc = FW.Firebug.chrome.window.document;
                 var cmdLine = doc.getElementById("fbCommandLine");
                 var completionBox = doc.getElementById("fbCommandLineCompletion");
@@ -55,9 +57,11 @@ function runTest()
                         }
                         window.a = new A(3);
                     }
+
                     var src = (createA + "").replace(/\n/g,' ').replace(/ +/g, ' ');
                     src += " createA();";
                     var sync = false;
+
                     FW.Firebug.CommandLine.evaluate(src, FW.Firebug.currentContext, undefined,
                         undefined, function()
                     {
@@ -67,6 +71,7 @@ function runTest()
                         sync = true;
                         FBTest.compare(1, 0, "evaluation error: " + e);
                     });
+
                     FBTest.compare(true, sync, "Evaluation must be syncronous.");
                     callback();
                 }
@@ -88,6 +93,7 @@ function runTest()
                         {
                             return el.textContent;
                         }).join(",");
+
                         var wanted = "catched,helper,local,param,unused,withVar";
                         FBTest.compare(wanted, joined, "The completion popup should show the right list of closure variables.");
                         cmdLine.value = "";
@@ -132,6 +138,7 @@ function runTest()
                         ["0.%a", "0.%a"],
                         ["'a.%a'", "'a.%a'"]
                     ];
+
                     for (var i = 0; i < tests.length; ++i)
                     {
                         var from = tests[i][0], to = tests[i][1];
@@ -300,7 +307,8 @@ function runTest()
                 taskList.push(testInDebugger);
 
                 // Run!
-                taskList.run(function() {
+                taskList.run(function()
+                {
                     FBTest.testDone();
                 }, 0)
             });

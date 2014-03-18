@@ -3,14 +3,13 @@
  * 2) Select e.g. Net panel
  * 3) Reload the page.
  * 4) Verify that the context associated with the page exists and is active.
-
  */
-
 function runTest()
 {
     FBTest.openNewTab(basePath + "firebug/OpenFirebugOnThisPage.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableNetPanel();
 
             FBTest.reload(function()

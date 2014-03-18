@@ -2,9 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/4217/issue4217.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.selectPanel("console");
-
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var config = {tagName: "div", classes: "logRow", counter: 2};

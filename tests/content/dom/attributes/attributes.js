@@ -5,7 +5,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "dom/attributes/attributes.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 FBTest.progress("console enabled, creating task list");

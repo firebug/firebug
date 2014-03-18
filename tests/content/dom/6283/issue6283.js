@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "dom/6283/issue6283.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("stylesheet");
 
             if (FBTest.selectPanelLocationByName(panel, "issue6283.html"))

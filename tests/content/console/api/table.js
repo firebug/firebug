@@ -5,7 +5,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/api/table.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var doc = win.document;
@@ -51,7 +52,8 @@ function runTest()
                 var table11 = {cols: 2, rows: 3, content: text11};
                 tasks.push(executeTest, "testButton11", doc, null, [table11]);
 
-                tasks.run(function() {
+                tasks.run(function()
+                {
                     FBTest.testDone();
                 });
             });
@@ -96,6 +98,7 @@ function executeTest(callback, buttonId, doc, title, expected)
 function verifyLogBody(logRow, expected)
 {
     var tables = logRow.querySelectorAll(".dataTable");
+
     FBTest.compare(expected.length, tables.length, "There must be " +
         expected.length + " table(s).");
 

@@ -2,8 +2,10 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/5359/issue5359.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.enablePanels(["console", "script"], function() {
+        FBTest.openFirebug(function()
+        {
+            FBTest.enablePanels(["console", "script"], function()
+            {
                 var panelNode = FBTest.getSelectedPanel().panelNode;
                 FBTest.clearConsole();
 

@@ -4,15 +4,17 @@ function runTest()
     FBTest.openNewTab(basePath + "net/2763/issue2763.html", function(win)
     {
         // Open Firebug and enable the Net panel.
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableNetPanel(function(win)
             {
                 // Select Net panel
                 var panel = FW.Firebug.chrome.selectPanel("net");
 
-                // The upload can take more time on slower connetions, so wait
+                // The upload can take more time on slower connections, so wait
                 // for 5 sec at most, which is enough to repro the problem.
-                var timeoutID = setTimeout(function() {
+                var timeoutID = setTimeout(function()
+                {
                     FBTest.progress("Test finished on timeout.");
                     FBTest.testDone();
                 }, 5000);

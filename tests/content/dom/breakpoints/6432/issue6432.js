@@ -2,8 +2,10 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "dom/breakpoints/6432/issue6432.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.enableScriptPanel(function() {
+        FBTest.openFirebug(function()
+        {
+            FBTest.enableScriptPanel(function()
+            {
                 FBTest.selectPanel("dom");
 
                 FBTest.waitForDOMProperty("testString", function(row)

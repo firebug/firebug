@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "dom/sidePanel/sidePanel.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("domSide");
             var rows = panel.panelNode.getElementsByClassName("memberRow");
 

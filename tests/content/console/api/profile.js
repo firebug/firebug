@@ -47,7 +47,8 @@ function runTest()
             FBTest.click(win.document.getElementById("testButton"));
         };
 
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 FBTest.progress("console panel enabled");

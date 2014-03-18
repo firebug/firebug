@@ -3,7 +3,8 @@ function runTest()
     FBTest.openNewTab(basePath + "html/style/6281/issue6281.html", function(win)
     {
         var elementID = "textinput";
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
             FBTest.selectElementInHtmlPanel(elementID, function(sel)
             {

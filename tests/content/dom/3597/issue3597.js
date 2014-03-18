@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "dom/3597/issue3597.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("dom");
 
             expandProperty("_testString", "childObj", function()

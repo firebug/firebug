@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "cookies/5560/issue5560.php", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableCookiesPanel(function(win)
             {
                 var panelNode = FBTest.selectPanel("cookies").panelNode;

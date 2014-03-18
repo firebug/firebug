@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "search/6455/issue6455.php", function()
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableCookiesPanel(function(win)
             {
                 var testSuite = new FBTest.TaskList();

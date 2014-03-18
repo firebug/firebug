@@ -8,7 +8,8 @@ function runTest()
     FBTest.openNewTab(basePath + "net/2696/issue2696.html", function(win)
     {
         // 2) Open Firebug and enable the Net panel.
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableNetPanel(function(win)
             {
                 // 3) Select Net panel

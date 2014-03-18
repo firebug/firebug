@@ -4,8 +4,10 @@ function runTest()
 
     FBTest.openNewTab(basePath + "console/grouping/cookies.php", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.enablePanels(["console", "cookies"], function() {
+        FBTest.openFirebug(function()
+        {
+            FBTest.enablePanels(["console", "cookies"], function()
+            {
                 FBTest.clearConsole();
 
                 var config = {

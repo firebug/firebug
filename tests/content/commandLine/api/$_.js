@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/api/$_.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var taskList = new FBTest.TaskList();
@@ -13,7 +14,8 @@ function runTest()
                 taskList.push(FBTest.executeCommandAndVerify, "$_",
                     "2", "span", "objectBox objectBox-number");
 
-                taskList.run(function() {
+                taskList.run(function()
+                {
                     FBTest.testDone();
                 });
             });

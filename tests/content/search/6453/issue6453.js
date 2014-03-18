@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "search/6453/issue6453.html", function()
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var testSuite = new FBTest.TaskList();

@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/5177/issue5177.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
             FBTest.selectElementInHtmlPanel("element1", function(node)
             {
@@ -20,7 +21,8 @@ function runTest()
                 tasks.push(fuzzIncrements, text, "rgba(1,3, 9,0)", false, 1057413430);
                 tasks.push(fuzzIncrements, text, "hsla(3,30%,9%,0", false, 1395508803);
 
-                tasks.run(function() {
+                tasks.run(function()
+                {
                     FBTest.testDone();
                 });
             });

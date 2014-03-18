@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "net/4905/issue4905.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var diskCache = FW.Firebug.getPref("browser.cache", "disk.enable");
             var memoryCache = FW.Firebug.getPref("browser.cache", "memory.enable");
             FBTest.progress("disk: " + diskCache + ", memory: " + memoryCache);

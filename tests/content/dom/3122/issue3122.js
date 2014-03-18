@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "dom/3122/issue3122.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableScriptPanel(function()
             {
                 // Wait for break in debugger.

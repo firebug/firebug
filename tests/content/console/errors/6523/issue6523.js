@@ -4,8 +4,10 @@ function runTest()
 
     FBTest.openNewTab(basePath + "console/errors/6523/issue6523.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.enablePanels(["console", "script"], function() {
+        FBTest.openFirebug(function()
+        {
+            FBTest.enablePanels(["console", "script"], function()
+            {
                 var config = {tagName: "div", classes: "logRow logRow-errorMessage"};
                 FBTest.waitForDisplayedElement("console", config, function()
                 {

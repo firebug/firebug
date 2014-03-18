@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/7068/issue7068.html?automated=true", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             // Note: we don't test the Firefox DevTools logs directly.
             // The webpage overwrited the console.log() function and just appends the logged messages
             // into win.logged.

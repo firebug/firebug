@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/5130/issue5130.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.clearCache();
 
             FBTest.enableConsolePanel(function(win)
@@ -15,7 +16,8 @@ function runTest()
                 tasks.push(FBTest.executeCommandAndVerify, expr, expected,
                     "div", "logRow logRow-dir");
 
-                tasks.run(function() {
+                tasks.run(function()
+                {
                     FBTest.testDone();
                 });
             });

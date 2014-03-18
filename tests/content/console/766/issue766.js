@@ -6,7 +6,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/766/issue766.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function()
             {
                 FBTest.selectPanel("console");
