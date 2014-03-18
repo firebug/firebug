@@ -14,7 +14,7 @@ function runTest()
                 FBTest.compare(expected, row.textContent,
                     "The proper message must be displayed.");
 
-                FBTest.testDone(;
+                FBTest.testDone("issue4658.DONE");
             });
 
             FBTest.clickContentButton(win, "testButton");
