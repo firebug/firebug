@@ -350,11 +350,16 @@ this.getPanel = function(name)
  * var panel = FBTest.selectPanel("script");
  * FBTest.selectPanelLocationByName(panel, "foo.js");
  * ~~
+ *
+ * xxxHonza: the method should be asynchronous since the source can be fetched from
+ * the backend asynchronously. For now it should be used together with:
+ * FBTest.waitForDisplayedText() to wait till specific source is really displayed
+ * in the panel.
  */
 this.selectPanelLocationByName = function(panel, name)
 {
     var locations = panel.getLocationList();
-    for(var i = 0; i < locations.length; i++)
+    for (var i = 0; i < locations.length; i++)
     {
         var location = locations[i];
         var description = panel.getObjectDescription(location);
@@ -364,6 +369,7 @@ this.selectPanelLocationByName = function(panel, name)
             return true;
         }
     }
+
     return false;
 };
 

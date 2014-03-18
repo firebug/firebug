@@ -10,10 +10,10 @@
 // Constants
 
 // Must be synchronized with nsICompositionStringSynthesizer.
-const COMPOSITION_ATTR_RAWINPUT              = 0x02;
-const COMPOSITION_ATTR_SELECTEDRAWTEXT       = 0x03;
-const COMPOSITION_ATTR_CONVERTEDTEXT         = 0x04;
-const COMPOSITION_ATTR_SELECTEDCONVERTEDTEXT = 0x05;
+var COMPOSITION_ATTR_RAWINPUT = 0x02;
+var COMPOSITION_ATTR_SELECTEDRAWTEXT = 0x03;
+var COMPOSITION_ATTR_CONVERTEDTEXT = 0x04;
+var COMPOSITION_ATTR_SELECTEDCONVERTEDTEXT = 0x05;
 
 // ********************************************************************************************* //
 // Search API
@@ -24,13 +24,15 @@ this.clearSearchField = function(callback)
     var searchBox = FW.Firebug.chrome.$("fbSearchBox");
     var searchBoxText = FW.FBL.domUtils.getChildrenForNode(searchBox, true)[0];
     var searchIcon = searchBoxText.getElementsByClassName("fbsearch-icon")[0];
+
     FBTest.click(searchIcon);
 
     if (callback)
     {
         // Firebug uses search delay so, we need to wait till the panel is updated
         // (see firebug/chrome/searchBox module, searchDelay constant).
-        setTimeout(function() {
+        setTimeout(function()
+        {
             callback()
         }, 250);
     }
@@ -62,7 +64,8 @@ this.setSearchFieldText = function(searchText, callback)
         {
             // Firebug uses search delay so, we need to wait till the panel is updated
             // (see firebug/chrome/searchBox module, searchDelay constant).
-            setTimeout(function() {
+            setTimeout(function()
+            {
                 callback()
             }, 250);
         }
@@ -86,7 +89,7 @@ this.searchInScriptPanel = function(searchText, callback)
 
     FBTest.waitForDisplayedElement("script", config, function(element)
     {
-        waitForLineUnhighlight(callback);
+        FBTest.waitForLineUnhighlight(callback);
     });
 
     // Set search string into the search box.
@@ -100,23 +103,6 @@ this.searchInScriptPanel = function(searchText, callback)
     // press enter instead (asynchronously).
     FBTest.sendKey("RETURN", "fbSearchBox");
 };
-
-function waitForLineUnhighlight(callback)
-{
-    var browser = FBTest.getCurrentTabBrowser();
-
-    var listener =
-    {
-        onLineUnhighlight: function(line)
-        {
-            DebuggerController.removeListener(browser, listener);
-
-            callback(line + 1);
-        }
-    };
-
-    DebuggerController.addListener(browser, listener);
-}
 
 /**
  * Executes search within the CSS panel.
@@ -170,14 +156,14 @@ this.searchInHtmlPanel = function(searchText, callback)
     searchBox.value = "";
 
     // The listener is automatically removed when the test window
-    // is unloaded in case the seletion actually doesn't occur,
+    // is unloaded in case the selection actually doesn't occur,
     // see FBTestSelection.js
-    FBTestApp.SelectionController.addListener(function selectionListener()
+    SelectionController.addListener(function selectionListener()
     {
         var sel = panel.document.defaultView.getSelection();
         if (sel && !sel.isCollapsed && sel.toString() == searchText)
         {
-            FBTestApp.SelectionController.removeListener(arguments.callee);
+            SelectionController.removeListener(arguments.callee);
             callback(sel);
         }
     });
