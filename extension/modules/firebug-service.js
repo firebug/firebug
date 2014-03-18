@@ -1699,6 +1699,10 @@ var fbs =
                     FBTrace.sysout("fbs.activation begin jsd.asyncOn " + startAsyncOn);
                 }
 
+                // See issue 7252
+                if (jsd.acknowledgeDeprecation)
+                    jsd.acknowledgeDeprecation();
+
                 jsd.asyncOn(  // turn on jsd for the next event
                 {
                     onDebuggerActivated: function doDebuggerActivated()
