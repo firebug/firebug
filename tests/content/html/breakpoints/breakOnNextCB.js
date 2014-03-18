@@ -50,16 +50,18 @@ function breakOnMutation(win, buttonId, lineNo, callback)
     FBTest.compare(false, FW.Firebug.filterSystemURLs, "Pref Firebug.filterSystemURLs must not be set true");
 
     var chrome = FW.Firebug.chrome;
-    FBTest.clickBreakOnNextButton(chrome);
-
-    FBTest.waitForBreakInDebugger(chrome, lineNo, false, function(sourceRow)
+    FBTest.clickBreakOnNextButton(chrome, function()
     {
-        FBTest.sysout("html.breakpoints.CB; "+ buttonId);
-        FBTest.clickContinueButton(chrome),
-        FBTest.progress("The continue button is pushed");
-        callback();
-    });
 
-    FBTest.click(win.document.getElementById(buttonId));
-    FBTest.sysout("html.breakpoints.CB; " + buttonId + " button clicked");
+        FBTest.waitForBreakInDebugger(chrome, lineNo, false, function(sourceRow)
+        {
+            FBTest.sysout("html.breakpoints.CB; "+ buttonId);
+            FBTest.clickContinueButton(chrome),
+            FBTest.progress("The continue button is pushed");
+            callback();
+        });
+
+        FBTest.click(win.document.getElementById(buttonId));
+        FBTest.sysout("html.breakpoints.CB; " + buttonId + " button clicked");
+    });
 }

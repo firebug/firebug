@@ -2009,10 +2009,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Break on Mutate
 
-    breakOnNext: function(breaking)
+    breakOnNext: function(breaking, callback)
     {
         HTMLModule.MutationBreakpoints.breakOnNext(this.context, breaking);
         this.updateMutationBreakpointListeners();
+        // Immediately invoke the callback in the case of HTMLPanel (may change soon with RDP).
+        if (callback)
+            callback(this.context, breaking);
     },
 
     shouldBreakOnNext: function()

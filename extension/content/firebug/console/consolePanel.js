@@ -1198,7 +1198,7 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
         return this.context.breakOnErrors;
     },
 
-    breakOnNext: function(breaking)
+    breakOnNext: function(breaking, callback)
     {
         Trace.sysout("consolePanel.breakOnNext;");
 
@@ -1206,7 +1206,7 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
 
         // Set the flag on the server.
         var tool = this.context.getTool("debugger");
-        tool.updateBreakOnErrors();
+        tool.updateBreakOnErrors(callback);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -49,7 +49,7 @@ this.clickRerunButton = function(chrome)
  * on the current panel.
  * @param {Object} chrome Firebug.chrome object.
  */
-this.clickBreakOnNextButton = function(chrome)
+this.clickBreakOnNextButton = function(chrome, callback)
 {
     if (!chrome)
         chrome = FW.Firebug.chrome;
@@ -64,6 +64,19 @@ this.clickBreakOnNextButton = function(chrome)
         FBTest.sysout("FBTestFirebug breakable false, click should disarm break on next");
     else
         FBTest.sysout("FBTestFirebug breakOnNext breakable:"+breakable, button);
+
+    var panel = this.getSelectedPanel();
+    if (!panel)
+        throw new Error("Can't get the current panel");
+
+    var browser = FBTestFirebug.getCurrentTabBrowser();
+    DebuggerController.addListener(browser, {
+        breakOnNextUpdated: function()
+        {
+            DebuggerController.removeListener(browser, this);
+            callback();
+        }
+    });
 
     // Do not use FBTest.click, toolbar buttons need to use sendMouseEvent.
     this.synthesizeMouse(button);

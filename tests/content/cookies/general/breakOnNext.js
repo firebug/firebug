@@ -13,10 +13,10 @@ function runTest()
     });
 };
 
-function clickBreakOnCookie()
+function clickBreakOnCookie(callback)
 {
     var chrome = FW.Firebug.chrome;
-    FBTest.clickBreakOnNextButton(chrome);
+    FBTest.clickBreakOnNextButton(chrome, callback);
 }
 
 function waitForBreakOnCookie(lineNo, breakpoint, callback)

@@ -25,7 +25,7 @@
         <command id="cmd_firebug_focusWatchEditor" oncommand="if (Firebug.currentContext) Firebug.chrome.focusWatch(Firebug.currentContext);"/>
         <command id="cmd_firebug_focusLocation" oncommand="if (Firebug.currentContext) Firebug.chrome.focusLocationList(Firebug.currentContext);"/>
 
-        <command id="cmd_firebug_toggleBreakOn" oncommand="Firebug.chrome.breakOnNext(Firebug.currentContext, event);"/>
+        <command id="cmd_firebug_toggleBreakOn" oncommand="Firebug.BreakOnNext.onToggleBreakOnNext(event);"/>
 
         <command id="cmd_firebug_rerun" oncommand="Firebug.Debugger.rerun(Firebug.currentContext)" disabled="true"/>
         <command id="cmd_firebug_resumeExecution" oncommand="Firebug.Debugger.resume(Firebug.currentContext)" disabled="true"/>

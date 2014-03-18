@@ -46,16 +46,17 @@ function breakOnMutation(win, buttonId, lineNo, callback)
     FBTest.selectPanel("html");
 
     var chrome = FW.Firebug.chrome;
-    FBTest.clickBreakOnNextButton(chrome);
-
-    FBTest.waitForBreakInDebugger(chrome, lineNo, false, function(sourceRow)
+    FBTest.clickBreakOnNextButton(chrome, function()
     {
-        FBTest.sysout("html.breakpoints; "+ buttonId);
-        FBTest.clickContinueButton(chrome),
-        FBTest.progress("The continue button is pushed");
-        callback();
-    });
+        FBTest.waitForBreakInDebugger(chrome, lineNo, false, function(sourceRow)
+        {
+            FBTest.sysout("html.breakpoints; "+ buttonId);
+            FBTest.clickContinueButton(chrome),
+            FBTest.progress("The continue button is pushed");
+            callback();
+        });
 
-    FBTest.click(win.document.getElementById(buttonId));
-    FBTest.sysout("html.breakpoints; " + buttonId + " button clicked");
+        FBTest.click(win.document.getElementById(buttonId));
+        FBTest.sysout("html.breakpoints; " + buttonId + " button clicked");
+    });
 }
