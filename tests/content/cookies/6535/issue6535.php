@@ -6,7 +6,7 @@
     <head>
         <title>Issue 6535: Show Max-Age for cookies in Net panel</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-        <link href="https://getfirebug.com/tests/head/_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
     </head>
     <body>
         <header>
