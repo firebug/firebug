@@ -12,7 +12,7 @@ function runTest()
     browser.addEventListener("onContextLoaded", function(context)
     {
         FBTest.compare(context.getURL(), url, "URL of newly loaded context should be " + url);
-        FBTest.testDone("done test #onContextLoaded()");
+        FBTest.testDone();
     });
     FBTest.progress("onContextLoaded, open test page "+url);
     FBTest.openNewTab(url, function(win)

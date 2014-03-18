@@ -40,6 +40,6 @@ function verifyCopiedCURL(executeContextMenuCommand)
     FBTest.waitForClipboard(expected, executeContextMenuCommand, (text) =>
     {
         FBTest.compare(expected, text, "Proper cURL must be copied");
-        FBTest.testDone("issue6817.DONE");
+        FBTest.testDone();
     });
 }

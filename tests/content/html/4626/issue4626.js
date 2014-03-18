@@ -16,7 +16,7 @@ function runTest()
                         "Doctype must be correct");
                 }
 
-                FBTest.testDone("issue4626.DONE");
+                FBTest.testDone();
             });
         });
     });

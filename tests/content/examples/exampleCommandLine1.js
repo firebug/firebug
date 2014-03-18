@@ -10,7 +10,7 @@ function runTest()
                 FBTest.waitForDisplayedElement("console", config, function(row)
                 {
                     FBTest.compare("3", row.textContent, "Number 3 must be displayed");
-                    FBTest.testDone("examples.commandline.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.executeCommand("1+2");

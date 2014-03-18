@@ -15,7 +15,7 @@ function runTest()
                 FBTest.compare(/^location/, cmdLine.value,
                     "The autocomplete must produce: /^location/");
 
-                FBTest.testDone("issue3394.DONE");
+                FBTest.testDone();
             });
         });
     });

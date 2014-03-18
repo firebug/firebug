@@ -34,7 +34,7 @@ function runTest()
                         "The placeholders of '" + logMsg + "' must be replaced");
                 }
 
-                FBTest.testDone("issue3204.DONE");
+                FBTest.testDone();
             });
         });
     });

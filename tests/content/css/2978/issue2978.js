@@ -21,7 +21,7 @@ function runTest()
                     var cssPath = FBTest.getClipboardText();
                     FBTest.compare(expected, cssPath,
                         "CSS path must be properly copied into the clipboard");
-                    FBTest.testDone("issue2978.DONE");
+                    FBTest.testDone();
                 });
             });
         });

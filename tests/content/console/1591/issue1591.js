@@ -26,7 +26,7 @@ function testCommandLineForError()
         "logRow", "logRow-error");
     FBTest.ok(isEmpty(rows), "Checking for Errors");
     // Finish test
-    FBTest.testDone("issue1591.DONE");
+    FBTest.testDone();
 }
 
 // Test entry point.

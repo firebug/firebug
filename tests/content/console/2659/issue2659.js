@@ -20,7 +20,7 @@ function runTest()
                     FBTest.reload(function()
                     {
                         verifyNumberOfLogs(2);
-                        FBTest.testDone("issue2659.DONE");
+                        FBTest.testDone();
                     })
                 })
             });

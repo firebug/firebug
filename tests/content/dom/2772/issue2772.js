@@ -20,7 +20,7 @@ function runTest()
                             FBTest.waitForDOMProperty("yetAnotherObject", function(row)
                             {
                                 FBTest.ok(true, "yetAnotherObject object must be visible now.");
-                                FBTest.testDone("issue2772.DONE");
+                                FBTest.testDone();
                             }, true);
                         });
                     }, true);

@@ -38,7 +38,7 @@ function runTest()
                     // Reset the filter
                     clickToolbarButton("fbConsoleFilter-all", false);
 
-                    FBTest.testDone("issue4384.DONE");
+                    FBTest.testDone();
                 }, 200);
             });
         });

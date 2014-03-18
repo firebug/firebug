@@ -19,7 +19,7 @@ function runTest()
 
             FBTest.ok(searchField.value == searchString, "The search field must still contain '"+
                 searchString+"' after switching between panels");
-            FBTest.testDone("issue958.DONE");
+            FBTest.testDone();
         });
     });
 }

@@ -56,7 +56,7 @@ function runTest()
                     if (!browserCacheEnabled)
                         browserCache.toggle(false);
 
-                    FBTest.testDone("issue4905.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.expandElements(panelNode, "netRow", "category-undefined",

@@ -16,7 +16,7 @@ function runTest()
                     "Value of 'elements' must not be undefined.");
 
                 FBTest.clickContinueButton();
-                FBTest.testDone("issue5336.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

@@ -25,7 +25,7 @@ function runTest()
                             "Max age must match");
                     }
 
-                    FBTest.testDone("issue6535.DONE");
+                    FBTest.testDone();
                 });
             });
         });

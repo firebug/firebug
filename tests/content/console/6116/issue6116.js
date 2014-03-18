@@ -12,7 +12,7 @@ function runTest()
                     FBTest.compare(expected, row.textContent, "The log must match: " +
                         row.textContent);
 
-                    FBTest.testDone("issue6116.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.executeCommand("console.log('%o%o%o', 'foo', undefined, 'bar')");

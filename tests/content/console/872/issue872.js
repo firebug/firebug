@@ -12,7 +12,7 @@ function runTest()
                     FBTest.compare(/This is an error from an iframe!/, message.textContent,
                         "Error message must be correct");
 
-                    FBTest.testDone("issue872.DONE");
+                    FBTest.testDone();
                 });
 
                 var button = win.document.getElementById("refreshIFrame");

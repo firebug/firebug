@@ -11,7 +11,7 @@ function runTest()
                     FBTest.compare(/Object\s*\{\s*arr\=\[3\]\s*\}/, row.textContent,
                         "The result must match '" + row.textContent + "'");
 
-                    FBTest.testDone("issue4234.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.clickToolbarButton(null, "fbConsoleClear");

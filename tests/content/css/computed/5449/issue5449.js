@@ -23,7 +23,7 @@ function runTest()
 
                 FBTest.runTestSuite(tests, function()
                 {
-                    FBTest.testDone("issue5449; DONE");
+                    FBTest.testDone();
                 });
             });
         });

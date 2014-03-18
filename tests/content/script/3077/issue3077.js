@@ -18,7 +18,7 @@ function runTest()
             {
                 // Resume debugger and finish the test.
                 FBTest.clickContinueButton();
-                FBTest.testDone("issue3077.DONE");
+                FBTest.testDone();
             });
         });
     });

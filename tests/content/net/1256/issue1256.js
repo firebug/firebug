@@ -35,7 +35,7 @@ function runTest()
                     FBTest.compare("1 + 2", paramValue, "The parameter value must be '1 + 2'");
                 }
 
-                FBTest.testDone("issue1256.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

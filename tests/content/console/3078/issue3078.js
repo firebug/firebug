@@ -20,7 +20,7 @@ function runTest()
                 }
 
                 FBTest.ok(scrolled, "Panel must be scrolled to the bottom");
-                FBTest.testDone("issue3078.DONE");
+                FBTest.testDone();
             });
         });
     });

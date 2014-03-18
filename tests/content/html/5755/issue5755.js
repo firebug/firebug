@@ -26,13 +26,13 @@ function runTest()
                             FBTest.compare(longOnclickValue, texteditor.value,
                                 "Inline editor must contain whole string of onclick value.");
                         }
-                        FBTest.testDone("issue5755.DONE");
+                        FBTest.testDone();
                     });
                 });
             }
             else
             {
-                FBTest.testDone("issue5755.FAILED");
+                FBTest.testDone();
             }
         });
     });

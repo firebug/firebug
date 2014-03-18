@@ -14,7 +14,7 @@ function runTest()
 
                 FBTest.waitForDisplayedElement("console", options, function(row)
                 {
-                    FBTest.testDone("issue4085.jsonViewer.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test implemented on the test page.

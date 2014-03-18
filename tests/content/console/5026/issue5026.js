@@ -25,7 +25,7 @@ function runTest()
                         "The "+i+". regular expression log message must be correct");
                 }
 
-                FBTest.testDone("issue5026.DONE");
+                FBTest.testDone();
             });
         });
     });

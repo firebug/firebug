@@ -107,7 +107,7 @@ function runTest()
                     "Verify non-array logs");
 
                 tasks.run(function() {
-                    FBTest.testDone("arrayDisplay.DONE");
+                    FBTest.testDone();
                 });
             });
         });

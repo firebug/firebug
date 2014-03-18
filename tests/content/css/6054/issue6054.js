@@ -23,7 +23,7 @@ function runTest()
                 {
                     FBTest.compare(expectedValue, copiedValue,
                         "Rule must be copied with colors in hexadecimal format");
-                    FBTest.testDone("issue6054; DONE");
+                    FBTest.testDone();
                 });
 
             });

@@ -20,7 +20,7 @@ function runTest()
                 FBTest.ok(locationButtons.getAttribute("collapsed") != "false",
                     "Edit button must be hidden");
 
-                FBTest.testDone("issue6582.DONE");
+                FBTest.testDone();
             })
 
             // Remove all stylesheets

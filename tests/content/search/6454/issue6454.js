@@ -13,7 +13,7 @@ function runTest()
             tasks.push(searchTest, "/html/body", true, 3);
             tasks.run(function()
             {
-                FBTest.testDone("issue6454.DONE");
+                FBTest.testDone();
             });
         });
     });

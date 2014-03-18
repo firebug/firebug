@@ -15,6 +15,6 @@ function runTest()
     {
         var message = A.getMessage();
         FBTest.compare("Hello World!", message, "The message from modules must match.");
-        FBTest.testDone("dependencies.DONE");
+        FBTest.testDone();
     });
 }

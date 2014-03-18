@@ -26,7 +26,7 @@ function runTest()
                             rows[1].textContent,
                             "The proper message must be displayed.");
                     }
-                    FBTest.testDone("console.count.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("testButton"));

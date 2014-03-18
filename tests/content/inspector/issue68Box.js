@@ -23,7 +23,7 @@ function runTest()
                 actualImage = FBTest.getImageDataFromWindow(ifr.contentWindow, width, height);
 
                 FBTest.compare(expectedImage, actualImage, "The screen must be in expected state");
-                FBTest.testDone("issue68Box.DONE");
+                FBTest.testDone();
             });
         });
     });

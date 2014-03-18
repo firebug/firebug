@@ -13,7 +13,7 @@ function runTest()
 
             tasks.run(function()
             {
-                FBTest.testDone("StepIntoInIFrame.DONE");
+                FBTest.testDone();
             });
         });
     });

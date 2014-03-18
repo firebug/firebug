@@ -7,7 +7,7 @@ function runTest()
             {
                 executeAndVerify("a", "\"Hello\"", "span", "objectBox objectBox-string", function()
                 {
-                    FBTest.testDone("issue4931.DONE");
+                    FBTest.testDone();
                 });
             });
         });

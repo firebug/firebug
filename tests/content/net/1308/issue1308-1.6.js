@@ -22,7 +22,7 @@ function runTest()
                 panel.copyParams(netRow.repObject);
 
                 checkCopyLocationWithParametersAction(netRow, function() {
-                    FBTest.testDone("issue1308.DONE");
+                    FBTest.testDone();
                 });
             });
 

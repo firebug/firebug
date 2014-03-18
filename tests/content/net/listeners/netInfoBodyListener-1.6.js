@@ -27,7 +27,7 @@ function runTest()
                 FBTest.ok(updateTabBody, "updateTabBody callback verified");
                 FBTest.ok(destroyTabBody, "destroyTabBody callback verified");
 
-                FBTest.testDone("netInfoBodyListener.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

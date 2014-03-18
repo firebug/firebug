@@ -20,7 +20,7 @@ function runTest()
                     FBTest.waitForDisplayedElement("net", config, function(row)
                     {
                         FBTest.progress("HTTP request has been resent!");
-                        FBTest.testDone("issue5714.DONE");
+                        FBTest.testDone();
                     });
 
                     FBTest.executeContextMenuCommand(row, "fbNetResend", function()

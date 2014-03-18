@@ -21,7 +21,7 @@ function runTest()
                     FBTest.compare(expectedResult, errorTitle.textContent, "There must be an error log");
 
                     FBTest.setPref("showXMLHttpRequests", prefOrigValue);
-                    FBTest.testDone("issue2271; DONE");
+                    FBTest.testDone();
                 });
 
                 // Run test implemented on the page.

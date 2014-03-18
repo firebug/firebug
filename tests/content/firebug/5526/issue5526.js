@@ -13,7 +13,7 @@ function runTest()
                 openFirebug(function()
                 {
                     FBTest.ok(FBTest.isDetached(), "Firebug must be detached now");
-                    FBTest.testDone("issue5526.DONE");
+                    FBTest.testDone();
                 });
             })
         });

@@ -22,7 +22,7 @@ function runTest()
                 tasks.push(executeAndVerify, expr, expected);
 
                 tasks.run(function() {
-                    FBTest.testDone("issue5655.DONE");
+                    FBTest.testDone();
                 });
             });
         });

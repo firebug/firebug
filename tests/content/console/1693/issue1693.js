@@ -58,7 +58,7 @@ function onDataComplete(e)
                 var text1 = responseText.substr(0, limit);
                 var text2 = responseBody.textContent.substr(0, limit);
                 FBTest.compare(text1, text2, "The response text must be properly displayed");
-                FBTest.testDone("issue1693.DONE");
+                FBTest.testDone();
             }
         });
 

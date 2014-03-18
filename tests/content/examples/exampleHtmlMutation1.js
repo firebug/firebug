@@ -8,7 +8,7 @@ function runTest()
 
             FBTest.waitForHtmlMutation(null, "div", function(node)
             {
-                FBTest.testDone("examples.HtmlMutation.DONE");
+                FBTest.testDone();
             });
 
             FBTest.progress("fbTestFirebug.waitForHtmlMutation;");

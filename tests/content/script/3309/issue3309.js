@@ -29,7 +29,7 @@ function runTest()
                         "The page must display expected text: " + text);
                 }
 
-                FBTest.testDone("issue3309.DONE");
+                FBTest.testDone();
             });
         });
     });

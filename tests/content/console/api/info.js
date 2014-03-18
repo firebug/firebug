@@ -11,7 +11,7 @@ function runTest()
                     var reTextContent = new RegExp("This is a test info\\s*" +
                         FW.FBL.$STRF("Line", ["info.html", 31]).replace(/([\\"'\(\)])/g, "\\$1"));
                     FBTest.compare(reTextContent, row.textContent, "The proper message must be displayed.");
-                    FBTest.testDone("console.info.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("testButton"));

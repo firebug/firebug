@@ -14,7 +14,7 @@ function runTest()
 
                 FBTest.waitForDisplayedElement("console", config, function(row)
                 {
-                    FBTest.testDone("issue6750.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("createLogs"));

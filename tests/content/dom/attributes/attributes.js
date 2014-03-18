@@ -21,7 +21,7 @@ function runTest()
                     "a", "objectLink objectLink-Attr");
 
                 tasks.run(function() {
-                    FBTest.testDone("attributes.DONE");
+                    FBTest.testDone();
                 })
             });
         });

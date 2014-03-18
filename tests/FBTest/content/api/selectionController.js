@@ -31,6 +31,7 @@ var SelectionController =
 // ************************************************************************************************
 // Clean up
 
-window.addEventListener("unload", function testSelectionUnload() {
+window.addEventListener("unload", function testSelectionUnload()
+{
     SelectionController.cleanUp();
 }, true);

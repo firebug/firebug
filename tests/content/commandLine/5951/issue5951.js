@@ -25,7 +25,7 @@ function runTest()
                         FBTest.compare("dom", panel.name, "The DOM panel must be selected");
                     }
 
-                    FBTest.testDone("issue5951.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.executeCommand(expression);

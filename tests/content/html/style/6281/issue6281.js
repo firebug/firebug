@@ -27,7 +27,7 @@ function runTest()
                 if (!ruleExists)
                     FBTest.ok(false, "::-moz-placeholder pseudo-element rule does not exist");
 
-                FBTest.testDone("issue6281.DONE");
+                FBTest.testDone();
             });
         });
     });

@@ -43,7 +43,7 @@ function runTest()
                         FBTest.compare("\"issue4979=value\"", rows[rows.length - 1].textContent,
                             "The console should display the raw cookie data");
 
-                        FBTest.testDone("cookiesGrouping.DONE");
+                        FBTest.testDone();
                     });
 
                     FBTest.executeCommand("document.cookie");

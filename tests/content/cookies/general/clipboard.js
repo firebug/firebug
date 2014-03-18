@@ -55,7 +55,7 @@ function runTest()
                 newCookie = FBTest.getCookieByName(panelNode, "CopyPasteCookie-1");
                 FBTest.ok(!newCookie, "There must not be 'CopyPasteCookie-1'.");
 
-                return FBTest.testDone("cookies.general.cookieClipboard.DONE");
+                return FBTest.testDone();
             });
         });
     });

@@ -27,7 +27,7 @@ function runTest()
                         var expected = /section.*a &aring;&auml;&ouml; b.*section/;
                         FBTest.compare(expected, node.textContent, "The text content must match");
 
-                        FBTest.testDone("issue5448.DONE");
+                        FBTest.testDone();
                     });
                 });
             });

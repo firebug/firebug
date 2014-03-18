@@ -14,7 +14,7 @@ function runTest()
             var editor = panel.panelNode.getElementsByClassName("fixedWidthEditor").item(0);
             FBTest.ok(editor, "The editor must be there");
 
-            FBTest.testDone("issue5009.DONE");
+            FBTest.testDone();
         });
     });
 }

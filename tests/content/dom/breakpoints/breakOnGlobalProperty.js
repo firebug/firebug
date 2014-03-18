@@ -40,7 +40,7 @@ function runTest()
                             });
 
                             FBTest.runTestSuite(testSuite, function() {
-                                FBTest.testDone("dom.breakpoints; DONE");
+                                FBTest.testDone();
                             });
                         });
 

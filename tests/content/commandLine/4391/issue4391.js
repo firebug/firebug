@@ -22,7 +22,7 @@ function runTest()
                     FBTest.ok(!contentView._FirebugCommandLine,
                         "Commandline API should not be available now.");
 
-                    FBTest.testDone("issue4391.DONE");
+                    FBTest.testDone();
                 });
             });
         });

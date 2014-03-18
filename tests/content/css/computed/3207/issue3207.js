@@ -51,7 +51,7 @@ function runTest()
                         propValue = propNames[i].parentNode.querySelector(".stylePropValue").textContent;
                         FBTest.compare("Georgia", propValue, "Property value must be 'Georgia'");
 
-                        FBTest.testDone("issue3207.DONE");
+                        FBTest.testDone();
                     });
 
                     // xxxHonza: terrible hack, we need to figure out why the

@@ -63,7 +63,7 @@ function runTest()
 
                 // Run all expressions step by step.
                 tasks.run(function() {
-                    FBTest.testDone("commandline.api.DONE");
+                    FBTest.testDone();
                 });
             });
         });

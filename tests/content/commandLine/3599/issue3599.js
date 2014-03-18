@@ -22,7 +22,7 @@ function runTest()
                             "The second log must be 'undefined'");
                     }
 
-                    FBTest.testDone("issue3599.DONE");
+                    FBTest.testDone();
                 });
 
                 // Clear console and execute an expression on the command line.

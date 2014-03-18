@@ -53,7 +53,7 @@ function runTest()
 
                 tasks.run(function()
                 {
-                    FBTest.testDone("issue5358.DONE");
+                    FBTest.testDone();
                 });
             }
         });

@@ -7,7 +7,7 @@ function runTest()
     if (!supportedVersion)
     {
         FBTest.progress("This test needs Firefox 15+");
-        FBTest.testDone("issue1811.DONE");
+        FBTest.testDone();
         return;
     }
 
@@ -44,7 +44,7 @@ function runTest()
 
                         // Resume debugger, test done.
                         FBTest.clickContinueButton();
-                        FBTest.testDone("issue2558; DONE");
+                        FBTest.testDone();
                     }, 300);
                 });
 

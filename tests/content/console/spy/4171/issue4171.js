@@ -32,7 +32,7 @@ function runTest()
                         tab = row.getElementsByClassName("netInfoJSONText netInfoText")[0];
                         FBTest.ok(tab, "JSON tab must exist");
 
-                        FBTest.testDone("issue2868.DONE");
+                        FBTest.testDone();
                     });
                 });
 

@@ -13,7 +13,7 @@ function runTest()
     {
         FBTest.compare(context.getURL(), url, "URL of newly created context should be " + url);
         FBTest.ok(context.getJavaScriptContext(), "JavaScriptContext should exist when created");
-        FBTest.testDone("done test #getJavaScriptContext()");
+        FBTest.testDone();
     });
     FBTest.progress("getJavaScriptContext, open test page "+url);
     FBTest.openNewTab(url, function(win)

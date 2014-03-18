@@ -23,7 +23,7 @@ function runTest()
                     FBTest.compare("myFuncB", profileRows[2].childNodes[0].textContent,
                         "myFuncB has proper name.");
 
-                    FBTest.testDone("issue5359.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("testButton"));

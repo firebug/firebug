@@ -16,7 +16,7 @@ function runTest()
                 FBTest.waitForDisplayedElement("net", options, function(row)
                 {
                     verifyContent(numberOfRequests);
-                    FBTest.testDone("issue369.jsonViewer.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("testButton1"));

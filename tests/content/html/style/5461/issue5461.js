@@ -34,7 +34,7 @@ function runTest()
                 {
                     FBTest.compare(expected, cssDecl,
                         "CSS declaration must be properly copied into the clipboard");
-                    FBTest.testDone("issue5461.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.sendShortcut("c", {accelKey: true});

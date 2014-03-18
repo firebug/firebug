@@ -9,7 +9,7 @@ function runTest()
                 tasks.push(test1, win);
                 tasks.push(test2, win);
                 tasks.run(function() {
-                    FBTest.testDone("console.dir.DONE");
+                    FBTest.testDone();
                 });
             });
         });

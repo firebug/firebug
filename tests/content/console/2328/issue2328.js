@@ -27,7 +27,7 @@ function runTest()
                     FBTest.compare(expectedResult, spyFullTitle.textContent, "There must be a XHR log");
 
                     FBTest.setPref("showXMLHttpRequests", prefOrigValue);
-                    FBTest.testDone("issue2328; DONE");
+                    FBTest.testDone();
                 });
 
                 // Run test implemented on the page.

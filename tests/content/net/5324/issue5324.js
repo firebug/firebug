@@ -10,7 +10,7 @@ function runTest()
             {
                 var label = row.getElementsByClassName("netProtocolLabel")[0];
                 FBTest.compare(/SPDY/, label.innerHTML, "It must be a SPDY request");
-                FBTest.testDone("issue5324.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

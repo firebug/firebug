@@ -23,7 +23,7 @@ function runTest()
                 FBTest.waitForDisplayedElement("console", config, function(row)
                 {
                     verifyConsoleUI(config);
-                    FBTest.testDone("console.assert.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test implemented on the test page.

@@ -29,7 +29,7 @@ function runTest()
                 FBTest.compare(/iframe log/, logContents[2].textContent,
                     "\"iframe log\" must be displayed");
 
-                FBTest.testDone("issue3292.DONE");
+                FBTest.testDone();
             });
 
             FBTest.reload();

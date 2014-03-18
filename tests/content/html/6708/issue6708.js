@@ -27,7 +27,7 @@ function runTest()
                     // Stop Edit Mode
                     FBTest.clickToolbarButton(null, "fbToggleHTMLEditing");
 
-                    FBTest.testDone("issue6708.DONE");
+                    FBTest.testDone();
                 }
             });
         });

@@ -41,7 +41,7 @@ function runTest()
                 }
 
                 // Finish test
-                FBTest.testDone("issue2285.DONE");
+                FBTest.testDone();
             };
 
             win.document.addEventListener("test-done", testDone, false);

@@ -747,6 +747,11 @@ SourceEditor.prototype =
         this.highlighter.highlight(line);
     },
 
+    unhighlightLine: function()
+    {
+        this.removeHighlighter();
+    },
+
     removeHighlighter: function()
     {
         if (this.highlighter)
@@ -780,7 +785,9 @@ SourceEditor.prototype =
             // seting the source. So, we need to update it asynchronously :-(
             // (see also issue 7160)
             // We might want to re-check when the next CM version is used.
-            setTimeout(() =>
+            // xxxHonza: how to avoid using the Firebug.currentContext global?
+            var context = Firebug.currentContext;
+            context.setTimeout(() =>
             {
                 var scrollInfo = this.editorObject.getScrollInfo();
                 var hScrollBar = this.view.getElementsByClassName("CodeMirror-hscrollbar")[0];
@@ -1164,10 +1171,19 @@ LineHighlighter.prototype =
             this.line = line;
             var handle = this.cm.getLineHandle(line);
             this.cm.addLineClass(handle, "wrap", HIGHLIGHTED_LINE_CLASS);
+
+            var lineText = this.editor.getDocument().getLine(this.line);
+            var panel = Firebug.getElementPanel(this.editor.parentNode);
+            Firebug.dispatchEvent(panel.context.browser, "onLineHighlight",
+                [this.line, lineText]);
         }
 
         // Unhighlight after a timeout.
-        this.timeout = setTimeout(this.unhighlight.bind(this), unhighlightDelay);
+        // xxxHonza: it's not nice to use the Firebug.currentContext global, but every
+        // setTimeout should be initialized through the context. It ensures that
+        // any running timeout is cleared when the context is destroyed.
+        var context = Firebug.currentContext;
+        this.timeout = context.setTimeout(this.unhighlight.bind(this), unhighlightDelay);
     },
 
     unhighlight: function()
@@ -1183,8 +1199,10 @@ LineHighlighter.prototype =
         // Do not forget to delete the highlighter.
         this.editor.highlighter = null;
 
+        var lineText = this.editor.getDocument().getLine(this.line);
         var panel = Firebug.getElementPanel(this.editor.parentNode);
-        Firebug.dispatchEvent(panel.context.browser, "onLineUnhighlight", [this.line]);
+        Firebug.dispatchEvent(panel.context.browser, "onLineUnhighlight",
+            [this.line, lineText]);
     },
 
     cancel: function()

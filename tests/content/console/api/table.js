@@ -52,7 +52,7 @@ function runTest()
                 tasks.push(executeTest, "testButton11", doc, null, [table11]);
 
                 tasks.run(function() {
-                    FBTest.testDone("console.table.DONE");
+                    FBTest.testDone();
                 });
             });
         });
@@ -104,7 +104,7 @@ function verifyLogBody(logRow, expected)
         var e = expected[i];
         if (!verifyTableLayout(tables[i], e.cols, e.rows, e.content))
         {
-            FBTest.testDone("console.table.FAIL");
+            FBTest.testDone();
             return;
         }
     }

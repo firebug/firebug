@@ -16,7 +16,7 @@ function runTest()
                     FBTest.compare(FW.FBL.$STRF("Line", ["issue4322.html", 10]), link.textContent,
                         "The source link must match.");
 
-                    FBTest.testDone("issue4322.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.clearConsole();

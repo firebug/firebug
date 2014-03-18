@@ -64,7 +64,7 @@ function runTest()
                 tasks.push(testNonEmptyCmdLine);
                 tasks.run(function()
                 {
-                    FBTest.testDone("issue6422.DONE");
+                    FBTest.testDone();
                 }, 0);
             });
         });

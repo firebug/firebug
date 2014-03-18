@@ -12,7 +12,7 @@ function runTest()
     browser.addEventListener("onContextCreated", function(context)
     {
         FBTest.compare(context.getURL(), url, "URL of newly created context should be " + url);
-        FBTest.testDone("done test #onContextCreated()");
+        FBTest.testDone();
     });
     FBTest.progress("onContextCreated, open test page "+url);
     FBTest.openNewTab(url, function(win)

@@ -14,7 +14,7 @@ function runTest()
                 FBTest.waitForDisplayedElement("html", config, function(editor)
                 {
                     FBTest.compare("", editor.value, "The default value must be an empty string");
-                    FBTest.testDone("issue5504.DONE");
+                    FBTest.testDone();
                 });
             });
         });

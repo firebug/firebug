@@ -16,7 +16,7 @@ function runTest()
             FBTest.verifyInfoTabContent(panelNode, "TestCookie44-XML", "Xml",
                 "<person><firstname>Jan</firstname><secondname>Honza</secondname><lastname>Odvarko</lastname></person>");
 
-            FBTest.testDone("cookies.test.issue44; DONE");
+            FBTest.testDone();
         });
     });
 };

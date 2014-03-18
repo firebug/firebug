@@ -58,7 +58,7 @@ function runTest()
                     FBTest.ok(false, "'#element' rule does not exist");
                 }
 
-                FBTest.testDone("issue2495.DONE");
+                FBTest.testDone();
             });
         });
     });

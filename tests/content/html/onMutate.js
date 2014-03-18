@@ -25,7 +25,7 @@ function runTest()
             FBTest.reload(function(win)
             {
                 testSuite.run(function() {
-                    FBTest.testDone("html.onMutate; DONE");
+                    FBTest.testDone();
                 });
             });
         });

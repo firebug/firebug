@@ -54,7 +54,7 @@ function runTest()
                     "style attribute must be correct afterwards");
                 FBTest.compare("true", win.document.body.getAttribute("spellcheck"),
                     "spellcheck attribute must be correct afterwards");
-                FBTest.testDone("issue3700.DONE");
+                FBTest.testDone();
             });
 
             // Get the selected element and click ">" to add a new attribute.

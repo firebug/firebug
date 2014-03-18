@@ -25,7 +25,7 @@ function runTest()
 
                     // If the test fails there would be an alert dialog that
                     // causes the test to fail on timeout.
-                    FBTest.testDone("issue4553.DONE");
+                    FBTest.testDone();
                 });
 
             });

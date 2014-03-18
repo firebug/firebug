@@ -36,7 +36,7 @@ function runTest()
                     FBTest.waitForDisplayedElement("breakpoints", options, function(row)
                     {
                         FBTest.ok(true, "XHR breakpoint must be deleted");
-                        FBTest.testDone("issue4854.DONE");
+                        FBTest.testDone();
                     });
 
                     setTimeout(function()
@@ -47,7 +47,7 @@ function runTest()
                 }
                 else
                 {
-                    FBTest.testDone("issue4854.DONE");
+                    FBTest.testDone();
                 }
             });
 

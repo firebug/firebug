@@ -7,7 +7,7 @@ function runTest()
             var rows = panel.panelNode.getElementsByClassName("memberRow");
 
             FBTest.ok(rows.length > 0, "There must be some properties: " + rows.length);
-            FBTest.testDone("sidePanel.DONE");
+            FBTest.testDone();
         });
     });
 }

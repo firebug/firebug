@@ -38,7 +38,7 @@ function runTest()
                         FBTest.compare(expResult, result, "Max age must be " + expResult);
                     }
 
-                    FBTest.testDone("issue6547.DONE");
+                    FBTest.testDone();
                 });
             });
         });

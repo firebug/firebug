@@ -16,7 +16,7 @@ function runTest()
                 tasks.push(reloadAgainAndWaitForBreak);
 
                 tasks.run(function() {
-                    FBTest.testDone("openInNewWindow.DONE");
+                    FBTest.testDone();
                 });
             });
         });
@@ -29,7 +29,7 @@ function waitForDetachedFirebug(callback)
     {
         if (!FBTest.ok(detachedWindow, "Firebug is detaching..."))
         {
-            FBTest.testDone("openInNewWindow.FAILED");
+            FBTest.testDone();
             return;
         }
 

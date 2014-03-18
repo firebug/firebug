@@ -38,7 +38,7 @@ function runTest()
                             "'hello' must be shown inside the Console");
                     }
 
-                    FBTest.testDone("issue4217.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.executeCommand("console.log('hello')");

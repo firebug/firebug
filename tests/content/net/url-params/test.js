@@ -20,7 +20,7 @@ function runTest()
                     FBTest.compare("value11value22value33", paramsTable.textContent,
                         "Ampersands must be propery encoded.");
 
-                    FBTest.testDone("UrlParams.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("testButton"));

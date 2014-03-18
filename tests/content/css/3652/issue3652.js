@@ -42,7 +42,7 @@ function runTest()
                 FBTest.sendKey("DOWN", editor);
                 FBTest.compare("red", editor.value, "Must be autocompleted to red.");
 
-                FBTest.testDone("issue3652.DONE");
+                FBTest.testDone();
             });
         });
     });

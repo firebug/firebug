@@ -30,7 +30,7 @@ function runTest()
                             postBody.textContent, "Post tab body content verified");
                     }
 
-                    FBTest.testDone("issue5004.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementsByTagName("button").item(0));

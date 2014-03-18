@@ -64,7 +64,7 @@ function runTest()
                             "-moz-linear-gradient(135deg, rgb(120, 140, 255), rgb(180, 200, 255))",
                             csElement.backgroundImage, "Element display must be correct");
 
-                        FBTest.testDone("atMediaStyleEditing.DONE");
+                        FBTest.testDone();
                     }, 500);
                 }
 

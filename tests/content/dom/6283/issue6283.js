@@ -19,7 +19,7 @@ function runTest()
             }
             else
             {
-                FBTest.testDone("issue6283.DONE");
+                FBTest.testDone();
             }
         });
     });
@@ -45,7 +45,7 @@ function onInspect()
 
         if (!FBTest.ok(prop, "cssRules property must be there"))
         {
-            FBTest.testDone("issue5247.DONE");
+            FBTest.testDone();
             return;
         }
 
@@ -60,7 +60,7 @@ function onInspect()
             FBTest.compare("CSSPageRule", cssRuleValue.textContent.trim(),
                 "Rule must be displayed as CSSPageRule");
 
-            FBTest.testDone("issue6283.DONE");
+            FBTest.testDone();
         });
 
         FBTest.click(prop);

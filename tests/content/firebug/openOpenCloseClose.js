@@ -45,7 +45,7 @@ function openOpenCloseClose()
         var open = FW.Firebug.chrome.isOpen();
         FBTest.ok(!open, "Firebug closed");
 
-        FBTest.testDone("openOpenCloseClose.DONE");
+        FBTest.testDone();
     });
 }
 
