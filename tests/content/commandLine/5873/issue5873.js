@@ -171,11 +171,16 @@ function runTest()
                     function step3()
                     {
                         // Set a conditional breakpoint with .% syntax.
-                        FBTest.setBreakpoint(null, null, 18, {
+                        // 
+                        /*FBTest.setBreakpoint(null, null, 18, {
                             condition: "count.%counter === 4"
-                        }, step4);
+                        }, step4);*/
+
+                        // Because of this issue: http://code.google.com/p/fbug/issues/detail?id=7265
+                        // Skip the next steps until this issue is fixed.
+                        step8();
                     }
-                    function step4()
+                    /*function step4()
                     {
                         // Hit it.
                         FBTest.waitForBreakInDebugger(null, 18, true, step5);
@@ -196,7 +201,7 @@ function runTest()
                         // Resume.
                         FBTest.waitForDebuggerResume(step8);
                         FBTest.clickToolbarButton(null, "fbContinueButton");
-                    }
+                    }*/
                     function step8()
                     {
                         // Whew, done. Switch back to the console panel.
