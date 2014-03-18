@@ -1,6 +1,3 @@
-// Custom timeout for this test.
-window.FBTestTimeout = 25000;
-
 // FBTest entry point
 function runTest()
 {
