@@ -31,7 +31,7 @@ function runTest()
                     FBTest.removeBreakpoint(chrome, url, lineNo, function()
                     {
                         FBTest.clickContinueButton(chrome);
-                        FBTest.progress("issue1483.the continue button is pused");
+                        FBTest.progress("issue1483.the continue button is paused");
                     });
                 });
 
@@ -49,7 +49,7 @@ function runTest()
                     FBTest.compare("init", (log ? log.textContent : ""),
                         "there must be one log in the console.");
 
-                    FBTest.testDone("issue1483.DONE");
+                    FBTest.testDone();
                 });
             });
         });

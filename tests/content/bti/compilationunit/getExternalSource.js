@@ -25,7 +25,7 @@ function runTest()
                 FBTest.compare(source, "document.write(\"<p>Browser Tools Interface " +
                     "(external source file)<br>\");\r\ndocument.write(\"Another line of " +
                     "text</p>\");", "incorrect source");
-                FBTest.testDone("done test #getExternalSource()");
+                FBTest.testDone();
             });
         });
 

@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/spy/4738/issue4738.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var options = {
@@ -30,7 +31,7 @@ function runTest()
                     {
                         FBTest.compare(expected, text, "Proper URL must be copied. Current: " +
                             text);
-                        FBTest.testDone("issue4738.DONE");
+                        FBTest.testDone();
                     });
                 });
 

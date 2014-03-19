@@ -8,7 +8,8 @@ function runTest()
     FBTest.openNewTab(testPageURL, function(win)
     {
         // TODO: open detached Firebug via Firebug icon context menu
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var tasks = new FBTest.TaskList();
             tasks.push(waitForDetachedFirebug);
 
@@ -73,7 +74,7 @@ function runTest()
 
             tasks.run(function()
             {
-                FBTest.testDone("changeUILocation.DONE");
+                FBTest.testDone();
             }, 400);
         });
     });
@@ -85,7 +86,7 @@ function waitForDetachedFirebug(callback)
     {
         if (!FBTest.ok(detachedWindow, "Firebug is detaching..."))
         {
-            FBTest.testDone("openInNewWindow.FAILED");
+            FBTest.testDone();
             return;
         }
 

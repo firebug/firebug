@@ -30,7 +30,7 @@ function runTest()
             FBTest.compare(other, unit.getURL(), "compilation unit URL is not consistent");
             FBTest.ok(unit.getBrowserContext() == context, "compilation unit browser context is " +
                 "not consistent");
-            FBTest.testDone("done test #getCompilationUnits()");
+            FBTest.testDone();
         });
 
     });

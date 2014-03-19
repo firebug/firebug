@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/3599/issue3599.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var config = {
@@ -22,7 +23,7 @@ function runTest()
                             "The second log must be 'undefined'");
                     }
 
-                    FBTest.testDone("issue3599.DONE");
+                    FBTest.testDone();
                 });
 
                 // Clear console and execute an expression on the command line.

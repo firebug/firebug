@@ -34,7 +34,7 @@ function runTest()
                     // All panels must be still enabled.
                     checkIsEnabled(FW.FBL.$STR("Panel-script"), FW.Firebug.Debugger);
 
-                    FBTest.testDone("AsyncJSD.DONE");
+                    FBTest.testDone();
                 });
             }
             catch (err)

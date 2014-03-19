@@ -5,8 +5,10 @@ function runTest()
 
     FBTest.openNewTab(basePath + "console/2271/issue2271.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.enableConsolePanel(function () {
+        FBTest.openFirebug(function()
+        {
+            FBTest.enableConsolePanel(function ()
+            {
                 // Create listener for mutation events.
                 var doc = FBTest.getPanelDocument();
                 var recognizer = new MutationRecognizer(doc.defaultView, "div",
@@ -21,7 +23,7 @@ function runTest()
                     FBTest.compare(expectedResult, errorTitle.textContent, "There must be an error log");
 
                     FBTest.setPref("showXMLHttpRequests", prefOrigValue);
-                    FBTest.testDone("issue2271; DONE");
+                    FBTest.testDone();
                 });
 
                 // Run test implemented on the page.

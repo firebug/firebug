@@ -4,7 +4,8 @@ function runTest()
 
     FBTest.openNewTab(basePath + "console/spy/2712/issue2712.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 // Wait for request being displayed in the Console panel.
@@ -12,7 +13,7 @@ function runTest()
                 {
                     FBTest.ok(!FW.FBL.hasClass(row, "error"),
                         "The request must not be marked as 'aborted'.");
-                    FBTest.testDone("issue2712.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test on the test page.

@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/6582/issue6582-2.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("stylesheet");
 
             var locationButtons = FW.Firebug.chrome.$("fbLocationButtons");
@@ -20,7 +21,7 @@ function runTest()
                 FBTest.ok(locationButtons.getAttribute("collapsed") != "false",
                     "Edit button must be hidden");
 
-                FBTest.testDone("issue6582.DONE");
+                FBTest.testDone();
             })
 
             // Remove all stylesheets

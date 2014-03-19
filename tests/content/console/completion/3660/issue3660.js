@@ -3,7 +3,8 @@ function runTest()
     FBTest.setPref("commandLineShowCompleterPopup", true);
     FBTest.openNewTab(basePath + "console/completion/3660/issue3660.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var panel = FW.Firebug.chrome.selectPanel("console");
@@ -73,7 +74,7 @@ function runTest()
                         if (runs++)
                             return;
                         FBTest.ok(false, "The completion popup should be opened.");
-                        FBTest.testDone("issue3660.DONE");
+                        FBTest.testDone();
                     }, 1000);
                 }
 
@@ -216,7 +217,7 @@ function runTest()
 
                 tasks.run(function()
                 {
-                    FBTest.testDone("issue3660.DONE");
+                    FBTest.testDone();
                 }, 0);
             });
         });

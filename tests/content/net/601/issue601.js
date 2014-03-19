@@ -28,7 +28,7 @@ function runTest()
                 FBTest.compare(postElement.innerHTML, responseText, "Test response must match.");
 
                 FBTest.setPref("showXMLHttpRequests", prefOrigValue);
-                FBTest.testDone("issue601.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

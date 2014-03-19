@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/api/$x.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var taskList = new FBTest.TaskList();
@@ -34,8 +35,9 @@ function runTest()
                     "try{$x(\"test test\")} catch(e){'ex';}", "\"ex\"", "span",
                     "objectBox objectBox-string");
 
-                taskList.run(function() {
-                    FBTest.testDone("$x.DONE");
+                taskList.run(function()
+                {
+                    FBTest.testDone();
                 });
             });
         });

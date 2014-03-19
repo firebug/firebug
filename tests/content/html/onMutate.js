@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/onMutate.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.setPref("highlightMutations", true);
             FBTest.setPref("scrollToMutations", true);
 
@@ -24,8 +25,9 @@ function runTest()
             // Reload window to activate debugger and run all tests.
             FBTest.reload(function(win)
             {
-                testSuite.run(function() {
-                    FBTest.testDone("html.onMutate; DONE");
+                testSuite.run(function()
+                {
+                    FBTest.testDone();
                 });
             });
         });

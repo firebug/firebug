@@ -2,18 +2,17 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/4087/issue4087.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
-                FW.Firebug.chrome.selectPanel("console");
-
                 var tests = [];
                 tests.push(testCommandLine);
                 tests.push(testCommandEditor);
 
                 FBTest.runTestSuite(tests, function()
                 {
-                    FBTest.testDone("issue4087; DONE");
+                    FBTest.testDone();
                 });
             });
         });

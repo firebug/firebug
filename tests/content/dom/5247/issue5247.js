@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "dom/5247/issue5247.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("stylesheet");
 
             if (FBTest.selectPanelLocationByName(panel, "issue5247.html"))
@@ -12,14 +13,15 @@ function runTest()
                 {
                     // xxxHonza, xxxsz: hack that fixes this test on Mac. The panel can
                     // be selected asynchronously.
-                    setTimeout(function() {
+                    setTimeout(function()
+                    {
                         onInspect();
                     }, 1000);
                 });
             }
             else
             {
-                FBTest.testDone("issue5247.DONE");
+                FBTest.testDone();
             }
         });
     });
@@ -45,7 +47,7 @@ function onInspect()
 
         if (!FBTest.ok(prop, "cssRules property must be there"))
         {
-            FBTest.testDone("issue5247.DONE");
+            FBTest.testDone();
             return;
         }
 
@@ -82,7 +84,7 @@ function onInspect()
                 }
             }
 
-            FBTest.testDone("issue5247.DONE");
+            FBTest.testDone();
         });
 
         FBTest.click(prop);

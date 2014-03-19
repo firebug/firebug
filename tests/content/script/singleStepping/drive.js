@@ -33,15 +33,17 @@ function breakOnNext(callback, targetLine, fileName, win)
 {
     var chrome = FW.Firebug.chrome;
 
-    FBTest.waitForBreakInDebugger(chrome, targetLine, false, function(row)
+    FBTest.clickBreakOnNextButton(chrome, function()
     {
-        var label = FBTest.getCurrentLocation();
-        FBTest.ok(label.indexOf(fileName) != -1, "The location must be expected: " + fileName);
-        callback();
-    });
+        FBTest.waitForBreakInDebugger(chrome, targetLine, false, function(row)
+        {
+            var label = FBTest.getCurrentLocation();
+            FBTest.ok(label.indexOf(fileName) != -1, "The location must be expected: " + fileName);
+            callback();
+        });
 
-    FBTest.clickBreakOnNextButton(chrome);
-    FBTest.click(win.document.getElementById("clicker"));
+        FBTest.click(win.document.getElementById("clicker"));
+    });
 }
 
 function step(callback, stepFunction, targetLine, fileName)

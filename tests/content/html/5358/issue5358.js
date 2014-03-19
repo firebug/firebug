@@ -3,7 +3,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath5358 + "issue5358.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("html");
             if (FBTest.ok(panel, "Firebug must be opened and switched to HTML panel now."))
             {
@@ -30,12 +31,10 @@ function runTest()
                 // check that the "Replace Node", "Before" and "After" items are disabled
                 tasks.push(checkDisabledItemsOnRootElement);
 
-
                 // ***********************************************************************************//
                 // XML
 
                 tasks.push(FBTest.openURL.bind(FBTest, basePath5358 + "issue5358_xml.html"));
-
 
                 // set the new context baseWindow
                 tasks.push(setBaseWindow);
@@ -53,13 +52,12 @@ function runTest()
 
                 tasks.run(function()
                 {
-                    FBTest.testDone("issue5358.DONE");
+                    FBTest.testDone();
                 });
             }
         });
     });
 }
-
 
 function copyAndPasteContent(callback, target, menuId, contentToPaste)
 {

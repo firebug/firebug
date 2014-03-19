@@ -3,7 +3,7 @@ function runTest()
     if (FBTest.compareFirefoxVersion("3.6.*") <= 0)
     {
         FBTest.progress("This test is only for Firefox 4.0+");
-        FBTest.testDone("issue2871-b.DONE");
+        FBTest.testDone();
         return;
     }
 
@@ -11,7 +11,8 @@ function runTest()
 
     FBTest.openNewTab(basePath + "script/2871/issue2871-b.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableScriptPanel(function(win)
             {
                 // Create a new breakpoint
@@ -32,7 +33,7 @@ function runTest()
                         FBTest.compare(expected, valueCol.textContent,
                             "Verify the result value");
 
-                        FBTest.testDone("issue2871-b.DONE");
+                        FBTest.testDone();
                     });
                 });
             });

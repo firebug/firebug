@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/3042/issue3042.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var config = {
@@ -19,14 +20,16 @@ function runTest()
                         FBTest.compare("---------------------------------------------------",
                             errorIndicatorLeftPart.item(0).textContent,
                             "The left part of the error indicator must be shown as dashes");
+
                        var errorIndicatorRightPart = errorIndicatorLeftPart.item(0).parentNode.
                            getElementsByClassName("errorColCaret").item(0);
                        var backgroundImage = win.getComputedStyle(errorIndicatorRightPart, "").
                            getPropertyValue("background-image");
+
                        FBTest.compare("url(\"chrome://firebug/skin/errorColumnIndicator.svg\")",
                            backgroundImage, "The right part of the error indicator must be shown as an arrow");
 
-                       FBTest.testDone("issue3042.DONE");
+                       FBTest.testDone();
                     }
                 });
             });

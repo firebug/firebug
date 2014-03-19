@@ -15,7 +15,7 @@ function runTest()
                 FBTest.compare(expected, row.textContent,
                     "The script panel must show expected source: " + row.textContent);
 
-                FBTest.testDone("issue4932.DONE");
+                FBTest.testDone();
             });
         });
     });

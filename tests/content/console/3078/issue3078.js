@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/3078/issue3078.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function()
             {
                 var panel = FBTest.getSelectedPanel();
@@ -20,7 +21,7 @@ function runTest()
                 }
 
                 FBTest.ok(scrolled, "Panel must be scrolled to the bottom");
-                FBTest.testDone("issue3078.DONE");
+                FBTest.testDone();
             });
         });
     });

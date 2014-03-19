@@ -3,7 +3,8 @@ function runTest()
     FBTest.setPref("commandLineShowCompleterPopup", true);
     FBTest.openNewTab(basePath + "console/completion/959/issue959.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var panel = FW.Firebug.chrome.selectPanel("console");
@@ -74,7 +75,7 @@ function runTest()
 
                 tasks.run(function()
                 {
-                    FBTest.testDone("issue959.DONE");
+                    FBTest.testDone();
                 }, 0);
             });
         });

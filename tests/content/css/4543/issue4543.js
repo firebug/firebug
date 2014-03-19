@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/4543/issue4543.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
             FBTest.selectElementInHtmlPanel("element1", function(node)
             {
@@ -31,7 +32,7 @@ function runTest()
                     FBTest.compare(/png;base64/, editor.value, "Semicolon must be entered");
                 }
 
-                FBTest.testDone("issue4543.DONE");
+                FBTest.testDone();
             });
 
             // xxxsz: Needs to be executed after the first test

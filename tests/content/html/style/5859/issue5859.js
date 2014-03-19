@@ -20,7 +20,7 @@ function runTest()
                     var cs = win.getComputedStyle(element);
                     FBTest.compare("rgb(0, 0, 0)", cs.color, "Element display must be correct");
 
-                    FBTest.testDone("issue5859.DONE");
+                    FBTest.testDone();
                 });
             });
         });

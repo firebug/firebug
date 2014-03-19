@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/computed/3207/issue3207.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
             FBTest.selectElementInHtmlPanel("element1", function(sel)
             {
@@ -51,7 +52,7 @@ function runTest()
                         propValue = propNames[i].parentNode.querySelector(".stylePropValue").textContent;
                         FBTest.compare("Georgia", propValue, "Property value must be 'Georgia'");
 
-                        FBTest.testDone("issue3207.DONE");
+                        FBTest.testDone();
                     });
 
                     // xxxHonza: terrible hack, we need to figure out why the

@@ -2,15 +2,17 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/6525/issue6525.php", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.enablePanels(["net", "cookies", "console"], function() {
+        FBTest.openFirebug(function()
+        {
+            FBTest.enablePanels(["net", "cookies", "console"], function()
+            {
                 var taskList = new FBTest.TaskList();
                 taskList.push(checkNetPanel);
                 taskList.push(checkCookiesPanel);
 
                 taskList.run(function()
                 {
-                    FBTest.testDone("issue6525.DONE");
+                    FBTest.testDone();
                 });
             });
         });

@@ -3,7 +3,8 @@ function runTest()
     FBTest.openNewTab(basePath + "net/1461/issue1461.html", function(win)
     {
         // 1. Open Firebug
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             // 2. Enable and switch to the Net panel
             FBTest.enableNetPanel();
 
@@ -32,7 +33,7 @@ function runTest()
                     "\\(FF 3\\.0\\.6 FireBug 1\\.3\\.2\\)<\\/title>");
                 FBTest.compare(partOfThePageSource, responseBody.textContent, "Proper response must be there");
 
-                FBTest.testDone("issue1461.DONE");
+                FBTest.testDone();
             });
 
             // 3. Reload the page

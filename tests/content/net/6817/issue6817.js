@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "net/6817/issue6817.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableNetPanel(function()
             {
                 var button = win.frames[0].document.getElementById("sendRequest");
@@ -40,6 +41,6 @@ function verifyCopiedCURL(executeContextMenuCommand)
     FBTest.waitForClipboard(expected, executeContextMenuCommand, (text) =>
     {
         FBTest.compare(expected, text, "Proper cURL must be copied");
-        FBTest.testDone("issue6817.DONE");
+        FBTest.testDone();
     });
 }

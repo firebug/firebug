@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/computed/4132/issue4132.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("computed");
 
             FBTest.selectElementInHtmlPanel("element", function(win)
@@ -17,7 +18,7 @@ function runTest()
 
                 FBTest.ok(computedStyles.length > 0, "There should be user agent styles shown.");
 
-                FBTest.testDone("issue4132.DONE");
+                FBTest.testDone();
             });
         });
     });

@@ -47,6 +47,6 @@ function checkWatchPanel()
     {
         FBTest.ok(panel.editing, "The Watch panel must be in an 'editing' mode now.");
         FBTest.clickContinueButton(chrome);
-        FBTest.testDone("issue1575.DONE");
+        FBTest.testDone();
     }, 100);
 }

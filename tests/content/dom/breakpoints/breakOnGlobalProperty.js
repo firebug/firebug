@@ -4,7 +4,8 @@ function runTest()
 
     FBTest.openNewTab(basePath + "dom/breakpoints/breakOnProperty.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableScriptPanel(function()
             {
                 FBTest.selectPanel("dom");
@@ -24,23 +25,28 @@ function runTest()
 
                             var doc = row.ownerDocument;
                             var testSuite = [];
-                            testSuite.push(function(callback) {
+                            testSuite.push(function(callback)
+                            {
                                 FBTest.progress("4 " + win);
                                 breakOnMutation(win, "changeProperty", 44, callback);
                             });
-                            testSuite.push(function(callback) {
+                            testSuite.push(function(callback)
+                            {
                                 FBTest.click(win.document.getElementById("removeProperty"));
                                 callback();
                             });
-                            testSuite.push(function(callback) {
+                            testSuite.push(function(callback)
+                            {
                                 breakOnMutation(win, "addProperty", 39, callback);
                             });
-                            testSuite.push(function(callback) {
+                            testSuite.push(function(callback)
+                            {
                                 breakOnMutation(win, "changeProperty", 44, callback);
                             });
 
-                            FBTest.runTestSuite(testSuite, function() {
-                                FBTest.testDone("dom.breakpoints; DONE");
+                            FBTest.runTestSuite(testSuite, function()
+                            {
+                                FBTest.testDone();
                             });
                         });
 

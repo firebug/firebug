@@ -30,7 +30,7 @@ function runTest()
                             "Menu item must be checked");
                     }
 
-                    FBTest.testDone("issue4724.DONE");
+                    FBTest.testDone();
                 });
             });
         });

@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "net/url-params/test.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableNetPanel(function(win)
             {
                 var panel = FW.Firebug.chrome.selectPanel("net");
@@ -20,7 +21,7 @@ function runTest()
                     FBTest.compare("value11value22value33", paramsTable.textContent,
                         "Ampersands must be propery encoded.");
 
-                    FBTest.testDone("UrlParams.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("testButton"));

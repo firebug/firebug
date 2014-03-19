@@ -55,5 +55,5 @@ function onLoadResponse()
         FBTest.compare(expectedValue, postTable.rows[1].textContent, "The data must match.");
     }
 
-    FBTest.testDone("issue2221.DONE");
+    FBTest.testDone();
 }

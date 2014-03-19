@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/5033/issue5033.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enablePanels(["script", "console"], function()
             {
                 FBTest.waitForBreakInDebugger(null, 10, true, function()
@@ -24,7 +25,7 @@ function runTest()
                             if (FBTest.ok(result, "Result must exist"))
                                 FBTest.compare(20, result.textContent, "Result must be correct");
 
-                            FBTest.testDone("issue5033.DONE");
+                            FBTest.testDone();
                         });
                     });
 

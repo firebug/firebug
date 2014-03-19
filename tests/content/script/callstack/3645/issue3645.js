@@ -10,7 +10,7 @@ function runTest()
             tasks.push(executeTest, win);
             tasks.push(clickRerun, win);
             tasks.run(function() {
-                FBTest.testDone("issue3645.DONE");
+                FBTest.testDone();
             });
         });
     });

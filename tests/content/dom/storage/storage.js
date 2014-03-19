@@ -8,7 +8,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "dom/storage/storage.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var tasks = new FBTest.TaskList();
@@ -38,7 +39,7 @@ function runTest()
 
                 tasks.run(function()
                 {
-                    FBTest.testDone("storage.DONE");
+                    FBTest.testDone();
                 });
             });
         });

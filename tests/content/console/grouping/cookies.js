@@ -4,8 +4,10 @@ function runTest()
 
     FBTest.openNewTab(basePath + "console/grouping/cookies.php", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.enablePanels(["console", "cookies"], function() {
+        FBTest.openFirebug(function()
+        {
+            FBTest.enablePanels(["console", "cookies"], function()
+            {
                 FBTest.clearConsole();
 
                 var config = {
@@ -43,7 +45,7 @@ function runTest()
                         FBTest.compare("\"issue4979=value\"", rows[rows.length - 1].textContent,
                             "The console should display the raw cookie data");
 
-                        FBTest.testDone("cookiesGrouping.DONE");
+                        FBTest.testDone();
                     });
 
                     FBTest.executeCommand("document.cookie");

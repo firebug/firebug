@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/4826/issue4826.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("html");
 
             FBTest.selectElementInHtmlPanel("testnode", function(node)
@@ -50,7 +51,7 @@ function runTest()
                     }
                 }
 
-                FBTest.testDone("issue4826.DONE");
+                FBTest.testDone();
             });
         });
     });

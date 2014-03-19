@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/reps/arrayDisplay.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var expectedArrays =
@@ -106,8 +107,9 @@ function runTest()
                 tasks.push(verifyLogs, win, 7, expectedNonArrays, "logNonArrays",
                     "Verify non-array logs");
 
-                tasks.run(function() {
-                    FBTest.testDone("arrayDisplay.DONE");
+                tasks.run(function()
+                {
+                    FBTest.testDone();
                 });
             });
         });

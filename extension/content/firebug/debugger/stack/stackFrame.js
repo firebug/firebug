@@ -8,8 +8,9 @@ define([
     "firebug/lib/string",
     "firebug/debugger/clients/grip",
     "firebug/debugger/script/sourceLink",
+    "firebug/debugger/debuggerLib",
 ],
-function (FBTrace, Obj, Url, Locale, Str, Grip, SourceLink) {
+function (FBTrace, Obj, Url, Locale, Str, Grip, SourceLink, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -339,13 +340,31 @@ StackFrame.guessFunctionArgNamesFromSource = function(source)
     return args;
 };
 
-// XXX This probably isn't needed any more.
-StackFrame.cleanStackTraceOfFirebug = function(trace)
+StackFrame.removeChromeFrames = function(trace)
 {
-    if (trace && trace.frames && !trace.frames.length)
-        return undefined;
+    var frames = trace ? trace.frames : null;
+    if (!frames || !frames.length)
+        return null;
+
+    var filteredFrames = [];
+    for (var i = 0; i < frames.length; i++)
+    {
+        var href = frames[i].href;
+        if (href.startsWith("chrome:") || href.startsWith("resource:"))
+            continue;
+
+        // xxxFlorent: should be reverted if we integrate
+        // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
+        if (DebuggerLib.isFrameLocationEval(href))
+            continue;
+
+        filteredFrames.push(frames[i]);
+    }
+
+    trace.frames = filteredFrames;
+
     return trace;
-};
+}
 
 StackFrame.getFrameSourceLink = function(frame)
 {

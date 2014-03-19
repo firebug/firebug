@@ -14,7 +14,8 @@ function runTest()
 
     FBTest.openNewTab(basePath + "net/2297/issue2297.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enablePanels(["console", "net"], function()
             {
                 var config = {tagName: "div", classes: "logRow logRow-error"};
@@ -33,7 +34,7 @@ function runTest()
                     FBTest.compare(1, errorCount, "There must be 1 Error displayed in the status bar");
 
                     FBTest.setPref("showNetworkErrors", prefOrigValue);
-                    FBTest.testDone("issue2297; end");
+                    FBTest.testDone();
                 });
 
                 // Reload the page to get an error in the console.

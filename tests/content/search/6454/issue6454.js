@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "search/6454/issue6454.html", function()
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
 
             var tasks = new FBTest.TaskList();
@@ -13,7 +14,7 @@ function runTest()
             tasks.push(searchTest, "/html/body", true, 3);
             tasks.run(function()
             {
-                FBTest.testDone("issue6454.DONE");
+                FBTest.testDone();
             });
         });
     });

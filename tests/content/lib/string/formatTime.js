@@ -65,5 +65,5 @@ function runTest()
                 value.decimalPlaces), msg);
     }
 
-    FBTest.testDone("formatTime.DONE");
+    FBTest.testDone();
 }

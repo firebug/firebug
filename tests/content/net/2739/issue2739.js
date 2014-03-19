@@ -8,7 +8,8 @@ function runTest()
     FBTest.openNewTab(basePath + "net/2739/issue2739.html", function(win)
     {
         // Open Firebug and enable the Net panel.
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableNetPanel(function(win)
             {
                 var panel = FW.Firebug.chrome.selectPanel("net");
@@ -47,7 +48,7 @@ function waitForResponse(panel)
 function onVerifyResponses()
 {
     verifyResponses();
-    FBTest.testDone("issue2696.DONE");
+    FBTest.testDone();
 }
 
 function verifyResponses(netRow)

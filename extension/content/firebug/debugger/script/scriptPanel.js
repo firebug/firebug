@@ -111,6 +111,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.context.getTool("breakpoint").addListener(this);
         this.context.getTool("source").addListener(this);
 
+        BreakOnNext.addListener(this);
+
         // Register as a listener for 'updateSidePanels' event.
         Firebug.registerUIListener(this);
     },
@@ -1369,9 +1371,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         return this.breakable;
     },
 
-    breakOnNext: function(enabled)
+    breakOnNext: function(enabled, callback)
     {
-        BreakOnNext.breakOnNext(this.context, enabled);
+        BreakOnNext.breakOnNext(this.context, enabled, callback);
     },
 
     getBreakOnNextTooltip: function(armed)

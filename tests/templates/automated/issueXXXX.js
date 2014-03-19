@@ -10,7 +10,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "category/XXXX/issueXXXX.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("mainPanel");
 
             FBTest.doSomething(function(win)

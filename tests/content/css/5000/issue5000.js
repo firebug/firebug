@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/5000/issue5000.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("stylesheet");
             var id = "element1";
 
@@ -27,7 +28,7 @@ function runTest()
                     var elementDisplayNow = FBTest.getImageDataFromNode(win.document.getElementById(id));
                     FBTest.ok(elementDisplayBefore != elementDisplayNow, "The styles of the deleted rule shouldn't affect the element anymore");
 
-                    FBTest.testDone("issue5000.DONE");
+                    FBTest.testDone();
                 });
             });
         });

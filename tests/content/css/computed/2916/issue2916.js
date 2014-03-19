@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/computed/2916/issue2916.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("computed");
 
             FBTest.selectElementInHtmlPanel("element", function(win)
@@ -68,7 +69,7 @@ function runTest()
                     }
                 }
 
-                FBTest.testDone("issue2916.DONE");
+                FBTest.testDone();
             });
         });
     });

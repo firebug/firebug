@@ -19,5 +19,5 @@ function logTestResult(event)
 
     // Finish test
     //cleanUpTestTabs();
-    FBTest.testDone("Example Test DONE");
+    FBTest.testDone();
 }

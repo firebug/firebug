@@ -41,7 +41,7 @@ function ErrorMessageObj(message, href, lineNo, source, category, context,
     this.trace = trace;
     this.msgId = msgId || this.getId();
     this.colNumber = colNumber;
-    this.sourceLoaded = false;
+    this.sourceLoaded = !!source;
 }
 
 ErrorMessageObj.prototype =

@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/completion/index/index.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var panel = FW.Firebug.chrome.selectPanel("console");
@@ -39,7 +40,7 @@ function runTest()
                     var cmdLine = doc.getElementById("fbCommandLine");
                     cmdLine.value = "";
 
-                    FBTest.testDone("index.DONE");
+                    FBTest.testDone();
                 });
             });
         });

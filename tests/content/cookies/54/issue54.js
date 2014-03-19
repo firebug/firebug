@@ -19,7 +19,7 @@ function runTest()
             FBTest.verifyInfoTabContent(panelNode, "TestCookie54", "Value", "-!-");
             FBTest.verifyInfoTabContent(panelNode, "TestCookie54", "RawValue", "-%21-");
 
-            FBTest.testDone("cookies.test.issue54; DONE");
+            FBTest.testDone();
         });
     });
 };

@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/2160/issue2160.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function()
             {
                 FBTest.selectPanel("console");
@@ -11,8 +12,9 @@ function runTest()
                 tests.push(test1);
                 tests.push(test2);
 
-                FBTest.runTestSuite(tests, function() {
-                    FBTest.testDone("issue2160.DONE");
+                FBTest.runTestSuite(tests, function()
+                {
+                    FBTest.testDone();
                 });
             });
         });

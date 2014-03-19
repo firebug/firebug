@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "firebug/4553/issue4553.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableNetPanel(function(win)
             {
                 FBTest.progress("Net panel enabled");
@@ -25,9 +26,8 @@ function runTest()
 
                     // If the test fails there would be an alert dialog that
                     // causes the test to fail on timeout.
-                    FBTest.testDone("issue4553.DONE");
+                    FBTest.testDone();
                 });
-
             });
         });
     });

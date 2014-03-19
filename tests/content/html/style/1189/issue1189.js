@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/style/1189/issue1189.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("css");
 
             var tests = [];
@@ -18,7 +19,7 @@ function runTest()
 
             FBTestFirebug.runTestSuite(tests, function()
             {
-                FBTest.testDone("issue1189.DONE");
+                FBTest.testDone();
             });
         });
     });

@@ -28,7 +28,7 @@ function runTest()
                 FBTest.compare(rows.length, 1, "There must be one breakpoint");
 
                 // Finish test
-                FBTest.testDone("issue5525.DONE");
+                FBTest.testDone();
             });
 
             FBTest.clickContentButton(win, "testButton");

@@ -2,8 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/4209/issue4209.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.selectPanel("console");
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var config = {tagName: "a", classes: "objectLink objectLink-object"};
@@ -12,7 +12,7 @@ function runTest()
                     FBTest.compare(/Object\s*{\s*obj={...}}/, row.textContent,
                         "The result must match");
 
-                    FBTest.testDone("issue4209.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.clickToolbarButton(null, "fbConsoleClear");

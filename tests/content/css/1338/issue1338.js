@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/1338/issue1338.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
             FBTest.selectElementInHtmlPanel("element1", function(node)
             {
@@ -54,7 +55,7 @@ function runTest()
                 FBTest.sendShortcut("VK_PAGE_UP", {shiftKey: true});
                 FBTest.compare("7em", editor.value, "Must be incremented to 7em");
 
-                FBTest.testDone("issue1338.DONE");
+                FBTest.testDone();
             });
         });
     });

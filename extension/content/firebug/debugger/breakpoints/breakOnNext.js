@@ -9,8 +9,9 @@ define([
     "firebug/chrome/module",
     "firebug/debugger/debuggerHalter",
     "firebug/debugger/debuggerLib",
+    "firebug/debugger/breakpoints/breakpointModule",
 ],
-function(Firebug, FBTrace, Obj, Module, DebuggerHalter, DebuggerLib) {
+function(Firebug, FBTrace, Obj, Module, DebuggerHalter, DebuggerLib, BreakpointModule) {
 
 "use strict";
 
@@ -64,7 +65,7 @@ var BreakOnNext = Obj.extend(Module,
      * @param context The context object.
      * @param enabled
      */
-    breakOnNext: function(context, enabled)
+    breakOnNext: function(context, enabled, callback)
     {
         // Don't continue if we don't change the state of Break On Next.
         var breakOnNextActivated = !!context.breakOnNextActivated;
@@ -94,6 +95,9 @@ var BreakOnNext = Obj.extend(Module,
         // Change the "breakOnNextActivated" property, so the button of the
         // script panel is updated.
         context.breakOnNextActivated = enabled;
+
+        if (callback)
+            callback(context, enabled);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -136,6 +140,49 @@ var BreakOnNext = Obj.extend(Module,
             BreakOnNext.breakOnNext(context, false);
             return false;
         }
+    },
+
+    /**
+     * Event handler for all "break on next" buttons.
+     */
+    onToggleBreakOnNext: function(event)
+    {
+        var selectedPanel = Firebug.chrome.getSelectedPanel();
+        var context = selectedPanel.context;
+        // Ensure that the selected panel is breakable. Otherwise, abort.
+        if (!selectedPanel.breakable)
+            return;
+
+        // Also ensure that the script panel is activated (required to have BON).
+        // The contrary shouldn't happen (the UI prevent this case), but let's test that anyway.
+        var scriptPanel = context.getPanel("script");
+        if (!scriptPanel || !scriptPanel.isEnabled())
+        {
+            TraceError.sysout("BreakOnNext.onToggleBreakOnNext; BON activated whereas " +
+                "the script panel is not activated. Abort");
+            return;
+        }
+
+        var breaking = !selectedPanel.shouldBreakOnNext();
+
+        Trace.sysout("BreakOnNext.onToggleBreakOnNext; selectedPanel = " +
+            selectedPanel.name + "; breaking = " + breaking);
+
+        selectedPanel.breakOnNext(breaking, function()
+        {
+            Trace.sysout("BreakOnNext.onToggleBreakOnNext; BreakOnNext " +
+                (breaking ? "enabled" : "disabled"));
+
+            // Toggle button's state.
+            Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleBreakOn", "breakable", !breaking);
+
+            // Update the state of the button of the selected panel.
+            BreakpointModule.updatePanelState(selectedPanel);
+
+            // Trigger an event for the FBTest API.
+            var evArgs = {context: context, breaking: breaking};
+            Firebug.dispatchEvent(context.browser, "breakOnNextUpdated", evArgs);
+        });
     }
 });
 
@@ -180,6 +227,8 @@ function isFrameInlineEvent(frame)
 
 // ********************************************************************************************* //
 // Registration
+
+Firebug.BreakOnNext = BreakOnNext;
 
 Firebug.registerModule(BreakOnNext);
 

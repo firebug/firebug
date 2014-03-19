@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/5042/issue5042.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var doc = FW.Firebug.chrome.window.document;
@@ -23,7 +24,7 @@ function runTest()
                         "Command Line must not be focused anymore");
                 }
 
-                FBTest.testDone("issue5042.DONE");
+                FBTest.testDone();
             });
         });
     });

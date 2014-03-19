@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/selectors/6058/issue6058.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectSidePanel("selectors");
 
             FBTest.ok(panel, "Selectors side panel must be there");
@@ -26,12 +27,14 @@ function runTest()
                 FBTest.compare(output, editor.value, "Completing \"" + input + "\" → \"" + output + "\"");
                 callback();
             }
+
             var tasks = new FBTest.TaskList();
             tasks.push(test, ".he", ".hello");
             tasks.push(test, "#wo", "#world");
-            tasks.run(function() {
+            tasks.run(function()
+            {
                 FBTest.synthesizeKey("VK_ESCAPE", null, win);
-                FBTest.testDone("issue6058.DONE");
+                FBTest.testDone();
             }, 0);
         });
     });

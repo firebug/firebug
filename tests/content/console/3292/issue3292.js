@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/3292/issue3292.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel();
 
             var config = {
@@ -29,7 +30,7 @@ function runTest()
                 FBTest.compare(/iframe log/, logContents[2].textContent,
                     "\"iframe log\" must be displayed");
 
-                FBTest.testDone("issue3292.DONE");
+                FBTest.testDone();
             });
 
             FBTest.reload();

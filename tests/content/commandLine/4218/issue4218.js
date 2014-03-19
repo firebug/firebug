@@ -2,9 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/4218/issue4218.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.selectPanel("console");
-
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var doc = FW.Firebug.chrome.window.document;
@@ -30,7 +29,7 @@ function runTest()
                 FBTest.synthesizeKey("VK_UP", null, win);
                 FBTest.compare("2", cmdLine.value, "The Command Line must display '2' after re-calling the previous command from the history.");
 
-                FBTest.testDone("issue4218.DONE");
+                FBTest.testDone();
             });
         });
     });

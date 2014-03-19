@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/5430/issue5430.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("stylesheet");
 
             FBTest.selectPanelLocationByName(panel, "issue5430.html");
@@ -16,7 +17,7 @@ function runTest()
                     "The namespace rule must be correct");
             }
 
-            FBTest.testDone("issue5430.DONE");
+            FBTest.testDone();
         });
     });
 }

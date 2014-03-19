@@ -2,19 +2,19 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/api/debug.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.enablePanels(["console", "script"], function() {
-                var tasks = new FBTest.TaskList();
+        FBTest.enablePanels(["console", "script"], function()
+        {
+            var tasks = new FBTest.TaskList();
 
-                // Create breakpoint using 'debug(onTextExecute)' method on the cmd line.
-                tasks.push(createBreakpoint);
+            // Create breakpoint using 'debug(onTextExecute)' method on the cmd line.
+            tasks.push(createBreakpoint);
 
-                // Execute breakpoint by pressing 'Execute Test' button on the page.
-                tasks.push(executeBreakpoint, win);
+            // Execute breakpoint by pressing 'Execute Test' button on the page.
+            tasks.push(executeBreakpoint, win);
 
-                tasks.run(function() {
-                    FBTest.testDone("commandline.debug.DONE");
-                });
+            tasks.run(function()
+            {
+                FBTest.testDone();
             });
         });
     });
@@ -45,5 +45,5 @@ function executeBreakpoint(callback, win)
     });
 
     // Execute test by clicking on the 'Execute Test' button.
-    FBTest.click(win.document.getElementById("testButton"));
+    FBTest.clickContentButton(win, "testButton");
 }

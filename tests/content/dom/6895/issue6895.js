@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "dom/6895/issue6895.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.waitForDOMProperty("testString", function(row)
             {
                 var memberValueElement = row.getElementsByClassName("memberValueCell")[0];
@@ -21,7 +22,7 @@ function runTest()
 
                 FBTest.click(editorInput.parentNode);
 
-                FBTest.testDone("issue6895.DONE");
+                FBTest.testDone();
             });
 
             FBTest.selectPanel("dom");

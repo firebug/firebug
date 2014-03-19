@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/5469/issue5469.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
             FBTest.selectElementInHtmlPanel("element1", function(node)
             {
@@ -31,9 +32,10 @@ function runTest()
                 tasks.push(test, "'a 0 b'", "'a 1 b'");
                 tasks.push(test, "-moz-calc(11px * 0)", "-moz-calc(11px * 1)");
 
-                tasks.run(function() {
+                tasks.run(function()
+                {
                     FBTest.synthesizeKey("VK_ESCAPE", null, win);
-                    FBTest.testDone("issue5469.DONE");
+                    FBTest.testDone();
                 }, 0);
             });
         });

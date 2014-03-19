@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/2976/issue2976.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableNetPanel(function(win)
             {
                 FW.Firebug.chrome.selectPanel("html");
@@ -23,7 +24,7 @@ function runTest()
                     {
                         FBTest.compare(expected, text,
                             "CSS declaration must be properly copied into the clipboard");
-                        FBTest.testDone("issue2976.DONE");
+                        FBTest.testDone();
                     });
                 })
             });

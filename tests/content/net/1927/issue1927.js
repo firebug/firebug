@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "net/1927/issue1927.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableNetPanel(function(win)
             {
                 var panel = FW.Firebug.chrome.selectPanel("net");
@@ -19,7 +20,7 @@ function runTest()
                                 setTimeout(function()
                                 {
                                     verifyNetResponse();
-                                    FBTest.testDone("issue1927.DONE");
+                                    FBTest.testDone();
                                 }, 500);
                             });
                         });

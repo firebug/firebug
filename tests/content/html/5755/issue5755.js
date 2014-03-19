@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/5755/issue5755.html", function (win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("html");
             if (FBTest.ok(panel, "Firebug must be opened and switched to HTML panel now."))
             {
@@ -26,13 +27,13 @@ function runTest()
                             FBTest.compare(longOnclickValue, texteditor.value,
                                 "Inline editor must contain whole string of onclick value.");
                         }
-                        FBTest.testDone("issue5755.DONE");
+                        FBTest.testDone();
                     });
                 });
             }
             else
             {
-                FBTest.testDone("issue5755.FAILED");
+                FBTest.testDone();
             }
         });
     });

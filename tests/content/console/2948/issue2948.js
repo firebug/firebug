@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/2948/issue2948.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var panel = FW.Firebug.chrome.selectPanel("console");
@@ -14,8 +15,9 @@ function runTest()
                 tasks.push(executeResponse, win);
 
                 // Run them all.
-                tasks.run(function() {
-                    FBTest.testDone("issue2948.DONE");
+                tasks.run(function()
+                {
+                    FBTest.testDone();
                 });
             });
         });

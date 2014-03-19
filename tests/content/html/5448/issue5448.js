@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/5448/issue5448.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function()
             {
                 FBTest.selectPanel("html");
@@ -27,7 +28,7 @@ function runTest()
                         var expected = /section.*a &aring;&auml;&ouml; b.*section/;
                         FBTest.compare(expected, node.textContent, "The text content must match");
 
-                        FBTest.testDone("issue5448.DONE");
+                        FBTest.testDone();
                     });
                 });
             });

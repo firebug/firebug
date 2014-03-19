@@ -11,7 +11,8 @@ function runTest()
 
         FBTest.openURL(basePath + "inspector/InspectorTestIframe.htm?url=Issue68FrameActual.htm", function(win)
         {
-            FBTest.openFirebug(function() {
+            FBTest.openFirebug(function()
+            {
                 ifr = win.document.getElementById("testIframe");
 
                 var target = ifr.contentDocument.getElementById("testTarget1");
@@ -23,7 +24,7 @@ function runTest()
                 actualImage = FBTest.getImageDataFromWindow(ifr.contentWindow, width, height);
 
                 FBTest.compare(expectedImage, actualImage, "The screen must be in expected state");
-                FBTest.testDone("issue68Frame.DONE");
+                FBTest.testDone();
             });
         });
     });

@@ -661,9 +661,11 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
         }
     },
 
-    breakOnNext: function(breaking)
+    breakOnNext: function(breaking, callback)
     {
         this.context.breakOnXHR = breaking;
+        if (callback)
+            callback(this.context, breaking);
     },
 
     shouldBreakOnNext: function()

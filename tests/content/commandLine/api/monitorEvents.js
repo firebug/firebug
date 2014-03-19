@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/api/monitorEvents.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var taskList = new FBTest.TaskList();
@@ -23,8 +24,9 @@ function runTest()
                      /^keydown\s+charCode=\d+,\s+keyCode=\d+$/, /^keypress\s+charCode=\d+,\s+keyCode=\d+$/,
                      /^keyup\s+charCode=\d+,\s+keyCode=\d+$/]);
 
-                taskList.run(function() {
-                    FBTest.testDone("monitorEvents.DONE");
+                taskList.run(function()
+                {
+                    FBTest.testDone();
                 });
             });
         });

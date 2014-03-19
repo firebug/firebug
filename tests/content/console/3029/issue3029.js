@@ -3,7 +3,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/3029/issue3029.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var panel = FW.Firebug.chrome.selectPanel("console");
@@ -22,7 +23,7 @@ function runTest()
                     FBTest.compare("\"" + testProp + "\"",
                         value.textContent, "Full value must be displayed now.");
 
-                    FBTest.testDone("issue3029.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test.

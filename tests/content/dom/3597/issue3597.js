@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "dom/3597/issue3597.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("dom");
 
             expandProperty("_testString", "childObj", function()
@@ -21,7 +22,7 @@ function runTest()
                             /_testString\s+\"\{\"childObj\"\:\{\"a\"\:5\,\"b\"\:4\,\"lastItem\"\:5\}\}/,
                             row.textContent, "The object must be displayed as a string now");
 
-                        FBTest.testDone("issue3597.DONE");
+                        FBTest.testDone();
                     });
 
                     FBTest.refreshDOMPanel();

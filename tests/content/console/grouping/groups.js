@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/grouping/groups.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 FBTest.clearConsole();
@@ -26,7 +27,7 @@ function runTest()
                     var cascadedGroups = panelNode.querySelectorAll(".logGroupBody > .logRow-group");
                     FBTest.compare(1, cascadedGroups.length, "There must be one cascaded group");
 
-                    FBTest.testDone("groupGrouping.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("testButton"));

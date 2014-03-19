@@ -3,7 +3,8 @@ function runTest()
     FBTest.setPref("showXMLHttpRequests", true);
     FBTest.openNewTab(basePath + "console/spy/4171/issue4171.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var options = {
@@ -32,7 +33,7 @@ function runTest()
                         tab = row.getElementsByClassName("netInfoJSONText netInfoText")[0];
                         FBTest.ok(tab, "JSON tab must exist");
 
-                        FBTest.testDone("issue2868.DONE");
+                        FBTest.testDone();
                     });
                 });
 

@@ -7,7 +7,8 @@ function runTest()
 {
     FBTest.openNewTab(testPageURL, function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableScriptPanel(function()
             {
                 var tasks = new FBTest.TaskList();
@@ -15,8 +16,9 @@ function runTest()
                 tasks.push(setBreakpointReloadAndWaitForBreak);
                 tasks.push(reloadAgainAndWaitForBreak);
 
-                tasks.run(function() {
-                    FBTest.testDone("openInNewWindow.DONE");
+                tasks.run(function()
+                {
+                    FBTest.testDone();
                 });
             });
         });
@@ -29,7 +31,7 @@ function waitForDetachedFirebug(callback)
     {
         if (!FBTest.ok(detachedWindow, "Firebug is detaching..."))
         {
-            FBTest.testDone("openInNewWindow.FAILED");
+            FBTest.testDone();
             return;
         }
 
@@ -66,7 +68,8 @@ function reloadAgainAndWaitForBreak(callback)
         // xxxHonza: This timeout is puzzling me, but if it isn't there
         // the debugger is not resumed even if the Debugger.resume is
         // properly called.
-        setTimeout(function() {
+        setTimeout(function()
+        {
             FBTest.clickContinueButton();
         }, 500);
     });

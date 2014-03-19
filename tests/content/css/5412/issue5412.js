@@ -2,12 +2,13 @@ function runTest()
 {
     function done()
     {
-        FBTest.testDone("issue5412.DONE");
+        FBTest.testDone();
     }
 
     FBTest.openNewTab(basePath + "css/5412/issue5412.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("stylesheet");
 
             var editor = null;
@@ -75,7 +76,8 @@ function runTest()
             tasks.push(selectLocation, "frame.html", "div");
             tasks.push(test, "#frameel", "#frameelement");
 
-            tasks.run(function() {
+            tasks.run(function()
+            {
                 FBTest.synthesizeKey("VK_ESCAPE", null, win);
                 done();
             }, 0);

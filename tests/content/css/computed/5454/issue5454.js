@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/computed/5451/issue5451.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("computed");
 
             FBTest.setPref("showUserAgentCSS", true);
@@ -67,7 +68,7 @@ function runTest()
                     "Part of the 'Background' group must be visible at the top of the panel");
             }
 
-            FBTest.testDone("issue5454.DONE");
+            FBTest.testDone();
         });
     });
 }

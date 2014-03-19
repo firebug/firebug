@@ -7,7 +7,7 @@ function runTest()
     if (!supportedVersion)
     {
         FBTest.progress("This test needs Firefox 15+");
-        FBTest.testDone("issue1811.DONE");
+        FBTest.testDone();
         return;
     }
 
@@ -15,7 +15,8 @@ function runTest()
     FBTest.openNewTab(basePath + "dom/2558/issue2558.html", function(win)
     {
         // 2) Open Firebug and enable the Script panel.
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableScriptPanel(function()
             {
                 FBTest.selectPanel("script");
@@ -44,12 +45,13 @@ function runTest()
 
                         // Resume debugger, test done.
                         FBTest.clickContinueButton();
-                        FBTest.testDone("issue2558; DONE");
+                        FBTest.testDone();
                     }, 300);
                 });
 
                 // 3) Execute test on the page (use async to have clean callstack).
-                setTimeout(function() {
+                setTimeout(function()
+                {
                     FBTest.click(win.document.getElementById("testButton"));
                 }, 10);
             });

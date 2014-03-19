@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "script/dynamicScriptEval/test1.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enablePanels(["console", "script"], function()
             {
                 var config = {tagName: "div", classes: "logRow logRow-log", counter: 2};
@@ -16,7 +17,7 @@ function runTest()
                     FBTest.compare(/quack\s*/, rows[0].textContent, "The first log must say: quack");
                     FBTest.compare(/meow!!\s*/, rows[1].textContent, "The second log must say: meow!!");
 
-                    FBTest.testDone("dynScriptLoad.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.clearConsole();

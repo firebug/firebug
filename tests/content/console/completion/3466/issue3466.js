@@ -3,7 +3,8 @@ function runTest()
     FBTest.setPref("commandLineShowCompleterPopup", true);
     FBTest.openNewTab(basePath + "console/completion/3466/issue3466.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var panel = FW.Firebug.chrome.selectPanel("console");
@@ -15,7 +16,7 @@ function runTest()
                 FBTest.compare("dir(", cmdLine.value,
                     "Expected value must be in the command line now: " + cmdLine.value);
 
-                FBTest.testDone("issue3466.DONE");
+                FBTest.testDone();
             });
         });
     });

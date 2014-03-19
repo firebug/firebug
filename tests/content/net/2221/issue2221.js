@@ -64,5 +64,5 @@ function onLoadResponse()
         }
     }
 
-    FBTest.testDone("issue2221.DONE");
+    FBTest.testDone();
 }

@@ -13,7 +13,7 @@ function runTest()
 
                 var jsonTab = rowInfoBody.querySelector(".netInfoJSONTab");
                 FBTest.ok(jsonTab, "JSON tab must exist");
-                FBTest.testDone("issue2209-2; DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("executeTest"));

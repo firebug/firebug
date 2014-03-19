@@ -61,7 +61,7 @@ function runTest()
                     FBTest.compare("Test Cookie Value", infoValue.textContent, "Value of the cookie (in the body) validation");
 
                     // Finish test
-                    FBTest.testDone("cookieInfo.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(cookieRow);

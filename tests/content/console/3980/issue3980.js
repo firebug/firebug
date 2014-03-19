@@ -2,15 +2,17 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/3980/issue3980.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.enablePanels(["console", "script"], function() {
+        FBTest.openFirebug(function()
+        {
+            FBTest.enablePanels(["console", "script"], function()
+            {
                 var tests = [];
                 tests.push(testCPUProfileClearButton);
                 tests.push(testCPUProfileConsoleClearCommand);
 
                 FBTestFirebug.runTestSuite(tests, function()
                 {
-                    FBTest.testDone("issue3980; DONE");
+                    FBTest.testDone();
                 });
             });
         });

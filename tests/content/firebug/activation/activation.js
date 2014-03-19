@@ -22,7 +22,8 @@ function runTest()
         FBTest.openNewTab(pageWithFirebug, function(win)
         {
             FBTest.progress("Now open the Firebug UI in this new tab");
-            FBTest.openFirebug(function() {
+            FBTest.openFirebug(function()
+            {
                 var tabWithFirebug = tabBrowser.selectedTab;
 
                 FBTest.ok(FBTest.isFirebugOpen(), "Firebug UI must be open");
@@ -51,7 +52,8 @@ function runTest()
                 FBTest.openNewTab(secondPageWithFirebug, function(win)
                 {
                     FBTest.progress("Also open Firebug on " + secondPageWithFirebug);
-                    FBTest.openFirebug(function() {
+                    FBTest.openFirebug(function()
+                    {
                         FBTest.compare(secondPageWithFirebug, FW.Firebug.currentContext.getName(),
                                 "The context should be '" + secondPageWithFirebug + "'");
 
@@ -61,7 +63,7 @@ function runTest()
                         FBTest.compare(pageWithFirebug, FW.Firebug.currentContext.getName(),
                             "The context should be '" + pageWithFirebug + "'");
 
-                        FBTest.testDone("activation.DONE");
+                        FBTest.testDone();
                     });
                 });
             });

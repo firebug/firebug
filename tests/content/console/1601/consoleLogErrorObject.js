@@ -4,7 +4,8 @@
  * Author: johnjbarton@johnjbarton.com March 2009
  */
 
-function isEmpty(obj) {
+function isEmpty(obj)
+{
     if (obj)
         return obj.length == 0;
     return true;
@@ -12,7 +13,7 @@ function isEmpty(obj) {
 
 function testConsoleError()
 {
-    FBTest.testDone("issue1601.DONE");
+    FBTest.testDone();
 }
 
 // Test entry point.
@@ -20,8 +21,10 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/1601/consoleLogErrorObject.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.enableConsolePanel(function() {
+        FBTest.openFirebug(function()
+        {
+            FBTest.enableConsolePanel(function()
+            {
                 testConsoleError();
             });
         });

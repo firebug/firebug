@@ -7,7 +7,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "firebug/OpenFirebugOnThisPage.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("console");
             FW.Firebug.Console.setDefaultState(true);
             FW.Firebug.Console.setDefaultState(false);
@@ -20,7 +21,7 @@ function runTest()
             FBTest.ok(splitter.collapsed, "Splitter must be hidden");
             FBTest.ok(sidePanel.collapsed, "Large command line must be hidden");
 
-            FBTest.testDone("panelContentAfterDisable.DONE");
+            FBTest.testDone();
         });
     });
 }

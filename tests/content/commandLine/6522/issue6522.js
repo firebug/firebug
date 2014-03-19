@@ -2,8 +2,10 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/6522/issue6522.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.enablePanels(["console", "script"], function() {
+        FBTest.openFirebug(function()
+        {
+            FBTest.enablePanels(["console", "script"], function()
+            {
                 var taskList = new FBTest.TaskList();
                 taskList.push(FBTest.executeCommandAndVerify, "getEventListeners(window).load[0].useCapture", "false",
                     "span", "objectBox-number", true, false);
@@ -18,7 +20,7 @@ function runTest()
 
                 taskList.run(function()
                 {
-                    FBTest.testDone("issue6522.DONE");
+                    FBTest.testDone();
                 });
             });
         });

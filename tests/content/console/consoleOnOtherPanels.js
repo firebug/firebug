@@ -13,13 +13,15 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/consoleOnOtherPanels.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var tasks = new FBTest.TaskList();
             tasks.push(enableConsole);
             tasks.push(disableConsole);
 
-            tasks.run(function() {
-                FBTest.testDone("consoleOnOtherPanels.DONE");
+            tasks.run(function()
+            {
+                FBTest.testDone();
             });
         });
     });

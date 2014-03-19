@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "dom/3122/issue3122.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableScriptPanel(function()
             {
                 // Wait for break in debugger.
@@ -16,7 +17,7 @@ function runTest()
 
                     // Resume debugger, test done.
                     FBTest.clickContinueButton();
-                    FBTest.testDone("issue3122; DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("testButton"));

@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/3303/issue3303.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
             FBTest.selectElementInHtmlPanel("font", function(node)
             {
@@ -62,7 +63,7 @@ function runTest()
                     FBTest.compare("Arial", editor.value.substring(editor.selectionStart, editor.selectionEnd), "The selection must extend up to the comma");
                 }
 
-                FBTest.testDone("issue3303.DONE");
+                FBTest.testDone();
             });
         });
     });

@@ -3,7 +3,8 @@ function runTest()
     FBTest.setPref("showXMLHttpRequests", true);
     FBTest.openNewTab(basePath + "console/spy/2868/issue2868.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 FBTest.waitForDisplayedElement("console", null, function(row)
@@ -20,7 +21,7 @@ function runTest()
                             "Response text must match.");
                     }
 
-                    FBTest.testDone("issue2868.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test implemented on the test page.

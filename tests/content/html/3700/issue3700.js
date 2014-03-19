@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/3700/issue3700.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("html");
 
             // Wait till the inline editor becomes available.
@@ -54,7 +55,7 @@ function runTest()
                     "style attribute must be correct afterwards");
                 FBTest.compare("true", win.document.body.getAttribute("spellcheck"),
                     "spellcheck attribute must be correct afterwards");
-                FBTest.testDone("issue3700.DONE");
+                FBTest.testDone();
             });
 
             // Get the selected element and click ">" to add a new attribute.

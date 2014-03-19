@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/completion/completion.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var doc = FW.Firebug.chrome.window.document;
@@ -106,7 +107,7 @@ function runTest()
 
                 FBTest.sendKey("RETURN", "fbCommandLine");
 
-                FBTest.testDone("issue2934.DONE");
+                FBTest.testDone();
             });
         });
     });

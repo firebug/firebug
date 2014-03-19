@@ -3,7 +3,8 @@ function runTest()
     FBTest.openNewTab(basePath + "html/style/2495/issue2495.html", function(win)
     {
         var elementID = "element";
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
             FBTest.selectElementInHtmlPanel(elementID, function(sel)
             {
@@ -58,7 +59,7 @@ function runTest()
                     FBTest.ok(false, "'#element' rule does not exist");
                 }
 
-                FBTest.testDone("issue2495.DONE");
+                FBTest.testDone();
             });
         });
     });

@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/6582/issue6582-1.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("stylesheet");
 
             var locationButtons = FW.Firebug.chrome.$("fbLocationButtons");
@@ -22,7 +23,7 @@ function runTest()
                     "The current CSS file name must be correct");
             }
 
-            FBTest.testDone("issue6582.DONE");
+            FBTest.testDone();
         });
     });
 }

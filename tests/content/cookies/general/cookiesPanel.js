@@ -11,7 +11,7 @@ function runTest()
                 FBTest.ok(panel.panelNode, "Cookies panel must be initialized.");
 
             // Finish test
-            FBTest.testDone("cookiesPanel.DONE");
+            FBTest.testDone();
         });
     });
 };

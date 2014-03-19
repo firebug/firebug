@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "search/4602/issue4602.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("stylesheet");
             if (FBTest.ok(FBTest.selectPanelLocationByName(panel, "issue4602.html"),
                 "CSS Location Menu should contain an entry for 'issue4602.html'"))
@@ -25,7 +26,7 @@ function runTest()
                     "The value inside the search field much match the selection.");
             }
 
-            FBTest.testDone("issue4602.DONE");
+            FBTest.testDone();
         });
     });
 }

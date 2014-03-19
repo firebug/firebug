@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/3652/issue3652.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
             FBTest.selectElementInHtmlPanel("element1", function(node)
             {
@@ -42,7 +43,7 @@ function runTest()
                 FBTest.sendKey("DOWN", editor);
                 FBTest.compare("red", editor.value, "Must be autocompleted to red.");
 
-                FBTest.testDone("issue3652.DONE");
+                FBTest.testDone();
             });
         });
     });

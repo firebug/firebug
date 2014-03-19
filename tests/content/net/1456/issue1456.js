@@ -57,7 +57,7 @@ function runTest()
                 FBTest.progress("done at "+ (time - startTime)+"ms");
 
                 // Finish test
-                FBTest.testDone("issue1456.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

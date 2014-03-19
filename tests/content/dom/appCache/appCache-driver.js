@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "dom/appCache/appCache.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FW.Firebug.chrome.selectPanel("dom");
 
             var href = win.location.href;
@@ -17,8 +18,9 @@ function runTest()
             tasks.push(verifyNumberOfItems, win, 1);
             tasks.push(testClearOfflinePermission, win);
 
-            tasks.run(function() {
-                FBTest.testDone("appCache.DONE");
+            tasks.run(function()
+            {
+                FBTest.testDone();
             });
         });
     });

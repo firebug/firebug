@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/55/issue55.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 // Click the Command Line toggle button to switch to the Command Editor
@@ -64,9 +65,10 @@ function runTest()
                 tasks.push(testCompletion, "document.get|elementbyi;", "document.getElementById|;");
                 tasks.push(testCompletion, "|document.gete", "  |document.gete");
                 tasks.push(testSelectionIndent);
+
                 tasks.run(function()
                 {
-                    FBTest.testDone("issue55.DONE");
+                    FBTest.testDone();
                 }, 0);
             });
         });

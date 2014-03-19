@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/api/time.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var config = {tagName: "div", classes: "logRow logRow-info"};
@@ -19,7 +20,7 @@ function runTest()
                     FBTest.ok(elapsed > 0 && elapsed < 2000, "The elapsed time should be within " +
                         "this range.");
 
-                    FBTest.testDone("console.time.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test implemented on the test page.

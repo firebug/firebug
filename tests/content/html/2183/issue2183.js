@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/2183/issue2183.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("html");
 
             // Show cropped text for this test
@@ -37,7 +38,7 @@ function runTest()
                         FBTest.compare(/^Loram(?!.*\.\.\.)/, win.document.getElementById("paragraph").textContent,
                             "Node contents on page must not be cropped and contain 'Loram'");
 
-                        FBTest.testDone("issue2183.DONE");
+                        FBTest.testDone();
                     });
 
                     FBTest.sendKey("HOME", editor);

@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/4542/issue4542.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("html");
 
             var tasks = new FBTest.TaskList();
@@ -10,8 +11,9 @@ function runTest()
             tasks.push(checkQuotesInOnClick, panel, win);
             tasks.push(checkQuotesInStyle, panel, win);
 
-            tasks.run(function() {
-                FBTest.testDone("issue4542.DONE");
+            tasks.run(function()
+            {
+                FBTest.testDone();
             });
         });
     });
@@ -25,7 +27,8 @@ function checkQuotesInId(callback)
     {
         var attributes = node.getElementsByClassName("nodeAttr");
 
-        clickAttributeValue(attributes, "id", function(attribute, editor) {
+        clickAttributeValue(attributes, "id", function(attribute, editor)
+        {
             // Enter a double quote
             FBTest.sendChar("\"", editor);
             if (FBTest.ok(editor, "Editor must still be available"))

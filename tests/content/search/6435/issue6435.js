@@ -4,7 +4,8 @@ function runTest()
 
     FBTest.openNewTab(basePath + "search/6435/issue6435.html", function()
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("dom");
 
             // There is several configurations.
@@ -45,7 +46,7 @@ function runTest()
 
             FBTest.runTestSuite(testSuite, function()
             {
-                FBTest.testDone("issue6435.DONE");
+                FBTest.testDone();
             });
         });
     });

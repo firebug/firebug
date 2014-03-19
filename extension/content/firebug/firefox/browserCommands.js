@@ -50,7 +50,7 @@ var BrowserCommands =
         $command(doc, "cmd_firebug_toggleFirebug", "Firebug.toggleBar();");
         $command(doc, "cmd_firebug_detachFirebug", "Firebug.toggleDetachBar(false, true);");
         $command(doc, "cmd_firebug_inspect", "Firebug.Inspector.inspectFromContextMenu(arg);", "document.popupNode");
-        $command(doc, "cmd_firebug_toggleBreakOn", "if (Firebug.currentContext) Firebug.chrome.breakOnNext(Firebug.currentContext, event);");
+        $command(doc, "cmd_firebug_toggleBreakOn", "if (Firebug.currentContext) Firebug.BreakOnNext.onToggleBreakOnNext(event);");
         $command(doc, "cmd_firebug_toggleDetachFirebug", "Firebug.toggleDetachBar(false, true);");
         $command(doc, "cmd_firebug_increaseTextSize", "Firebug.Options.changeTextSize(1);");
         $command(doc, "cmd_firebug_decreaseTextSize", "Firebug.Options.changeTextSize(-1);");

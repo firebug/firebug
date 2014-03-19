@@ -12,7 +12,7 @@ function runTest()
             // Asynchronously wait for the request beeing displayed.
             FBTest.waitForDisplayedElement("console", options, function(logRow)
             {
-                FBTest.testDone("issue2462.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

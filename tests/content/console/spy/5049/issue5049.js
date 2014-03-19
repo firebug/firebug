@@ -3,7 +3,8 @@ function runTest()
     FBTest.setPref("showXMLHttpRequests", true);
     FBTest.openNewTab(basePath + "console/spy/5049/issue5049.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var options = {
@@ -35,7 +36,7 @@ function runTest()
                             times[1].textContent);
                     }
 
-                    FBTest.testDone("issue5049.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test implemented on the test page.

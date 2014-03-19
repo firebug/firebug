@@ -3,7 +3,8 @@ function runTest()
     FBTest.setPref("commandLineShowCompleterPopup", true);
     FBTest.openNewTab(basePath + "console/completion/3421/issue3421.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var panel = FW.Firebug.chrome.selectPanel("console");
@@ -23,7 +24,7 @@ function runTest()
                     FBTest.ok(typeof(window.a) == "undefined",
                         "There must not be a new global");
 
-                    FBTest.testDone("issue3421.DONE");
+                    FBTest.testDone();
                 });
             });
         });

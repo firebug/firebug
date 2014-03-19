@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/7068/issue7068.html?automated=true", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             // Note: we don't test the Firefox DevTools logs directly.
             // The webpage overwrited the console.log() function and just appends the logged messages
             // into win.logged.
@@ -30,7 +31,7 @@ function runTest()
                                 (node) => node.textContent).join(",");
                             FBTest.compare("log from the main window,log from the iframe", loggedInFB,
                                 "Two logs should have appeared in the Firebug Console");
-                            FBTest.testDone("issue7068.DONE");
+                            FBTest.testDone();
                         });
                     });
                 });

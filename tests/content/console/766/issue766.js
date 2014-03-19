@@ -6,7 +6,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/766/issue766.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function()
             {
                 FBTest.selectPanel("console");
@@ -39,7 +40,7 @@ function runTest()
                     FBTest.compare(values[0].textContent, "\"test1\"", "There value must be == 'test1'");
                     FBTest.compare(values[1].textContent, "\"test2\"", "There value must be == 'test2'");
 
-                    FBTest.testDone("issue766; DONE");
+                    FBTest.testDone();
                 });
 
                 // Run test implemented on the page.

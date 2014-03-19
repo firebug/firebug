@@ -12,7 +12,7 @@ function runTest()
                 {
                     FBTest.ok(!(FBTest.isDetached() && isDeactive()),
                         "Firebug must be activated and also attached to the main window now.");
-                    FBTest.testDone("issue4153.DONE");
+                    FBTest.testDone();
                 });
             });
         });
@@ -49,7 +49,7 @@ function toggleDetachBar(callback)
     }
     else
     {
-        FBTest.testDone("issue4153.FAILED.");
+        FBTest.testDone();
         return;
     }
 }
@@ -66,7 +66,7 @@ function deactiveFirebug(callback)
     }
     else
     {
-        FBTest.testDone("issue4153.FAILED.");
+        FBTest.testDone();
         return;
     }
 }

@@ -9,7 +9,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/computed/5449/issue5449.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.setSidePanelWidth(520);
             FBTest.selectPanel("html");
 
@@ -23,7 +24,7 @@ function runTest()
 
                 FBTest.runTestSuite(tests, function()
                 {
-                    FBTest.testDone("issue5449; DONE");
+                    FBTest.testDone();
                 });
             });
         });

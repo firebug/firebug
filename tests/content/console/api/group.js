@@ -4,7 +4,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/api/group.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 testWindow = win;
@@ -13,8 +14,9 @@ function runTest()
                 tests.push(test1);
                 tests.push(clear);
                 tests.push(test2);
-                FBTest.runTestSuite(tests, function() {
-                    FBTest.testDone("console.group.DONE");
+                FBTest.runTestSuite(tests, function()
+                {
+                    FBTest.testDone();
                 });
             });
         });
@@ -38,6 +40,7 @@ function test1(callback)
 
         callback();
     });
+
     FBTest.click(testWindow.document.getElementById("testButton1"));
 }
 
@@ -68,5 +71,6 @@ function test2(callback)
 
         callback();
     });
+
     FBTest.click(testWindow.document.getElementById("testButton2"));
 }

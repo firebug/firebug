@@ -11,7 +11,8 @@ function runTest()
         var elementDisplaySmallWindow = FBTest.getImageDataFromNode(
             win.document.getElementById(id));
 
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("stylesheet");
 
             FBTest.selectPanelLocationByName(panel, "issue5277.html");
@@ -54,7 +55,7 @@ function runTest()
                         "The div must be green now");
                 }
             }
-            FBTest.testDone("issue5277.DONE");
+            FBTest.testDone();
         });
     });
 }

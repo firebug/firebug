@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/style/5461/issue5461.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
             FBTest.selectElementInHtmlPanel("element", function(node)
             {
@@ -34,7 +35,7 @@ function runTest()
                 {
                     FBTest.compare(expected, cssDecl,
                         "CSS declaration must be properly copied into the clipboard");
-                    FBTest.testDone("issue5461.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.sendShortcut("c", {accelKey: true});

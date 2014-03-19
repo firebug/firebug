@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "firebug/options/textSize.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var config = {tagName: "div", classes: "logRow logRow-log"};
@@ -28,7 +29,7 @@ function runTest()
 
                     FW.FBL.$("cmd_firebug_normalTextSize").doCommand();
 
-                    FBTest.testDone("textSize.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test implemented on the test page.

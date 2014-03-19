@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "net/5007/issue5007.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableNetPanel(function(win)
             {
                 var options =
@@ -30,7 +31,7 @@ function runTest()
                             "Content-Length header exists");
                     }
 
-                    FBTest.testDone("issue5007.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementsByTagName("button").item(0));

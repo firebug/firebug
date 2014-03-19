@@ -2,9 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/3363/issue3363.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.selectPanel("console");
-
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var config = {
@@ -31,7 +30,7 @@ function runTest()
                         }
                     }
 
-                    FBTest.testDone("issue3363.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("createLogGroups"));

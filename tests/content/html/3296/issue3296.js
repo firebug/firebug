@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/3296/issue3296.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
             FBTest.selectElementInHtmlPanel("formField", function(node)
             {
@@ -19,7 +20,7 @@ function runTest()
                             attribute.getElementsByClassName("nodeValue").item(0).textContent,
                             "The value of the 'action' attribute must be '"+actionValue+"'")
                     }
-                    FBTest.testDone("issue3296.DONE");
+                    FBTest.testDone();
                 });
             });
         });

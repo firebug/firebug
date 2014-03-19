@@ -4,7 +4,8 @@ function runTest()
 
     FBTest.openNewTab(basePath + "dom/6481/issue6481.html", function()
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableScriptPanel(function(win)
             {
                 var panel = FBTest.selectPanel("dom");
@@ -36,7 +37,7 @@ function runTest()
                                     FBTest.compare(FW.FBL.$STR("firebug.reps.optimizedAway"), value.textContent,
                                         "The value must match");
 
-                                    FBTest.testDone("issue6481.DONE");
+                                    FBTest.testDone();
                                 }, true);
 
                             }, true);

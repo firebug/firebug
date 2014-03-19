@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/grouping/6750/issue6750.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 FBTest.clearConsole();
@@ -14,7 +15,7 @@ function runTest()
 
                 FBTest.waitForDisplayedElement("console", config, function(row)
                 {
-                    FBTest.testDone("issue6750.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("createLogs"));

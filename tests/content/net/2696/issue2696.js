@@ -8,7 +8,8 @@ function runTest()
     FBTest.openNewTab(basePath + "net/2696/issue2696.html", function(win)
     {
         // 2) Open Firebug and enable the Net panel.
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableNetPanel(function(win)
             {
                 // 3) Select Net panel
@@ -41,7 +42,7 @@ function runTest()
                             responseBody.textContent, "Test response must match.");
 
                     // 7) Finish test
-                    FBTest.testDone("issue2696.DONE");
+                    FBTest.testDone();
                 });
 
                 // 4) Execute test by clicking on the 'Execute Test' button.

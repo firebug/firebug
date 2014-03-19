@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "net/4156/issue4156.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableNetPanel(function(win)
             {
                 FBTest.progress("Test setting multiple filters");
@@ -29,7 +30,7 @@ function runTest()
                 verifyNetPanelDisplay(["fbNetFilter-all"],
                     ["issue4156.html", "testcase.css", "issue4156-test.js", "firebug.png"]);
 
-                FBTest.testDone("issue4156.DONE");
+                FBTest.testDone();
             });
         });
     });

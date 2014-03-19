@@ -32,7 +32,7 @@ function runTest()
                 // Resume debugger
                 FBTest.clickContinueButton(null);
 
-                FBTest.testDone("issue4934.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("executeTest"));

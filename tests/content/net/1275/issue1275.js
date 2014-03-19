@@ -6,7 +6,8 @@ function runTest()
 
     FBTest.openNewTab(basePath + "net/1275/issue1275.htm", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enablePanels(["net", "console"], function()
             {
                 FBTest.clearCache();
@@ -30,7 +31,7 @@ function runTest()
                         verifyResponse(panel);
 
                         FBTest.setPref("showXMLHttpRequests", prefOrigValue);
-                        FBTest.testDone("issue1275.DONE");
+                        FBTest.testDone();
                     });
 
                     FBTest.click(win.document.getElementById("testButton"));

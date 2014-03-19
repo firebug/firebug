@@ -17,5 +17,5 @@ function runTest()
     {
         FBTest.ok(false, "browser should be connected");
     }
-    FBTest.testDone("done test #getContexts()");
+    FBTest.testDone();
 }

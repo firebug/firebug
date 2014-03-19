@@ -3,7 +3,8 @@ function runTest()
     FBTest.openNewTab(basePath + "net/654/issue654.html", function(win)
     {
         // 1. Open Firebug
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             // 2. Enable and switch to the Net panel
             FBTest.enableNetPanel(function(win)
             {
@@ -48,7 +49,7 @@ function runTest()
                             }
                         }
 
-                        FBTest.testDone("issue654.DONE");
+                        FBTest.testDone();
                     });
 
                     // 5. Click the "Make request" button

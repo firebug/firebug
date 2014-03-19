@@ -3,7 +3,8 @@ function runTest()
     FBTest.openNewTab(basePath + "cookies/general/cookieValues.php", function(win)
     {
         // 1. Open Firebug
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             // 2. Enable and switch to the Cookies panel
             FBTest.enableCookiesPanel(function(win)
             {
@@ -13,8 +14,8 @@ function runTest()
 
                 // 3. Right-click the Cookies panel column header and check <em>Raw Value</em>
                 FBTest.executeContextMenuCommand(cookieHeaderRow,
-                        {label: FW.FBL.$STR("cookies.header.rawValue")}, function () {
-
+                        {label: FW.FBL.$STR("cookies.header.rawValue")}, function ()
+                {
                     var cookieValueCol = panelNode.getElementsByClassName("cookieValueCol")[0];
                     var cookieValueColDisplay = panelNode.ownerDocument.defaultView.
                         getComputedStyle(cookieValueCol).display;
@@ -51,7 +52,7 @@ function runTest()
                         "Escaped value of the cookie in detailed info must be correct");
 
                     // Finish test
-                    FBTest.testDone("escapedAndUnescapedCookieValues; DONE");
+                    FBTest.testDone();
                 });
             });
         });

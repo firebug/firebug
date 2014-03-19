@@ -2,19 +2,20 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/style/2440/issue2440.html", function(win)
     {
-    	function test0(callback)
-    	{
-    	    executeTest("element1", "element1", callback);
-    	}
+        function test0(callback)
+        {
+            executeTest("element1", "element1", callback);
+        }
 
-    	function test1(callback)
-    	{
-    		var frame = win.document.getElementById("testFrame");
-    		var frameElement = frame.contentWindow.document.getElementById("frameElement");
-    	    executeTest("frameElement", frameElement, callback);
-    	}
+        function test1(callback)
+        {
+            var frame = win.document.getElementById("testFrame");
+            var frameElement = frame.contentWindow.document.getElementById("frameElement");
+            executeTest("frameElement", frameElement, callback);
+        }
 
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
 
             var tests = [];
@@ -23,7 +24,7 @@ function runTest()
 
             FBTest.runTestSuite(tests, function()
             {
-                FBTest.testDone("issue2440; DONE");
+                FBTest.testDone();
             });
         });
     });

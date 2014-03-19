@@ -6,5 +6,5 @@ function runTest()
     var html = FW.FBL.getElementHTML(element);
     FBTest.compare("<div>some text</div>", html, "Verify FW.FBL.getElementHTML()");
 
-    FBTest.testDone("exampleScript1.DONE");
+    FBTest.testDone();
 }

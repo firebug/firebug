@@ -14,7 +14,7 @@ function runTest()
                 {
                     verifyLocation("issue6476-dynamic.js");
 
-                    FBTest.testDone("issue4213.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("testButtonExecute"));

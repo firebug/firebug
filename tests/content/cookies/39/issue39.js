@@ -21,7 +21,7 @@ function runTest()
             FBTest.compare("CookieValue;39", cookie ? cookie.cookie.value : "",
                 "Cookie value must be correct.");
 
-            FBTest.testDone("cookies.test.issue39; DONE");
+            FBTest.testDone();
         });
     });
 };

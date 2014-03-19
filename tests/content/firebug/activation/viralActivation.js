@@ -13,7 +13,8 @@ function viralActivation()
         var isFirebugOpen = FBTest.isFirebugOpen();
         FBTest.ok(!isFirebugOpen, "Firebug starts closed");
 
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var isFirebugOpen = FBTest.isFirebugOpen();
             FBTest.ok(isFirebugOpen, "Firebug now open");
 
@@ -24,7 +25,9 @@ function viralActivation()
                 FBTest.ok(contextName == viralActivationURL, "Firebug.currentContext set to "+viralActivationURL);
             }
             else
+            {
                 FBTest.ok(false, "no Firebug.currentContext");
+            }
 
             sameTabOpen(win, path);
         });
@@ -57,7 +60,7 @@ function sameTabOpen(win, path)
 
             var suspension = FW.Firebug.getSuspended();
             FBTest.compare(null, suspension, "Firebug is not suspended on "+browser.currentURI.spec);
-            FBTest.testDone("viralActivation: 1/4 completed");
+            FBTest.testDone();
         });
 
     }
@@ -66,7 +69,6 @@ function sameTabOpen(win, path)
     FBTest.progress("Click link "+link.getAttribute('id'));
     FBTest.click(link);
 }
-
 
 //------------------------------------------------------------------------
 // Auto-run test

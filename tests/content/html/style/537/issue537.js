@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/style/537/issue537.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
             FBTest.selectElementInHtmlPanel("element1", function(sel)
             {
@@ -18,6 +19,7 @@ function runTest()
                     if (isPseudoElementSelector(selector))
                         pseudoElementRules.push(rules[i]);
                 }
+
                 // Four pseudo-element rules must be shown inside the Style side panel
                 FBTest.compare(4, pseudoElementRules.length, "There must be four pseudo-element rules.");
 
@@ -40,13 +42,14 @@ function runTest()
                         FBTest.ok(containsContent, "'" + selector + "' must contain a property 'content'");
                     }
                 }
-                FBTest.testDone("issue537.DONE");
+                FBTest.testDone();
             });
         });
     });
 }
 
-function isPseudoElementSelector(selector) {
+function isPseudoElementSelector(selector)
+{
     const pseudoElements = [":first-letter", ":first-line", ":before", ":after"];
 
     for(var i=0; i<pseudoElements.length; i++)

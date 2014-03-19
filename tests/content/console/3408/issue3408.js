@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/3408/issue3408.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var panel = FW.Firebug.chrome.selectPanel("net");
@@ -13,8 +14,9 @@ function runTest()
                 tasks.push(openFirebug);
                 tasks.push(testLog, win);
 
-                tasks.run(function() {
-                    FBTest.testDone("issue3408.DONE");
+                tasks.run(function()
+                {
+                    FBTest.testDone();
                 });
             });
         });
@@ -43,7 +45,8 @@ function closeFirebug(callback)
 
 function openFirebug(callback)
 {
-    FBTest.openFirebug(function() {
+    FBTest.openFirebug(function()
+    {
         callback();
     });
 }

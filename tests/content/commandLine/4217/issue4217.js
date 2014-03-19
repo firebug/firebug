@@ -2,9 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "commandLine/4217/issue4217.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.selectPanel("console");
-
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var config = {tagName: "div", classes: "logRow", counter: 2};
@@ -38,7 +37,7 @@ function runTest()
                             "'hello' must be shown inside the Console");
                     }
 
-                    FBTest.testDone("issue4217.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.executeCommand("console.log('hello')");

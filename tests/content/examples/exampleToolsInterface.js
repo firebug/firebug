@@ -23,7 +23,7 @@ function runTest()
                 FBTest.clickContinueButton();
 
                 // 5) Finish test.
-                FBTest.testDone("exampleToolsInterface.DONE");
+                FBTest.testDone();
             });
 
             // 4) Execute test by clicking on the 'Execute Test' button.

@@ -14,11 +14,13 @@ function runTest()
     FBTest.openNewTab(basePath + "net/1764/issue1764-1.html", function(win)
     {
         // Step 1.
-        nextStep(function() {
+        nextStep(function()
+        {
             FBTest.openNewTab(basePath + "net/1764/issue1764-2.html", function(win)
             {
                 // Step 2.
-                FBTest.openFirebug(function() {
+                FBTest.openFirebug(function()
+                {
                     // Step 3.
                     FBTest.enableNetPanel(function(win)
                     {
@@ -26,25 +28,30 @@ function runTest()
 
                         // Step 4.
                         FBTest.clearCache();
-                        FBTest.reload(function() {
+                        FBTest.reload(function()
+                        {
                             verifyNetPanel("Step 4");
 
                             // Step 5 & 6.
-                            nextStep(function() {
+                            nextStep(function()
+                            {
                                 var tabbrowser = FBTest.getBrowser();
                                 tabbrowser.removeTab(tabbrowser.selectedTab);
 
                                 // Step 7.
-                                nextStep(function() {
+                                nextStep(function()
+                                {
                                     // ... clear cache and open again.
                                     FBTest.clearCache();
-                                    nextStep(function() {
+                                    nextStep(function()
+                                    {
                                         FBTest.openNewTab(basePath + "net/1764/issue1764-2.html", function(win)
                                         {
                                             // Step 8.
                                             verifyNetPanel("Step 8");
-                                            nextStep(function() {
-                                                FBTest.testDone("issue1764.DONE");
+                                            nextStep(function()
+                                            {
+                                                FBTest.testDone();
                                             });
                                         });
                                     });

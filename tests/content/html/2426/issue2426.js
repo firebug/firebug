@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/2426/issue2426.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableNetPanel(function(win)
             {
                 FBTest.selectPanel("html");
@@ -27,7 +28,7 @@ function runTest()
                     {
                         FBTest.compare(expectedXPath, xPath,
                             "XPath must be properly copied into the clipboard");
-                        FBTest.testDone("issue2426.DONE");
+                        FBTest.testDone();
                     });
                 })
             });

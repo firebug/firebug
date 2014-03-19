@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "html/4669/issue4669.xml", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("html");
             FBTest.selectElementInHtmlPanel(win.document.documentElement, function(node)
             {
@@ -12,7 +13,7 @@ function runTest()
                 var notExpandedNodes = panel.panelNode.querySelectorAll(".containerNodeBox:not(.open)");
                 FBTest.ok(notExpandedNodes.length == 0, "All nodes must be expanded");
 
-                FBTest.testDone("issue4669.DONE");
+                FBTest.testDone();
             });
         });
     });

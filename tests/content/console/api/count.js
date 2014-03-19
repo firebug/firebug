@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/api/count.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 // Don't forget to select the console panel (so the Clear button is visible).
@@ -26,7 +27,7 @@ function runTest()
                             rows[1].textContent,
                             "The proper message must be displayed.");
                     }
-                    FBTest.testDone("console.count.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("testButton"));

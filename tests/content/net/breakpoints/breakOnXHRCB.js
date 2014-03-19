@@ -4,30 +4,36 @@ function runTest()
 
     FBTest.openNewTab(basePath + "net/breakpoints/breakOnXHR.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enablePanels(["net", "script"], function()
             {
                 // A suite of asynchronous tests.
                 var testSuite = [];
-                testSuite.push(function(callback) {
+                testSuite.push(function(callback)
+                {
                     addBreakpoint(win, callback);
                 });
-                testSuite.push(function(callback) {
+                testSuite.push(function(callback)
+                {
                     breakOnXHR(win, 45, callback);
                 });
-                testSuite.push(function(callback) {
+                testSuite.push(function(callback)
+                {
                     setCondition(win, callback);
                 });
-                testSuite.push(function(callback) {
+                testSuite.push(function(callback)
+                {
                     breakOnXHR(win, 45, callback);
                 });
-                testSuite.push(function(callback) {
+                testSuite.push(function(callback)
+                {
                     removeBreakpoint(win, callback);
                 });
 
                 FBTest.runTestSuite(testSuite, function()
                 {
-                    FBTest.testDone("breakOnXHRCB.DONE");
+                    FBTest.testDone();
                 });
             });
         });

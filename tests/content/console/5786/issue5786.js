@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/5786/issue5786.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var tasks = new FBTest.TaskList();
@@ -32,7 +33,7 @@ function runTest()
 
                 tasks.run(function()
                 {
-                    FBTest.testDone("issue5786.DONE");
+                    FBTest.testDone();
                 });
             });
         });

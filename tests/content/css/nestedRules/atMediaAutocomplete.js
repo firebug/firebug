@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/nestedRules/atMediaAutocomplete.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             var panel = FBTest.selectPanel("stylesheet");
 
             FBTest.selectPanelLocationByName(panel, "atMediaAutocomplete.html");
@@ -27,6 +28,7 @@ function runTest()
                     }
                 }
             }
+
             FBTest.compare(2, atMediaRuleCount, "Two @media rules must be shown");
 
             // Try editing the '@media print' rule
@@ -59,7 +61,7 @@ function runTest()
                     });
                 }
 
-                FBTest.testDone("atMediaAutocomplete.DONE");
+                FBTest.testDone();
             }
         });
     });

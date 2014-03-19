@@ -4,7 +4,8 @@ function runTest()
 
     FBTest.openNewTab(basePath + "dom/breakpoints/breakOnProperty.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableScriptPanel(function()
             {
                 FBTest.selectPanel("dom");
@@ -40,7 +41,7 @@ function runTest()
                             });
 
                             FBTest.runTestSuite(testSuite, function() {
-                                FBTest.testDone("dom.breakpoints.CB; DONE");
+                                FBTest.testDone();
                             });
                         });
 

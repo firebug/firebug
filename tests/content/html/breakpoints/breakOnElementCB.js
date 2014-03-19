@@ -18,26 +18,32 @@ function runTest()
         FBTest.compare(false, filter, "Pref filterSystemURLs must not be set true");
         FBTest.compare(false, FW.Firebug.filterSystemURLs, "Pref Firebug.filterSystemURLs must not be set true");
 
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableScriptPanel(function()
             {
                 // A suite of asynchronous tests.
                 var testSuite = [];
-                testSuite.push(function(callback) {
+                testSuite.push(function(callback)
+                {
                     breakOnMutation(win, BP_BREAKONATTRCHANGE, "breakOnAttrModified", 45, callback);
                 });
-                testSuite.push(function(callback) {
+                testSuite.push(function(callback)
+                {
                     breakOnMutation(win, BP_BREAKONCHILDCHANGE, "breakOnChildInserted", 50, callback);
                 });
-                testSuite.push(function(callback) {
+                testSuite.push(function(callback)
+                {
                     breakOnMutation(win, BP_BREAKONCHILDCHANGE, "breakOnChildRemoved", 55, callback);
                 });
-                testSuite.push(function(callback) {
+                testSuite.push(function(callback)
+                {
                     breakOnMutation(win, BP_BREAKONREMOVE, "breakOnNodeRemoved", 60, callback);
                 });
 
-                FBTest.runTestSuite(testSuite, function() {
-                    FBTest.testDone("html.breakpoints.CB; DONE");
+                FBTest.runTestSuite(testSuite, function()
+                {
+                    FBTest.testDone();
                 });
             });
         });

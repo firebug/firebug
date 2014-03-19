@@ -2,8 +2,10 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/882/issue882.html", function(win)
     {
-        FBTest.openFirebug(function() {
-            FBTest.enablePanels(["console", "script"], function() {
+        FBTest.openFirebug(function()
+        {
+            FBTest.enablePanels(["console", "script"], function()
+            {
                 var config = {tagName: "div", classes: "logRow-info", count: 2};
                 FBTest.waitForDisplayedElement("console", config, function(row)
                 {
@@ -31,7 +33,7 @@ function runTest()
                             "The proper source link must be displayed: " + sourceLink.textContent);
                     }
 
-                    FBTest.testDone("issue882.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(win.document.getElementById("createLog"));

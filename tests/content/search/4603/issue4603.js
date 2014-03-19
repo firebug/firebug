@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "search/4603/issue4603.html", function()
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
 
             var win = FW.Firebug.chrome.window;
@@ -27,7 +28,7 @@ function runTest()
                 win.getComputedStyle(searchFieldIcon, null).backgroundImage,
                 "Search Field icon must be normal again");
 
-            FBTest.testDone("issue4603.DONE");
+            FBTest.testDone();
         });
     });
 }

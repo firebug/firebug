@@ -14,7 +14,8 @@ function runTest()
     FBTest.openNewTab(basePath + "firebug/OpenFirebugOnThisPage.html", function(win)
     {
         FBTest.progress("opened tab for "+win.location);
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.progress("All panels should be disabled: check them");
             // All panels must be disabled.
             checkIsDisabled(FW.FBL.$STR("Panel-console"), FW.Firebug.Console);  // console must be disabled first
@@ -35,10 +36,11 @@ function runTest()
                 FBTest.sysout("exception", err);
             }
 
-            setTimeout(function () {
+            setTimeout(function()
+            {
                 checkIsEnabled(FW.FBL.$STR("Panel-script"), FW.Firebug.Debugger);
 
-                FBTest.reload(function ()
+                FBTest.reload(function()
                 {
                     FBTest.progress("reloaded, check isEnabled");
                     // All panels must be still enabled.
@@ -46,7 +48,7 @@ function runTest()
                     checkIsEnabled(FW.FBL.$STR("Panel-net"), FW.Firebug.NetMonitor);
                     checkIsEnabled(FW.FBL.$STR("Panel-console"), FW.Firebug.Console);
 
-                    FBTest.testDone("openDisableEnableReload.DONE");
+                    FBTest.testDone();
                 });
             });
         });

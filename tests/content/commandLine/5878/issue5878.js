@@ -3,7 +3,8 @@ function runTest()
     var basePath5878 = basePath + "commandLine/5878/";
     FBTest.openNewTab(basePath5878 + "issue5878.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var tasks = new FBTest.TaskList();
@@ -12,6 +13,7 @@ function runTest()
                 tasks.push(FBTest.executeCommandAndVerify, 'window.a', "1", "span", "objectBox-number");
                 tasks.push(executeIncludeCommand, 'include("./myScript.js", "myscript");');
                 tasks.push(FBTest.executeCommandAndVerify, 'window.a', "2", "span", "objectBox-number");
+
                 var contextMenuTarget = null;
                 var expectedMyScriptURL = basePath5878 + "myScript.js";
                 tasks.push(checkTableContent, "myscript", function(table, row, aliasName, url)
@@ -66,7 +68,7 @@ function runTest()
                     "objectBox-number");
                 tasks.run(function()
                 {
-                    FBTest.testDone("include.DONE");
+                    FBTest.testDone();
                 });
             });
         });

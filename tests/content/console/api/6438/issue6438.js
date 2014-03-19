@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "console/api/6438/issue6438.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.enableConsolePanel(function(win)
             {
                 var config = {tagName: "div", classes: "logRow"};
@@ -16,7 +17,7 @@ function runTest()
                     // Test whether the message is displayed correctly
                     FBTest.compare(expected, row.textContent, "Message must be displayed correctly");
 
-                    FBTest.testDone("issue6438.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.reload();

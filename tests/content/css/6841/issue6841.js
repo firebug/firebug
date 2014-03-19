@@ -2,7 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "css/6841/issue6841.html", function(win)
     {
-        FBTest.openFirebug(function() {
+        FBTest.openFirebug(function()
+        {
             FBTest.selectPanel("html");
             FBTest.selectElementInHtmlPanel("element1", function(node)
             {
@@ -56,7 +57,7 @@ function runTest()
                 tasks.push(testCompletion, "font", "cal", "cal");
                 tasks.run(function()
                 {
-                    FBTest.testDone("issue6841.DONE");
+                    FBTest.testDone();
                 }, 0);
             });
         });
