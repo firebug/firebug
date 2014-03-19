@@ -10,18 +10,12 @@ function runTest()
             {
                 FBTest.progress("breakpoint set.");
 
-                setTimeout(function()
-                {
-                    FBTest.selectPanel("html");
+                FBTest.selectPanel("html");
 
-                    setTimeout(function()
-                    {
-                        FBTest.removeBreakpoint(null, fileName, 1069, function(row)
-                        {
-                            FBTest.testDone();
-                        });
-                    }, 500);
-                }, 500);
+                FBTest.removeBreakpoint(null, fileName, 1069, function(row)
+                {
+                    FBTest.testDone();
+                });
             });
         });
     });

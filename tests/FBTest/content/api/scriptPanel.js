@@ -18,8 +18,10 @@
  * can stop at another breakpoint).
  * @param {Object} chrome Firebug.chrome object.
  */
-this.clickContinueButton = function(chrome)
+this.clickContinueButton = function(chrome, callback)
 {
+    if (callback)
+        DebuggerController.listenOnce(null, "onResumed", callback);
     this.clickToolbarButton(chrome, "fbContinueButton");
 };
 
@@ -69,14 +71,8 @@ this.clickBreakOnNextButton = function(chrome, callback)
     if (!panel)
         throw new Error("Can't get the current panel");
 
-    var browser = FBTestFirebug.getCurrentTabBrowser();
-    DebuggerController.addListener(browser, {
-        breakOnNextUpdated: function()
-        {
-            DebuggerController.removeListener(browser, this);
-            callback();
-        }
-    });
+    if (callback)
+        DebuggerController.listenOnce(null, "breakOnNextUpdated", callback);
 
     // Do not use FBTest.click, toolbar buttons need to use sendMouseEvent.
     this.synthesizeMouse(button);

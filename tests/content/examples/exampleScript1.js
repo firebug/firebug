@@ -22,10 +22,11 @@ function runTest()
                     // TODO: test code, verify UI, etc.
 
                     // Resume debugger.
-                    FBTest.clickContinueButton();
-
-                    // 5) Finish test.
-                    FBTest.testDone();
+                    FBTest.clickContinueButton(null, function()
+                    {
+                        // 5) Finish test.
+                        FBTest.testDone();
+                    });
                 });
 
                 // 4) Execute test by clicking on the 'Execute Test' button.

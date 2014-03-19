@@ -63,7 +63,8 @@ this.setBreakpoint = function(chrome, url, lineNo, attributes, callback)
             });
 
             var target = row.querySelector(".CodeMirror-linenumber");
-            FBTest.synthesizeMouse(target, 2, 2, {type: "mousedown"});
+            FBTest.synthesizeMouse(target, 2, 2);
+            target = null;
         }
     });
 };
@@ -115,25 +116,18 @@ this.removeBreakpoint = function(chrome, url, lineNo, callback)
         var hasBreakpoint = FBTest.hasBreakpoint(lineNo);
         FBTest.ok(hasBreakpoint, "There must be a breakpoint at line: " + lineNo);
 
-        var listener =
-        {
-            onBreakpointRemoved: function()
-            {
-                DebuggerController.removeListener(browser, listener);
-
-                hasBreakpoint = FBTest.hasBreakpoint(lineNo);
-                FBTest.ok(!hasBreakpoint, "Breakpoint must be removed");
-
-                callback();
-            }
-        };
-
         var browser = FBTestFirebug.getCurrentTabBrowser();
-        DebuggerController.addListener(browser, listener);
+        DebuggerController.listenOnce(browser, "onBreakpointRemoved", function()
+        {
+            hasBreakpoint = FBTest.hasBreakpoint(lineNo);
+            FBTest.ok(!hasBreakpoint, "Breakpoint must be removed");
+
+            callback();
+        });
 
         // Click to remove a breakpoint.
         var target = row.querySelector(".CodeMirror-linenumber");
-        FBTest.synthesizeMouse(target, 2, 2, {type: "mousedown"});
+        FBTest.synthesizeMouse(target, 2, 2);
     });
 };
 
