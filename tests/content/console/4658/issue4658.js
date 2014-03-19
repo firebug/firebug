@@ -1,3 +1,8 @@
+// Custom timeout for this test. The dojo.js.uncompressed.js source file is relatively
+// big and it can take some time to load the source over RDP. Increasin the timeout
+// should avoid random failure.
+window.FBTestTimeout = 20000;
+
 function runTest()
 {
     FBTest.setPref("preferJSDSourceLinks", true);
