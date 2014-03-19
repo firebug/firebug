@@ -17,6 +17,9 @@ const Ci = Components.interfaces;
 var elService = Xpcom.CCSV("@mozilla.org/eventlistenerservice;1", "nsIEventListenerService");
 var Events = {};
 
+function fakeJSDValue() {}
+var jsdIValue = Ci.jsdIValue ? Ci.jsdIValue : fakeJSDValue;
+
 // ********************************************************************************************* //
 
 Events.dispatch = function(listeners, name, args)
@@ -534,7 +537,7 @@ Events.getEventListenersForTarget = function(target)
         else
         {
             var debugObject = rawListener.getDebugObject();
-            listener.func = (debugObject instanceof Ci.jsdIValue && Wrapper.unwrapIValue(debugObject));
+            listener.func = (debugObject instanceof jsdIValue && Wrapper.unwrapIValue(debugObject));
         }
 
         // Skip chrome event listeners.

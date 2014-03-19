@@ -18,8 +18,9 @@ var Xpcom = {};
  * Returns required XPCOM service
  * @param {Object} cName Name of the service.
  * @param {Object} ifaceName Name of the required interface 
+ * @param {Boolean} noErrorLog If set to true, no log is created, just silently fails.
  */
-Xpcom.CCSV = function(cName, ifaceName)
+Xpcom.CCSV = function(cName, ifaceName, noErrorLog)
 {
     try
     {
@@ -28,6 +29,9 @@ Xpcom.CCSV = function(cName, ifaceName)
     }
     catch (exc)
     {
+        if (noErrorLog)
+            return;
+
         Cu.reportError(cName + "@" + ifaceName + " FAILED " + exc + " " +
             (exc.stack ? exc.stack : ""));
 

@@ -14,15 +14,18 @@ define([
     "firebug/lib/dom",
     "firebug/lib/string",
     "firebug/js/fbs",
+    "firebug/lib/xpcom",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url, StackFrame, Events,
-    Css, Dom, Str, FBS) {
+    Css, Dom, Str, FBS, Xpcom) {
 
 // ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+
+var jsd = Xpcom.CCSV("@mozilla.org/js/jsd/debugger-service;2", "jsdIDebuggerService", true);
 
 // ********************************************************************************************* //
 // Profiler
@@ -118,6 +121,9 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
     {
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleProfiling", "checked", "true");
 
+        if (!jsd)
+            return;
+
         if (FBS.profiling)
             return;
 
@@ -178,6 +184,9 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
 
     logProfileReport: function(context, cancelReport)
     {
+        if (!jsd)
+            return;
+
         var calls = [];
         var totalCalls = 0;
         var totalTime = 0;
@@ -189,7 +198,6 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
                 FBTrace.sysout("logProfileReport: "+sourceFileMap[url]+"\n");
         }
 
-        var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebuggerService);
         jsd.enumerateScripts({enumerateScript: function(script)
         {
             if (script.callCount)

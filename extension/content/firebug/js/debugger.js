@@ -31,9 +31,11 @@ function(Obj, Firebug, Firefox, CompilationUnit, Xpcom, FirebugReps, Locale,
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const jsdIScript = Ci.jsdIScript;
-const jsdIStackFrame = Ci.jsdIStackFrame;
-const jsdIExecutionHook = Ci.jsdIExecutionHook;
+function fakeJSDObject() {}
+
+const jsdIScript = Ci.jsdIScript ? Ci.jsdIScript : fakeJSDObject;
+const jsdIStackFrame = Ci.jsdIStackFrame ? Ci.jsdIStackFrame : fakeJSDObject;
+const jsdIExecutionHook = Ci.jsdIExecutionHook ? Ci.jsdIExecutionHook : fakeJSDObject;
 const nsISupports = Ci.nsISupports;
 const nsICryptoHash = Ci.nsICryptoHash;
 const nsIURI = Ci.nsIURI;
@@ -63,8 +65,6 @@ const reEval =  /\s*eval\s*\(([^)]*)\)/m;        // eval ( $1 )
 const reHTM = /\.[hH][tT][mM]/;
 const reFunction = /\s*Function\s*\(([^)]*)\)/m;
 const reTooMuchRecursion = /too\smuch\srecursion/;
-
-var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebuggerService);
 
 var comparator = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
 var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
@@ -359,8 +359,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             // For some reason we don't always end up here
 
             if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.stop, nesting depth:"+depth+" jsd.pauseDepth: "+
-                    jsd.pauseDepth+" context:"+context.getName());
+                FBTrace.sysout("debugger.stop, nesting depth:"+depth+
+                    " context:"+context.getName());
         }
         catch (exc)
         {

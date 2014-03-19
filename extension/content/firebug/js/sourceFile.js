@@ -6,8 +6,9 @@ define([
     "firebug/lib/url",
     "firebug/js/sourceLink",
     "firebug/js/stackFrame",
+    "firebug/lib/xpcom",
 ],
-function(Obj, Firebug, Url, SourceLink, StackFrame) {
+function(Obj, Firebug, Url, SourceLink, StackFrame, Xpcom) {
 
 // ********************************************************************************************* //
 // Constants
@@ -15,10 +16,13 @@ function(Obj, Firebug, Url, SourceLink, StackFrame) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const PCMAP_SOURCETEXT = Ci.jsdIScript.PCMAP_SOURCETEXT;
-const PCMAP_PRETTYPRINT = Ci.jsdIScript.PCMAP_PRETTYPRINT;
+const PCMAP_SOURCETEXT = Ci.jsdIScript ? Ci.jsdIScript.PCMAP_SOURCETEXT : null;
+const PCMAP_PRETTYPRINT = Ci.jsdIScript ? Ci.jsdIScript.PCMAP_PRETTYPRINT : null;
 
-var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebuggerService);
+var jsd = Xpcom.CCSV("@mozilla.org/js/jsd/debugger-service;2", "jsdIDebuggerService", true);
+
+function fakeJSDObject() {}
+var jsdIScript = Ci.jsdIScript ? Ci.jsdIScript : fakeJSDObject;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -521,7 +525,7 @@ Firebug.SourceFile.addScriptsToSourceFile = function(sourceFile, outerScript, in
     while (innerScripts.hasMoreElements())
     {
         var script = innerScripts.getNext();
-        if (!script || ((script instanceof Ci.jsdIScript) && !script.tag))
+        if (!script || ((script instanceof jsdIScript) && !script.tag))
         {
             if (FBTrace.DBG_SOURCEFILES)
                 FBTrace.sysout("addScriptsToSourceFile innerScripts.getNext FAILS "+
@@ -964,6 +968,9 @@ Firebug.SourceFile.findScriptForFunctionInContext = function(context, fn)
     var found = null;
 
     if (!fn || typeof(fn) !== "function")
+        return found;
+
+    if (!jsd)
         return found;
 
     try

@@ -20,7 +20,7 @@ function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, StackFrame, Dom, 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-var RETURN_CONTINUE = Ci.jsdIExecutionHook.RETURN_CONTINUE;
+var RETURN_CONTINUE = Ci.jsdIExecutionHook ? Ci.jsdIExecutionHook.RETURN_CONTINUE : null;
 
 var memoryReporterManager = null;
 

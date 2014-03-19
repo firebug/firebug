@@ -23,6 +23,10 @@ function(Obj, Firebug, FirebugReps, JavaScriptTool, Events, Wrapper, StackFrame,
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+function fakeJSDObject() {}
+var jsdIStackFrame = Ci.jsdIStackFrame ? Ci.jsdIStackFrame : fakeJSDObject;
+var jsdIValue = Ci.jsdIValue ? Ci.jsdIValue : fakeJSDObject;
+
 // ********************************************************************************************* //
 // Callstack Panel
 
@@ -135,7 +139,7 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
     supportsObject: function(object, type)
     {
         return (object instanceof StackFrame.StackTrace) ||
-            (object instanceof Ci.jsdIStackFrame) ||
+            (object instanceof jsdIStackFrame) ||
             (object instanceof StackFrame.StackFrame);
     },
 
@@ -163,7 +167,7 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
                 FBTrace.sysout("Callstack updateSelection index:"+trace.currentFrameIndex+
                     " StackFrame "+object, object);
         }
-        else if (object instanceof Ci.jsdIStackFrame)
+        else if (object instanceof jsdIStackFrame)
         {
             var trace = this.location;
             if (trace)
@@ -186,7 +190,7 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
         // All paths lead to showStackTrace
         if (object instanceof StackFrame.StackTrace)
             this.showStackTrace(object);
-        else if (object instanceof Ci.jsdIStackFrame)
+        else if (object instanceof jsdIStackFrame)
             this.navigate(StackFrame.getCorrectedStackTrace(object, this.context));
         else if (object instanceof StackFrame.StackFrame)
             this.showStackFrame(object);
@@ -383,7 +387,7 @@ function getReferents(frame, fnName)
     var ok = frame.eval(js, "", 1, result);
     if (ok)
     {
-        if (result.value instanceof Ci.jsdIValue)
+        if (result.value instanceof jsdIValue)
         {
             if (FBTrace.DBG_STACK)
                 FBTrace.sysout("Firebug.Debugger.showReferents evaled "+js+" and got "+

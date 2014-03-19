@@ -16,18 +16,20 @@ const Cu = Components.utils;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
-const DebuggerService = Cc["@mozilla.org/js/jsd/debugger-service;1"];
+const DebuggerService = Cc["@mozilla.org/js/jsd/debugger-service;2"];
 const ConsoleService = Cc["@mozilla.org/consoleservice;1"];
 const Timer = Cc["@mozilla.org/timer;1"];
 const ObserverServiceFactory = Cc["@mozilla.org/observer-service;1"];
 
-const jsdIDebuggerService = Ci.jsdIDebuggerService;
-const jsdIScript = Ci.jsdIScript;
-const jsdIStackFrame = Ci.jsdIStackFrame;
-const jsdICallHook = Ci.jsdICallHook;
-const jsdIExecutionHook = Ci.jsdIExecutionHook;
-const jsdIErrorHook = Ci.jsdIErrorHook;
-const jsdIFilter = Components.interfaces.jsdIFilter;
+function fakeJSDObject() {}
+
+const jsdIDebuggerService = Ci.jsdIDebuggerService ? Ci.jsdIDebuggerService : fakeJSDObject;
+const jsdIScript = Ci.jsdIScript ? Ci.jsdIScript : fakeJSDObject;
+const jsdIStackFrame = Ci.jsdIStackFrame ? Ci.jsdIStackFrame : fakeJSDObject;
+const jsdICallHook = Ci.jsdICallHook ? Ci.jsdICallHook : fakeJSDObject;
+const jsdIExecutionHook = Ci.jsdIExecutionHook ? Ci.jsdIExecutionHook : fakeJSDObject;
+const jsdIErrorHook = Ci.jsdIErrorHook ? Ci.jsdIErrorHook : fakeJSDObject;
+const jsdIFilter = Ci.jsdIFilter ? Ci.jsdIFilter : fakeJSDObject;
 const nsISupports = Ci.nsISupports;
 const nsIPrefBranch = Ci.nsIPrefBranch;
 const nsIComponentRegistrar = Ci.nsIComponentRegistrar;
@@ -1661,6 +1663,9 @@ var fbs =
     {
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("FBS.enableDebugger()");
+
+        if (!DebuggerService)
+            return;
 
         if (waitingForTimer)
         {

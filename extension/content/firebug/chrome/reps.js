@@ -49,7 +49,6 @@ try
     // xxxHonza: RJS
     var FBS = {};
     Components.utils["import"]("resource://firebug/firebug-service.js", FBS);
-    var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebuggerService);
 }
 catch (err)
 {
