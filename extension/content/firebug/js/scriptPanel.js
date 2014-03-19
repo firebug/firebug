@@ -23,6 +23,7 @@ define([
     "firebug/trace/debug",
     "firebug/lib/keywords",
     "firebug/js/fbs",
+    "firebug/lib/xpcom",
     "firebug/editor/editorSelector",
     "firebug/chrome/infotip",
     "firebug/chrome/searchBox",
@@ -31,7 +32,12 @@ define([
 ],
 function (Obj, Firebug, Firefox, FirebugReps, Domplate, JavaScriptTool, CompilationUnit,
     Locale, Events, Url, SourceLink, StackFrame, Css, Dom, Win, Search, Persist,
-    System, Menu, Debug, Keywords, FBS) {
+    System, Menu, Debug, Keywords, FBS, Xpcom) {
+
+// ********************************************************************************************* //
+// Constants
+
+var jsd = Xpcom.CCSV("@mozilla.org/js/jsd/debugger-service;2", "jsdIDebuggerService", true);
 
 // ********************************************************************************************* //
 // Script panel
@@ -1564,6 +1570,15 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends ActivablePanel
+
+    setEnabled: function(enable)
+    {
+        // If JSD1 is not available don't allow to enable the panel.
+        if (!jsd)
+            return;
+
+        Firebug.SourceBoxPanel.setEnabled.apply(this, arguments);
+    },
 
     /**
      * Support for panel activation.

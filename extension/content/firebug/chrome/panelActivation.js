@@ -347,7 +347,7 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
                 SPAN("&nbsp;"),
                 SPAN({"class": "descImage descImage-$panelName"})
             ),
-            A({"class": "objectLink", onclick: "$onEnable"},
+            A({"class": "objectLink enable", onclick: "$onEnable"},
                 Locale.$STR("moduleManager.Enable")
             )
             /* need something here that pushes down any thing appended to the panel */

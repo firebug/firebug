@@ -891,6 +891,11 @@
                     items.push("-");
             }
 
+            // Yet notify UI listeners. In this case pass panelType (since panel can be
+            // disabled, so there is no instance).
+            Firebug.dispatch(Firebug.uiListeners, "onOptionsMenu2",
+                [Firebug.currentContext, panelType, items]);
+
             var menu = FBL.extendArray(items, panelItems);
             for (var i = 0; i < menu.length; ++i)
                 FBL.createMenuItem(this.popup, menu[i]);

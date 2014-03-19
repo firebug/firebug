@@ -30,13 +30,16 @@ var Ci = Components.interfaces;
 var {domplate, SPAN, P, DIV, BUTTON, TABLE, TR, TD, TBODY} = Domplate;
 
 var slowJSDBugUrl = "https://bugzilla.mozilla.org/show_bug.cgi?id=815603";
+var firebug20Url = "https://getfirebug.com/releases/firebug/2.0";
 
 var comparator = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
 var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
 var Fx27 = (comparator.compare(appInfo.version, "27.0*") >= 0);
 
+var jsd = Xpcom.CCSV("@mozilla.org/js/jsd/debugger-service;2", "jsdIDebuggerService", true);
+
 // ********************************************************************************************* //
-// Domplate
+// Slow JSD1 Message
 
 var slowJsdTag =
     P({"class": "slowJsdMessage disabledPanelDescription",
@@ -78,6 +81,14 @@ var slowJsdRep = domplate(Firebug.Rep,
         Events.cancelEvent(event);
     }
 });
+
+// ********************************************************************************************* //
+// JSD1 Removed Message
+
+var jsdRemovedTag =
+    P({"class": "jsdRemovedMessage disabledPanelDescription",
+        style: "margin: 15px 0 15px 0; color: green; font-family: sans-serif"}
+    );
 
 // ********************************************************************************************* //
 
@@ -160,6 +171,24 @@ var KnownIssues = Obj.extend(Firebug.Module,
      */
     showDisabledPanelBox: function(panelName, parentNode)
     {
+        this.showJSDSlowMessage(panelName, parentNode);
+        this.showJSDRemovedMessage(panelName, parentNode);
+    },
+
+    onOptionsMenu2: function(context, panelType, items)
+    {
+        if (panelType.prototype.name != "script")
+            return;
+
+        // Remove all items from the menu.
+        items.splice(0, items.length);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Script Panel Messages
+
+    showJSDSlowMessage: function(panelName, parentNode)
+    {
         // The bug 815603 landed in Fx27, so do not display the warning anymore
         // (see also issue 7193)
         if (Fx27)
@@ -173,6 +202,27 @@ var KnownIssues = Obj.extend(Firebug.Module,
 
         FirebugReps.Description.render(Locale.$STR("knownissues.message.slowJSD"),
             message, Obj.bindFixed(Win.openNewTab, Win, slowJSDBugUrl));
+    },
+
+    showJSDRemovedMessage: function(panelName, parentNode)
+    {
+        // The message is visible only if JSD has been removed.
+        if (jsd)
+            return;
+
+        if (panelName != "script")
+            return;
+
+        var box = parentNode.getElementsByClassName("disabledPanelDescription")[0];
+        var message = jsdRemovedTag.insertAfter({}, box);
+
+        FirebugReps.Description.render(Locale.$STR("knownissues.message.jsdRemoved"),
+            message, Obj.bindFixed(Win.openNewTab, Win, firebug20Url));
+
+        box.parentNode.removeChild(box);
+
+        var enableLink = parentNode.querySelector(".objectLink.enable");
+        enableLink.parentNode.removeChild(enableLink);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
