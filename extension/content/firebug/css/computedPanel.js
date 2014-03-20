@@ -213,16 +213,24 @@ CSSComputedPanel.prototype = Obj.extend(Panel,
         var props = [];
         for (var i = 0; i < computedStyle.length; ++i)
         {
-            var prop = this.cssLogic ? this.cssLogic.getPropertyInfo(computedStyle[i]) :
-                Firebug.CSSModule.getPropertyInfo(computedStyle, computedStyle[i]);
-
-            if (isUnwantedProp(prop.property) ||
-                (this.cssLogic && !Firebug.showUserAgentCSS && prop.matchedRuleCount == 0))
+            // xxxsz: There's a bug in the CssLogic module, which is caused by styles inherited
+            // from inline styles of ancestor elements. See issue 7269.
+            try
             {
-                continue;
-            }
+                var prop = this.cssLogic ? this.cssLogic.getPropertyInfo(computedStyle[i]) :
+                    Firebug.CSSModule.getPropertyInfo(computedStyle, computedStyle[i]);
 
-            props.push(prop);
+                if (isUnwantedProp(prop.property) ||
+                    (this.cssLogic && !Firebug.showUserAgentCSS && prop.matchedRuleCount == 0))
+                {
+                    continue;
+                }
+
+                props.push(prop);
+            }
+            catch (e)
+            {
+            }
         }
 
         var parentNode = this.template.computedStylesTag.replace({}, this.panelNode);
