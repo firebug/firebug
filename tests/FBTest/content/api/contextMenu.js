@@ -40,7 +40,7 @@ this.checkIfContextMenuCommandExists = function(target, menuItemIdentifier, call
         ContextMenuController.removeListener(target, "popupshown", onPopupShown);
 
         // Fire the event handler asynchronously so items have a chance to be appended.
-        setTimeout(function()
+        setTimeout(() =>
         {
             var menuItem;
             if (typeof menuItemIdentifier == "string" || menuItemIdentifier.id)
@@ -92,18 +92,14 @@ this.checkIfContextMenuCommandExists = function(target, menuItemIdentifier, call
     var mouseDownEventDetails = {type: "mousedown", button: 2};
     this.synthesizeMouse(target, offset.x, offset.y, mouseDownEventDetails);
 
-    var self = this;
-    setTimeout(function()
+    setTimeout(() =>
     {
         var mouseUpEventDetails = {type: "mouseup", button: 2};
-        self.synthesizeMouse(target, offset.x, offset.y, mouseUpEventDetails);
+        this.synthesizeMouse(target, offset.x, offset.y, mouseUpEventDetails);
 
-        setTimeout(function()
-        {
-            var contextMenuEventDetails = {type: "contextmenu", button: 2};
-            self.synthesizeMouse(target, offset.x, offset.y, contextMenuEventDetails);
-        }, 20);
-    }, 20);
+        var contextMenuEventDetails = {type: "contextmenu", button: 2};
+        this.synthesizeMouse(target, offset.x, offset.y, contextMenuEventDetails);
+    }, 50);
 };
 
 /**
@@ -131,7 +127,7 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback, 
         ContextMenuController.removeListener(target, "popupshown", onPopupShown);
 
         // Fire the event handler asynchronously so items have a chance to be appended.
-        setTimeout(function()
+        setTimeout(() =>
         {
             var menuItem;
             if (typeof menuItemIdentifier == "string" || menuItemIdentifier.id)
@@ -187,7 +183,7 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback, 
                 // Since the command is dispatched asynchronously,
                 // execute the callback using timeout.
                 // Especially Mac OS needs this.
-                setTimeout(function()
+                setTimeout(() =>
                 {
                     callback();
                 }, 250);
@@ -203,18 +199,14 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback, 
     var mouseDownEventDetails = {type: "mousedown", button: 2};
     this.synthesizeMouse(target, offset.x, offset.y, mouseDownEventDetails);
 
-    var self = this;
-    setTimeout(function()
+    setTimeout(() =>
     {
         var mouseUpEventDetails = {type: "mouseup", button: 2};
-        self.synthesizeMouse(target, offset.x, offset.y, mouseUpEventDetails);
+        this.synthesizeMouse(target, offset.x, offset.y, mouseUpEventDetails);
 
-        setTimeout(function()
-        {
-            var contextMenuEventDetails = {type: "contextmenu", button: 2};
-            self.synthesizeMouse(target, offset.x, offset.y, contextMenuEventDetails);
-        }, 20);
-    }, 20);
+        var contextMenuEventDetails = {type: "contextmenu", button: 2};
+        this.synthesizeMouse(target, offset.x, offset.y, contextMenuEventDetails);
+    }, 50);
 };
 
 // ********************************************************************************************* //
