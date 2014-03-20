@@ -1085,6 +1085,17 @@ window.Firebug =
         return tooltip != panelType.prototype.name ? tooltip : this.getPanelTitle(panelType);
     },
 
+    getPanelTab: function(panelName)
+    {
+        var chrome = Firebug.chrome;
+
+        var tab = chrome.$("fbPanelBar2").getTab(panelName);
+        if (!tab)
+            tab = chrome.$("fbPanelBar1").getTab(panelName);
+
+        return tab;
+    },
+
     getMainPanelTypes: function(context)
     {
         var resultTypes = [];

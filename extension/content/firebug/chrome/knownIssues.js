@@ -87,7 +87,7 @@ var slowJsdRep = domplate(Firebug.Rep,
 
 var jsdRemovedTag =
     P({"class": "jsdRemovedMessage disabledPanelDescription",
-        style: "margin: 15px 0 15px 0; color: green; font-family: sans-serif"}
+        style: "margin: 15px 0 15px 0; font-family: sans-serif"}
     );
 
 // ********************************************************************************************* //
@@ -223,6 +223,10 @@ var KnownIssues = Obj.extend(Firebug.Module,
 
         var enableLink = parentNode.querySelector(".objectLink.enable");
         enableLink.parentNode.removeChild(enableLink);
+
+        // Hide Script panel tab menu, there are no option if JSD1 is gone.
+        var panelTab = Firebug.getPanelTab("script");
+        panelTab.tabMenu.setAttribute("collapsed", "true");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
