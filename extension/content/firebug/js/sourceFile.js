@@ -19,7 +19,7 @@ const Ci = Components.interfaces;
 const PCMAP_SOURCETEXT = Ci.jsdIScript ? Ci.jsdIScript.PCMAP_SOURCETEXT : null;
 const PCMAP_PRETTYPRINT = Ci.jsdIScript ? Ci.jsdIScript.PCMAP_PRETTYPRINT : null;
 
-var jsd = Xpcom.CCSV("@mozilla.org/js/jsd/debugger-service;2", "jsdIDebuggerService", true);
+var jsd = Xpcom.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService", true);
 
 function fakeJSDObject() {}
 var jsdIScript = Ci.jsdIScript ? Ci.jsdIScript : fakeJSDObject;

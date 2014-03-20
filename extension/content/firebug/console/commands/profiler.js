@@ -25,7 +25,7 @@ function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url, StackFrame, 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-var jsd = Xpcom.CCSV("@mozilla.org/js/jsd/debugger-service;2", "jsdIDebuggerService", true);
+var jsd = Xpcom.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService", true);
 
 // ********************************************************************************************* //
 // Profiler

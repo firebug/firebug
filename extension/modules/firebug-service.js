@@ -16,7 +16,7 @@ const Cu = Components.utils;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
-const DebuggerService = Cc["@mozilla.org/js/jsd/debugger-service;2"];
+const DebuggerService = Cc["@mozilla.org/js/jsd/debugger-service;1"];
 const ConsoleService = Cc["@mozilla.org/consoleservice;1"];
 const Timer = Cc["@mozilla.org/timer;1"];
 const ObserverServiceFactory = Cc["@mozilla.org/observer-service;1"];

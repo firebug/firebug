@@ -132,7 +132,7 @@ FBL.$ = function(id, doc)
 };
 
 // deprecated
-FBL.jsd = FBL.CCSV("@mozilla.org/js/jsd/debugger-service;2", "jsdIDebuggerService", true);
+FBL.jsd = FBL.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService", true);
 
 // ********************************************************************************************* //
 // Constants

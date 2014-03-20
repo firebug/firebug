@@ -36,7 +36,7 @@ var comparator = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersi
 var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
 var Fx27 = (comparator.compare(appInfo.version, "27.0*") >= 0);
 
-var jsd = Xpcom.CCSV("@mozilla.org/js/jsd/debugger-service;2", "jsdIDebuggerService", true);
+var jsd = Xpcom.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService", true);
 
 // ********************************************************************************************* //
 // Slow JSD1 Message

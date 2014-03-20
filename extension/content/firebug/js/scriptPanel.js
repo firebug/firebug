@@ -37,7 +37,7 @@ function (Obj, Firebug, Firefox, FirebugReps, Domplate, JavaScriptTool, Compilat
 // ********************************************************************************************* //
 // Constants
 
-var jsd = Xpcom.CCSV("@mozilla.org/js/jsd/debugger-service;2", "jsdIDebuggerService", true);
+var jsd = Xpcom.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService", true);
 
 // ********************************************************************************************* //
 // Script panel
