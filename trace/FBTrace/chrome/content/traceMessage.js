@@ -19,6 +19,9 @@ var Cu = Components.utils;
 
 var EOF = "<br/>";
 
+function fakeJSDObject() {}
+var jsdIValue = Ci.jsdIValue ? Ci.jsdIValue : fakeJSDObject;
+
 // ********************************************************************************************* //
 // Trace Message Object
 
@@ -212,7 +215,7 @@ TraceMessage.prototype =
         {
             this.props = this.obj;
         }
-        else if (this.obj instanceof Ci.jsdIValue)
+        else if (this.obj instanceof jsdIValue)
         {
             var listValue = {value: null}, lengthValue = {value: 0};
             this.obj.getProperties(listValue, lengthValue);
