@@ -75,18 +75,19 @@ this.selectElementInHtmlPanel = function(element, callback)
         }
     }
 
-    // select the elelement in the HTML Panel
+    // select the element in the HTML Panel
     var htmlPanel = FBTest.getPanel("html");
     htmlPanel.select(element);
 
     // find the related nodeBox in the HTML Panel tree that corresponds to the element
     var nodeBox = htmlPanel.panelNode.getElementsByClassName("nodeBox selected")[0];
 
-    // call the callback with the nodeBox
-    //setTimeout(function()
-    //{
+    // Execute the callback with the nodeBox
+    // xxxHonza: Sebastian, we need to get rid of the timeout
+    setTimeout(function()
+    {
         callback(nodeBox);
-    //},0);
+    }, 500);
 
     /*
     FBTest.searchInHtmlPanel(element, function(sel)
