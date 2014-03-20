@@ -51,6 +51,9 @@ var scope = {};
 Cu["import"]("resource://fbtrace/firebug-trace-service.js", scope);
 var traceService = scope.traceConsoleService;
 
+// For Tracing Console UI
+Locale.registerStringBundle("chrome://fbtrace/locale/firebug-tracing.properties");
+
 // ********************************************************************************************* //
 // Trace Window Implementation
 
