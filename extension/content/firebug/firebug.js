@@ -118,6 +118,10 @@ window.Firebug =
         // Measure the entire Firebug initialization time.
         FBTrace.time("INITIALIZATION_TIME");
 
+        // Make sure the Script panel is disabled by default if there is no JSD1
+        if (!FBL.jsd)
+            Options.set("script.enableSites", false);
+
         Firebug.chrome = chrome;
         Firebug.originalChrome = Firebug.chrome;
 
