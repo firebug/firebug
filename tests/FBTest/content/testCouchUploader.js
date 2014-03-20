@@ -366,6 +366,9 @@ var CouchDB =
             data: toJSON(doc),
             complete: function(req)
             {
+                if (FBTrace.DBG_FBTEST)
+                    FBTrace.sysout("testCouchUploader.saveDoc;", req);
+
                 var resp = parseJSON(req.responseText);
                 if (req.status == 201)
                 {
@@ -376,11 +379,16 @@ var CouchDB =
                 }
                 else if (options.error)
                 {
-                    options.error(req.status, resp.error, resp.reason);
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("testCouchUploader.saveDoc; ERROR " + options.error, req);
+
+                    options.error(req.status, (resp ? resp.error : "unknown"),
+                        (resp ? resp.reason : "unknown"));
                 }
                 else
                 {
-                    alert("The document could not be saved: " + resp.reason);
+                    alert("The document could not be saved: " +
+                        (resp ? resp.reason : "unknown"));
                 }
             }
         });
@@ -400,6 +408,9 @@ var CouchDB =
             data: toJSON(docs),
             complete: function(req)
             {
+                if (FBTrace.DBG_FBTEST)
+                    FBTrace.sysout("testCouchUploader.bulkSave;", req);
+
                 var resp = parseJSON(req.responseText);
                 if (req.status == 201)
                 {
@@ -408,11 +419,16 @@ var CouchDB =
                 }
                 else if (options.error)
                 {
-                    options.error(req.status, resp.error, resp.reason);
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("testCouchUploader.bulkSave; ERROR " + options.error, req);
+
+                    options.error(req.status, (resp ? resp.error : "unknown"),
+                        (resp ? resp.reason : "unknown"));
                 }
                 else
                 {
-                    alert("The document could not be saved: " + resp.reason);
+                    alert("The document could not be saved: " +
+                        (resp ? resp.reason : "unknown"));
                 }
             },
         });
