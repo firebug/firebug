@@ -13,8 +13,10 @@ function runTest()
             {
                 FBTest.waitForBreakInDebugger(chrome, lineNo, true, function(row)
                 {
-                    FBTest.clickContinueButton();
-                    FBTest.testDone();
+                    FBTest.clickContinueButton(null, function()
+                    {
+                        FBTest.testDone()
+                    });
                 });
 
                 // Execute test script on the page.
