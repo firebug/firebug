@@ -5,9 +5,10 @@ define([
     "firebug/lib/trace",
     "firebug/lib/events",
     "firebug/lib/options",
-    "firebug/console/consolePanel",
+    "firebug/chrome/panelNotification",
+    "firebug/console/consolePanel"
 ],
-function(Firebug, FBTrace, Events, Options, ConsolePanel) {
+function(Firebug, FBTrace, Events, Options, PanelNotification, ConsolePanel) {
 
 "use strict";
 
