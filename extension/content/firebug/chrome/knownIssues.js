@@ -180,7 +180,10 @@ var KnownIssues = Obj.extend(Firebug.Module,
         if (panelType.prototype.name != "script")
             return;
 
-        // Remove all items from the menu.
+        if (jsd)
+            return;
+
+        // Remove all items from the menu (only if JSD1 is not available).
         items.splice(0, items.length);
     },
 
