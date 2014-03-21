@@ -11,7 +11,7 @@ function runTest()
                 FBTest.waitForDisplayedElement("console", config, function(row)
                 {
                     var panelNode = FBTest.getPanel("console").panelNode;
-                    var rows = panelNode.querySelectorAll(".logRow");
+                    var rows = panelNode.getElementsByClassName("logRow");
 
                     if (FBTest.compare(2, rows.length, "There must be two logs"))
                     {
@@ -23,14 +23,13 @@ function runTest()
                             "'hello' must be shown inside the Console");
                     }
 
-                    var isMac = panelNode.ownerDocument.defaultView.navigator.platform.contains("Mac");
-                    var eventModifierKeys = (isMac ?
-                                            {metaKey: true, shiftKey: true} :
-                                            {ctrlKey: true, shiftKey: true});
+                    var eventModifierKeys = FBTest.isMac() ?
+                        {metaKey: true, shiftKey: true} :
+                        {ctrlKey: true, shiftKey: true};
 
                     FBTest.sendShortcut("e", eventModifierKeys);
 
-                    rows = panelNode.querySelectorAll(".logRow");
+                    rows = panelNode.getElementsByClassName("logRow");
 
                     if (FBTest.compare(4, rows.length, "There must be four logs"))
                     {
