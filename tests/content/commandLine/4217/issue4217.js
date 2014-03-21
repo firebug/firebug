@@ -23,7 +23,12 @@ function runTest()
                             "'hello' must be shown inside the Console");
                     }
 
-                    FBTest.sendShortcut("e", {ctrlKey: true, shiftKey: true});
+                    var isMac = panelNode.ownerDocument.defaultView.navigator.platform.contains("Mac");
+                    var eventModifierKeys = (isMac ?
+                                            {metaKey: true, shiftKey: true} :
+                                            {ctrlKey: true, shiftKey: true});
+
+                    FBTest.sendShortcut("e", eventModifierKeys);
 
                     rows = panelNode.querySelectorAll(".logRow");
 
