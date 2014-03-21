@@ -3,11 +3,12 @@
 define([
     "firebug/firebug",
     "firebug/lib/trace",
+    "firebug/lib/deprecated",
     "firebug/lib/events",
     "firebug/lib/options",
-    "firebug/lib/deprecated",
+    "firebug/chrome/panelNotification"
 ],
-function(Firebug, FBTrace, Events, Options, Deprecated) {
+function(Firebug, FBTrace, Deprecated, Events, Options, PanelNotification) {
 
 "use strict";
 
