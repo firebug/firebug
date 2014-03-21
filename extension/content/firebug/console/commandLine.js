@@ -293,13 +293,13 @@ Firebug.CommandLine = Obj.extend(Module,
         if (!Firebug.commandEditor || context.panelName !== "console")
         {
             this.clear(context);
-            Firebug.Console.log(commandPrefix + expr, context, "command", FirebugReps.Text);
+            Firebug.Console.log(commandPrefix + expr, context, "command", FirebugReps.Command);
         }
         else
         {
             var shortExpr = Str.cropString(Str.stripNewLines(expr), 100);
             Firebug.Console.log(commandPrefix + shortExpr, context, "command",
-                FirebugReps.Text);
+                FirebugReps.Command);
         }
 
         this.commandHistory.appendToHistory(expr);

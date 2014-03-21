@@ -216,6 +216,13 @@ FirebugReps.Text = domplate(Rep,
 
 // ********************************************************************************************* //
 
+FirebugReps.Command = domplate(FirebugReps.Text,
+{
+    groupable: false
+});
+
+// ********************************************************************************************* //
+
 FirebugReps.Caption = domplate(Rep,
 {
     tag: SPAN({"class": "caption"}, "$object")
