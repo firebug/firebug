@@ -149,6 +149,8 @@ SourceEditor.Events =
 SourceEditor.prototype =
 /** @lends SourceEditor */
 {
+    savedCursorLocation: null,
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
@@ -223,7 +225,7 @@ SourceEditor.prototype =
 
     isInitialized: function()
     {
-        return (this.editorObject != null)
+        return (this.editorObject != null);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -333,11 +335,6 @@ SourceEditor.prototype =
         {
             if (!this.BuiltInEventsHandlers || !this.BuiltInEventsHandlers[type])
                 return;
-
-            var func = function()
-            {
-                handler(getEventObject(type, arguments));
-            };
 
             for (var i = 0; i < this.BuiltInEventsHandlers[type].length; i++)
             {
@@ -797,7 +794,6 @@ SourceEditor.prototype =
                 var editorHeight = scrollInfo.clientHeight - hScrollBar.offsetHeight;
                 var top = coords.top;
                 var bottom = coords.bottom;
-                var lineHeight = this.editorObject.defaultTextHeight();
 
                 // Scroll only if the target line is outside of the viewport.
                 var scrollNeeded = (top <= scrollInfo.top ||
@@ -856,6 +852,18 @@ SourceEditor.prototype =
     focus: function()
     {
         this.editorObject.focus();
+        if (this.savedCursorLocation)
+        {
+            this.setSelection(this.savedCursorLocation.start, this.savedCursorLocation.end);
+            this.savedCursorLocation = null;
+        }
+    },
+
+    blur: function(saveCursorLocation)
+    {
+        if (saveCursorLocation)
+            this.savedCursorLocation = this.getSelection();
+        this.contentView.blur();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -941,7 +949,7 @@ SourceEditor.prototype =
         var currentLine = viewport.from;
 
         // Iterate over all visible lines.
-        this.editorObject.eachLine(viewport.from, viewport.to, (handle) =>
+        this.editorObject.eachLine(viewport.from, viewport.to, () =>
         {
             this.removeGutterMarker(bpGutter, currentLine++);
         });
@@ -1210,7 +1218,7 @@ LineHighlighter.prototype =
         clearInterval(this.timeout);
         this.unhighlight();
     }
-}
+};
 
 // ********************************************************************************************* //
 // Support for Debugging - Tracing
@@ -1296,7 +1304,7 @@ ScriptLoader.prototype =
         if (!this.scripts.length)
             this.callback();
     }
-}
+};
 
 // ********************************************************************************************* //
 // Registration

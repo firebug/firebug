@@ -380,6 +380,12 @@ var CommandLine = Obj.extend(Module,
         }
     },
 
+    blur: function(context)
+    {
+        var commandLine = this.getCommandLine(context);
+        commandLine.blur();
+    },
+
     clear: function(context)
     {
         var commandLine = this.getCommandLine(context);

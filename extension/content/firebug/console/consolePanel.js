@@ -18,13 +18,14 @@ define([
     "firebug/chrome/searchBox",
     "firebug/chrome/panelNotification",
     "firebug/chrome/activablePanel",
+    "firebug/console/commandLine",
+    "firebug/console/errorMessageObj",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/breakpoints/breakpointStore",
-    "firebug/console/errorMessageObj",
 ],
 function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Search, Options, Wrapper,
-    Xpcom, Menu, FirebugReps, SearchBox, PanelNotification, ActivablePanel, DebuggerLib,
-    BreakpointStore, ErrorMessageObj) {
+    Xpcom, Menu, FirebugReps, SearchBox, PanelNotification, ActivablePanel, CommandLine,
+    ErrorMessageObj, DebuggerLib, BreakpointStore) {
 
 "use strict";
 
@@ -214,7 +215,7 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
 
         this.showCommandLine(true);
         if (Firebug.chrome.hasFocus())
-            Firebug.CommandLine.focus(this.context);
+            CommandLine.focus(this.context);
 
         this.showToolbarButtons("fbConsoleButtons", true);
 
@@ -1037,13 +1038,14 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
         if (shouldShow)
         {
             Dom.collapse(Firebug.chrome.$("fbCommandBox"), false);
-            Firebug.CommandLine.setMultiLine(Firebug.commandEditor, Firebug.chrome);
+            CommandLine.setMultiLine(Firebug.commandEditor, Firebug.chrome);
         }
         else
         {
             // Make sure that entire content of the Console panel is hidden when
             // the panel is disabled.
-            Firebug.CommandLine.setMultiLine(false, Firebug.chrome, Firebug.commandEditor);
+            CommandLine.setMultiLine(false, Firebug.chrome, Firebug.commandEditor);
+            CommandLine.blur(this.context);
             Dom.collapse(Firebug.chrome.$("fbCommandBox"), true);
         }
     },

@@ -262,6 +262,13 @@ Firebug.CommandEditor = Obj.extend(Module,
             this.editor.focus();
     },
 
+    blur: function()
+    {
+        // When bluring, save the selection (see issue 7273).
+        if (this.editor)
+            this.editor.blur(true);
+    },
+
     fontSizeAdjust: function(adjust)
     {
         if (!this.editor)
