@@ -21,12 +21,17 @@
 }
 
 /* Text indent from the breakpoint column */
-.cm-s-firebug .firebug-line {
-    margin-left: 10px;
+
+.cm-s-firebug pre {
+    padding-left: 10px;
 }
 
-.cm-s-firebug.CodeMirror pre {
-    padding-left:0px;
+/*
+ * Unset the padding when the Command Editor is hidden to prevent "Unresponsive Warnings".
+ * See issue 6824
+ */
+.cm-s-firebug.CommandEditor-hidden pre {
+    padding-left: 0px;
 }
 
 .cm-s-firebug .CodeMirror-scrollbar-filler {
