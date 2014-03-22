@@ -574,10 +574,7 @@ TabContext.prototype =
         // We're using a sandboxed setTimeout function.
         var timeout = setTimeout(() =>
         {
-            // Make sure to remove the timeout ID from the array of ongoing timeouts, so
-            // the 'setTimeout' caller doesn't have to explicitly do it.
-            if (this.timeouts)
-                delete this.timeouts[timeout];
+            this.timeouts.delete(timeout);
 
             try
             {
@@ -618,6 +615,8 @@ TabContext.prototype =
         // We're using a sandboxed setInterval function.
         var timeout = setInterval(() =>
         {
+            this.intervals.delete(timeout);
+
             try
             {
                 fn();
