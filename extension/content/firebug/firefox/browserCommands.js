@@ -1,13 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/trace",
     "firebug/lib/options",
-    "firebug/lib/locale",
     "firebug/firefox/browserOverlayLib",
 ],
-function(FBTrace, Options, Locale, BrowserOverlayLib) {
-with (BrowserOverlayLib) {
+function(Options, BrowserOverlayLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -20,6 +17,8 @@ var shortcuts = [
     "closeFirebug",
     "toggleBreakOn"
 ];
+
+var {$, $el, $command} = BrowserOverlayLib;
 
 /* Used by the browser menu, but should be really global shortcuts?
 key_increaseTextSize
@@ -167,4 +166,4 @@ var BrowserCommands =
 return BrowserCommands;
 
 // ********************************************************************************************* //
-}});
+});

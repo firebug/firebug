@@ -294,6 +294,14 @@ function updatePersistedValues(doc, options)
 // ********************************************************************************************* //
 // Registration
 
+// Bind every method to BrowserOverlayLib.
+
+for (var method in BrowserOverlayLib)
+{
+    if (BrowserOverlayLib.hasOwnProperty(method))
+        BrowserOverlayLib[method] = BrowserOverlayLib[method].bind(BrowserOverlayLib);
+}
+
 return BrowserOverlayLib;
 
 // ********************************************************************************************* //
