@@ -63,6 +63,9 @@ this.setBreakpoint = function(chrome, url, lineNo, attributes, callback)
             });
 
             var target = row.querySelector(".CodeMirror-linenumber");
+
+            // Note: Don't synthesize a mousedown event: this would make
+            // console/breakOnError/breakOnError fail in timeout (see issue 7267).
             FBTest.synthesizeMouse(target, 2, 2);
             target = null;
         }
@@ -94,7 +97,7 @@ this.waitForBreakpoint = function(url, lineNo, callback)
     };
 
     DebuggerController.addListener(browser, listener);
-}
+};
 
 this.removeBreakpoint = function(chrome, url, lineNo, callback)
 {
@@ -127,13 +130,15 @@ this.removeBreakpoint = function(chrome, url, lineNo, callback)
 
         // Click to remove a breakpoint.
         var target = row.querySelector(".CodeMirror-linenumber");
+
+        // Note: Don't synthesize a mousedown event: this would make
+        // console/breakOnError/breakOnError fail in timeout (see issue 7267).
         FBTest.synthesizeMouse(target, 2, 2);
     });
 };
 
 this.hasBreakpoint = function(line, chrome)
 {
-    var line = line;
     if (typeof(line) == "number")
         line = FBTest.getSourceLineNode(line, chrome);
 
@@ -162,7 +167,7 @@ this.waitForDisplayedBreakpoint = function(chrome, url, lineNo, callback)
 this.removeAllBreakpoints = function(callback)
 {
     FW.Firebug.Debugger.clearAllBreakpoints(null, callback);
-}
+};
 
 // ********************************************************************************************* //
 }).apply(FBTest);
