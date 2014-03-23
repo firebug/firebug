@@ -148,6 +148,8 @@ this.enableConsolePanel = function(callback)
     }
 
     var cb = callback ? onCallback : null;
+    // xxxFlorent: replace !!cb with false, and see which FBTests fail because they rely on
+    // the page reload.
     this.setPanelState(FW.Firebug.Console, "console", cb, true, !!cb);
 };
 
@@ -222,7 +224,7 @@ this.selectPanel = function(panelName, chrome)
 
     var panelType = FW.Firebug.getPanelType(panelName);
     if (panelType.prototype.parentPanel)
-        return chrome.selectSidePanel(panelName);
+        return this.selectSidePanel(panelName, chrome);
 
     return chrome.selectPanel(panelName);
 };

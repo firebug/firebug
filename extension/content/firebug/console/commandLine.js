@@ -373,10 +373,7 @@ var CommandLine = Obj.extend(Module,
             // We are already on the console, if the command line has also
             // the focus, toggle back. But only if the UI has been already
             // opened.
-            if (Firebug.commandEditor)
-                commandLine.focus();
-            else if (commandLine.getAttribute("focused") !== "true")
-                setTimeout(function() { commandLine.select(); });
+            commandLine.focus();
         }
     },
 

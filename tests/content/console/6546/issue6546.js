@@ -5,10 +5,7 @@ function runTest()
         // 1. Open Firebug
         FBTest.openFirebug(() =>
         {
-            // 2. Focus Firebug
-            FW.Firebug.chrome.window.focus();
-
-            // 3. Enable and switch to the Console panel
+            // 2. Enable and switch to the Console panel
             FBTest.enableConsolePanel(() =>
             {
                 var doc = FW.Firebug.chrome.window.document;

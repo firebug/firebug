@@ -37,12 +37,9 @@ function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Search, Opti
 // ********************************************************************************************* //
 // Constants
 
-var {domplate, DIV, SPAN, TD, TR, TABLE, TBODY, P, A} = Domplate;
+var {domplate, DIV, SPAN, TD, TR, TABLE, TBODY} = Domplate;
 
 var reAllowedCss = /^(-moz-)?(background|border|color|font|line|margin|padding|text)/;
-
-var Cc = Components.classes;
-var Ci = Components.interfaces;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -214,7 +211,9 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
                 " " + this.context.getName(), state);
 
         this.showCommandLine(true);
-        if (Firebug.chrome.hasFocus())
+
+        // Don't steal the focus if the document is not loaded (see issue 6589).
+        if (this.context.window.document.readyState === "complete")
             CommandLine.focus(this.context);
 
         this.showToolbarButtons("fbConsoleButtons", true);
@@ -231,6 +230,7 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
     showPanel: function(state)
     {
         var wasScrolledToBottom;
+
         if (state)
             wasScrolledToBottom = state.wasScrolledToBottom;
 
@@ -422,10 +422,10 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
                 else if (type == "warning")
                     classNames = ["warn", "warningMessage"];
 
-                for (var i=0, classNamesLen=classNames.length; i<classNamesLen; ++i)
+                for (var i = 0, classNamesLen = classNames.length; i < classNamesLen; i++)
                 {
                     var logRows = panelNode.getElementsByClassName("logRow-" + classNames[i]);
-                    for (var j=0, len=logRows.length; j<len; ++j)
+                    for (var j = 0, len = logRows.length; j < len; j++)
                     {
                         // Mark the groups, in which the log row is located, also as matched
                         for (var group = Dom.getAncestorByClass(logRows[j], "logRow-group"); group;
@@ -846,7 +846,7 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
             var part = parts[i];
             if (part && typeof(part) == "object")
             {
-            	var object = objects[objIndex];
+                var object = objects[objIndex];
                 if (part.type == "%c")
                 {
                     lastStyle = object.toString();
@@ -1103,7 +1103,7 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
         // xxxHonza: this is how the other BON implementations work, but we could reconsider it.
         // Another problem is that the debugger breaks in every frame by default, which
         // is avoided by reseting of the flag.
-        this.breakOnNext(false)
+        this.breakOnNext(false);
 
         // At this point, the BON flag is reset and can't be used anymore in |shouldResumeDebugger|.
         // So add a custom flag in packet.why so we know that the debugger is paused because of
