@@ -46,7 +46,7 @@ var BrowserCommands =
     {
         $command(doc, "cmd_firebug_closeFirebug", "Firebug.closeFirebug(true);");
         $command(doc, "cmd_firebug_toggleInspecting", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.Inspector.toggleInspecting(Firebug.currentContext);");
-        $command(doc, "cmd_firebug_focusCommandLine", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.CommandLine.focus(Firebug.currentContext);");
+        $command(doc, "cmd_firebug_focusCommandLine", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.CommandLine.focus(Firebug.currentContext, {select: true});");
         $command(doc, "cmd_firebug_toggleFirebug", "Firebug.toggleBar();");
         $command(doc, "cmd_firebug_detachFirebug", "Firebug.toggleDetachBar(false, true);");
         $command(doc, "cmd_firebug_inspect", "Firebug.Inspector.inspectFromContextMenu(arg);", "document.popupNode");

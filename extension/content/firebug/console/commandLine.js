@@ -350,8 +350,10 @@ var CommandLine = Obj.extend(Module,
         System.copyToClipboard(expr);
     },
 
-    focus: function(context)
+    focus: function(context, options)
     {
+        options = options || {};
+
         if (Firebug.isDetached())
             Firebug.chrome.focus();
         else
@@ -373,7 +375,10 @@ var CommandLine = Obj.extend(Module,
             // We are already on the console, if the command line has also
             // the focus, toggle back. But only if the UI has been already
             // opened.
-            commandLine.focus();
+            if (!options.select)
+                commandLine.focus();
+            else
+                commandLine.select();
         }
     },
 
