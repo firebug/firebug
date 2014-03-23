@@ -156,8 +156,8 @@ this.synthesizeMouse = function(node, offsetX, offsetY, event, win)
 
     // Hit the middle of the button
     // (Clicks to hidden parts of the element doesn't open the context menu).
-    offsetX = (typeof offsetX != "undefined" ? offsetX : 0.5 * Math.max(1, rect.width));
-    offsetY = (typeof offsetY != "undefined" ? offsetY : 0.5 * Math.max(1, rect.height));
+    offsetX = (typeof offsetX === "number" ? offsetX : 0.5 * Math.max(1, rect.width));
+    offsetY = (typeof offsetY === "number" ? offsetY : 0.5 * Math.max(1, rect.height));
 
     // include frame offset
     offsetX += frameOffset.left;
