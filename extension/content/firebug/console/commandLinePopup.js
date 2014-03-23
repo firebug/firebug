@@ -191,7 +191,8 @@ var CommandLinePopup = Obj.extend(Module,
             if (visible)
             {
                 this.lastFocused = document.commandDispatcher.focusedElement;
-                commandLine.focus();
+                // Focus and select the whole text when displaying the Command Line Popup.
+                commandLine.select();
             }
             else if (this.lastFocused && Xml.isVisible(this.lastFocused) &&
                 typeof this.lastFocused.focus == "function")
