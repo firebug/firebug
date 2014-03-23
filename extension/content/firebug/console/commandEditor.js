@@ -296,6 +296,15 @@ Firebug.CommandEditor = Obj.extend(Module,
             // support for TextEditor, not used at the moment
             this.editor.textBox.style.fontSizeAdjust = adjust;
         }
+    },
+
+    // Method used for the hack of issue 6824 (Randomly get "Unresponsive Script Warning" with 
+    // commandEditor.html). Adds or removes the .CommandEditor-Hidden class.
+    // IMPORTANT: that method should only be used within the Firebug code, and may be removed soon.
+    addOrRemoveClassCommandEditorHidden: function(addClass)
+    {
+        if (this.editor)
+            this.editor.addOrRemoveClassCommandEditorHidden(addClass);
     }
 });
 

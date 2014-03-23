@@ -433,7 +433,6 @@ var CommandLine = Obj.extend(Module,
 
         var commandLine = this.getSingleRowCommandLine();
         var commandEditor = this.getCommandEditor();
-        var commandEditorView = commandEditor && commandEditor.editor && commandEditor.editor.view;
 
         // We are just closing the view.
         if (saveMultiLine)
@@ -442,8 +441,8 @@ var CommandLine = Obj.extend(Module,
 
             // Specify that the Command Editor is hidden, so we remove the padding
             // which causes an unresponsive warning (see issue 6824).
-            if (commandEditorView)
-                commandEditorView.classList.add("CommandEditor-hidden");
+            if (commandEditor)
+                commandEditor.addOrRemoveClassCommandEditorHidden(true);
 
             return;
         }
@@ -454,8 +453,8 @@ var CommandLine = Obj.extend(Module,
 
         if (multiLine)
         {
-            if (commandEditorView)
-                commandEditorView.classList.remove("CommandEditor-hidden");
+            if (commandEditor)
+                commandEditor.addOrRemoveClassCommandEditorHidden(false);
             chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbCommandEditorBox");
         }
 

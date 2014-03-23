@@ -581,7 +581,7 @@ SourceEditor.prototype =
 
     onCommand: function(event, cmd)
     {
-        Trace.sysout("sourceEditor.onCommand; " + cmd)
+        Trace.sysout("sourceEditor.onCommand; " + cmd);
 
         var map = {
             "cmd_selectAll": "selectAll",
@@ -1092,6 +1092,24 @@ SourceEditor.prototype =
         // Return index (zero based)
         return lineNo - 1;
     },
+
+    // Method used for the hack of issue 6824 (Randomly get "Unresponsive Script Warning" with 
+    // commandEditor.html). Adds or removes the .CommandEditor-Hidden class.
+    // IMPORTANT: that method should only be used within the Firebug code, and may be removed soon.
+    addOrRemoveClassCommandEditorHidden: function(addClass)
+    {
+        if (!this.view)
+        {
+            TraceError.sysout("SourceEditor.addOrRemoveClassCommandEditorHidden; " +
+                "the view is undefined. Abort!");
+            return;
+        }
+
+        if (addClass)
+            this.view.classList.add("CommandEditor-hidden");
+        else
+            this.view.classList.remove("CommandEditor-hidden");
+    }
 };
 
 // ********************************************************************************************* //
