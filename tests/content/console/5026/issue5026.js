@@ -4,7 +4,7 @@ function runTest()
     {
         FBTest.openFirebug(function()
         {
-            FBTest.enableConsolePanel(function(win)
+            FBTest.enableConsolePanelAndReload(function(win)
             {
                 var panel = FBTest.selectPanel("console");
                 var logs = panel.panelNode.getElementsByClassName("logRow");

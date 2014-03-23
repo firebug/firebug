@@ -9,7 +9,7 @@ function runTest()
         {
             // 2. Enable and switch to the Console panel
             // 3. Reload the page
-            FBTest.enableConsolePanel(function()
+            FBTest.enableConsolePanelAndReload(function()
             {
                 // Show all messages
                 clickToolbarButton("fbConsoleFilter-all", false);

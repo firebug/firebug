@@ -10,19 +10,22 @@ function runTest()
     {
         FBTest.enablePanels(["console", "script"], function(win)
         {
-            var config = {tagName: "div", classes: "logRow logRow-debug"};
-            FBTest.waitForDisplayedElement("console", config, function(row)
+            FBTest.reload(function()
             {
-                var expected = new RegExp("FirebugBug\\s*" + FW.FBL.$STRF("Line",
-                    ["clickedFirebugBug.js", 6]).replace(/([\\"'\(\)])/g, "\\$1"));
+                var config = {tagName: "div", classes: "logRow logRow-debug"};
+                FBTest.waitForDisplayedElement("console", config, function(row)
+                {
+                    var expected = new RegExp("FirebugBug\\s*" + FW.FBL.$STRF("Line",
+                        ["clickedFirebugBug.js", 6]).replace(/([\\"'\(\)])/g, "\\$1"));
 
-                FBTest.compare(expected, row.textContent,
-                    "The proper message must be displayed.");
+                    FBTest.compare(expected, row.textContent,
+                        "The proper message must be displayed.");
 
-                FBTest.testDone();
+                    FBTest.testDone();
+                });
+
+                FBTest.clickContentButton(win, "testButton");
             });
-
-            FBTest.clickContentButton(win, "testButton");
         });
     });
 }

@@ -4,7 +4,7 @@ function runTest()
     {
         FBTest.openFirebug(() =>
         {
-            FBTest.enableConsolePanel(() =>
+            FBTest.enableConsolePanelAndReload(() =>
             {
                 var styleConfig = {tagName: "div", classes: "logRow", count: 2};
                 FBTest.waitForDisplayedElement("console", styleConfig, () =>

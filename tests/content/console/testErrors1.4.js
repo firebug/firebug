@@ -3,7 +3,7 @@ function runTest()
     FBTest.openNewTab(basePath + "console/testErrors.html", function(win)
     {
         FBTest.selectPanel("console");
-        FBTest.enableConsolePanel(function(win) // causes reload
+        FBTest.enableConsolePanel(function(win)
         {
            FBTest.selectPanel("console");
            fireTest(win, 0);

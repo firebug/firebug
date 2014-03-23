@@ -4,7 +4,7 @@ function runTest()
     {
         FBTest.openFirebug(function()
         {
-            FBTest.enableConsolePanel(function()
+            FBTest.enableConsolePanelAndReload(function()
             {
                 var config = {tagName: "SPAN", classes: "objectBox-text"};
                 FBTest.waitForDisplayedElement("console", config, function(row)

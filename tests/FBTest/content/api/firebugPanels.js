@@ -137,7 +137,7 @@ this.disableConsolePanel = function(callback)
  * Enables the Console panel and reloads if a callback is specified.
  * @param {Function} callback A handler that is called as soon as the page is reloaded.
  */
-this.enableConsolePanel = function(callback)
+this.enableConsolePanel = function(callback, reload)
 {
     function onCallback(win)
     {
@@ -148,9 +148,12 @@ this.enableConsolePanel = function(callback)
     }
 
     var cb = callback ? onCallback : null;
-    // xxxFlorent: replace !!cb with false, and see which FBTests fail because they rely on
-    // the page reload.
-    this.setPanelState(FW.Firebug.Console, "console", cb, true, !!cb);
+    this.setPanelState(FW.Firebug.Console, "console", cb, true, !!reload);
+};
+
+this.enableConsolePanelAndReload = function(callback)
+{
+    return this.enableConsolePanel(callback, true);
 };
 
 /**
@@ -206,7 +209,7 @@ this.enablePanels = function(panelNames, callback)
         else
             FBTestFirebug.enablePanels(panelNames, callback);
     });
-}
+};
 
 // ********************************************************************************************* //
 // Panel Selection

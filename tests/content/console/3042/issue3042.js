@@ -4,7 +4,7 @@ function runTest()
     {
         FBTest.openFirebug(function()
         {
-            FBTest.enableConsolePanel(function(win)
+            FBTest.enableConsolePanelAndReload(function(win)
             {
                 var config = {
                     tagName: "div",
