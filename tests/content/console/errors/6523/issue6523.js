@@ -8,14 +8,16 @@ function runTest()
         {
             FBTest.enablePanels(["console", "script"], function()
             {
-                var config = {tagName: "div", classes: "logRow logRow-errorMessage"};
+                var config = {tagName: "pre", classes: "errorSourceCode ", attributes: {
+                    title: "throw new Error(\"b\");"
+                }};
                 FBTest.waitForDisplayedElement("console", config, function()
                 {
                     var panelNode = FBTest.getPanel("console").panelNode;
                     var row = panelNode.querySelector(".logRow.logRow-errorMessage");
 
                     // Verify displayed text.
-                    var reTextContent = /\s*b\s*throw new Error\(\"b\"\)\;\s*issue6...me\.html\s*\(line\s*17\)\s*/;
+                    var reTextContent = /\s*Error: b\s*throw new Error\("b"\);\s*issue6...me\.html\s*\(line\s*17, col 8\)\s*/;
                     FBTest.compare(reTextContent, row.textContent, "Text content must match.");
 
                     // Show stack trace.
