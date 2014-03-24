@@ -1,10 +1,9 @@
-var FF3p6OrLess = FBTest.compareFirefoxVersion("3.6.*") <= 0;
-
 function runTest()
 {
-    FBTest.openNewTab(basePath + "console/testErrors.html", function(win)
+    FBTest.openNewTab(basePath + "console/testErrors.html", (win) =>
     {
-        FBTest.enablePanels(["console", "script"], function() {
+        FBTest.enablePanels(["console", "script"], () =>
+        {
             fireTest(win, 0);
         });
     });
@@ -12,9 +11,6 @@ function runTest()
 
 function fireTest(win, ith)
 {
-    var syntaxErrorMsg = FF3p6OrLess ? "missing ; before statement" :
-        /identifier starts immediately after numeric literal/;
-
     var buttons = [
         "syntaxError",
         "shallowError",
@@ -25,7 +21,7 @@ function fireTest(win, ith)
     ];
 
     var titles = [
-        syntaxErrorMsg,
+        /identifier starts immediately after numeric literal/,
         /foops is not defined/,
         /B3 is not defined/,
         /uncaught exception: hi/,
@@ -47,34 +43,32 @@ function fireTest(win, ith)
         return;
     }
 
-    var panelDoc = FBTest.getPanelDocument();
-    var lookForLogRow = new MutationRecognizer(panelDoc.defaultView, "div",
-        {"class": "logRow-errorMessage"});
+    var config = {
+        tagName: "div",
+        classes: "logRow-errorMessage",
+        onlyMutations: true
+    };
 
-    lookForLogRow.onRecognize(function sawLogRow(elt)
+    FBTest.waitForDisplayedElement("console", config, (elt) =>
     {
-        FBTest.progress("matched logRow-errorMessage with "+ith, elt);
+        FBTest.progress("matched logRow-errorMessage with " + ith, elt);
         checkConsoleLogMessage(buttons[ith], elt, titles[ith], sources[ith]);
-        setTimeout(function bindArgs() { return fireTest(win, ith+1); });
+        setTimeout(() => fireTest(win, ith + 1));
     });
 
-    FBTest.progress("waiting for "+lookForLogRow.getDescription());
-
-    var button = win.document.getElementById(buttons[ith]);
-    FBTest.progress("clicking "+button.getAttribute("id"));
-    FBTest.click(button);
+    FBTest.clickContentButton(win, buttons[ith]);
 }
 
 function checkConsoleLogMessage(button, log, expectedTitle, expectedSource)
 {
-    var title = FW.FBL.getElementByClass(log, "errorTitle");
-    var source = FW.FBL.getElementByClass(log, "errorSource");
+    var title = log.getElementsByClassName("errorTitle")[0];
+    var source = log.getElementsByClassName("errorSource")[0];
 
-    FBTest.compare(expectedTitle, title.textContent, "The "+button+
+    FBTest.compare(expectedTitle, title.textContent, "The " + button +
         " error message must be correct.");
     if (expectedSource)
     {
-        var isCorrect = FBTest.compare(expectedSource, source.textContent, "The "+button+
+        var isCorrect = FBTest.compare(expectedSource, source.textContent, "The " + button +
             " error source must be correct.");
         if (!isCorrect)
         {
@@ -86,21 +80,21 @@ function checkConsoleLogMessage(button, log, expectedTitle, expectedSource)
                 var expected = expectedSource.charAt(i);
                 var was = source.textContent.charAt(i);
                 if (expected != was)
-                    FBTest.progress(" source differs at "+i+" |"+expected+"| vs |"+was+"|");
+                    FBTest.progress(" source differs at " + i + " |" + expected + "| vs |" + was + "|");
             }
 
             if (expectedSource.length < source.textContent.length)
             {
-                FBTest.progress("The error source has "+source.textContent.length+
-                    " characters, next charCodeAt is |"+source.textContent.charAt(min)+
-                    "|("+source.textContent.charCodeAt(min)+")");
+                FBTest.progress("The error source has " + source.textContent.length +
+                    " characters, next charCodeAt is |" + source.textContent.charAt(min) +
+                    "|(" + source.textContent.charCodeAt(min) + ")");
             }
 
             if (expectedSource.length > source.textContent.length)
             {
-                FBTest.progress("The expected source has "+expectedSource.length+
-                    " characters, next charCodeAt is |"+expectedSource.charAt(min)+
-                    "|("+expectedSource.charCodeAt(min)+")");
+                FBTest.progress("The expected source has " + expectedSource.length +
+                    " characters, next charCodeAt is |" + expectedSource.charAt(min) +
+                    "|(" + expectedSource.charCodeAt(min) + ")");
             }
         }
         else

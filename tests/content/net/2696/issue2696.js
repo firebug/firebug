@@ -5,23 +5,17 @@ function runTest()
     FBTest.setPref("showXMLHttpRequests", false);
 
     // 1) Load test case page
-    FBTest.openNewTab(basePath + "net/2696/issue2696.html", function(win)
+    FBTest.openNewTab(basePath + "net/2696/issue2696.html", (win) =>
     {
         // 2) Open Firebug and enable the Net panel.
-        FBTest.openFirebug(function()
+        FBTest.openFirebug(() =>
         {
-            FBTest.enableNetPanel(function(win)
+            // 3) Select Net panel
+            FBTest.enableNetPanel(() =>
             {
-                // 3) Select Net panel
-                var panel = FW.Firebug.chrome.selectPanel("net");
-
                 // Asynchronously wait for the request beeing displayed.
-                onRequestDisplayed(function(netRow)
+                FBTest.waitForDisplayedElement("net", null, (netRow) =>
                 {
-                    var panel = FW.Firebug.chrome.selectPanel("net");
-                    var netRow = FW.FBL.getElementByClass(panel.panelNode, "netRow", "category-xhr",
-                        "hasHeaders", "loaded");
-
                     FBTest.ok(netRow, "There must be just one xhr request.");
                     if (!netRow)
                         return FBTest.testDone();
@@ -32,33 +26,23 @@ function runTest()
                     var netInfoRow = netRow.nextSibling;
                     FBTest.expandElements(netInfoRow, "netInfoResponseTab");
 
-                    var responseBody = FW.FBL.getElementByClass(panel.panelNode, "netInfoResponseText",
-                        "netInfoText");
+                    var responseBody = netInfoRow.
+                        getElementsByClassName("netInfoResponseText netInfoText")[0];
 
                     // 6) Verify response
-                    FBTest.ok(responseBody, "Response tab must exist");
-                    if (responseBody)
+                    if (FBTest.ok(responseBody, "Response tab must exist"))
+                    {
                         FBTest.compare("Test response for 2696.",
                             responseBody.textContent, "Test response must match.");
+                    }
 
                     // 7) Finish test
                     FBTest.testDone();
                 });
 
                 // 4) Execute test by clicking on the 'Execute Test' button.
-                FBTest.click(win.document.getElementById("testButton"));
+                FBTest.clickContentButton(win, "testButton");
             });
         });
     });
-}
-
-function onRequestDisplayed(callback)
-{
-    // Create listener for mutation events.
-    var doc = FBTest.getPanelDocument();
-    var recognizer = new MutationRecognizer(doc.defaultView, "tr",
-        {"class": "netRow category-xhr loaded"});
-
-    // Wait for a XHR log to appear in the Net panel.
-    recognizer.onRecognizeAsync(callback);
 }

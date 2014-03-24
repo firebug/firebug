@@ -1,14 +1,13 @@
 var testProp = "0123456789012345678901234567890123456789012345678901234567890123456789";
 function runTest()
 {
-    FBTest.openNewTab(basePath + "console/3029/issue3029.html", function(win)
+    FBTest.openNewTab(basePath + "console/3029/issue3029.html", (win) =>
     {
         FBTest.openFirebug(function()
         {
             FBTest.enableConsolePanel(function(win)
             {
-                var panel = FW.Firebug.chrome.selectPanel("console");
-                onTextDisplayed(panel, "myProperty", function(elt)
+                FBTest.waitForDisplayedText("console", "myProperty", (elt) =>
                 {
                     // Expand the property (the label must be clicked).
 
@@ -31,11 +30,4 @@ function runTest()
             });
         });
     });
-}
-
-// xxxHonza: this could be part of the shared lib.
-function onTextDisplayed(panel, text, callback)
-{
-    var rec = new MutationRecognizer(panel.document.defaultView, "Text", {}, text);
-    rec.onRecognizeAsync(callback);
 }

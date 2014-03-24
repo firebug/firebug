@@ -4,17 +4,18 @@
 // 4) Verify UI in the Console panel.
 function runTest()
 {
-    FBTest.openNewTab(basePath + "console/3503/issue3503.html", function(win)
+    FBTest.openNewTab(basePath + "console/3503/issue3503.html", (win) =>
     {
         FBTest.sysout("issue3503; Test page loaded.");
 
-        FBTest.enableConsolePanel(function()
+        FBTest.enableConsolePanel(() =>
         {
-            var doc = FBTest.getPanelDocument();
-            var recognizer = new MutationRecognizer(doc.defaultView, "div",
-                {"class": "logRow logRow-log"});
+            var config = {
+                tagName: "div",
+                classes: "logRow logRow-log"
+            };
 
-            recognizer.onRecognize(function(element)
+            FBTest.waitForDisplayedElement("console", config, (element) =>
             {
                 var log = element.getElementsByClassName("objectBox objectBox-array")[0];
                 FBTest.ok(log, "There must be a log row");

@@ -3,19 +3,18 @@ function runTest()
     var prefOrigValue = FBTest.getPref("showXMLHttpRequests");
     FBTest.setPref("showXMLHttpRequests", true);
 
-    FBTest.openNewTab(basePath + "console/2271/issue2271.html", function(win)
+    FBTest.openNewTab(basePath + "console/2271/issue2271.html", (win) =>
     {
-        FBTest.openFirebug(function()
+        FBTest.openFirebug(() =>
         {
-            FBTest.enableConsolePanel(function ()
+            FBTest.enableConsolePanel(() =>
             {
-                // Create listener for mutation events.
-                var doc = FBTest.getPanelDocument();
-                var recognizer = new MutationRecognizer(doc.defaultView, "div",
-                    {"class": "logRow logRow-errorMessage"});
+                var config = {
+                    tagName: "div",
+                    classes: "logRow logRow-errorMessage"
+                };
 
-                // Wait for an error log in the Console panel.
-                recognizer.onRecognize(function (element)
+                FBTest.waitForDisplayedElement("console", config, (element) =>
                 {
                     // Verify error log in the console.
                     var expectedResult = /\s*document.getElementId is not a function/;

@@ -9,29 +9,14 @@ function runTest()
             FBTest.enablePanels(["net", "script"], function()
             {
                 // A suite of asynchronous tests.
-                var testSuite = [];
-                testSuite.push(function(callback)
-                {
-                    addBreakpoint(win, callback);
-                });
-                testSuite.push(function(callback)
-                {
-                    breakOnXHR(win, 45, callback);
-                });
-                testSuite.push(function(callback)
-                {
-                    setCondition(win, callback);
-                });
-                testSuite.push(function(callback)
-                {
-                    breakOnXHR(win, 45, callback);
-                });
-                testSuite.push(function(callback)
-                {
-                    removeBreakpoint(win, callback);
-                });
+                var tasks = new FBTest.TaskList();
+                tasks.push(addBreakpoint, win);
+                tasks.push(breakOnXHR, win, 45);
+                tasks.push(setCondition, win);
+                tasks.push(breakOnXHR, win, 45);
+                tasks.push(removeBreakpoint, win);
 
-                FBTest.runTestSuite(testSuite, function()
+                tasks.run(function()
                 {
                     FBTest.testDone();
                 });
@@ -43,21 +28,16 @@ function runTest()
 // ************************************************************************************************
 // Asynchronous Tests
 
-function addBreakpoint(win, callback)
+function addBreakpoint(callback, win)
 {
     FBTest.sysout("net.breakpoints.CB; addBreakpoint");
 
-    var panel = FBTest.selectPanel("net");
+    var panel = FBTest.getSelectedPanel();
 
     panel.context.netProgress.breakpoints.breakpoints = [];
 
-    // Create listener for mutation events.
-    var doc = FBTest.getPanelDocument();
-    var recognizer = new MutationRecognizer(doc.defaultView, "tr",
-        {"class": "netRow category-xhr hasHeaders loaded"});
-
     // Wait till the XHR request is visible
-    recognizer.onRecognize(function(row)
+    FBTest.waitForDisplayedElement("net", null, (row) =>
     {
         FBTest.sysout("net.breakpoints.CB; XHR visible");
 
@@ -73,7 +53,7 @@ function addBreakpoint(win, callback)
         waitForRepObject();
     });
 
-    pushButton(win, "executeRequest1");
+    FBTest.clickContentButton(win, "executeRequest1");
 
     FBTest.sysout("net.breakpoints.CB; XHR executed");
 }
@@ -97,7 +77,7 @@ function createBreakpoint(panel, repObject, callback)
     callback();
 }
 
-function breakOnXHR(win, lineNo, callback)
+function breakOnXHR(callback, win, lineNo)
 {
     FBTest.sysout("net.breakpoints.CB; breakOnXHR");
 
@@ -113,10 +93,10 @@ function breakOnXHR(win, lineNo, callback)
         callback();
     });
 
-    pushButton(win, "executeRequest1");
+    FBTest.clickContentButton(win, "executeRequest1");
 }
 
-function setCondition(win, callback)
+function setCondition(callback, win)
 {
     FBTest.progress("net.breakpoints.CB; setCondition");
 
@@ -131,14 +111,13 @@ function setCondition(win, callback)
     callback();
 }
 
-function removeBreakpoint(win, callback)
+function removeBreakpoint(callback, win)
 {
     FBTest.progress("net.breakpoints.CB; removeBreakpoint");
 
     var panel = FBTest.selectPanel("net");
 
-    var row = FW.FBL.getElementByClass(panel.panelNode, "netRow",
-        "category-xhr", "hasHeaders", "loaded");
+    var row = panel.panelNode.getElementsByClassName("netRow category-xhr hasHeaders loaded")[0];
     FBTest.sysout("net.breakpoints.CB; removeBreakpoint, row", row.repObject);
 
     // Remove breakpoint
@@ -149,12 +128,4 @@ function removeBreakpoint(win, callback)
     FBTest.ok(!bp, "XHR breakpoint for 'process1.php' must not exist.");
 
     callback();
-}
-
-// ************************************************************************************************
-// Helpers
-
-function pushButton(win, buttonId)
-{
-    FBTest.click(win.document.getElementById(buttonId));
 }

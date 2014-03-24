@@ -6,8 +6,6 @@ function runTest()
         {
             FBTest.enableConsolePanel(function()
             {
-                FBTest.selectPanel("console");
-
                 var tests = [];
                 tests.push(test1);
                 tests.push(test2);
@@ -52,12 +50,10 @@ function test2(callback)
 
 function reload(callback)
 {
-    FBTest.reload();
-
-    // Wait for the last log.
-    var doc = FBTest.getPanelDocument();
-    var recognizer = new MutationRecognizer(doc.defaultView, "Text", null, "Doing addOnLoad...");
-    recognizer.onRecognizeAsync(callback);
+    FBTest.reload(() =>
+    {
+        FBTest.waitForDisplayedText("console", "Doing addOnLoad...", callback);
+    });
 }
 
 // ************************************************************************************************
