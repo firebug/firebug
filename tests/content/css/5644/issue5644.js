@@ -76,7 +76,7 @@ function runTest()
                     var prop = findProperty(name);
 
                     // Try to hit the disable button.
-                    FBTest.synthesizeMouse(prop, 2, 2);
+                    FBTest.synthesizeMouse(prop, 4, 4);
                     callback();
                 };
 

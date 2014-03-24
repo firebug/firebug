@@ -55,5 +55,5 @@ function clickToolbarButton(buttonID, ctrlKey)
     FBTest.sysout("Click toolbar button " + buttonID, button);
 
     var eventDetails = {ctrlKey: ctrlKey};
-    FBTest.synthesizeMouse(button, 2, 2, eventDetails);
+    FBTest.synthesizeMouse(button, 4, 4, eventDetails);
 }
