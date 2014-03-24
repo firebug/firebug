@@ -166,11 +166,11 @@ SourceEditor.prototype =
         this.parentNode = parentNode;
 
         var doc = parentNode.ownerDocument;
+        this.win = doc.defaultView;
 
         // Unwrap Firebug content view (panel.html). This view is running in
         // content mode with no chrome privileges.
-        var contentView = Wrapper.getContentView(doc.defaultView);
-        this.contentView = contentView;
+        var contentView = Wrapper.getContentView(this.win);
 
         Trace.sysout("sourceEditor.onInit; " + contentView.CodeMirror);
 
@@ -179,9 +179,9 @@ SourceEditor.prototype =
         // The config object passed to the view must be content-accessible.
         // CodeMirror writes to it, so make sure properties are writable (we
         // cannot use plain cloneIntoCMScope).
-        var newConfig = Cu.createObjectIn(contentView);
+        var newConfig = new this.win.Object();
         for (var prop in config)
-            newConfig[prop] = Wrapper.cloneIntoContentScope(contentView, config[prop]);
+            newConfig[prop] = Wrapper.cloneIntoContentScope(this.win, config[prop]);
         Cu.makeObjectPropsNormal(newConfig);
 
         var self = this;
@@ -556,12 +556,13 @@ SourceEditor.prototype =
 
     cloneIntoCMScope: function(obj)
     {
-        return Wrapper.cloneIntoContentScope(this.contentView, obj);
+        return Wrapper.cloneIntoContentScope(this.win, obj);
     },
 
     getCodeMirrorSingleton: function()
     {
-        return this.contentView.CodeMirror;
+        var contentView = Wrapper.getContentView(this.win);
+        return contentView.CodeMirror;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -863,7 +864,7 @@ SourceEditor.prototype =
     {
         if (saveCursorLocation)
             this.savedCursorLocation = this.getSelection();
-        this.contentView.blur();
+        this.win.blur();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
