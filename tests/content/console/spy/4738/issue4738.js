@@ -1,10 +1,10 @@
 function runTest()
 {
-    FBTest.openNewTab(basePath + "console/spy/4738/issue4738.html", function(win)
+    FBTest.openNewTab(basePath + "console/spy/4738/issue4738.html", (win) =>
     {
-        FBTest.openFirebug(function()
+        FBTest.openFirebug(() =>
         {
-            FBTest.enableConsolePanel(function(win)
+            FBTest.enableConsolePanel(() =>
             {
                 var options = {
                     tagName: "div",
@@ -12,22 +12,22 @@ function runTest()
                     counter: 2
                 };
 
-                FBTest.waitForDisplayedElement("console", options, function(row)
+                FBTest.waitForDisplayedElement("console", options, (row) =>
                 {
-                    var panel = FBTest.selectPanel("console");
+                    var panel = FBTest.getSelectedPanel();
                     var requests = panel.panelNode.getElementsByClassName(
                         "logRow logRow-spy error loaded");
                     FBTest.compare(2, requests.length, "There must be 2 requests");
 
+                    var requestHead = panel.panelNode.getElementsByClassName("spyHead")[0];
+
                     function executeContextMenuCommand()
                     {
-                        FBTest.executeContextMenuCommand(
-                            requests[0].getElementsByClassName("spyTitle")[0],
-                            "fbSpyCopyLocation");
+                        FBTest.executeContextMenuCommand(requestHead, "fbSpyCopyLocation");
                     }
 
                     var expected = /path1$/;
-                    FBTest.waitForClipboard(expected, executeContextMenuCommand, function(text)
+                    FBTest.waitForClipboard(expected, executeContextMenuCommand, (text) =>
                     {
                         FBTest.compare(expected, text, "Proper URL must be copied. Current: " +
                             text);
@@ -35,7 +35,7 @@ function runTest()
                     });
                 });
 
-                FBTest.click(win.document.getElementById("testButton"));
+                FBTest.clickContentButton(win, "testButton");
             });
         });
     });
