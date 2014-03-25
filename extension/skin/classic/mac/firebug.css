@@ -11,7 +11,6 @@
     font-size: 11px;
     border: none;
     height: calc(22rem + 9px);
-    background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
     padding-left: 25px;
 }
 
@@ -54,8 +53,6 @@
     height: calc(22rem + 10px);
     width: 6px;
     background-color: -moz-dialog;
-    background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
-    border-bottom: 1px solid #bebebe;
     cursor: default;
 }
 
@@ -76,8 +73,14 @@
 /*************************************************************************************************/
 /* Toolbars */
 
-#fbToolbox, #fbCommandToolbar {
+#fbToolbox {
+}
+
+#fbToolbox,
+#fbCommandToolbar,
+#fbPanelSplitter > #fbPanelSplitterBox {
     border-bottom: 1px solid #bebebe;
+    background: url('chrome://browser/skin/Toolbar-background-noise.png'), linear-gradient(#EDEDED, #D3D3D3)
 }
 
 #fbToolbar {
@@ -96,7 +99,7 @@
 }
 
 #fbPanelBar1-tabBox {
-    background: linear-gradient(#f1f1f1, #d2d2d2) no-repeat 0 0;
+    -moz-appearance: -moz-window-titlebar;
 }
 
 #fbPanelBar2-tabBox {
