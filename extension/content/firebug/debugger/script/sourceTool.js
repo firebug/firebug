@@ -330,16 +330,20 @@ DynamicSourceCollector.prototype =
         // xxxHonza: ugh, I don't know how to distinguish between static scriptElement
         // scripts and those who are dynamically created.
         // Bug: https://bugzilla.mozilla.org/show_bug.cgi?id=983297
-        // xxxHonza: another workaround, a script element must be appended dynamically
-        // if the document state is set to 'complete'.
-        var state = this.context.window.document.readyState;
-        if (introType == "scriptElement" && state != "complete")
+        if (introType == "scriptElement")
         {
-            Trace.sysout("sourceTool.onNewScript; Could be dynamic script, " +
-                "but we can't be sure. See bug 983297 " + script.url + ", " +
-                introType, script);
+            // xxxHonza: another workaround, a script element is appended
+            // dynamically if the parent document state is already set to 'complete'.
+            var element = script.source.element.unsafeDereference();
+            var state = element.ownerDocument.document.readyState;
+            if (state != "complete")
+            {
+                Trace.sysout("sourceTool.onNewScript; Could be dynamic script, " +
+                    "but we can't be sure. See bug 983297 " + script.url + ", " +
+                    introType, script);
 
-            return this.originalOnNewScript.apply(dbg, arguments);
+                return this.originalOnNewScript.apply(dbg, arguments);
+            }
         }
 
         var scriptType = dynamicTypesMap[introType];
