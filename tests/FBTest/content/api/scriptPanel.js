@@ -97,7 +97,7 @@ this.waitForBreakInDebugger = function(chrome, lineNo, breakpoint, callback)
     FBTest.progress("waitForBreakInDebugger in chrome.window: " + chrome.window.location);
 
     // Get document of Firebug's panel.html
-    var panel = chrome.getSelectedPanel();
+    var panel = chrome.selectPanel("script");
     if (!panel)
     {
         FBTest.ok(panel, "Firebug needs a selected panel!");
@@ -107,18 +107,22 @@ this.waitForBreakInDebugger = function(chrome, lineNo, breakpoint, callback)
     var actor = FW.Firebug.DebuggerLib.getThreadActor(panel.context.browser);
     FBTest.sysout("waitForBreakInDebugger; actor: " + (actor ? actor._state : "no tab actor"));
 
-    var doc = panel.panelNode.ownerDocument;
-
-    // Complete attributes that must be set on sourceRow element.
-    var attributes = {"class": "CodeMirror-debugLocation"};
+    var config = {
+        target: panel.panelNode.getElementsByClassName("CodeMirror-code")[0],
+        tagName: "div",
+        attributes: {
+            class: "CodeMirror-debugLocation"
+        }
+    }
+    // Complete attributes that must be set on sourceRow element
     if (breakpoint)
-        attributes["class"] += " CodeMirror-breakpoint";
+        config.attributes.class += " CodeMirror-breakpoint";
 
     // Wait for the UI modification that shows the source line where break happened.
-    var lookBP = new MutationRecognizer(doc.defaultView, "div", attributes);
+    var lookBP = new MutationRecognizer(config);
     lookBP.onRecognizeAsync(function onBreak(sourceRow)
     {
-        var panel = chrome.getSelectedPanel();
+        var panel = FBTest.getSelectedPanel();
         if (panel)
         {
             setTimeout(function()
@@ -150,10 +154,11 @@ this.waitForBreakInDebugger = function(chrome, lineNo, breakpoint, callback)
             FBTest.progress("onRecognizeAsync; check source line number, exe_line" +
                 (breakpoint ? " and breakpoint" : ""));
 
-            var panel = chrome.getSelectedPanel();
+            var panel = FBTest.getSelectedPanel();
             FBTest.compare("script", panel.name, "The script panel should be selected");
 
-            var currentLineElt = sourceRow.querySelector(".CodeMirror-linenumber");
+            FBTrace.sysout("sourceRow", sourceRow);
+            var currentLineElt = sourceRow.getElementsByClassName("CodeMirror-linenumber")[0];
             var currentLineNo = parseInt(currentLineElt.textContent, 10);
             FBTest.compare(lineNo, currentLineNo, "The break must be on line " + lineNo + ".");
 

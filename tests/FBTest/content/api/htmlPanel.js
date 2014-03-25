@@ -23,32 +23,26 @@ this.waitForHtmlMutation = function(chrome, tagName, callback)
     if (!chrome)
         chrome = FW.Firebug.chrome;
 
-    // FIXME: xxxpedro variable not used
-    var htmlPanel = FBTest.selectPanel("html");
-    var doc = FBTest.getPanelDocument();
-    var view = doc.defaultView;
+    var panelNode = FBTest.selectPanel("html").panelNode;
     var attributes = {"class": "mutated"};
 
-    // Make sure that random mutations coming from other pages (but still in the
-    // same view (panel.html) are ignored.
-    function matches(element)
-    {
-        var panel = FW.Firebug.getElementPanel(element);
-        if (panel != htmlPanel)
-            return null;
-
-        return MutationRecognizer.prototype.matches.apply(this, arguments);
-    }
-
-    // Wait for mutation event. The HTML panel will set "mutate" class on the
+    // Wait for mutation event. The HTML panel will set 'mutate' class on the
     // corresponding element.
-    var mutated = new MutationRecognizer(view, tagName, attributes);
-    mutated.matches = matches;
+    var config = {
+        target: panelNode,
+        tagName: tagName,
+        attributes: attributes
+    }
+    var mutated = new MutationRecognizer(config);
     mutated.onRecognize(function onMutate(node)
     {
-        // Now wait till the HTML panel unhighlight the element (removes the mutate class)
-        var unmutated = new MutationRecognizer(view, tagName, null, null, attributes);
-        unmutated.matches = matches;
+        var unhighlightConfig = {
+            target: node,
+            attributes: attributes,
+            removed: true
+        }
+        // Now wait till the HTML panel unhighlight the element (removes the 'mutate' class)
+        var unmutated = new MutationRecognizer(unhighlightConfig);
         unmutated.onRecognizeAsync(function onUnMutate(node)
         {
             callback(node);

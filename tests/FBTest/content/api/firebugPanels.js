@@ -553,14 +553,12 @@ this.waitForDisplayedElement = function(panelName, config, callback)
     if (!config.counter)
         config.counter = 1;
 
-    this.selectPanel(panelName);
+    var panelNode = this.selectPanel(panelName).panelNode;
 
     // If config.onlyMutations is not true, let's check the UI since the nodes we
     // are waiting for might me already displayed.
     if (!config.onlyMutations)
     {
-        var panelNode = this.getPanel(panelName).panelNode;
-
         if (config.id)
         {
             var node = panelNode.ownerDocument.getElementById(config.id);
@@ -597,7 +595,7 @@ this.waitForDisplayedElement = function(panelName, config, callback)
     var mutationAttributes = {};
     if (config.id)
         mutationAttributes.id = config.id;
-    else
+    else if (config.classes)
         mutationAttributes.class = config.classes;
 
     if (config.attributes)
@@ -606,7 +604,13 @@ this.waitForDisplayedElement = function(panelName, config, callback)
             mutationAttributes[prop] = config.attributes[prop];
     }
 
-    var recognizer = new MutationRecognizer(doc.defaultView, config.tagName, mutationAttributes);
+    var mutationRecognizerConfig = {
+        target: config.target || panelNode,
+        tagName: config.tagName,
+        attributes: mutationAttributes,
+        text: config.text
+    }
+    var recognizer = new MutationRecognizer(mutationRecognizerConfig);
 
     var tempCallback = callback;
     if (config.counter > 1)
@@ -634,10 +638,15 @@ this.waitForDisplayedElement = function(panelName, config, callback)
  * @param {Object} text Text to wait for.
  * @param {Object} callback Executed as soon as the text is displayed.
  */
-this.waitForDisplayedText = function(panelName, text, callback)
+this.waitForDisplayedText = function(panelName, config, callback)
 {
-    var panel = this.selectPanel(panelName);
-    var rec = new MutationRecognizer(panel.document.defaultView, "Text", {}, text);
+    var config = {
+        target: typeof config === "object" && config.target ?
+            config.target : this.selectPanel(panelName).panelNode,
+        text: typeof config === "object" && config.text ? config.text : config
+    };
+
+    var rec = new MutationRecognizer(config);
     rec.onRecognizeAsync(callback);
 };
 

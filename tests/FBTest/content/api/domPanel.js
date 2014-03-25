@@ -30,12 +30,19 @@ this.waitForDOMProperty = function(propName, callback, checkAvailability)
             return callback(row);
     }
 
-    var recognizer = new MutationRecognizer(panel.document.defaultView,
-        "Text", {}, propName);
+    var config = {
+        target: panel.panelNode,
+        tagName: "tr",
+        attributes: {
+            "class": "memberRow"
+        },
+        text: propName
+    };
+    var recognizer = new MutationRecognizer(config);
 
     recognizer.onRecognizeAsync(function(element)
     {
-        var row = FW.FBL.getAncestorByClass(element, "memberRow");
+        var row = element.getElementsByClassName("memberRow")[0];
 
         // If the memberRow isn't there, the mutation comes from different panel (console?).
         if (!row)
