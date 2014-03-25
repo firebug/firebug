@@ -72,10 +72,6 @@ function compareFrames(list, callback)
 
         var stackFrames = row.getElementsByClassName("objectBox-stackFrame");
 
-        var arr = Array.prototype.slice.call(stackFrames);
-        var arr2 = arr.map(function(item) { return item.textContent; })
-        FBTrace.sysout("!!!stackFrames " + arr2.length, arr2);
-
         // xxxHonza: Also frames from the driver are displayed, so there
         // is actually more (not sure if this is a platform bug).
         //FBTest.compare(list.length, stackFrames.length - 1,
