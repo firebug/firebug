@@ -34,7 +34,7 @@ function runTest()
 
                     // Create DOM breakpoint for the property
                     var breakpointColumn = row.getElementsByClassName("sourceLine")[0];
-                    FBTrace.sysout("breakpointColumn", breakpointColumn);
+                    FBTest.sysout("breakpointColumn", breakpointColumn);
                     FBTest.click(breakpointColumn);
                 }, true);
             });
