@@ -12,6 +12,7 @@
     border: none;
     height: calc(22rem + 9px);
     background-image: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    padding-left: 25px;
 }
 
 #fbCommandArrow,
@@ -75,13 +76,13 @@
 /*************************************************************************************************/
 /* Toolbars */
 
-#fbToolbox {
+#fbToolbox, #fbCommandToolbar {
     border-bottom: 1px solid #bebebe;
 }
 
 #fbToolbar {
     font-size: 11px;
-    padding-left: 4px;
+    padding-left: 10px;
     border-bottom: none;
 }
 
@@ -257,6 +258,10 @@
     filter: url(resource://firebugui/filters.svg#brightenedGrayscale);
 }
 
+#fbToggleSidePanelsBox2 {
+    padding-bottom: 0;
+}
+
 /********************************************************************************************/
 /* Quick Info Box */
 
@@ -275,7 +280,7 @@
 
 .panelTabBox {
     border-bottom: 1px solid #bebebe;
-    padding: 0;
+    padding-left: 6px;
     overflow: hidden;
 }
 
@@ -348,7 +353,7 @@ panelTab[selected="true"] > panelTabMenu {
 
 .panelStatusLabel {
     margin: 1px 0 0 0;
-    padding: 2px 4px;
+    padding: 3px 4px;
     color: #565656;
 }
 
@@ -374,6 +379,20 @@ panelTab[selected="true"] > panelTabMenu {
     border-radius: 9px;
 }
 
+.toolbarbutton-menubutton-dropmarker {
+    padding-top: 3px;
+}
+
+toolbarbutton[type=menu-button] > .toolbarbutton-menubutton-button {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+toolbarbutton[type="menu"],
+toolbarbutton[type="menu"] > toolbarbutton {
+    padding-left: 2px;
+}
+
 .toolbarbutton {
     font-weight: normal;
 }
@@ -390,8 +409,8 @@ panelTab[selected="true"] > panelTabMenu {
 .toolbar-text-menubutton:hover:not([disabled="true"]) ,
 .toolbar-text-button[checked="true"]:hover:not([disabled="true"]),
 .toolbar-text-menubutton[open="true"]:hover:not([disabled="true"]) {
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .5) inset;
-    background: rgba(0, 0, 0, 0.2);
+    background: #c3c3c3;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .3) inset;
 }
 
 .toolbar-text-button:hover:active:not([disabled="true"]),
@@ -403,14 +422,15 @@ panelTab[selected="true"] > panelTabMenu {
 .toolbar-text-button:hover:not([disabled="true"]) > .toolbarbutton-text,
 .toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-menu-dropmarker,
 .toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-text {
-    color: #4a4a4a;
-    text-shadow: 0 1px rgba(255, 255, 255, .4);
+    color: #fff;
+    text-shadow: 0 1px rgba(0, 0, 0, .4);
 }
 
 .toolbar-text-button[checked="true"]:not([disabled="true"]),
 .toolbar-text-menubutton[open="true"]:not([disabled="true"]) {
-    color: #4a4a4a;
-    text-shadow: 0 1px rgba(255, 255, 255, .4);
+    background: #aaa;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .3) inset !important;
+    text-shadow: 0 1px rgba(0, 0, 0, .4);
 }
 
 .toolbar-text-menubutton:hover:active:not([disabled="true"]) > .toolbarbutton-text,
@@ -425,7 +445,7 @@ panelTab[selected="true"] > panelTabMenu {
 
 .toolbarbutton[checked="true"] > .toolbarbutton-text,
 .toolbar-text-button[checked="true"] > .toolbarbutton-text {
-    color: #4a4a4a;
+    color: #fff;
 }
 
 .toolbarbutton[disabled=true] > .toolbarbutton-text,
