@@ -86,10 +86,14 @@ function initPropertyData()
 
     // We block initial, inherit and unset from appearing in results, instead
     // we manually add them to auto-completion when they constitute the only
-    // value in an editor. -moz-calc is also removed, because calc should be
-    // used instead, and it can be annoying when writing negative numbers.
+    // value in an editor. Some prexed values are also removed in favor of
+    // standardized equivalents.
     var forbiddenValues = new Set(universalValues.values());
     forbiddenValues.add("-moz-calc");
+    forbiddenValues.add("-moz-linear-gradient");
+    forbiddenValues.add("-moz-radial-gradient");
+    forbiddenValues.add("-moz-repeating-linear-gradient");
+    forbiddenValues.add("-moz-repeating-radial-gradient");
     var filterValues = function(list)
     {
         return list.filter((value) => !forbiddenValues.has(value));
