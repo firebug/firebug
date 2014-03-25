@@ -289,7 +289,7 @@ panelTab {
     margin: 1px 1px 0 3px;
     border: 1px solid transparent;
     border-bottom: none;
-    border-radius: 4px 4px 0 0;
+    border-radius: 8px 8px 0 0;
     padding: 5px 8px 7px 8px;
     font-size: 11px;
     font-weight: bold;
@@ -303,9 +303,9 @@ panelTab[aria-disabled="true"] .panelTab-text {
 }
 
 panelTab[selected="true"] {
-    border: 1px solid #A0A0A0;
+    border: 1px solid #bebebe;
     border-bottom: none;
-    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6)) no-repeat 0 0;
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(234, 234, 234, 1)) no-repeat 0 0;
     color: inherit;
 }
 
