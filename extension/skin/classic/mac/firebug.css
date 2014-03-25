@@ -234,6 +234,10 @@
     list-style-image: url(chrome://firebug/skin/mac/minimize.svg);
 }
 
+#fbToggleCommandEditorBox .column {
+    width: 29px;
+}
+
 :-moz-any(#fbMinimizeButton,
           #fbToggleCommandEditor,
           #fbDetachButton,
