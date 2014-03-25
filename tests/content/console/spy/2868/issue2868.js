@@ -15,7 +15,7 @@ function runTest()
                     var responseNode = row.getElementsByClassName(
                         "netInfoResponseText netInfoText")[0];
 
-                    if (FBTest.ok(responseNode, "Response tab must exist in"))
+                    if (FBTest.ok(responseNode, "Response tab must exist for request"))
                     {
                         FBTest.compare("Response for test 2868.", responseNode.textContent,
                             "Response text must match.");
