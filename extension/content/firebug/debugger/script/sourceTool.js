@@ -17,8 +17,9 @@ define([
     "firebug/remoting/debuggerClient",
     "arch/compilationunit",
 ],
-function (Firebug, FBTrace, Obj, Str, Url, Xpath, Tool, ErrorStackTraceObserver, BreakpointStore,
-    BreakpointTool, SourceFile, StackFrame, DebuggerLib, DebuggerClient, CompilationUnit) {
+function (Firebug, FBTrace, Obj, Str, Url, Xpath, Tool, ErrorStackTraceObserver,
+    BreakpointStore, BreakpointTool, SourceFile, StackFrame, DebuggerLib,
+    DebuggerClient, CompilationUnit) {
 
 "use strict";
 
@@ -329,7 +330,10 @@ DynamicSourceCollector.prototype =
         // xxxHonza: ugh, I don't know how to distinguish between static scriptElement
         // scripts and those who are dynamically created.
         // Bug: https://bugzilla.mozilla.org/show_bug.cgi?id=983297
-        if (introType == "scriptElement")
+        // xxxHonza: another workaround, a script element must be appended dynamically
+        // if the document state is set to 'complete'.
+        var state = this.context.window.document.readyState;
+        if (introType == "scriptElement" && state != "complete")
         {
             Trace.sysout("sourceTool.onNewScript; Could be dynamic script, " +
                 "but we can't be sure. See bug 983297 " + script.url + ", " +
