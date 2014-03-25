@@ -75,16 +75,16 @@ MutationRecognizer.prototype.onRecognizeAsync = function(handler, delay)
     var observer = new MutationObserver((mutations) =>
     {
         FBTrace.sysout("FBTest.MutationRecognizer.mutationFilter", mutations);
-        setTimeout(() =>
+        var node = self.mutationFilter.filter(mutations);
+        FBTest.sysout("FBTest.MutationRecognizer.onRecognizeAsync:", node);
+        if (node)
         {
-            var node = self.mutationFilter.filter(mutations);
-            FBTest.sysout("FBTest.MutationRecognizer.onRecognizeAsync:", node);
-            if (node)
+            observer.disconnect();
+            setTimeout(() =>
             {
-                observer.disconnect();
                 handler(node);
-            }
-        }, delay);
+            }, delay);
+        }
     });
 
     FBTrace.sysout("MutationRecognizer.onRecognizeAsync", {target: this.target, config: this.mutationFilter.getMutationObserverConfig()});

@@ -55,27 +55,40 @@ function MutationFilter(config)
  */
 MutationFilter.prototype.filter = function(mutations)
 {
-    function checkAttributes(attributes)
+    function checkAttributes(mutation, attributes, removed)
     {
         for (var name in attributes)
         {
             var attribute = mutation.target.attributes.getNamedItem(name);
-            if (!attribute)
+            if (!removed && !attribute)
                 return false;
 
             if (name === "class")
             {
-                var checkedClassNames = attributes[name].split(" ");
-                var classList = mutation.target.classList;
-                for (var j = 0; j < checkedClassNames.length; j++)
+                if (removed)
                 {
-                    if (!classList.contains(checkedClassNames[j]))
-                        return false;
+                    var checkedClassNames = attributes[name].split(" ");
+                    for (var j = 0; j < checkedClassNames.length; j++)
+                    {
+                        if (mutation.oldValue.contains(checkedClassNames[j]))
+                            return false;
+                    }
+                }
+                else
+                {
+                    var checkedClassNames = attributes[name].split(" ");
+                    var classList = mutation.target.classList;
+                    for (var j = 0; j < checkedClassNames.length; j++)
+                    {
+                        if (!classList.contains(checkedClassNames[j]))
+                            return false;
+                    }
                 }
             }
-            else if (attribute.value !== attributes[name])
+            else
             {
-                return false;
+                return (removed ? attribute.value !== attributes[name] :
+                    attribute.value === attributes[name]);
             }
         }
 
@@ -106,7 +119,7 @@ MutationFilter.prototype.filter = function(mutations)
                 if (!this.attributes)
                     continue;
 
-                if (!checkAttributes(this.attributes))
+                if (!checkAttributes(mutation, this.attributes))
                     continue;
 
                 return mutation.target;
@@ -181,7 +194,8 @@ MutationFilter.prototype.createXPath = function ()
             {
                 var classes = this.attributes[name].split(" ");
                 xpath += "[" + classes.map(
-                    (currentClass) => "contains(@class,'" + currentClass + "')").join(" and ") +
+                    (currentClass) => "contains(concat(' ', normalize-space(@class), ' '), ' " +
+                        currentClass + " ')").join(" and ") +
                     "]";
             }
             else
