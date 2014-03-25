@@ -21,11 +21,15 @@
 /*************************************************************************************************/
 /* Command Line */
 
+#fbCommandArrow,
+.fbCommandLine {
+    font-family: monospace;
+    font-size: 10px;
+}
+
 #fbCommandArrow {
     margin-left: 7px;
-    font-family: monospace;
     color: #0000FF;
-    padding: 2px 0;
 }
 
 .fbCommandLine {
@@ -33,8 +37,6 @@
     margin: 0 0 0 4px !important;
     padding: 2px 0 !important;
     border: none;
-    font-family: monospace;
-    font-size: 12px;
     direction: ltr;
     width: 100%;
     background: none repeat scroll 0% 0% transparent;
