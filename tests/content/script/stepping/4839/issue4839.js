@@ -2,8 +2,7 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "script/stepping/4839/issue4839.html", function(win)
     {
-        FBTest.selectPanel("script");
-        FBTest.enableScriptPanel(function(win)
+        FBTest.enablePanels(["script"], function(win)
         {
             var tasks = new FBTest.TaskList();
             tasks.push(createBreakpoint, 11);
