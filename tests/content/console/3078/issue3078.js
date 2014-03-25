@@ -4,24 +4,30 @@ function runTest()
     {
         FBTest.openFirebug(function()
         {
-            FBTest.enableConsolePanel(function()
+            FBTest.enableConsolePanelAndReload(function()
             {
                 var panel = FBTest.getSelectedPanel();
 
-                // ensure that the console starts scrolled to bottom
+                // Ensure that the console starts scrolled to bottom.
                 panel.clear();
 
-                var scrolled = FW.FBL.isScrolledToBottom(panel.panelNode);
-                if (!scrolled)
+                // Wait that the last log appears.
+                // This ensures that at least one message has been logged and that the scrollbar
+                // has appeared.
+                FBTest.waitForDisplayedText("console", "299", function()
                 {
-                    FBTest.progress("isScrolledToBottom offsetHeight: " +
-                        panel.panelNode.offsetHeight + ", scrollTop: " +
-                        panel.panelNode.scrollTop + ", scrollHeight: " +
-                        panel.panelNode.scrollHeight);
-                }
+                    var scrolled = FW.FBL.isScrolledToBottom(panel.panelNode);
+                    if (!scrolled)
+                    {
+                        FBTest.progress("isScrolledToBottom offsetHeight: " +
+                            panel.panelNode.offsetHeight + ", scrollTop: " +
+                            panel.panelNode.scrollTop + ", scrollHeight: " +
+                            panel.panelNode.scrollHeight);
+                    }
 
-                FBTest.ok(scrolled, "Panel must be scrolled to the bottom");
-                FBTest.testDone();
+                    FBTest.ok(scrolled, "Panel must be scrolled to the bottom");
+                    FBTest.testDone();
+                });
             });
         });
     });
