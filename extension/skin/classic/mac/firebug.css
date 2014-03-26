@@ -81,7 +81,7 @@
 #fbPanelSplitter > #fbPanelSplitterBox,
 .panelTabBox {
     border-bottom: 1px solid #bebebe;
-    background: url('chrome://browser/skin/Toolbar-background-noise.png'), linear-gradient(#EDEDED, #D3D3D3)
+    background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
 }
 
 #fbToolbar {
@@ -100,7 +100,7 @@
 }
 
 #fbPanelBar1-tabBox {
-    -moz-appearance: -moz-window-titlebar;
+    background: linear-gradient(#f1f1f1, #d2d2d2) no-repeat 0 0;
 }
 
 #fbPanelBar2-tabBox {
