@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5879: Crop long CSS values in Computed side panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #element {
+            width: 100px;
+            height: 100px;
+            background: #788CFF url(veryLongImageFileNameForTestingStringCroppingWithinComputedSidePanel.png) center no-repeat;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5879">Issue 5879</a>: Crop long CSS values in Computed side panel</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Computed</em> side panel</li>
+                    <li>
+                        Inspect the blue <code>&lt;div&gt;</code> above with the Firebug icon inside<br/>
+                        <span class="ok">
+                            &rArr; The computed value of the <code>background-image</code> property
+                            inside the <em>Computed</em> side panel should be cropped.
+                        </span>
+                    </li>
+                    <li>
+                        Expand the property
+                        <span class="ok">
+                            &rArr; The value of the <code>#element</code> rule inside the style
+                            trace should be cropped.
+                        </span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Long values inside the <em>Computed</em> side panel should be cropped</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

@@ -9,10 +9,13 @@
 // ********************************************************************************************* //
 // Inspector API
 
-this.inspectElement = function(elt)
+this.inspectElement = function(elt, onlyHover)
 {
     FBTest.clickToolbarButton(FW.Firebug.chrome, "fbInspectButton");
-    FBTest.click(elt);
+    FBTest.mouseOver(elt);
+
+    if (!onlyHover)
+        FBTest.click(elt);
 };
 
 this.inspectUsingFrame = function(elt)
@@ -40,5 +43,10 @@ this.isInspectorActive = function()
     return FW.Firebug.Inspector.inspecting;
 };
 
+this.stopInspecting = function()
+{
+    if (this.isInspectorActive())
+        FBTest.clickToolbarButton(FW.Firebug.chrome, "fbInspectButton");
+};
 // ********************************************************************************************* //
 }).apply(FBTest);
