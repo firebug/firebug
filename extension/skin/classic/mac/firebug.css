@@ -78,7 +78,8 @@
 
 #fbToolbox,
 #fbCommandToolbar,
-#fbPanelSplitter > #fbPanelSplitterBox {
+#fbPanelSplitter > #fbPanelSplitterBox,
+.panelTabBox {
     border-bottom: 1px solid #bebebe;
     background: url('chrome://browser/skin/Toolbar-background-noise.png'), linear-gradient(#EDEDED, #D3D3D3)
 }
