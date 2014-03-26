@@ -342,6 +342,25 @@ panelTab[selected="true"] > panelTabMenu {
     border-bottom: none;
 }
 
+/*************************************************************************************************/
+/* Toggle Side Panels */
+
+.fbToggleSidePanels {
+    list-style-image: url(chrome://firebug-os/skin/collapseSidePanels.svg);
+}
+
+.fbToggleSidePanels.closed {
+    list-style-image: url(chrome://firebug-os/skin/expandSidePanels.svg);
+}
+
+#fbPanelPane[orient="vertical"] .fbToggleSidePanels {
+    list-style-image: url(chrome://firebug-os/skin/collapseSidePanelsVertical.svg);
+}
+
+#fbPanelPane[orient="vertical"] .fbToggleSidePanels.closed {
+    list-style-image: url(chrome://firebug-os/skin/expandSidePanelsVertical.svg);
+}
+
 /************************************************************************************************/
 
 #fbPanelStatus {
