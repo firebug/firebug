@@ -10,7 +10,7 @@
 #fbCommandToolbar {
     font-size: 11px;
     border: none;
-    height: calc(22rem + 9px);
+    height: calc(22rem + 10px);
     padding-left: 25px;
 }
 
@@ -290,7 +290,7 @@ panelTab {
     border: 1px solid transparent;
     border-bottom: none;
     border-radius: 8px 8px 0 0;
-    padding: 5px 8px 7px 8px;
+    padding: 5px 9px 7px 9px;
     font-size: 11px;
     font-weight: bold;
     color: #3a3a3a;
@@ -305,7 +305,7 @@ panelTab[aria-disabled="true"] .panelTab-text {
 panelTab[selected="true"] {
     border: 1px solid #bebebe;
     border-bottom: none;
-    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(234, 234, 234, 1)) no-repeat 0 0;
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(235, 235, 235, 1)) no-repeat 0 0;
     color: inherit;
 }
 
