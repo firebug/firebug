@@ -369,7 +369,7 @@ panelTab[selected="true"] > panelTabMenu {
 /* Ancestor path */
 
 #fbPanelStatus {
-    margin: 2px 5px 3px 0;
+    margin: 1px 5px 3px 0;
     padding: 0 5px;
     overflow: hidden;
 }
@@ -391,7 +391,8 @@ panelTab[selected="true"] > panelTabMenu {
 
 .toolbarbutton,
 .toolbar-text-button,
-.toolbar-text-menubutton {
+.toolbar-text-menubutton,
+.panelStatusLabel {
     -moz-appearance: none;
     margin-top: 5px;
     margin-bottom: 5px;
@@ -402,6 +403,12 @@ panelTab[selected="true"] > panelTabMenu {
     color: #4a4a4a;
     border: none !important;
     border-radius: 9px;
+}
+
+.panelStatusLabel {
+    font-weight: normal;
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
 
 .toolbarbutton-menubutton-dropmarker {
@@ -433,7 +440,8 @@ toolbarbutton[type="menu"] > toolbarbutton {
 .toolbar-text-button:hover:not([disabled="true"]),
 .toolbar-text-menubutton:hover:not([disabled="true"]) ,
 .toolbar-text-button[checked="true"]:hover:not([disabled="true"]),
-.toolbar-text-menubutton[open="true"]:hover:not([disabled="true"]) {
+.toolbar-text-menubutton[open="true"]:hover:not([disabled="true"]),
+.panelStatusLabel:hover:not([disabled="true"]) {
     background: #c3c3c3;
     box-shadow: 0 1px 2px rgba(0, 0, 0, .3) inset;
 }
@@ -446,7 +454,8 @@ toolbarbutton[type="menu"] > toolbarbutton {
 
 .toolbar-text-button:hover:not([disabled="true"]) > .toolbarbutton-text,
 .toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-menu-dropmarker,
-.toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-text {
+.toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-text,
+.panelStatusLabel:hover:not([disabled="true"]) {
     color: #fff;
     text-shadow: 0 1px rgba(0, 0, 0, .4);
 }
