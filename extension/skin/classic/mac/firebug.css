@@ -561,16 +561,15 @@ toolbarbutton[type="menu"] > toolbarbutton {
 /* Scrollable TabBar + TabList */
 
 #fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-up {
-    border-right: 2px solid !important;
+    border-width: 0 2px 0 0;
+    border-style: none solid none none;
     -moz-border-right-colors: rgba(0,0,0,0.25) rgba(255, 255, 255, 0.15) !important;
-    border-left: 2px solid transparent !important;
 }
 
 #fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-down {
-    border-left: 2px solid !important;
-    border-right: 2px solid !important;
+    border-width: 0 0 0 2px;
+    border-style: none none none solid;
     -moz-border-left-colors: rgba(0,0,0,0.25) rgba(255, 255, 255, 0.15) !important;
-    -moz-border-right-colors: rgba(0,0,0,0.25) rgba(255, 255, 255, 0.15) !important;
 }
 
 /*************************************************************************************************/
