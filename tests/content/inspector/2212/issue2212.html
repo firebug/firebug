@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 2212: Delete elements while inspecting</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #elementToInspect {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(-45deg, #788CFF, #B4C8FF);
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=2212">Issue 2212</a>: Delete elements while inspecting</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="elementToInspect"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel</li>
+                    <li>Enable the Inspector</li>
+                    <li>Hover the blue <code>&lt;div&gt;</code> (<code>#elementToInspect</code>) above</li>
+                    <li>Press <kbd>Del</kbd></li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The <code>&lt;div&gt;</code> should be removed from the page and the <em>HTML</em> panel.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>
