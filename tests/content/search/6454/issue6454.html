@@ -4,6 +4,13 @@
         <title>Issue 6454: Create FBTest that covers HTML panel search</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        iframe {
+            width: 100px;
+            height: 100px;
+            border: none;
+        }
+        </style>
     </head>
     <body>
         <header>
@@ -21,8 +28,14 @@
                         <testing>1</testing>
                     </div>
                 </div>
+                <iframe src="issue6454-iframe.html"></iframe>
             </section>
             <section id="description">
+                <p class="note">
+                    Note: This test covers the general <em>HTML</em> panel search as well as
+                    <a href="http://code.google.com/p/fbug/issues/detail?id=7259"
+                        title="HTML search don't work in frames">issue 7259</a>.
+                </p>
                 <h3>Steps to reproduce</h3>
                 <ol>
                     <li>Open Firebug</li>
@@ -31,7 +44,7 @@
                     <li>Ensure the search option <em>Case Sensitive</em> is unchecked</li>
                     <li>
                         Search for 'testing'<br/>
-                        <span class="ok">There should be 13 occurrences for 'testing' inside the <em>HTML</em> panel.</span>
+                        <span class="ok">There should be 14 occurrences for 'testing' inside the <em>HTML</em> panel.</span>
                     </li>
                     <li>Check the search option <em>Case Sensitive</em></li>
                     <li>
@@ -41,7 +54,7 @@
                     <li>Uncheck the search option <em>Case Sensitive</em></li>
                     <li>
                         Search for 'Testing'<br/>
-                        <span class="ok">There should be 7 occurrences for 'Testing' inside the <em>HTML</em> panel.</span>
+                        <span class="ok">There should be 8 occurrences for 'Testing' inside the <em>HTML</em> panel.</span>
                     </li>
                     <li>
                         Search for '#test div'<br/>
@@ -50,7 +63,7 @@
                     <li>Check the search option <em>Case Sensitive</em></li>
                     <li>
                         Search for '/html/body'<br/>
-                        <span class="ok">There should be 3 occurrences for '/html/body' inside the <em>HTML</em> panel.</span>
+                        <span class="ok">There should be 4 occurrences for '/html/body' inside the <em>HTML</em> panel.</span>
                     </li>
                 </ol>
                 <h3>Expected results</h3>

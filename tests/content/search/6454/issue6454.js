@@ -7,11 +7,11 @@ function runTest()
             FBTest.selectPanel("html");
 
             var tasks = new FBTest.TaskList();
-            tasks.push(searchTest, "testing", false, 13);
+            tasks.push(searchTest, "testing", false, 14);
             tasks.push(searchTest, "testing", true, 7);
-            tasks.push(searchTest, "Testing", false, 7);
+            tasks.push(searchTest, "Testing", false, 8);
             tasks.push(searchTest, "#test div", false, 5);
-            tasks.push(searchTest, "/html/body", true, 3);
+            tasks.push(searchTest, "/html/body", true, 4);
             tasks.run(function()
             {
                 FBTest.testDone();
