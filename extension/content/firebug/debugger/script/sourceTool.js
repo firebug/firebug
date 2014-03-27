@@ -334,9 +334,13 @@ DynamicSourceCollector.prototype =
         {
             // xxxHonza: another workaround, a script element is appended
             // dynamically if the parent document state is already set to 'complete'.
+            // Also <script> elements with external scripts (src attribute set) are
+            // not considered as dynamic scripts here (we'll get 'newScript' event
+            // from the backend for those).
             var element = script.source.element.unsafeDereference();
             var state = element.ownerDocument.readyState;
-            if (state != "complete")
+            var srcAttr = element.getAttribute("src");
+            if (state != "complete" || srcAttr)
             {
                 Trace.sysout("sourceTool.onNewScript; Could be dynamic script, " +
                     "but we can't be sure. See bug 983297 " + script.url + ", " +
