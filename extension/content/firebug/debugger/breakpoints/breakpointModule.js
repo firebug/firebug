@@ -211,7 +211,7 @@ var BreakpointModule = Obj.extend(Firebug.Module,
         var type = packet.why.type;
         var tool = context.getTool("debugger");
 
-        Trace.sysout("breakpointModule.shouldBreakDebugger;");
+        Trace.sysout("breakpointModule.shouldBreakDebugger;", packet);
 
         // If paused by a breakpoint, evaluate optional condition expression.
         if (type == "breakpoint")
@@ -229,7 +229,10 @@ var BreakpointModule = Obj.extend(Firebug.Module,
 
             // If there is normal disabled breakpoint, do not break.
             if (bp.isNormal() && bp.isDisabled())
+            {
+                Trace.sysout("breakpointModule.paused; Do not break on disabled breakpoint", bp);
                 return false;
+            }
 
             // Evaluate optional condition
             if (bp.condition)

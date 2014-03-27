@@ -66,9 +66,14 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
 
         this.context.getTool("source").removeListener(this);
 
-        // Thread has been detached, so clean up also all breakpoint clients. They
-        // need to be re-created as soon as the thread actor is attached again.
-        this.context.breakpointClients = [];
+        // Breakpoint clients (instance of native BreakpointClient object) are
+        // preserved across page reloads through Panel's persistent state.
+        // So, we can't just remove them here otherwise breakpoints would be re-created
+        // and duplicated on the server side (at the same location)
+        // (see also {@BreakpointTool.newSource} method) breakpoints with no client object
+        // are set on the backend (see also issue 7290). See also issue 7295 that might be
+        // related.
+        // this.context.breakpointClients = [];
 
         BreakpointStore.removeListener(this);
     },
