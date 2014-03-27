@@ -319,12 +319,11 @@ panelTab[selected="true"] > panelTabMenu {
 
 #fbPanelBar2-panelTabs > panelTab.watchesPanelTab[selected="true"],
 #fbPanelBar2-panelTabs > panelTab.selectorsPanelTab[selected="true"] {
-    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6)) no-repeat 0 0;
-    background-color: rgb(253, 253, 253);
+    background: rgb(253, 253, 253) linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6)) no-repeat 0 0;
 }
 
 #fbPanelBar2-panelTabs > panelTab[selected="true"] {
-    background-color: rgb(253, 253, 253);
+    background: rgb(255, 255, 255) none;
     border-bottom: none;
 }
 
