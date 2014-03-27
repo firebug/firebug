@@ -47,6 +47,7 @@ window.initWithParams = function(args)
         var params = testListURI.split("#");
         FBTestApp.defaultTestList = params[0];
         FBTestApp.defaultTest = params[1];
+        FBTestApp.quitAfterRun = args.quitAfterRun;
     }
     else
     {

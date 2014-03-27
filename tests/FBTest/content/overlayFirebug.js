@@ -59,7 +59,7 @@ this.onLoad = function()
         // Open console if the command line says so or if the pref says so.
         var cmd = cmdLineHandler.wrappedJSObject;
         if (cmd.runFBTests)
-            FBTestFirebugOverlay.open(cmd.testListURI);
+            FBTestFirebugOverlay.open(cmd.testListURI, cmd.quitAfterRun);
         else if (getPref("alwaysOpenTestConsole"))
             FBTestFirebugOverlay.open();
     }
@@ -138,7 +138,7 @@ this.close = function()
         consoleWindow.close();
 };
 
-this.open = function(testListURI)
+this.open = function(testListURI, quitAfterRun)
 {
     var consoleWindow = null;
     this.iterateBrowserWindows("FBTestConsole", function(win) {
@@ -170,7 +170,8 @@ this.open = function(testListURI)
 
         var args = {
             firebugWindow: firebugWindow,
-            testListURI: testListURI
+            testListURI: testListURI,
+            quitAfterRun: quitAfterRun
         };
 
         // Try to connect an existing test-console window first.
