@@ -73,13 +73,11 @@
 /*************************************************************************************************/
 /* Toolbars */
 
-#fbToolbox {
-}
-
 #fbToolbox,
 #fbCommandToolbar,
 #fbPanelSplitter > #fbPanelSplitterBox,
-.panelTabBox {
+#fbPanelBar1-tabBoxBackground,
+#fbPanelBar2-tabBoxBackground {
     border-bottom: 1px solid #bebebe;
     background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
 }
@@ -101,11 +99,6 @@
 
 #fbPanelBar1-tabBox {
     background: linear-gradient(#f1f1f1, #d2d2d2) no-repeat 0 0;
-}
-
-#fbPanelBar2-tabBox {
-    -moz-appearance: none;
-    background-color: transparent;
 }
 
 /* ensure the inner toolbar background looks the same as the other toolbars */
@@ -306,14 +299,14 @@ panelTab[aria-disabled="true"] .panelTab-text {
 panelTab[selected="true"] {
     border: 1px solid #bebebe;
     border-bottom: none;
-    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(235, 235, 235, 1)) no-repeat 0 0;
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(252, 252, 252, 1)) no-repeat 0 0;
     color: inherit;
 }
 
 panelTab:not([selected="true"]):hover {
     border: 1px solid #C8C8C8;
     border-bottom: none;
-    background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2)) no-repeat 0 0;
+    background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(252, 252, 252, 0.2)) no-repeat 0 0;
 }
 
 .panelTab-text {
