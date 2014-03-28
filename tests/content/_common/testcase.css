@@ -101,6 +101,10 @@ section#description li.ok, section#description li span.ok {
     color: #00B400;
 }
 
+section#description li span.info {
+    color: #31708f;
+}
+
 section#description li.error, section#description li span.error {
     color: #DC0000;
 }
