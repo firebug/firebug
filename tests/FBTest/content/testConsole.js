@@ -576,7 +576,7 @@ FBTestApp.TestConsole =
     /**
      * Function used to bisect commits automatically.
      * Should be used with:
-     * git bisect run sh -c "<path>/firefox <args> -runFBTests http://<server>/<path>/firebug.html#<test> -quitAfterRun | fgrep PASS"
+     * git bisect run sh -c "<path>/firefox <args> -runFBTests http://<server>/<path>/firebug.html#<test> -quitAfterRun | grep \"PASS\""
      */
     quitOnTestDone: function(test)
     {
