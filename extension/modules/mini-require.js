@@ -71,8 +71,6 @@ var Loader =
         var self = this;
         var args = deps.map(function(dep)
         {
-            if (dep.endsWith("ValueModifier"))
-                debugger;
             var result = self.loadModule(dep);
             if (!result)
             {
