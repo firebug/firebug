@@ -71,6 +71,8 @@ var Loader =
         var self = this;
         var args = deps.map(function(dep)
         {
+            if (dep.endsWith("ValueModifier"))
+                debugger;
             var result = self.loadModule(dep);
             if (!result)
             {
@@ -141,6 +143,12 @@ var Loader =
         {
             Cu.reportError(fullName + " -> " + url);
             Cu.reportError(err);
+
+            if (FBTrace.DBG_ERRORS)
+            {
+                FBTrace.sysout("mini-require; EXCEPTION load "+ fullName +" -> " + url + ": " + err,
+                    err);
+            }
         }
     },
 
