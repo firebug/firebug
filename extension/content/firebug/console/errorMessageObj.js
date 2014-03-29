@@ -130,64 +130,67 @@ var SourceProvider =
 
     onGetSourceLine: function(context, url, lineNo, callback)
     {
-        var dbg = DebuggerLib.makeDebuggerForContext(context);
-        if (!dbg)
-        {
-            TraceError.sysout("errorMessageObj.SourceProvider.onGetSourceLine; " +
-                "ERROR no debugger");
-            return;
-        }
+        var line;
 
-        var scripts = dbg.findScripts({url: url, line: lineNo});
-        if (!scripts.length)
+        DebuggerLib.withTemporaryDebugger(context, context.getCurrentGlobal(), function(dbg)
         {
-            Trace.sysout("errorMessageObj.SourceProvider.onGetSourceLine; " +
-                "No script at this location " + url + " (" + lineNo + ")");
+            if (!dbg)
+            {
+                TraceError.sysout("errorMessageObj.SourceProvider.onGetSourceLine; " +
+                    "ERROR no debugger");
+                return;
+            }
 
+            var scripts = dbg.findScripts({url: url, line: lineNo});
+            if (!scripts.length)
+            {
+                Trace.sysout("errorMessageObj.SourceProvider.onGetSourceLine; " +
+                    "No script at this location " + url + " (" + lineNo + ")");
+
+                return;
+            }
+
+            // xxxHonza: sometimes the top level script is not found (only child script) :-(
+            var script = scripts[0];
+            var startLine = script.startLine;
+            var lines = Str.splitLines(script.source.text);
+
+            Trace.sysout("errorMessageObj.SourceProvider.onGetSourceLine; scripts", scripts);
+
+            // Don't forge to destroy the debugger.
             DebuggerLib.destroyDebuggerForContext(context, dbg);
-            return;
-        }
 
-        // xxxHonza: sometimes the top level script is not found (only child script) :-(
-        var script = scripts[0];
-        var startLine = script.startLine;
-        var lines = Str.splitLines(script.source.text);
+            // Get particular line of the source code.
+            var index = lineNo - startLine;
+            if (index < 0 || index >= lines.length)
+            {
+                Trace.sysout("errorMessageObj.SourceProvider.onGetSourceLine; Line " + lineNo +
+                    " is out of range " + lines.length, source);
+                return;
+            }
 
-        Trace.sysout("errorMessageObj.SourceProvider.onGetSourceLine; scripts", scripts);
+            var line = lines[index];
 
-        // Don't forge to destroy the debugger.
-        DebuggerLib.destroyDebuggerForContext(context, dbg);
+            Trace.sysout("errorMessageObj.SourceProvider.onGetSourceLine; " +
+                "return source for line: " + lineNo + ", index: " + index +
+                ", source start: " + script.startLine, script.source.text);
 
-        // Get particular line of the source code.
-        var index = lineNo - startLine;
-        if (index < 0 || index >= lines.length)
-        {
-            Trace.sysout("errorMessageObj.SourceProvider.onGetSourceLine; Line " + lineNo +
-                " is out of range " + lines.length, source);
-            return;
-        }
+            if (callback)
+                callback(line);
 
-        var line = lines[index];
+            // Dispatch event with fake sourceFile object as an argument, so the UI
+            // (mainly the Console UI) can be updated and the source displayed.
+            // See e.g. {@link ErrorMessageUpdater}
+            var sourceFile = {
+                context: context,
+                href: url,
+                loaded: true,
+                lines: lines,
+                isBlackBoxed: false,
+            };
 
-        Trace.sysout("errorMessageObj.SourceProvider.onGetSourceLine; " +
-            "return source for line: " + lineNo + ", index: " + index +
-            ", source start: " + script.startLine, script.source.text);
-
-        if (callback)
-            callback(line);
-
-        // Dispatch event with fake sourceFile object as an argument, so the UI
-        // (mainly the Console UI) can be updated and the source displayed.
-        // See e.g. {@link ErrorMessageUpdater}
-        var sourceFile = {
-            context: context,
-            href: url,
-            loaded: true,
-            lines: lines,
-            isBlackBoxed: false,
-        };
-
-        Events.dispatch(Firebug.modules, "onUpdateErrorObject", [sourceFile]);
+            Events.dispatch(Firebug.modules, "onUpdateErrorObject", [sourceFile]);
+        });
 
         return line;
     },
