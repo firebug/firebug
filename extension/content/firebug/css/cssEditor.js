@@ -5,14 +5,21 @@ define([
     "firebug/lib/trace",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/domplate",
     "firebug/lib/events",
     "firebug/lib/xml",
     "firebug/css/autoCompleter",
     "firebug/css/cssModule",
     "firebug/css/cssReps",
-    "firebug/editor/inlineEditor",
+    "firebug/editor/inlineEditor"
 ],
-function(Firebug, FBTrace, Css, Dom, Events, Xml, CSSAutoCompleter, CSSModule, CSSReps, InlineEditor) {
+function(Firebug, FBTrace, Css, Dom, Domplate, Events, Xml, CSSAutoCompleter, CSSModule, CSSReps,
+    InlineEditor) {
+
+// ********************************************************************************************* //
+// Constants
+
+var {domplate} = Domplate;
 
 // ********************************************************************************************* //
 // CSSEditor
