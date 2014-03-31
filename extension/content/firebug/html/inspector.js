@@ -10,6 +10,7 @@ define([
     "firebug/lib/array",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/options",
     "firebug/lib/xml",
     "firebug/lib/system",
     "firebug/chrome/window",
@@ -17,7 +18,7 @@ define([
     "firebug/html/highlighterCache",
     "firebug/html/quickInfoBox",
 ],
-function(Firebug, FBTrace, Module, Obj, Events, Wrapper, Arr, Css, Dom, Xml, System, Win,
+function(Firebug, FBTrace, Module, Obj, Events, Wrapper, Arr, Css, Dom, Options, Xml, System, Win,
     StatusPath, HighlighterCache, QuickInfoBox) {
 
 "use strict";
@@ -695,8 +696,8 @@ Firebug.Inspector = Obj.extend(Module,
         this.onInspectingKeyPress = Obj.bind(this.onInspectingKeyPress, this);
         this.onPanelChanged = Obj.bind(this.onPanelChanged, this);
 
-        this.updateOption("shadeBoxModel", Firebug.shadeBoxModel);
-        this.updateOption("showQuickInfoBox", Firebug.showQuickInfoBox);
+        this.updateOption("shadeBoxModel", Options.get("shadeBoxModel"));
+        this.updateOption("showQuickInfoBox", Options.get("showQuickInfoBox"));
 
         var panelBar1 = Firebug.chrome.$("fbPanelBar1");
         Events.addEventListener(panelBar1, "selectPanel", this.onPanelChanged, false);
@@ -1272,7 +1273,7 @@ BoxModelHighlighter.prototype =
             contentCssText = resizeImp(null, w, h);
 
             // element.tagName !== "BODY" for issue 2447. hopefully temporary, robc
-            var showLines = Firebug.showRulers && boxFrame && element.tagName !== "BODY";
+            var showLines = Options.get("showRulers") && boxFrame && element.tagName !== "BODY";
             if (showLines)
             {
                 var offsetParent = element.offsetParent;

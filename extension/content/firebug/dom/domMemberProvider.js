@@ -10,13 +10,14 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/dom",
     "firebug/lib/locale",
+    "firebug/lib/options",
     "firebug/console/closureInspector",
     "firebug/chrome/panelActivation",
     "firebug/chrome/reps",
     "firebug/debugger/debuggerLib",
 ],
-function(Firebug, FBTrace, Obj, Arr, Wrapper, Dom, Locale, ClosureInspector, PanelActivation,
-    FirebugReps, DebuggerLib) {
+function(Firebug, FBTrace, Obj, Arr, Wrapper, Dom, Locale, Options, ClosureInspector,
+    PanelActivation, FirebugReps, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -66,8 +67,8 @@ DOMMemberProvider.prototype =
             try
             {
                 // Make sure not to touch the prototype chain of the magic scope objects.
-                var ownOnly = Firebug.showOwnProperties || isScope;
-                var enumerableOnly = Firebug.showEnumerableProperties;
+                var ownOnly = Options.get("showOwnProperties") || isScope;
+                var enumerableOnly = Options.get("showEnumerableProperties");
 
                 properties = this.getObjectProperties(object, enumerableOnly, ownOnly);
                 properties = Arr.sortUnique(properties);
@@ -143,8 +144,13 @@ DOMMemberProvider.prototype =
                     {
                         add("userClass", userClasses);
                     }
+<<<<<<< Upstream, based on origin/master
                     else if (!Firebug.showUserFuncs && Firebug.showInlineEventHandlers &&
                         isInlineEventHandler)
+=======
+                    else if (!Options.get("showUserFuncs") && Options.get("showInlineEventHandlers") &&
+                        Dom.isInlineEventHandler(name))
+>>>>>>> 9621022 Issue 4536 (Cache options) http://code.google.com/p/fbug/issues/detail?id=4536
                     {
                         add("userFunction", domHandlers);
                     }
@@ -200,13 +206,13 @@ DOMMemberProvider.prototype =
         ordinals.sort(sortOrdinal);
         members.push.apply(members, ordinals);
 
-        if (Firebug.showUserProps)
+        if (Options.get("showUserProps"))
         {
             userProps.sort(sortName);
             members.push.apply(members, userProps);
         }
 
-        if (Firebug.showUserFuncs)
+        if (Options.get("showUserFuncs"))
         {
             userClasses.sort(sortName);
             members.push.apply(members, userClasses);
@@ -215,13 +221,13 @@ DOMMemberProvider.prototype =
             members.push.apply(members, userFuncs);
         }
 
-        if (Firebug.showDOMProps)
+        if (Options.get("showDOMProps"))
         {
             domProps.sort(sortName);
             members.push.apply(members, domProps);
         }
 
-        if (Firebug.showDOMFuncs)
+        if (Options.get("showDOMFuncs"))
         {
             domClasses.sort(sortName);
             members.push.apply(members, domClasses);
@@ -230,12 +236,12 @@ DOMMemberProvider.prototype =
             members.push.apply(members, domFuncs);
         }
 
-        if (Firebug.showDOMConstants)
+        if (Options.get("showDOMConstants"))
             members.push.apply(members, domConstants);
 
         members.push.apply(members, proto);
 
-        if (Firebug.showInlineEventHandlers)
+        if (Options.get("showInlineEventHandlers"))
         {
             domHandlers.sort(sortName);
             members.push.apply(members, domHandlers);
@@ -243,8 +249,8 @@ DOMMemberProvider.prototype =
 
         if (FBTrace.DBG_DOM)
         {
-            var showEnum = Firebug.showEnumerableProperties;
-            var showOwn = Firebug.showOwnProperties;
+            var showEnum = Options.get("showEnumerableProperties");
+            var showOwn = Options.get("showOwnProperties");
             FBTrace.sysout("dom.getMembers; Report: enum-only: " + showEnum +
                 ", own-only: " + showOwn + ", total members: " + members.length,
             {
@@ -280,7 +286,7 @@ DOMMemberProvider.prototype =
 
     shouldShowClosures: function()
     {
-        if (!Firebug.showClosures)
+        if (!Options.get("showClosures"))
             return false;
         var requireScriptPanel = DebuggerLib._closureInspectionRequiresDebugger();
         if (requireScriptPanel && !PanelActivation.isPanelEnabled(Firebug.getPanelType("script")))
@@ -296,8 +302,8 @@ DOMMemberProvider.prototype =
         if (value instanceof FirebugReps.ErrorCopy)
             return false;
 
-        var enumerableOnly = Firebug.showEnumerableProperties;
-        var ownOnly = Firebug.showOwnProperties;
+        var enumerableOnly = Options.get("showEnumerableProperties");
+        var ownOnly = Options.get("showOwnProperties");
         if (Obj.hasProperties(value, !enumerableOnly, ownOnly))
             return true;
 

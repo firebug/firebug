@@ -374,7 +374,7 @@
                     return;
 
                 // Don't shrink at all, if the pref is set to zero or less
-                if (Firebug.panelTabMinWidth <= 0)
+                if (Firebug.Options.get("panelTabMinWidth") <= 0)
                     return;
 
                 var totalWidth = parseInt(this.scrollbox.boxObject.width, 10);
@@ -389,7 +389,7 @@
                 while (tabs.length && availableSpace > 0)
                 {
                     var noSpace = true;
-                    var tabWidth = Math.max(Firebug.panelTabMinWidth,
+                    var tabWidth = Math.max(Firebug.Options.get("panelTabMinWidth"),
                         availableSpace / tabs.length);
 
                     for (var i=0; i<tabs.length; i++)

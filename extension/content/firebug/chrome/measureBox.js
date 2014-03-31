@@ -4,8 +4,9 @@ define([
     "firebug/firebug",
     "firebug/lib/trace",
     "firebug/lib/css",
+    "firebug/lib/options"
 ],
-function(Firebug, FBTrace, Css) {
+function(Firebug, FBTrace, Css, Options) {
 
 "use strict";
 
@@ -61,7 +62,7 @@ var MeasureBox =
         if (!value)
             value = "m";
 
-        if (!Firebug.showTextNodesWithWhitespace)
+        if (!Options.get("showTextNodesWithWhitespace"))
             value = value.replace(/\t/g, "mmmmmm").replace(/\ /g, "m");
 
         this.measureBox.textContent = value;

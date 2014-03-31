@@ -10,6 +10,7 @@ define([
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/options",
     "firebug/lib/string",
     "firebug/chrome/reps",
     "firebug/chrome/module",
@@ -20,7 +21,7 @@ define([
     "firebug/console/console",
     "firebug/remoting/debuggerClient",
 ],
-function(Firebug, FBTrace, Obj, Domplate, Locale, Url, Events, Css, Dom, Str,
+function(Firebug, FBTrace, Obj, Domplate, Locale, Url, Events, Css, Dom, Options, Str,
     FirebugReps, Module, Rep, StackFrame, SourceFile, ProfilerEngine, Console,
     DebuggerClient) {
 
@@ -250,7 +251,7 @@ var Profiler = Obj.extend(Module,
                 return;
 
             var fileName = Url.getFileName(script.url);
-            if (Firebug.filterSystemURLs && Url.isSystemURL(fileName))
+            if (Options.get("filterSystemURLs") && Url.isSystemURL(fileName))
                 return;
 
             var sourceLink = SourceFile.getSourceLinkForScript(script, context);
