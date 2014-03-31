@@ -37,24 +37,14 @@ this.addWatchExpression = function(chrome, expression, callback)
     var editor = panelNode.querySelector(".completionInput");
     FBTest.ok(editor, "The editor must be there; " + expression);
 
-    // xxxHonza: the variable name is used to identify the row, but note that the same
-    // variable can be displayed more than once in the Watch panel. Once as an
-    // user expression and once as part of the scope chain.
-    // The API works in this particular case since user expressions are displayed
-    // first, but the entire logic should be improved.
-    // It would help if MutationRecognizer can target elements through CSS selectors
-    // (e.g. .memberRow.wathRow .memberLabelBox -> identifies user expression label)
-
     // Wait till the result is evaluated and displayed.
     var doc = FBTest.getSidePanelDocument();
-    var recognizer = new MutationRecognizer(doc.defaultView, "Text",
-        {"class": "memberLabelBox"}, expression);
+    var recognizer = new MutationRecognizer(doc.defaultView, "tr",
+        {"class": "memberRow watchRow"});
 
-    recognizer.onRecognizeAsync(function(element)
+    recognizer.onRecognizeAsync((row) =>
     {
-        var row = FW.FBL.getAncestorByClass(element, "memberRow");
         var value = FW.FBL.getChildByClass(row, "memberValueCell");
-
         if (callback)
             callback(value);
     });
