@@ -37,11 +37,11 @@
 }
 
 #fbContentSplitter[orient=vertical] {
-    background: transparent;
+    background: #bebebe;
     border-bottom-width: 0;
-    min-height: 7px;
-    height: 7px;
-    margin-bottom: -7px;
+    min-height: 1px;
+    height: 1px;
+    margin-bottom: 0;
     position: relative;
 }
 
