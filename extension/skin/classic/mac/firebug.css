@@ -128,6 +128,7 @@
 
 .fbsearch-icon {
     width: 22px;
+    background-image: url(chrome://firebug/skin/mac/search.svg);
 }
 
 .fbsearch-icon,
