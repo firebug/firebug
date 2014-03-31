@@ -388,7 +388,7 @@ DebuggerLib.isExecutableLine = function(context, location)
 };
 
 /**
- * xxxHonza: related to issue 1238. This is how we get could executable lines
+ * xxxHonza: related to issue 1238. This is how we could get executable lines
  * for pretty printed scripts (based on source maps). WIP
  *
  * Source maps terminology:
@@ -456,7 +456,9 @@ DebuggerLib.getExecutableLines = function(context, sourceFile)
 
             sources.getOriginalLocation(location).then((loc) =>
             {
-                FBTrace.sysout("org [" + i + ":" + col + "] -> [" + loc.line + ":" + loc.column + "]", loc);
+                FBTrace.sysout("org [" + i + ":" + col + "] -> [" + loc.line + ":" +
+                    loc.column + "]", loc);
+
                 exeLines[loc.line] = loc.line;
             });
         }
