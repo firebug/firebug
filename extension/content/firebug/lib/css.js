@@ -139,6 +139,7 @@ function initPropertyData()
             values = values.concat(extraColors);
 
         // Gradients, see bug 973345
+        // xxxsz: Can be removed when Firefox 31 is the minimum supported version
         if (values.indexOf("-moz-element()") !== -1)
             values = values.concat(extraImages);
 
