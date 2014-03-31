@@ -1,6 +1,11 @@
 /* xxxHonza: This should be removed, fix me: issue 471 */
 @import "chrome://firebug/skin/win/firebug.css";
 
+/* Add some basic padding to the completion popup (missing on Linux). */
+.userTypedText {
+    margin-left: 1px;
+}
+
 /*************************************************************************************************/
 /* Command Line */
 
@@ -11,11 +16,6 @@
 
 /*************************************************************************************************/
 /* Toolbar */
-
-/* Add some basic padding to the completion popup (missing on Linux). */
-.userTypedText {
-    margin-left: 1px;
-}
 
 #fbToolbox {
     border-bottom: 1px solid #A0A0A0;
