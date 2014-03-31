@@ -1399,8 +1399,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         var sourceFile = this.getSourceFile();
         sourceFile.togglePrettyPrint(() =>
         {
-            var lines = DebuggerLib.getExecutableLines(this.context, sourceFile);
-            Trace.sysout("lines " + lines.join(", "), lines);
+            //var lines = DebuggerLib.getExecutableLines(this.context, sourceFile);
+            //Trace.sysout("lines " + lines.join(", "), lines);
         });
     },
 

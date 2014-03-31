@@ -414,7 +414,8 @@ DebuggerLib.getExecutableLines = function(context, sourceFile)
     };
 
     var scripts = threadActor.dbg.findScripts(query);
-    FBTrace.sysout("scripts " + url, lines);
+    //FBTrace.sysout("scripts " + url, lines);
+
     for (var i = 0; i < scripts.length; i++)
     {
         var script = scripts[i];
@@ -430,14 +431,14 @@ DebuggerLib.getExecutableLines = function(context, sourceFile)
         }
     }
 
-    FBTrace.sysout("lines " + url, lines);
+    //FBTrace.sysout("lines " + url, lines);
 
     var exeLines = new Array();
     var sources = threadActor.sources;
 
     var sourceActor = threadActor.threadLifetimePool.get(sourceFile.actor);
 
-    FBTrace.sysout("_sourceMapsByGeneratedSource[url]", sourceActor._sourceMap);
+    //FBTrace.sysout("_sourceMapsByGeneratedSource[url]", sourceActor._sourceMap);
 
     for (var i = 0; i < lines.length; i++)
     {
@@ -456,8 +457,8 @@ DebuggerLib.getExecutableLines = function(context, sourceFile)
 
             sources.getOriginalLocation(location).then((loc) =>
             {
-                FBTrace.sysout("org [" + i + ":" + col + "] -> [" + loc.line + ":" +
-                    loc.column + "]", loc);
+                //FBTrace.sysout("org [" + i + ":" + col + "] -> [" + loc.line + ":" +
+                //    loc.column + "]", loc);
 
                 exeLines[loc.line] = loc.line;
             });
