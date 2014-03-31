@@ -22,7 +22,7 @@ function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Str, Arr, Closure
 // Constants
 
 var kwActions = ["throw", "return", "in", "instanceof", "delete", "new",
-                   "typeof", "void", "yield"];
+                 "typeof", "void", "yield"];
 var kwAll = ["break", "case", "catch", "const", "continue", "debugger",
   "default", "delete", "do", "else", "false", "finally", "for", "function",
   "get", "if", "in", "instanceof", "let", "new", "null", "return", "set",
@@ -744,15 +744,13 @@ function JSAutoCompleter(textBox, completionBox, options)
 
     this.popupCandidates = function(cycling)
     {
-        Dom.eraseNode(this.completionPopup);
+        var doc = this.completionPopup.ownerDocument;
         this.selectedPopupElement = null;
 
-        var vbox = this.completionPopup.ownerDocument.createElement("vbox");
+        var vbox = doc.createElement("vbox");
         vbox.classList.add("fbCommandLineCompletions");
-        this.completionPopup.appendChild(vbox);
 
-        var title = this.completionPopup.ownerDocument.
-            createElementNS("http://www.w3.org/1999/xhtml", "div");
+        var title = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
         title.textContent = Locale.$STR("console.Use Arrow keys, Tab or Enter");
         title.classList.add("fbPopupTitle");
         vbox.appendChild(title);
@@ -809,20 +807,17 @@ function JSAutoCompleter(textBox, completionBox, options)
             var prefixLen = this.completions.prefix.length;
             var completion = list[i], name = completion.name;
 
-            var hbox = this.completionPopup.ownerDocument.
-                createElementNS("http://www.w3.org/1999/xhtml", "div");
+            var hbox = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
             hbox.completionIndex = i;
             hbox.classList.add("completionLine");
             hbox.classList.add("fbPopupEntry");
 
-            var pre = this.completionPopup.ownerDocument.
-                createElementNS("http://www.w3.org/1999/xhtml", "span");
+            var pre = doc.createElementNS("http://www.w3.org/1999/xhtml", "span");
             var preText = this.completionBase.expr + name.substr(0, prefixLen);
             pre.textContent = preText;
             pre.classList.add("userTypedText");
 
-            var post = this.completionPopup.ownerDocument.
-                createElementNS("http://www.w3.org/1999/xhtml", "span");
+            var post = doc.createElementNS("http://www.w3.org/1999/xhtml", "span");
             var postText = name.substr(prefixLen);
             post.textContent = postText;
             post.classList.add("completionText");
@@ -836,8 +831,7 @@ function JSAutoCompleter(textBox, completionBox, options)
 
                 if (!separatorInserted)
                 {
-                    var separator = this.completionPopup.ownerDocument.
-                        createElementNS("http://www.w3.org/1999/xhtml", "div");
+                    var separator = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
                     separator.textContent = Locale.$STR("console.Firebug_Command_Line_API");
                     separator.classList.add("fbPopupSeparator");
                     vbox.appendChild(separator);
@@ -868,7 +862,21 @@ function JSAutoCompleter(textBox, completionBox, options)
         // xxxHonza: needs to be properly calculated
         offsetX -= 5;
 
-        this.completionPopup.openPopup(this.textBox, "before_start", offsetX, 0, false, false);
+        var popup = this.completionPopup;
+        Dom.eraseNode(popup);
+        if (popup.state === "closed")
+        {
+            // Hack: Open the popup and force a reflow while it is empty, to avoid
+            // being hit by bug 842380 (see issue 6197).
+            popup.openPopup(this.textBox, "before_start", offsetX, 0, false, false);
+            popup.clientHeight;
+            popup.appendChild(vbox);
+        }
+        else
+        {
+            popup.appendChild(vbox);
+            popup.openPopup(this.textBox, "before_start", offsetX, 0, false, false);
+        }
     };
 
     this.getCharWidth = function(text)
