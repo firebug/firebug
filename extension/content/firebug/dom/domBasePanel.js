@@ -261,6 +261,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
                     "-",
                     {
                         label: label,
+                        id: "EditDOMProperty",
                         tooltiptext: tooltiptext,
                         command: Obj.bindFixed(this.editProperty, this, row)
                     }
