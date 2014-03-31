@@ -386,8 +386,7 @@ panelTab[selected="true"] > panelTabMenu {
 .toolbar-text-menubutton,
 .panelStatusLabel {
     -moz-appearance: none;
-    margin-top: 5px;
-    margin-bottom: 5px;
+    margin: 5px 5px 5px 0;
     padding: 1px 8px;
     min-width: 0;
     max-width: 13em;
