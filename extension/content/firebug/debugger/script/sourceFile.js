@@ -8,8 +8,9 @@ define([
     "firebug/lib/url",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/script/sourceLink",
+    "firebug/net/netUtils",
 ],
-function(Firebug, FBTrace, Events, Str, Url, DebuggerLib, SourceLink) {
+function(Firebug, FBTrace, Events, Str, Url, DebuggerLib, SourceLink, NetUtils) {
 
 "use strict";
 
@@ -30,7 +31,7 @@ var Trace = FBTrace.to("DBG_SOURCEFILE");
  * at the back end). The instance is created by {@link SourceTool} every time a "newSource"
  * or the initial "sources" packet is received.
  */
-function SourceFile(context, actor, href, isBlackBoxed)
+function SourceFile(context, actor, href, isBlackBoxed, isPrettyPrinted)
 {
     this.context = context;
     this.actor = actor;
@@ -41,6 +42,7 @@ function SourceFile(context, actor, href, isBlackBoxed)
 
     // xxxHonza: this field should be utilized by issue 4885.
     this.isBlackBoxed = isBlackBoxed;
+    this.isPrettyPrinted = isPrettyPrinted;
 
     // The content type is set when 'source' packet is received (see onSourceLoaded).
     this.contentType = null;
@@ -170,13 +172,44 @@ SourceFile.prototype =
         for (var i=0; i<this.callbacks.length; i++)
             this.callbacks[i](this.lines);
 
-        // Fire also global notification.
-        Events.dispatch(Firebug.modules, "onSourceLoaded", [this]);
+        // Fire global notification.
+        Events.dispatch(Firebug.modules, "onSourceLoaded", [this, this.lines]);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Pretty Print
+
+    /**
+     * xxxHonza: yet need to be revisited
+     */
+    togglePrettyPrint: function(cb)
+    {
+        function callback(response)
+        {
+            this.onSourceLoaded(response);
+            cb();
+        }
+
+        callback = callback.bind(this);
+        var sourceClient = this.context.activeThread.source(this);
+
+        if (this.isPrettyPrinted)
+            sourceClient.disablePrettyPrint(callback);
+        else
+            sourceClient.prettyPrint(4, callback);
+
+        this.isPrettyPrinted = !this.isPrettyPrinted;
+    },
+
+    getCategory: function()
+    {
+        var mimeType = NetUtils.getMimeType(this.contentType, this.href);
+        return NetUtils.getCategory(mimeType);
+    }
 }
 
 // ********************************************************************************************* //
-// Static Methods (aka class methods)
+// Static Methods
 
 SourceFile.getSourceFileByUrl = function(context, url)
 {

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 7300: Watch expressions are cropped when editing them</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        var veryLongVariableNameToTestNameCropping = "Hello Firebug user!";
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=7300">Issue 7300</a>: Watch expressions are cropped when editing them</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>
+                        Enable and switch to the <em>Script</em> panel and there to the
+                        <em>Watch</em> side panel
+                    </li>
+                    <li>
+                        Add a new watch expression called <code>veryLongVariableNameToTestNameCropping</code><br/>
+                        <span class="ok">&rArr; The name of the variable should be cropped to <code>veryLongVa...ameCropping</code></span>
+                    </li>
+                    <li>Right-click the watch expression and choose <em>Edit Watch...</em> from the context menu</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The editor should open and display the full name of the variable.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

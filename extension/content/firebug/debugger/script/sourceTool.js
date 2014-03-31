@@ -158,7 +158,7 @@ SourceTool.prototype = Obj.extend(new Tool(),
         // Create a source file and append it into the context. This is the only
         // place where an instance of {@link SourceFile} is created.
         var sourceFile = new SourceFile(this.context, script.actor, script.url,
-            script.isBlackBoxed);
+            script.isBlackBoxed, script.isPrettyPrinted);
 
         this.context.addSourceFile(sourceFile);
 
@@ -401,7 +401,7 @@ DynamicSourceCollector.prototype =
         if (!sourceFile)
         {
             // xxxHonza: there should be only one place where instance of SourceFile is created.
-            var sourceFile = new SourceFile(this.context, null, url, false);
+            var sourceFile = new SourceFile(this.context, null, url, false, false);
 
             // xxxHonza: duplicated from {@link SourceFile}
             var source = script.source.text.replace(/\r\n/gm, "\n");

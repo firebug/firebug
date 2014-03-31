@@ -365,7 +365,7 @@ DebuggerLib.getNextExecutableLine = function(context, aLocation)
 
 DebuggerLib.isExecutableLine = function(context, location)
 {
-    var threadClient = this.getThreadActor(context.browser);
+    var threadActor = this.getThreadActor(context.browser);
 
     // Use 'innermost' property so, the result is (almost) always just one script object
     // and we can save time in the loop below. See: https://wiki.mozilla.org/Debugger
@@ -375,7 +375,7 @@ DebuggerLib.isExecutableLine = function(context, location)
         innermost: true,
     };
 
-    var scripts = threadClient.dbg.findScripts(query);
+    var scripts = threadActor.dbg.findScripts(query);
     for (var i = 0; i < scripts.length; i++)
     {
         var script = scripts[i];
@@ -385,6 +385,87 @@ DebuggerLib.isExecutableLine = function(context, location)
     }
 
     return false;
+};
+
+/**
+ * xxxHonza: related to issue 1238. This is how we could get executable lines
+ * for pretty printed scripts (based on source maps). WIP
+ *
+ * Source maps terminology:
+ * 1) original (the running ugly code)
+ * 2) generated (the pretty not really running code)
+ *
+ * Notes:
+ * 1) Not optimized and returns all lines
+ * 2) Should be done in a worker probably
+ * 3) Some tracing should be removed
+ */
+DebuggerLib.getExecutableLines = function(context, sourceFile)
+{
+    var lines = new Array();
+    if (!sourceFile.isPrettyPrinted)
+        return;
+
+    var url = sourceFile.href;
+    var threadActor = this.getThreadActor(context.browser);
+
+    var query = {
+        url: url,
+    };
+
+    var scripts = threadActor.dbg.findScripts(query);
+    //FBTrace.sysout("scripts " + url, lines);
+
+    for (var i = 0; i < scripts.length; i++)
+    {
+        var script = scripts[i];
+        var offsets = script.getAllColumnOffsets();
+        for (var j = 0; j < offsets.length; j++)
+        {
+            var offset = offsets[j];
+            var cols = lines[offset.lineNumber];
+            if (!cols)
+                cols = lines[offset.lineNumber] = new Array();
+
+            cols.push(offset.columnNumber);
+        }
+    }
+
+    //FBTrace.sysout("lines " + url, lines);
+
+    var exeLines = new Array();
+    var sources = threadActor.sources;
+
+    var sourceActor = threadActor.threadLifetimePool.get(sourceFile.actor);
+
+    //FBTrace.sysout("_sourceMapsByGeneratedSource[url]", sourceActor._sourceMap);
+
+    for (var i = 0; i < lines.length; i++)
+    {
+        var columns = lines[i];
+        if (!columns)
+            continue;
+
+        for (var j = 0; j < columns.length; j++)
+        {
+            var col = columns[j];
+            var location = {
+                url: url,
+                line: i,
+                column: col,
+            }
+
+            sources.getOriginalLocation(location).then((loc) =>
+            {
+                //FBTrace.sysout("org [" + i + ":" + col + "] -> [" + loc.line + ":" +
+                //    loc.column + "]", loc);
+
+                exeLines[loc.line] = loc.line;
+            });
+        }
+    }
+
+    return exeLines;
 };
 
 // ********************************************************************************************* //

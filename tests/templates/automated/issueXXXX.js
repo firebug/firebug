@@ -8,17 +8,17 @@
 */
 function runTest()
 {
-    FBTest.openNewTab(basePath + "category/XXXX/issueXXXX.html", function(win)
+    FBTest.openNewTab(basePath + "category/XXXX/issueXXXX.html", (win) =>
     {
-        FBTest.openFirebug(function()
+        FBTest.openFirebug(() =>
         {
             FBTest.selectPanel("mainPanel");
 
-            FBTest.doSomething(function(win)
+            FBTest.doSomething(() =>
             {
                 // Test functionality must be placed here
 
-                FBTest.testDone("issueXXXX.DONE");
+                FBTest.testDone();
             });
         });
     });

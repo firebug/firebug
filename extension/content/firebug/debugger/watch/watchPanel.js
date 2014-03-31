@@ -707,14 +707,33 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     {
         var items = BasePanel.getContextMenuItems.apply(this, arguments);
 
-        if (!this.watches || this.watches.length == 0)
+        if (!this.watches || this.watches.length == 0 ||
+            !Dom.getAncestorByClass(target, "watchRow"))
+        {
             return items;
+        }
 
-        // find the index of "DeleteWatch" in the items: 
-        var deleteWatchIndex = items.map(function(item)
+        // find the index of "DeleteWatch" in the items:
+        var itemIDs = items.map((item) =>
         {
             return item.id;
-        }).indexOf("DeleteProperty");
+        });
+
+        // find the index of "EditDOMProperty" in the items: 
+        var editWatchIndex = itemIDs.indexOf("EditDOMProperty");
+        if (editWatchIndex !== -1)
+        {
+            items[editWatchIndex].label = "EditWatch";
+            items[editWatchIndex].tooltiptext = "watch.tip.Edit_Watch";
+        }
+
+        // find the index of "DeleteWatch" in the items: 
+        var deleteWatchIndex = itemIDs.indexOf("DeleteProperty");
+        if (deleteWatchIndex !== -1)
+        {
+            items[deleteWatchIndex].label = "DeleteWatch";
+            items[deleteWatchIndex].tooltiptext = "watch.tip.Delete_Watch";
+        }
 
         // if DeleteWatch was found, we insert DeleteAllWatches after it
         // otherwise, we insert the item at the beginning of the menu
@@ -811,6 +830,11 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         BasePanel.editProperty.apply(this, arguments);
     },
 
+    deleteProperty: function(row)
+    {
+        this.deleteWatch(row);
+    },
+    
     getEditor: function(target, value)
     {
         if (!this.editor)

@@ -9,13 +9,15 @@ define([
     "firebug/lib/locale",
     "firebug/lib/css",
     "firebug/lib/options",
+    "firebug/lib/promise",
     "firebug/chrome/module",
     "firebug/chrome/menu",
     "firebug/console/autoCompleter",
+    "firebug/console/commandLine",
     "firebug/editor/sourceEditor",
 ],
-function(Firebug, FBTrace, Obj, Events, Dom, Locale, Css, Options, Module, Menu, AutoCompleter,
-    SourceEditor) {
+function(Firebug, FBTrace, Obj, Events, Dom, Locale, Css, Options, Promise, Module, Menu,
+    AutoCompleter, CommandLine, SourceEditor) {
 
 "use strict";
 
@@ -25,14 +27,32 @@ function(Firebug, FBTrace, Obj, Events, Dom, Locale, Css, Options, Module, Menu,
 var CONTEXT_MENU = SourceEditor.Events.contextMenu;
 var TEXT_CHANGED = SourceEditor.Events.textChange;
 
+var prettyPrintWorker = null;
+
+// Tracing
+var Trace = FBTrace.to("DBG_COMMANDEDITOR");
+var TraceError = FBTrace.toError();
+
 // ********************************************************************************************* //
 // Command Editor
 
-Firebug.CommandEditor = Obj.extend(Module,
+/**
+ * @module This object is responsible for logic related to a command editor (known
+ * also as multiline command line). It's based on {@link SourceEditor} that supports
+ * JavaScript syntax coloring.
+ *
+ * This editor is available in the Console panel and can be used to execute JS code.
+ * See also: https://getfirebug.com/wiki/index.php?title=Command_Editor
+ */
+var CommandEditor = Obj.extend(Module,
+/** @lends CommandEditor */
 {
     dispatchName: "commandEditor",
 
     editor: null,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
 
     initialize: function()
     {
@@ -86,6 +106,8 @@ Firebug.CommandEditor = Obj.extend(Module,
 
         this.editor.destroy();
         this.editor = null;
+
+        destroyPrettyPrintWorker();
     },
 
     /**
@@ -113,16 +135,16 @@ Firebug.CommandEditor = Obj.extend(Module,
     onExecute: function()
     {
         var context = Firebug.currentContext;
-        Firebug.CommandLine.update(context);
-        Firebug.CommandLine.enter(context);
+        CommandLine.update(context);
+        CommandLine.enter(context);
         return true;
     },
 
     onEscape: function()
     {
         var context = Firebug.currentContext;
-        Firebug.CommandLine.update(context);
-        Firebug.CommandLine.cancel(context);
+        CommandLine.update(context);
+        CommandLine.cancel(context);
         return true;
     },
 
@@ -149,11 +171,11 @@ Firebug.CommandEditor = Obj.extend(Module,
     onTextChanged: function(event)
     {
         // Ignore changes that are triggered by Firebug's restore logic.
-        if (Firebug.CommandEditor.ignoreChanges)
+        if (CommandEditor.ignoreChanges)
             return;
 
         var context = Firebug.currentContext;
-        Firebug.CommandLine.update(context);
+        CommandLine.update(context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -166,7 +188,7 @@ Firebug.CommandEditor = Obj.extend(Module,
         var popup = document.getElementById("fbCommandEditorPopup");
         Dom.eraseNode(popup);
 
-        var items = Firebug.CommandEditor.editor.getContextMenuItems();
+        var items = CommandEditor.editor.getContextMenuItems();
         Menu.createMenuItems(popup, items);
 
         if (!popup.childNodes.length)
@@ -305,18 +327,62 @@ Firebug.CommandEditor = Obj.extend(Module,
     {
         if (this.editor)
             this.editor.addOrRemoveClassCommandEditorHidden(addClass);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Pretty Print
+
+    prettyPrint: function(context)
+    {
+        var worker = getPrettyPrintWorker();
+        var id = "firebug-" + Obj.getUniqueId();
+        var deferred = Promise.defer();
+
+        var onReply = ({data}) =>
+        {
+            if (data.id !== id)
+                return;
+
+            worker.removeEventListener("message", onReply, false);
+
+            if (data.error)
+            {
+                TraceError.sysout("commandEditor.prettyPrint; ERROR " + data.error, data);
+
+                Firebug.Console.logFormatted([data.error], context, "error", true);
+
+                deferred.reject(data.error);
+            }
+            else
+            {
+                this.setText(data.code);
+
+                deferred.resolve(data.code);
+            }
+        };
+
+        worker.addEventListener("message", onReply, false);
+
+        worker.postMessage({
+            id: id,
+            url: "(command-editor)",
+            indent: Options.get("replaceTabs"),
+            source: this.getText()
+        });
+
+        return deferred.promise;
     }
 });
 
 // ********************************************************************************************* //
 // Getters/setters
 
-Firebug.CommandEditor.__defineGetter__("value", function()
+CommandEditor.__defineGetter__("value", function()
 {
     return this.getText();
 });
 
-Firebug.CommandEditor.__defineSetter__("value", function(val)
+CommandEditor.__defineSetter__("value", function(val)
 {
     this.setText(val);
 });
@@ -420,11 +486,46 @@ TextEditor.prototype =
 };
 
 // ********************************************************************************************* //
+// Local Helpers
+
+/**
+ * Get or create the worker that handles pretty printing.
+ */
+function getPrettyPrintWorker()
+{
+    if (!prettyPrintWorker)
+    {
+        prettyPrintWorker = new ChromeWorker(
+            "resource://gre/modules/devtools/server/actors/pretty-print-worker.js");
+
+        prettyPrintWorker.addEventListener("error", ({message, fileName, lineNo}) =>
+        {
+            TraceError.sysout("commandEditor.getPrettyPrintWorker; ERROR " + message +
+                " " + fileName + ":" + lineNo);
+        }, false);
+    }
+
+    return prettyPrintWorker;
+}
+
+function destroyPrettyPrintWorker()
+{
+    if (prettyPrintWorker)
+    {
+        prettyPrintWorker.terminate();
+        prettyPrintWorker = null;
+    }
+}
+
+// ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(Firebug.CommandEditor);
+Firebug.registerModule(CommandEditor);
 
-return Firebug.CommandEditor;
+// xxxHonza: backward compatibility, should be removed
+Firebug.CommandEditor = CommandEditor;
+
+return CommandEditor;
 
 // ********************************************************************************************* //
 });
