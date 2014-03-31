@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5987: Infotip isn't displayed for images with parentheses and escaped characters in their name</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #image {
+            width: 100px;
+            height: 100px;
+            background: url("imageWith()And'InItsName.png") center no-repeat;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5987">Issue 5987</a>: Infotip isn't displayed for images with parentheses and escaped characters in their name</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="image"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>Select <em>issue5987.html</em> from the location menu</li>
+                    <li>Hover the image URL of the <code>background</code> property</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>An infotip should be shown displaying the image.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

@@ -1,34 +1,34 @@
 function runTest()
 {
-    FBTest.sysout("issue369.jsonViewer.START");
-
     FBTest.openNewTab(basePath + "net/369/issue369.1.6.htm", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableNetPanel(function(win)
+        FBTest.openFirebug(function()
         {
-            var numberOfRequests = 5;
-
-            var options = {
-                tagName: "tr",
-                classes: "netRow category-xhr hasHeaders loaded",
-                counter: numberOfRequests
-            };
-
-            FBTest.waitForDisplayedElement("net", options, function(row)
+            FBTest.enableNetPanel(function(win)
             {
-                verifyContent(numberOfRequests);
-                FBTest.testDone("issue369.jsonViewer.DONE");
-            });
+                var numberOfRequests = 5;
 
-            FBTest.click(win.document.getElementById("testButton1"));
-            FBTest.click(win.document.getElementById("testButton2"));
-            FBTest.click(win.document.getElementById("testButton3"));
-            FBTest.click(win.document.getElementById("testButton4"));
-            // xxxHonza: Not implemented yet.
-            //FBTest.click(win.document.getElementById("testButton5"));
-            //FBTest.click(win.document.getElementById("testButton6"));
-            FBTest.click(win.document.getElementById("testButton7"));
+                var options = {
+                    tagName: "tr",
+                    classes: "netRow category-xhr hasHeaders loaded",
+                    counter: numberOfRequests
+                };
+
+                FBTest.waitForDisplayedElement("net", options, function(row)
+                {
+                    verifyContent(numberOfRequests);
+                    FBTest.testDone();
+                });
+
+                FBTest.click(win.document.getElementById("testButton1"));
+                FBTest.click(win.document.getElementById("testButton2"));
+                FBTest.click(win.document.getElementById("testButton3"));
+                FBTest.click(win.document.getElementById("testButton4"));
+                // xxxHonza: Not implemented yet.
+                //FBTest.click(win.document.getElementById("testButton5"));
+                //FBTest.click(win.document.getElementById("testButton6"));
+                FBTest.click(win.document.getElementById("testButton7"));
+            });
         });
     });
 }

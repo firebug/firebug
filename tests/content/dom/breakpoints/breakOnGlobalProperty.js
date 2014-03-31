@@ -1,54 +1,61 @@
 function runTest()
 {
-    FBTest.sysout("dom.breakpoints; START");
     FBTest.setPref("filterSystemURLs", true);
 
     FBTest.openNewTab(basePath + "dom/breakpoints/breakOnProperty.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableAllPanels();
-
-        FBTest.selectPanel("dom");
-
-        // Reload window to activate debugger and run breakOnTest.
-        FBTest.reload(function(win)
+        FBTest.openFirebug(function()
         {
-            var panel = FBTest.getPanel("dom");
-            FBTest.waitForDOMProperty("anObject", function(row)
+            FBTest.enableScriptPanel(function()
             {
-                // Wait till _testProperty row in the UI is available. This row displays
-                // the _testProperty and we need to created a breakpoint on it.
-                FBTest.waitForDOMProperty("_testProperty", function(row)
+                FBTest.selectPanel("dom");
+
+                // Reload window to activate debugger and run breakOnTest.
+                FBTest.reload(function(win)
                 {
-                    // Set breakpoint.
-                    panel.breakOnProperty(row);
+                    var panel = FBTest.getPanel("dom");
+                    FBTest.waitForDOMProperty("anObject", function(row)
+                    {
+                        // Wait till _testProperty row in the UI is available. This row displays
+                        // the _testProperty and we need to created a breakpoint on it.
+                        FBTest.waitForDOMProperty("_testProperty", function(row)
+                        {
+                            // Set breakpoint.
+                            panel.breakOnProperty(row);
 
-                    var doc = row.ownerDocument;
-                    var testSuite = [];
-                    testSuite.push(function(callback) {
-                        FBTest.progress("4 " + win);
-                        breakOnMutation(win, "changeProperty", 44, callback);
-                    });
-                    testSuite.push(function(callback) {
-                        FBTest.click(win.document.getElementById("removeProperty"));
-                        callback();
-                    });
-                    testSuite.push(function(callback) {
-                        breakOnMutation(win, "addProperty", 39, callback);
-                    });
-                    testSuite.push(function(callback) {
-                        breakOnMutation(win, "changeProperty", 44, callback);
-                    });
+                            var doc = row.ownerDocument;
+                            var testSuite = [];
+                            testSuite.push(function(callback)
+                            {
+                                FBTest.progress("4 " + win);
+                                breakOnMutation(win, "changeProperty", 44, callback);
+                            });
+                            testSuite.push(function(callback)
+                            {
+                                FBTest.click(win.document.getElementById("removeProperty"));
+                                callback();
+                            });
+                            testSuite.push(function(callback)
+                            {
+                                breakOnMutation(win, "addProperty", 39, callback);
+                            });
+                            testSuite.push(function(callback)
+                            {
+                                breakOnMutation(win, "changeProperty", 44, callback);
+                            });
 
-                    FBTest.runTestSuite(testSuite, function() {
-                        FBTest.testDone("dom.breakpoints; DONE");
-                    });
+                            FBTest.runTestSuite(testSuite, function()
+                            {
+                                FBTest.testDone();
+                            });
+                        });
+
+                        // Click to expand object's properties.
+                        var label = row.getElementsByClassName("memberLabel").item(0);
+                        FBTest.click(label);
+                    }, true);
                 });
-
-                // Click to expand object's properties.
-                var label = row.getElementsByClassName("memberLabel").item(0);
-                FBTest.click(label);
-            }, true);
+            });
         });
     });
 }

@@ -803,7 +803,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         }
         else if (Css.hasClass(row, "watchRow"))
         {
-            Firebug.Editor.startEditing(row, this.tree.getRowName(row));
+            Firebug.Editor.startEditing(row, member.value.expr);
             return;
         }
 

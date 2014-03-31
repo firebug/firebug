@@ -1,20 +1,19 @@
 function runTest()
 {
-    FBTest.sysout("issue2160.START");
-
     FBTest.openNewTab(basePath + "console/2160/issue2160.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function()
+        FBTest.openFirebug(function()
         {
-            FBTest.selectPanel("console");
+            FBTest.enableConsolePanel(function()
+            {
+                var tests = [];
+                tests.push(test1);
+                tests.push(test2);
 
-            var tests = [];
-            tests.push(test1);
-            tests.push(test2);
-
-            FBTest.runTestSuite(tests, function() {
-                FBTest.testDone("issue2160.DONE");
+                FBTest.runTestSuite(tests, function()
+                {
+                    FBTest.testDone();
+                });
             });
         });
     });
@@ -51,12 +50,10 @@ function test2(callback)
 
 function reload(callback)
 {
-    FBTest.reload();
-
-    // Wait for the last log.
-    var doc = FBTest.getPanelDocument();
-    var recognizer = new MutationRecognizer(doc.defaultView, "Text", null, "Doing addOnLoad...");
-    recognizer.onRecognizeAsync(callback);
+    FBTest.reload(() =>
+    {
+        FBTest.waitForDisplayedText("console", "Doing addOnLoad...", callback);
+    });
 }
 
 // ************************************************************************************************

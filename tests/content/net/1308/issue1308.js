@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue1308.START");
-
     var pageURI = basePath + "net/1308/issue1308.html";
     var scriptURI = basePath + "net/1308/issue1308.js";
 
@@ -51,5 +49,5 @@ function checkCopyLocationWithParametersAction(request)
     FBTest.compare(expected, actual, "Verify that the copied URL is properly encoded.");
 
     // Finish test
-    FBTest.testDone("issue1308.DONE");
+    FBTest.testDone();
 }

@@ -1,35 +1,38 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/chrome/module",
-    "firebug/lib/object",
     "firebug/firebug",
-    "firebug/chrome/reps",
+    "firebug/lib/trace",
+    "firebug/lib/array",
+    "firebug/lib/css",
+    "firebug/lib/object",
+    "firebug/lib/string",
     "firebug/lib/xpcom",
     "firebug/console/console",
-    "firebug/lib/css",
-    "firebug/chrome/window",
-    "firebug/lib/array",
-    "firebug/lib/string",
-    "firebug/debugger/breakpoints/breakpointStore",
     "firebug/console/errorMessageObj",
     "firebug/console/errorStackTraceObserver",
+    "firebug/chrome/window",
+    "firebug/chrome/module",
+    "firebug/chrome/reps",
+    "firebug/debugger/breakpoints/breakpointStore",
 ],
-function(Module, Obj, Firebug, FirebugReps, Xpcom, Console, Css, Win, Arr, Str, BreakpointStore,
-    ErrorMessageObj, ErrorStackTraceObserver) {
+function(Firebug, FBTrace, Arr, Css, Obj, Str, Xpcom, Console, ErrorMessageObj,
+    ErrorStackTraceObserver, Win, Module, FirebugReps, BreakpointStore) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
-const WARNING_FLAG = Ci.nsIScriptError.warningFlag;
+var WARNING_FLAG = Ci.nsIScriptError.warningFlag;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const urlRe = new RegExp("([^:]*):(//)?([^/]*)");
-const pointlessErrors =
+var urlRe = new RegExp("([^:]*):(//)?([^/]*)");
+var pointlessErrors =
 {
     "uncaught exception: Permission denied to call method Location.toString": 1,
     "uncaught exception: Permission denied to get property Window.writeDebug": 1,
@@ -42,8 +45,8 @@ const pointlessErrors =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const consoleService = Xpcom.CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
-const wm = Xpcom.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
+var consoleService = Xpcom.CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
+var wm = Xpcom.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
 
 // ********************************************************************************************* //
 // Tracing
@@ -56,7 +59,7 @@ var TraceError = FBTrace.toError();
 /**
  * @module
  */
-var Errors = Firebug.Errors = Obj.extend(Module,
+var Errors = Obj.extend(Module,
 /** @lends Errors */
 {
     dispatchName: "errors",
@@ -91,14 +94,6 @@ var Errors = Firebug.Errors = Obj.extend(Module,
         tool.removeListener(this);
 
         this.showCount(0);
-
-        if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS && "initTime" in this)
-        {
-            var deltaT = new Date().getTime() - this.initTime.getTime();
-
-            FBTrace.sysout("errors.destroyContext sheets: " + Css.totalSheets + " rules: " +
-                Css.totalRules + " time: " + deltaT);
-        }
     },
 
     showContext: function(browser, context)
@@ -163,8 +158,7 @@ var Errors = Firebug.Errors = Obj.extend(Module,
         if (this.isObserving)
             return;
 
-        if (FBTrace.DBG_ERRORLOG)
-            FBTrace.sysout("Errors.startObserving");
+        Trace.sysout("Errors.startObserving;");
 
         if (consoleService)
             consoleService.registerListener(this);
@@ -177,8 +171,7 @@ var Errors = Firebug.Errors = Obj.extend(Module,
         if (!this.isObserving)
             return;
 
-        if (FBTrace.DBG_ERRORLOG)
-            FBTrace.sysout("Errors.stopObserving");
+        Trace.sysout("Errors.stopObserving;");
 
         if (consoleService)
             consoleService.unregisterListener(this);
@@ -200,12 +193,6 @@ var Errors = Firebug.Errors = Obj.extend(Module,
         {
             if (window.closed)
                 this.stopObserving();
-
-            if (typeof FBTrace == "undefined")
-                return;
-
-            if (!FBTrace)
-                return;
         }
         catch (exc)
         {
@@ -218,12 +205,12 @@ var Errors = Firebug.Errors = Obj.extend(Module,
         }
         catch (exc)
         {
-            // Errors prior to console init will come out here, eg error message
-            // from Firefox startup jjb.
-            if (FBTrace.DBG_ERRORLOG)
+            // Errors prior to console initialization will come out here,
+            // e.g. error message from Firefox startup jjb.
+            if (Trace.active)
             {
-                FBTrace.sysout("errors.observe FAILS " + exc, exc);
-                FBTrace.sysout("errors.observe object " + object, object);
+                Trace.sysout("errors.observe; ERROR " + exc, exc);
+                Trace.sysout("errors.observe; object " + object, object);
             }
         }
     },
@@ -244,28 +231,20 @@ var Errors = Firebug.Errors = Obj.extend(Module,
         if (Str.hasPrefix(sourceName, "chrome:") || Str.hasPrefix(sourceName, "resource:"))
             XPConnect = true;
 
-        if (FBTrace.DBG_ERRORLOG)
-            FBTrace.sysout("errors.observe; ScriptError: " + ScriptError +
-                ", XPConnect: " + XPConnect + ", sourceName: " + sourceName);
+        Trace.sysout("errors.observe; ScriptError: " + ScriptError +
+            ", XPConnect: " + XPConnect + ", sourceName: " + sourceName);
 
         if (ScriptError && !XPConnect)  // all branches should trace 'object'
         {
-            if (FBTrace.DBG_ERRORLOG)
-            {
-                FBTrace.sysout("errors.observe nsIScriptError: " + object.errorMessage,
-                    object);
-            }
+            Trace.sysout("errors.observe nsIScriptError: " + object.errorMessage, object);
 
             // after instanceof
             var context = this.getErrorContext(object);
             if (context)
                 return this.logScriptError(context, object, isWarning);
 
-            if (FBTrace.DBG_ERRORLOG)
-            {
-                FBTrace.sysout("errors.observe nsIScriptError no context! " +
-                    object.errorMessage, object);
-            }
+            Trace.sysout("errors.observe nsIScriptError no context! " +
+                object.errorMessage, object);
         }
         else
         {
@@ -276,7 +255,7 @@ var Errors = Firebug.Errors = Obj.extend(Module,
                     if (Trace.active)
                     {
                         var type = (ConsoleMessage ? "nsIConsoleMessage" : "object.message");
-                        FBTrace.sysout("errors.observe " + type + ": " + object.message, object);
+                        Trace.sysout("errors.observe " + type + ": " + object.message, object);
                     }
 
                     var context = this.getErrorContext(object);  // after instanceof
@@ -298,43 +277,42 @@ var Errors = Firebug.Errors = Obj.extend(Module,
                     }
                     else
                     {
-                        Trace.sysout("errors.observe, no context for message", object);
+                        Trace.sysout("errors.observe; no context for message", object);
                     }
                 }
                 else
                 {
-                    FBTrace.sysout("errors.observe, no message in object", object);
+                    Trace.sysout("errors.observe; no message in object", object);
                 }
             }
             else
             {
-                if (FBTrace.DBG_ERRORLOG)
-                    FBTrace.sysout("errors.observe showChromeMessages off, dropped:", object);
+                Trace.sysout("errors.observe; showChromeMessages off, dropped:", object);
                 return;
             }
         }
 
-        if (FBTrace.DBG_ERRORLOG)
+        if (Trace.active)
         {
             if (context)
             {
                 if (context.window)
                 {
-                    FBTrace.sysout((isWarning?"warning":"error") + " logged to " +
+                    Trace.sysout((isWarning ? "warning" : "error") + " logged to " +
                         context.getName());
                 }
                 else
                 {
-                    FBTrace.sysout("errors.observe, context with no window, " +
-                        (isWarning?"warning":"error")+" object:", object);
+                    Trace.sysout("errors.observe, context with no window, " +
+                        (isWarning ? "warning" : "error") + " object:", object);
 
-                    FBTrace.sysout("errors.observe, context with no window, context:",
+                    Trace.sysout("errors.observe, context with no window, context:",
                         context);
                 }
             }
             else
             {
-                FBTrace.sysout("errors.observe, no context!");
+                Trace.sysout("errors.observe, no context!");
             }
         }
     },
@@ -386,8 +364,7 @@ var Errors = Firebug.Errors = Obj.extend(Module,
 
         var className = isWarning ? "warningMessage" : "errorMessage";
 
-        if (FBTrace.DBG_ERRORLOG)
-            FBTrace.sysout("errors.observe delayed log to " + context.getName());
+        Trace.sysout("errors.observe delayed log to " + context.getName());
 
         // report later to avoid loading sources
         context.throttle(this.delayedLogging, this, [msgId, context, error, context, className,
@@ -411,9 +388,8 @@ var Errors = Firebug.Errors = Obj.extend(Module,
         // page related (issue 4991).
         if (!url && !object.outerWindowID)
         {
-            if (FBTrace.DBG_ERRORLOG)
-                FBTrace.sysout("errors.getErrorContext; No URL & no outer-window. " +
-                    "url: " + url + ", outerWindowID: " + object.outerWindowID, object);
+            Trace.sysout("errors.getErrorContext; No URL & no outer-window. " +
+                "url: " + url + ", outerWindowID: " + object.outerWindowID, object);
             return null;
         }
 
@@ -429,8 +405,7 @@ var Errors = Firebug.Errors = Obj.extend(Module,
         Firebug.connection.eachContext(
             function findContextByURL(context)
             {
-                if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
-                    FBTrace.sysout("findContextByURL " + context.getName());
+                Trace.sysout("errors.findContextByURL; " + context.getName());
 
                 if (!context.window || !context.getWindowLocation())
                     return false;
@@ -442,26 +417,25 @@ var Errors = Firebug.Errors = Obj.extend(Module,
                 if (errorWindow && errorWindow != context.window)
                     return false;
 
-                if (FBTrace.DBG_ERRORLOG)
+                if (Trace.active)
                 {
-                    FBTrace.sysout("findContextByURL seeking " + url + " in " +
+                    Trace.sysout("errors.findContextByURL seeking " + url + " in " +
                         (context.loaded ? "loaded" : "not loaded") +
                         " window location: " + context.getWindowLocation().toString());
                 }
 
                 if (context.getWindowLocation().toString() == url)
                 {
-                    if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
-                        FBTrace.sysout("findContextByURL found match to context window location");
+                    Trace.sysout("finderrors.ContextByURL; found match to context " +
+                        "window location");
 
                     return errorContext = context;
                 }
                 else
                 {
-                    if (context.sourceFileMap && context.sourceFileMap[url])
+                    if (context.getSourceFile(url))
                     {
-                        if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
-                            FBTrace.sysout("findContextByURL found match in sourceFileMap");
+                        Trace.sysout("errors.findContextByURL; found match in sourceFileMap");
                         return errorContext = context;
                     }
                 }
@@ -470,11 +444,8 @@ var Errors = Firebug.Errors = Obj.extend(Module,
                 {
                     if (Css.getStyleSheetByHref(url, context))
                     {
-                        if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
-                        {
-                            FBTrace.sysout("findContextByURL found match to in loaded " +
-                                "styleSheetMap");
-                        }
+                        Trace.sysout("errors.findContextByURL; found match to in loaded " +
+                            "styleSheetMap");
 
                         return errorContext = context;
                     }
@@ -487,19 +458,15 @@ var Errors = Firebug.Errors = Obj.extend(Module,
                 {
                     if (context.getCompilationUnit(url))
                     {
-                        if (FBTrace.DBG_EERRORLOG)
-                            FBTrace.sysout("findContextByURL found match in compilationUnits");
+                        Trace.sysout("errors.findContextByURL; found match in compilationUnits");
 
                         return errorContext = context;
                     }
 
                     if (Css.getStyleSheetByHref(url, context))
                     {
-                        if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
-                        {
-                            FBTrace.sysout("findContextByURL found match to in non-loaded " +
-                                "styleSheetMap");
-                        }
+                        Trace.sysout("errors.findContextByURL; found match to in non-loaded " +
+                            "styleSheetMap");
 
                         // but we already have this one.
                         errorContext = context;
@@ -510,23 +477,15 @@ var Errors = Firebug.Errors = Obj.extend(Module,
                 }
             });
 
-        if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS && "initTime" in this)
-        {
-            var deltaT = new Date().getTime() - this.initTime.getTime();
-            FBTrace.sysout("errors.getErrorContext sheets: " + Css.totalSheets +
-                " rules: " + Css.totalRules + " time: " + deltaT);
-        }
-
         if (!errorContext)
         {
-            if (FBTrace.DBG_ERRORLOG)
-                FBTrace.sysout("errors.getErrorContext no context from error filename:"+
-                    url, object);
+            Trace.sysout("errors.getErrorContext no context from error filename: " +
+                url, object);
         }
 
         // Use nsIScriptError to compare the parent window guessed by Firebug
         // with the window found through outerWindowID
-        if (FBTrace.DBG_ERRORLOG)
+        if (Trace.active)
         {
             var win1 = getErrorWindow(object);
             var win2 = errorContext ? errorContext.window : null;
@@ -543,7 +502,7 @@ var Errors = Firebug.Errors = Obj.extend(Module,
                 var win2Name = Win.safeGetWindowLocation(win2);
                 var moreInfo = {object: object, fromError2: win1, fromFirebug: win2};
 
-                FBTrace.sysout("errors.getErrorContext; ERROR wrong parent window? " +
+                Trace.sysout("errors.getErrorContext; ERROR wrong parent window? " +
                     win1Name + " !== " + win2Name, moreInfo);
             }
         }
@@ -577,10 +536,12 @@ var Errors = Firebug.Errors = Obj.extend(Module,
             // else we must not be and we are not
         }
 
-        if (FBTrace.DBG_ERRORLOG)
-            FBTrace.sysout("errors.checkEnabled mustBeEnabled: " + this.mustBeEnabled() +
+        if (Trace.active)
+        {
+            Trace.sysout("errors.checkEnabled mustBeEnabled: " + this.mustBeEnabled() +
                 " Console.isAlwaysEnabled " + Console.isAlwaysEnabled() +
                 " isObserving:" + this.isObserving);
+        }
     },
 
     mustBeEnabled: function()
@@ -635,9 +596,9 @@ var Errors = Firebug.Errors = Obj.extend(Module,
             {
                 sourceLine = context.sourceCache.getLine(sourceFile, sourceLineNo);
             }
-            else if (FBTrace.DBG_ERRORS)
+            else
             {
-                FBTrace.sysout("errors.reparseXPC; ERROR, NULL context.sourceCache, " +
+                TraceError.sysout("errors.reparseXPC; ERROR, NULL context.sourceCache, " +
                     sourceFile + ", " + sourceLineNo);
             }
         }
@@ -773,8 +734,7 @@ function lessTalkMoreAction(context, object, isWarning)
 {
     if (!context)
     {
-        if (FBTrace.DBG_ERRORLOG)
-            FBTrace.sysout("errors.observe dropping " + object.category + " no context");
+        Trace.sysout("errors.lessTalkMoreAction; dropping " + object.category + " no context");
         return false;
     }
 
@@ -785,8 +745,8 @@ function lessTalkMoreAction(context, object, isWarning)
     var why = whyNotShown(object.sourceName, object.category, isWarning);
     if (why)
     {
-        if (FBTrace.DBG_ERRORLOG)
-            FBTrace.sysout("errors.observe dropping " + object.category + " because: " + why);
+        Trace.sysout("errors.lessTalkMoreAction; dropping " + object.category +
+            " because: " + why);
 
         context.droppedErrors = context.droppedErrors || {};
 
@@ -813,8 +773,7 @@ function lessTalkMoreAction(context, object, isWarning)
             {
                 if (Str.hasPrefix(incoming_message, msg))
                 {
-                    if (FBTrace.DBG_ERRORLOG)
-                        FBTrace.sysout("errors.observe dropping pointlessError: " + msg);
+                    Trace.sysout("errors.observe dropping pointlessError: " + msg);
                     return null;
                 }
             }
@@ -859,13 +818,11 @@ function getErrorWindow(object)
             why = "not an nsIScriptError";
         }
 
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("errors.getErrorWindow failed " + why, object);
+        Trace.sysout("errors.getErrorWindow failed " + why, object);
     }
     catch (err)
     {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("errors.getErrorWindow; EXCEPTION" + err, err);
+        TraceError.sysout("errors.getErrorWindow; EXCEPTION " + err, err);
     }
 
     return null;
@@ -878,11 +835,11 @@ function getExceptionContext(object)
         return;
 
     var errorContext = Firebug.connection.getContextByWindow(errorWin);
-    if (FBTrace.DBG_ERRORLOG)
+    if (Trace.active)
     {
-        FBTrace.sysout("errors.observe exception context: " +
+        Trace.sysout("errors.getExceptionContext; exception context: " +
             (errorContext ? errorContext.getName() : "none") + " errorWin: " +
-                Win.safeGetWindowLocation(errorWin));
+            Win.safeGetWindowLocation(errorWin));
     }
 
     if (errorContext)
@@ -893,6 +850,9 @@ function getExceptionContext(object)
 // Registration
 
 Firebug.registerModule(Errors);
+
+// xxxHonza: backward compatibility
+Firebug.Errors = Errors
 
 return Firebug.Errors;
 

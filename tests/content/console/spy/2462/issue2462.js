@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue2462.START");
     FBTest.openNewTab(basePath + "console/spy/2462/issue2462.html", function(win)
     {
         FBTest.enableConsolePanel(function()
@@ -13,7 +12,7 @@ function runTest()
             // Asynchronously wait for the request beeing displayed.
             FBTest.waitForDisplayedElement("console", options, function(logRow)
             {
-                FBTest.testDone("issue2462.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

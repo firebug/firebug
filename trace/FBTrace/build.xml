@@ -46,6 +46,7 @@
                <include name="**/*.xml"/>
                <include name="**/*.dtd"/>
                <include name="**/*.png"/>
+               <include name="**/*.svg"/>
                <include name="**/*.gif"/>
                <include name="**/*.ico"/>
                <include name="**/*.manifest"/>
@@ -64,6 +65,7 @@
         <copy todir="${build.dir}/modules">
             <fileset dir="modules">
                <include name="**/*.js"/>
+               <include name="**/*.jsm"/>
             </fileset>
         </copy>
 

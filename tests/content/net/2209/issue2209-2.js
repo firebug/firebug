@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue2209-2.START");
-
     FBTest.openNewTab(basePath + "net/2209/issue2209-2.html", function(win)
     {
         FBTest.enableNetPanel(function(win)
@@ -15,7 +13,7 @@ function runTest()
 
                 var jsonTab = rowInfoBody.querySelector(".netInfoJSONTab");
                 FBTest.ok(jsonTab, "JSON tab must exist");
-                FBTest.testDone("issue2209-2; DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("executeTest"));

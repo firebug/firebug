@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("exampleToolsInterface.START");
-
     // 1) Load test case page
     FBTest.openNewTab(basePath + "examples/exampleToolsInterface.html", function(win)
     {
@@ -25,7 +23,7 @@ function runTest()
                 FBTest.clickContinueButton();
 
                 // 5) Finish test.
-                FBTest.testDone("exampleToolsInterface.DONE");
+                FBTest.testDone();
             });
 
             // 4) Execute test by clicking on the 'Execute Test' button.

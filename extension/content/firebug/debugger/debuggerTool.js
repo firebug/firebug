@@ -344,7 +344,11 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
         Trace.sysout("debuggerTool.resume; limit: " + (limit ? limit.type: "no type"), limit);
 
         // xxxHonza: do not use _doResume. Use stepping methods instead.
-        return this.context.activeThread._doResume(limit, callback);
+        return this.context.activeThread._doResume(limit, (response) =>
+        {
+            if (callback)
+                callback();
+        });
     },
 
     stepOver: function(callback)
@@ -353,7 +357,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
 
         // The callback must be passed into the stepping functions, otherwise there is
         // an exception.
-        return this.context.activeThread.stepOver(function()
+        return this.context.activeThread.stepOver(function(response)
         {
             if (callback)
                 callback();
@@ -364,7 +368,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
     {
         Trace.sysout("debuggerTool.stepInto");
 
-        return this.context.activeThread.stepIn(function()
+        return this.context.activeThread.stepIn(function(response)
         {
             if (callback)
                 callback();
@@ -375,7 +379,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
     {
         Trace.sysout("debuggerTool.stepOut");
 
-        return this.context.activeThread.stepOut(function()
+        return this.context.activeThread.stepOut(function(response)
         {
             if (callback)
                 callback();
@@ -471,7 +475,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Break On Exceptions
 
-    updateBreakOnErrors: function()
+    updateBreakOnErrors: function(callback)
     {
         // Either 'breakOnExceptions' option can be set (from within the Script panel options
         // menu) or 'break on next' (BON) can be activated (on the Console panel).
@@ -482,9 +486,11 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
             ", ignore: " + ignore + ", thread paused: " + this.context.activeThread.paused +
             ", context stopped: " + this.context.stopped);
 
-        return this.context.activeThread.pauseOnExceptions(pause, ignore, function(response)
+        return this.context.activeThread.pauseOnExceptions(pause, ignore, (response) =>
         {
             Trace.sysout("debuggerTool.updateBreakOnErrors; response received:", response);
+            if (callback)
+                callback(this.context, pause, ignore);
         });
     },
 });

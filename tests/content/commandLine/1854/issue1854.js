@@ -1,42 +1,43 @@
 function runTest()
 {
-    FBTest.sysout("issue1854.START");
-
-    FBTest.openNewTab(basePath + "commandLine/1854/issue1854.html", function(win)
+    var url = basePath + "commandLine/1854/issue1854.html";
+    FBTest.openNewTab(url, function()
     {
         // Step 1: Open Firebug
-        FBTest.openFirebug();
-
-        // Step 2: Enable the Script and the Console panel
-        FBTest.enableScriptPanel();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(function()
         {
-            // Step 4: Reload the page (is done within FBTest.enableConsolePanel())
-
+            // Step 2: Enable the Script and the Console panel
             // Step 3: Switch to the Console panel
-            FBTest.selectPanel("console");
-
-            // Asynchronously wait for result in the Console panel.
-            var config = {tagName: "div", classes: "logRow logRow-command"};
-            FBTest.waitForDisplayedElement("console", config, function(row)
+            FBTest.enablePanels(["console", "script"], function()
             {
-                FBTest.compare(">>> debug(showOutput)", row.textContent,
-                    "The command line should display: >>> debug(showOutput)");
-
-                // Asynchronously wait for break in debugger.
-                FBTest.waitForBreakInDebugger(FW.Firebug.chrome, 11, false, function(row)
+                // Step 4: Reload the page
+                FBTest.reload(function(win)
                 {
-                    FBTest.clickContinueButton();
-                    FBTest.testDone("issue1854.DONE");
+                    // Asynchronously wait for result in the Console panel.
+                    var config = {tagName: "div", classes: "logRow logRow-command"};
+                    FBTest.waitForDisplayedElement("console", config, function(row)
+                    {
+                        FBTest.compare(">>> debug(showOutput)", row.textContent,
+                            "The command line should display: >>> debug(showOutput)");
+
+                        FBTest.waitForBreakpoint(url, 11, function()
+                        {
+                            // Asynchronously wait for break in debugger.
+                            FBTest.waitForBreakInDebugger(null, 11, false, function(row)
+                            {
+                                FBTest.clickContinueButton();
+                                FBTest.testDone();
+                            });
+
+                            // Step 6: Click the 'Show output' button
+                            FBTest.clickContentButton(win, "showOutput");
+                        });
+                    });
+
+                    // Step 5: Type debug(showOutput) into the Command Line and hit Enter
+                    FBTest.executeCommand("debug(showOutput)");
                 });
-
-                // Step 6: Click the 'Show output' button
-                FBTest.click(win.document.getElementById("showOutput"));
             });
-
-            // Step 5: Type debug(showOutput) into the Command Line and hit Enter
-            FBTest.executeCommand("debug(showOutput)");
-
         });
     });
 }

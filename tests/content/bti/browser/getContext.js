@@ -14,11 +14,12 @@ function runTest()
     {
         var contexts = browser.getBrowserContexts();
         FBTest.ok(contexts.length > 0, "Should be at least one context");
-        for ( var i = 0; i < contexts.length; i++) {
+        for ( var i = 0; i < contexts.length; i++)
+        {
             var context = contexts[i];
             var candidate = browser.getContext(context.getId());
             FBTest.ok(candidate == context, "Contexts should be identical");
         }
-        FBTest.testDone("done test #getContext(id)");
+        FBTest.testDone();
     });
 }

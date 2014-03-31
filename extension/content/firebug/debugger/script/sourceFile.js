@@ -3,13 +3,16 @@
 define([
     "firebug/firebug",
     "firebug/lib/trace",
-    "firebug/lib/string",
     "firebug/lib/events",
-    "firebug/debugger/script/sourceLink",
+    "firebug/lib/string",
+    "firebug/lib/url",
     "firebug/debugger/debuggerLib",
+    "firebug/debugger/script/sourceLink",
     "firebug/net/netUtils",
 ],
-function(Firebug, FBTrace, Str, Events, SourceLink, DebuggerLib, NetUtils) {
+function(Firebug, FBTrace, Events, Str, Url, DebuggerLib, SourceLink, NetUtils) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -24,14 +27,17 @@ var Trace = FBTrace.to("DBG_SOURCEFILE");
 // Source File
 
 /**
- * SourceFile instance is created for every compilation unit (i.e. a script created
- * on the back end). The instance is created by {@link SourceTool} every time a "newSource"
+ * SourceFile instance is created for every compilation unit (i.e. a source created
+ * at the back end). The instance is created by {@link SourceTool} every time a "newSource"
  * or the initial "sources" packet is received.
  */
 function SourceFile(context, actor, href, isBlackBoxed, isPrettyPrinted)
 {
     this.context = context;
     this.actor = actor;
+
+    // SourceFile should not use URL fragment (issue 7251)
+    //this.href = Url.normalizeURL(href);
     this.href = href;
 
     // xxxHonza: this field should be utilized by issue 4885.
@@ -41,7 +47,7 @@ function SourceFile(context, actor, href, isBlackBoxed, isPrettyPrinted)
     // The content type is set when 'source' packet is received (see onSourceLoaded).
     this.contentType = null;
 
-    // xxxHonza: refactore the flag logic.
+    // xxxHonza: refactor the flag logic.
     this.compilation_unit_type = "script_tag";
     this.callbacks = [];
 }

@@ -83,7 +83,7 @@ Firebug.Console.injector =
         }
         catch (ex)
         {
-            if (FBTrace.DBG_ERROR)
+            if (FBTrace.DBG_ERRORS)
             {
                 FBTrace.sysout("consoleInjector.attachConsoleInjector; exception while injecting",
                     ex);

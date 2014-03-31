@@ -1,29 +1,30 @@
 function runTest()
 {
-    FBTest.sysout("issue5655.START");
     FBTest.openNewTab(basePath + "console/api/log.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(function()
         {
-            var tasks = new FBTest.TaskList();
+            FBTest.enableConsolePanel(function(win)
+            {
+                var tasks = new FBTest.TaskList();
 
-            var nothingToOutput = FW.FBL.$STR("console.msg.nothing_to_output");
-            var emptyString = FW.FBL.$STR("console.msg.an_empty_string");
+                var nothingToOutput = FW.FBL.$STR("console.msg.nothing_to_output");
+                var emptyString = FW.FBL.$STR("console.msg.an_empty_string");
 
-            tasks.push(executeAndVerify, "console.log()", nothingToOutput);
-            tasks.push(executeAndVerify, "console.log(null)", /null/);
-            tasks.push(executeAndVerify, "console.log(undefined)", /undefined/);
-            tasks.push(executeAndVerify, "console.log(\"\")", emptyString);
-            tasks.push(executeAndVerify, "console.log(\"TEXT\")", "TEXT");
+                tasks.push(executeAndVerify, "console.log()", nothingToOutput);
+                tasks.push(executeAndVerify, "console.log(null)", /null/);
+                tasks.push(executeAndVerify, "console.log(undefined)", /undefined/);
+                tasks.push(executeAndVerify, "console.log(\"\")", emptyString);
+                tasks.push(executeAndVerify, "console.log(\"TEXT\")", "TEXT");
 
-            var expr = "console.log(1,2,0,NaN,null,undefined,\"\",3, \"TEXT\", {1:2},[1,2,\"\", undefined])";
-            var expected = " 1 2 0 NaN null undefined " + emptyString +
-                " 3 TEXT Object { 1=2} [1, 2, \"\", undefined]";
-            tasks.push(executeAndVerify, expr, expected);
+                var expr = "console.log(1,2,0,NaN,null,undefined,\"\",3, \"TEXT\", {1:2},[1,2,\"\", undefined])";
+                var expected = " 1 2 0 NaN null undefined " + emptyString +
+                    " 3 TEXT Object { 1=2} [1, 2, \"\", undefined]";
+                tasks.push(executeAndVerify, expr, expected);
 
-            tasks.run(function() {
-                FBTest.testDone("issue5655.DONE");
+                tasks.run(function() {
+                    FBTest.testDone();
+                });
             });
         });
     });

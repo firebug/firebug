@@ -1,11 +1,10 @@
 function runTest()
 {
-    FBTest.sysout("profiler.START");
     FBTest.openNewTab(basePath + "console/profiler/profiler.html", function(win)
     {
         FBTest.enablePanels(["console", "script"], function(win)
         {
-            var panel = FBTest.getPanel("console");
+            var panel = FBTest.getSelectedPanel();
             FBTest.clearConsole();
 
             var config = {tagName: "tr", classes: "profileRow", counter: 2};
@@ -32,7 +31,7 @@ function runTest()
                 FBTest.compare(177, profileRows[0].childNodes[1].textContent,
                     "The 'fib' function was called exactly 177 times.");
 
-                FBTest.testDone("profiler.DONE");
+                FBTest.testDone();
             });
 
             var chrome = FW.Firebug.chrome;

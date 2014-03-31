@@ -21,10 +21,10 @@ define([
     "firebug/lib/events",
     "firebug/chrome/panelActivation",
 ],
-function(Firebug, Module, Rep, FBTrace, Domplate, Errors, ErrorMessageObj, FirebugReps, Locale, Url, Str,
-    SourceLink, Dom, Css, Obj, Menu, System, Events, PanelActivation) {
+function(Firebug, Module, Rep, FBTrace, Domplate, Errors, ErrorMessageObj, FirebugReps,
+    Locale, Url, Str, SourceLink, Dom, Css, Obj, Menu, System, Events, PanelActivation) {
 
-"use strict"
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -42,7 +42,7 @@ var Trace = FBTrace.to("DBG_ERRORLOG");
 
 /**
  * @domplate Domplate template used to represent Error logs in the UI. Registered as Firebug rep.
- * This template is used for {@ErrorMessageObj} instances.
+ * This template is used for {@link ErrorMessageObj} instances.
  */
 var ErrorMessage = domplate(Rep,
 /** @lends ErrorMessage */
@@ -141,7 +141,10 @@ var ErrorMessage = domplate(Rep,
 
     hasErrorBreak: function(error)
     {
-        var url = Url.normalizeURL(error.href);
+        var url = error.href;
+        // SourceFile should not use URL fragment (issue 7251)
+        //var url = Url.normalizeURL(error.href);
+
         var line = error.lineNo - 1;
         return Errors.hasErrorBreakpoint(url, line);
     },
@@ -255,16 +258,15 @@ var ErrorMessage = domplate(Rep,
 
     getSourceType: function(error)
     {
-        // Errors occurring inside of HTML event handlers look like "foo.html (line 1)"
-        // so let's try to skip those
-        if (error.source)
+        var hasScriptPanel = PanelActivation.isPanelEnabled("script");
+
+        if (!hasScriptPanel)
+            return "none";
+        else if (error.source)
             return "syntax";
         else if (error.category == "css")
             return "show";
         else if (!error.href || !error.lineNo)
-            return "none";
-        // Why do we have that at all?
-        else if (error.lineNo == 1 && Url.getFileExtension(error.href) != "js")
             return "none";
         else
             return "show";
@@ -361,17 +363,23 @@ var ErrorMessage = domplate(Rep,
             error.href,
             "Line " +  error.lineNo
         ];
+
         System.copyToClipboard(message.join(Str.lineBreak()));
     },
 
     breakOnThisError: function(error, context)
     {
-        var url = Url.normalizeURL(error.href);
+        var url = error.href;
+        // SourceFile should not use URL fragment (issue 7251)
+        //var url = Url.normalizeURL(error.href);
+
+        Trace.sysout("errorMessageRep.breakOnThisError; " + url, error);
+
         var compilationUnit = context.getCompilationUnit(url);
         if (!compilationUnit)
         {
-            TraceError.sysout("reps.breakOnThisError has no source file for error.href: " +
-                error.href + "  error:" + error, context);
+            TraceError.sysout("errorMessageRep.breakOnThisError; ERROR No source file!",
+                context);
             return;
         }
 
@@ -509,17 +517,35 @@ var ErrorMessageUpdater = Obj.extend(Module,
      * creating/removing a breakpoint. Existence of an error-breakpoint is indicated
      * by displaying a red circle before the error description.
      * This method updates the UI if a breakpoint is created/removed.
+     * Note that Error messages can be also displayed in the Watch panel (issue 7220).
      *
      * @param {Object} bp Breakpoint instance.
      * @param {Object} isSet If true, an error breakpoint has been added, otherwise false.
      */
     updateErrorBreakpoints: function(context, bp, isSet)
     {
-        var panel = context.getPanel("console");
+        var messages = [];
+
+        //xxxHonza: we could also use context.invalidatePanels("watches") to
+        // update the Watches panel, but this is faster.
+        var panels = ["console", "watches"];
+        for (var name of panels)
+        {
+            var panel = context.getPanel(name);
+            if (!panel)
+                continue;
+
+            var nodes = panel.panelNode.getElementsByClassName("objectBox-errorMessage");
+            messages.push.apply(messages, nodes);
+        }
+
+        if (!messages.length)
+            return;
+
+        Trace.sysout("errorMessageRep.updateErrorBreakpoints; " + messages.length, messages);
 
         // Iterate all error messages (see firebug/console/errorMessageRep template)
         // in the Console panel and update associated breakpoint UI.
-        var messages = panel.panelNode.getElementsByClassName("objectBox-errorMessage");
         for (var i=0; i<messages.length; i++)
         {
             var message = messages[i];

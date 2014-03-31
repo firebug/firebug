@@ -1,16 +1,12 @@
 function runTest()
 {
-    FBTest.sysout("issue1299.START");
-
     var pageURI = basePath + "net/1299/issue1299.html";
     var scriptURI = basePath + "net/1299/issue1299.js";
 
     FBTest.clearCache();
     FBTest.openNewTab(pageURI, function(win)
     {
-        FBTest.enableScriptPanel();
-        FBTest.enableNetPanel(function(win)
-        {
+        FBTest.enablePanels(["net", "script"], function() {
             // Remove issue1299.js from Firebug cache.
             FW.Firebug.currentContext.sourceCache.invalidate(scriptURI);
 
@@ -31,7 +27,7 @@ function runTest()
                 FBTest.compare(expectedText, text,
                     "Firebug should cache even files coming directly from Firefox cache.");
 
-                FBTest.testDone("issue1299.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

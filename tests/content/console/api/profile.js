@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("console.profile.START");
     FBTest.progress("profile start");
     FBTest.openNewTab(basePath + "console/api/profile.html", function(win)
     {
@@ -42,22 +41,24 @@ function runTest()
                     profileRows[1].childNodes[8].textContent,
                     "The source link must be correct.");
 
-                FBTest.testDone("console.profile.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));
         };
 
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(function()
         {
-            FBTest.progress("console panel enabled");
-
-            var expected = FW.FBL.$STR("ProfilerRequiresTheScriptPanel");
-            FBTest.executeCommandAndVerify(function()
+            FBTest.enableConsolePanel(function(win)
             {
-                FBTest.enableScriptPanel(actualTest);
-            }, "console.profile();", expected, "div", "logRow-warn", true);
+                FBTest.progress("console panel enabled");
+
+                var expected = FW.FBL.$STR("ProfilerRequiresTheScriptPanel");
+                FBTest.executeCommandAndVerify(function()
+                {
+                    FBTest.enableScriptPanel(actualTest);
+                }, "console.profile();", expected, "div", "logRow-warn", true);
+            });
         });
     });
 }

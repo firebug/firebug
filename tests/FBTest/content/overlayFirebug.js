@@ -30,6 +30,9 @@ var getPref = PrefLoader.getPref;
 
 Cu.import("resource://firebug/fbtrace.js");
 
+var Locale = Cu.import("resource://firebug/locale.js").Locale;
+Locale.registerStringBundle("chrome://fbtest/locale/fbtest.properties");
+
 // ********************************************************************************************* //
 
 this.onLoad = function()
@@ -56,7 +59,7 @@ this.onLoad = function()
         // Open console if the command line says so or if the pref says so.
         var cmd = cmdLineHandler.wrappedJSObject;
         if (cmd.runFBTests)
-            FBTestFirebugOverlay.open(cmd.testListURI);
+            FBTestFirebugOverlay.open(cmd.testListURI, cmd.quitAfterRun);
         else if (getPref("alwaysOpenTestConsole"))
             FBTestFirebugOverlay.open();
     }
@@ -86,7 +89,7 @@ this.onFirebugMenuShowing = function(event)
             }),
             $menuitem(doc, {
                 id: "menu_openTestConsole",
-                label: "Open Test Console",
+                label: "fbtest.Open_Test_Console",
                 command: "cmd_openTestConsole",
                 insertbefore: "menu_firebug_aboutSeparator",
                 key: "key_openTestConsole"
@@ -99,7 +102,7 @@ this.onFirebugMenuShowing = function(event)
             $menuitem(doc, {
                 id: "FirebugMenu_Options_alwaysOpenTestConsole",
                 type: "checkbox",
-                label: "Always Open Test Console",
+                label: "fbtest.Always_Open_Test_Console",
                 oncommand: "FBTestFirebugOverlay.onToggleOption(this)",
                 insertbefore: "menu_firebug_optionsSeparator",
                 option: "alwaysOpenTestConsole"
@@ -135,7 +138,7 @@ this.close = function()
         consoleWindow.close();
 };
 
-this.open = function(testListURI)
+this.open = function(testListURI, quitAfterRun)
 {
     var consoleWindow = null;
     this.iterateBrowserWindows("FBTestConsole", function(win) {
@@ -167,7 +170,8 @@ this.open = function(testListURI)
 
         var args = {
             firebugWindow: firebugWindow,
-            testListURI: testListURI
+            testListURI: testListURI,
+            quitAfterRun: quitAfterRun
         };
 
         // Try to connect an existing test-console window first.

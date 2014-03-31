@@ -1,46 +1,47 @@
 function runTest()
 {
-    FBTest.sysout("index.START");
     FBTest.openNewTab(basePath + "console/completion/index/index.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(function()
         {
-            var panel = FW.Firebug.chrome.selectPanel("console");
-
-            var tests = [
-                ["qqq", true, "window[\"qqq--\"]"],
-                ["qqa", true, "window[\"qqa'\\\"\\\\\"]"],
-                ["window.qqq", true, "window[\"qqq--\"]"],
-                ["window['", true],
-                ["window['qqq", true],
-                ["window[\"qqq", true],
-                ["window[\"qqa'", true, "window[\"qqa'\\\"\\\\\"]"],
-                ["window['qqa\\'", true, "window['qqa\\'\"\\\\']"],
-                ["-", false],
-                ["\"", false],
-                ["\\\"", false],
-                ["[\"", false],
-                ["qqq-", false],
-                ["window.qqa'", false],
-                ["window[", false],
-                ["window['qqa'", false],
-                ["window[/qq", false]
-            ];
-
-            var tasks = new FBTest.TaskList();
-            for (var i = 0; i < tests.length; ++i) {
-                var test = tests[i];
-                tasks.push(testExpression, win, test[0], test[1], test[2]);
-            }
-
-            tasks.run(function()
+            FBTest.enableConsolePanel(function(win)
             {
-                var doc = FW.Firebug.chrome.window.document;
-                var cmdLine = doc.getElementById("fbCommandLine");
-                cmdLine.value = "";
+                var panel = FW.Firebug.chrome.selectPanel("console");
 
-                FBTest.testDone("index.DONE");
+                var tests = [
+                    ["qqq", true, "window[\"qqq--\"]"],
+                    ["qqa", true, "window[\"qqa'\\\"\\\\\"]"],
+                    ["window.qqq", true, "window[\"qqq--\"]"],
+                    ["window['", true],
+                    ["window['qqq", true],
+                    ["window[\"qqq", true],
+                    ["window[\"qqa'", true, "window[\"qqa'\\\"\\\\\"]"],
+                    ["window['qqa\\'", true, "window['qqa\\'\"\\\\']"],
+                    ["-", false],
+                    ["\"", false],
+                    ["\\\"", false],
+                    ["[\"", false],
+                    ["qqq-", false],
+                    ["window.qqa'", false],
+                    ["window[", false],
+                    ["window['qqa'", false],
+                    ["window[/qq", false]
+                ];
+
+                var tasks = new FBTest.TaskList();
+                for (var i = 0; i < tests.length; ++i) {
+                    var test = tests[i];
+                    tasks.push(testExpression, win, test[0], test[1], test[2]);
+                }
+
+                tasks.run(function()
+                {
+                    var doc = FW.Firebug.chrome.window.document;
+                    var cmdLine = doc.getElementById("fbCommandLine");
+                    cmdLine.value = "";
+
+                    FBTest.testDone();
+                });
             });
         });
     });

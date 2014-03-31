@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5044: Shortcut for Break On Next</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function sayHello()
+        {
+            console.log("Hello Firebug user!");
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5044">Issue 5044</a>: Shortcut for Break On Next</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="sayHello" onclick="sayHello()">Say hello</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Script</em> panel</li>
+                    <li>Press <kbd>Ctrl</kbd>/<kbd>&#8984;</kbd>+<kbd>Alt</kbd>+<kbd>B</kbd></li>
+                    <li>Click the <em>Say hello</em> button above</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The script execution should stop at line 1 of <em>sayHello onclick Say hello</em>
+                    (<code>console.log("Hello Firebug user!");</code>).</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

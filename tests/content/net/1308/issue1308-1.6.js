@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue1308.START");
-
     var pageURI = basePath + "net/1308/issue1308-1.6.html";
     var scriptURI = basePath + "net/1308/issue1308.js";
 
@@ -24,7 +22,7 @@ function runTest()
                 panel.copyParams(netRow.repObject);
 
                 checkCopyLocationWithParametersAction(netRow, function() {
-                    FBTest.testDone("issue1308.DONE");
+                    FBTest.testDone();
                 });
             });
 

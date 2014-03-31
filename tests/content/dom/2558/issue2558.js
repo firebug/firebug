@@ -1,59 +1,47 @@
-var supportedVersion = FBTest.compareFirefoxVersion("15*") >= 0;
-
 function runTest()
 {
-    FBTest.sysout("issue2558.START");
-
-    // A bug needed for this feature has been fixed in Firefox 15
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=746601
-    if (!supportedVersion)
-    {
-        FBTest.progress("This test needs Firefox 15+");
-        FBTest.testDone("issue1811.DONE");
-        return;
-    }
-
     // 1) Open test page
-    FBTest.openNewTab(basePath + "dom/2558/issue2558.html", function(win)
+    FBTest.openNewTab(basePath + "dom/2558/issue2558.html", (win) =>
     {
         // 2) Open Firebug and enable the Script panel.
-        FBTest.openFirebug();
-        FBTest.enableScriptPanel(function()
+        FBTest.openFirebug(function()
         {
-            FBTest.selectPanel("script");
-
-            // Wait for break in debugger.
-            var chrome = FW.Firebug.chrome;
-            FBTest.waitForBreakInDebugger(chrome, 32, false, function(sourceRow)
+            FBTest.enableScriptPanel(function()
             {
-                FBTest.progress("issue2558; Halted on debugger keyword.");
-                FW.Firebug.chrome.selectSidePanel("watches");
-                var watchPanel = FW.Firebug.currentContext.getPanel("watches", true);
-                FBTest.ok(watchPanel, "The watch panel must be there");
-
-                // 4) Create new watch expression 'arguments'.
-                watchPanel.addWatch("arguments");
-
-                //xxxHonza: sometimes the element is there synchronously
-                // sometimes asynchronously. This must be solved e.g. by
-                // MutationRecognizer?
-                setTimeout(function()
+                // Wait for break in debugger.
+                var chrome = FW.Firebug.chrome;
+                FBTest.waitForBreakInDebugger(chrome, 33, false, (sourceRow) =>
                 {
-                    // 5) Check evaluated expression.
-                    var watchEntry = watchPanel.panelNode.getElementsByClassName(
-                        "memberRow watchRow hasChildren").item(0);
-                    FBTest.ok(watchEntry, "There must be an expandable watch entry");
+                    FBTest.progress("issue2558; Halted on debugger keyword.");
+                    FW.Firebug.chrome.selectSidePanel("watches");
+                    var watchPanel = FW.Firebug.currentContext.getPanel("watches", true);
+                    FBTest.ok(watchPanel, "The watch panel must be there");
 
-                    // Resume debugger, test done.
-                    FBTest.clickContinueButton();
-                    FBTest.testDone("issue2558; DONE");
-                }, 300);
+                    // 4) Create new watch expression 'arguments'.
+                    watchPanel.addWatch("arguments");
+
+                    var config = {
+                        tagName: "div",
+                        classes: "memberRow watchRow hasChildren"
+                    };
+
+                    FBTest.waitForDisplayedElement("watches", config, (watchEntry) =>
+                    {
+                        // 5) Check evaluated expression.
+                        FBTest.ok(watchEntry, "There must be an expandable watch entry");
+
+                        // Resume debugger, test done.
+                        FBTest.clickContinueButton();
+                        FBTest.testDone();
+                    });
+                });
+
+                // 3) Execute test on the page (use async to have clean callstack).
+                setTimeout(() =>
+                {
+                    FBTest.click(win.document.getElementById("testButton"));
+                }, 10);
             });
-
-            // 3) Execute test on the page (use async to have clean callstack).
-            setTimeout(function() {
-                FBTest.click(win.document.getElementById("testButton"));
-            }, 10);
         });
     });
 }

@@ -269,13 +269,13 @@ var CommandLine = Obj.extend(Module,
         if (!Firebug.commandEditor || context.panelName !== "console")
         {
             this.clear(context);
-            Firebug.Console.log(commandPrefix + expr, context, "command", FirebugReps.Text);
+            Firebug.Console.log(commandPrefix + expr, context, "command", FirebugReps.Command);
         }
         else
         {
             var shortExpr = Str.cropString(Str.stripNewLines(expr), 100);
             Firebug.Console.log(commandPrefix + shortExpr, context, "command",
-                FirebugReps.Text);
+                FirebugReps.Command);
         }
 
         this.commandHistory.appendToHistory(expr);
@@ -350,8 +350,10 @@ var CommandLine = Obj.extend(Module,
         System.copyToClipboard(expr);
     },
 
-    focus: function(context)
+    focus: function(context, options)
     {
+        options = options || {};
+
         if (Firebug.isDetached())
             Firebug.chrome.focus();
         else
@@ -373,11 +375,17 @@ var CommandLine = Obj.extend(Module,
             // We are already on the console, if the command line has also
             // the focus, toggle back. But only if the UI has been already
             // opened.
-            if (Firebug.commandEditor)
+            if (!options.select)
                 commandLine.focus();
-            else if (commandLine.getAttribute("focused") !== "true")
-                setTimeout(function() { commandLine.select(); });
+            else
+                commandLine.select();
         }
+    },
+
+    blur: function(context)
+    {
+        var commandLine = this.getCommandLine(context);
+        commandLine.blur();
     },
 
     clear: function(context)
@@ -426,10 +434,16 @@ var CommandLine = Obj.extend(Module,
         var commandLine = this.getSingleRowCommandLine();
         var commandEditor = this.getCommandEditor();
 
-        // we are just closing the view
+        // We are just closing the view.
         if (saveMultiLine)
         {
             commandLine.value = commandEditor.value;
+
+            // Specify that the Command Editor is hidden, so we remove the padding
+            // which causes an unresponsive warning (see issue 6824).
+            if (commandEditor)
+                commandEditor.addOrRemoveClassCommandEditorHidden(true);
+
             return;
         }
 
@@ -438,7 +452,11 @@ var CommandLine = Obj.extend(Module,
         Dom.collapse(chrome.$("fbSidePanelDeck"), !multiLine);
 
         if (multiLine)
+        {
+            if (commandEditor)
+                commandEditor.addOrRemoveClassCommandEditorHidden(false);
             chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbCommandEditorBox");
+        }
 
         if (context)
         {
@@ -667,7 +685,6 @@ var CommandLine = Obj.extend(Module,
         switch (event.keyCode)
         {
             case KeyEvent.DOM_VK_RETURN:
-            case KeyEvent.DOM_VK_ENTER:
                 event.preventDefault();
 
                 if (!event.metaKey && !event.shiftKey)

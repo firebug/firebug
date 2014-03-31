@@ -31,7 +31,7 @@ var CommandLinePopup = Obj.extend(Module,
 {
     dispatchName: "commandLinePopup",
 
-    lastFocused : null,
+    lastFocused: null,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
@@ -72,6 +72,7 @@ var CommandLinePopup = Obj.extend(Module,
         var visible = this.isVisible();
         var isConsole = (panel && panel.name == "console");
         var showCommandEditor = Firebug.commandEditor;
+        var context = Firebug.currentContext;
 
         // Disable the console popup button (Firebug toolbar) if the Console panel
         // is disabled or selected.
@@ -96,7 +97,7 @@ var CommandLinePopup = Obj.extend(Module,
         Dom.collapse(chrome.$("fbToggleCommandLine"), !isConsole);
 
         // Update visibility of the console-popup (hidden if the Console panel is selected).
-        this.updateVisibility(visible && !isConsole && panel && disabled != "true");
+        this.updateVisibility(visible && !isConsole && panel && disabled != "true", context);
 
         // Make sure the console panel is attached to the proper document
         // (the one used by all panels, or the one used by console popup and available
@@ -139,7 +140,7 @@ var CommandLinePopup = Obj.extend(Module,
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleCommandPopup", "checked", newState);
         Options.set("alwaysShowCommandLine", newState);
 
-        this.updateVisibility(newState);
+        this.updateVisibility(newState, context, {isToggle: true});
 
         this.reattach(context);
         this.showPopupPanel(context);
@@ -159,13 +160,14 @@ var CommandLinePopup = Obj.extend(Module,
         }
     },
 
-    updateVisibility: function(visible)
+    updateVisibility: function(visible, context, options)
     {
         var chrome = Firebug.chrome;
         var popup = chrome.$("fbCommandPopup");
         var splitter = chrome.$("fbCommandPopupSplitter");
         var cmdbox = chrome.$("fbCommandBox");
         var toggle = chrome.$("fbToggleCommandLine");
+        options = options || {};
 
         // If all the visual parts are already visible then bail out.
         if (visible && !Dom.isCollapsed(popup) && !Dom.isCollapsed(splitter) &&
@@ -183,16 +185,21 @@ var CommandLinePopup = Obj.extend(Module,
         var commandEditor = CommandLine.getCommandEditor();
 
         // Focus the command line if it has been just displayed.
-        if (visible)
+        // Also check that we don't steal the focus after a refresh (see issue 6589).
+        if (context && context.window.document.readyState === "complete" && options.isToggle)
         {
-            this.lastFocused = document.commandDispatcher.focusedElement;
-            commandLine.focus();
-        }
-        else if (this.lastFocused && Xml.isVisible(this.lastFocused) &&
-            typeof this.lastFocused.focus == "function")
-        {
-            this.lastFocused.focus();
-            this.lastFocused = null;
+            if (visible)
+            {
+                this.lastFocused = document.commandDispatcher.focusedElement;
+                // Focus and select the whole text when displaying the Command Line Popup.
+                commandLine.select();
+            }
+            else if (this.lastFocused && Xml.isVisible(this.lastFocused) &&
+                typeof this.lastFocused.focus == "function")
+            {
+                this.lastFocused.focus();
+                this.lastFocused = null;
+            }
         }
 
         if (Firebug.commandEditor)
@@ -238,8 +245,8 @@ var CommandLinePopup = Obj.extend(Module,
         // ESC
         var target = event.target;
         // prevent conflict with inline editors being closed
-        if (this.isVisible() && target && event.keyCode == KeyEvent.DOM_VK_ESCAPE
-            && !Css.hasClass(target, "textEditorInner"))
+        if (this.isVisible() && target && event.keyCode == KeyEvent.DOM_VK_ESCAPE &&
+            !Css.hasClass(target, "textEditorInner"))
             this.toggle(Firebug.currentContext);
     }
 });
@@ -250,7 +257,7 @@ var CommandLinePopup = Obj.extend(Module,
 Firebug.registerModule(CommandLinePopup);
 
 // xxxHonza: backward compatibility
-CommandLine.Popup = CommandLinePopup
+CommandLine.Popup = CommandLinePopup;
 
 return CommandLinePopup;
 

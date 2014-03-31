@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue5009.START");
     FBTest.openNewTab(basePath + "script/watch/5009/issue5009.html", function(win)
     {
         FBTest.enableScriptPanel(function(win)
@@ -15,7 +14,7 @@ function runTest()
             var editor = panel.panelNode.getElementsByClassName("fixedWidthEditor").item(0);
             FBTest.ok(editor, "The editor must be there");
 
-            FBTest.testDone("issue5009.DONE");
+            FBTest.testDone();
         });
     });
 }

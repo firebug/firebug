@@ -376,6 +376,10 @@
     color: rgb(0, 95, 117);
 }
 
+.DBG_EXCLAMATION {
+    background-color: rgb(246, 186, 186);
+}
+
 /************************************************************************************************/
 
 #consoleToolbar toolbarbutton {

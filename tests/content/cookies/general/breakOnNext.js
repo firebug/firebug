@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("cookies.test.breakOnNext; START");
-
     FBTest.openNewTab(basePath + "cookies/general/breakOnNext.php", function(win)
     {
         FBTest.enableCookiesPanel(function(win)
@@ -10,15 +8,15 @@ function runTest()
 
             // xxxHonza TODO:
 
-            FBTest.testDone("cookies.test.breakOnNext; DONE");
+            FBTest.testDone();
         });
     });
 };
 
-function clickBreakOnCookie()
+function clickBreakOnCookie(callback)
 {
     var chrome = FW.Firebug.chrome;
-    FBTest.clickBreakOnNextButton(chrome);
+    FBTest.clickBreakOnNextButton(chrome, callback);
 }
 
 function waitForBreakOnCookie(lineNo, breakpoint, callback)

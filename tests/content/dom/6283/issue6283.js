@@ -1,28 +1,28 @@
 function runTest()
 {
-    FBTest.sysout("issue6283.START");
-
     FBTest.openNewTab(basePath + "dom/6283/issue6283.html", function(win)
     {
-        FBTest.openFirebug();
-        var panel = FBTest.selectPanel("stylesheet");
+        FBTest.openFirebug(function()
+        {
+            var panel = FBTest.selectPanel("stylesheet");
 
-        if (FBTest.selectPanelLocationByName(panel, "issue6283.html"))
-        {
-            FBTest.executeContextMenuCommand(FW.Firebug.chrome.$("fbLocationList"),
-                "InspectIndomPanel", function()
+            if (FBTest.selectPanelLocationByName(panel, "issue6283.html"))
             {
-                // xxxHonza, xxxsz: hack that fixes this test on Mac. The panel can
-                // be selected asynchronously.
-                setTimeout(function() {
-                    onInspect();
-                }, 1000);
-            });
-        }
-        else
-        {
-            FBTest.testDone("issue6283.DONE");
-        }
+                FBTest.executeContextMenuCommand(FW.Firebug.chrome.$("fbLocationList"),
+                    "InspectIndomPanel", function()
+                {
+                    // xxxHonza, xxxsz: hack that fixes this test on Mac. The panel can
+                    // be selected asynchronously.
+                    setTimeout(function() {
+                        onInspect();
+                    }, 1000);
+                });
+            }
+            else
+            {
+                FBTest.testDone();
+            }
+        });
     });
 }
 
@@ -46,7 +46,7 @@ function onInspect()
 
         if (!FBTest.ok(prop, "cssRules property must be there"))
         {
-            FBTest.testDone("issue5247.DONE");
+            FBTest.testDone();
             return;
         }
 
@@ -61,7 +61,7 @@ function onInspect()
             FBTest.compare("CSSPageRule", cssRuleValue.textContent.trim(),
                 "Rule must be displayed as CSSPageRule");
 
-            FBTest.testDone("issue6283.DONE");
+            FBTest.testDone();
         });
 
         FBTest.click(prop);

@@ -1,30 +1,30 @@
 function runTest()
 {
-    FBTest.sysout("issue4391.START");
     FBTest.openNewTab(basePath + "commandLine/4391/issue4391.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("console");
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(function()
         {
-            var contentView = FW.FBL.getContentView(win);
-            FBTest.ok(!contentView._FirebugCommandLine,
-                "Commandline API should not be available now.");
-
-            var tasks = new FBTest.TaskList();
-            tasks.push(executeAndVerify, '$("#testElement")', /\<div\s*id\=\"testElement\"\>/,
-                "a", "objectLink objectLink-element");
-            tasks.push(loadjQuery, win);
-            tasks.push(executeAndVerify, '$("#testElement")', /div\#testElement/,
-                "a", "objectLink objectLink-element");
-
-            tasks.run(function()
+            FBTest.enableConsolePanel(function(win)
             {
                 var contentView = FW.FBL.getContentView(win);
                 FBTest.ok(!contentView._FirebugCommandLine,
                     "Commandline API should not be available now.");
 
-                FBTest.testDone("issue4391.DONE");
+                var tasks = new FBTest.TaskList();
+                tasks.push(executeAndVerify, '$("#testElement")', /\<div\s*id\=\"testElement\"\>/,
+                    "a", "objectLink objectLink-element");
+                tasks.push(loadjQuery, win);
+                tasks.push(executeAndVerify, '$("#testElement")', /div\#testElement/,
+                    "a", "objectLink objectLink-element");
+
+                tasks.run(function()
+                {
+                    var contentView = FW.FBL.getContentView(win);
+                    FBTest.ok(!contentView._FirebugCommandLine,
+                        "Commandline API should not be available now.");
+
+                    FBTest.testDone();
+                });
             });
         });
     });

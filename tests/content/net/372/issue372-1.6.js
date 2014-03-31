@@ -1,6 +1,5 @@
 function runTest(request)
 {
-    FBTest.sysout("issue372.START");
     FBTest.openNewTab(basePath + "net/372/issue372-1.6.html", function(win)
     {
         // Open Firebug UI and enable Net panel.
@@ -30,7 +29,7 @@ function runTest(request)
                 }
 
                 // Finish test
-                FBTest.testDone("issue372.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

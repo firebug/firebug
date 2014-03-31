@@ -1,6 +1,17 @@
 /* xxxHonza: This should be removed, fix me: issue 471 */
 @import "chrome://firebug/skin/win/firebug.css";
 
+/*************************************************************************************************/
+/* Command Line */
+
+#fbCommandArrow,
+.fbCommandLine {
+    font-size: 11px;
+}
+
+/*************************************************************************************************/
+/* Toolbar */
+
 /* Add some basic padding to the completion popup (missing on Linux). */
 .userTypedText {
     margin-left: 1px;
@@ -34,6 +45,11 @@ panelTab {
 
 /*************************************************************************************************/
 /* Override Australis Styles coming from Win theme xxxHonza: fix me issue 471 */
+
+panelBarArrowscrollbox > .scrollbutton-up,
+panelBarArrowscrollbox > .scrollbutton-down {
+    border-color: rgb(207, 207, 207);
+}
 
 panelTab[selected="true"] {
     border: 1px solid #A0A0A0;

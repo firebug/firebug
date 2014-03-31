@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("formatSize.START");
-
     var decimalMark = (0.1).toLocaleString().match(/\D/);
 
     var testValues = [
@@ -49,5 +47,5 @@ function runTest()
         FBTest.compare(value.expected, FW.FBL.formatSize(value.value), msg);
     }
 
-    FBTest.testDone("formatSize.DONE");
+    FBTest.testDone();
 }

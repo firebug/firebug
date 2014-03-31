@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue2209.START");
-
     FBTest.openNewTab(basePath + "net/2209/issue2209.html", function(win)
     {
         FBTest.enableNetPanel(function(win)
@@ -27,7 +25,7 @@ function runTest()
                     FBTest.compare("ResultSet", label.textContent, "The root label must be displayed");
                 }
 
-                FBTest.testDone("issue2209; end");
+                FBTest.testDone();
             });
 
             // Execute Test

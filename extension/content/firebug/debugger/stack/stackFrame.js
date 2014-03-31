@@ -8,8 +8,9 @@ define([
     "firebug/lib/string",
     "firebug/debugger/clients/grip",
     "firebug/debugger/script/sourceLink",
+    "firebug/debugger/debuggerLib",
 ],
-function (FBTrace, Obj, Url, Locale, Str, Grip, SourceLink) {
+function (FBTrace, Obj, Url, Locale, Str, Grip, SourceLink, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -197,7 +198,7 @@ StackFrame.buildStackFrame = function(frame, context)
         return;
     }
 
-    var sourceFile = context.sourceFileMap[frame.where.url];
+    var sourceFile = context.getSourceFile(frame.where.url);
     if (!sourceFile)
         sourceFile = {href: frame.where.url};
 
@@ -302,8 +303,12 @@ StackFrame.resumeShowStackTrace = function(){}
 
 // ********************************************************************************************* //
 
-// functionName@fileName:lineNo
-var reErrorStackLine = /^(.*)@(.*):(\d*)$/;
+// Firefox 30 introduced also column number in the URL (see Bug 762556)
+// functionName@fileName:lineNo:columnNo
+// xxxHonza: at some point we might want to utilize the column number as well.
+// The regular expression can be simplified to expect both (:line:column) as soon
+// as Firefox 30 (Fx30) is the minimum required version.
+var reErrorStackLine = /^(.*)@(.*?):(\d*)(?::(\d*))?$/
 
 StackFrame.parseToStackFrame = function(line, context)
 {
@@ -335,13 +340,31 @@ StackFrame.guessFunctionArgNamesFromSource = function(source)
     return args;
 };
 
-// XXX This probably isn't needed any more.
-StackFrame.cleanStackTraceOfFirebug = function(trace)
+StackFrame.removeChromeFrames = function(trace)
 {
-    if (trace && trace.frames && !trace.frames.length)
-        return undefined;
+    var frames = trace ? trace.frames : null;
+    if (!frames || !frames.length)
+        return null;
+
+    var filteredFrames = [];
+    for (var i = 0; i < frames.length; i++)
+    {
+        var href = frames[i].href;
+        if (href.startsWith("chrome:") || href.startsWith("resource:"))
+            continue;
+
+        // xxxFlorent: should be reverted if we integrate
+        // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
+        if (DebuggerLib.isFrameLocationEval(href))
+            continue;
+
+        filteredFrames.push(frames[i]);
+    }
+
+    trace.frames = filteredFrames;
+
     return trace;
-};
+}
 
 StackFrame.getFrameSourceLink = function(frame)
 {

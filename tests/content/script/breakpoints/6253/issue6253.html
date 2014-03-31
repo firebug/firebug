@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6253: Auto-correction of breakpoints location</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+            (function aFunction()
+            {
+                // Showing a comment line just to set a breakpoint at!
+
+                return (true == true);
+            }());
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1>
+                <a href="https://code.google.com/p/fbug/issues/detail?id=6253">Issue 6253</a>: Auto-correction of breakpoints location
+            </h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug on this page</li>
+                    <li>Switch to the Script panel and enable it.</li>
+                    <li>As there is a <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=853847">platform bug</a>, press F5 to reload the page.
+                        <br />
+                        <span class="info"><strong>Only by reloading the page can ensure against being broken with the platform bug. See: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=853847">bug #853847</a></strong></span>
+                    </li>
+                    <li>
+                        Click on the breakpoint column at line 10 (A line just to show a comment).
+                    </li>
+
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>A breakpoint must be created at line 12, which is nearer executable line</li>
+                </ul>
+            </section>
+            <footer>
+                @farshidbeheshti, farshid.beheshti@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>

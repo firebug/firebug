@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue68Frame.START");
-
     FBTest.openNewTab(basePath + "inspector/InspectorTestIframe.htm?url=Issue68FrameExpected.htm", function(win)
     {
         var actualImage, expectedImage,
@@ -13,20 +11,21 @@ function runTest()
 
         FBTest.openURL(basePath + "inspector/InspectorTestIframe.htm?url=Issue68FrameActual.htm", function(win)
         {
-            FBTest.openFirebug();
+            FBTest.openFirebug(function()
+            {
+                ifr = win.document.getElementById("testIframe");
 
-            ifr = win.document.getElementById('testIframe');
+                var target = ifr.contentDocument.getElementById("testTarget1");
 
-            var target = ifr.contentDocument.getElementById("testTarget1");
+                // To get full html for expected page break here and use: ifr.contentDocument.documentElement.innerHTML
 
-            // To get full html for expected page break here and use: ifr.contentDocument.documentElement.innerHTML
+                FBTest.inspectUsingFrame(target);
 
-            FBTest.inspectUsingFrame(target);
+                actualImage = FBTest.getImageDataFromWindow(ifr.contentWindow, width, height);
 
-            actualImage = FBTest.getImageDataFromWindow(ifr.contentWindow, width, height);
-
-            FBTest.compare(expectedImage, actualImage, "The screen must be in expected state");
-            FBTest.testDone("issue68Frame.DONE");
+                FBTest.compare(expectedImage, actualImage, "The screen must be in expected state");
+                FBTest.testDone();
+            });
         });
     });
 }

@@ -86,7 +86,7 @@ function alsoOpened(win)
     var all = (new RegExp(expectedText)).exec(toolTip);
     FBTest.compare(expectedText, all, "Should be All pages info");
 
-    FBTest.testDone("allOpenAllClose.DONE");
+    FBTest.testDone();
 }
 
 //------------------------------------------------------------------------

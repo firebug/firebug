@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue1693.START");
     FBTest.openNewTab(basePath + "console/1693/issue1693.html", function(win)
     {
         FBTest.enableConsolePanel(function(win)
@@ -32,12 +31,12 @@ function onDataComplete(e)
     FBTest.waitForDisplayedElement("console", config, function(row)
     {
         var panel = FBTest.getPanel("console");
-    
+
         var config = {
             tagName: "div",
             classes: "netInfoResponseSizeLimit"
         };
-    
+
         // It takes some time to display huge response so, wait for the last message
         // saying: a limit has been reached...
         FBTest.waitForDisplayedElement("console", config, function(responseSizeLimit)
@@ -54,12 +53,12 @@ function onDataComplete(e)
                 var responseText = "";
                 for (var i = 0; i < 80000; i++)
                     responseText += i + " ";
-            
+
                 // Compare expected and actuall (displayed) response text.
                 var text1 = responseText.substr(0, limit);
                 var text2 = responseBody.textContent.substr(0, limit);
                 FBTest.compare(text1, text2, "The response text must be properly displayed");
-                FBTest.testDone("issue1693.DONE");
+                FBTest.testDone();
             }
         });
 

@@ -18,8 +18,10 @@
  * can stop at another breakpoint).
  * @param {Object} chrome Firebug.chrome object.
  */
-this.clickContinueButton = function(chrome)
+this.clickContinueButton = function(chrome, callback)
 {
+    if (callback)
+        DebuggerController.listenOnce(null, "onResumed", callback);
     this.clickToolbarButton(chrome, "fbContinueButton");
 };
 
@@ -49,7 +51,7 @@ this.clickRerunButton = function(chrome)
  * on the current panel.
  * @param {Object} chrome Firebug.chrome object.
  */
-this.clickBreakOnNextButton = function(chrome)
+this.clickBreakOnNextButton = function(chrome, callback)
 {
     if (!chrome)
         chrome = FW.Firebug.chrome;
@@ -65,12 +67,136 @@ this.clickBreakOnNextButton = function(chrome)
     else
         FBTest.sysout("FBTestFirebug breakOnNext breakable:"+breakable, button);
 
+    var panel = this.getSelectedPanel();
+    if (!panel)
+        throw new Error("Can't get the current panel");
+
+    if (callback)
+        DebuggerController.listenOnce(null, "breakOnNextUpdated", callback);
+
     // Do not use FBTest.click, toolbar buttons need to use sendMouseEvent.
     this.synthesizeMouse(button);
 };
 
 // ********************************************************************************************* //
 // Debugger
+
+/**
+ * Registers handler for break in Debugger. The handler is called as soon as Firebug
+ * breaks the JS execution on a breakpoint or due a <i>Break On Next<i> active feature.
+ * @param {Object} chrome Current Firebug's chrome object (e.g. FW.Firebug.chrome)
+ * @param {Number} lineNo Expected source line number where the break should happen.
+ * @param {boolean} breakpoint Set to true if breakpoint should be displayed in the UI.
+ * @param {Object} callback Handler that should be called when break happens.
+ */
+this.waitForBreakInDebugger = function(chrome, lineNo, breakpoint, callback)
+{
+    if (!chrome)
+        chrome = FW.Firebug.chrome;
+
+    FBTest.progress("waitForBreakInDebugger in chrome.window: " + chrome.window.location);
+
+    // Get document of Firebug's panel.html
+    var panel = chrome.getSelectedPanel();
+    if (!panel)
+    {
+        FBTest.ok(panel, "Firebug needs a selected panel!");
+        return;
+    }
+
+    var actor = FW.Firebug.DebuggerLib.getThreadActor(panel.context.browser);
+    FBTest.sysout("waitForBreakInDebugger; actor: " + (actor ? actor._state : "no tab actor"));
+
+    var doc = panel.panelNode.ownerDocument;
+
+    // Complete attributes that must be set on sourceRow element.
+    var attributes = {"class": "CodeMirror-debugLocation"};
+    if (breakpoint)
+        attributes["class"] += " CodeMirror-breakpoint";
+
+    // Wait for the UI modification that shows the source line where break happened.
+    var lookBP = new MutationRecognizer(doc.defaultView, "div", attributes);
+    lookBP.onRecognizeAsync(function onBreak(sourceRow)
+    {
+        var panel = chrome.getSelectedPanel();
+        if (panel)
+        {
+            setTimeout(function()
+            {
+                onPanelReady(sourceRow);
+            }, 200);
+            return;
+        }
+
+        FBTest.progress("onRecognizeAsync; wait for panel to be selected");
+
+        // The script panel is not yet selected so wait for the 'selectingPanel' event.
+        var panelBar1 = FW.FBL.$("fbPanelBar1", chrome.window.document);
+        function onSelectingPanel()
+        {
+            panelBar1.removeEventListener("selectingPanel", onSelectingPanel, false);
+            setTimeout(function()
+            {
+                onPanelReady(sourceRow);
+            }, 200);
+        }
+        panelBar1.addEventListener("selectingPanel", onSelectingPanel, false);
+    });
+
+    function onPanelReady(sourceRow)
+    {
+        try
+        {
+            FBTest.progress("onRecognizeAsync; check source line number, exe_line" +
+                (breakpoint ? " and breakpoint" : ""));
+
+            var panel = chrome.getSelectedPanel();
+            FBTest.compare("script", panel.name, "The script panel should be selected");
+
+            var currentLineElt = sourceRow.querySelector(".CodeMirror-linenumber");
+            var currentLineNo = parseInt(currentLineElt.textContent, 10);
+            FBTest.compare(lineNo, currentLineNo, "The break must be on line " + lineNo + ".");
+
+            callback(sourceRow);
+        }
+        catch (exc)
+        {
+            FBTest.exception("waitForBreakInDebugger", exc);
+            FBTest.sysout("listenForBreakpoint callback FAILS "+exc, exc);
+        }
+    }
+
+    FBTest.sysout("fbTestFirebug.waitForBreakInDebugger recognizing ", lookBP);
+};
+
+/**
+ * Wait till the debugger is resumed.
+ *
+ * @param {Object} callback A callback executed when the debugger is resumed.
+ */
+this.waitForDebuggerResume = function(callback)
+{
+    var timeout = 250;
+    var counter = 20;
+    var chrome = FW.Firebug.chrome;
+
+    function checkResumeState()
+    {
+        counter--;
+
+        var stopped = chrome.getGlobalAttribute("fbDebuggerButtons", "stopped");
+        if (stopped == "false" || counter <= 0)
+            callback();
+        else
+            setTimeout(checkResumeState, timeout);
+    }
+
+    // Start checking state on timeout.
+    setTimeout(checkResumeState, timeout);
+};
+
+// ********************************************************************************************* //
+// Source
 
 this.getSourceLineNode = function(lineNo, chrome)
 {
@@ -141,118 +267,6 @@ function isSourceLineVisible(lineNo)
 }
 
 /**
- * Registers handler for break in Debugger. The handler is called as soon as Firebug
- * breaks the JS execution on a breakpoint or due a <i>Break On Next<i> active feature.
- * @param {Object} chrome Current Firebug's chrome object (e.g. FW.Firebug.chrome)
- * @param {Number} lineNo Expected source line number where the break should happen.
- * @param {boolean} breakpoint Set to true if breakpoint should be displayed in the UI.
- * @param {Object} callback Handeler that should be called when break happens.
- */
-this.waitForBreakInDebugger = function(chrome, lineNo, breakpoint, callback)
-{
-    if (!chrome)
-        chrome = FW.Firebug.chrome;
-
-    FBTest.progress("waitForBreakInDebugger in chrome.window: " + chrome.window.location);
-
-    // Get document of Firebug's panel.html
-    var panel = chrome.getSelectedPanel();
-    if (!panel)
-    {
-        FBTest.ok(panel, "Firebug needs a selected panel!");
-        return;
-    }
-
-    var actor = FW.Firebug.DebuggerLib.getThreadActor(panel.context.browser);
-    FBTest.sysout("waitForBreakInDebugger; actor: " + (actor ? actor._state : "no tab actor"));
-
-    var doc = panel.panelNode.ownerDocument;
-
-    // Complete attributes that must be set on sourceRow element.
-    var attributes = {"class": "CodeMirror-debugLocation"};
-    if (breakpoint)
-        attributes["class"] += " CodeMirror-breakpoint";
-
-    // Wait for the UI modification that shows the source line where break happened.
-    var lookBP = new MutationRecognizer(doc.defaultView, "div", attributes);
-    lookBP.onRecognizeAsync(function onBreak(sourceRow)
-    {
-        var panel = chrome.getSelectedPanel();
-        if (panel)
-        {
-            setTimeout(function() {
-                onPanelReady(sourceRow);
-            }, 200);
-            return;
-        }
-
-        FBTest.progress("onRecognizeAsync; wait for panel to be selected");
-
-        // The script panel is not yet selected so wait for the 'selectingPanel' event.
-        var panelBar1 = FW.FBL.$("fbPanelBar1", chrome.window.document);
-        function onSelectingPanel()
-        {
-            panelBar1.removeEventListener("selectingPanel", onSelectingPanel, false);
-            setTimeout(function() {
-                onPanelReady(sourceRow);
-            }, 200);
-        }
-        panelBar1.addEventListener("selectingPanel", onSelectingPanel, false);
-    });
-
-    function onPanelReady(sourceRow)
-    {
-        try
-        {
-            FBTest.progress("onRecognizeAsync; check source line number, exe_line" +
-                (breakpoint ? " and breakpoint" : ""));
-
-            var panel = chrome.getSelectedPanel();
-            FBTest.compare("script", panel.name, "The script panel should be selected");
-
-            var currentLineElt = sourceRow.querySelector(".CodeMirror-linenumber");
-            var currentLineNo = parseInt(currentLineElt.textContent, 10);
-            FBTest.compare(lineNo, currentLineNo, "The break must be on line " + lineNo + ".");
-
-            callback(sourceRow);
-        }
-        catch (exc)
-        {
-            FBTest.exception("waitForBreakInDebugger", exc);
-            FBTest.sysout("listenForBreakpoint callback FAILS "+exc, exc);
-        }
-    }
-
-    FBTest.sysout("fbTestFirebug.waitForBreakInDebugger recognizing ", lookBP);
-};
-
-/**
- * Wait till the debugger is resumed.
- *
- * @param {Object} callback A callback executed when the debugger is resumed.
- */
-this.waitForDebuggerResume = function(callback)
-{
-    var timeout = 250;
-    var counter = 20;
-    var chrome = FW.Firebug.chrome;
-
-    function checkResumeState()
-    {
-        counter--;
-
-        var stopped = chrome.getGlobalAttribute("fbDebuggerButtons", "stopped");
-        if (stopped == "false" || counter <= 0)
-            callback();
-        else
-            setTimeout(checkResumeState, timeout);
-    }
-
-    // Start checking state on timeout.
-    setTimeout(checkResumeState, timeout);
-};
-
-/**
  * Jump to a file@line.
  *
  * Example:
@@ -272,6 +286,18 @@ this.selectSourceLine = function(url, lineNo, category, chrome, callback)
         url = panel.getObjectLocation(panel.location);
     }
 
+    if (!url.startsWith("http"))
+    {
+        if (!FW.Firebug.currentContext)
+        {
+            FBTest.ok(FW.Firebug.currentContext, "There is a current context");
+            throw "";
+        }
+
+        var docLocation = FW.Firebug.currentContext.window.location.href;
+        url = new URL(url, docLocation).href;
+    }
+
     var sourceLink = new FBTest.FirebugWindow.FBL.SourceLink(url, lineNo, category);
     if (chrome)
         chrome.select(sourceLink);
@@ -281,7 +307,7 @@ this.selectSourceLine = function(url, lineNo, category, chrome, callback)
     if (!callback)
         return;
 
-    var tries = 5;
+    var tries = 50;
     var checking = setInterval(function checkScrolling()
     {
         var row = FBTest.getSourceLineNode(lineNo, chrome);
@@ -296,6 +322,62 @@ this.selectSourceLine = function(url, lineNo, category, chrome, callback)
         callback(row);
     }, 50);
 };
+
+this.getScriptPanelSelection = function()
+{
+    var panel = FBTest.getPanel("script");
+    return panel.scriptView.getSelectedText();
+}
+
+this.unhighlightScriptPanelLine = function()
+{
+    var panel = FBTest.getPanel("script");
+    return panel.scriptView.editor.unhighlightLine();
+}
+
+/**
+ * Wait till a line in the Script panel is unhighlighted.
+ *
+ * @param {Function} callback Executed when a line is unhighlighted.
+ */
+this.waitForLineUnhighlight = function(callback)
+{
+    var browser = FBTest.getCurrentTabBrowser();
+
+    var listener =
+    {
+        onLineUnhighlight: function(line, text)
+        {
+            DebuggerController.removeListener(browser, listener);
+
+            callback(line + 1, text);
+        }
+    };
+
+    DebuggerController.addListener(browser, listener);
+}
+
+/**
+ * Wait till a line in the Script panel is highlighted.
+ *
+ * @param {Function} callback Executed when a line is highlighted.
+ */
+this.waitForLineHighlight = function(callback)
+{
+    var browser = FBTest.getCurrentTabBrowser();
+
+    var listener =
+    {
+        onLineHighlight: function(line, text)
+        {
+            DebuggerController.removeListener(browser, listener);
+
+            callback(line + 1, text);
+        }
+    };
+
+    DebuggerController.addListener(browser, listener);
+}
 
 // ********************************************************************************************* //
 // Context menu
@@ -378,6 +460,33 @@ FBTest.waitForThreadAttach = function(callback)
     };
 
     DebuggerController.addListener(browser, listener);
+}
+
+// ********************************************************************************************* //
+// Stepping
+
+this.stepOver = function(targetLine, callback)
+{
+    var chrome = FW.Firebug.chrome;
+
+    FBTest.waitForBreakInDebugger(chrome, targetLine, false, callback);
+    FBTest.clickStepOverButton(chrome);
+}
+
+this.stepOut = function(targetLine, callback)
+{
+    var chrome = FW.Firebug.chrome;
+
+    FBTest.waitForBreakInDebugger(chrome, targetLine, false, callback);
+    FBTest.clickStepOutButton(chrome);
+}
+
+this.stepInto = function(targetLine, callback)
+{
+    var chrome = FW.Firebug.chrome;
+
+    FBTest.waitForBreakInDebugger(chrome, targetLine, false, callback);
+    FBTest.clickStepIntoButton(chrome);
 }
 
 // ********************************************************************************************* //

@@ -139,31 +139,54 @@ this.progress = function(msg)
 };
 
 /**
- * Finishes current test and prints info message (if any) to the status bar.
+ * Executed by the framework at the beginning of each test.
+ */
+this.testStart = function(test)
+{
+    FBTest.sysout("FBTestFirebug.testStart; " + test.path + " - " + test.desc, test);
+};
+
+/**
+ * Finishes current test and prints also an info message to the status bar. The method
+ * performs clean up (closes all browser tabs opened as part of the test,
+ * removes all breakpoints, etc.)
  *
- * All test tabs are removed from the browser.
+ * The method is asynchronous and the test that executed it should not perform
+ * any further actions.
+ *
+ * @param {String} [message] A custom message for tracing. If not provided default
+ * message will be generated automatically.
  */
 this.testDone = function(message)
 {
-    FBTest.sysout("FBTestFirebug.testDone; start test done timeout");
+    FBTest.sysout("FBTestFirebug.testDone; Cleaning...");
 
     // Clean up now so, annotations are cleared and Firebug is not activated for the
     // next activated tab that would coincidentally come from the same domain. 
-    this.setToKnownState();
-
-    var self = this;
-    var test = FBTestApp.TestRunner.currentTest;
-    setTimeout(function cleanUpLater()
+    this.setToKnownState(() =>
     {
-        self.closeFirebug();
-        self.cleanUpTestTabs();
+        var test = FBTestApp.TestRunner.currentTest;
 
-        FBTest.sysout("FBTestFirebug.testDone; after timeout");
+        // Make sure the current stack is gone.
+        setTimeout(() =>
+        {
+            this.closeFirebug();
+            this.cleanUpTestTabs();
 
-        if (message)
+            if (!message)
+            {
+                // Compose default message for the tracing
+                var path = test.path;
+                var index = path.lastIndexOf("/");
+                message = path.substr(index + 1) + " DONE";
+            }
+
             FBTest.progress(message);
 
-        FBTestApp.TestRunner.testDone(false, test);
+            FBTest.sysout("FBTestFirebug.testDone; DONE");
+
+            FBTestApp.TestRunner.testDone(false, test);
+        });
     });
 };
 
@@ -232,7 +255,7 @@ this.onFailure = function(msg)
 /**
  * This function is automatically called before every test sequence.
  */
-this.setToKnownState = function()
+this.setToKnownState = function(callback)
 {
     FBTest.sysout("FBTestFirebug setToKnownState");
 
@@ -241,28 +264,36 @@ this.setToKnownState = function()
     // 2) Net panel filter is not reset (the preference is, but the UI isn't)
 
     var Firebug = FBTest.FirebugWindow.Firebug;
-    Firebug.PanelActivation.toggleAll("off");  // These should be done with button presses not API calls.
-    Firebug.PanelActivation.toggleAll("none");
-    Firebug.PanelActivation.clearAnnotations(true);
-
-    if (Firebug.isDetached())
-        Firebug.toggleDetachBar();
-
-    // First clear all breakpoints and consequently the reset all options that
-    // clears the breakpoints storage.
-    Firebug.Debugger.clearAllBreakpoints(null);
-    Firebug.resetAllOptions(false);
 
     // Console preview is hidden by default
     if (this.isConsolePreviewVisible())
         this.clickConsolePreviewButton();
 
     // Use default Firebug height and side panel width
-    this.setBrowerWindowSize(1024, 768);
+    this.setBrowserWindowSize(1024, 768);
     this.setFirebugBarHeight(270);
     this.setSidePanelWidth(350);
 
     this.clearSearchField();
+
+    this.clearCache();
+
+    // First clear all breakpoints and then perform deactivation.
+    this.removeAllBreakpoints(function()
+    {
+        // These should be done with button presses not API calls.
+        Firebug.PanelActivation.toggleAll("off");
+        Firebug.PanelActivation.toggleAll("none");
+        Firebug.PanelActivation.clearAnnotations(true);
+
+        if (Firebug.isDetached())
+            Firebug.toggleDetachBar();
+
+        // Reset all options that also clears the breakpoints storage.
+        Firebug.resetAllOptions(false);
+
+        callback();
+    });
 
     // xxxHonza: xxxJJB how clear the persisted panel state?
 };

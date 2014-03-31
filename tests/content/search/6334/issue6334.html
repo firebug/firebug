@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6334: Pressing the search field shortcut should select the previously entered search text</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6334">Issue 6334</a>: Pressing the search field shortcut should select the previously entered search text</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug on this page</li>
+                    <li>Focus Firebug</li>
+                    <li>Press Ctrl+F => The search field should be focused.</li>
+                    <li>Type "test" (without quotes) into the field</li>
+                    <li>Press Ctrl+F again => The search field value "test" should be selected</li>
+                    <li>Click into the main panel</li>
+                    <li>Press Ctrl+F again => The search field value "test" should be selected</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The search field value should be selected every time we click on Ctrl+F</li>
+                </ul>
+            </section>
+            <footer>
+                &lt;Abdeldjalil Belakhdar&gt;, &lt;zendyani@gmail.com&gt;
+            </footer>
+        </div>
+    </body>
+</html>

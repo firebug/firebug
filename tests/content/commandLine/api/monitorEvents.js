@@ -1,33 +1,33 @@
 function runTest()
 {
-    FBTest.sysout("monitorEvents.START");
-
     FBTest.openNewTab(basePath + "commandLine/api/monitorEvents.html", function(win)
     {
-        FBTest.openFirebug();
-
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(function()
         {
-            var taskList = new FBTest.TaskList();
+            FBTest.enableConsolePanel(function(win)
+            {
+                var taskList = new FBTest.TaskList();
 
-            taskList.push(executeAndVerify, win, "'click'", ["click"],
-                [/^click\s+clientX=\d+,\s+clientY=\d+$/]);
+                taskList.push(executeAndVerify, win, "'click'", ["click"],
+                    [/^click\s+clientX=\d+,\s+clientY=\d+$/]);
 
-            taskList.push(executeAndVerify, win, "'key'", ["click", "key"],
-                [/^click\s+clientX=\d+,\s+clientY=\d+$/, /^keydown\s+charCode=\d+,\s+keyCode=\d+$/,
-                 /^keypress\s+charCode=\d+,\s+keyCode=\d+$/, /^keyup\s+charCode=\d+,\s+keyCode=\d+$/]);
+                taskList.push(executeAndVerify, win, "'key'", ["click", "key"],
+                    [/^click\s+clientX=\d+,\s+clientY=\d+$/, /^keydown\s+charCode=\d+,\s+keyCode=\d+$/,
+                     /^keypress\s+charCode=\d+,\s+keyCode=\d+$/, /^keyup\s+charCode=\d+,\s+keyCode=\d+$/]);
 
-            taskList.push(executeAndVerify, win, "['click', 'key']", ["click", "key"],
-                [/^click\s+clientX=\d+,\s+clientY=\d+$/, /^keydown\s+charCode=\d+,\s+keyCode=\d+$/,
-                 /^keypress\s+charCode=\d+,\s+keyCode=\d+$/, /^keyup\s+charCode=\d+,\s+keyCode=\d+$/]);
+                taskList.push(executeAndVerify, win, "['click', 'key']", ["click", "key"],
+                    [/^click\s+clientX=\d+,\s+clientY=\d+$/, /^keydown\s+charCode=\d+,\s+keyCode=\d+$/,
+                     /^keypress\s+charCode=\d+,\s+keyCode=\d+$/, /^keyup\s+charCode=\d+,\s+keyCode=\d+$/]);
 
-            taskList.push(executeAndVerify, win, null, ["click", "key"],
-                [/^click\s+clientX=\d+,\s+clientY=\d+$/, /focus/,
-                 /^keydown\s+charCode=\d+,\s+keyCode=\d+$/, /^keypress\s+charCode=\d+,\s+keyCode=\d+$/,
-                 /^keyup\s+charCode=\d+,\s+keyCode=\d+$/]);
+                taskList.push(executeAndVerify, win, null, ["click", "key"],
+                    [/^click\s+clientX=\d+,\s+clientY=\d+$/, /focus/,
+                     /^keydown\s+charCode=\d+,\s+keyCode=\d+$/, /^keypress\s+charCode=\d+,\s+keyCode=\d+$/,
+                     /^keyup\s+charCode=\d+,\s+keyCode=\d+$/]);
 
-            taskList.run(function() {
-                FBTest.testDone("monitorEvents.DONE");
+                taskList.run(function()
+                {
+                    FBTest.testDone();
+                });
             });
         });
     });

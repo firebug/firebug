@@ -7,24 +7,24 @@
 // 7) Verify number of logs (must be == 2)
 function runTest()
 {
-    FBTest.sysout("issue2659.START");
-
     FBTest.openNewTab(basePath + "console/2659/issue2659.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(function()
         {
-            FW.Firebug.chrome.selectPanel("console");
-            FBTest.reload(function()
+            FBTest.enableConsolePanel(function(win)
             {
-                verifyNumberOfLogs(1);
-                FBTest.clickToolbarButton(FW.Firebug.chrome, "fbConsolePersist");
+                FW.Firebug.chrome.selectPanel("console");
                 FBTest.reload(function()
                 {
-                    verifyNumberOfLogs(2);
-                    FBTest.testDone("issue2659.DONE");
+                    verifyNumberOfLogs(1);
+                    FBTest.clickToolbarButton(FW.Firebug.chrome, "fbConsolePersist");
+                    FBTest.reload(function()
+                    {
+                        verifyNumberOfLogs(2);
+                        FBTest.testDone();
+                    })
                 })
-            })
+            });
         });
     });
 }

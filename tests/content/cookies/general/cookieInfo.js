@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("cookieInfo.START");
     var bcookieRowser = FBTest.FirebugWindow;
 
     FBTest.openNewTab(basePath + "cookies/general/cookieInfo.php", function(win)
@@ -62,7 +61,7 @@ function runTest()
                     FBTest.compare("Test Cookie Value", infoValue.textContent, "Value of the cookie (in the body) validation");
 
                     // Finish test
-                    FBTest.testDone("cookieInfo.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.click(cookieRow);

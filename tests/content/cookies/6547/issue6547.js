@@ -1,14 +1,8 @@
 function runTest()
 {
-    FBTest.sysout("issue6547.START");
-
     FBTest.openNewTab(basePath + "cookies/6547/issue6547.php", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("net");
-
-        FBTest.enableCookiesPanel();
-        FBTest.enableNetPanel(function(win)
+        FBTest.enablePanels(["net", "cookies"], function()
         {
             var options =
             {
@@ -44,7 +38,7 @@ function runTest()
                     FBTest.compare(expResult, result, "Max age must be " + expResult);
                 }
 
-                FBTest.testDone("issue6547.DONE");
+                FBTest.testDone();
             });
         });
     });

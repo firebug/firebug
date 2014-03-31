@@ -44,6 +44,15 @@
     <implementation>
         <constructor><![CDATA[
             var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+            var searchPrev = document.getAnonymousElementByAttribute(this, "anonid", "searchPrev");
+            var searchNext = document.getAnonymousElementByAttribute(this, "anonid", "searchNext");
+
+            FBL.internationalize(searchBox, "label");
+            FBL.internationalize(searchPrev, "label");
+            FBL.internationalize(searchPrev, "tooltiptext");
+            FBL.internationalize(searchNext, "label");
+            FBL.internationalize(searchNext, "tooltiptext");
+
             var optionsPopup = document.getElementById("fbSearchOptionsPanel");
 
             var self = this;
@@ -89,6 +98,8 @@
                     "searchBox");
                 searchBox.setAttribute("active-search", !!val);
                 searchBox.value = val;
+                searchBox.selectionStart = searchBox.value.length;
+                searchBox.selectionEnd = searchBox.value.length;
             ]]></xbl:setter>
         </property>
 
@@ -166,16 +177,6 @@
 
         <method name="showOptions">
             <body><![CDATA[
-                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
-                var searchPrev = document.getAnonymousElementByAttribute(this, "anonid", "searchPrev");
-                var searchNext = document.getAnonymousElementByAttribute(this, "anonid", "searchNext");
-
-                FBL.internationalize(searchBox, "label");
-                FBL.internationalize(searchPrev, "label");
-                FBL.internationalize(searchPrev, "tooltiptext");
-                FBL.internationalize(searchNext, "label");
-                FBL.internationalize(searchNext, "tooltiptext");
-
                 var searchMenu = document.getAnonymousElementByAttribute(this, "anonid",
                     "fbSearchOptionsMenu");
                 var searchDescription = document.getAnonymousElementByAttribute(this, "anonid",
@@ -187,7 +188,7 @@
                 if (searchDescription)
                 {
                     searchDescription.setAttribute("tooltiptext",
-                        FBL.$STR("a11y.labels.Press up or down arrow key for search options"));
+                        FBL.$STR("a11y.labels.Press_up_or_down"));
                 }
 
                 var optionsPopup = document.getElementById("fbSearchOptionsPanel");

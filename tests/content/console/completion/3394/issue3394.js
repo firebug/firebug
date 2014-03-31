@@ -1,22 +1,23 @@
 function runTest()
 {
-    FBTest.sysout("issue3394.START");
     FBTest.openNewTab(basePath + "console/completion/3394/issue3394.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(function()
         {
-            var panel = FW.Firebug.chrome.selectPanel("console");
+            FBTest.enableConsolePanel(function(win)
+            {
+                var panel = FW.Firebug.chrome.selectPanel("console");
 
-            FBTest.clearAndTypeCommand("loc");
-            FBTest.synthesizeKey("VK_TAB", null, win);
+                FBTest.clearAndTypeCommand("loc");
+                FBTest.synthesizeKey("VK_TAB", null, win);
 
-            var doc = FW.Firebug.chrome.window.document;
-            var cmdLine = doc.getElementById("fbCommandLine");
-            FBTest.compare(/^location/, cmdLine.value,
-                "The autocomplete must produce: /^location/");
+                var doc = FW.Firebug.chrome.window.document;
+                var cmdLine = doc.getElementById("fbCommandLine");
+                FBTest.compare(/^location/, cmdLine.value,
+                    "The autocomplete must produce: /^location/");
 
-            FBTest.testDone("issue3394.DONE");
+                FBTest.testDone();
+            });
         });
     });
 }

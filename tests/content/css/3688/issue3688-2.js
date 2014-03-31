@@ -1,20 +1,21 @@
 function runTest()
 {
-    FBTest.sysout("issue3688-2.START");
     FBTest.openNewTab(basePath + "css/3688/issue3688-2.html", function(win)
     {
-        FBTest.openFirebug();
-        var panel = FBTest.selectPanel("stylesheet");
-        var warning = panel.panelNode.querySelector(".warning");
-        FBTest.ok(warning, "There must be a warning: There are no rules ...");
-
-        FBTest.reload(function(win)
+        FBTest.openFirebug(function()
         {
             var panel = FBTest.selectPanel("stylesheet");
-            var warning = panel.panelNode.querySelector(".warning");
-            FBTest.ok(warning, "The text must be still there...");
+            var warning = panel.panelNode.getElementsByClassName("warning")[0];
+            FBTest.ok(warning, "There must be a warning: There are no rules ...");
 
-            FBTest.testDone("issue3688-2.DONE");
-        })
+            FBTest.reload(function(win)
+            {
+                var panel = FBTest.selectPanel("stylesheet");
+                var warning = panel.panelNode.getElementsByClassName("warning")[0];
+                FBTest.ok(warning, "The text must be still there...");
+
+                FBTest.testDone();
+            });
+        });
     });
 }

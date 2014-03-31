@@ -61,7 +61,9 @@ EventSource.prototype =
     dispatch: function(eventName, args)
     {
         if (this.fbListeners && this.fbListeners.length > 0)
-            Events.dispatch(this.fbListeners, eventName, args);
+            return Events.dispatch(this.fbListeners, eventName, args);
+
+        return [];
     },
 
     dispatch2: function(eventName, args)

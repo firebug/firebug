@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4932.START");
-
     var url = basePath + "script/4932/issue4932.html";
     FBTest.openNewTab(url, function(win)
     {
@@ -17,7 +15,7 @@ function runTest()
                 FBTest.compare(expected, row.textContent,
                     "The script panel must show expected source: " + row.textContent);
 
-                FBTest.testDone("issue4932.DONE");
+                FBTest.testDone();
             });
         });
     });

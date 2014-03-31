@@ -51,6 +51,7 @@ CommandLineHandler.prototype =
 
     runFBTests: false,
     testListURI: null,
+    quitAfterRun: false,
 
     handle: function(cmdLine)
     {
@@ -64,7 +65,8 @@ CommandLineHandler.prototype =
             // Handle flag with test URI specified. This throws an exception
             // if the parameter isn't specified.
             var testListURI = cmdLine.handleFlagWithParam(CMDLINE_FLAG, false);
-            this.startOnStartup(testListURI);
+            var quitAfterRun = cmdLine.handleFlag("quitAfterRun", false);
+            this.startOnStartup(testListURI, quitAfterRun);
         }
         catch (e)
         {
@@ -75,7 +77,7 @@ CommandLineHandler.prototype =
         }
     },
 
-    startOnStartup: function(testListURI)
+    startOnStartup: function(testListURI, quitAfterRun)
     {
         if (!testListURI)
             window.dump("FBTest; No test list URI specified.");
@@ -83,6 +85,7 @@ CommandLineHandler.prototype =
         // This info will be used by FBTest overlay as soon as the browser window is loaded.
         this.runFBTests = true;
         this.testListURI = testListURI;
+        this.quitAfterRun = quitAfterRun;
 
         window.dump("FBTest; FBTests will be executed as soon as Firefox is ready.\n");
         window.dump("FBTest; Test List URI: " + testListURI + "\n");

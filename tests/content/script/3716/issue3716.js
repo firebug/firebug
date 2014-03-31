@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue3716.START");
     FBTest.openNewTab(basePath + "script/3716/issue3716.html", function(win)
     {
         FBTest.enableScriptPanel(function(win)
@@ -11,7 +10,7 @@ function runTest()
             FBTest.waitForBreakInDebugger(null, 11, true, function()
             {
                 FBTest.clickContinueButton();
-                FBTest.testDone("issue3716.DONE");
+                FBTest.testDone();
             });
 
             // Set a breakpoint and reload the page to trigger it.

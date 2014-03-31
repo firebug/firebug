@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue176.START");
-
     FBTest.openNewTab(basePath + "net/filter/176/issue176.html", function(win)
     {
         FBTest.enableNetPanel(function(win)
@@ -51,5 +49,5 @@ function checkNetPanelUI()
     }
 
     FW.Firebug.NetMonitor.onToggleFilter(FW.Firebug.currentContext, "all");
-    FBTest.testDone("issue1256.DONE");
+    FBTest.testDone();
 }

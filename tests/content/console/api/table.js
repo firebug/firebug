@@ -3,57 +3,59 @@
  */
 function runTest()
 {
-    FBTest.sysout("console.table.START");
     FBTest.openNewTab(basePath + "console/api/table.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(function()
         {
-            var doc = win.document;
+            FBTest.enableConsolePanel(function(win)
+            {
+                var doc = win.document;
 
-            // #1 table with 3 columns, 2 rows and specified text content.
-            var table1 = {cols: 3, rows: 3, content: "abc123234345"};
-            var table2 = table1;
+                // #1 table with 3 columns, 2 rows and specified text content.
+                var table1 = {cols: 3, rows: 3, content: "abc123234345"};
+                var table2 = table1;
 
-            var text3 = "firstNamelastNameagedesc\"Susan\"\"Doyle\"32\"mother\"\"John\"\"Doyle\"33\"father\"\"Lily\"\"Doyle\"5undefined\"Mike\"\"Doyle\"8undefined";
-            var table3 = {cols: 4, rows: 4, content: text3};
+                var text3 = "firstNamelastNameagedesc\"Susan\"\"Doyle\"32\"mother\"\"John\"\"Doyle\"33\"father\"\"Lily\"\"Doyle\"5undefined\"Mike\"\"Doyle\"8undefined";
+                var table3 = {cols: 4, rows: 4, content: text3};
 
-            var text4 = FW.FBL.$STR("firebug.reps.table.ObjectProperties") +
-                FW.FBL.$STR("firebug.reps.table.ObjectValues") +
-                "\"a\"\"propA\"\"b\"\"propB\"\"c\"\"propC\""
-            var table4 = {cols: 2, rows: 3, content: text4};
+                var text4 = FW.FBL.$STR("firebug.reps.table.ObjectProperties") +
+                    FW.FBL.$STR("firebug.reps.table.ObjectValues") +
+                    "\"a\"\"propA\"\"b\"\"propB\"\"c\"\"propC\""
+                var table4 = {cols: 2, rows: 3, content: text4};
 
-            var table5 = table3;
-            var table6 = {cols: 2, rows: 3, content: "12233445"};
-            var table7 = {cols: 2, rows: 3, content: "2nd3rd233445"};
+                var table5 = table3;
+                var table6 = {cols: 2, rows: 3, content: "12233445"};
+                var table7 = {cols: 2, rows: 3, content: "2nd3rd233445"};
 
-            var text8 = "firstNamelastName\"Susan\"\"Doyle\"\"John\"\"Doyle\"\"Lily\"\"Doyle\"\"Mike\"\"Doyle\"";
-            var table8 = {cols: 2, rows: 4, content: text8};
+                var text8 = "firstNamelastName\"Susan\"\"Doyle\"\"John\"\"Doyle\"\"Lily\"\"Doyle\"\"Mike\"\"Doyle\"";
+                var table8 = {cols: 2, rows: 4, content: text8};
 
-            var text9 = text8;
-            var table9 = {cols: 2, rows: 4, content: text9};
+                var text9 = text8;
+                var table9 = {cols: 2, rows: 4, content: text9};
 
-            var tasks = new FBTest.TaskList();
-            tasks.push(executeTest, "testButton1", doc, null, [table1]);
-            tasks.push(executeTest, "testButton2", doc, null, [table2]);
-            tasks.push(executeTest, "testButton3", doc, null, [table3]);
-            tasks.push(executeTest, "testButton4", doc, null, [table4]);
-            tasks.push(executeTest, "testButton5", doc, "My family", [table5]);
-            tasks.push(executeTest, "testButton6", doc, null, [table6]);
-            tasks.push(executeTest, "testButton7", doc, null, [table7]);
-            tasks.push(executeTest, "testButton8", doc, null, [table8]);
-            tasks.push(executeTest, "testButton9", doc, null, [table9]);
+                var tasks = new FBTest.TaskList();
+                tasks.push(executeTest, "testButton1", doc, null, [table1]);
+                tasks.push(executeTest, "testButton2", doc, null, [table2]);
+                tasks.push(executeTest, "testButton3", doc, null, [table3]);
+                tasks.push(executeTest, "testButton4", doc, null, [table4]);
+                tasks.push(executeTest, "testButton5", doc, "My family", [table5]);
+                tasks.push(executeTest, "testButton6", doc, null, [table6]);
+                tasks.push(executeTest, "testButton7", doc, null, [table7]);
+                tasks.push(executeTest, "testButton8", doc, null, [table8]);
+                tasks.push(executeTest, "testButton9", doc, null, [table9]);
 
-            var text10 = "Object PropertiesValues\"firstName\"\"Susan\"\"lastName\"\"Doyle\"\"age\"32\"desc\"\"mother\"";
-            var table10 = {cols: 2, rows: 4, content: text10};
-            tasks.push(executeTest, "testButton10", doc, null, [table10]);
+                var text10 = "Object PropertiesValues\"firstName\"\"Susan\"\"lastName\"\"Doyle\"\"age\"32\"desc\"\"mother\"";
+                var table10 = {cols: 2, rows: 4, content: text10};
+                tasks.push(executeTest, "testButton10", doc, null, [table10]);
 
-            var text11 = "Object PropertiesValues011223";
-            var table11 = {cols: 2, rows: 3, content: text11};
-            tasks.push(executeTest, "testButton11", doc, null, [table11]);
+                var text11 = "Object PropertiesValues011223";
+                var table11 = {cols: 2, rows: 3, content: text11};
+                tasks.push(executeTest, "testButton11", doc, null, [table11]);
 
-            tasks.run(function() {
-                FBTest.testDone("console.table.DONE");
+                tasks.run(function()
+                {
+                    FBTest.testDone();
+                });
             });
         });
     });
@@ -96,6 +98,7 @@ function executeTest(callback, buttonId, doc, title, expected)
 function verifyLogBody(logRow, expected)
 {
     var tables = logRow.querySelectorAll(".dataTable");
+
     FBTest.compare(expected.length, tables.length, "There must be " +
         expected.length + " table(s).");
 
@@ -104,7 +107,7 @@ function verifyLogBody(logRow, expected)
         var e = expected[i];
         if (!verifyTableLayout(tables[i], e.cols, e.rows, e.content))
         {
-            FBTest.testDone("console.table.FAIL");
+            FBTest.testDone();
             return;
         }
     }

@@ -3,29 +3,28 @@ var expectedValue2 = /style="color:\s*green"/;
 
 function runTest()
 {
-    FBTest.sysout("attributes.START");
     FBTest.openNewTab(basePath + "dom/attributes/attributes.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("console");
-
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(function()
         {
-            FBTest.progress("console enabled, creating task list");
-            var tasks = new FBTest.TaskList();
-            tasks.push(testDomPanel);
+            FBTest.enableConsolePanel(function(win)
+            {
+                FBTest.progress("console enabled, creating task list");
+                var tasks = new FBTest.TaskList();
+                tasks.push(testDomPanel);
 
-            tasks.push(executeCommandAndVerify,
-                "$('#testId').attributes", expectedValue,
-                "a", "objectLink objectLink-NamedNodeMap");
+                tasks.push(executeCommandAndVerify,
+                    "$('#testId').attributes", expectedValue,
+                    "a", "objectLink objectLink-NamedNodeMap");
 
-            tasks.push(executeCommandAndVerify,
-                "$('#testId').attributes[0]", expectedValue2,
-                "a", "objectLink objectLink-Attr");
+                tasks.push(executeCommandAndVerify,
+                    "$('#testId').attributes[0]", expectedValue2,
+                    "a", "objectLink objectLink-Attr");
 
-            tasks.run(function() {
-                FBTest.testDone("attributes.DONE");
-            })
+                tasks.run(function() {
+                    FBTest.testDone();
+                })
+            });
         });
     });
 }

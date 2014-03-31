@@ -6,7 +6,6 @@
  */
 function runTest()
 {
-    FBTest.sysout("AsyncJSD.START");
     FBTest.disableAllPanels();
     FBTest.progress("All panels start disabled");
     FBTest.setPref("activateSameOrigin", false);
@@ -35,7 +34,7 @@ function runTest()
                     // All panels must be still enabled.
                     checkIsEnabled(FW.FBL.$STR("Panel-script"), FW.Firebug.Debugger);
 
-                    FBTest.testDone("AsyncJSD.DONE");
+                    FBTest.testDone();
                 });
             }
             catch (err)

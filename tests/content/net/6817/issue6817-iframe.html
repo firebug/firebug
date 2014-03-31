@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Insert title here</title>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        body {
+            background-image: none;
+            background-color: transparent;
+        }
+
+        input {
+            display: none;
+        }
+        </style>
+    </head>
+    <body>
+        <form action="issue6817.php" method="post" enctype="multipart/form-data">
+            <input type="text" name="text" value="Hello Firebug user!"/>
+            <input type="file" name="file"/>
+            <button type="submit" id="sendRequest">Send request</button>
+        </form>
+    </body>
+</html>

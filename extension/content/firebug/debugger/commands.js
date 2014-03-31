@@ -21,6 +21,7 @@ const Cu = Components.utils;
 
 Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
 
+var Trace = FBTrace.to("DBG_DEBUGGER_COMMANDS");
 var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
@@ -131,14 +132,18 @@ function threadBreakpoints(context, args)
 
         // Log breakpoints on the server side.
         var actors = threadActor.breakpointStore._wholeLineBreakpoints;
-        Firebug.Console.logFormatted(["Server actors %o", actors], context, "info");
+        var size = threadActor.breakpointStore.size;
+
+        Firebug.Console.logFormatted(["Server actors %d %o ", size, actors], context, "info");
+
+        Trace.sysout("Server breakpoint store", threadActor.breakpointStore);
 
         // xxxHonza: Clone all breakpoints before logging. There is an exception
         // when the DOM panel (used after clicking on the logged object)
         // is trying to display instances of {@link Breakpoint} using
         // {@link BreakpointRep}
         var result = {};
-        BreakpointStore.enumerateBreakpoints(null, function(bp)
+        BreakpointStore.enumerateBreakpoints(null, true, function(bp)
         {
             var newBp = {};
             for (var p in bp)

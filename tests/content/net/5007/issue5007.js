@@ -1,43 +1,41 @@
 function runTest()
 {
-    FBTest.sysout("issue5007.START");
-
     FBTest.openNewTab(basePath + "net/5007/issue5007.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("net");
-
-        FBTest.enableNetPanel(function(win)
+        FBTest.openFirebug(function()
         {
-            var options =
+            FBTest.enableNetPanel(function(win)
             {
-                tagName: "tr",
-                classes: "netRow category-html hasHeaders loaded"
-            };
-
-            var panel = FBTest.selectPanel("net");
-            panel.clear();
-
-            FBTest.waitForDisplayedElement("net", options, function(row)
-            {
-                var panelNode = FBTest.selectPanel("net").panelNode;
-
-                FBTest.click(row);
-                FBTest.expandElements(panelNode, "netInfoPostTab");
-
-                var headersBody = FW.FBL.getElementByClass(panelNode, "netInfoResponseHeadersBody");
-                if (FBTest.ok(headersBody, "Response headers must exist"))
+                var options =
                 {
-                    FBTest.ok(headersBody.textContent.indexOf("Content-Type") !== -1,
-                        "Content-Type header exists");
-                    FBTest.ok(headersBody.textContent.indexOf("Content-Length") !== -1,
-                        "Content-Length header exists");
-                }
+                    tagName: "tr",
+                    classes: "netRow category-html hasHeaders loaded"
+                };
 
-                FBTest.testDone("issue5007.DONE");
+                var panel = FBTest.selectPanel("net");
+                panel.clear();
+
+                FBTest.waitForDisplayedElement("net", options, function(row)
+                {
+                    var panelNode = FBTest.selectPanel("net").panelNode;
+
+                    FBTest.click(row);
+                    FBTest.expandElements(panelNode, "netInfoPostTab");
+
+                    var headersBody = FW.FBL.getElementByClass(panelNode, "netInfoResponseHeadersBody");
+                    if (FBTest.ok(headersBody, "Response headers must exist"))
+                    {
+                        FBTest.ok(headersBody.textContent.indexOf("Content-Type") !== -1,
+                            "Content-Type header exists");
+                        FBTest.ok(headersBody.textContent.indexOf("Content-Length") !== -1,
+                            "Content-Length header exists");
+                    }
+
+                    FBTest.testDone();
+                });
+
+                FBTest.click(win.document.getElementsByTagName("button").item(0));
             });
-
-            FBTest.click(win.document.getElementsByTagName("button").item(0));
         });
     });
 }

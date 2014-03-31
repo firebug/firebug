@@ -64,7 +64,8 @@ Wrapper.cloneIntoContentScope = function(global, obj)
 {
     if (!obj || typeof obj !== "object")
         return obj;
-    var newObj = (Array.isArray(obj) ? Cu.createArrayIn(global) : Cu.createObjectIn(global));
+    global = Wrapper.wrapObject(global);
+    var newObj = (Array.isArray(obj) ? new global.Array() : new global.Object());
     for (var prop in obj)
     {
         var desc = Object.getOwnPropertyDescriptor(obj, prop);

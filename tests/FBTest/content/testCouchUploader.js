@@ -215,6 +215,34 @@ FBTestApp.TestCouchUploader =
                 if (versions.has(version))
                     return "Mac OS X " + versions.get(version);
                 break;
+                
+            case "Linux":
+                // Check for Fedora
+                var reFedora = /fc(\d+)/;
+                var match = version.match(reFedora);
+                if (match)
+                  return "Fedora " + match[1];
+                break;
+
+                // Check for Ubuntu
+                var reGnome = /^(3\.\d+).*-generic$/;
+
+                var match = version.match(reGnome);
+                if (match)
+                {
+                    // According to http://en.wikipedia.org/wiki/List_of_Ubuntu_releases#Table_of_versions
+                    var versions = new Map();
+                    versions.set("3.0", "11.10");
+                    versions.set("3.2", "12.04 LTS");
+                    versions.set("3.5", "12.10/12.04.2 LTS");
+                    versions.set("3.8", "13.04/12.04.3 LTS");
+                    versions.set("3.11", "13.10/12.04.4 LTS");
+                    versions.set("3.13", "14.04 LTS");
+                    versions.set("3.14", "12.04.5 LTS");
+
+                    if (versions.has(version))
+                        return "Ubuntu " + versions.get(version);
+                }
         }
 
         return "";
@@ -338,6 +366,9 @@ var CouchDB =
             data: toJSON(doc),
             complete: function(req)
             {
+                if (FBTrace.DBG_FBTEST)
+                    FBTrace.sysout("testCouchUploader.saveDoc;", req);
+
                 var resp = parseJSON(req.responseText);
                 if (req.status == 201)
                 {
@@ -348,11 +379,16 @@ var CouchDB =
                 }
                 else if (options.error)
                 {
-                    options.error(req.status, resp.error, resp.reason);
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("testCouchUploader.saveDoc; ERROR " + options.error, req);
+
+                    options.error(req.status, (resp ? resp.error : "unknown"),
+                        (resp ? resp.reason : "unknown"));
                 }
                 else
                 {
-                    alert("The document could not be saved: " + resp.reason);
+                    alert("The document could not be saved: " +
+                        (resp ? resp.reason : "unknown"));
                 }
             }
         });
@@ -372,6 +408,9 @@ var CouchDB =
             data: toJSON(docs),
             complete: function(req)
             {
+                if (FBTrace.DBG_FBTEST)
+                    FBTrace.sysout("testCouchUploader.bulkSave;", req);
+
                 var resp = parseJSON(req.responseText);
                 if (req.status == 201)
                 {
@@ -380,11 +419,16 @@ var CouchDB =
                 }
                 else if (options.error)
                 {
-                    options.error(req.status, resp.error, resp.reason);
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("testCouchUploader.bulkSave; ERROR " + options.error, req);
+
+                    options.error(req.status, (resp ? resp.error : "unknown"),
+                        (resp ? resp.reason : "unknown"));
                 }
                 else
                 {
-                    alert("The document could not be saved: " + resp.reason);
+                    alert("The document could not be saved: " +
+                        (resp ? resp.reason : "unknown"));
                 }
             },
         });

@@ -13,22 +13,24 @@ function viralActivation()
         var isFirebugOpen = FBTest.isFirebugOpen();
         FBTest.ok(!isFirebugOpen, "Firebug starts closed");
 
-        FBTest.openFirebug();
-
-        var isFirebugOpen = FBTest.isFirebugOpen();
-        FBTest.ok(isFirebugOpen, "Firebug now open");
-
-        if (FBTest.FirebugWindow.Firebug.currentContext)
+        FBTest.openFirebug(function()
         {
-            var contextName = FBTest.FirebugWindow.Firebug.currentContext.getName();
-            FBTest.ok(true, "chromeWindow.Firebug.currentContext "+contextName);
-            FBTest.ok(contextName == viralActivationURL, "Firebug.currentContext set to "+viralActivationURL);
-        }
-        else
-            FBTest.ok(false, "no Firebug.currentContext");
+            var isFirebugOpen = FBTest.isFirebugOpen();
+            FBTest.ok(isFirebugOpen, "Firebug now open");
 
-        sameTabOpen(win, path);
+            if (FBTest.FirebugWindow.Firebug.currentContext)
+            {
+                var contextName = FBTest.FirebugWindow.Firebug.currentContext.getName();
+                FBTest.ok(true, "chromeWindow.Firebug.currentContext "+contextName);
+                FBTest.ok(contextName == viralActivationURL, "Firebug.currentContext set to "+viralActivationURL);
+            }
+            else
+            {
+                FBTest.ok(false, "no Firebug.currentContext");
+            }
 
+            sameTabOpen(win, path);
+        });
     });
 }
 
@@ -58,7 +60,7 @@ function sameTabOpen(win, path)
 
             var suspension = FW.Firebug.getSuspended();
             FBTest.compare(null, suspension, "Firebug is not suspended on "+browser.currentURI.spec);
-            FBTest.testDone("viralActivation: 1/4 completed");
+            FBTest.testDone();
         });
 
     }
@@ -67,7 +69,6 @@ function sameTabOpen(win, path)
     FBTest.progress("Click link "+link.getAttribute('id'));
     FBTest.click(link);
 }
-
 
 //------------------------------------------------------------------------
 // Auto-run test

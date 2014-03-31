@@ -4,8 +4,6 @@ with (FW.FBL)
 
 function runTest()
 {
-    FBTest.sysout("issue4425.START");
-
     var template1 = domplate(
     {
         tag:
@@ -30,7 +28,7 @@ function runTest()
 
     FBTest.compare("temp1 topArg", parentNode.textContent, "The content must match.");
 
-    FBTest.testDone("issue4425.DONE");
+    FBTest.testDone();
 }
 
 // ********************************************************************************************* //

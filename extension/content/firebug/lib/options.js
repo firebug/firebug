@@ -441,6 +441,10 @@ var Options =
                     FBTrace.sysout("Skipped clearing option: " + i + ") " + preferences[i]);
             }
         }
+
+        // Make sure Firebug object properties that represents preferences are
+        // also updated.
+        this.initializePrefs();
     },
 
     forceSave: function()

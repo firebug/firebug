@@ -1,21 +1,21 @@
 function runTest()
 {
-    FBTest.sysout("issue369.jsonViewer.START");
-
     FBTest.openNewTab(basePath + "net/369/issue369.htm", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableNetPanel(function(win)
+        FBTest.openFirebug(function()
         {
-            var panel = FBTest.selectPanel("net");
+            FBTest.enableNetPanel(function(win)
+            {
+                var panel = FBTest.selectPanel("net");
 
-            win.makeRequest1(onRequest);
-            win.makeRequest2(onRequest);
-            win.makeRequest3(onRequest);
-            win.makeRequest4(onRequest);
-            // xxxHonza: Not implemented yet.
-            //win.makeRequest5(onRequest);
-            //win.makeRequest6(onRequest);
+                win.makeRequest1(onRequest);
+                win.makeRequest2(onRequest);
+                win.makeRequest3(onRequest);
+                win.makeRequest4(onRequest);
+                // xxxHonza: Not implemented yet.
+                //win.makeRequest5(onRequest);
+                //win.makeRequest6(onRequest);
+            });
         });
     });
 }
@@ -52,7 +52,7 @@ function verifyContent()
         FBTest.ok(textContent, domTable.textContent, "JSON data must be properly displayed.");
     }
 
-    FBTest.testDone("issue369.jsonViewer.DONE");
+    FBTest.testDone();
 }
 
 // ************************************************************************************************

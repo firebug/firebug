@@ -182,7 +182,7 @@ Firebug.TabWatcher = Obj.extend(new EventSource(),
             // HTML panel's edit mode can cause onStateChange changes and context
             // recreation.
             if (context.loaded && context == Firebug.currentContext &&
-                context.getName() == "about:blank")
+                context.getName() == aboutBlank)
             {
                 FBTrace.sysout("tabWatcher.watchTopWindow; page already watched");
                 return;
@@ -518,8 +518,9 @@ Firebug.TabWatcher = Obj.extend(new EventSource(),
     unwatchTopWindow: function(win)
     {
         // Ignore about:blank pages
-        if (win.location == aboutBlank)
-            return;
+        // xxxHonza: we can't ignore about blank pages, the context is created for them too.
+        //if (win.location == aboutBlank)
+        //    return;
 
         var context = this.getContextByWindow(win);
         if (FBTrace.DBG_WINDOWS)
@@ -783,9 +784,17 @@ Firebug.TabWatcher = Obj.extend(new EventSource(),
     {
         for (var i = 0; i < contexts.length; ++i)
         {
-            var rc = fn(contexts[i]);
-            if (rc)
-                return rc;
+            try
+            {
+                var rc = fn(contexts[i]);
+                if (rc)
+                    return rc;
+            }
+            catch (err)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("-> tabWatcher.iterateContexts; EXCEPTION " + err, err);
+            }
         }
     },
 
@@ -811,7 +820,7 @@ var TabWatcherUnloader =
     registerWindow: function(win)
     {
         var root = (win.parent == win);
-        var eventName = (root && (win.location.href !== "about:blank")) ? "pagehide" : "unload";
+        var eventName = (root && (win.location.href !== aboutBlank)) ? "pagehide" : "unload";
         var listener = Obj.bind(root ? this.onPageHide : this.onUnload, this);
         Events.addEventListener(win, eventName, listener, false);
 
@@ -947,10 +956,10 @@ var TabProgressListener = Obj.extend(Http.BaseProgressListener,
             // There is a workaround for this case in {@TabWatchListener.showContext]
             //
             // the onStateChange will deal with this troublesome case
+            // This must stay disabled otherwise firebug/4040 test fails
+            // See also a comment in {@link NetMonitor.onModifyRequest}
             //if (uri && uri.spec === "about:blank")
             //    return;
-            if (uri && uri.spec === "about:blank")
-                return;
 
             // document.open() was called, the document was cleared.
             if (uri && uri.scheme === "wyciwyg")
@@ -1032,7 +1041,7 @@ var FrameProgressListener = Obj.extend(Http.BaseProgressListener,
 
                 // xxxHonza: we need to use (win.location.href == "about:blank")
                 // Otherwise the DOM panel is updated too soon (when doc.readyState == "loading")
-                if (win.parent == win && (win.location.href == "about:blank"))
+                if (win.parent == win && (win.location.href == aboutBlank))
                 {
                     Firebug.TabWatcher.watchTopWindow(win, win.location.href);
                     return;
@@ -1165,7 +1174,7 @@ var TabWatcherHttpObserver = Obj.extend(Object,
                 delete browser.FirebugLink;
 
                 // then this page is opened in new tab or window
-                if (Win.safeGetWindowLocation(win).toString() == "about:blank")
+                if (Win.safeGetWindowLocation(win).toString() == aboutBlank)
                 {
                     var referer = getRefererHeader(request);
                     if (referer)

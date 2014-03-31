@@ -1,34 +1,34 @@
 function runTest()
 {
-    FBTest.sysout("issue5951.START");
     FBTest.openNewTab(basePath + "commandLine/5951/issue5951.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.clearCache();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(function()
         {
-            var expression = "document.getElementsByTagName('span')";
-            var expected = "HTMLCollection[span.test, span#root]";
-
-            var config = {tagName: "span", classes: "objectBox-array"};
-            FBTest.waitForDisplayedElement("console", config, function(row)
+            FBTest.enableConsolePanel(function(win)
             {
-                FBTest.compare(expected, row.textContent, "Verify: " +
-                    expression + " SHOULD BE " + expected);
+                var expression = "document.getElementsByTagName('span')";
+                var expected = "HTMLCollection[span.test, span#root]";
 
-                var title = row.getElementsByClassName("objectTitle")[0];
-                if (FBTest.ok(title, "HTMLCollection title must exist"))
+                var config = {tagName: "span", classes: "objectBox-array"};
+                FBTest.waitForDisplayedElement("console", config, function(row)
                 {
-                    FBTest.click(title);
+                    FBTest.compare(expected, row.textContent, "Verify: " +
+                        expression + " SHOULD BE " + expected);
 
-                    var panel = FBTest.getSelectedPanel();
-                    FBTest.compare("dom", panel.name, "The DOM panel must be selected");
-                }
+                    var title = row.getElementsByClassName("objectTitle")[0];
+                    if (FBTest.ok(title, "HTMLCollection title must exist"))
+                    {
+                        FBTest.click(title);
 
-                FBTest.testDone("issue5951.DONE");
+                        var panel = FBTest.getSelectedPanel();
+                        FBTest.compare("dom", panel.name, "The DOM panel must be selected");
+                    }
+
+                    FBTest.testDone();
+                });
+
+                FBTest.executeCommand(expression);
             });
-
-            FBTest.executeCommand(expression);
         });
     });
 }

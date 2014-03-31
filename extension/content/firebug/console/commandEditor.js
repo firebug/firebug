@@ -48,12 +48,13 @@ Firebug.CommandEditor = Obj.extend(Module,
             mode: "javascript",
             lineNumbers: true,
             readOnly: false,
-            gutters: [],
+            gutters: []
         };
 
         // Custom shortcuts for source editor
         config.extraKeys = {
             "Ctrl-Enter": this.onExecute.bind(this),
+            "Cmd-Enter": this.onExecute.bind(this),
             "Esc": this.onEscape.bind(this),
             "Ctrl-Space": this.autoComplete.bind(this, true),
             "Tab": this.onTab.bind(this)
@@ -261,6 +262,13 @@ Firebug.CommandEditor = Obj.extend(Module,
             this.editor.focus();
     },
 
+    blur: function()
+    {
+        // When bluring, save the selection (see issue 7273).
+        if (this.editor)
+            this.editor.blur(true);
+    },
+
     fontSizeAdjust: function(adjust)
     {
         if (!this.editor)
@@ -288,6 +296,15 @@ Firebug.CommandEditor = Obj.extend(Module,
             // support for TextEditor, not used at the moment
             this.editor.textBox.style.fontSizeAdjust = adjust;
         }
+    },
+
+    // Method used for the hack of issue 6824 (Randomly get "Unresponsive Script Warning" with 
+    // commandEditor.html). Adds or removes the .CommandEditor-Hidden class.
+    // IMPORTANT: that method should only be used within the Firebug code, and may be removed soon.
+    addOrRemoveClassCommandEditorHidden: function(addClass)
+    {
+        if (this.editor)
+            this.editor.addOrRemoveClassCommandEditorHidden(addClass);
     }
 });
 

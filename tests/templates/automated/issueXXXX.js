@@ -8,18 +8,18 @@
 */
 function runTest()
 {
-    FBTest.sysout("issueXXXX.START");
-
-    FBTest.openNewTab(basePath + "category/XXXX/issueXXXX.html", function(win)
+    FBTest.openNewTab(basePath + "category/XXXX/issueXXXX.html", (win) =>
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("mainPanel");
-
-        FBTest.doSomething(function(win)
+        FBTest.openFirebug(() =>
         {
-            // Test functionality must be placed here
+            FBTest.selectPanel("mainPanel");
 
-            FBTest.testDone("issueXXXX.DONE");
+            FBTest.doSomething(() =>
+            {
+                // Test functionality must be placed here
+
+                FBTest.testDone();
+            });
         });
     });
 }

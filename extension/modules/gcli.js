@@ -20,7 +20,7 @@ try
 }
 catch (err)
 {
-    if (FBTrace.DBG_ERROR)
+    if (FBTrace.DBG_ERRORS)
         FBTrace.sysout("GCLI not available");
 }
 

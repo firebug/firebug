@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("cookies.test.issue60; START");
-
     FBTest.setPref("cookies.filterByPath", false);
 
     FBTest.openNewTab(basePath + "cookies/60/issue60.php", function(win)
@@ -22,7 +20,7 @@ function runTest()
             var cookie = FBTest.getCookieByName(panelNode, "TestCookie60%5Buser%5D");
             FBTest.ok(cookie == null, "Cookie name must not be escaped");
 
-            FBTest.testDone("cookies.test.issue60; DONE");
+            FBTest.testDone();
         });
     });
 };

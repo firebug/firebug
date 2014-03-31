@@ -1,14 +1,8 @@
 function runTest()
 {
-    FBTest.sysout("issue6570.START");
-
     FBTest.openNewTab(basePath + "cookies/6570/issue6570.php", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("net");
-
-        FBTest.enableCookiesPanel();
-        FBTest.enableNetPanel(function(win)
+        FBTest.enablePanels(["net", "cookies"], function()
         {
             var options =
             {
@@ -50,7 +44,7 @@ function runTest()
                         (expResult ? "" : "not ") + "be marked as deleted.");
                 }
 
-                FBTest.testDone("issue6570.DONE");
+                FBTest.testDone();
             });
         });
     });

@@ -9,25 +9,26 @@
 var theWindow;
 function runTest()
 {
-    FBTest.sysout("issue2122.START");
-
     FBTest.openNewTab(basePath + "console/2122/issue2122.html", function()
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(function()
         {
-            FBTest.selectPanel("console");
+            FBTest.enableConsolePanel(function(win)
+            {
+                FBTest.selectPanel("console");
 
-            theWindow = win;
+                theWindow = win;
 
-            var tests = [];
-            tests.push(test0);
-            tests.push(test1);
-            tests.push(test2);
-            tests.push(test3);
+                var tests = [];
+                tests.push(test0);
+                tests.push(test1);
+                tests.push(test2);
+                tests.push(test3);
 
-            FBTest.runTestSuite(tests, function() {
-                FBTest.testDone("issue2122; DONE");
+                FBTest.runTestSuite(tests, function()
+                {
+                    FBTest.testDone();
+                });
             });
         });
     });

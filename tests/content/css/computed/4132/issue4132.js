@@ -1,25 +1,25 @@
 function runTest()
 {
-    FBTest.sysout("issue4132.START");
-
     FBTest.openNewTab(basePath + "css/computed/4132/issue4132.html", function(win)
     {
-        FBTest.openFirebug();
-        var panel = FBTest.selectPanel("computed");
-
-        FBTest.selectElementInHtmlPanel("element", function(win)
+        FBTest.openFirebug(function()
         {
-            var computedStyles = panel.panelNode.querySelectorAll(".computedStyle:not(.hasSelectors)");
+            var panel = FBTest.selectPanel("computed");
 
-            FBTest.compare(0, computedStyles.length, "There should not be any user agent styles be shown.");
+            FBTest.selectElementInHtmlPanel("element", function(win)
+            {
+                var computedStyles = panel.panelNode.querySelectorAll(".computedStyle:not(.hasSelectors)");
 
-            FBTest.setPref("showUserAgentCSS", true);
+                FBTest.compare(0, computedStyles.length, "There should not be any user agent styles be shown.");
 
-            computedStyles = panel.panelNode.querySelectorAll(".computedStyle:not(.hasSelectors)");
+                FBTest.setPref("showUserAgentCSS", true);
 
-            FBTest.ok(computedStyles.length > 0, "There should be user agent styles shown.");
+                computedStyles = panel.panelNode.querySelectorAll(".computedStyle:not(.hasSelectors)");
 
-            FBTest.testDone("issue4132.DONE");
+                FBTest.ok(computedStyles.length > 0, "There should be user agent styles shown.");
+
+                FBTest.testDone();
+            });
         });
     });
 }

@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue3309.START");
     FBTest.setPref("filterSystemURLs", true);
     FBTest.progress("The filterSystemURLs Option is true for this test");
 
@@ -30,7 +29,7 @@ function runTest()
                         "The page must display expected text: " + text);
                 }
 
-                FBTest.testDone("issue3309.DONE");
+                FBTest.testDone();
             });
         });
     });

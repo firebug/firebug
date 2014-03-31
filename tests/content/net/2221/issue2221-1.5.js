@@ -7,7 +7,6 @@
 var panel = null;
 function runTest()
 {
-    FBTest.sysout("issue2221.START");
     FBTest.openNewTab(basePath + "net/2221/issue2221.html", function(win)
     {
         FBTest.enableNetPanel(function(win)
@@ -56,5 +55,5 @@ function onLoadResponse()
         FBTest.compare(expectedValue, postTable.rows[1].textContent, "The data must match.");
     }
 
-    FBTest.testDone("issue2221.DONE");
+    FBTest.testDone();
 }

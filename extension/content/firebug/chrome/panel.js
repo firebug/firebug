@@ -29,9 +29,22 @@ var TraceError = FBTrace.toError();
 // Implementation
 
 /**
- * @panel Base class for all panels. Every derived panel must define a constructor and
+ * @panel Base object for all Firebug panels. Every derived panel must define a constructor and
  * register with <code>Firebug.registerPanel</code> method. An instance of the panel
  * object is created by the framework for each browser tab where Firebug is activated.
+ *
+ * An example of a new panel:
+ * <code>
+ * function MyPanel() {}
+ * MyPanel.prototype = Obj.extend(Firebug.Panel,
+ * {
+ *     initialize: function(context, doc)
+ *     {
+ *         Firebug.Panel.initialize.apply(this, arguments);
+ *         Trace.sysout("My Panel initialized!");
+ *     }
+ * });
+ * </code>
  */
 var Panel = Obj.extend(new EventSource(),
 /** @lends Panel */
@@ -245,6 +258,9 @@ var Panel = Obj.extend(new EventSource(),
         return false;
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Location
+
     navigate: function(object)
     {
         // Get default location object if none is specified.
@@ -291,6 +307,18 @@ var Panel = Obj.extend(new EventSource(),
     {
     },
 
+    /**
+     * Normalize location object to make sure we always deal with an object presented
+     * in the location list.
+     */
+    normalizeLocation: function(object)
+    {
+        return object;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Selection
+
     select: function(object, forceUpdate)
     {
         if (!object)
@@ -330,6 +358,8 @@ var Panel = Obj.extend(new EventSource(),
     updateSelection: function(object)
     {
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     /**
      * Redisplay the panel based on the current location and selection
@@ -534,7 +564,8 @@ var Panel = Obj.extend(new EventSource(),
      * for the current search keyword.
      * @param {Boolean} reverse Indicates whether passing through the documents
      * should be done in reverse order
-     * @param {Object} The current document used in the (asynchronous) loop.
+     * @param {Object} doc The current document used in the (asynchronous) loop.
+     * @param {Object} deferred Internally used to deal with asynchronous loops.
      *
      * @return {Object} The method can return
      * 1) A document object that has been found
@@ -543,6 +574,18 @@ var Panel = Obj.extend(new EventSource(),
      */
     navigateToNextDocument: function(match, reverse, doc, deferred)
     {
+        if (!doc)
+        {
+            TraceError.sysout("panel.navigateToNextDocument; NULL location!");
+            return;
+        }
+
+        // Normalize location object to make sure we are dealing only with
+        // objects coming from the location list. This allows us to compare
+        // theme and find the right next location (document).
+        var location = this.normalizeLocation(this.location);
+        doc = this.normalizeLocation(doc);
+
         // The result value of the following promise will be resolved to
         // true if a document matching the search keyword has been found.
         // It'll be resolved to false if all documents have been checked
@@ -560,7 +603,7 @@ var Panel = Obj.extend(new EventSource(),
             // The result value must be a promise in such case.
             var result = match(doc);
 
-            Trace.sysout("panel.navigateToNextDocument; " + doc.href + ", match: " + result);
+            Trace.sysout("panel.navigateToNextDocument; " + doc + ", match: " + result);
 
             // It isn't nice to use isPromise in general, but we don't want to force
             // every panel to use promises, so {@link Promise} as the return value is not
@@ -571,7 +614,7 @@ var Panel = Obj.extend(new EventSource(),
                 result.then((found) =>
                 {
                     Trace.sysout("panel.navigateToNextDocument; async match done: " +
-                        found + ", for: " + doc.href, result);
+                        found + ", for: " + doc, result);
 
                     if (found)
                     {
@@ -585,22 +628,16 @@ var Panel = Obj.extend(new EventSource(),
                         if (Trace.active)
                         {
                             Trace.sysout("panel.navigateToNextDocument; next async cycle: " +
-                                (doc.href !== this.location.href ? "yes" : "no") + ", [doc: " +
-                                Url.getFileName(doc.href) + "], [location: " +
-                                Url.getFileName(this.location.href) + "]");
+                                (doc !== location ? "yes" : "no") + ", [doc: " +
+                                doc + "], [location: " + location + "]");
                         }
 
                         // There was no search match in the current document, let's move
                         // to the next one. If the next one is the one we started with
                         // we already iterated all documents, so resolve the final
                         // promise to false.
-                        // xxxHonza: ideally we should compare (doc !== this.location)
-                        // but the Script panel is also using SourceLink instances as the
-                        // location and so, it wouldn't work.
-                        // It should be possible to normalize panel's location through
-                        // 'normalizeLocation' API implemented by derived panels.
-                        // (jut like it's done for the selection, see: normalizeSelection)
-                        if (doc.href !== this.location.href)
+
+                        if (doc !== location)
                             this.navigateToNextDocument(match, reverse, doc, deferred);
                         else
                             deferred.resolve(false);
@@ -620,10 +657,10 @@ var Panel = Obj.extend(new EventSource(),
                 return doc;
             }
 
-            Trace.sysout("panel.navigateToNextDocument; next cycle? " + doc.href +
-                " !== " + this.location.href);
+            Trace.sysout("panel.navigateToNextDocument; next cycle? " + doc +
+                (doc !== location ? " !== " : " == ") + location);
 
-        } while (doc.href !== this.location.href);
+        } while (doc !== location);
 
         // There is no document that would match the search keyword, so resolve
         // the final promise to false.

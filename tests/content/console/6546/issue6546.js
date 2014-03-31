@@ -1,18 +1,19 @@
 function runTest()
 {
-    FBTest.sysout("issue6546.START");
-
-    FBTest.openNewTab(basePath + "console/6546/issue6546.html", function(win)
+    FBTest.openNewTab(basePath + "console/6546/issue6546.html", (win) =>
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("console");
-
-        FBTest.enableConsolePanel(function(win)
+        // 1. Open Firebug
+        FBTest.openFirebug(() =>
         {
-            var doc = FW.Firebug.chrome.window.document;
-            FBTest.compare("textbox-input", doc.activeElement.className, "Command Line must be focused");
+            // 2. Enable and switch to the Console panel
+            FBTest.enableConsolePanel(() =>
+            {
+                var doc = FW.Firebug.chrome.window.document;
+                FBTest.compare("textbox-input", doc.activeElement.className,
+                    "Command Line must be focused");
 
-            FBTest.testDone("issue6546.DONE");
+                FBTest.testDone();
+            });
         });
     });
 }

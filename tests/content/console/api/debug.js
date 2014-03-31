@@ -1,21 +1,22 @@
 function runTest()
 {
-    FBTest.sysout("console.debug.START");
     FBTest.openNewTab(basePath + "console/api/debug.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(function()
         {
-            var config = {tagName: "div", classes: "logRow logRow-debug"};
-            FBTest.waitForDisplayedElement("console", config, function(row)
+            FBTest.enableConsolePanel(function(win)
             {
-                FBTest.compare(new RegExp("This is a debug message\\s*Object\\s*{\\s*a=1\\s*}" +
-                    FW.FBL.$STRF("Line", ["debug.html", 31]).replace(/([\\"'\(\)])/g, "\\$1")),
-                    row.textContent, "The proper message must be displayed.");
-                FBTest.testDone("console.debug.DONE");
-            });
+                var config = {tagName: "div", classes: "logRow logRow-debug"};
+                FBTest.waitForDisplayedElement("console", config, function(row)
+                {
+                    FBTest.compare(new RegExp("This is a debug message\\s*Object\\s*{\\s*a=1\\s*}" +
+                        FW.FBL.$STRF("Line", ["debug.html", 31]).replace(/([\\"'\(\)])/g, "\\$1")),
+                        row.textContent, "The proper message must be displayed.");
+                    FBTest.testDone();
+                });
 
-            FBTest.click(win.document.getElementById("testButton"));
+                FBTest.click(win.document.getElementById("testButton"));
+            });
         });
     });
 }

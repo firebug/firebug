@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue1575.START");
     FBTest.openNewTab(basePath + "script/1575/issue1575.htm", function(win)
     {
         FBTest.progress("issue1575 opens " + win.location);
@@ -48,6 +47,6 @@ function checkWatchPanel()
     {
         FBTest.ok(panel.editing, "The Watch panel must be in an 'editing' mode now.");
         FBTest.clickContinueButton(chrome);
-        FBTest.testDone("issue1575.DONE");
+        FBTest.testDone();
     }, 100);
 }

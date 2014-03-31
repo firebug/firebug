@@ -1,7 +1,7 @@
 function runTest()
 {
     // A message displayed within Firebug tracing console.
-    FBTest.sysout("exampleTest.START");
+    FBTest.sysout("This is a tracing message");
 
     // A message displayed under the test within Firebug test console.
     FBTest.progress("This is a progress message");
@@ -14,5 +14,5 @@ function runTest()
     FBTest.compare("Expected", "Expected", "Compare test (positive)");
     //FBTest.compare("Expected", "Actual", "Compare test (negative)");
 
-    FBTest.testDone("exampleTest.DONE");
+    FBTest.testDone();
 }

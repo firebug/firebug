@@ -1,35 +1,36 @@
 function runTest()
 {
-    FBTest.sysout("html.breakpoints; START");
-
     FBTest.openNewTab(basePath + "html/onMutate.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.setPref("highlightMutations", true);
-        FBTest.setPref("scrollToMutations", true);
-
-        // A suite of asynchronous tests.
-        var testSuite = new FBTest.TaskList();
-        testSuite.push(onMutateText, win, "mutateText", false);
-        testSuite.push(onMutateText, win, "mutateTextInline", true);
-        testSuite.push(onMutateNode, win, "mutateNode");
-        testSuite.push(onMutateNode, win, "mutateNodeText");
-        testSuite.push(onMutateNode, win, "mutateNodeEmpty");
-        testSuite.push(onRemoveNode, win, "removeNode", 1);
-        testSuite.push(onRemoveNode, win, "removeNodeText", 0);
-        testSuite.push(onRemoveNode, win, "removeNodeEmpty", 0);
-        testSuite.push(onMutateAttr, win, "mutateAttrNew", "title", "boo");
-        testSuite.push(onMutateAttr, win, "mutateAttrSet", "title", "boo");
-        testSuite.push(onMutateAttr, win, "mutateAttrRemove", "title", undefined);
-        testSuite.push(onMutateRemovedRace, win, "mutateRemovedRace");
-
-        // Reload window to activate debugger and run all tests.
-        FBTest.reload(function(win)
+        FBTest.openFirebug(function()
         {
-            testSuite.run(function() {
-                FBTest.testDone("html.onMutate; DONE");
+            FBTest.setPref("highlightMutations", true);
+            FBTest.setPref("scrollToMutations", true);
+
+            // A suite of asynchronous tests.
+            var testSuite = new FBTest.TaskList();
+            testSuite.push(onMutateText, win, "mutateText", false);
+            testSuite.push(onMutateText, win, "mutateTextInline", true);
+            testSuite.push(onMutateNode, win, "mutateNode");
+            testSuite.push(onMutateNode, win, "mutateNodeText");
+            testSuite.push(onMutateNode, win, "mutateNodeEmpty");
+            testSuite.push(onRemoveNode, win, "removeNode", 1);
+            testSuite.push(onRemoveNode, win, "removeNodeText", 0);
+            testSuite.push(onRemoveNode, win, "removeNodeEmpty", 0);
+            testSuite.push(onMutateAttr, win, "mutateAttrNew", "title", "boo");
+            testSuite.push(onMutateAttr, win, "mutateAttrSet", "title", "boo");
+            testSuite.push(onMutateAttr, win, "mutateAttrRemove", "title", undefined);
+            testSuite.push(onMutateRemovedRace, win, "mutateRemovedRace");
+
+            // Reload window to activate debugger and run all tests.
+            FBTest.reload(function(win)
+            {
+                testSuite.run(function()
+                {
+                    FBTest.testDone();
+                });
             });
-        })
+        });
     });
 }
 

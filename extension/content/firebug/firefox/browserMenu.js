@@ -1,13 +1,14 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/trace",
-    "firebug/lib/options",
-    "firebug/lib/locale",
     "firebug/firefox/browserOverlayLib",
 ],
-function(FBTrace, Options, Locale, BrowserOverlayLib) {
-with (BrowserOverlayLib) {
+function(BrowserOverlayLib) {
+
+// ********************************************************************************************* //
+// Constants
+
+var {$menupopupOverlay, $, $menupopup, $menu, $menuseparator, $menuitem} = BrowserOverlayLib;
 
 // ********************************************************************************************* //
 // GlobalCommands Implementation
@@ -515,4 +516,4 @@ var BrowserMenu =
 return BrowserMenu;
 
 // ********************************************************************************************* //
-}});
+});

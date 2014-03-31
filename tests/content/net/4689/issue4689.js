@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4689.START");
     FBTest.openNewTab(basePath + "net/4689/issue4689.html", function()
     {
         //FBTest.clearConsole();
@@ -10,7 +9,7 @@ function runTest()
 
         tasks.run(function()
         {
-            FBTest.testDone("issue4689.DONE");
+            FBTest.testDone();
         });
     })
 }
@@ -32,17 +31,20 @@ function testNetPanel(callback)
 
             var panel = FBTest.getPanel("net");
             var openedGroups = panel.panelNode.querySelectorAll(".memberLabelCell");
-            FBTest.executeContextMenuCommand(openedGroups[0], "fbNetCopyJSON", function()
-            {
-                var expected =
-                    '{"name":"foo","surname":"bar","address":{"no":"15","name":"foobar"}}';
 
-                FBTest.waitForClipboard(expected,function(text)
-                {
-                    FBTest.compare(expected, text,
-                        "Proper JSON must be in the clipboard. Current: " + text);
-                    callback();
-                });
+            function executeContextMenuCommand()
+            {
+                FBTest.executeContextMenuCommand(openedGroups[0], "fbNetCopyJSON");
+            }
+
+            var expected =
+                '{"name":"foo","surname":"bar","address":{"no":"15","name":"foobar"}}';
+
+            FBTest.waitForClipboard(expected, executeContextMenuCommand, (text) =>
+            {
+                FBTest.compare(expected, text,
+                    "Proper JSON must be in the clipboard. Current: " + text);
+                callback();
             });
         });
 
@@ -54,7 +56,6 @@ function testConsolPanel(callback)
 {
     FBTest.enableConsolePanel(function(win)
     {
-        FBTest.selectPanel("console");
         FBTest.waitForDisplayedElement("console", null, function(row)
         {
             var  panel = FBTest.selectPanel("console");
@@ -66,17 +67,20 @@ function testConsolPanel(callback)
             FBTest.click(spyLogRow2);
 
             var openedGroups = panel.panelNode.querySelectorAll(".memberLabel");
-            FBTest.executeContextMenuCommand(openedGroups[0], "fbNetCopyJSON", function()
-            {
-                var expected =
-                    '{"name":"foo","surname":"bar","address":{"no":"15","name":"foobar"}}';
 
-                FBTest.waitForClipboard(expected,function(text)
-                {
-                    FBTest.compare(expected, text,
-                        "Proper JSON must be in the clipboard. Current: " + text);
-                    callback();
-                });
+            function executeContextMenuCommand()
+            {
+                FBTest.executeContextMenuCommand(openedGroups[0], "fbNetCopyJSON");
+            }
+
+            var expected =
+                '{"name":"foo","surname":"bar","address":{"no":"15","name":"foobar"}}';
+
+            FBTest.waitForClipboard(expected, executeContextMenuCommand, (text) =>
+            {
+                FBTest.compare(expected, text,
+                    "Proper JSON must be in the clipboard. Current: " + text);
+                callback();
             });
         });
 

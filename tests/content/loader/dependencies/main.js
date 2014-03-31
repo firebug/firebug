@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("dependencies.START;");
     FBTest.progress("using module dependencies: " + baseLocalPath);
 
     // Compute relative path and construct module loader.
@@ -16,6 +15,6 @@ function runTest()
     {
         var message = A.getMessage();
         FBTest.compare("Hello World!", message, "The message from modules must match.");
-        FBTest.testDone("dependencies.DONE");
+        FBTest.testDone();
     });
 }

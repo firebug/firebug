@@ -4,40 +4,39 @@ function runTest()
     var prefOrigValue = FBTest.getPref("showXMLHttpRequests");
     FBTest.setPref("showXMLHttpRequests", true);
 
-    FBTest.openNewTab(basePath + "net/1275/issue1275.htm", function(win)
+    FBTest.openNewTab(basePath + "net/1275/issue1275.htm", (win) =>
     {
-        FBTest.sysout("issue1275.START");
-
-        // Open Firebug UI and enable Net panel.
-        FBTest.openFirebug();
-        FBTest.enableNetPanel();
-        FBTest.enableConsolePanel();
-        FBTest.clearCache();
-        FBTest.selectPanel("net");
-
-        // Reload test page.
-        FBTest.reload(function()
+        FBTest.openFirebug(function()
         {
-            onRequestDisplayed("tr", "netRow category-xhr hasHeaders loaded", function(row)
+            FBTest.enablePanels(["net", "console"], () =>
             {
-                // Verify Net panel response
-                var panel = FBTest.getPanel("net");
-                FBTest.click(row);
-                verifyResponse(panel);
+                FBTest.clearCache();
 
-                // Verify Console panel response
-                panel = FBTest.getPanel("console");
-                var spyLogRow = FW.FBL.getElementByClass(panel.panelNode, "logRow",
-                    "logRow-spy", "loaded");
-                var xhr = FW.FBL.getElementByClass(spyLogRow, "spyTitleCol", "spyCol");
-                FBTest.click(xhr);
-                verifyResponse(panel);
+                // Reload test page.
+                FBTest.reload(function()
+                {
+                    FBTest.waitForDisplayedElement("net", null, (row) =>
+                    {
+                        // Verify Net panel response
+                        var panel = FBTest.getSelectedPanel();
+                        FBTest.click(row);
+                        verifyResponse(panel);
 
-                FBTest.setPref("showXMLHttpRequests", prefOrigValue);
-                FBTest.testDone("issue1275.DONE");
+                        // Verify Console panel response
+                        panel = FBTest.selectPanel("console");
+                        var spyLogRow = panel.panelNode.
+                            getElementsByClassName("logRow logRow-spy loaded")[0];
+                        var xhr = spyLogRow.getElementsByClassName("spyTitleCol spyCol")[0];
+                        FBTest.click(xhr);
+                        verifyResponse(panel);
+
+                        FBTest.setPref("showXMLHttpRequests", prefOrigValue);
+                        FBTest.testDone();
+                    });
+
+                    FBTest.click(win.document.getElementById("testButton"));
+                });
             });
-
-            FBTest.click(win.document.getElementById("testButton"));
         });
     })
 }
@@ -49,15 +48,9 @@ function verifyResponse(panel)
     var responseBody = FW.FBL.getElementByClass(panel.panelNode, "netInfoResponseText",
         "netInfoText");
 
-    FBTest.ok(responseBody, "Response tab must exist in: " + panel.name);
-    if (responseBody)
+    if (FBTest.ok(responseBody, "Response tab must exist in: " + panel.name))
+    {
         FBTest.compare("{ data1: 'value1', data2: 'value2' }",
             responseBody.textContent, "Test JSON response must match in: " + panel.name);
-}
-
-function onRequestDisplayed(nodeName, classes, callback)
-{
-    var doc = FBTest.getPanelDocument();
-    var recognizer = new MutationRecognizer(doc.defaultView, nodeName, {"class": classes});
-    recognizer.onRecognizeAsync(callback);
+    }
 }

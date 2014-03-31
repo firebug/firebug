@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6744: List all classes of an element inside the Element Path</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #test {
+            width: 100px;
+            height: 100px;
+            background: #8C8CFF linear-gradient(-45deg, #788CFF, #B4C8FF);
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6744">Issue 6744</a>: List all classes of an element inside the Element Path</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="test" class="a b c"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel</li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> (<code>#test</code>) above</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The Element Path item for the selected element should display <em>div#test.a.b.c</em>.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

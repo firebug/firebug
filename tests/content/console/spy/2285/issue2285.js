@@ -4,8 +4,6 @@ var FF22OrHigher = versionChecker.compare(appInfo.version, "21.*") >= 0;
 
 function runTest()
 {
-    FBTest.sysout("issue2285.START");
-
     FBTest.openNewTab(basePath + "console/spy/2285/issue2285.html", function(win)
     {
         FBTest.enableConsolePanel(function()
@@ -43,7 +41,7 @@ function runTest()
                 }
 
                 // Finish test
-                FBTest.testDone("issue2285.DONE");
+                FBTest.testDone();
             };
 
             win.document.addEventListener("test-done", testDone, false);

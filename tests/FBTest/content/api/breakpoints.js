@@ -41,6 +41,13 @@ this.setBreakpoint = function(chrome, url, lineNo, attributes, callback)
 
         if (false && attributes && attributes.condition)
         {
+            // Right click on the target element.
+            var eventDetails = {type: "mousedown", button: 2};
+            FBTest.synthesizeMouse(target, 2, 2, eventDetails);
+
+            var editor = panel.panelNode.querySelector(".conditionEditor .completionInput");
+            FBTest.ok(editor, "Editor must exist");
+
             // xxxHonza: TODO
         }
         else
@@ -50,14 +57,46 @@ this.setBreakpoint = function(chrome, url, lineNo, attributes, callback)
             {
                 FBTest.sysout("setBreakpoint; breakpoint created");
 
+                // The source view may have been rebuilt, refetch the row.
+                var row = FBTest.getSourceLineNode(lineNo, chrome);
                 callback(row);
             });
 
-            var lineNode = FBTest.getSourceLineNode(lineNo, chrome);
-            var target = lineNode.querySelector(".CodeMirror-linenumber");
-            FBTest.synthesizeMouse(target, 2, 2, {type: "mousedown"});
+            var target = row.querySelector(".CodeMirror-linenumber");
+
+            // Note: Don't synthesize a mousedown event: this would make
+            // console/breakOnError/breakOnError fail in timeout (see issue 7267).
+            FBTest.synthesizeMouse(target, 2, 2);
+            target = null;
         }
     });
+};
+
+/**
+ * Wait till specific breakpoint is set (response from the backend received)
+ *
+ * @param {String} url URL of the breakpoint we are waiting for.
+ * @param {Number} lineNo Line number where the breakpoint should be set.
+ * @param {Function} callback Executed when the breakpoint is set.
+ */
+this.waitForBreakpoint = function(url, lineNo, callback)
+{
+    var browser = FBTest.getCurrentTabBrowser();
+
+    var listener =
+    {
+        onBreakpointAdded: function(bp)
+        {
+            if (bp.lineNo+1 != lineNo || bp.href != url)
+                return;
+
+            DebuggerController.removeListener(browser, listener);
+
+            callback();
+        }
+    };
+
+    DebuggerController.addListener(browser, listener);
 };
 
 this.removeBreakpoint = function(chrome, url, lineNo, callback)
@@ -80,31 +119,26 @@ this.removeBreakpoint = function(chrome, url, lineNo, callback)
         var hasBreakpoint = FBTest.hasBreakpoint(lineNo);
         FBTest.ok(hasBreakpoint, "There must be a breakpoint at line: " + lineNo);
 
-        var listener =
-        {
-            onBreakpointRemoved: function()
-            {
-                DebuggerController.removeListener(browser, listener);
-
-                hasBreakpoint = FBTest.hasBreakpoint(lineNo);
-                FBTest.ok(!hasBreakpoint, "Breakpoint must be removed");
-
-                callback();
-            }
-        };
-
         var browser = FBTestFirebug.getCurrentTabBrowser();
-        DebuggerController.addListener(browser, listener);
+        DebuggerController.listenOnce(browser, "onBreakpointRemoved", function()
+        {
+            hasBreakpoint = FBTest.hasBreakpoint(lineNo);
+            FBTest.ok(!hasBreakpoint, "Breakpoint must be removed");
+
+            callback();
+        });
 
         // Click to remove a breakpoint.
         var target = row.querySelector(".CodeMirror-linenumber");
-        FBTest.synthesizeMouse(target, 2, 2, {type: "mousedown"});
+
+        // Note: Don't synthesize a mousedown event: this would make
+        // console/breakOnError/breakOnError fail in timeout (see issue 7267).
+        FBTest.synthesizeMouse(target, 2, 2);
     });
 };
 
 this.hasBreakpoint = function(line, chrome)
 {
-    var line = line;
     if (typeof(line) == "number")
         line = FBTest.getSourceLineNode(line, chrome);
 
@@ -128,6 +162,11 @@ this.waitForDisplayedBreakpoint = function(chrome, url, lineNo, callback)
             callback(row);
         });
     });
+};
+
+this.removeAllBreakpoints = function(callback)
+{
+    FW.Firebug.Debugger.clearAllBreakpoints(null, callback);
 };
 
 // ********************************************************************************************* //

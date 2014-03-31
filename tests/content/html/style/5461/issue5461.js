@@ -1,23 +1,22 @@
 function runTest()
 {
-    FBTest.sysout("issue5461.START");
-
     FBTest.openNewTab(basePath + "html/style/5461/issue5461.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("html");
-
-        FBTest.selectElementInHtmlPanel("element", function(node)
+        FBTest.openFirebug(function()
         {
-            var panel = FBTest.selectSidePanel("css");
-
-            FBTest.synthesizeMouse(panel.panelNode);
-            FBTest.sendShortcut("a", {accelKey: true});
-
-            // Reset clipboard content
-            FBTest.setClipboardText("issue5461");
-            FBTest.waitForClipboard("issue5461", function()
+            FBTest.selectPanel("html");
+            FBTest.selectElementInHtmlPanel("element", function(node)
             {
+                var panel = FBTest.selectSidePanel("css");
+
+                FBTest.synthesizeMouse(panel.panelNode);
+                FBTest.sendShortcut("a", {accelKey: true});
+
+                function copy()
+                {
+                    FBTest.setClipboardText("issue5461");
+                }
+
                 var expected = new RegExp("#element\\s+\\{[\\r\\n]{1,2}"+
                     "\\s+background:\\s+-moz-linear-gradient\\(135deg, #788cff, #b4c8ff\\) repeat "+
                     "scroll 0 0 #8c8cff;[\\r\\n]{1,2}"+
@@ -32,16 +31,15 @@ function runTest()
                     "\\s+font-size:\\s+0.9em;[\\r\\n]{1,2}"+
                     "\\}");
 
-                FBTest.waitForClipboard(expected, function(cssDecl)
+                FBTest.waitForClipboard(expected, copy, function(cssDecl)
                 {
                     FBTest.compare(expected, cssDecl,
                         "CSS declaration must be properly copied into the clipboard");
-                    FBTest.testDone("issue5461.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.sendShortcut("c", {accelKey: true});
             });
-
         });
     });
 }

@@ -168,9 +168,9 @@ function onExecuteCommand(context, args)
         if (!context.getEventListenersCache)
             context.getEventListenersCache = new WeakMap();
 
-        // The logged object doesn't have any specific type since returned from
-        // Wrapper.cloneIntoContentScope, which is based on Cu.createObjectIn.
-        // (using specific types will be able as soon as bug 914970 is fixed)
+        // The logged object doesn't have any specific type since it is returned
+        // from Wrapper.cloneIntoContentScope (using specific types will be
+        // able as soon as bug 914970 is fixed).
         // So, store the result logged-object into a weak-map, which will be used
         // later (within 'log' event handler) to figure out whether additional
         // pretty-printed logs should be appended in to the Console.

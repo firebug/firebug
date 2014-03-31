@@ -1,8 +1,6 @@
 // Test entry point.
 function runTest()
 {
-    FBTest.sysout("issue1495.START");
-
     var prefOrigValue = FBTest.getPref("showXMLHttpRequests");
     FBTest.setPref("showXMLHttpRequests", true);
 
@@ -10,26 +8,25 @@ function runTest()
     {
         FBTest.enableConsolePanel(function()
         {
-            var panel = FW.Firebug.chrome.selectPanel("console");
+            var panel = FBTest.getSelectedPanel()
 
             onAllFourRequestsDisplayed(function()
             {
                 // Expand all XHR logs in the Console panel.
-                var rows = FW.FBL.getElementsByClass(panel.panelNode,
-                    "logRow", "logRow-spy", "loaded");
+                var rows = panel.panelNode.getElementsByClassName("logRow logRow-spy loaded");
 
                 for (var i = 0; i < rows.length; i++)
                 {
                     var logRow = rows[i];
-                    var clickTarget = FW.FBL.getElementByClass(logRow, "spyTitleCol", "spyCol");
+                    var clickTarget = logRow.getElementsByClassName("spyTitleCol spyCol")[0];
                     FBTest.click(clickTarget);
                     FBTest.expandElements(clickTarget, "netInfoResponseTab");
 
-                    var title = FW.FBL.getElementByClass(clickTarget, "spyFullTitle");
+                    var title = clickTarget.getElementsByClassName("spyFullTitle")[0];
 
-                    var responseBody = FW.FBL.getElementByClass(logRow,
-                        "netInfoResponseText", "netInfoText");
-                    FBTest.ok(responseBody, "Response tab must exist in");
+                    var responseBody = logRow.
+                        getElementsByClassName("netInfoResponseText netInfoText")[0];
+                    FBTest.ok(responseBody, "Response tab must exist for request");
 
                     if (responseBody)
                     {
@@ -40,7 +37,7 @@ function runTest()
 
                 // Finish test
                 FBTest.setPref("showXMLHttpRequests", prefOrigValue);
-                FBTest.testDone("issue1495.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("runTest"));
@@ -50,13 +47,8 @@ function runTest()
 
 function onAllFourRequestsDisplayed(callback)
 {
-    // Create listener for mutation events.
-    var doc = FBTest.getPanelDocument();
-    var recognizer = new MutationRecognizer(doc.defaultView, "div",
-        {"class": "logRow logRow-spy loaded"});
-
     // Wait for a XHR log to appear in the Net panel.
-    recognizer.onRecognizeAsync(function()
+    FBTest.waitForDisplayedElement("console", null, () =>
     {
         var panelNode = FBTest.getPanel("console").panelNode;
         var nodes = panelNode.getElementsByClassName("logRow logRow-spy loaded");

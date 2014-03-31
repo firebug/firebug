@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue846.START");
-
     FBTest.openNewTab(basePath + "net/846/Issue846.1.6.htm", function(win)
     {
         // Disable XHR spy.
@@ -43,7 +41,7 @@ function runTest()
 
                 // Finish test
                 FBTest.setPref("showXMLHttpRequests", prefOrigValue);
-                FBTest.testDone("issue846.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("Button"));

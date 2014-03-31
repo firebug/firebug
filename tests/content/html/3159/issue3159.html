@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 3159: Show numeric character reference of MathML</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=3159">Issue 3159</a>: Show numeric character reference of MathML</h1>
+        </header>
+        <div>
+            <section id="content">
+                <math display="block">
+                  <mrow>
+                    <mi>x</mi>
+                    <mo>=</mo>
+                    <mfrac>
+                      <mrow>
+                        <mo form="prefix" id="minus">&minus;</mo>
+                        <mi>b</mi>
+                        <mo>&PlusMinus;</mo>
+                        <msqrt>
+                          <msup>
+                            <mi>b</mi>
+                            <mn>2</mn>
+                          </msup>
+                          <mo>&minus;</mo>
+                          <mn>4</mn>
+                          <mo>&InvisibleTimes;</mo>
+                          <mi>a</mi>
+                          <mo>&InvisibleTimes;</mo>
+                          <mi>c</mi>
+                        </msqrt>
+                      </mrow>
+                      <mrow>
+                        <mn>2</mn>
+                        <mo>&InvisibleTimes;</mo>
+                        <mi>a</mi>
+                      </mrow>
+                    </mfrac>
+                  </mrow>
+                </math>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel</li>
+                    <li>Inspect the first minus of the formula above</li>
+                    <li>
+                        Click the item <em>Show Entities As Symbols</em> from the <em>HTML</em> panel options menu<br/>
+                        <span class="ok">&rArr; The minus should be displayed as <code>&minus;</code>.</span>
+                    </li>
+                    <li>
+                        Click the item <em>Show Entities As Names</em> from the <em>HTML</em> panel options menu<br/>
+                        <span class="ok">&rArr; The minus should be displayed as <code>&amp;minus;</code>.</span>
+                    </li>
+                    <li>
+                        Click the item <em>Show Entities As Unicode</em> from the <em>HTML</em> panel options menu<br/>
+                        <span class="ok">&rArr; The minus should be displayed as <code>&amp;#8722;</code>.</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        There should be three different options to display special characters to
+                        display them as symbols, using their names or in Unicode format.
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>
