@@ -10,7 +10,7 @@
             var request = new XMLHttpRequest();
             request.open("POST", "issue4663.php", true);
             request.send();
-            request.abort();
+            window.setTimeout(() => request.abort(), 100);
         }
         </script>
     </head>
