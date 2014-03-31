@@ -10,7 +10,8 @@ function runTest()
             {
                 var filter = FBTest.getPref("filterSystemURLs");
                 FBTest.compare(false, filter, "Pref filterSystemURLs must not be set true");
-                FBTest.compare(false, FW.Firebug.filterSystemURLs, "Pref Firebug.filterSystemURLs must not be set true");
+                FBTest.compare(false, FW.Firebug.Options.get("filterSystemURLs"),
+                    "Pref Firebug.filterSystemURLs must not be set true");
 
                 // A suite of asynchronous tests.
                 var testSuite = [];
@@ -47,7 +48,8 @@ function breakOnMutation(win, buttonId, lineNo, callback)
     var filter = FBTest.getPref("filterSystemURLs");
 
     FBTest.compare(false, filter, "Pref filterSystemURLs must not be set true");
-    FBTest.compare(false, FW.Firebug.filterSystemURLs, "Pref Firebug.filterSystemURLs must not be set true");
+    FBTest.compare(false, FW.Firebug.Options.get("filterSystemURLs"),
+        "Pref Firebug.filterSystemURLs must not be set true");
 
     var chrome = FW.Firebug.chrome;
     FBTest.clickBreakOnNextButton(chrome, function()
