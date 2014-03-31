@@ -473,6 +473,10 @@
                                     class="toolbar-text-button fbInternational"
                                     tooltiptext="firebug.Copy_the_script_as_a_bookmarklet"
                                     oncommand="Firebug.CommandLine.copyBookmarklet(Firebug.currentContext)"/>
+                                <toolbarbutton id="fbCmdLinePrettyPrintButton" label="script.PrettyPrint"
+                                    class="toolbar-text-button fbInternational"
+                                    tooltiptext="script.tip.PrettyPrint"
+                                    oncommand="Firebug.CommandEditor.prettyPrint(Firebug.currentContext)"/>
                                 <toolbarbutton id="fbCommandEditorHistoryButton"
                                     label="firebug.History"
                                     class="toolbarbutton fbInternational" type="checkbox"
