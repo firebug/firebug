@@ -335,9 +335,7 @@ var CommandEditor = Obj.extend(Module,
     prettyPrint: function(context)
     {
         var worker = getPrettyPrintWorker();
-        var uglyText = this.getText();
-        var tabsize = Options.get("replaceTabs");
-        var id = Obj.getUniqueId();
+        var id = "firebug-" + Obj.getUniqueId();
         var deferred = Promise.defer();
 
         var onReply = ({data}) =>
@@ -368,8 +366,8 @@ var CommandEditor = Obj.extend(Module,
         worker.postMessage({
             id: id,
             url: "(command-editor)",
-            indent: tabsize,
-            source: uglyText
+            indent: Options.get("replaceTabs"),
+            source: this.getText()
         });
 
         return deferred.promise;
