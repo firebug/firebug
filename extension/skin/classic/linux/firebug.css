@@ -1,6 +1,17 @@
 /* xxxHonza: This should be removed, fix me: issue 471 */
 @import "chrome://firebug/skin/win/firebug.css";
 
+/*************************************************************************************************/
+/* Command Line */
+
+#fbCommandArrow,
+.fbCommandLine {
+    font-size: 11px;
+}
+
+/*************************************************************************************************/
+/* Toolbar */
+
 /* Add some basic padding to the completion popup (missing on Linux). */
 .userTypedText {
     margin-left: 1px;
