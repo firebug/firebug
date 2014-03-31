@@ -129,6 +129,8 @@ WatchTree.prototype = domplate(BaseTree,
         if (value instanceof Grip)
             member.readOnly = value.readOnly;
 
+        member.deletable = true;
+
         return member;
     }
 });
