@@ -391,7 +391,7 @@ panelTab[selected="true"] > panelTabMenu {
     padding: 1px 8px;
     min-width: 0;
     max-width: 13em;
-    font-weight: bold;
+    font-weight: normal;
     color: #4a4a4a;
     border: none !important;
     border-radius: 9px;
