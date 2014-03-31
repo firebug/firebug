@@ -377,14 +377,15 @@ var CommandEditor = Obj.extend(Module,
 // ********************************************************************************************* //
 // Getters/setters
 
-CommandEditor.__defineGetter__("value", function()
-{
-    return this.getText();
-});
-
-CommandEditor.__defineSetter__("value", function(val)
-{
-    this.setText(val);
+Object.defineProperty(CommandEditor, "value", {
+    get: function()
+    {
+        return this.getText();
+    },
+    set: function(val)
+    {
+        this.setText(val);
+    }
 });
 
 // ********************************************************************************************* //
