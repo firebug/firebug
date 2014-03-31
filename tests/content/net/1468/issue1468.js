@@ -2,7 +2,6 @@ window.FBTestTimeout = 15000;
 
 function runTest()
 {
-    FBTest.sysout("issue1468.START");
     FBTest.openNewTab(basePath + "net/1468/issue1468.html", function(win)
     {
         FBTest.enableNetPanel(function(win)
@@ -34,7 +33,7 @@ function runTest()
                 }
 
                 FBTest.ok(removed, "Posted file must *not* be locked.");
-                FBTest.testDone("issue1468.DONE");
+                FBTest.testDone();
             }, true);
 
             // Submit the form.

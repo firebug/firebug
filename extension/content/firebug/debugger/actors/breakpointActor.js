@@ -37,6 +37,9 @@ BreakpointActor.prototype.hit = function(frame)
     var line = this.location.line;
 
     var bp = BreakpointStore.findBreakpoint(url, line - 1);
+
+    Trace.sysout("breakpointActor.hit; " + url + " " + line, bp);
+
     if (!bp || !bp.condition)
         return originalHit.apply(this, arguments);
 
@@ -45,37 +48,12 @@ BreakpointActor.prototype.hit = function(frame)
     // Note that the client side doesn't evaluate the condition again.
     // See {@link BreakpointModule.shouldBreakDebugger}
     // Bugzilla: https://bugzilla.mozilla.org/show_bug.cgi?id=812172
-    if (!evalCondition(frame, bp))
+    if (!DebuggerLib.evalBreakpointCondition(frame, bp))
         return undefined;
 
     Trace.sysout("breakpointActor.hit; Break on conditional breakpoint");
 
     return originalHit.apply(this, arguments);
-}
-
-// ********************************************************************************************* //
-// Helper
-
-function evalCondition(frame, bp)
-{
-    try
-    {
-        var result = frame.eval(bp.condition);
-
-        if (result.hasOwnProperty("return"))
-        {
-            result = result["return"];
-
-            if (typeof(result) == "object")
-                return DebuggerLib.unwrapDebuggeeValue(result);
-            else
-                return result;
-        }
-    }
-    catch (e)
-    {
-        TraceError.sysout("breakpointActor.evalCondition; EXCEPTION " + e, e);
-    }
 }
 
 // ********************************************************************************************* //

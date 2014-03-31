@@ -1,11 +1,8 @@
 function runTest()
 {
-    FBTest.sysout("console.assert.START");
-
     FBTest.openNewTab(basePath + "console/api/assert.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.enablePanels(["console", "script"], function(win)
         {
             FBTest.setPref("filterSystemURLs", true);
 
@@ -26,7 +23,7 @@ function runTest()
                 FBTest.waitForDisplayedElement("console", config, function(row)
                 {
                     verifyConsoleUI(config);
-                    FBTest.testDone("console.assert.DONE");
+                    FBTest.testDone();
                 });
 
                 // Execute test implemented on the test page.

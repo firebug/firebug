@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("exampleScript1.START");
-
     // 1) Load test case page
     FBTest.openNewTab(basePath + "examples/exampleScript1.html", function(win)
     {
@@ -24,10 +22,11 @@ function runTest()
                     // TODO: test code, verify UI, etc.
 
                     // Resume debugger.
-                    FBTest.clickContinueButton();
-
-                    // 5) Finish test.
-                    FBTest.testDone("exampleScript1.DONE");
+                    FBTest.clickContinueButton(null, function()
+                    {
+                        // 5) Finish test.
+                        FBTest.testDone();
+                    });
                 });
 
                 // 4) Execute test by clicking on the 'Execute Test' button.

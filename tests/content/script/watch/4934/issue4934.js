@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4934.START");
     FBTest.openNewTab(basePath + "script/watch/4934/issue4934.html", function(win)
     {
         FBTest.enableScriptPanel(function(win)
@@ -33,7 +32,7 @@ function runTest()
                 // Resume debugger
                 FBTest.clickContinueButton(null);
 
-                FBTest.testDone("issue4934.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("executeTest"));

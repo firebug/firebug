@@ -5,46 +5,47 @@ var detachedWindow;
 
 function runTest()
 {
-    FBTest.sysout("openInNewWindow.START");
     FBTest.openNewTab(testPageURL, function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableAllPanels();
-
-        // Reload afeter enable panels.
-        FBTest.reload(function()
+        FBTest.openFirebug(function()
         {
-            var tasks = new FBTest.TaskList();
-            tasks.push(waitForDetachedFirebug);
-            tasks.push(setBreakpointReloadAndWaitForBreak);
-            tasks.push(reloadAgainAndWaitForBreak);
+            FBTest.enableScriptPanel(function()
+            {
+                var tasks = new FBTest.TaskList();
+                tasks.push(waitForDetachedFirebug);
+                tasks.push(setBreakpointReloadAndWaitForBreak);
+                tasks.push(reloadAgainAndWaitForBreak);
 
-            tasks.run(function() {
-                FBTest.testDone("openInNewWindow.DONE");
-            })
+                tasks.run(function()
+                {
+                    FBTest.testDone();
+                });
+            });
         });
     });
 };
 
 function waitForDetachedFirebug(callback)
 {
-    detachedWindow = FBTest.detachFirebug();
-    if (!FBTest.ok(detachedWindow, "Firebug is detaching..."))
+    FBTest.detachFirebug(function(detachedWindow)
     {
-        FBTest.testDone("openInNewWindow.FAILED");
-        return;
-    }
+        if (!FBTest.ok(detachedWindow, "Firebug is detaching..."))
+        {
+            FBTest.testDone();
+            return;
+        }
 
-    FBTest.OneShotHandler(detachedWindow, "load", function(event)
-    {
-        FBTest.progress("Firebug detached in a new window.");
-        callback();
+        FBTest.OneShotHandler(detachedWindow, "load", function(event)
+        {
+            FBTest.progress("Firebug detached in a new window.");
+            callback();
+        });
     });
 }
 
 function setBreakpointReloadAndWaitForBreak(callback)
 {
-    FBTest.waitForBreakInDebugger(null, lineNo, true, function()
+    FBTest.waitForBreakInDebugger(null, lineNo, false, function()
     {
         FBTest.progress("The first break happened");
         callback();
@@ -67,7 +68,8 @@ function reloadAgainAndWaitForBreak(callback)
         // xxxHonza: This timeout is puzzling me, but if it isn't there
         // the debugger is not resumed even if the Debugger.resume is
         // properly called.
-        setTimeout(function() {
+        setTimeout(function()
+        {
             FBTest.clickContinueButton();
         }, 500);
     });

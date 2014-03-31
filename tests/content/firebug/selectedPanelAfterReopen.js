@@ -6,16 +6,19 @@
  */
 function runTest()
 {
-    FBTest.sysout("selectedPanelAfterReopen.START");
     FBTest.openNewTab(basePath + "firebug/OpenFirebugOnThisPage.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanelTab(FW.FBL.$STR("Panel-net"));
-        FBTest.closeFirebug();
-        FBTest.openFirebug();
-        var tab = FBTest.getSelectedPanelTab();
-        var label = tab.getAttribute("label");
-        FBTest.compare(FW.FBL.$STR("Panel-net"), label, "Net panel must be selected now");
-        FBTest.testDone("selectedPanelAfterReopen.DONE");
+        FBTest.openFirebug(function()
+        {
+            FBTest.selectPanelTab(FW.FBL.$STR("Panel-net"));
+            FBTest.closeFirebug();
+            FBTest.openFirebug(function()
+            {
+                var tab = FBTest.getSelectedPanelTab();
+                var label = tab.getAttribute("label");
+                FBTest.compare(FW.FBL.$STR("Panel-net"), label, "Net panel must be selected now");
+                FBTest.testDone();
+            });
+        });
     });
 }

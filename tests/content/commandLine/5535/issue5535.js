@@ -3,36 +3,37 @@ var fileName = "index.js";
 
 function runTest()
 {
-    FBTest.sysout("issue5535.START");
     FBTest.openNewTab(testPageURL, function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function()
+        FBTest.openFirebug(function()
         {
-            var tasks = new FBTest.TaskList();
-            FBTest.selectPanel("console");
-            // we create the instructions we will play with
-            var instructions = "var a = \"no selection\";";
-            instructions += "var b = window.a || \"selection\";";
-            instructions += "console.log(b);";
-
-            var selectionStart = instructions.indexOf(";")+1;
-
-            // expected results :
-            var RES_NO_SELECTION = 'no selection';
-            var RES_SELECTION = 'selection';
-
-            tasks.push(executeAndVerifySelection, instructions, RES_SELECTION,
-                true, selectionStart);
-
-            tasks.push(executeAndVerifyNoSelection, instructions, RES_NO_SELECTION, true);
-
-            tasks.push(executeAndVerifySelection, instructions, RES_NO_SELECTION,
-                false, selectionStart);
-
-            tasks.run(function()
+            FBTest.enableConsolePanel(function()
             {
-                FBTest.testDone("issue5535.DONE");
+                var tasks = new FBTest.TaskList();
+                FBTest.selectPanel("console");
+                // we create the instructions we will play with
+                var instructions = "var a = \"no selection\";";
+                instructions += "var b = window.a || \"selection\";";
+                instructions += "console.log(b);";
+
+                var selectionStart = instructions.indexOf(";")+1;
+
+                // expected results :
+                var RES_NO_SELECTION = 'no selection';
+                var RES_SELECTION = 'selection';
+
+                tasks.push(executeAndVerifySelection, instructions, RES_SELECTION,
+                    true, selectionStart);
+
+                tasks.push(executeAndVerifyNoSelection, instructions, RES_NO_SELECTION, true);
+
+                tasks.push(executeAndVerifySelection, instructions, RES_NO_SELECTION,
+                    false, selectionStart);
+
+                tasks.run(function()
+                {
+                    FBTest.testDone();
+                });
             });
         });
     });

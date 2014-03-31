@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue5400.START");
     FBTest.setPref("showStackTrace", true);
 
     FBTest.openNewTab(basePath + "script/callstack/5400/issue5400.html", function(win)
@@ -11,7 +10,7 @@ function runTest()
             FBTest.waitForDisplayedElement("console", config, function(row)
             {
                 // Verify displayed text.
-                var reTextContent = /\s*b\s*throw new Error\(\"b\"\)\;\s*issue5400\.html\s*\(line\s*25\)\s*/;
+                var reTextContent = /\s*b\s*throw new Error\(\"b\"\)\;\s*issue5400\.html\s*\(line\s*25(,\s*col\s*8)?\)\s*/;
                 FBTest.compare(reTextContent, row.textContent, "Text content must match.");
 
                 // Show stack trace.
@@ -36,7 +35,7 @@ function runTest()
                         "The function name must be correct " + frames[3].textContent);
                 }
 
-                FBTest.testDone("issue5400.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

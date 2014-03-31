@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue5526.START");
-
     FBTest.openNewTab(basePath + "firebug/5526/issue5526.html", function(win)
     {
         detachFirebug(function(win)
@@ -15,7 +13,7 @@ function runTest()
                 openFirebug(function()
                 {
                     FBTest.ok(FBTest.isDetached(), "Firebug must be detached now");
-                    FBTest.testDone("issue5526.DONE");
+                    FBTest.testDone();
                 });
             })
         });
@@ -28,18 +26,20 @@ function runTest()
 // FBTest.detachFirebug API)
 function detachFirebug(callback)
 {
-    var detachedWindow = FBTest.detachFirebug();
-    if (FBTest.ok(detachedWindow, "Firebug is detaching..."))
+    FBTest.detachFirebug(function(detachedWindow)
     {
-        FBTest.OneShotHandler(detachedWindow, "load", function(event)
+        if (FBTest.ok(detachedWindow, "Firebug is detaching..."))
         {
-            FBTest.progress("Firebug detached in a new window.");
-            setTimeout(function()
+            FBTest.OneShotHandler(detachedWindow, "load", function(event)
             {
-                callback(detachedWindow);
+                FBTest.progress("Firebug detached in a new window.");
+                setTimeout(function()
+                {
+                    callback(detachedWindow);
+                });
             });
-        });
-    }
+        }
+    });
 }
 
 function openFirebug(callback)

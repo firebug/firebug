@@ -534,7 +534,7 @@ FBTestApp.TestConsole =
                 ", defaultTest: " + FBTestApp.defaultTest);
 
         // Run all asynchronously so, callstack is correct.
-        setTimeout(function()
+        setTimeout(() =>
         {
             // If a test is specified on the command line, run it. Otherwise
             // run entire test suite.
@@ -544,6 +544,8 @@ FBTestApp.TestConsole =
                 if (test)
                 {
                     FBTestApp.TestRunner.runTests([test]);
+                    if (FBTestApp.quitAfterRun)
+                        this.quitOnTestDone(test);
                 }
                 else
                 {
@@ -568,7 +570,28 @@ FBTestApp.TestConsole =
                         goQuitApplication();
                 });
             }
-        }, 5000);
+        });
+    },
+
+    /**
+     * Function used to bisect commits automatically.
+     * Should be used with:
+     * git bisect run sh -c "<path>/firefox <args> -runFBTests http://<server>/<path>/firebug.html#<test> -quitAfterRun | grep \"PASS\""
+     */
+    quitOnTestDone: function(test)
+    {
+        FBTestApp.TestRunner.addListener({
+            onTestDone: function()
+            {
+                FBTestApp.TestRunner.removeListener(this);
+
+                // Output FAIL or PASS to pass it to grep.
+                window.dump("Test " + test.uri + ": " +
+                    (test.error ?  "FAIL" : "PASS") + "\n");
+
+                Services.startup.quit(Services.startup.eAttemptQuit);
+            }
+        });
     },
 
     getTest: function(uri)

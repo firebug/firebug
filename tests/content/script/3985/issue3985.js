@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue3985.START");
-
     FBTest.openNewTab(basePath + "script/3985/issue3985.html", function(win)
     {
         FBTest.enableScriptPanel(function(win)
@@ -21,7 +19,7 @@ function runTest()
                         FBTest.progress("Click continue button");
 
                         FBTest.clickContinueButton();
-                        FBTest.testDone("issue3985.DONE");
+                        FBTest.testDone();
                     });
 
                     FBTest.waitForDisplayedBreakpoint(null, url, 3, function(row)

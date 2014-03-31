@@ -111,6 +111,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.context.getTool("breakpoint").addListener(this);
         this.context.getTool("source").addListener(this);
 
+        BreakOnNext.addListener(this);
+
         // Register as a listener for 'updateSidePanels' event.
         Firebug.registerUIListener(this);
     },
@@ -317,7 +319,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     showSourceLink: function(sourceLink)
     {
-        this.navigate(sourceLink);
+        // Show the source only if the target source file actually exists.
+        if (SourceFile.getSourceFileByUrl(this.context, sourceLink.href))
+            this.navigate(sourceLink);
     },
 
     showFunction: function(fn)
@@ -400,9 +404,55 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Location List
 
+    showThisCompilationUnit: function(compilationUnit)
+    {
+        if (compilationUnit.getURL().lastIndexOf("chrome://", 0) === 0)
+            return false;
+
+        if (compilationUnit.getKind() === CompilationUnit.EVAL && !this.showEvals)
+            return false;
+
+        if (compilationUnit.getKind() === CompilationUnit.BROWSER_GENERATED && !this.showEvents)
+            return false;
+
+        return true;
+    },
+
     getLocationList: function()
     {
-        return this.context.getAllCompilationUnits();
+        var allSources = this.context.getAllCompilationUnits();
+
+        if (!allSources.length)
+            return [];
+
+        var filter = Options.get("scriptsFilter");
+        this.showEvents = (filter == "all" || filter == "events");
+        this.showEvals = (filter == "all" || filter == "evals");
+
+        var list = [];
+        for (var i = 0; i < allSources.length; i++)
+        {
+            if (this.showThisCompilationUnit(allSources[i]))
+            {
+                list.push(allSources[i]);
+            }
+            else
+            {
+                Trace.sysout("scriptPanel.getLocationList; filtered " + allSources[i].getURL(),
+                    allSources[i]);
+            }
+        }
+
+        if (!list.length && allSources.length)
+            this.context.allScriptsWereFiltered = true;
+        else
+            delete this.context.allScriptsWereFiltered;
+
+        Trace.sysout("scriptPanel.getLocationList; enabledOnLoad: " +
+            this.context.onLoadWindowContent + " all:" + allSources.length + " filtered:" +
+            list.length + " allFiltered: " + this.context.allScriptsWereFiltered, list);
+
+        return list;
     },
 
     getDefaultCompilationUnit: function()
@@ -454,6 +504,21 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Events.dispatch(this.fbListeners, "onUpdateScriptLocation", [this, sourceLink]);
     },
 
+    /**
+     * Always return {@link CompilationUnit} instance. The method should always return
+     * an object that is also used within the location list (built in getLocationList method).
+     */
+    normalizeLocation: function(object)
+    {
+        if (object instanceof CompilationUnit)
+            return object;
+
+        if (object instanceof SourceLink)
+            return this.context.getCompilationUnit(object.href);
+
+        TraceError.sysout("scriptPanel.normalizeLocation; Unknown location! ", object);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getCurrentURL: function()
@@ -467,11 +532,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     getCompilationUnit: function()
     {
-        if (this.location instanceof CompilationUnit)
-            return this.location;
-
-        if (this.location instanceof SourceLink)
-            return this.context.getCompilationUnit(this.location.href);
+        return this.normalizeLocation(this.location);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -616,6 +677,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     search: function(text, reverse)
     {
         Trace.sysout("scriptPanel.search; " + text + ", reverse: " + reverse);
+
+        // Ignore empty searches, but keep the current selection.
+        if (!text)
+            return;
 
         // Check if the search is for a line number.
         var m = /^[^\\]?#(\d*)$/.exec(text);
@@ -848,7 +913,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // Get only standard breakpoints. Breakpoints for errors or monitors, etc.
         // Are not displayed in the breakpoint column.
-        BreakpointStore.enumerateBreakpoints(url, function(bp)
+        // Do not get dynamic breakpoints either (second argument false).
+        BreakpointStore.enumerateBreakpoints(url, false, function(bp)
         {
             // xxxHonza: perhaps we should pass only line numbers to the ScriptView?
             breakpoints.push(bp);
@@ -975,7 +1041,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // initialized, but it should never happen at this moment.
         this.scrollTop = this.scriptView.getScrollInfo().top;
 
-        Firebug.Editor.startEditing(target, condition, null, null, this);
+        Editor.startEditing(target, condition, null, null, this);
     },
 
     onSetBreakpointCondition: function(bp, value, cancel)
@@ -1003,7 +1069,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         if (!this.conditionEditor)
         {
-            this.conditionEditor = new BreakpointConditionEditor(this.document);
+            var sourceEditor = this.scriptView.getInternalEditor();
+            this.conditionEditor = new BreakpointConditionEditor(this.document, sourceEditor);
             this.conditionEditor.callback = this.onSetBreakpointCondition.bind(this);
         }
 
@@ -1060,7 +1127,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // Remove breakpoint from the UI.
         this.scriptView.removeBreakpoint(bp);
-        if (this.scriptView.editor && this.scriptView.editor.debugLocation == bp.lineNo)
+        var editor = this.scriptView.getInternalEditor();
+        if (editor && editor.debugLocation == bp.lineNo)
             this.scriptView.setDebugLocation(bp.lineNo, true);
     },
 
@@ -1303,9 +1371,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         return this.breakable;
     },
 
-    breakOnNext: function(enabled)
+    breakOnNext: function(enabled, callback)
     {
-        BreakOnNext.breakOnNext(this.context, enabled);
+        BreakOnNext.breakOnNext(this.context, enabled, callback);
     },
 
     getBreakOnNextTooltip: function(armed)
@@ -1531,6 +1599,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!this.location)
         {
             this.location = this.getDefaultLocation();
+            Trace.sysout("scriptPanel.newSource; this.location.getURL() = " +
+                this.location.getURL());
             this.updateLocation(this.location);
             Firebug.chrome.syncLocationList();
         }
@@ -1665,7 +1735,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         var self = this;
         var currentLine = from;
-        var editor = this.scriptView.editor.editorObject;
+        var editor = this.scriptView.getInternalEditor().editorObject;
 
         Trace.sysout("scriptPanel.markExecutableLines; from: " + from + ", to: " + to);
 

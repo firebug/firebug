@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("cookies.general.cookieClipboard.START");
-
     FBTest.setPref("cookies.filterByPath", false);
 
     FBTest.openNewTab(basePath + "cookies/general/clipboard.php", function(win)
@@ -23,14 +21,17 @@ function runTest()
             // Helper shortcut
             var CookieRow = FW.Firebug.CookieModule.CookieReps.CookieRow;
 
-            // Copy & Paste
-            CookieRow.onCopy(originalCookie);
-
             // Expected clipboard value
             var clipboardValue = "CopyPasteCookie=Test+Cookie+Value; expires=Wed, " +
-                "14 Aug 2019 10:25:57 GMT; path=/dir; domain=legoas";
+                "18 May 2033 03:33:20 GMT; path=/dir; domain=" + win.location.host;
 
-            FBTest.waitForClipboard(clipboardValue, function()
+            function copyCookie()
+            {
+                // Copy & Paste
+                CookieRow.onCopy(originalCookie);
+            }
+
+            FBTest.waitForClipboard(clipboardValue, copyCookie, function()
             {
                 CookieRow.onPaste(null);
 
@@ -54,7 +55,7 @@ function runTest()
                 newCookie = FBTest.getCookieByName(panelNode, "CopyPasteCookie-1");
                 FBTest.ok(!newCookie, "There must not be 'CopyPasteCookie-1'.");
 
-                return FBTest.testDone("cookies.general.cookieClipboard.DONE");
+                return FBTest.testDone();
             });
         });
     });

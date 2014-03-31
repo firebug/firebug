@@ -8,8 +8,9 @@ define([
     "firebug/lib/string",
     "firebug/debugger/clients/grip",
     "firebug/debugger/script/sourceLink",
+    "firebug/debugger/debuggerLib",
 ],
-function (FBTrace, Obj, Url, Locale, Str, Grip, SourceLink) {
+function (FBTrace, Obj, Url, Locale, Str, Grip, SourceLink, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -100,10 +101,10 @@ StackFrame.prototype = Obj.descend(Grip.prototype,
         this.frameIndex = frameIndex;
     },
 
+    // xxxHonza: not used, should be refactored or removed.
     getCallingFrame: function()
     {
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("getCallingFrame "+this, this);
+        Trace.sysout("stackFrame.getCallingFrame; " + this, this);
 
         if (!this.callingFrame && this.nativeFrame && this.nativeFrame.isValid)
         {
@@ -112,6 +113,7 @@ StackFrame.prototype = Obj.descend(Grip.prototype,
                 this.callingFrame = StackFrame.getStackFrame(nativeCallingFrame, this.context,
                     this.newestFrame);
         }
+
         return this.callingFrame;
     },
 
@@ -127,8 +129,7 @@ StackFrame.prototype = Obj.descend(Grip.prototype,
 
     destroy: function()
     {
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("StackFrame destroyed:"+this.uid+"\n");
+        Trace.sysout("stackFrame.destroy; " + this.uid);
 
         this.script = null;
         this.nativeFrame = null;
@@ -197,14 +198,15 @@ StackFrame.buildStackFrame = function(frame, context)
         return;
     }
 
-    var sourceFile = context.sourceFileMap[frame.where.url];
+    var sourceFile = context.getSourceFile(frame.where.url);
     if (!sourceFile)
         sourceFile = {href: frame.where.url};
 
     var args = [];
     var bindings = frame.environment.bindings;
     var arguments = bindings ? bindings.arguments : [];
-    for (var i=0; i<arguments.length; i++)
+
+    for (var i = 0; i < arguments.length; i++)
     {
         var arg = arguments[i];
         args.push({
@@ -236,7 +238,7 @@ StackFrame.guessFunctionName = function(url, lineNo, sourceFile)
     if (sourceFile)
         return StackFrame.guessFunctionNameFromLines(url, lineNo, sourceFile);
 
-    return "? in " + Url.getFileName(url) + "@" + lineNo;
+    return Url.getFileName(url) + "@" + lineNo;
 }
 
 var reGuessFunction = /['"]?([$0-9A-Za-z_]+)['"]?\s*[:=]\s*(function|eval|new Function)/;
@@ -259,9 +261,8 @@ StackFrame.guessFunctionNameFromLines = function(url, lineNo, sourceFile)
             }
             else
             {
-                if (FBTrace.DBG_FUNCTION_NAMES)
-                    FBTrace.sysout("lib.guessFunctionName re failed for lineNo-i="+lineNo+
-                        "-"+i+" line="+line+"\n");
+                Trace.sysout("stackFrame.guessFunctionNameFromLines; re failed for lineNo-i=" +
+                    lineNo + "-" + i + " line=" + line);
             }
 
             m = reFunctionArgNames.exec(line);
@@ -302,8 +303,12 @@ StackFrame.resumeShowStackTrace = function(){}
 
 // ********************************************************************************************* //
 
-// functionName@fileName:lineNo
-var reErrorStackLine = /^(.*)@(.*):(\d*)$/;
+// Firefox 30 introduced also column number in the URL (see Bug 762556)
+// functionName@fileName:lineNo:columnNo
+// xxxHonza: at some point we might want to utilize the column number as well.
+// The regular expression can be simplified to expect both (:line:column) as soon
+// as Firefox 30 (Fx30) is the minimum required version.
+var reErrorStackLine = /^(.*)@(.*?):(\d*)(?::(\d*))?$/
 
 StackFrame.parseToStackFrame = function(line, context)
 {
@@ -335,13 +340,31 @@ StackFrame.guessFunctionArgNamesFromSource = function(source)
     return args;
 };
 
-// XXX This probably isn't needed any more.
-StackFrame.cleanStackTraceOfFirebug = function(trace)
+StackFrame.removeChromeFrames = function(trace)
 {
-    if (trace && trace.frames && !trace.frames.length)
-        return undefined;
+    var frames = trace ? trace.frames : null;
+    if (!frames || !frames.length)
+        return null;
+
+    var filteredFrames = [];
+    for (var i = 0; i < frames.length; i++)
+    {
+        var href = frames[i].href;
+        if (href.startsWith("chrome:") || href.startsWith("resource:"))
+            continue;
+
+        // xxxFlorent: should be reverted if we integrate
+        // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
+        if (DebuggerLib.isFrameLocationEval(href))
+            continue;
+
+        filteredFrames.push(frames[i]);
+    }
+
+    trace.frames = filteredFrames;
+
     return trace;
-};
+}
 
 StackFrame.getFrameSourceLink = function(frame)
 {

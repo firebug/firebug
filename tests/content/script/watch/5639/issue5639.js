@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue5639.START");
     FBTest.openNewTab(basePath + "script/watch/5639/issue5639.html", function(win)
     {
         FBTest.enableScriptPanel(function(win)
@@ -20,7 +19,7 @@ function runTest()
 
             tasks.run(function()
             {
-                FBTest.testDone("issue5639.DONE");
+                FBTest.testDone();
             });
         });
     });

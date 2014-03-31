@@ -141,6 +141,12 @@ var Loader =
         {
             Cu.reportError(fullName + " -> " + url);
             Cu.reportError(err);
+
+            if (FBTrace.DBG_ERRORS)
+            {
+                FBTrace.sysout("mini-require; EXCEPTION load "+ fullName +" -> " + url + ": " + err,
+                    err);
+            }
         }
     },
 

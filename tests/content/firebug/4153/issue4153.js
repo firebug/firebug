@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4153.START");
     FBTest.openNewTab(basePath + "firebug/4153/issue4153.html", function (win)
     {
         detachFirebug(function (win)
@@ -13,7 +12,7 @@ function runTest()
                 {
                     FBTest.ok(!(FBTest.isDetached() && isDeactive()),
                         "Firebug must be activated and also attached to the main window now.");
-                    FBTest.testDone("issue4153.DONE");
+                    FBTest.testDone();
                 });
             });
         });
@@ -22,18 +21,20 @@ function runTest()
 
 function detachFirebug(callback)
 {
-    var detachedWindow = FBTest.detachFirebug();
-    if (FBTest.ok(detachedWindow, "Firebug is detaching ....."))
+    FBTest.detachFirebug(function(detachedWindow)
     {
-        FBTest.OneShotHandler(detachedWindow, "load", function (event)
+        if (FBTest.ok(detachedWindow, "Firebug is detaching ....."))
         {
-            FBTest.progress("Firebug detached in a new window.");
-            setTimeout(function ()
+            FBTest.OneShotHandler(detachedWindow, "load", function (event)
             {
-                callback(detachedWindow);
+                FBTest.progress("Firebug detached in a new window.");
+                setTimeout(function ()
+                {
+                    callback(detachedWindow);
+                });
             });
-        });
-    }
+        }
+    });
 }
 
 function toggleDetachBar(callback)
@@ -48,7 +49,7 @@ function toggleDetachBar(callback)
     }
     else
     {
-        FBTest.testDone("issue4153.FAILED.");
+        FBTest.testDone();
         return;
     }
 }
@@ -65,7 +66,7 @@ function deactiveFirebug(callback)
     }
     else
     {
-        FBTest.testDone("issue4153.FAILED.");
+        FBTest.testDone();
         return;
     }
 }

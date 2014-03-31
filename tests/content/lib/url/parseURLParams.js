@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("parseURLParams.START");
-
     var testURLWithParameters = "https://ssl.google-analytics.com/__utm.gif?" +
         "utmwv=4.5.6&utmn=954720376&utmhn=store.httpwatch.com&utmcs=UTF-8&" +
         "utmsr=1280x768&utmsc=32-bit&utmul=en-us&utmje=1&utmfl=10.0%20r32&" +
@@ -47,5 +45,5 @@ function runTest()
         }
     }
 
-    FBTest.testDone("parseURLParams.DONE");
+    FBTest.testDone();
 }

@@ -4,18 +4,19 @@
 // 3. The Console panel scroll position must be at the bottom.
 function runTest()
 {
-    FBTest.sysout("issue2694.START");
-
     // Step 1.
     FBTest.openNewTab(basePath + "console/2694/issue2694.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function()
+        FBTest.openFirebug(function()
         {
-            executeSetOfCommands(40, function() {
-                FBTest.ok(isScrolledToBottom(), "The Console panel must be scrolled to the bottom.");
-                FBTest.testDone("issue2694; DONE");
-            })
+            FBTest.enableConsolePanel(function()
+            {
+                executeSetOfCommands(40, function()
+                {
+                    FBTest.ok(isScrolledToBottom(), "The Console panel must be scrolled to the bottom.");
+                    FBTest.testDone();
+                });
+            });
         });
     });
 }

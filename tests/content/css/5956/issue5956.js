@@ -1,22 +1,22 @@
 function runTest()
 {
-    FBTest.sysout("issue5956.START");
-
     FBTest.openNewTab(basePath + "css/5956/issue5956.html", function(win)
     {
-        FBTest.openFirebug();
-        var panel = FBTest.selectPanel("stylesheet");
-
-        FBTest.selectPanelLocationByName(panel, "issue5956.html");
-
-        var tests = [];
-        tests.push(propDeclaration);
-        tests.push(propName);
-        tests.push(propValue);
-
-        FBTest.runTestSuite(tests, function()
+        FBTest.openFirebug(function()
         {
-            FBTest.testDone("issue5956; DONE");
+            var panel = FBTest.selectPanel("stylesheet");
+
+            FBTest.selectPanelLocationByName(panel, "issue5956.html");
+
+            var tests = [];
+            tests.push(propDeclaration);
+            tests.push(propName);
+            tests.push(propValue);
+
+            FBTest.runTestSuite(tests, function()
+            {
+                FBTest.testDone();
+            });
         });
     });
 }
@@ -51,12 +51,15 @@ function executeTest(contextMenuItemID, expectedValue, message, callback)
         var rule = FW.FBL.getAncestorByClass(node, "cssRule");
         var prop = rule.getElementsByClassName("cssProp").item(0);
 
-        FBTest.waitForClipboard(expectedValue, function(copiedValue)
+        function executeContextMenuCommand()
+        {
+            FBTest.executeContextMenuCommand(prop, contextMenuItemID);
+        }
+
+        FBTest.waitForClipboard(expectedValue, executeContextMenuCommand, function(copiedValue)
         {
             FBTest.compare(expectedValue, copiedValue, message);
             callback();
         });
-
-        FBTest.executeContextMenuCommand(prop, contextMenuItemID);
     });
 }

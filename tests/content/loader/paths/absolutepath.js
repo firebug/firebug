@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("absolutepath.START;");
     FBTest.progress("using baseLocalPath: " + baseLocalPath);
 
     var baseUrl = baseLocalPath + "loader/paths/";
@@ -18,6 +17,6 @@ function runTest()
     {
         FBTest.compare(3, AddModule.add(1, 2), "The add module must be properly loaded");
         FBTest.compare(2, SubtractModule.subtract(3, 1), "The subtract module must be properly loaded");
-        FBTest.testDone("absolutepath.DONE");
+        FBTest.testDone();
     });
 }

@@ -208,6 +208,13 @@ DebuggerLib.getThreadActor = function(browser)
     }
 };
 
+DebuggerLib.getThreadDebugger = function(context)
+{
+    var threadActor = this.getThreadActor(context.browser);
+    if (threadActor)
+        return threadActor.dbg;
+};
+
 /**
  * Returns the debugger's Debugger.Object associated with a frame within the
  * passed context. If no frame is specified, the context's current global is used.
@@ -428,7 +435,6 @@ DebuggerLib.getFrameResultObject = function(context)
 // ********************************************************************************************* //
 // Debugger
 
-
 /**
  * Breaks the debugger in the newest frame (if any) or in the debuggee global.
  * Should not be used directly. Instead use Debugger.breakNow()
@@ -515,6 +521,38 @@ DebuggerLib.destroyDebuggerForContext = function(context, dbg)
     var ind = context.debuggers.indexOf(dbg);
     if (ind !== -1)
         context.debuggers.splice(ind, 1);
+};
+
+// ********************************************************************************************* //
+// Breakpoints
+
+/**
+ * Used for breakpoint condition evaluation.
+ * xxxHonza: it's rather a hack since:
+ * 1) Firebug customizes the BreakpointActor to workaround Bug 812172
+ * 2) Firebug has custom breakpoint hit handler for dynamic breakpoints
+ * (see: firebug/debugger/script/sourceTool)
+ */
+DebuggerLib.evalBreakpointCondition = function(frame, bp)
+{
+    try
+    {
+        var result = frame.eval(bp.condition);
+
+        if (result.hasOwnProperty("return"))
+        {
+            result = result["return"];
+
+            if (typeof result  == "object")
+                return this.unwrapDebuggeeValue(result);
+            else
+                return result;
+        }
+    }
+    catch (e)
+    {
+        TraceError.sysout("breakpointActor.evalCondition; EXCEPTION " + e, e);
+    }
 };
 
 // ********************************************************************************************* //

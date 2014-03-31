@@ -2,10 +2,6 @@
 // It's automatically executed by Firebug test harness (FBTest).
 function runTest()
 {
-    // Just a log into the Firebug tracing console (FBTrace). You need to set
-    // 'TESTCASE' option to see logs made through FBTest.sysout.
-    FBTest.sysout("issue5592.START");
-
     // Open a new tab with the test page. 'basePath' variable is provided
     // by test harness.
     FBTest.openNewTab(basePath + "net/5592/issue5592.html", function(win)
@@ -38,7 +34,7 @@ function runTest()
                 // Run both async tasks
                 tasks.run(function()
                 {
-                    FBTest.testDone("issue5592.DONE");
+                    FBTest.testDone();
                 });
             });
 
@@ -55,17 +51,19 @@ function runTest()
 // allow the next registered task to be started.
 function executeAndVerify(callback, target, actionID, expected)
 {
-    // Open context menu on the specified target.
-    FBTest.executeContextMenuCommand(target, actionID, function()
+    function executeContextMenuCommand()
     {
-        // Data can be copyied into the clipboard asynchronously,
-        // so wait till they are available.
-        FBTest.waitForClipboard(expected, function(text)
-        {
-            // Verify data in the clipboard
-            FBTest.compare(expected, text,
-                "Proper data must be in the clipboard. Current: " + text);
-            callback();
-        });
+        // Open context menu on the specified target
+        FBTest.executeContextMenuCommand(target, actionID);
+    }
+
+    // Data can be copyied into the clipboard asynchronously,
+    // so wait till they are available.
+    FBTest.waitForClipboard(expected, executeContextMenuCommand, (text) =>
+    {
+        // Verify data in the clipboard
+        FBTest.compare(expected, text,
+            "Proper data must be in the clipboard. Current: " + text);
+        callback();
     });
 }

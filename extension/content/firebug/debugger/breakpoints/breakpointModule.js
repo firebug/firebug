@@ -61,30 +61,6 @@ var BreakpointModule = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // BON
 
-    toggleBreakOnNext: function(panel)
-    {
-        var breakable = Firebug.chrome.getGlobalAttribute("cmd_firebug_toggleBreakOn", "breakable");
-
-        if (FBTrace.DBG_BP)
-        {
-            FBTrace.sysout("breakpoint.toggleBreakOnNext; currentBreakable " + breakable +
-                " in " + panel.context.getName());
-        }
-
-        // Toggle button's state.
-        breakable = (breakable == "true" ? "false" : "true");
-        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleBreakOn", "breakable", breakable);
-
-        // Call the current panel's logic related to break-on-next.
-        // If breakable == "true" the feature is currently disabled.
-        var enabled = (breakable == "true" ? false : true);
-        panel.breakOnNext(enabled);
-
-        this.updatePanelState(panel);
-
-        return enabled;
-    },
-
     showPanel: function(browser, panel)
     {
         this.updatePanelState(panel);
@@ -235,19 +211,28 @@ var BreakpointModule = Obj.extend(Firebug.Module,
         var type = packet.why.type;
         var tool = context.getTool("debugger");
 
-        Trace.sysout("breakpointModule.shouldBreakDebugger;");
+        Trace.sysout("breakpointModule.shouldBreakDebugger;", packet);
 
         // If paused by a breakpoint, evaluate optional condition expression.
         if (type == "breakpoint")
         {
             var location = packet.frame.where;
             var bp = BreakpointStore.findBreakpoint(location.url, location.line - 1);
+
+            // xxxHonza: hack, breakpoints in dynamic scripts are using different URLs., fix me.
             if (!bp)
-                return false;
+            {
+                TraceError.sysout("breakpointModule.shouldBreakDebugger; " +
+                    "Paused on a breakpoint, but there is no such breakpoint.", location);
+                return true;
+            }
 
             // If there is normal disabled breakpoint, do not break.
             if (bp.isNormal() && bp.isDisabled())
+            {
+                Trace.sysout("breakpointModule.paused; Do not break on disabled breakpoint", bp);
                 return false;
+            }
 
             // Evaluate optional condition
             if (bp.condition)

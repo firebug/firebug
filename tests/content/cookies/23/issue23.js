@@ -2,8 +2,6 @@ var currentBaseURI = null;
 
 function runTest()
 {
-    FBTest.sysout("cookies.test.issue23; START");
-
     currentBaseURI = FW.FBL.makeURI(basePath);
 
     FBTest.clearCache();
@@ -19,7 +17,7 @@ function runTest()
 
             cookie = FBTest.getCookieByName(panelNode, "TestCookie23");
             FBTest.compare("ValueCookie23-modified", cookie.cookie.value, "Check new cookie value");
-            FBTest.testDone("cookies.test.issue23; DONE");
+            FBTest.testDone();
         });
     });
 };

@@ -356,6 +356,10 @@
     color: rgb(198, 78, 0);
 }
 
+.DBG_SOURCETOOL {
+    color: rgb(89, 0, 51);
+}
+
 .DBG_SCRIPTPANEL {
     color: rgb(135, 0, 21);
 }
@@ -370,6 +374,10 @@
 
 .DBG_SOURCETOOL {
     color: rgb(0, 95, 117);
+}
+
+.DBG_EXCLAMATION {
+    background-color: rgb(246, 186, 186);
 }
 
 /************************************************************************************************/

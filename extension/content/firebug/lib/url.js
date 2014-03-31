@@ -12,10 +12,10 @@ function (FBTrace, Str, Options) {
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
-const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 
 // ********************************************************************************************* //
 // Implementation
@@ -324,6 +324,23 @@ Url.getBaseURL = function(win)
     return base ? base.href : win.location.href;
 };
 
+/**
+ * Returns true if the URL is absolute otherwise false, see the following
+ * examples:
+ *
+ * 1) http://example.com -> true
+ * 2) //myserver/index.html -> true
+ * 3) index.html -> false
+ * 4) /index.html -> false
+ *
+ * @param {String} URL
+ * @returns {Boolean} True if the URL is absolute.
+ */
+Url.isAbsoluteUrl = function(url)
+{
+    return (/^(?:[a-z]+:)?\/\//i.test(url))
+}
+
 Url.absoluteURL = function(url, baseURL)
 {
     // Replace "/./" with "/" using regular expressions (don't use string since /./
@@ -370,13 +387,17 @@ Url.absoluteURLWithDots = function(url, baseURL)
     var head = m[1];
     var tail = m[3];
     if (url.substr(0, 2) == "//")
+    {
         return m[2] + url;
+    }
     else if (url[0] == "/")
     {
         return head + url;
     }
     else if (tail[tail.length-1] == "/")
+    {
         return B_head + url;
+    }
     else
     {
         var parts = tail.split("/");
@@ -384,31 +405,35 @@ Url.absoluteURLWithDots = function(url, baseURL)
     }
 };
 
-var reChromeCase = /chrome:\/\/([^\/]*)\/(.*?)$/;
-Url.normalizeURL = function(url)  // this gets called a lot, any performance improvement welcome
+/**
+ * xxxHonza: This gets called a lot, any performance improvement welcome.
+ */
+Url.normalizeURL = function(url)
 {
     if (!url)
         return "";
-    // Replace one or more characters that are not forward-slash followed by /.., by space.
-    if (url.length < 255) // guard against monsters.
-    {
-        // Replace one or more characters that are not forward-slash followed by /.., by space.
-        url = url.replace(/[^\/]+\/\.\.\//, "", "g");
-        // Issue 1496, avoid #
-        url = url.replace(/#.*/,"");
-        // For some reason, JSDS reports file URLs like "file:/" instead of "file:///", so they
-        // don't match up with the URLs we get back from the DOM
-        url = url.replace(/file:\/([^\/])/g, "file:///$1");
-        // For script tags inserted dynamically sometimes the script.fileName is bogus
+
+    // Guard against monsters.
+    if (url.length > 255)
+        return url;
+
+    // Normalize path traversals (a/b/../c -> a/c).
+    while (url.contains("/../") && url[0] != "/")
+        url = url.replace(/[^\/]+\/\.\.\//g, "");
+
+    // Issue 1496, avoid #
+    url = url.replace(/#.*/, "");
+
+    // For script tags inserted dynamically sometimes the script.fileName is bogus
+    if (url.contains("->"))
         url = url.replace(/[^\s]*\s->\s/, "");
 
-        if (Str.hasPrefix(url, "chrome:"))
+    if (url.startsWith("chrome:"))
+    {
+        var m = /^chrome:\/\/([^\/]*)\/(.*?)$/.exec(url);
+        if (m)
         {
-            var m = reChromeCase.exec(url);  // 1 is package name, 2 is path
-            if (m)
-            {
-                url = "chrome://"+m[1].toLowerCase()+"/"+m[2];
-            }
+            url = "chrome://" + m[1].toLowerCase() + "/" + m[2];
         }
     }
     return url;

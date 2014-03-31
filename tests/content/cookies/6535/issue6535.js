@@ -1,14 +1,8 @@
 function runTest()
 {
-    FBTest.sysout("issue6535.START");
-
     FBTest.openNewTab(basePath + "cookies/6535/issue6535.php", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("net");
-
-        FBTest.enableCookiesPanel();
-        FBTest.enableNetPanel(function(win)
+        FBTest.enablePanels(["net", "cookies"], function()
         {
             var options =
             {
@@ -19,7 +13,7 @@ function runTest()
             FBTest.waitForDisplayedElement("net", options, function(row)
             {
                 var panelNode = FBTest.selectPanel("net").panelNode;
-    
+
                 FBTest.click(row);
                 FBTest.expandElements(panelNode, "netInfoCookiesTab");
 
@@ -31,7 +25,7 @@ function runTest()
                         "Max age must match");
                 }
 
-                FBTest.testDone("issue6535.DONE");
+                FBTest.testDone();
             });
         });
     });

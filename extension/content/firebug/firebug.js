@@ -89,7 +89,7 @@ if (window.Firebug)
  */
 window.Firebug =
 {
-    version: "1.13",
+    version: "2.0",
 
     dispatchName: "Firebug",
     modules: modules,

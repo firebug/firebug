@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue5006.START");
     FBTest.openNewTab(basePath + "console/completion/5006/issue5006.html", function(win)
     {
         FBTest.openFirebug(function()
@@ -12,7 +11,7 @@ function runTest()
             tasks.push(testCompletions, win);
 
             tasks.run(function() {
-                FBTest.testDone("issue5006.DONE");
+                FBTest.testDone();
             });
         });
     });

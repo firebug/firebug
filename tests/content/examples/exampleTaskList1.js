@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("examples.tasklist.START");
-
     // Create a task list object.
     var tasks = new FBTest.TaskList();
 
@@ -31,6 +29,6 @@ function runTest()
 
     // Run all.
     tasks.run(function() {
-        FBTest.testDone("examples.tasklist.DONE");
+        FBTest.testDone();
     });
 }

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6616: Copy request as a cURL command</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function sendRequest()
+        {
+            var postData = "Hello Firebug user!";
+            var request = new XMLHttpRequest();
+            request.open("POST", "issue6616.php", true);
+
+            request.onreadystatechange = function()
+            {
+                if (request.readyState == 4 && request.status == 200)
+                {
+                    var output = document.getElementById("output");
+                    output.style.display = "block";
+                    output.textContent = request.responseText;
+                }
+            }
+
+            request.send(postData);
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6616">Issue 6616</a>: Copy request as a cURL command</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button onclick="sendRequest()" id="sendRequest">Send request</button>
+                <section id="output"></section>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Net</em> panel</li>
+                    <li>
+                        Click the <em>Send request</em> button above<br/>
+                        <span class="ok">&rArr; A request to <em>issue6616.php</em> should be shown</span>
+                    </li>
+                    <li>Right-click the request and choose <em>Copy as cURL</em> from the context menu</li>
+                    <li>
+                        Paste the text from the clipboard into a text editor<br/>
+                        <span class="ok">&rArr; The clipboard data should contain a valid cURL command.</span>
+                    </li>
+                    <li>Set the preference <code>extensions.firebug.net.curlAddCompressedArgument</code> to <code>true</code></li>
+                    <li>
+                        Repeat steps 4 and 5
+                        <span class="ok">&rArr; The cURL command should contain the <code>--compressed</code> argument.</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>A valid cURL command should be copied to the clipboard.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

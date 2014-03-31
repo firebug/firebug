@@ -244,8 +244,6 @@ var Profiler = Obj.extend(Module,
         var totalCalls = 0;
         var totalTime = 0;
 
-        var sourceFileMap = context.sourceFileMap;
-
         context.profiling.enumerateScripts({enumerateScript: function(script)
         {
             if (!script.callCount)
@@ -256,7 +254,7 @@ var Profiler = Obj.extend(Module,
                 return;
 
             var sourceLink = SourceFile.getSourceLinkForScript(script, context);
-            if (sourceLink && sourceLink.href in sourceFileMap)
+            if (sourceLink && context.getSourceFile(sourceLink.href))
             {
                 var call = new ProfileCall(script, context, script.funcName,
                     script.callCount, script.totalExecutionTime,

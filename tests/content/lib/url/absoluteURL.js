@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("absoluteURL.START");
-
     // http://www.apps.ietf.org/rfc/rfc3986.html#sec-5
     var testBaseURL = "http://a/b/c/d;p?q";
 
@@ -34,5 +32,5 @@ function runTest()
         FBTest.compare(absolute, FW.FBL.absoluteURL(relative, testBaseURL), "For base "+testBaseURL+" relative url: "+relative+" = "+absolute);
     }
 
-    FBTest.testDone("absoluteURL.DONE");
+    FBTest.testDone();
 }

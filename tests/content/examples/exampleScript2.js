@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("exampleScript2.START");
-
     FBTest.openNewTab(basePath + "examples/exampleScript2.html", function(win)
     {
         FBTest.enableScriptPanel(function(win)
@@ -15,8 +13,10 @@ function runTest()
             {
                 FBTest.waitForBreakInDebugger(chrome, lineNo, true, function(row)
                 {
-                    FBTest.clickContinueButton();
-                    FBTest.testDone("exampleScript2.DONE");
+                    FBTest.clickContinueButton(null, function()
+                    {
+                        FBTest.testDone()
+                    });
                 });
 
                 // Execute test script on the page.

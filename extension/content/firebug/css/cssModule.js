@@ -8,19 +8,22 @@ define([
     "firebug/lib/options",
     "firebug/lib/xpcom",
     "firebug/chrome/module",
+    "firebug/css/cssDirtyListener",
     "firebug/editor/editorSelector"
 ],
-function(Firebug, Css, Events, Obj, Options, Xpcom, Module, EditorSelector) {
+function(Firebug, Css, Events, Obj, Options, Xpcom, Module, CSSDirtyListener, EditorSelector) {
 
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
-const reSplitCSS = /(url\("?[^"\)]+"?\)?)|(rgba?\([^)]*\)?)|(hsla?\([^)]*\)?)|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|"([^"]*)"?|'([^']*)'?|([^,\s\/!\(\)]+)|(!(.*)?)/;
-const reURL = /url\("?([^"\)]+)?"?\)/;
-const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
+var reSplitCSS = new RegExp("(url\\((\\\")?.*?\\2\\))|(rgba?\\([^)]*\\)?)|(hsla?\\([^)]*\\)?)|" +
+    "(#[\\dA-Fa-f]+)|(-?\\d+(\\.\\d+)?(%|[a-z]{1,4})?)|\\\"([^\\\"]*)\\\"?|'([^']*)'?|" +
+    "([^,\\s\\/!\\(\\)]+)|(!(.*)?)");
+var reURL = /url\((")?(.*)?\1\)/;
+var reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 
 // ********************************************************************************************* //
 // CSS Module
@@ -62,7 +65,7 @@ Firebug.CSSModule = Obj.extend(Module, Firebug.EditorSelector,
 
     initContext: function(context)
     {
-        context.dirtyListener = new Firebug.CSSDirtyListener(context);
+        context.dirtyListener = new CSSDirtyListener(context);
         this.addListener(context.dirtyListener);
     },
 
@@ -257,11 +260,11 @@ Firebug.CSSModule = Obj.extend(Module, Firebug.EditorSelector,
         while (true)
         {
             m = reSplitCSS.exec(value);
-            if (m && m.index+m[0].length < offset)
+            if (m && m.index + m[0].length < offset)
             {
-                value = value.substr(m.index+m[0].length);
-                start += m.index+m[0].length;
-                offset -= m.index+m[0].length;
+                value = value.substr(m.index + m[0].length);
+                start += m.index + m[0].length;
+                offset -= m.index + m[0].length;
             }
             else
                 break;
@@ -273,18 +276,23 @@ Firebug.CSSModule = Obj.extend(Module, Firebug.EditorSelector,
         var type;
         if (m[1])
             type = "url";
-        else if (m[2] || m[4])
+        else if (m[3] || m[4])
             type = "rgb";
-        else if (m[3])
-            type = "hsl";
         else if (m[5])
+            type = "hsl";
+        else if (m[6])
             type = "int";
 
-        var cssValue = {value: m[0], start: start+m.index, end: start+m.index+m[0].length, type: type};
+        var cssValue = {
+            value: m[0],
+            start: start + m.index,
+            end: start + m.index + m[0].length,
+            type: type
+        };
 
         if (!type)
         {
-            if (m[10] && m[10].indexOf("gradient") != -1)
+            if (m[11] && m[11].contains("gradient"))
             {
                 var arg = value.substr(m[0].length).match(/\((?:(?:[^\(\)]*)|(?:\(.*?\)))+\)/);
                 if (!arg)
@@ -360,7 +368,9 @@ Firebug.CSSModule = Obj.extend(Module, Firebug.EditorSelector,
     parseURLValue: function(value)
     {
         var m = reURL.exec(value);
-        return m ? m[1] : "";
+        // URLs can contain characters like a single quote, which are escaped,
+        // so we need to strip the backslash in order to get the valid URL
+        return m ? m[2].replace("\\", "") : "";
     },
 
     parseRepeatValue: function(value)

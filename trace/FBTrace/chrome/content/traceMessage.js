@@ -212,21 +212,6 @@ TraceMessage.prototype =
         {
             this.props = this.obj;
         }
-        else if (this.obj instanceof Ci.jsdIValue)
-        {
-            var listValue = {value: null}, lengthValue = {value: 0};
-            this.obj.getProperties(listValue, lengthValue);
-            for (var i = 0; i < lengthValue.value; ++i)
-            {
-                var prop = listValue.value[i];
-                try {
-                    var name = Wrapper.unwrapIValue(prop.name);
-                    this.props[name] = "" + Wrapper.unwrapIValue(prop.value);
-                } catch (e) {
-                    onPanic("instanceof jsdIValue, i="+i, e);
-                }
-            }
-        }
         else if (this.obj instanceof Ci.nsISupportsCString)
         {
             this.props = this.obj.data;

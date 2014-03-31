@@ -1,26 +1,25 @@
 function runTest()
 {
-    FBTest.sysout("issue5507.START");
-
     FBTest.openNewTab(basePath + "css/5507/issue5507.html", function(win)
     {
-        FBTest.openFirebug();
-
-        // Save the current value of the "colorDisplay" and "expandShorthandProps" preferences,
-        // so we can revert it after the test is finished
-        var colorDisplayOrigValue = FBTest.getPref("colorDisplay");
-        var expandShorthandPropsOrigValue = FBTest.getPref("expandShorthandProps");
-
-        var tests = [];
-        tests.push(checkCSSPanel);
-        tests.push(checkStyleSidePanel);
-        tests.push(checkComputedSidePanel);
-
-        FBTestFirebug.runTestSuite(tests, function()
+        FBTest.openFirebug(function()
         {
-            FBTest.setPref("colorDisplay", colorDisplayOrigValue);
-            FBTest.setPref("expandShorthandProps", expandShorthandPropsOrigValue);
-            FBTest.testDone("issue5507; DONE");
+            // Save the current value of the "colorDisplay" and "expandShorthandProps" preferences,
+            // so we can revert it after the test is finished
+            var colorDisplayOrigValue = FBTest.getPref("colorDisplay");
+            var expandShorthandPropsOrigValue = FBTest.getPref("expandShorthandProps");
+
+            var tests = [];
+            tests.push(checkCSSPanel);
+            tests.push(checkStyleSidePanel);
+            tests.push(checkComputedSidePanel);
+
+            FBTestFirebug.runTestSuite(tests, function()
+            {
+                FBTest.setPref("colorDisplay", colorDisplayOrigValue);
+                FBTest.setPref("expandShorthandProps", expandShorthandPropsOrigValue);
+                FBTest.testDone();
+            });
         });
     });
 }

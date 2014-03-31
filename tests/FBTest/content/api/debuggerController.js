@@ -26,6 +26,7 @@ var DebuggerController =
 
     addListener: function(browser, listener)
     {
+        browser = browser || FBTestFirebug.getCurrentTabBrowser();
         var entry = {
             browser: browser,
             handler: new EventHandler(listener)
@@ -38,10 +39,23 @@ var DebuggerController =
 
     removeListener: function(browser, listener)
     {
+        browser = browser || FBTestFirebug.getCurrentTabBrowser();
         var entry = this.listeners.get(listener);
         browser.removeEventListener(eventId, entry.handler, true);
 
         this.listeners.delete(listener);
+    },
+
+    listenOnce: function(browser, eventName, callback)
+    {
+        var listener = {};
+        listener[eventName] = function(...args)
+        {
+            DebuggerController.removeListener(browser, listener);
+            callback(...args);
+        };
+
+        return DebuggerController.addListener(browser, listener);
     },
 
     cleanUp: function()
@@ -82,7 +96,8 @@ EventHandler.prototype =
 
         try
         {
-            this.listener[type](event);
+            var args = event.detail.args;
+            this.listener[type].apply(this.listener, args);
         }
         catch (err)
         {

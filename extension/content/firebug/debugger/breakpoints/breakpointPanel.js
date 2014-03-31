@@ -160,8 +160,11 @@ BreakpointPanel.prototype = Obj.extend(Panel,
         Events.dispatch(this.fbListeners, "onBreakRowsRefreshed", [this, this.panelNode]);
     },
 
-    // xxxHonza: this function is also responsible for setting the breakpoint name
-    // it should be done just once and probably somewhere else.
+    // xxxHonza: This function is also responsible for setting the breakpoint name.
+    // It should be done just once and probably somewhere else.
+    // Note that the breakpoint name can be generated from the source and the source
+    // (especially in case of dynamically created scripts) doesn't have to be immediately
+    // available. Since the methods always set the name, it's auto-updated in the panel.
     extractBreakpoints: function(context)
     {
         var breakpoints = [];
@@ -170,29 +173,46 @@ BreakpointPanel.prototype = Obj.extend(Panel,
 
         var self = this;
 
-        for (var url in context.compilationUnits)
+        context.enumerateSourceFiles(function(sourceFile)
         {
-            var unit = context.compilationUnits[url];
-            var sourceFile = unit.sourceFile;
+            var url = sourceFile.getURL();
 
-            BreakpointStore.enumerateBreakpoints(url, function(bp)
-            {
-                self.getSourceLine(bp, unit.sourceFile);
-                breakpoints.push(bp);
-            });
+            // When extracting breakpoints for the current page make sure to remove the
+            // URL fragment. Also pass 'true' for the 'dynamic' argument into enumeration methods,
+            // so all breakpoints for this page are displayed in the Breakpoints panel.
+            // 1) There can be dynamic breakpoints for dynamic scripts with special URL suffix.
+            // 2) There can be breakpoints using a URL fragment (see issue 7251).
+            url = Url.normalizeURL(url);
 
-            BreakpointStore.enumerateErrorBreakpoints(url, function(bp)
-            {
-                self.getSourceLine(bp, sourceFile);
-                errorBreakpoints.push(bp);
-            });
-
-            BreakpointStore.enumerateMonitors(url, function(bp)
+            // xxxHonza: We might want to introduce an 'options' argument
+            // for all the enumeration methods.
+            BreakpointStore.enumerateBreakpoints(url, true, function(bp)
             {
                 self.getSourceLine(bp, sourceFile);
-                monitors.push(bp);
+
+                // xxxHonza: optimize me
+                // There can be duplicates since dynamic breakpoints are returned for
+                // the parent script URL as well as for the (dynamic) URL they really belong to.
+                if (breakpoints.indexOf(bp) == -1)
+                    breakpoints.push(bp);
             });
-        }
+
+            BreakpointStore.enumerateErrorBreakpoints(url, true, function(bp)
+            {
+                self.getSourceLine(bp, sourceFile);
+
+                if (errorBreakpoints.indexOf(bp) == -1)
+                    errorBreakpoints.push(bp);
+            });
+
+            BreakpointStore.enumerateMonitors(url, true, function(bp)
+            {
+                self.getSourceLine(bp, sourceFile);
+
+                if (monitors.indexOf(bp) == -1)
+                    monitors.push(bp);
+            });
+        });
 
         var result = {
             breakpoints: breakpoints,
@@ -210,6 +230,14 @@ BreakpointPanel.prototype = Obj.extend(Panel,
     {
         var self = this;
         var line = bp.lineNo;
+
+        if (bp.href != sourceFile.href)
+        {
+            var name = StackFrame.guessFunctionName(bp.href, line + 1);
+            bp.setName(name);
+            bp.setSourceLine("");
+            return;
+        }
 
         // Getting source might be asynchronous in case the source is not yet
         // fetched from the server side.
@@ -320,24 +348,17 @@ BreakpointPanel.prototype = Obj.extend(Panel,
 
     clearAllBreakpoints: function(context)
     {
-        this.noRefresh = true;
+        TraceError.sysout("breakpointPanel.clearAllBreakpoints;");
 
-        try
-        {
-            // Remove regular JSD breakpoints
-            Firebug.Debugger.clearAllBreakpoints(context);
-        }
-        catch (exc)
-        {
-            TraceError.sysout("breakpointPanel.clearAllBreakpoints; EXCEPTION " + exc, exc);
-        }
-
-        this.noRefresh = false;
-        this.refresh();
-
-        // Remove the rest of all the other kinds of breakpoints (after refresh).
-        // These can come from various modules and perhaps extensions, so use
-        // the appropriate remove buttons.
+        // Remove all breakpoints. Note that some can come from various modules and
+        // perhaps also various extensions, so use the appropriate remove buttons for now.
+        // xxxHonza: we should dispatch a message that would be properly handled by
+        // all modules that provided the breakpoints (see also "getBreakpoints" event).
+        // See also issue 7227
+        // xxxHonza: if the breakpoint removal fails from some reason (breakpoint doesn't
+        // If the breakpoint removal fails from some reason (breakpoint doesn't
+        // exist, etc.) the UI BP entry is not removed, and so the |buttons| array is never
+        // empty. This causes infinite recursion.
         var buttons = this.panelNode.getElementsByClassName("closeButton");
         while (buttons.length)
             this.click(buttons[0]);

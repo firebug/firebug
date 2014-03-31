@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("formatTime.START");
-
     var testValues = [
         {expected: "0ms", value: 0},
         {expected: "123ms", value: 123},
@@ -67,5 +65,5 @@ function runTest()
                 value.decimalPlaces), msg);
     }
 
-    FBTest.testDone("formatTime.DONE");
+    FBTest.testDone();
 }

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5672: Missing color and image context menu items</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #element {
+            width: 100px;
+            height: 100px;
+            background: #8C8CFF url(firebug.png) center no-repeat;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5672">Issue 5672</a>: Missing color and image context menu items</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element"></div>
+            </section>
+            <section id="description">
+                <p class="note">
+                    This test also covers
+                    <a href="http://code.google.com/p/fbug/issues/detail?id=5677"
+                        title="Color and image context menu items are missing when infotips are turned off">issue 5677</a>
+                </p>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Style</em> side panel</li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> with the Firebug logo above</li>
+                    <li>
+                        Inside the <em>Style</em> side panel right-click on the color value
+                        (<code>#8c8cff</code>) of the <code>background</code> property inside the
+                        <code>#element</code> rule<br/>
+                        <span class="ok">&rArr; There should be an option <em>Copy Color</em>.</span>
+                    </li>
+                    <li>Click the <em>Copy Color</em> menu item</li>
+                    <li>
+                        Paste the clipboard content into a text editor<br/>
+                        <span class="ok">&rArr; The copied text should be <code>#8c8cff</code>.</span>
+                    </li>
+                    <li>
+                        Right-click on the image value (<code>url(firebug.png)</code>) of the
+                        <code>background</code> property<br/>
+                        <span class="ok">&rArr; There should be an option
+                        <em>Copy Image Location</em>.</span>
+                    </li>
+                    <li>Click the <em>Copy Image Location</em> menu item</li>
+                    <li>
+                        Paste the clipboard content into a text editor<br/>
+                        <span class="ok">&rArr; The copied text should be the URL of the image
+                        ending with <code>html/style/5672/firebug.png</code>.</span>
+                    </li>
+                    <li>
+                        Right-click on the image value (<code>url(firebug.png)</code>) of the
+                        <code>background</code> property<br/>
+                        <span class="ok">&rArr; There should be an option
+                        <em>Open Image In New Tab</em>.</span>
+                    </li>
+                    <li>
+                        Click the <em>Open Image In New Tab</em> menu item<br/>
+                        <span class="ok">&rArr; A new browser tab should open showing the Firebug logo.</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        There should be special context menu options for colors and images defined in CSS.
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

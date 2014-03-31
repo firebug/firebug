@@ -496,6 +496,10 @@ var MessageTemplate = domplate(Reps.Rep,
         {
             message.type = "DBG_BTI";
         }
+        else if (message.text && message.text.indexOf("!!!") == 0)
+        {
+            message.type = "DBG_EXCLAMATION";
+        }
 
         var scrollingNode = outputNodes.getScrollingNode();
         var scrolledToBottom = Dom.isScrolledToBottom(scrollingNode);

@@ -1,22 +1,21 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
-    "firebug/chrome/infotip",
-    "firebug/lib/domplate",
-    "firebug/debugger/script/sourceLink",
-    "firebug/lib/locale",
-    "firebug/lib/dom",
     "firebug/lib/css",
+    "firebug/lib/dom",
+    "firebug/lib/domplate",
+    "firebug/lib/fonts",
+    "firebug/lib/locale",
+    "firebug/lib/object",
     "firebug/lib/string",
-    "firebug/lib/fonts"
+    "firebug/chrome/infotip",
 ],
-function(Obj, InfoTip, Domplate, SourceLink, Locale, Dom, Css, Str, Fonts) {
+function(Css, Dom, Domplate, Fonts, Locale, Obj, Str, InfoTip) {
 
 // ********************************************************************************************* //
 // Constants
 
-var {domplate, FOR, DIV, TR, P, IMG, STYLE} = Domplate;
+var {domplate, FOR, TAG, DIV, SPAN, A, TR, P, IMG, STYLE} = Domplate;
 
 const maxWidth = 100;
 const maxHeight = 80;
@@ -185,6 +184,305 @@ var CSSInfoTip = Obj.extend(InfoTip,
     }
 });
 
+var CSSDomplateBase =
+{
+    isEditable: function(rule)
+    {
+        return !rule.isSystemSheet && !rule.isNotEditable;
+    },
+
+    isSelectorEditable: function(rule)
+    {
+        return rule.isSelectorEditable && this.isEditable(rule);
+    },
+
+    getPropertyValue: function(prop)
+    {
+        // Disabled, see http://code.google.com/p/fbug/issues/detail?id=5880
+        /*
+        var limit = Options.get("stringCropLength");
+        */
+        var limit = 0;
+        if (limit > 0)
+            return Str.cropString(prop.value, limit);
+        return prop.value;
+    }
+};
+
+var CSSPropTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssProp focusRow", $disabledStyle: "$prop.disabled",
+            $editGroup: "$rule|isEditable",
+            $cssOverridden: "$prop.overridden",
+            role: "option"},
+
+            // Use spaces for indent to make "copy to clipboard" nice.
+            SPAN({"class": "cssPropIndent"}, "&nbsp;&nbsp;&nbsp;&nbsp;"),
+            SPAN({"class": "cssPropName", $editable: "$rule|isEditable"},
+                "$prop.name"
+            ),
+
+            // Use a space here, so that "copy to clipboard" has it (issue 3266).
+            SPAN({"class": "cssColon"}, ": "),
+            SPAN({"class": "cssPropValue", $editable: "$rule|isEditable"},
+                "$prop|getPropertyValue$prop.important"
+            ),
+            SPAN({"class": "cssSemi"}, ";")
+        )
+});
+
+var CSSRuleTag =
+    TAG("$rule.tag", {rule: "$rule"});
+
+var CSSImportRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule insertInto focusRow importRule", _repObject: "$rule.rule"},
+        "@import &quot;",
+        A({"class": "objectLink", _repObject: "$rule.rule.styleSheet"}, "$rule.rule.href"),
+        "&quot;",
+        SPAN({"class": "separator"}, "$rule.rule|getSeparator"),
+        SPAN({"class": "cssMediaQuery", $editable: "$rule|isEditable"},
+            "$rule.rule.media.mediaText"),
+        ";"
+    ),
+
+    getSeparator: function(rule)
+    {
+        return rule.media.mediaText == "" ? "" : " ";
+    }
+});
+
+var CSSCharsetRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssCharsetRule", _repObject: "$rule.rule"},
+            SPAN({"class": "cssRuleName"}, "@charset"),
+            "&nbsp;&quot;",
+            SPAN({"class": "cssRuleValue", $editable: "$rule|isEditable"}, "$rule.rule.encoding"),
+            "&quot;;"
+        )
+});
+
+var CSSMediaRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssMediaRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"},
+                SPAN({"class": "cssRuleName"}, "@media"),
+                SPAN({"class": "separator"}, " "),
+                SPAN({"class": "cssMediaRuleCondition", $editable: "$rule|isEditable"},
+                    "$rule.rule.conditionText"),
+                SPAN(" {")
+            ),
+            DIV({"class": "cssRulesListBox", role: "listbox"},
+                FOR("subRule", "$rule.subRules",
+                    TAG("$subRule.tag", {rule: "$subRule"})
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+                "}")
+        )
+});
+
+var CSSSupportsRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssSupportsRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"},
+                SPAN({"class": "cssRuleName"}, "@supports"),
+                SPAN({"class": "separator"}, " "),
+                SPAN({"class": "cssSupportsRuleCondition", $editable: "$rule|isEditable"},
+                "$rule.rule.conditionText"),
+                SPAN(" {")
+            ),
+            DIV({"class": "cssRulesListBox", role: "listbox"},
+                FOR("subRule", "$rule.subRules",
+                    TAG("$subRule.tag", {rule: "$subRule"})
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+            "}")
+        )
+});
+
+var CSSKeyframesRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssKeyframesRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"},
+                SPAN({"class": "cssRuleName"}, "@keyframes"),
+                SPAN({"class": "separator"}, " "),
+                SPAN({"class": "cssKeyframesRuleName", $editable: "$rule|isEditable"},
+                "$rule.rule.name"),
+                SPAN(" {")
+            ),
+            DIV({"class": "cssRulesListBox", role: "listbox"},
+                FOR("subRule", "$rule.subRules",
+                    TAG("$subRule.tag", {rule: "$subRule"})
+                )
+            ),
+            DIV({role:"presentation"},
+                "}")
+        )
+});
+
+var CSSKeyframeRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule",
+                $cssEditableRule: "$rule|isEditable",
+                $insertInto: "$rule|isEditable",
+                $editGroup: "$rule|isSelectorEditable",
+                _repObject: "$rule.rule",
+                role: "presentation"},
+            DIV({"class": "cssHead focusRow", role: "listitem"},
+                SPAN({"class": "cssKeyText", $editable: "$rule|isEditable"},
+                    "$rule.rule.keyText"),
+                " {"
+            ),
+            DIV({role: "group"},
+                DIV({"class": "cssPropertyListBox", _rule: "$rule", role: "listbox"},
+                    FOR("prop", "$rule.props",
+                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
+                    )
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore: "$rule|isEditable",
+                role:"presentation"},
+                "}"
+            )
+        )
+});
+
+var CSSNamespaceRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssNamespaceRule", _repObject: "$rule.rule"},
+            SPAN({"class": "cssRuleName"}, "@namespace"),
+            SPAN({"class": "separator"}, "$rule.prefix|getSeparator"),
+            SPAN({"class": "cssNamespacePrefix", $editable: "$rule|isEditable"}, "$rule.prefix"),
+            "&nbsp;&quot;",
+            SPAN({"class": "cssNamespaceName", $editable: "$rule|isEditable"}, "$rule.name"),
+            "&quot;;"
+        ),
+
+    getSeparator: function(prefix)
+    {
+        return prefix == "" ? "" : " ";
+    }
+});
+
+var CSSFontFaceRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule cssFontFaceRule",
+            $cssEditableRule: "$rule|isEditable",
+            $insertInto: "$rule|isEditable",
+            _repObject: "$rule.rule",
+            role : 'presentation'},
+            DIV({"class": "cssHead focusRow", role : "listitem"}, "@font-face {"),
+            DIV({role : "group"},
+                DIV({"class": "cssPropertyListBox", role: "listbox"},
+                    FOR("prop", "$rule.props",
+                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
+                    )
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+                "}"
+            )
+        )
+});
+
+var CSSPageRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssPageRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"},
+                SPAN({"class": "cssRuleName"}, "@page"),
+                SPAN({"class": "separator"}, "$rule.selectorText|getSeparator"),
+                SPAN({"class": "cssPageRuleSelector", $editable: "$rule|isEditable"},
+                    "$rule.selectorText|getSelectorText"),
+                SPAN(" {")
+            ),
+            DIV({role : "group"},
+                DIV({"class": "cssPropertyListBox", role: "listbox"},
+                    FOR("prop", "$rule.props",
+                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
+                    )
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+                "}")
+        ),
+
+    getSeparator: function(selector)
+    {
+        return (!selector || selector == "") ? "" : " ";
+    },
+
+    getSelectorText: function(selector)
+    {
+        return selector || "";
+    }
+});
+
+var CSSDocumentRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssDocumentRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"},
+                SPAN({"class": "cssRuleName"}, "@-moz-document"),
+                SPAN({"class": "separator"}, " "),
+                SPAN({"class": "cssDocumentRuleCondition", $editable: "$rule|isEditable"},
+                "$rule.rule.conditionText"),
+                SPAN(" {")
+            ),
+            DIV({"class": "cssRulesListBox", role: "listbox"},
+                FOR("subRule", "$rule.subRules",
+                    TAG("$subRule.tag", {rule: "$subRule"})
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+            "}")
+        )
+});
+
+var CSSStyleRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule",
+            $cssEditableRule: "$rule|isEditable",
+            $insertInto: "$rule|isEditable",
+            $editGroup: "$rule|isSelectorEditable",
+            _repObject: "$rule.rule",
+            role: "presentation"},
+            DIV({"class": "cssHead focusRow", role: "listitem"},
+                SPAN({"class": "cssSelector", $editable: "$rule|isSelectorEditable"},
+                    "$rule.selector"),
+                " {"
+            ),
+            DIV({role: "group"},
+                DIV({"class": "cssPropertyListBox", _rule: "$rule", role: "listbox"},
+                    FOR("prop", "$rule.props",
+                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
+                    )
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore: "$rule|isEditable",
+                role:"presentation"},
+                "}"
+            )
+        )
+});
+
 // ********************************************************************************************* //
 // Local Helpers
 
@@ -218,7 +516,23 @@ function getFontFaceCSS(font)
 // ********************************************************************************************* //
 // Registration
 
-return CSSInfoTip;
+return {
+    CSSInfoTip: CSSInfoTip,
+    CSSDomplateBase: CSSDomplateBase,
+    CSSPropTag: CSSPropTag,
+    CSSRuleTag: CSSRuleTag,
+    CSSImportRuleTag: CSSImportRuleTag,
+    CSSCharsetRuleTag: CSSCharsetRuleTag,
+    CSSMediaRuleTag: CSSMediaRuleTag,
+    CSSSupportsRuleTag: CSSSupportsRuleTag,
+    CSSKeyframesRuleTag: CSSKeyframesRuleTag,
+    CSSKeyframeRuleTag: CSSKeyframeRuleTag,
+    CSSNamespaceRuleTag: CSSNamespaceRuleTag,
+    CSSFontFaceRuleTag: CSSFontFaceRuleTag,
+    CSSPageRuleTag: CSSPageRuleTag,
+    CSSDocumentRuleTag: CSSDocumentRuleTag,
+    CSSStyleRuleTag: CSSStyleRuleTag
+};
 
 // ********************************************************************************************* //
 });

@@ -7,10 +7,11 @@ define([
     "firebug/firefox/browserOverlayLib",
 ],
 function(FBTrace, Options, Locale, BrowserOverlayLib) {
-with (BrowserOverlayLib) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {$toolbarButton, $menupopupOverlay, $, $tooltip, $label, $toolbarItem, $el} = BrowserOverlayLib;
 
 // ********************************************************************************************* //
 // Firefox Toolbar Buttons
@@ -96,8 +97,8 @@ var BrowserToolbar =
         // TODO: merge into $toolbarButton?
         // toolbarpalette check is for seamonkey, where it is in the document
         if ((!$(doc, "firebug-badged-button") ||
-            $(doc, "firebug-badged-button").parentNode.tagName == "toolbarpalette")
-            && !Options.get("toolbarCustomizationDone"))
+            $(doc, "firebug-badged-button").parentNode.tagName == "toolbarpalette") &&
+            !Options.get("toolbarCustomizationDone"))
         {
             Options.set("toolbarCustomizationDone", true);
 
@@ -120,7 +121,7 @@ var BrowserToolbar =
                 navBar.ownerDocument.persist("nav-bar", "currentset");
 
                 // Check whether insertItem really works
-                var curSet = navBar.currentSet.split(",");
+                curSet = navBar.currentSet.split(",");
                 if (curSet.indexOf(startButtonId) == -1)
                     FBTrace.sysout("Startbutton; navBar.insertItem doesn't work", curSet);
 
@@ -155,4 +156,4 @@ var BrowserToolbar =
 return BrowserToolbar;
 
 // ********************************************************************************************* //
-}});
+});

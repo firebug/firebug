@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4724.START");
-
     var url = basePath + "script/4724/issue4724.html";
     FBTest.openNewTab(url, function(win)
     {
@@ -32,7 +30,7 @@ function runTest()
                             "Menu item must be checked");
                     }
 
-                    FBTest.testDone("issue4724.DONE");
+                    FBTest.testDone();
                 });
             });
         });

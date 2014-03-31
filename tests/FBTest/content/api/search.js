@@ -10,32 +10,29 @@
 // Constants
 
 // Must be synchronized with nsICompositionStringSynthesizer.
-const COMPOSITION_ATTR_RAWINPUT              = 0x02;
-const COMPOSITION_ATTR_SELECTEDRAWTEXT       = 0x03;
-const COMPOSITION_ATTR_CONVERTEDTEXT         = 0x04;
-const COMPOSITION_ATTR_SELECTEDCONVERTEDTEXT = 0x05;
+var COMPOSITION_ATTR_RAWINPUT = 0x02;
+var COMPOSITION_ATTR_SELECTEDRAWTEXT = 0x03;
+var COMPOSITION_ATTR_CONVERTEDTEXT = 0x04;
+var COMPOSITION_ATTR_SELECTEDCONVERTEDTEXT = 0x05;
 
 // ********************************************************************************************* //
 // Search API
 
 this.clearSearchField = function(callback)
 {
-    // FIX ME: characters should be sent into the search box individually
-    // (using key events) to simulate incremental search.
+    // Clear the search field by clicking on the icon at the left
     var searchBox = FW.Firebug.chrome.$("fbSearchBox");
-    searchBox.value = "";
+    var searchBoxText = FW.FBL.domUtils.getChildrenForNode(searchBox, true)[0];
+    var searchIcon = searchBoxText.getElementsByClassName("fbsearch-icon")[0];
 
-    var doc = searchBox.ownerDocument;
-    doc.defaultView.focus();
-    FBTest.focus(searchBox);
-
-    FBTest.sendKey("RETURN", "fbSearchBox");
+    FBTest.click(searchIcon);
 
     if (callback)
     {
         // Firebug uses search delay so, we need to wait till the panel is updated
         // (see firebug/chrome/searchBox module, searchDelay constant).
-        setTimeout(function() {
+        setTimeout(function()
+        {
             callback()
         }, 250);
     }
@@ -56,15 +53,19 @@ this.setSearchFieldText = function(searchText, callback)
         doc.defaultView.focus();
         FBTest.focus(searchBox);
 
-        // Send text into the input box.
-        FBTest.synthesizeText(searchText, doc.defaultView);
+        // Send text into the input box
+        // xxxsz: FBTest.synthesizeText() doesn't work when FBTest.clearSearchField() is called
+        // before it
+        // FBTest.synthesizeText(searchText, doc.defaultView);
+        sendString(searchText, doc.defaultView);
         FBTest.sendKey("RETURN", "fbSearchBox");
 
         if (callback)
         {
             // Firebug uses search delay so, we need to wait till the panel is updated
             // (see firebug/chrome/searchBox module, searchDelay constant).
-            setTimeout(function() {
+            setTimeout(function()
+            {
                 callback()
             }, 250);
         }
@@ -88,12 +89,7 @@ this.searchInScriptPanel = function(searchText, callback)
 
     FBTest.waitForDisplayedElement("script", config, function(element)
     {
-        // Wait till CodeMirror-highlightedLine is removed.
-        var attributes = {"class": "CodeMirror-highlightedLine"}
-        var doc = FBTestFirebug.getPanelDocument();
-        var recognizer = new MutationRecognizer(doc.defaultView, config.tagName,
-            null, null, attributes);
-        recognizer.onRecognizeAsync(callback);
+        FBTest.waitForLineUnhighlight(callback);
     });
 
     // Set search string into the search box.
@@ -160,14 +156,14 @@ this.searchInHtmlPanel = function(searchText, callback)
     searchBox.value = "";
 
     // The listener is automatically removed when the test window
-    // is unloaded in case the seletion actually doesn't occur,
+    // is unloaded in case the selection actually doesn't occur,
     // see FBTestSelection.js
-    FBTestApp.SelectionController.addListener(function selectionListener()
+    SelectionController.addListener(function selectionListener()
     {
         var sel = panel.document.defaultView.getSelection();
         if (sel && !sel.isCollapsed && sel.toString() == searchText)
         {
-            FBTestApp.SelectionController.removeListener(arguments.callee);
+            SelectionController.removeListener(arguments.callee);
             callback(sel);
         }
     });
@@ -183,13 +179,14 @@ this.searchInHtmlPanel = function(searchText, callback)
     FBTest.sendKey("RETURN", "fbSearchBox");
 };
 
+// xxxsz: This is broken when called multiple times. See also setSearchFieldText().
 this.synthesizeText = function(str, win)
 {
     synthesizeText({
         composition: {
             string: str,
             clauses: [
-                { length: str.length, attr: COMPOSITION_ATTR_RAWINPUT }
+                { length: str.length, attr: COMPOSITION_ATTR_CONVERTEDTEXT }
             ]
         },
         caret: { start: str.length, length: 0 }

@@ -68,7 +68,7 @@ var Exception = domplate(Rep,
         if (object.stack)
         {
             trace = StackTrace.parseToStackTrace(object.stack, context);
-            trace = StackFrame.cleanStackTraceOfFirebug(trace);
+            trace = StackFrame.removeChromeFrames(trace);
 
             if (!trace)
                 lineNo = 0;

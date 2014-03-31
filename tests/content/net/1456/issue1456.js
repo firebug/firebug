@@ -4,7 +4,6 @@ function runTest()
 {
     var startTime = new Date().getTime();
 
-    FBTest.sysout("issue1456.START");
     var responseText = "$('tb').shake();\n$('tb').value='Some Response';\n";
 
     FBTest.openNewTab(basePath + "net/1456/issue1456.htm", function(win)
@@ -58,7 +57,7 @@ function runTest()
                 FBTest.progress("done at "+ (time - startTime)+"ms");
 
                 // Finish test
-                FBTest.testDone("issue1456.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

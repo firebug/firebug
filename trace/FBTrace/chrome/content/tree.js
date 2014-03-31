@@ -14,13 +14,6 @@ function(FBTrace, Events, Reps, Css, Str, Obj, Domplate, Dom) {
 with (Domplate) {
 
 // ********************************************************************************************* //
-// Constants
-
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cu = Components.utils;
-
-// ********************************************************************************************* //
 // Domplate helpers - Tree (domplate widget)
 
 /**
@@ -141,23 +134,21 @@ var Tree = domplate(Reps.Rep,
         return members;
     },
 
+    hasMembers: function(value)
+    {
+        var type = typeof value;
+        if (type === "function" || type === "object")
+            return value && Obj.hasProperties(value);
+        else
+            return type === "string" && value.length > 50;
+    },
+
     createMember: function(type, name, value, level)
     {
         var rep = Reps.getRep(value);
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
-        var valueType = typeof(value);
 
-        var hasChildren = Obj.hasProperties(value) && !(value instanceof Reps.ErrorCopy) &&
-            (valueType == "function" || (valueType == "object" && value != null)
-            || (valueType == "string" && value.length > 50));
-
-        // Special case for Map() instance (from some reason instanceof Map doesn't work).
-        if (typeof (value.forEach) == "function")
-        {
-            value.forEach(function(value) {
-                hasChildren = true;
-            });
-        }
+        var hasChildren = this.hasMembers(value);
 
         return {
             name: name,

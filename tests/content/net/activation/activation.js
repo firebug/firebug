@@ -10,18 +10,21 @@ var tab2 = null;
 
 function runTest()
 {
-    FBTest.sysout("activation.START");
-
     // Open two tabs one after another, open Firebug on both and select Net panel.
-    tab1 = FBTest.openNewTab(basePath + "net/activation/activation1.html", function(win) {
+    tab1 = FBTest.openNewTab(basePath + "net/activation/activation1.html", function(win)
+    {
         FBTest.progress("Opened new tab at "+win.location);
-        FBTest.openFirebug();
-        FW.Firebug.chrome.selectPanel("net");
-        tab2 = FBTest.openNewTab(basePath + "net/activation/activation2.html", function() {
-            FBTest.progress("Opened new tab at "+win.location);
-            FBTest.openFirebug(function () {
-                FW.Firebug.chrome.selectPanel("net");
-                onRunTest();
+        FBTest.openFirebug(function()
+        {
+            FW.Firebug.chrome.selectPanel("net");
+            tab2 = FBTest.openNewTab(basePath + "net/activation/activation2.html", function()
+            {
+                FBTest.progress("Opened new tab at "+win.location);
+                FBTest.openFirebug(function ()
+                {
+                    FW.Firebug.chrome.selectPanel("net");
+                    onRunTest();
+                });
             });
         });
     });
@@ -36,9 +39,11 @@ function onRunTest(window)
     FBTest.enableNetPanel();
 
     // Select first tab, execute XHR and verify. Once it's done do the same for the other tab.
-    selectTabAndVerify(tab1, function() {
-        selectTabAndVerify(tab2, function() {
-            FBTest.testDone("activation.DONE");
+    selectTabAndVerify(tab1, function()
+    {
+        selectTabAndVerify(tab2, function()
+        {
+            FBTest.testDone();
         });
     });
 }

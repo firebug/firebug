@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("netInfoBodyListener.START");
     var NetInfoBody = FW.Firebug.NetMonitor.NetInfoBody;
     FBTest.openNewTab(basePath + "net/listeners/netInfoBodyListener.html", function(win)
     {
@@ -23,7 +22,7 @@ function runTest()
                 FBTest.ok(updateTabBody, "updateTabBody callback verified");
                 FBTest.ok(destroyTabBody, "destroyTabBody callback verified");
 
-                FBTest.testDone("netInfoBodyListener.DONE");
+                FBTest.testDone();
             });
         });
     });

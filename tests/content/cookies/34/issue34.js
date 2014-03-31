@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("cookies.test.issue34; START");
-
     FBTest.setPref("cookies.filterByPath", false);
 
     FBTest.openNewTab(basePath + "cookies/34/issue34.php", function(win)
@@ -15,7 +13,7 @@ function runTest()
 
             cookie = FBTest.getCookieByName(panelNode, "TestCookie34");
             FBTest.compare("ValueCookie34-modified", cookie.cookie.value, "Check new cookie value");
-            FBTest.testDone("cookies.test.issue34; DONE");
+            FBTest.testDone();
         });
     });
 };

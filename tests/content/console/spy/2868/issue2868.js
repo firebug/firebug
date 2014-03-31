@@ -1,31 +1,32 @@
 function runTest()
 {
-    FBTest.sysout("issue2868.START");
     FBTest.setPref("showXMLHttpRequests", true);
     FBTest.openNewTab(basePath + "console/spy/2868/issue2868.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(function()
         {
-            FBTest.waitForDisplayedElement("console", null, function(row)
+            FBTest.enableConsolePanel(function(win)
             {
-                var clickTarget = row.getElementsByClassName("spyTitleCol spyCol")[0];
-                FBTest.click(clickTarget);
-
-                var responseNode = row.getElementsByClassName(
-                    "netInfoResponseText netInfoText")[0];
-
-                if (FBTest.ok(responseNode, "Response tab must exist in"))
+                FBTest.waitForDisplayedElement("console", null, function(row)
                 {
-                    FBTest.compare("Response for test 2868.", responseNode.textContent,
-                        "Response text must match.");
-                }
+                    var clickTarget = row.getElementsByClassName("spyTitleCol spyCol")[0];
+                    FBTest.click(clickTarget);
 
-                FBTest.testDone("issue2868.DONE");
+                    var responseNode = row.getElementsByClassName(
+                        "netInfoResponseText netInfoText")[0];
+
+                    if (FBTest.ok(responseNode, "Response tab must exist in"))
+                    {
+                        FBTest.compare("Response for test 2868.", responseNode.textContent,
+                            "Response text must match.");
+                    }
+
+                    FBTest.testDone();
+                });
+
+                // Execute test implemented on the test page.
+                FBTest.click(win.document.getElementById("testButton"));
             });
-
-            // Execute test implemented on the test page.
-            FBTest.click(win.document.getElementById("testButton"));
         });
     });
 }

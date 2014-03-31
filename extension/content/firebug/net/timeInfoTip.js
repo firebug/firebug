@@ -210,7 +210,7 @@ var TimeInfoTip = domplate(Rep,
 
         var phases = context.netProgress.phases;
 
-        if (FBTrace.DBG_ERROR && phases.length == 0)
+        if (FBTrace.DBG_ERRORS && phases.length == 0)
             FBTrace.sysout("net.render; ERROR no phases");
 
         // Insert start request time. It's computed since the beginning (page load start time)

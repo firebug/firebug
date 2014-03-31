@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4889.START");
-
     FBTest.openNewTab(basePath + "script/breakpoints/4889/issue4889.html", function(win)
     {
         FBTest.enablePanels(["console", "script"], function(win)
@@ -46,7 +44,7 @@ function runTest()
                 }
 
                 // Finish test
-                FBTest.testDone("issue4889.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("callFirstFunction"));

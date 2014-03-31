@@ -17,11 +17,10 @@ function runTest()
         var nextContexts = browser.getBrowserContexts();
         FBTest.ok(nextContexts.length == (contexts.length + 1), "Should be a new browser context");
         var context = nextContexts[nextContexts.length - 1];
-        if (context) {
+        if (context)
             FBTest.compare(context.getURL(), url, "The URL should be " + url);
-        } else {
+        else
             FBTest.ok(context, "missing new browser context");
-        }
-        FBTest.testDone("done test #getContexts()");
+        FBTest.testDone();
     });
 }

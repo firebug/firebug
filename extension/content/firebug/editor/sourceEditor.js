@@ -30,7 +30,6 @@ var Cu = Components.utils;
 // Note that panel.html runs in content scope with restricted (no chrome) privileges.
 var codeMirrorSrc = "chrome://firebug/content/editor/codemirror/codemirror.js";
 var showHintSrc = "chrome://firebug/content/editor/codemirror/addon/show-hint.js";
-var searchSrc = "chrome://firebug/content/editor/codemirror/addon/search/search.js";
 var searchCursorSrc = "chrome://firebug/content/editor/codemirror/addon/search/searchcursor.js";
 var jsModeSrc = "chrome://firebug/content/editor/codemirror/mode/javascript.js";
 var htmlMixedModeSrc = "chrome://firebug/content/editor/codemirror/mode/htmlmixed.js";
@@ -151,6 +150,8 @@ SourceEditor.Events =
 SourceEditor.prototype =
 /** @lends SourceEditor */
 {
+    savedCursorLocation: null,
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
@@ -163,28 +164,31 @@ SourceEditor.prototype =
 
     onInit: function(parentNode, config, callback)
     {
+        this.parentNode = parentNode;
+
         var doc = parentNode.ownerDocument;
+        this.win = doc.defaultView;
 
         // Unwrap Firebug content view (panel.html). This view is running in
         // content mode with no chrome privileges.
-        var view = Wrapper.getContentView(doc.defaultView);
+        var contentView = Wrapper.getContentView(this.win);
 
-        Trace.sysout("sourceEditor.onInit; " + view.CodeMirror);
+        Trace.sysout("sourceEditor.onInit; " + contentView.CodeMirror);
 
         config = Obj.extend(SourceEditor.DefaultConfig, config);
 
         // The config object passed to the view must be content-accessible.
         // CodeMirror writes to it, so make sure properties are writable (we
-        // cannot use plain cloneIntoContentScope).
-        var newConfig = Cu.createObjectIn(view);
+        // cannot use plain cloneIntoCMScope).
+        var newConfig = new this.win.Object();
         for (var prop in config)
-            newConfig[prop] = Wrapper.cloneIntoContentScope(view, config[prop]);
+            newConfig[prop] = Wrapper.cloneIntoContentScope(this.win, config[prop]);
         Cu.makeObjectPropsNormal(newConfig);
 
         var self = this;
 
         // Create editor;
-        this.editorObject = view.CodeMirror(function(view)
+        this.editorObject = contentView.CodeMirror(function(view)
         {
             Trace.sysout("sourceEditor.onEditorCreate;");
 
@@ -222,7 +226,7 @@ SourceEditor.prototype =
 
     isInitialized: function()
     {
-        return (this.editorObject != null)
+        return (this.editorObject != null);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -244,7 +248,6 @@ SourceEditor.prototype =
 
         loader.addScript(doc, "cm", codeMirrorSrc);
         loader.addScript(doc, "cm-showhint", showHintSrc);
-        loader.addScript(doc, "cm-search", searchSrc);
         loader.addScript(doc, "cm-searchcursor", searchCursorSrc);
         loader.addScript(doc, "cm-js", jsModeSrc);
         loader.addScript(doc, "cm-xml", xmlModeSrc);
@@ -333,11 +336,6 @@ SourceEditor.prototype =
         {
             if (!this.BuiltInEventsHandlers || !this.BuiltInEventsHandlers[type])
                 return;
-
-            var func = function()
-            {
-                handler(getEventObject(type, arguments));
-            };
 
             for (var i = 0; i < this.BuiltInEventsHandlers[type].length; i++)
             {
@@ -559,7 +557,13 @@ SourceEditor.prototype =
 
     cloneIntoCMScope: function(obj)
     {
-        return Wrapper.cloneIntoContentScope(this.view, obj);
+        return Wrapper.cloneIntoContentScope(this.win, obj);
+    },
+
+    getCodeMirrorSingleton: function()
+    {
+        var contentView = Wrapper.getContentView(this.win);
+        return contentView.CodeMirror;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -579,7 +583,7 @@ SourceEditor.prototype =
 
     onCommand: function(event, cmd)
     {
-        Trace.sysout("sourceEditor.onCommand; " + cmd)
+        Trace.sysout("sourceEditor.onCommand; " + cmd);
 
         var map = {
             "cmd_selectAll": "selectAll",
@@ -599,12 +603,11 @@ SourceEditor.prototype =
 
     autoComplete: function(hintFunction)
     {
-        var doc = this.view.ownerDocument;
-        var view = Wrapper.getContentView(doc.defaultView);
         var clone = this.cloneIntoCMScope.bind(this);
-        var contentHintFunction = function()
+        var self = this;
+        var contentHintFunction = function(editor)
         {
-            var ret = hintFunction.apply(this, arguments);
+            var ret = hintFunction(self, editor);
             if (!ret)
                 return;
             return clone({
@@ -616,12 +619,12 @@ SourceEditor.prototype =
                 to: clone(ret.to)
             });
         };
-        view.CodeMirror.showHint(this.editorObject, contentHintFunction);
+        this.getCodeMirrorSingleton().showHint(this.editorObject, contentHintFunction);
     },
 
     tab: function()
     {
-        this.editorObject.execCommand("defaultTab");
+        this.editorObject.execCommand("indentMore");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -743,6 +746,11 @@ SourceEditor.prototype =
         this.highlighter.highlight(line);
     },
 
+    unhighlightLine: function()
+    {
+        this.removeHighlighter();
+    },
+
     removeHighlighter: function()
     {
         if (this.highlighter)
@@ -776,7 +784,9 @@ SourceEditor.prototype =
             // seting the source. So, we need to update it asynchronously :-(
             // (see also issue 7160)
             // We might want to re-check when the next CM version is used.
-            setTimeout(() =>
+            // xxxHonza: how to avoid using the Firebug.currentContext global?
+            var context = Firebug.currentContext;
+            context.setTimeout(() =>
             {
                 var scrollInfo = this.editorObject.getScrollInfo();
                 var hScrollBar = this.view.getElementsByClassName("CodeMirror-hscrollbar")[0];
@@ -786,7 +796,6 @@ SourceEditor.prototype =
                 var editorHeight = scrollInfo.clientHeight - hScrollBar.offsetHeight;
                 var top = coords.top;
                 var bottom = coords.bottom;
-                var lineHeight = this.editorObject.defaultTextHeight();
 
                 // Scroll only if the target line is outside of the viewport.
                 var scrollNeeded = (top <= scrollInfo.top ||
@@ -845,6 +854,18 @@ SourceEditor.prototype =
     focus: function()
     {
         this.editorObject.focus();
+        if (this.savedCursorLocation)
+        {
+            this.setSelection(this.savedCursorLocation.start, this.savedCursorLocation.end);
+            this.savedCursorLocation = null;
+        }
+    },
+
+    blur: function(saveCursorLocation)
+    {
+        if (saveCursorLocation)
+            this.savedCursorLocation = this.getSelection();
+        this.win.blur();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -930,10 +951,64 @@ SourceEditor.prototype =
         var currentLine = viewport.from;
 
         // Iterate over all visible lines.
-        this.editorObject.eachLine(viewport.from, viewport.to, (handle) =>
+        this.editorObject.eachLine(viewport.from, viewport.to, () =>
         {
             this.removeGutterMarker(bpGutter, currentLine++);
         });
+    },
+
+    getCodeMirrorStateForBreakpointLine: function(lineNo)
+    {
+        // Let's assume the breakpoint breaks at around the start of this line.
+        // Start by searching for the next non-comment, non-whitespace CodeMirror
+        // token, which holds the most relevant parse state.
+        // ({line: lineNo, ch: 0} is one step behind apparently.)
+        // We limit ourselves to 500 tokens of look-ahead as a precaution, though
+        // it's probably unnecessary).
+        var editor = this.editorObject;
+        var ch = 1, line = lineNo;
+        var token;
+        for (var steps = 0; steps < 500; steps++)
+        {
+            token = editor.getTokenAt(this.cloneIntoCMScope({line: line, ch: ch}));
+            if (!token.end || (token.string.trim() && token.type !== "comment"))
+                break;
+
+            if (token.end >= ch)
+            {
+                ch = token.end + 1;
+            }
+            else
+            {
+                ch = 1;
+                line++;
+            }
+        }
+
+        if (steps == 500)
+            TraceError.sysout("getCodeMirrorStateForBreakpointLine; too much look-ahead");
+
+        var cm = this.getCodeMirrorSingleton();
+        return cm.innerMode(editor.getMode(), token.state).state;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getSurroundingVariablesFromCodeMirrorState: function(state)
+    {
+        var list = [];
+        if (!state || !state.localVars)
+            return list;
+        var addVars = function(vars)
+        {
+            for (var v = vars; v; v = v.next)
+                list.push(v.name);
+        };
+        addVars(state.localVars);
+        addVars(state.globalVars);
+        for (var c = state.context; c && c.vars; c = c.prev)
+            addVars(c.vars);
+        return list;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1019,6 +1094,24 @@ SourceEditor.prototype =
         // Return index (zero based)
         return lineNo - 1;
     },
+
+    // Method used for the hack of issue 6824 (Randomly get "Unresponsive Script Warning" with 
+    // commandEditor.html). Adds or removes the .CommandEditor-Hidden class.
+    // IMPORTANT: that method should only be used within the Firebug code, and may be removed soon.
+    addOrRemoveClassCommandEditorHidden: function(addClass)
+    {
+        if (!this.view)
+        {
+            TraceError.sysout("SourceEditor.addOrRemoveClassCommandEditorHidden; " +
+                "the view is undefined. Abort!");
+            return;
+        }
+
+        if (addClass)
+            this.view.classList.add("CommandEditor-hidden");
+        else
+            this.view.classList.remove("CommandEditor-hidden");
+    }
 };
 
 // ********************************************************************************************* //
@@ -1106,10 +1199,19 @@ LineHighlighter.prototype =
             this.line = line;
             var handle = this.cm.getLineHandle(line);
             this.cm.addLineClass(handle, "wrap", HIGHLIGHTED_LINE_CLASS);
+
+            var lineText = this.editor.getDocument().getLine(this.line);
+            var panel = Firebug.getElementPanel(this.editor.parentNode);
+            Firebug.dispatchEvent(panel.context.browser, "onLineHighlight",
+                [this.line, lineText]);
         }
 
         // Unhighlight after a timeout.
-        this.timeout = setTimeout(this.unhighlight.bind(this), unhighlightDelay);
+        // xxxHonza: it's not nice to use the Firebug.currentContext global, but every
+        // setTimeout should be initialized through the context. It ensures that
+        // any running timeout is cleared when the context is destroyed.
+        var context = Firebug.currentContext;
+        this.timeout = context.setTimeout(this.unhighlight.bind(this), unhighlightDelay);
     },
 
     unhighlight: function()
@@ -1124,6 +1226,11 @@ LineHighlighter.prototype =
 
         // Do not forget to delete the highlighter.
         this.editor.highlighter = null;
+
+        var lineText = this.editor.getDocument().getLine(this.line);
+        var panel = Firebug.getElementPanel(this.editor.parentNode);
+        Firebug.dispatchEvent(panel.context.browser, "onLineUnhighlight",
+            [this.line, lineText]);
     },
 
     cancel: function()
@@ -1131,7 +1238,7 @@ LineHighlighter.prototype =
         clearInterval(this.timeout);
         this.unhighlight();
     }
-}
+};
 
 // ********************************************************************************************* //
 // Support for Debugging - Tracing
@@ -1217,7 +1324,7 @@ ScriptLoader.prototype =
         if (!this.scripts.length)
             this.callback();
     }
-}
+};
 
 // ********************************************************************************************* //
 // Registration

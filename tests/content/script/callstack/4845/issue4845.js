@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4845.START");
-
     FBTest.openNewTab(basePath + "script/callstack/4845/issue4845.html", function(win)
     {
         FBTest.enablePanels(["script", "console"], function()
@@ -39,7 +37,7 @@ function runTest()
                         "There must be two 'Hello Firebug user!' messages logged to the console.");
 
                     FBTest.clickContinueButton();
-                    FBTest.testDone("issue4845.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.sendShortcut("VK_F8", {shiftKey: true});

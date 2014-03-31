@@ -1,13 +1,8 @@
 function runTest()
 {
-    FBTest.sysout("profilerGrouping.START");
     FBTest.openNewTab(basePath + "console/grouping/profiler.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("console");
-
-        FBTest.enableScriptPanel();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.enablePanels(["console", "script"], function(win)
         {
             var config = {
                 tagName: "div",
@@ -25,10 +20,10 @@ function runTest()
                 FBTest.compare("", rows[0].textContent, "The log counter must be empty");
                 FBTest.compare("", rows[1].textContent, "The log counter must be empty");
 
-                FBTest.testDone("profilerGrouping.DONE");
+                FBTest.testDone();
             });
 
-            FBTest.click(win.document.getElementById("testButton"));
+            FBTest.clickContentButton(win, "testButton");
         });
     });
 }

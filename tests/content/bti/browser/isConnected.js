@@ -8,11 +8,14 @@
 function runTest()
 {
     var browser = new FW.Firebug.BTI.Browser(); // TODO
-    if (browser.isConnected()) {
+    if (browser.isConnected())
+    {
         browser.disconnect();
         FBTest.ok(!browser.isConnected(), "browser should be disconnected");
-    } else {
+    }
+    else
+    {
         FBTest.ok(false, "browser should be connected");
     }
-    FBTest.testDone("done test #getContexts()");
+    FBTest.testDone();
 }

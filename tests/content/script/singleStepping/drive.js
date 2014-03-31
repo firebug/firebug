@@ -1,131 +1,59 @@
 function runTest()
 {
-    FBTest.sysout("1603 runTest starts");
-
     FBTest.openNewTab(basePath + "script/singleStepping/index.html", function()
     {
-        FBTest.clearCache();
-        FBTest.enableScriptPanel(function callbackOnReload(testWindow)
+        FBTest.enableScriptPanel(function(win)
         {
-            win = testWindow;
-            selectFile();
+            var tasks = new FBTest.TaskList();
+
+            // Break in inline event handler
+            tasks.push(breakOnNext, 1, "onclick", win);
+
+            // Step into the page
+            tasks.push(step, FBTest.stepInto, 14, "index.html");
+
+            // Step over within the page
+            tasks.push(step, FBTest.stepOver, 15, "index.html");
+
+            // One more step over at the end of the function (shows result value)
+            tasks.push(step, FBTest.stepOver, 15, "index.html");
+
+            // Step out back to the event handler.
+            tasks.push(step, FBTest.stepOut, 1, "onclick");
+
+            tasks.run(function()
+            {
+                FBTest.testDone();
+            });
         });
     });
 }
 
-var fileName = "index.html";
-var breakOnNextLineNo = 2;
-
-function selectFile()
+function breakOnNext(callback, targetLine, fileName, win)
 {
-    FBTest.progress("selectFile");
+    var chrome = FW.Firebug.chrome;
 
-    // Select proper JS file.
-    var panel = FBTest.getSelectedPanel();
+    FBTest.clickBreakOnNextButton(chrome, function()
+    {
+        FBTest.waitForBreakInDebugger(chrome, targetLine, false, function(row)
+        {
+            var label = FBTest.getCurrentLocation();
+            FBTest.ok(label.indexOf(fileName) != -1, "The location must be expected: " + fileName);
+            callback();
+        });
 
-    var found = FBTest.selectPanelLocationByName(panel, fileName);
-    FBTest.compare(found, true, "The " + fileName + " should be found");
-
-    if (found)
-        breakOnNext(panel);
-    else
-        FBTest.testDone("issue1603.DONE");
+        FBTest.click(win.document.getElementById("clicker"));
+    });
 }
 
-function breakOnNext(panel)
+function step(callback, stepFunction, targetLine, fileName)
 {
-    FBTest.clickBreakOnNextButton(FW.Firebug.chrome);
-    FBTest.progress("The breakOnNext button was pushed");
+    var chrome = FW.Firebug.chrome;
 
-    var button = FW.Firebug.chrome.$("fbBreakOnNextButton");
-    FBTest.compare("false", button.getAttribute("breakable"), "The button is armed for break")
-
-    FBTest.progress("Listen for exeline true, meaning the breakOnNext hit");
-
-    FBTest.waitForBreakInDebugger(FW.Firebug.chrome,
-        breakOnNextLineNo, false, checkBreakOnNext);
-
-    var testPageButton = win.document.getElementById("clicker");
-    FBTest.click(testPageButton);
-}
-
-function checkBreakOnNext()
-{
-    stepInto();
-}
-
-var stepIntoLineNo = 14;
-
-function stepInto()
-{
-    FBTest.waitForBreakInDebugger(FW.Firebug.chrome,
-        stepIntoLineNo, false, checkStepInto);
-
-    FBTest.progress("Press single step button");
-    FBTest.clickToolbarButton(FW.Firebug.chrome, "fbStepIntoButton");
-};
-
-var stepIntoFileName = "index.html";
-
-function checkStepInto()
-{
-    var panel = FBTest.getSelectedPanel();
-    var name = panel.getObjectDescription(panel.location).name;
-    FBTest.compare(stepIntoFileName, name, "StepInto should land in " + stepIntoFileName);
-    stepOver();
-};
-
-function stepOver()
-{
-    FBTest.waitForBreakInDebugger(FW.Firebug.chrome,
-        stepOverLineNo, false, checkStepOver);
-
-    FBTest.progress("Press single over button");
-    FBTest.clickToolbarButton(FW.Firebug.chrome, "fbStepOverButton");
-}
-
-var stepOverLineNo = 15;
-var stepOverFileName = "index.html";
-
-function checkStepOver()
-{
-    var panel = FBTest.getSelectedPanel();
-    var name = panel.getObjectDescription(panel.location).name;
-    FBTest.compare(stepOverFileName, name, "StepOver should land in " +
-        stepOverFileName);
-
-    stepOut();
-};
-
-function stepOut()
-{
-    FBTest.waitForBreakInDebugger(FW.Firebug.chrome,
-        stepOutLineNo, false, checkstepOut);
-
-    FBTest.progress("Press single StepOut button");
-    FBTest.clickToolbarButton(FW.Firebug.chrome, "fbStepOutButton");
-}
-
-var stepOutLineNo = 2;
-var stepOutFileName = "onclick";
-
-function checkstepOut()
-{
-    var panel = FBTest.getSelectedPanel();
-    var name = panel.getObjectDescription(panel.location).name.split("/")[0];
-
-    FBTest.sysout("panel.location.getObjectDescription().name: " +
-        panel.getObjectDescription(panel.location).name,
-        panel.getObjectDescription(panel.location));
-
-    FBTest.compare(stepOutFileName, name, "StepOut should land in " +
-        stepOutFileName);
-
-    var row = FBTest.getSourceLineNode(stepOutLineNo);
-    if (!row)
-        FBTest.sysout("Failing row is "+row.parentNode.innerHTML, row);
-
-    FBTest.clickContinueButton();
-
-    FBTest.testDone("singleStepping.DONE");
+    stepFunction(targetLine, function()
+    {
+        var label = FBTest.getCurrentLocation();
+        FBTest.ok(label.indexOf(fileName) != -1, "The location must be expected: " + fileName);
+        callback();
+    });
 }

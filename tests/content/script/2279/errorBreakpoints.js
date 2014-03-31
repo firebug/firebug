@@ -28,7 +28,7 @@ function runTest()
                     {
                         FBTest.clickContinueButton();
                         FBTest.progress("Break on error!");
-                        FBTest.testDone("exampleScript2.DONE");
+                        FBTest.testDone();
                     });
 
                     FBTest.reload(function(win)

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>@-rules display within CSS panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <link href="atCharset.css" type="text/css" rel="stylesheet"/>
+        <link href="atDocument.css" type="text/css" rel="stylesheet"/>
+        <link href="atKeyframes.css" type="text/css" rel="stylesheet"/>
+        <link href="atPage.css" type="text/css" rel="stylesheet"/>
+        <link href="atSupports.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1>@-rules display within CSS panel</h1>
+        </header>
+        <div>
+            <section id="description">
+                <p class="note">
+                    Note: This test case covers
+                    <a href="http://code.google.com/p/fbug/issues/detail?id=5262" title="Show @charset rules inside CSS panel">Issue 5262</a>,
+                    <a href="http://code.google.com/p/fbug/issues/detail?id=5289" title="Show @page rules inside CSS panel">Issue 5289</a>,
+                    <a href="http://code.google.com/p/fbug/issues/detail?id=5290" title="Show @-moz-keyframes rules inside CSS panel">Issue 5290</a>,
+                    <a href="http://code.google.com/p/fbug/issues/detail?id=5429" title="Show @-moz-document rules inside CSS panel">Issue 5429</a> and
+                    <a href="http://code.google.com/p/fbug/issues/detail?id=5912" title="Show @supports rules inside CSS panel">Issue 5912</a>
+                </p>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>Select one of the <em>at*.css</em> files from the Location Menu</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        There should be a related @-rule (<code>@supports</code>,
+                        <code>@-moz-document</code>, <code>@keyframes</code>, <code>@page</code>,
+                        <code>@charset</code>) displayed inside the <em>CSS</em> panel
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

@@ -1,10 +1,6 @@
-// Custom timeout for this test.
-window.FBTestTimeout = 25000;
-
 // FBTest entry point
 function runTest()
 {
-    FBTest.sysout("search; START");
     FBTest.openNewTab(basePath + "search/scriptVictim.htm", function(win)
     {
         FBTest.enableScriptPanel(function(win)
@@ -18,18 +14,21 @@ function runTest()
             testSuite.push(function(callback)
             {
                 FBTest.selectPanelLocationByName(panel, "scriptVictim.htm");
-                executeSearchTest("script", false, false, true, function(counter)
+                FBTest.waitForDisplayedText("script", "Search Test Page", function(row)
                 {
-                    FBTest.sysout("search; Case insensitive test finished", counter);
+                    executeSearchTest("script", false, false, true, 30, function(counter)
+                    {
+                        FBTest.progress("search; Case insensitive test finished", counter);
 
-                    verifySearchResults({
-                        "scriptVictim.htm": 8,
-                        "htmlIframe.htm": 3,
-                        "script1.js": 5,
-                        "script2.js": 1
-                    }, counter);
+                        verifySearchResults({
+                            "scriptVictim.htm": 18,
+                            "htmlIframe.htm": 5,
+                            "script1.js": 5,
+                            "script2.js": 2
+                        }, counter);
 
-                    callback();
+                        callback();
+                    });
                 });
             });
 
@@ -37,9 +36,9 @@ function runTest()
             testSuite.push(function(callback)
             {
                 FBTest.selectPanelLocationByName(panel, "scriptVictim.htm");
-                executeSearchTest("Script", false, true, true, function(counter)
+                executeSearchTest("Script", false, true, true, 4, function(counter)
                 {
-                    FBTest.sysout("search; Case sensitive test finished", counter);
+                    FBTest.progress("search; Case sensitive test finished", counter);
 
                     verifySearchResults({
                         "scriptVictim.htm": 1,
@@ -56,9 +55,9 @@ function runTest()
             testSuite.push(function(callback)
             {
                 FBTest.selectPanelLocationByName(panel, "scriptVictim.htm");
-                executeSearchTest("script", false, false, false, function(counter)
+                executeSearchTest("script", false, false, false, 8, function(counter)
                 {
-                    FBTest.sysout("search; Search within one file finished", counter);
+                    FBTest.progress("search; Search within one file finished", counter);
 
                     verifySearchResults({
                         "scriptVictim.htm": 8,
@@ -71,8 +70,9 @@ function runTest()
                 });
             });
 
-            FBTest.runTestSuite(testSuite, function() {
-                FBTest.testDone("search; DONE");
+            FBTest.runTestSuite(testSuite, function()
+            {
+                FBTest.testDone();
             });
         });
     });
@@ -82,6 +82,7 @@ function runTest()
 function doSearch(text, reverse, caseSensitive, global, callback)
 {
     FW.Firebug.chrome.$("fbSearchBox").value = text;
+
     FBTest.setPref("searchCaseSensitive", caseSensitive);
     FBTest.setPref("searchGlobal", global);
 
@@ -91,25 +92,20 @@ function doSearch(text, reverse, caseSensitive, global, callback)
 }
 
 // Execute one test.
-function executeSearchTest(text, reverse, caseSensitive, global, callback)
+function executeSearchTest(text, reverse, caseSensitive, global, total, callback)
 {
     // Add panel listener.
     var panel = FBTest.getPanel("script");
     var panelNode = panel.panelNode;
-    panelNode.addEventListener("DOMAttrModified", onFound, false);
 
     var counter = {};
-    var prevMatch, firstMatch;
+    var totalMatches = 0;
 
-    // If a match is found a "jumpHighlight" style is used to highlight the source
-    // line. Use DOMAttrModified event to track this.
-    function onFound(event)
+    var listener =
     {
-        var target = event.target;
-        if (event.attrName == "class" && event.newValue.indexOf("jumpHighlight") > -1)
+        onLineHighlight: function(lineNum, lineText)
         {
-            var lineNumEl = target.getElementsByClassName("sourceLine")[0];
-            var lineNum = parseInt(lineNumEl.textContent.replace(/\s/g, ''));
+            lineNum = lineNum + 1;
 
             var href = (panel.location ? (panel.location.url || panel.location.href) : undefined);
 
@@ -121,50 +117,37 @@ function executeSearchTest(text, reverse, caseSensitive, global, callback)
             FBTest.sysout("match found for '" + text +"': " + match.href +
                 " (" + match.line + ") when panel.location ", panel.location);
 
-            var isFirstMatch = false;
-
-            // If we have found a next match make verification.
-            if (prevMatch)
-            {
-                isFirstMatch = firstMatch.href == match.href && firstMatch.line == match.line;
-                if (!isFirstMatch && prevMatch.href == match.href)
-                {
-                    if ((match.line < prevMatch.line) != reverse)
-                    {
-                        FBTest.sysout("search; line order is not correct " + isFirstMatch,
-                            [match, prevMatch, firstMatch]);
-
-                        FBTest.ok(false, "Line order is NOT correct: " + match.line + " " +
-                            prevMatch.line + " " + match.href);
-                    }
-                }
-            }
-
-            // Remember the very first an the previous match.
-            firstMatch = firstMatch || match;
-            prevMatch = match;
-
             // If it isn't again the first match do next search (pressing enter key).
             // If we have reached the end of the last file and starting again, finish
             // the test.
-            if (!isFirstMatch)
+            if (total > totalMatches)
             {
                 var href = match.href.substr(match.href.lastIndexOf("/") + 1);
                 counter[href] = (counter[href] || 0) + 1;
 
-                setTimeout(function(){
+                totalMatches++;
+
+                // Unhighlight manually, so we can immediatelly wait for the next
+                // highlight line event.
+                FBTest.unhighlightScriptPanelLine();
+
+                // The timeout is here mainly to get rid off the current stack
+                // and avoid UI freezing a bit.
+                setTimeout(function()
+                {
                     doSearch(text, reverse, caseSensitive, global, callback);
-                }, 400);
+                }, 50);
             }
             else
             {
-                panelNode.removeEventListener("DOMAttrModified", onFound, false);
+                DebuggerController.removeListener(browser, listener);
                 callback(counter);
             }
         }
-    }
+    };
 
-    panelNode.addEventListener("DOMAttrModified", onFound, false);
+    var browser = FBTest.getCurrentTabBrowser();
+    DebuggerController.addListener(browser, listener);
 
     // Start search.
     doSearch(text, reverse, caseSensitive, global, callback);
@@ -174,6 +157,8 @@ function executeSearchTest(text, reverse, caseSensitive, global, callback)
 function verifySearchResults(expected, actual)
 {
     for (var file in expected)
+    {
         FBTest.compare(expected[file], actual[file],
             "There must be " + expected[file] + " lines with 'Script' in " + file);
+    }
 }

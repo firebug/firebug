@@ -1,30 +1,31 @@
 function runTest()
 {
-    FBTest.sysout("issue3421.START");
     FBTest.setPref("commandLineShowCompleterPopup", true);
     FBTest.openNewTab(basePath + "console/completion/3421/issue3421.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(function()
         {
-            var panel = FW.Firebug.chrome.selectPanel("console");
-
-            var tasks = new FBTest.TaskList();
-            tasks.push(testExpression, "a={}.", false);
-            tasks.push(testExpression, "1+i", true);
-            tasks.push(testExpression, "{}i", true);
-            tasks.push(testExpression, "if(false)document.", true);
-            tasks.push(testExpression, "my_var.", true);
-            tasks.push(testExpression, "0<i", true);
-            tasks.push(testExpression, "$myvar.", true);
-            tasks.push(testExpression, "myvar2.", false);
-
-            tasks.run(function()
+            FBTest.enableConsolePanel(function(win)
             {
-                FBTest.ok(typeof(window.a) == "undefined",
-                    "There must not be a new global");
+                var panel = FW.Firebug.chrome.selectPanel("console");
 
-                FBTest.testDone("issue3421.DONE");
+                var tasks = new FBTest.TaskList();
+                tasks.push(testExpression, "a={}.", false);
+                tasks.push(testExpression, "1+i", true);
+                tasks.push(testExpression, "{}i", true);
+                tasks.push(testExpression, "if(false)document.", true);
+                tasks.push(testExpression, "my_var.", true);
+                tasks.push(testExpression, "0<i", true);
+                tasks.push(testExpression, "$myvar.", true);
+                tasks.push(testExpression, "myvar2.", false);
+
+                tasks.run(function()
+                {
+                    FBTest.ok(typeof(window.a) == "undefined",
+                        "There must not be a new global");
+
+                    FBTest.testDone();
+                });
             });
         });
     });

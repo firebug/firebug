@@ -1,75 +1,75 @@
 var basePath5358 = basePath+"html/5358/";
 function runTest()
 {
-    FBTest.sysout("issue5358.START");
-
     FBTest.openNewTab(basePath5358 + "issue5358.html", function(win)
     {
-        FBTest.openFirebug();
-        var panel = FBTest.selectPanel("html");
-        if (FBTest.ok(panel, "Firebug must be opened and switched to HTML panel now."))
+        FBTest.openFirebug(function()
         {
-            // ***********************************************************************************//
-            // HTML
-
-            // Test functionality must be placed here
-            var tasks = new FBTest.TaskList();
-            tasks.push(copyAndPasteContent, "onlyCell", "fbPasteReplaceOuter",
-                '<td id="middleCell">Foo!</td>');
-            tasks.push(copyAndPasteContent, "middleCell", "fbPasteReplaceInner",
-                '<b id="boldMiddleCell">Middle</b>');
-            tasks.push(copyAndPasteContent, "middleRow", "fbPasteFirstChild",
-                '<td id="leftCell">Left</td>');
-            tasks.push(copyAndPasteContent, "middleRow", "fbPasteLastChild",
-                '<td id="rightCell">Right</td>');
-            tasks.push(copyAndPasteContent, "middleRow", "fbPasteBefore",
-                '<tr id="topRow"><td colspan="3" id="topCell">Top</td></tr>');
-            tasks.push(copyAndPasteContent, "middleRow", "fbPasteAfter",
-                '<tr id="bottomRow"><td colspan="3" id="bottomCell">Bottom</td></tr>');
-
-            tasks.push(checkTableContent);
-
-            // check that the "Replace Node", "Before" and "After" items are disabled
-            tasks.push(checkDisabledItemsOnRootElement);
-
-
-            // ***********************************************************************************//
-            // XML
-
-            tasks.push(FBTest.openURL.bind(FBTest, basePath5358 + "issue5358_xml.html"));
-
-
-            // set the new context baseWindow
-            tasks.push(setBaseWindow);
-            // run the tests:
-            tasks.push(copyAndPasteXMLContent, "onlyContent", "fbPasteReplaceOuter",
-                '<item id="3">Item Number</item>');
-            tasks.push(copyAndPasteXMLContent, "3", "fbPasteReplaceInner", "3");
-            tasks.push(copyAndPasteXMLContent, "root", "fbPasteFirstChild",
-                '<item id="2">2</item>');
-            tasks.push(copyAndPasteXMLContent, "root", "fbPasteLastChild", '<item id="4">4</item>');
-            tasks.push(copyAndPasteXMLContent, "2", "fbPasteBefore", '<item id="1">1</item>');
-            tasks.push(copyAndPasteXMLContent, "4", "fbPasteAfter", '<item id="5">5</item>');
-
-            tasks.push(checkXMLContent);
-
-            tasks.run(function()
+            var panel = FBTest.selectPanel("html");
+            if (FBTest.ok(panel, "Firebug must be opened and switched to HTML panel now."))
             {
-                FBTest.testDone("issue5358.DONE");
-            });
-        }
+                // ***********************************************************************************//
+                // HTML
+
+                // Test functionality must be placed here
+                var tasks = new FBTest.TaskList();
+                tasks.push(copyAndPasteContent, "onlyCell", "fbPasteReplaceOuter",
+                    '<td id="middleCell">Foo!</td>');
+                tasks.push(copyAndPasteContent, "middleCell", "fbPasteReplaceInner",
+                    '<b id="boldMiddleCell">Middle</b>');
+                tasks.push(copyAndPasteContent, "middleRow", "fbPasteFirstChild",
+                    '<td id="leftCell">Left</td>');
+                tasks.push(copyAndPasteContent, "middleRow", "fbPasteLastChild",
+                    '<td id="rightCell">Right</td>');
+                tasks.push(copyAndPasteContent, "middleRow", "fbPasteBefore",
+                    '<tr id="topRow"><td colspan="3" id="topCell">Top</td></tr>');
+                tasks.push(copyAndPasteContent, "middleRow", "fbPasteAfter",
+                    '<tr id="bottomRow"><td colspan="3" id="bottomCell">Bottom</td></tr>');
+
+                tasks.push(checkTableContent);
+
+                // check that the "Replace Node", "Before" and "After" items are disabled
+                tasks.push(checkDisabledItemsOnRootElement);
+
+                // ***********************************************************************************//
+                // XML
+
+                tasks.push(FBTest.openURL.bind(FBTest, basePath5358 + "issue5358_xml.html"));
+
+                // set the new context baseWindow
+                tasks.push(setBaseWindow);
+                // run the tests:
+                tasks.push(copyAndPasteXMLContent, "onlyContent", "fbPasteReplaceOuter",
+                    '<item id="3">Item Number</item>');
+                tasks.push(copyAndPasteXMLContent, "3", "fbPasteReplaceInner", "3");
+                tasks.push(copyAndPasteXMLContent, "root", "fbPasteFirstChild",
+                    '<item id="2">2</item>');
+                tasks.push(copyAndPasteXMLContent, "root", "fbPasteLastChild", '<item id="4">4</item>');
+                tasks.push(copyAndPasteXMLContent, "2", "fbPasteBefore", '<item id="1">1</item>');
+                tasks.push(copyAndPasteXMLContent, "4", "fbPasteAfter", '<item id="5">5</item>');
+
+                tasks.push(checkXMLContent);
+
+                tasks.run(function()
+                {
+                    FBTest.testDone();
+                });
+            }
+        });
     });
 }
-
 
 function copyAndPasteContent(callback, target, menuId, contentToPaste)
 {
     FBTest.selectElementInHtmlPanel(target, function(nodeBox)
     {
-        FBTest.setClipboardText(contentToPaste);
+        function copy()
+        {
+            FBTest.setClipboardText(contentToPaste);
+        }
 
         // The clipboard content might be set asynchronously on some machines.
-        FBTest.waitForClipboard(contentToPaste, function()
+        FBTest.waitForClipboard(contentToPaste, copy, function()
         {
             FBTest.executeContextMenuCommand(nodeBox, menuId, callback);
         });
@@ -116,6 +116,7 @@ function checkDisabledItemsOnRootElement(callback)
 
 function checkTableContent(callback)
 {
+    // Do the querySelectorAll to check whether the elements are placed in the right order.
     var childrenOk = FW.Firebug.currentContext.window.document.querySelectorAll(
         "#table > tbody > #topRow:nth-child(1) > #topCell, "+
         "#table > tbody > #middleRow:nth-child(2) > #leftCell, "+
@@ -134,7 +135,14 @@ function checkTableContent(callback)
 
 function checkXMLContent(callback)
 {
-    var childrenOk = FW.Firebug.currentContext.baseWindow.document.querySelectorAll(
+    // Hack: remove the style element that will trouble the querySelectorAll below.
+    var doc = FW.Firebug.currentContext.baseWindow.document;
+    var style = doc.querySelector("style");
+    if (style)
+        style.remove();
+
+    // Do the querySelectorAll to check whether the elements are placed in the right order.
+    var childrenOk = doc.querySelectorAll(
         "root > item[id='1']:nth-child(1), "+
         "root > item[id='2']:nth-child(2), "+
         "root > item[id='3']:nth-child(3), "+

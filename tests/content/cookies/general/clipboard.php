@@ -1,5 +1,5 @@
 <?php
-    setcookie('CopyPasteCookie', 'Test Cookie Value', 1565778363, '/dir', '', false);
+    setcookie('CopyPasteCookie', 'Test Cookie Value', 2000000000, '/dir', '', false);
 ?>
 
 <!DOCTYPE html>

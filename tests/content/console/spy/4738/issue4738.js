@@ -1,38 +1,42 @@
 function runTest()
 {
-    FBTest.sysout("issue4738.START");
-
-    FBTest.openNewTab(basePath + "console/spy/4738/issue4738.html", function(win)
+    FBTest.openNewTab(basePath + "console/spy/4738/issue4738.html", (win) =>
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(() =>
         {
-            var options = {
-                tagName: "div",
-                classes: "logRow logRow-spy error loaded",
-                counter: 2
-            };
-
-            FBTest.waitForDisplayedElement("console", options, function(row)
+            FBTest.enableConsolePanel(() =>
             {
-                var panel = FBTest.selectPanel("console");
-                var requests = panel.panelNode.getElementsByClassName("logRow logRow-spy error loaded");
-                FBTest.compare(2, requests.length, "There must be 2 requests");
+                var options = {
+                    tagName: "div",
+                    classes: "logRow logRow-spy error loaded",
+                    counter: 2
+                };
 
-                FBTest.executeContextMenuCommand(requests[0].getElementsByClassName("spyTitle")[0],
-                    "fbSpyCopyLocation", function()
+                FBTest.waitForDisplayedElement("console", options, (row) =>
                 {
-                    var expected = /path1$/;
-                    FBTest.waitForClipboard(expected, function(text)
+                    var panel = FBTest.getSelectedPanel();
+                    var requests = panel.panelNode.getElementsByClassName(
+                        "logRow logRow-spy error loaded");
+                    FBTest.compare(2, requests.length, "There must be 2 requests");
+
+                    var requestHead = panel.panelNode.getElementsByClassName("spyHead")[0];
+
+                    function executeContextMenuCommand()
                     {
-                        FBTest.compare(expected, text, "Proper URL must be copied. Current: " + text);
-                        FBTest.testDone("issue4738.DONE");
+                        FBTest.executeContextMenuCommand(requestHead, "fbSpyCopyLocation");
+                    }
+
+                    var expected = /path1$/;
+                    FBTest.waitForClipboard(expected, executeContextMenuCommand, (text) =>
+                    {
+                        FBTest.compare(expected, text, "Proper URL must be copied. Current: " +
+                            text);
+                        FBTest.testDone();
                     });
                 });
-            });
 
-            FBTest.click(win.document.getElementById("testButton"));
+                FBTest.clickContentButton(win, "testButton");
+            });
         });
     });
 }
-

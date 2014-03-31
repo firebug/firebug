@@ -16,14 +16,14 @@ define([
 function(FBTrace, Options, Locale, Arr, Str, Xpcom, BrowserOverlayLib, BrowserCommands,
     BrowserMenu, BrowserToolbar, System) {
 
-with (BrowserOverlayLib) {
-
 // ********************************************************************************************* //
 // Constants
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
+
+var {$, $el, $stylesheet, $menuitem} = BrowserOverlayLib;
 
 Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
 Locale.registerStringBundle("chrome://firebug/locale/cookies.properties");
@@ -182,7 +182,8 @@ BrowserOverlay.prototype =
 
             // xxxHonza: TODO find a better place for notifying extensions
             FirebugLoader.dispatchToScopes("firebugFrameLoad", [self.win.Firebug]);
-            callback && callback(self.win.Firebug);
+            if (callback)
+                callback(self.win.Firebug);
         }, false);
     },
 
@@ -316,8 +317,6 @@ BrowserOverlay.prototype =
 
     onViewMenuShowing: function()
     {
-        var suspendMarker = this.win.document.getElementById("firebugStatus");
-
         // Check whether Firebug is open
         var open = false;
         if (this.win.Firebug.chrome)
@@ -423,16 +422,16 @@ BrowserOverlay.prototype =
         sis.close();
 
         var m = /RELEASE=(.*)/.exec(content);
-        if (m)
-            var release = m[1];
-        else
+        if (!m)
             return "no RELEASE in " + versionURL;
 
+        var release = m[1];
+
         m = /VERSION=(.*)/.exec(content);
-        if (m)
-            var version = m[1];
-        else
+        if (!m)
             return "no VERSION in " + versionURL;
+
+        var version = m[1];
 
         return version+""+release;
     },
@@ -592,4 +591,4 @@ BrowserOverlay.prototype =
 return BrowserOverlay;
 
 // ********************************************************************************************* //
-}});
+});

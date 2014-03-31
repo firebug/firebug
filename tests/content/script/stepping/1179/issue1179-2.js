@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue1179.START");
-
     FBTest.openNewTab(basePath + "script/stepping/1179/issue1179-2.html", function(win)
     {
         FBTest.selectPanel("script");
@@ -16,7 +14,7 @@ function runTest()
             tasks.run(function()
             {
                 FBTest.clickContinueButton();
-                FBTest.testDone("issue1179.DONE");
+                FBTest.testDone();
             });
         });
     });

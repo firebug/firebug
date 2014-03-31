@@ -1,29 +1,30 @@
 function runTest()
 {
-    FBTest.sysout("issue5177.START");
     FBTest.openNewTab(basePath + "css/5177/issue5177.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("html");
-
-        FBTest.selectElementInHtmlPanel("element1", function(node)
+        FBTest.openFirebug(function()
         {
-            var panel = FBTest.selectSidePanel("css");
-            var values = panel.panelNode.querySelectorAll(".cssPropValue");
+            FBTest.selectPanel("html");
+            FBTest.selectElementInHtmlPanel("element1", function(node)
+            {
+                var panel = FBTest.selectSidePanel("css");
+                var values = panel.panelNode.querySelectorAll(".cssPropValue");
 
-            // Click the CSS value of the background property to open the inline editor
-            FBTest.synthesizeMouse(values[0]);
+                // Click the CSS value of the background property to open the inline editor
+                FBTest.synthesizeMouse(values[0]);
 
-            var text = panel.panelNode.querySelector(".textEditorInner");
+                var text = panel.panelNode.querySelector(".textEditorInner");
 
-            var tasks = new FBTest.TaskList();
-            tasks.push(fuzzIncrements, text, "#9af ", true, 3865736374);
-            tasks.push(fuzzIncrements, text, "#9af ", false, 2321243364);
-            tasks.push(fuzzIncrements, text, "rgba(1,3, 9,0)", false, 1057413430);
-            tasks.push(fuzzIncrements, text, "hsla(3,30%,9%,0", false, 1395508803);
+                var tasks = new FBTest.TaskList();
+                tasks.push(fuzzIncrements, text, "#9af ", true, 3865736374);
+                tasks.push(fuzzIncrements, text, "#9af ", false, 2321243364);
+                tasks.push(fuzzIncrements, text, "rgba(1,3, 9,0)", false, 1057413430);
+                tasks.push(fuzzIncrements, text, "hsla(3,30%,9%,0", false, 1395508803);
 
-            tasks.run(function() {
-                FBTest.testDone("issue5177.DONE");
+                tasks.run(function()
+                {
+                    FBTest.testDone();
+                });
             });
         });
     });

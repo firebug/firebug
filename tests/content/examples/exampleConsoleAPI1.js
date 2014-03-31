@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("examples.console.START");
     FBTest.openNewTab(basePath + "examples/exampleConsoleAPI1.html", function(win)
     {
         FBTest.enableConsolePanel(function(win)
@@ -11,7 +10,7 @@ function runTest()
                 FBTest.compare(/Hello World!\s*/, row.textContent,
                     "The proper message must be displayed.");
 
-                FBTest.testDone("examples.console.DONE");
+                FBTest.testDone();
             });
 
             // Execute test implemented on the test page.

@@ -11,17 +11,18 @@
  */
 function runTest()
 {
-    FBTest.sysout("consoleOnOtherPanels.START");
     FBTest.openNewTab(basePath + "console/consoleOnOtherPanels.html", function(win)
     {
-        FBTest.openFirebug();
+        FBTest.openFirebug(function()
+        {
+            var tasks = new FBTest.TaskList();
+            tasks.push(enableConsole);
+            tasks.push(disableConsole);
 
-        var tasks = new FBTest.TaskList();
-        tasks.push(enableConsole);
-        tasks.push(disableConsole);
-
-        tasks.run(function() {
-            FBTest.testDone("consoleOnOtherPanels.DONE");
+            tasks.run(function()
+            {
+                FBTest.testDone();
+            });
         });
     });
 }

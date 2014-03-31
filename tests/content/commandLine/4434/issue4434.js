@@ -1,13 +1,8 @@
 function runTest()
 {
-    FBTest.sysout("issue4434.START");
-
     FBTest.openNewTab(basePath + "commandLine/4434/issue4434.html", function(win)
     {
-        FBTest.selectPanel("script");
-        FBTest.enableConsolePanel();
-        FBTest.enableScriptPanel(function(win)
-        {
+        FBTest.enablePanels(["script", "console"], function() {
             var tasks = new FBTest.TaskList();
             tasks.push(waitForBreak, win, 21);
             tasks.push(testAutocompletion, "myVar", "myVar1", win);
@@ -17,7 +12,7 @@ function runTest()
 
             tasks.run(function()
             {
-                FBTest.testDone("issue4434.DONE");
+                FBTest.testDone();
             });
         });
     });

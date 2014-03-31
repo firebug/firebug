@@ -19,7 +19,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-.panelNode-watches td {
+.watchTable > tbody > tr > td {
     border-bottom: 1px solid #EFEFEF;
 }
 

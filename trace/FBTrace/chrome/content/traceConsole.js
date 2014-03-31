@@ -51,6 +51,7 @@ var scope = {};
 Cu["import"]("resource://fbtrace/firebug-trace-service.js", scope);
 var traceService = scope.traceConsoleService;
 
+// For Tracing Console UI
 Locale.registerStringBundle("chrome://fbtrace/locale/firebug-tracing.properties");
 
 // ********************************************************************************************* //
@@ -409,7 +410,17 @@ var TraceConsole =
             ADDON_UPGRADE   : 7,
             ADDON_DOWNGRADE : 8
         };
-        var XPIProviderBP = Cu["import"]("resource://gre/modules/XPIProvider.jsm");
+
+        var XPIProviderBP;
+        try
+        {
+            XPIProviderBP = Cu.import("resource://gre/modules/addons/XPIProvider.jsm", {});
+        }
+        catch (err)
+        {
+            XPIProviderBP = Cu.import("resource://gre/modules/XPIProvider.jsm", {});
+        }
+
         var id = "firebug@software.joehewitt.com";
         var XPIProvider = XPIProviderBP.XPIProvider;
         var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);

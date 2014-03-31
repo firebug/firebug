@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue3645.START");
     FBTest.openNewTab(basePath + "script/callstack/3645/issue3645.html", function(win)
     {
         FBTest.enableScriptPanel(function(win)
@@ -11,7 +10,7 @@ function runTest()
             tasks.push(executeTest, win);
             tasks.push(clickRerun, win);
             tasks.run(function() {
-                FBTest.testDone("issue3645.DONE");
+                FBTest.testDone();
             });
         });
     });

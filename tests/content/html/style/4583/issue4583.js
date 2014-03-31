@@ -1,47 +1,46 @@
 function runTest()
 {
-    FBTest.sysout("issue4583.START");
-
     FBTest.openNewTab(basePath + "html/style/4583/issue4583.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("html");
-
-        FBTest.selectElementInHtmlPanel("elementWithOverwrittenStyles", function(node)
+        FBTest.openFirebug(function()
         {
-            var sidePanel = FBTest.selectSidePanel("css");
-            var selectors = sidePanel.panelNode.querySelectorAll(".cssSelector");
-            var rules = [];
-
-            for(var i=0; i<selectors.length; i++)
+            FBTest.selectPanel("html");
+            FBTest.selectElementInHtmlPanel("elementWithOverwrittenStyles", function(node)
             {
-                if (selectors[i].textContent == "#elementWithOverwrittenStyles")
-                {
-                    var rule = FW.FBL.getAncestorByClass(selectors[i], "cssRule");
-                    rules.push(rule);
-                }
-            }
+                var sidePanel = FBTest.selectSidePanel("css");
+                var selectors = sidePanel.panelNode.querySelectorAll(".cssSelector");
+                var rules = [];
 
-            if (FBTest.compare(2, rules.length, "There must be two '#elementWithOverwrittenStyles' CSS rules."))
-            {
-                var props = rules[0].querySelectorAll(".cssProp");
-                for (var i=0; i<props.length; i++)
+                for(var i=0; i<selectors.length; i++)
                 {
-                    var propName = props[i].querySelector(".cssPropName").textContent;
-                    if (propName == "width")
-                      FBTest.ok(!FW.FBL.hasClass(props[i], "cssOverridden"), "The 'width' property of the first rule must not be overwritten.")
+                    if (selectors[i].textContent == "#elementWithOverwrittenStyles")
+                    {
+                        var rule = FW.FBL.getAncestorByClass(selectors[i], "cssRule");
+                        rules.push(rule);
+                    }
                 }
 
-                var props = rules[1].querySelectorAll(".cssProp");
-                for (var i=0; i<props.length; i++)
+                if (FBTest.compare(2, rules.length, "There must be two '#elementWithOverwrittenStyles' CSS rules."))
                 {
-                    var propName = props[i].querySelector(".cssPropName").textContent;
-                    if (propName == "width")
-                      FBTest.ok(FW.FBL.hasClass(props[i], "cssOverridden"), "The 'width' property of the second rule must be overwritten.")
-                }
-            }
+                    var props = rules[0].querySelectorAll(".cssProp");
+                    for (var i=0; i<props.length; i++)
+                    {
+                        var propName = props[i].querySelector(".cssPropName").textContent;
+                        if (propName == "width")
+                          FBTest.ok(!FW.FBL.hasClass(props[i], "cssOverridden"), "The 'width' property of the first rule must not be overwritten.")
+                    }
 
-            FBTest.testDone("issue4583.DONE");
+                    var props = rules[1].querySelectorAll(".cssProp");
+                    for (var i=0; i<props.length; i++)
+                    {
+                        var propName = props[i].querySelector(".cssPropName").textContent;
+                        if (propName == "width")
+                          FBTest.ok(FW.FBL.hasClass(props[i], "cssOverridden"), "The 'width' property of the second rule must be overwritten.")
+                    }
+                }
+
+                FBTest.testDone();
+            });
         });
     });
 }

@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue3077.START");
     FBTest.openNewTab(basePath + "script/3077/issue3077.html", function()
     {
         FBTest.enableScriptPanel(function callbackOnReload(win)
@@ -19,7 +18,7 @@ function runTest()
             {
                 // Resume debugger and finish the test.
                 FBTest.clickContinueButton();
-                FBTest.testDone("issue3077.DONE");
+                FBTest.testDone();
             });
         });
     });

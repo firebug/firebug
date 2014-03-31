@@ -1,27 +1,28 @@
 function runTest()
 {
-    FBTest.sysout("issue1927.START");
     FBTest.openNewTab(basePath + "net/1927/issue1927.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableNetPanel(function(win)
+        FBTest.openFirebug(function()
         {
-            var panel = FW.Firebug.chrome.selectPanel("net");
-            FBTest.click(win.document.getElementById("testButton"));
-
-            waitForDialogLoaded(function(win)
+            FBTest.enableNetPanel(function(win)
             {
-                fireDialogCommand(win, "accept", function()
+                var panel = FW.Firebug.chrome.selectPanel("net");
+                FBTest.click(win.document.getElementById("testButton"));
+
+                waitForDialogLoaded(function(win)
                 {
-                    waitForDialogLoaded(function(win)
+                    fireDialogCommand(win, "accept", function()
                     {
-                        fireDialogCommand(win, "cancel", function()
+                        waitForDialogLoaded(function(win)
                         {
-                            setTimeout(function()
+                            fireDialogCommand(win, "cancel", function()
                             {
-                                verifyNetResponse();
-                                FBTest.testDone("issue1927.DONE");
-                            }, 500);
+                                setTimeout(function()
+                                {
+                                    verifyNetResponse();
+                                    FBTest.testDone();
+                                }, 500);
+                            });
                         });
                     });
                 });

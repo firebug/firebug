@@ -1,13 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/trace",
     "firebug/lib/options",
-    "firebug/lib/locale",
     "firebug/firefox/browserOverlayLib",
 ],
-function(FBTrace, Options, Locale, BrowserOverlayLib) {
-with (BrowserOverlayLib) {
+function(Options, BrowserOverlayLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -20,6 +17,8 @@ var shortcuts = [
     "closeFirebug",
     "toggleBreakOn"
 ];
+
+var {$, $el, $command} = BrowserOverlayLib;
 
 /* Used by the browser menu, but should be really global shortcuts?
 key_increaseTextSize
@@ -46,11 +45,11 @@ var BrowserCommands =
     {
         $command(doc, "cmd_firebug_closeFirebug", "Firebug.closeFirebug(true);");
         $command(doc, "cmd_firebug_toggleInspecting", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.Inspector.toggleInspecting(Firebug.currentContext);");
-        $command(doc, "cmd_firebug_focusCommandLine", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.CommandLine.focus(Firebug.currentContext);");
+        $command(doc, "cmd_firebug_focusCommandLine", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.CommandLine.focus(Firebug.currentContext, {select: true});");
         $command(doc, "cmd_firebug_toggleFirebug", "Firebug.toggleBar();");
         $command(doc, "cmd_firebug_detachFirebug", "Firebug.toggleDetachBar(false, true);");
         $command(doc, "cmd_firebug_inspect", "Firebug.Inspector.inspectFromContextMenu(arg);", "document.popupNode");
-        $command(doc, "cmd_firebug_toggleBreakOn", "if (Firebug.currentContext) Firebug.chrome.breakOnNext(Firebug.currentContext, event);");
+        $command(doc, "cmd_firebug_toggleBreakOn", "if (Firebug.currentContext) Firebug.BreakOnNext.onToggleBreakOnNext(event);");
         $command(doc, "cmd_firebug_toggleDetachFirebug", "Firebug.toggleDetachBar(false, true);");
         $command(doc, "cmd_firebug_increaseTextSize", "Firebug.Options.changeTextSize(1);");
         $command(doc, "cmd_firebug_decreaseTextSize", "Firebug.Options.changeTextSize(-1);");
@@ -96,7 +95,8 @@ var BrowserCommands =
                 var {attr, key, modifiers} = getShortcutInfo(shortcut);
 
                 // Disable existing global shortcuts
-                self.disableExistingShortcuts.call(self, node, attr, key, modifiers);
+                self.disableExistingShortcuts.call(self, doc.documentElement, attr, key,
+                    modifiers);
             }
         }
 
@@ -166,4 +166,4 @@ var BrowserCommands =
 return BrowserCommands;
 
 // ********************************************************************************************* //
-}});
+});

@@ -1,13 +1,10 @@
 function runTest()
 {
-    FBTest.sysout("issue4386.START");
     FBTest.openNewTab(basePath + "dom/4386/issue4386.html", function(win)
     {
-        FBTest.openFirebug();
-
-        FBTest.enableScriptPanel(function(win)
+        FBTest.openFirebug(function()
         {
-            FBTest.reload(function()
+            FBTest.enableScriptPanel(function(win)
             {
                 var panel = FBTest.selectPanel("dom");
 
@@ -73,7 +70,7 @@ function runTest()
                         row = FBTest.getDOMPropertyRow(null, "d");
                         FBTest.compare("true", row.getAttribute("breakpoint"), "The property 'b' must have an enabled breakpoint set");
 
-                        FBTest.testDone("issue4386.DONE");
+                        FBTest.testDone();
                     }, 500);
                 });
             });

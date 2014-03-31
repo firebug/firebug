@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue3596.START");
     FBTest.openNewTab(basePath + "script/callstack/3596/issue3596.html", function(win)
     {
         FBTest.enableScriptPanel(function(win)
@@ -46,7 +45,7 @@ function runTest()
 
                 // Finish the test.
                 FBTest.clickContinueButton();
-                FBTest.testDone("issue3596.DONE");
+                FBTest.testDone();
             });
 
             // Run test to break in debugger.

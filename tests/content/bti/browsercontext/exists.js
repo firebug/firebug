@@ -10,12 +10,13 @@ function runTest()
 {
     var browser = new FW.Firebug.BTI.Browser(); // TODO
     var url = FBTest.getHTTPURLBase()+"bti/browsercontext/testScripts.html";
-    browser.addEventListener("onContextCreated", function(context) {
+    browser.addEventListener("onContextCreated", function(context)
+    {
         FBTest.compare(context.getURL(), url, "URL of newly created context should be " +url);
         FBTest.ok(context.exists(), "Context should exist when created");
         browser.disconnect();
         FBTest.ok(!context.exists(), "Context should not exist when disconnected");
-        FBTest.testDone("done test #exists()");
+        FBTest.testDone();
     });
     FBTest.progress("exists, open test page "+url);
     FBTest.openNewTab(url, function(win)

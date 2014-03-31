@@ -2,20 +2,22 @@ var testWindow;
 
 function runTest()
 {
-    FBTest.sysout("console.group.START");
     FBTest.openNewTab(basePath + "console/api/group.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.openFirebug(function()
         {
-            testWindow = win;
+            FBTest.enableConsolePanel(function(win)
+            {
+                testWindow = win;
 
-            var tests = [];
-            tests.push(test1);
-            tests.push(clear);
-            tests.push(test2);
-            FBTest.runTestSuite(tests, function() {
-                FBTest.testDone("console.group.DONE");
+                var tests = [];
+                tests.push(test1);
+                tests.push(clear);
+                tests.push(test2);
+                FBTest.runTestSuite(tests, function()
+                {
+                    FBTest.testDone();
+                });
             });
         });
     });
@@ -38,6 +40,7 @@ function test1(callback)
 
         callback();
     });
+
     FBTest.click(testWindow.document.getElementById("testButton1"));
 }
 
@@ -68,5 +71,6 @@ function test2(callback)
 
         callback();
     });
+
     FBTest.click(testWindow.document.getElementById("testButton2"));
 }

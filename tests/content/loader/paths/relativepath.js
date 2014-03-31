@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("relativepath.START;");
     FBTest.progress("using baseLocalPath: " + baseLocalPath);
 
     // Compute relative path and construct module loader.
@@ -16,6 +15,6 @@ function runTest()
     {
         FBTest.compare(3, AddModule.add(1, 2), "The add module must be properly loaded");
         FBTest.compare(2, SubtractModule.subtract(3, 1), "The subtract module must be properly loaded");
-        FBTest.testDone("relativepath.DONE");
+        FBTest.testDone();
     });
 }

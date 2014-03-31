@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue5019.START");
-
     FBTest.openNewTab(basePath + "script/watch/5019/issue5019.html", function(win)
     {
         FBTest.enablePanels(["script", "console"], function(win)
@@ -34,7 +32,7 @@ function runTest()
                                 var expected = /200\s*helloworld\s*true\s*/;
                                 FBTest.compare(expected, row.textContent,
                                     "The proper message must be displayed.");
-                                FBTest.testDone("issue5019.DONE");
+                                FBTest.testDone();
                             });
                         });
                     });

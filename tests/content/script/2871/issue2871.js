@@ -3,7 +3,6 @@ function runTest()
     var lineNo = 16;
     var fileName = basePath + "script/2871/issue2871.html";
 
-    FBTest.sysout("issue2871.START");
     FBTest.openNewTab(fileName, function(win)
     {
         FBTest.enableScriptPanel(function(win)
@@ -26,7 +25,7 @@ function runTest()
                     FBTest.compare(expected, valueCol.textContent,
                         "Verify the result value");
 
-                    FBTest.testDone("issue2871.DONE");
+                    FBTest.testDone();
                 })
             })
         });

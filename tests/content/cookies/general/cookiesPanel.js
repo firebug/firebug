@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("cookiesPanel.START");
-
     FBTest.openNewTab(basePath + "cookies/general/cookiesPanel.html", function(win)
     {
         FBTest.openFirebug(true);
@@ -13,7 +11,7 @@ function runTest()
                 FBTest.ok(panel.panelNode, "Cookies panel must be initialized.");
 
             // Finish test
-            FBTest.testDone("cookiesPanel.DONE");
+            FBTest.testDone();
         });
     });
 };

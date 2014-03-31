@@ -1,7 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("StepIntoInIFrame.START");
-
     FBTest.openNewTab(basePath + "script/stepping/StepIntoInIFrame/test.html", function(win)
     {
         FBTest.selectPanel("script");
@@ -15,7 +13,7 @@ function runTest()
 
             tasks.run(function()
             {
-                FBTest.testDone("StepIntoInIFrame.DONE");
+                FBTest.testDone();
             });
         });
     });

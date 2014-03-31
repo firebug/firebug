@@ -1,60 +1,59 @@
 function runTest()
 {
-    FBTest.sysout("issue6481.START");
     FBTest.setPref("showClosures", true);
 
     FBTest.openNewTab(basePath + "dom/6481/issue6481.html", function()
     {
-        FBTest.openFirebug();
-        FBTest.enableScriptPanel(function(win)
+        FBTest.openFirebug(function()
         {
-            FBTest.selectPanel("dom");
-
-            var panel = FBTest.getPanel("dom");
-
-            FBTest.waitForDOMProperty("someone", function(row)
+            FBTest.enableScriptPanel(function(win)
             {
-                FBTest.progress("Property someone is visible");
+                var panel = FBTest.selectPanel("dom");
 
-                FBTest.waitForDOMProperty("introduce", function(row)
+                FBTest.waitForDOMProperty("someone", function(row)
                 {
-                    FBTest.progress("Function introduce is visible");
+                    FBTest.progress("Property someone is visible");
 
-                    FBTest.waitForDOMProperty("(closure)", function(row)
+                    FBTest.waitForDOMProperty("introduce", function(row)
                     {
-                        FBTest.progress("Property (closure) is visible");
+                        FBTest.progress("Function introduce is visible");
 
-                        FBTest.waitForDOMProperty("_name", function(row)
+                        FBTest.waitForDOMProperty("(closure)", function(row)
                         {
-                            FBTest.progress("Property _name is visible");
+                            FBTest.progress("Property (closure) is visible");
 
-                            var value = row.querySelector(".memberValueCell .objectBox-string");
-                            FBTest.compare("\"Arthur\"", value.textContent, "The value must match");
-
-                            FBTest.waitForDOMProperty("_unused", function(row)
+                            FBTest.waitForDOMProperty("_name", function(row)
                             {
-                                FBTest.progress("Property _unused is visible");
+                                FBTest.progress("Property _name is visible");
 
-                                var value = row.querySelector(".memberValueCell .objectBox-optimizedAway");
-                                FBTest.compare(FW.FBL.$STR("firebug.reps.optimizedAway"), value.textContent,
-                                    "The value must match");
+                                var value = row.querySelector(".memberValueCell .objectBox-string");
+                                FBTest.compare("\"Arthur\"", value.textContent, "The value must match");
 
-                                FBTest.testDone("issue6481.DONE");
+                                FBTest.waitForDOMProperty("_unused", function(row)
+                                {
+                                    FBTest.progress("Property _unused is visible");
+
+                                    var value = row.querySelector(".memberValueCell .objectBox-optimizedAway");
+                                    FBTest.compare(FW.FBL.$STR("firebug.reps.optimizedAway"), value.textContent,
+                                        "The value must match");
+
+                                    FBTest.testDone();
+                                }, true);
+
                             }, true);
 
+                            // Click to expand the '(closure)' item
+                            FBTest.click(FW.FBL.getElementByClass(row, "memberLabel", "protoLabel"));
                         }, true);
 
-                        // Click to expand the '(closure)' item
-                        FBTest.click(FW.FBL.getElementByClass(row, "memberLabel", "protoLabel"));
+                        // Click to expand the 'introduce' function
+                        FBTest.click(FW.FBL.getElementByClass(row, "memberLabel", "userFunctionLabel"));
                     }, true);
 
-                    // Click to expand the 'introduce' function
-                    FBTest.click(FW.FBL.getElementByClass(row, "memberLabel", "userFunctionLabel"));
+                    // Click to expand the 'someone' property
+                    FBTest.click(FW.FBL.getElementByClass(row, "memberLabel", "userLabel"));
                 }, true);
-
-                // Click to expand the 'someone' property
-                FBTest.click(FW.FBL.getElementByClass(row, "memberLabel", "userLabel"));
-            }, true);
+            });
         });
     });
 }

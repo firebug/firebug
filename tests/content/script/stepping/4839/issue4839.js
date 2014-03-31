@@ -1,11 +1,8 @@
 function runTest()
 {
-    FBTest.sysout("issue4839.START");
-
     FBTest.openNewTab(basePath + "script/stepping/4839/issue4839.html", function(win)
     {
-        FBTest.selectPanel("script");
-        FBTest.enableScriptPanel(function(win)
+        FBTest.enablePanels(["script"], function(win)
         {
             var tasks = new FBTest.TaskList();
             tasks.push(createBreakpoint, 11);
@@ -17,7 +14,7 @@ function runTest()
 
             tasks.run(function()
             {
-                FBTest.testDone("issue4839.DONE");
+                FBTest.testDone();
             });
         });
     });

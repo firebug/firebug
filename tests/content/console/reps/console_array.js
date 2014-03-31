@@ -1,10 +1,9 @@
 function runTest()
 {
-    FBTest.sysout("console_array.START");
     FBTest.openNewTab(basePath + "console/reps/console_array.html", function(win)
     {
         FBTest.selectPanel("console");
-        FBTest.enableConsolePanel(function(win) // causes reload
+        FBTest.enableConsolePanel(function(win)
         {
             fireTest(win, "runTests");
         });
@@ -25,7 +24,7 @@ function waitForLogEvent(event)
         var shouldBe = elt.firstChild;
 
         if (shouldBe.innerHTML == "DONE")
-            FBTest.testDone("console_array.done");
+            FBTest.testDone();
 
         var desc = shouldBe.nextSibling;
 

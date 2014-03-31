@@ -630,7 +630,11 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Rep, new EventSource(),
             return false;
 
         //xxxsz: file.responseHeaders is undefined here for some reason
-        var resp = file.responseHeadersText.match(/www-authenticate:\s(.+)/i)[1];
+        var m = file.responseHeadersText.match(/www-authenticate:\s(.+)/i);
+        if (!m)
+            return false;
+
+        var resp = m[1];
         return (resp && resp.search(/ntlm|negotiate/i) >= 0);
     },
 

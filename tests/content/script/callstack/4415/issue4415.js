@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue4415.START");
     FBTest.openNewTab(basePath + "script/callstack/4415/issue4415.html", function(win)
     {
         FBTest.enableScriptPanel(function(win)
@@ -15,7 +14,7 @@ function runTest()
                 FBTest.compare(4, frames.length, "There must be four frames");
 
                 FBTest.clickContinueButton();
-                FBTest.testDone("issue4415.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

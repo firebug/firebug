@@ -5,7 +5,7 @@
 
 /**
  * The object is responsible for registering 'popupshowing' listeners and safe clean up.
- * The clean up is important since it must happen even if the test doesn't fisnish.
+ * The clean up is important since it must happen even if the test doesn't finish.
  */
 var TooltipController =
 {

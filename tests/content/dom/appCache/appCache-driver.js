@@ -1,26 +1,28 @@
 function runTest()
 {
-    FBTest.sysout("appCache.START");
     FBTest.openNewTab(basePath + "dom/appCache/appCache.html", function(win)
     {
-        FBTest.openFirebug();
-        FW.Firebug.chrome.selectPanel("dom");
+        FBTest.openFirebug(function()
+        {
+            FW.Firebug.chrome.selectPanel("dom");
 
-        var href = win.location.href;
-        var i = href.lastIndexOf(".");
-        var itemURL = href.substr(0, i) + ".js";
+            var href = win.location.href;
+            var i = href.lastIndexOf(".");
+            var itemURL = href.substr(0, i) + ".js";
 
-        var tasks = new FBTest.TaskList();
-        tasks.push(testAddOfflinePermission, win);
-        tasks.push(testClearAppCache, win, itemURL);
-        tasks.push(verifyNumberOfItems, win, 0);
-        tasks.push(executeTest, win, itemURL);
-        tasks.push(verifyNumberOfItems, win, 1);
-        tasks.push(testClearOfflinePermission, win);
+            var tasks = new FBTest.TaskList();
+            tasks.push(testAddOfflinePermission, win);
+            tasks.push(testClearAppCache, win, itemURL);
+            tasks.push(verifyNumberOfItems, win, 0);
+            tasks.push(executeTest, win, itemURL);
+            tasks.push(verifyNumberOfItems, win, 1);
+            tasks.push(testClearOfflinePermission, win);
 
-        tasks.run(function() {
-            FBTest.testDone("appCache.DONE");
-        })
+            tasks.run(function()
+            {
+                FBTest.testDone();
+            });
+        });
     });
 }
 

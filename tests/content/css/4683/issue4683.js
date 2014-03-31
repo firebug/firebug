@@ -1,22 +1,23 @@
 function runTest()
 {
-    FBTest.sysout("issue4683.START");
     FBTest.setFirebugBarHeight(450);
 
     FBTest.openNewTab(basePath + "css/4683/issue4683.html", function(win)
     {
-        FBTest.openFirebug();
-        var panel = FBTest.selectPanel("stylesheet");
-
-        FBTest.selectPanelLocationByName(panel, "issue4683.html");
-
-        var tests = [];
-        tests.push(verdanaHover);
-        tests.push(comicSansMSHover);
-
-        FBTest.runTestSuite(tests, function()
+        FBTest.openFirebug(function()
         {
-            FBTest.testDone("issue4683; DONE");
+            var panel = FBTest.selectPanel("stylesheet");
+
+            FBTest.selectPanelLocationByName(panel, "issue4683.html");
+
+            var tests = [];
+            tests.push(verdanaHover);
+            tests.push(comicSansMSHover);
+
+            FBTest.runTestSuite(tests, function()
+            {
+                FBTest.testDone();
+            });
         });
     });
 }

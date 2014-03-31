@@ -1,39 +1,37 @@
 function runTest()
 {
-    FBTest.sysout("issue4156.START");
-
     FBTest.openNewTab(basePath + "net/4156/issue4156.html", function(win)
     {
-        FBTest.openFirebug();
-        FBTest.selectPanel("net");
-
-        FBTest.enableNetPanel(function(win)
+        FBTest.openFirebug(function()
         {
-            FBTest.progress("Test setting multiple filters");
+            FBTest.enableNetPanel(function(win)
+            {
+                FBTest.progress("Test setting multiple filters");
 
-            clickToolbarButton("fbNetFilter-css");
-            clickToolbarButton("fbNetFilter-js", true);
-            clickToolbarButton("fbNetFilter-image", true);
+                clickToolbarButton("fbNetFilter-css");
+                clickToolbarButton("fbNetFilter-js", true);
+                clickToolbarButton("fbNetFilter-image", true);
 
-            verifyNetPanelDisplay(["fbNetFilter-css", "fbNetFilter-js", "fbNetFilter-image"],
-                ["testcase.css", "issue4156-test.js", "firebug.png"]);
+                verifyNetPanelDisplay(["fbNetFilter-css", "fbNetFilter-js", "fbNetFilter-image"],
+                    ["testcase.css", "issue4156-test.js", "firebug.png"]);
 
-            FBTest.progress("Test unsetting filters");
+                FBTest.progress("Test unsetting filters");
 
-            clickToolbarButton("fbNetFilter-js", true);
+                clickToolbarButton("fbNetFilter-js", true);
 
-            verifyNetPanelDisplay(["fbNetFilter-css", "fbNetFilter-image"],
-                    ["testcase.css", "firebug.png"]);
+                verifyNetPanelDisplay(["fbNetFilter-css", "fbNetFilter-image"],
+                        ["testcase.css", "firebug.png"]);
 
-            clickToolbarButton("fbNetFilter-css", true);
-            clickToolbarButton("fbNetFilter-image", true);
+                clickToolbarButton("fbNetFilter-css", true);
+                clickToolbarButton("fbNetFilter-image", true);
 
-            FBTest.progress("Test unsetting all filters");
+                FBTest.progress("Test unsetting all filters");
 
-            verifyNetPanelDisplay(["fbNetFilter-all"],
-                ["issue4156.html", "testcase.css", "issue4156-test.js", "firebug.png"]);
+                verifyNetPanelDisplay(["fbNetFilter-all"],
+                    ["issue4156.html", "testcase.css", "issue4156-test.js", "firebug.png"]);
 
-            FBTest.testDone("issue4156.DONE");
+                FBTest.testDone();
+            });
         });
     });
 }
@@ -48,7 +46,8 @@ function clickToolbarButton(buttonID, ctrlKey)
     FBTest.sysout("Click toolbar button " + buttonID, button);
 
     var eventDetails = {ctrlKey: ctrlKey};
-    FBTest.synthesizeMouse(button, 2, 2, eventDetails);
+    // Offset should better be calculated to avoid problems in relation with different OS themes
+    FBTest.synthesizeMouse(button, 4, 4, eventDetails);
 }
 
 function verifyNetPanelDisplay(enabledFilters, displayedRequests)

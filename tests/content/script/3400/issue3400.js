@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("issue3400.START");
     FBTest.openNewTab(basePath + "script/3400/issue3400.html", function(win)
     {
         FBTest.enableScriptPanel(function(win)
@@ -32,7 +31,7 @@ function runTest()
 
                 // Resume debugger and finish the test.
                 FBTest.clickContinueButton();
-                FBTest.testDone("issue3400.DONE");
+                FBTest.testDone();
             });
 
             FBTest.click(win.document.getElementById("testButton"));

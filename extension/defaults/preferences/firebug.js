@@ -173,7 +173,7 @@ pref("extensions.firebug.key.shortcut.detachFirebug", "accel VK_F12");
 pref("extensions.firebug.key.shortcut.leftFirebugTab", "accel shift VK_PAGE_UP");
 pref("extensions.firebug.key.shortcut.rightFirebugTab", "accel shift VK_PAGE_DOWN");
 pref("extensions.firebug.key.shortcut.previousFirebugTab", "accel `");
-pref("extensions.firebug.key.shortcut.clearConsole", "accel shift r");
+pref("extensions.firebug.key.shortcut.clearConsole", "alt r");
 pref("extensions.firebug.key.shortcut.navBack", "accel shift VK_LEFT");
 pref("extensions.firebug.key.shortcut.navForward", "accel shift VK_RIGHT");
 pref("extensions.firebug.key.shortcut.increaseTextSize", "accel +");

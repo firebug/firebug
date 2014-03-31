@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("examples.commandline.START");
     FBTest.openNewTab(basePath + "examples/exampleCommandLine1.html", function(win)
     {
         FBTest.openFirebug(function()
@@ -11,7 +10,7 @@ function runTest()
                 FBTest.waitForDisplayedElement("console", config, function(row)
                 {
                     FBTest.compare("3", row.textContent, "Number 3 must be displayed");
-                    FBTest.testDone("examples.commandline.DONE");
+                    FBTest.testDone();
                 });
 
                 FBTest.executeCommand("1+2");

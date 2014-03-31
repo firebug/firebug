@@ -1,6 +1,5 @@
 function runTest()
 {
-    FBTest.sysout("examples.HtmlMutation.START");
     FBTest.openNewTab(basePath + "examples/exampleHtmlMutation1.html", function(win)
     {
         FBTest.openFirebug(function()
@@ -9,7 +8,7 @@ function runTest()
 
             FBTest.waitForHtmlMutation(null, "div", function(node)
             {
-                FBTest.testDone("examples.HtmlMutation.DONE");
+                FBTest.testDone();
             });
 
             FBTest.progress("fbTestFirebug.waitForHtmlMutation;");
