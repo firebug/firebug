@@ -39,16 +39,16 @@
 #fbContentSplitter[orient=vertical] {
     background: #bebebe;
     border-bottom-width: 0;
-    min-height: 1px;
-    height: 1px;
+    min-height: 2px;
+    height: 2px;
     margin-bottom: 0;
     position: relative;
 }
 
 #fbContentSplitter[orient=horizontal] {
-    border-right: 1px solid !important;
-    border-left: none;
-    min-width: 5px;
-    max-width: 5px;
-    background-color: -moz-dialog;
+    background: #bebebe;
+    border-bottom-width: 0;
+    min-width: 2px;
+    width: 2px;
+    position: relative;
 }
