@@ -684,7 +684,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             return;
 
         var row = Dom.getAncestorByClass(target, "memberRow");
-        if (!row) 
+        if (!row)
             return;
 
         var path = this.getPropertyPath(row);
@@ -713,13 +713,9 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             return items;
         }
 
-        // find the index of "DeleteWatch" in the items:
-        var itemIDs = items.map((item) =>
-        {
-            return item.id;
-        });
+        var itemIDs = items.map((item) => item.id);
 
-        // find the index of "EditDOMProperty" in the items: 
+        // find the index of "EditDOMProperty" in the items:
         var editWatchIndex = itemIDs.indexOf("EditDOMProperty");
         if (editWatchIndex !== -1)
         {
@@ -727,7 +723,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             items[editWatchIndex].tooltiptext = "watch.tip.Edit_Watch";
         }
 
-        // find the index of "DeleteWatch" in the items: 
+        // find the index of "DeleteWatch" in the items:
         var deleteWatchIndex = itemIDs.indexOf("DeleteProperty");
         if (deleteWatchIndex !== -1)
         {
@@ -834,7 +830,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     {
         this.deleteWatch(row);
     },
-    
+
     getEditor: function(target, value)
     {
         if (!this.editor)
