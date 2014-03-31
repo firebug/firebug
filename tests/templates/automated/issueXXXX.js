@@ -14,7 +14,7 @@ function runTest()
         {
             FBTest.selectPanel("mainPanel");
 
-            FBTest.doSomething((win) =>
+            FBTest.doSomething(() =>
             {
                 // Test functionality must be placed here
 
