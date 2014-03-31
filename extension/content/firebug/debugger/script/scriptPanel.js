@@ -1400,7 +1400,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         sourceFile.togglePrettyPrint(() =>
         {
             var lines = DebuggerLib.getExecutableLines(this.context, sourceFile);
-            FBTrace.sysout("lines " + lines.join(", "), lines);
+            Trace.sysout("lines " + lines.join(", "), lines);
         });
     },
 
