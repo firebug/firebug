@@ -353,7 +353,7 @@ var CommandEditor = Obj.extend(Module,
 
                 Firebug.Console.logFormatted([data.error], context, "error", true);
 
-                deferred.reject(errorString);
+                deferred.reject(data.error);
             }
             else
             {
