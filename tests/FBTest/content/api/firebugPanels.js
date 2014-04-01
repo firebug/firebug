@@ -390,6 +390,7 @@ this.getCurrentLocation = function()
 
 // ********************************************************************************************* //
 // Panel Options
+
 this.setPanelOption = function(panelName, menuItemIdentifier, callback)
 {
     var panelType = FW.Firebug.getPanelType(panelName);
@@ -447,7 +448,7 @@ this.setPanelOption = function(panelName, menuItemIdentifier, callback)
                     }
                 }
             }
-FBTrace.sysout("menuItem", menuItem);
+
             // If the menu item isn't available close the context menu and bail out.
             if (!self.ok(menuItem, "'" + menuItemId + "' item must be available in the options menu."))
             {
@@ -458,6 +459,97 @@ FBTrace.sysout("menuItem", menuItem);
             event.target.blur();
     
             callback();
+        }, 10);
+    }
+
+    optionsMenu.addEventListener("popupshowing", onPopupShown);
+
+    var contextMenuEventDetails = {type: "contextmenu", button: 2};
+    self.synthesizeMouse(panelTab, 5, 5, contextMenuEventDetails);
+};
+
+// ********************************************************************************************* //
+// Panel Options
+
+this.setPanelOption = function(panelName, menuItemIdentifier, callback, errorCallback)
+{
+    var panelType = FW.Firebug.getPanelType(panelName);
+    var panelTab;
+
+    var doc = FW.Firebug.chrome.window.document;
+    var panelTabs = doc.getElementById(panelType.prototype.parentPanel ?
+        "fbPanelBar2-panelTabs" : "fbPanelBar1-panelTabs");
+    for (var child = panelTabs.firstChild; child; child = child.nextSibling)
+    {
+        if (panelType == child.panelType)
+        {
+            panelTab = child;
+            break;
+        }
+    }
+
+    var optionsMenuButton = panelTab.getElementsByTagName("panelTabMenu")[0];
+    var optionsMenuButtonChildren = FW.FBL.domUtils.getChildrenForNode(optionsMenuButton, true);
+    var optionsMenu = null
+
+    for (var i = 0; i < optionsMenuButtonChildren.length; i++)
+    {
+        if (optionsMenuButtonChildren[i] instanceof XULElement && optionsMenuButtonChildren[i].className === "menuPopup")
+        {
+            optionsMenu = optionsMenuButtonChildren[i];
+            break;
+        }
+    }
+    var self = this;
+
+    function onPopupShown(event)
+    {
+        optionsMenu.removeEventListener("popupshowing", onPopupShown);
+
+        // Fire the event handler asynchronously so items have a chance to be appended.
+        setTimeout(function()
+        {
+            var menuItem;
+            if (typeof menuItemIdentifier == "string" || menuItemIdentifier.id)
+            {
+                var menuItemId = menuItemIdentifier.id || menuItemIdentifier;
+                menuItem = event.target.ownerDocument.getElementById(menuItemId);
+            }
+            else if (menuItemIdentifier.label)
+            {
+                var menuItemId = menuItemIdentifier.label;
+                for (var item = event.target.firstChild; item; item = item.nextSibling)
+                {
+                    if (item.label == menuItemId)
+                    {
+                        menuItem = item;
+                        break;
+                    }
+                }
+            }
+
+            // If the menu item isn't available close the options menu and bail out.
+            if (!self.ok(menuItem, "'" + menuItemId + "' item must be available in the options menu."))
+            {
+                optionsMenu.hidePopup();
+                if (errorCallback)
+                    errorCallback();
+                return;
+            }
+    
+            // Click on specified menu item.
+            self.synthesizeMouse(menuItem);
+
+            // Close the popup asynchronously to allow the click to take affect
+            setTimeout(() => optionsMenu.hidePopup());
+
+            if (callback)
+            {
+                // Since the command is dispatched asynchronously,
+                // execute the callback using timeout.
+                // Especially Mac OS needs this.
+                setTimeout(() => callback(), 250);
+            }
         }, 10);
     }
 
