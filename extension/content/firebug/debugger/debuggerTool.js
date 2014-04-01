@@ -201,7 +201,6 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
         this.context.stoppedFrame = frame;
         this.context.currentFrame = frame;
         this.context.currentPacket = packet;
-        this.context.stopped = true;
         this.context.currentPauseActor = packet.actor;
 
         // Notify listeners, about debugger pause event.
@@ -222,6 +221,17 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
             Trace.sysout("debuggerTool.paused; Listeners don't want to break the debugger.");
             return doResume(this);
         }
+
+        // Mark the context stopped as soon as we know that we don't want to resume
+        // immediately. See above code where listeners can cause that.
+        // This can save a lot of updates done within this.resumed() since the debugger
+        // didn't really stopped.
+        // Also, this solves recursion problem (see issue 7308), that happens when
+        // evaluation of expression in the {@link WatchPanel} cause exception and the
+        // debugger is set to break on it. The debugger will automatically resumed
+        // and so, the WatchPanel won't try to evaluate again causing the debugger
+        // break again and causing infinite asynchronous loop.
+        this.context.stopped = true;
 
         // Asynchronously initializes ThreadClient's stack frame cache. If you want to
         // sync with the cache handle 'framesadded' and 'framescleared' events.
