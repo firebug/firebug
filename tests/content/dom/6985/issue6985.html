@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6985: Correctly categorize DOM properties and methods</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+<script>
+window.custom_prop = function() {};
+document.custom_prop = function() {};
+document.body.custom_prop = "hi";
+history.custom_prop = function() {};
+</script>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6985">Issue 6985</a>: Correctly categorize DOM properties and methods</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>
+                        Turn on the Show User-defined {Properties,Functions} options in the DOM panel,
+                        and turn everything else off.
+                    </li>
+                    <li>
+                        Enable and switch to the <em>Console</em> panel<br/>
+                    </li>
+                    <li>
+                        Run the following expressions in the Command Line and verify that the
+                        opened DOM panel views contain only a "custom_prop" property, and __proto__:
+                        <ul>
+                            <li><code>inspect(window, "dom")</code>
+                            <li><code>inspect(document, "dom")</code>
+                            <li><code>inspect(document.body, "dom")</code>
+                            <li><code>inspect(history, "dom")</code>
+                        </ul>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        When "Show DOM {Properties,Functions,Constants}" are off, the DOM panel
+                        should be empty except for used-defined properties (and __proto__).
+                    </li>
+                </ul>
+            </section>
+            <footer>Simon Lindholm, simon.lindholm10@gmail.com</footer>
+        </div>
+    </body>
+</html>
