@@ -30,7 +30,7 @@ var Ci = Components.interfaces;
 var {domplate, SPAN, P, DIV, BUTTON, TABLE, TR, TD, TBODY} = Domplate;
 
 var slowJSDBugUrl = "https://bugzilla.mozilla.org/show_bug.cgi?id=815603";
-var firebug20Url = "https://getfirebug.com/releases/firebug/2.0";
+var firebug20Url = "https://getfirebug.com/firebug2";
 
 var comparator = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
 var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
