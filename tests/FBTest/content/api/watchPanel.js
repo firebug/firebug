@@ -40,7 +40,7 @@ this.addWatchExpression = function(chrome, expression, callback)
     // Wait till the result is evaluated and displayed.
     var doc = FBTest.getSidePanelDocument();
     var recognizer = new MutationRecognizer(doc.defaultView, "tr",
-        {"class": "memberRow watchRow"});
+        {"class": "memberRow watchRow"}, expression);
 
     recognizer.onRecognizeAsync((row) =>
     {
