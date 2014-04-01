@@ -118,7 +118,7 @@
 
 #fbSearchBox {
     margin-top: 5px;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
 }
 
 .fbsearch-textbox {
@@ -127,7 +127,7 @@
 }
 
 .fbsearch-icon {
-    width: 22px;
+    width: 24px;
     background-image: url(chrome://firebug/skin/mac/search.svg);
 }
 
