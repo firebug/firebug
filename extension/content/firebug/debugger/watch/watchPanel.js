@@ -707,33 +707,40 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     {
         var items = BasePanel.getContextMenuItems.apply(this, arguments);
 
-        if (!this.watches || this.watches.length == 0 ||
-            !Dom.getAncestorByClass(target, "watchRow"))
-        {
+        if (!this.watches || this.watches.length == 0)
             return items;
-        }
 
         var itemIDs = items.map((item) => item.id);
+        var isWatch = Dom.getAncestorByClass(target, "watchRow");
 
         // find the index of "EditDOMProperty" in the items:
         var editWatchIndex = itemIDs.indexOf("EditDOMProperty");
-        if (editWatchIndex !== -1)
-        {
-            items[editWatchIndex].label = "EditWatch";
-            items[editWatchIndex].tooltiptext = "watch.tip.Edit_Watch";
-        }
 
         // find the index of "DeleteWatch" in the items:
         var deleteWatchIndex = itemIDs.indexOf("DeleteProperty");
-        if (deleteWatchIndex !== -1)
+
+        if (isWatch)
         {
-            items[deleteWatchIndex].label = "DeleteWatch";
-            items[deleteWatchIndex].tooltiptext = "watch.tip.Delete_Watch";
+            if (editWatchIndex !== -1)
+            {
+                items[editWatchIndex].label = "EditWatch";
+                items[editWatchIndex].tooltiptext = "watch.tip.Edit_Watch";
+            }
+    
+            if (deleteWatchIndex !== -1)
+            {
+                items[deleteWatchIndex].label = "DeleteWatch";
+                items[deleteWatchIndex].tooltiptext = "watch.tip.Delete_Watch";
+            }
         }
 
         // if DeleteWatch was found, we insert DeleteAllWatches after it
         // otherwise, we insert the item at the beginning of the menu
-        var deleteAllWatchesIndex = (deleteWatchIndex >= 0) ? deleteWatchIndex + 1 : 0;
+        var deleteAllWatchesIndex = 0;
+        if (deleteWatchIndex !== -1)
+            deleteAllWatchesIndex = deleteWatchIndex + 1;
+        else if (editWatchIndex !== -1)
+            deleteAllWatchesIndex = editWatchIndex + 1;
 
         Trace.sysout("insert DeleteAllWatches at: " + deleteAllWatchesIndex);
 
@@ -744,6 +751,11 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             tooltiptext: "watch.tip.Delete_All_Watches",
             command: Obj.bindFixed(this.deleteAllWatches, this)
         });
+
+        // Add a separator before the 'Delete All Watches' option in case a
+        // DOM property was clicked
+        if (!isWatch)
+            items.splice(deleteAllWatchesIndex, 0, "-");
 
         return items;
     },
