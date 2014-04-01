@@ -8,7 +8,7 @@
         #image {
             width: 100px;
             height: 100px;
-            background: url("imageWith()And'InItsName.png") center no-repeat;
+            background: url("images/imageWith()And'InItsName.png") center no-repeat;
         }
         </style>
     </head>
@@ -21,6 +21,10 @@
                 <div id="image"></div>
             </section>
             <section id="description">
+                <p class="note">
+                    Note: This test also covers
+                    <a href="http://code.google.com/p/fbug/issues/detail?id=6067" title="Image infotip isn't shown anymore for relative paths">issue 6067</a>.
+                </p>
                 <h3>Steps to reproduce</h3>
                 <ol>
                     <li>Open Firebug</li>

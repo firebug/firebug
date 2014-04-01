@@ -18,7 +18,7 @@ function runTest()
 
             FBTest.waitForDisplayedElement("stylesheet", config, function(image)
             {
-                if (FBTest.compare(basePath + "css/5987/imageWith()And'InItsName.png",
+                if (FBTest.compare(basePath + "css/5987/images/imageWith()And'InItsName.png",
                     image.getAttribute("src"), "Image URL must be correct"))
                 {
                     function verifyImageDimensions()
