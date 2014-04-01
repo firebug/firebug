@@ -163,15 +163,15 @@ this.testDone = function(message)
 
     // Clean up now so, annotations are cleared and Firebug is not activated for the
     // next activated tab that would coincidentally come from the same domain. 
-    this.setToKnownState(() =>
+    FBTest.setToKnownState(() =>
     {
         var test = FBTestApp.TestRunner.currentTest;
 
         // Make sure the current stack is gone.
         setTimeout(() =>
         {
-            this.closeFirebug();
-            this.cleanUpTestTabs();
+            FBTest.closeFirebug();
+            FBTest.cleanUpTestTabs();
 
             if (!message)
             {
