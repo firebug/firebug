@@ -2,30 +2,23 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "cookies/general/breakOnNext.php", function(win)
     {
-        FBTest.enableCookiesPanel(function(win)
+        FBTest.enablePanels(["cookies", "script"], function(win)
         {
-            var panelNode = FBTest.selectPanel("cookies").panelNode;
+            FBTest.progress("cookies panel enabled");
 
-            // xxxHonza TODO:
+            var chrome = FW.Firebug.chrome;
+            FBTest.clickBreakOnNextButton(chrome, function()
+            {
+                FBTest.progress("break on next clicked");
 
-            FBTest.testDone();
+                FBTest.waitForBreakInDebugger(chrome, 94, false, function()
+                {
+                    FBTest.clickContinueButton(chrome);
+                    FBTest.testDone();
+                });
+            });
+
+            FBTest.clickContentButton(win, "changeCookie");
         });
     });
 };
-
-function clickBreakOnCookie(callback)
-{
-    var chrome = FW.Firebug.chrome;
-    FBTest.clickBreakOnNextButton(chrome, callback);
-}
-
-function waitForBreakOnCookie(lineNo, breakpoint, callback)
-{
-    var chrome = FW.Firebug.chrome;
-    FBTest.waitForBreakInDebugger(chrome, lineNo, breakpoint, function(sourceRow)
-    {
-        FBTest.sysout("net.breakpoints; Break on Cookie OK");
-        FBTest.clickContinueButton(chrome);
-        callback();
-    });
-}

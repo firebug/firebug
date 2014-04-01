@@ -18,9 +18,8 @@
 <ol>
 <li>Open Firebug and enable the <b>Cookies</b> panel.</li>
 <li>Click the <code>Break on Cookie Change</code> button.</li>
-<li>Click on one of the buttons bellow.</li>
-<li>The script execution must be stopped by Firebug debugger and
-the propert source code line must be displayed.</li>
+<li>Click on one the <code>Change Cookie</code> button bellow.</li>
+<li>The script execution must be stopped by Firebug debugger at line 94</li>
 </ol>
 
 <button id="addCookie" onclick="onAddCookie()">Add Cookie</button>
