@@ -390,6 +390,7 @@ this.getCurrentLocation = function()
 
 // ********************************************************************************************* //
 // Panel Options
+
 this.setPanelOption = function(panelName, menuItemIdentifier, callback)
 {
     var panelType = FW.Firebug.getPanelType(panelName);
@@ -447,7 +448,7 @@ this.setPanelOption = function(panelName, menuItemIdentifier, callback)
                     }
                 }
             }
-FBTrace.sysout("menuItem", menuItem);
+
             // If the menu item isn't available close the context menu and bail out.
             if (!self.ok(menuItem, "'" + menuItemId + "' item must be available in the options menu."))
             {
@@ -469,7 +470,7 @@ FBTrace.sysout("menuItem", menuItem);
 
 // ********************************************************************************************* //
 // Panel Options
-this.setPanelOption = function(panelName, menuItemIdentifier, callback)
+this.setPanelOption = function(panelName, menuItemIdentifier, callback, errorCallback)
 {
     var panelType = FW.Firebug.getPanelType(panelName);
     var panelTab;
@@ -502,7 +503,6 @@ this.setPanelOption = function(panelName, menuItemIdentifier, callback)
 
     function onPopupShown(event)
     {
-        FBTrace.sysout("popupshown", event);
         optionsMenu.removeEventListener("popupshowing", onPopupShown);
 
         // Fire the event handler asynchronously so items have a chance to be appended.
@@ -526,17 +526,29 @@ this.setPanelOption = function(panelName, menuItemIdentifier, callback)
                     }
                 }
             }
-FBTrace.sysout("menuItem", menuItem);
-            // If the menu item isn't available close the context menu and bail out.
+
+            // If the menu item isn't available close the options menu and bail out.
             if (!self.ok(menuItem, "'" + menuItemId + "' item must be available in the options menu."))
             {
-                // Click on specified menu item.
-                self.synthesizeMouse(menuItem);
+                optionsMenu.hidePopup();
+                if (errorCallback)
+                    errorCallback();
+                return;
             }
     
-            event.target.blur();
-    
-            callback();
+            // Click on specified menu item.
+            self.synthesizeMouse(menuItem);
+
+            // Close the popup asynchronously to allow the click to take affect
+            setTimeout(() => optionsMenu.hidePopup());
+
+            if (callback)
+            {
+                // Since the command is dispatched asynchronously,
+                // execute the callback using timeout.
+                // Especially Mac OS needs this.
+                setTimeout(() => callback(), 250);
+            }
         }, 10);
     }
 
