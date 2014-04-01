@@ -273,8 +273,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
                 );
             }
 
-            var isDomMember = Dom.isDOMMember(rowObject, rowName);
-            if (!isDomMember && member.breakable)
+            if (member.breakable && !Dom.isDOMMember(rowObject, rowName))
             {
                 var bps = this.context.dom.breakpoints;
                 var hasBreakpoint = bps.findBreakpoint(rowObject, rowName);

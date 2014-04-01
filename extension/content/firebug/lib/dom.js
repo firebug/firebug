@@ -874,6 +874,12 @@ Dom.getDOMMembers = function()
 
 Dom.DOMMemberTester = function(object)
 {
+    if (!object || !(typeof object === "object" || typeof object === "function"))
+    {
+        this.isDOMMember = this.isDOMConstant = () => false;
+        return;
+    }
+
     var global = Cu.getGlobalForObject(object);
     var wrappedObject = Wrapper.wrapObject(object);
     var isArray = Array.isArray(object);
