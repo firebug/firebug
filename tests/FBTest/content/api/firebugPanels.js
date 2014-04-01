@@ -389,6 +389,87 @@ this.getCurrentLocation = function()
 };
 
 // ********************************************************************************************* //
+
+// Panel Options
+
+this.setPanelOption = function(panelName, menuItemIdentifier, callback)
+{
+    var panelType = FW.Firebug.getPanelType(panelName);
+    var panelTab;
+
+    var doc = FW.Firebug.chrome.window.document;
+    var panelTabs = doc.getElementById(panelType.prototype.parentPanel ?
+        "fbPanelBar2-panelTabs" : "fbPanelBar1-panelTabs");
+    for (var child = panelTabs.firstChild; child; child = child.nextSibling)
+    {
+        if (panelType == child.panelType)
+        {
+            panelTab = child;
+            break;
+        }
+    }
+
+    var optionsMenuButton = panelTab.getElementsByTagName("panelTabMenu")[0];
+    var optionsMenuButtonChildren = FW.FBL.domUtils.getChildrenForNode(optionsMenuButton, true);
+    var optionsMenu = null
+
+    for (var i = 0; i < optionsMenuButtonChildren.length; i++)
+    {
+        if (optionsMenuButtonChildren[i] instanceof XULElement && optionsMenuButtonChildren[i].className === "menuPopup")
+        {
+            optionsMenu = optionsMenuButtonChildren[i];
+            break;
+        }
+    }
+    var self = this;
+
+    function onPopupShown(event)
+    {
+        FBTrace.sysout("popupshown", event);
+        optionsMenu.removeEventListener("popupshowing", onPopupShown);
+
+        // Fire the event handler asynchronously so items have a chance to be appended.
+        setTimeout(function()
+        {
+            var menuItem;
+            if (typeof menuItemIdentifier == "string" || menuItemIdentifier.id)
+            {
+                var menuItemId = menuItemIdentifier.id || menuItemIdentifier;
+                menuItem = event.target.ownerDocument.getElementById(menuItemId);
+            }
+            else if (menuItemIdentifier.label)
+            {
+                var menuItemId = menuItemIdentifier.label;
+                for (var item = event.target.firstChild; item; item = item.nextSibling)
+                {
+                    if (item.label == menuItemId)
+                    {
+                        menuItem = item;
+                        break;
+                    }
+                }
+            }
+
+            // If the menu item isn't available close the context menu and bail out.
+            if (!self.ok(menuItem, "'" + menuItemId + "' item must be available in the options menu."))
+            {
+                // Click on specified menu item.
+                self.synthesizeMouse(menuItem);
+            }
+    
+            event.target.blur();
+    
+            callback();
+        }, 10);
+    }
+
+    optionsMenu.addEventListener("popupshowing", onPopupShown);
+
+    var contextMenuEventDetails = {type: "contextmenu", button: 2};
+    self.synthesizeMouse(panelTab, 5, 5, contextMenuEventDetails);
+};
+
+// ********************************************************************************************* //
 // Panel DOM
 
 this.expandElements = function(panelNode, className) // className, className, ...
@@ -571,7 +652,7 @@ this.showTooltip = function(target, callback)
         callback(event.target);
     }
 
-    // Tooltip controller ensures clean up (listners removal) in cases
+    // Tooltip controller ensures clean up (listeners removal) in cases
     // when the tooltip is never shown and so, the listener not removed.
     TooltipController.addListener(onTooltipShowing);
 
