@@ -222,7 +222,7 @@ Url.getLocalPath = function(url)
 
 /**
  * Mozilla URI from non-web URL
- * @param URL 
+ * @param URL
  * @returns undefined or nsIURI
  */
 Url.getLocalSystemURI = function(url)

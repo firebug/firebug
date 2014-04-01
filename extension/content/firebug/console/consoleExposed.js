@@ -417,7 +417,7 @@ function createFirebugConsole(context, win)
     {
         var sourceLink = StackFrame.getFrameSourceLink(getComponentsStackDump());
 
-        // xxxFlorent: should be reverted if we integrate 
+        // xxxFlorent: should be reverted if we integrate
         // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
         if (sourceLink && DebuggerLib.isFrameLocationEval(sourceLink.href))
             return null;

@@ -62,7 +62,7 @@ function TabContext(win, browser, chrome, persistedState)
 
     // xxxHonza: remove?
     // Used by chromebug.
-    this.global = win; 
+    this.global = win;
 
     // Initialize context.baseWindow here (modified then by the cd() command).
     this.baseWindow = win;

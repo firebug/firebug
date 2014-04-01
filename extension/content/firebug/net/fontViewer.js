@@ -64,7 +64,7 @@ Firebug.FontViewerModel = Obj.extend(Module,
 
     /**
      * Checks whether the given file name and content are a valid font file
-     * 
+     *
      * @param contentType: MIME type of the file
      * @param url: URL of the file
      * @param data: File contents
@@ -112,7 +112,7 @@ Firebug.FontViewerModel = Obj.extend(Module,
 
     /**
      * Parses the file and returns information about the font
-     * 
+     *
      * @param file: File to parse
      * @return Font related information
      */
@@ -273,7 +273,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Handles toggling of the font information display
-     * 
+     *
      * @param event: Click event
      */
     onToggleView: function(event)
@@ -323,7 +323,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Checks, whether the font contains meta data
-     * 
+     *
      * @param fontObject: Font related information
      * @return True, if font contains meta data, otherwise false
      */
@@ -334,7 +334,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Selects the corresponding Domplate template related to a given meta data property
-     * 
+     *
      * @param prop: Meta data property
      * @return Domplate template related to the property
      */
@@ -345,7 +345,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Returns the translated property name
-     * 
+     *
      * @param prop: Meta data property
      * @return Translated name of the property
      */
@@ -356,7 +356,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Returns the text of a meta data property or a string
-     * 
+     *
      * @param value: Meta data property or string
      * @return String representing the text related to the property
      */
@@ -374,7 +374,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Opens a URL in a new browser tab
-     * 
+     *
      * @param event: Click event
      */
     onOpenUrl: function(event)
@@ -386,7 +386,7 @@ Firebug.FontViewerModel.Preview = domplate(
     /**
      * Returns either text or a linked text depending on a URL to be present of a
      * meta data property
-     * 
+     *
      * @param node: Meta data property node
      * @return Text or linked text
      */
@@ -400,7 +400,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Returns the URL of a meta data property
-     * 
+     *
      * @param node: Meta data property node
      * @return URL of the meta data property
      */
@@ -411,7 +411,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Returns the name of a link related to a meta data property
-     * 
+     *
      * @param node: Meta data property node
      * @return Link name of the meta data property
      */
@@ -422,7 +422,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Returns an array of font credits
-     * 
+     *
      * @param node: Meta data property node
      * @return Credits
      */
@@ -433,7 +433,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Returns the role of a contributor of the font
-     * 
+     *
      * @param node: Meta data property node
      * @return Contributor role
      */
@@ -445,7 +445,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Returns the available languages of a translated meta data property text
-     * 
+     *
      * @param node: Meta data property node
      * @return Array of languages
      */
@@ -464,7 +464,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Returns the default language of a meta data property
-     * 
+     *
      * @param node: Meta data property node
      * @return Language
      */
@@ -488,7 +488,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Returns the translated text of meta data property
-     * 
+     *
      * @param node: Meta data property node
      * @param lang: Language of the text
      * @return Translated text
@@ -510,7 +510,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Displays the XML source of the meta data
-     * 
+     *
      * @param fontInfo: Font related information
      * @param source: XML source of the meta data
      */
@@ -524,7 +524,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Displays the meta data information formatted
-     * 
+     *
      * @param fontInfo: Font related information
      * @param source: XML source of the meta data
      */
@@ -565,7 +565,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Handles text language changes
-     * 
+     *
      * @param event: Click event
      */
     onTranslatedLangChange: function(event)
@@ -586,7 +586,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Returns the CSS font-face class name
-     * 
+     *
      * @param cssFamilyName: CSS name of the font family
      * @return Name of the font-face class
      */
@@ -597,7 +597,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Returns the font size CSS
-     * 
+     *
      * @param size: Font size
      * @return Font size CSS
      */
@@ -608,7 +608,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Returns the characters used for the font preview
-     * 
+     *
      * @param charType: Type of characters to return
      * @return Preview characters
      */
@@ -629,7 +629,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Returns the CSS for the @font-face CSS
-     * 
+     *
      * @param fontObject: Font related information
      * @return @font-face CSS
      */
@@ -644,7 +644,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Displays general information about the font
-     * 
+     *
      * @param body: Node containing the font information display
      * @param fontObject: Font related information
      */
@@ -660,7 +660,7 @@ Firebug.FontViewerModel.Preview = domplate(
         {
             var props =
             [
-                {name: Locale.$STR("fontviewer.Name"), node: fontObject.name}, 
+                {name: Locale.$STR("fontviewer.Name"), node: fontObject.name},
                 {name: Locale.$STR("fontviewer.CSS Family Name"), node: fontObject.CSSFamilyName},
                 {name: Locale.$STR("fontviewer.Format"), node: fontObject.format}
             ];
@@ -670,7 +670,7 @@ Firebug.FontViewerModel.Preview = domplate(
 
     /**
      * Renders the font display
-     * 
+     *
      * @param body: Node containing the font information display
      * @param file: Font file to be displayed
      * @param context: Related context

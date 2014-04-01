@@ -29,7 +29,7 @@ catch (err)
 /**
  * No data should be written if Firefox is set to privatebrowsing.
  * don't forget to check it before access (issue 2923).
- * 
+ *
  * xxxHonza: as soon as Fx 22 is the min for Firebug most of the methods can be removed.
  * The most important one will be the isPrivateBrowsing
  */

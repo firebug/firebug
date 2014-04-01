@@ -191,7 +191,7 @@ function createGripProxy(grip)
 {
     // xxxHonza: this is the place where we can use proxies so, Grips are working
     // in DOM panel automatically
-    // xxxHonza: in case the grip represents an array the proxy should also 
+    // xxxHonza: in case the grip represents an array the proxy should also
     // be an array.
     var obj = {};
     for (var i=0; i<grip.properties.length; i++)

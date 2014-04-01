@@ -113,14 +113,14 @@ ChangeEditor.prototype =
                 var parser = Cc["@mozilla.org/xmlextras/domparser;1"].createInstance(Ci.nsIDOMParser);
                 var doc = parser.parseFromString("<vbox>" + localized + "</vbox>", "text/xml");
                 var root = doc.documentElement;
-    
+
                 while (elements[i].firstChild)
                     elements[i].removeChild(elements[i].firstChild);
-    
+
                 for (var j=0; j<root.childNodes.length; j++)
                 {
                     // ToDo: Show labels correctly
-                    // Namespaces are not inherited from doc, so labels 
+                    // Namespaces are not inherited from doc, so labels
                     // are not shown as links
                     node = doc.importNode(root.childNodes[j], true);
                     elements[i].appendChild(node);
@@ -140,7 +140,7 @@ ChangeEditor.prototype =
     onAccept: function()
     {
         this.item.label = this.win.document.getElementById("name").value;
-    
+
         if (!browseButton.disabled)
         {
             var file = this.win.document.getElementById("executable").file;

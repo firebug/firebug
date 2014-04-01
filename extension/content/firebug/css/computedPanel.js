@@ -21,7 +21,7 @@ define([
     "firebug/css/loadHandler",
     "firebug/debugger/script/sourceLink",
 ],
-function(Firebug, Arr, Css, Dom, Domplate, Events, Locale, Obj, Options, Persist, Str, Url, Xml, 
+function(Firebug, Arr, Css, Dom, Domplate, Events, Locale, Obj, Options, Persist, Str, Url, Xml,
     Menu, Panel, CSSModule, CSSReps, LoadHandler, SourceLink) {
 
 "use strict";

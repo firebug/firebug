@@ -15,7 +15,7 @@ var Cu = Components.utils;
 // ********************************************************************************************* //
 // CookieUtils Implementation
 
-var CookieUtils = 
+var CookieUtils =
 {
     isDeletedCookie: function(cookie)
     {
@@ -98,7 +98,7 @@ var CookieUtils =
             {
                 cookie.name = option[0];
                 cookie.value = option[1];
-            } 
+            }
             else
             {
                 var name = option[0].toLowerCase();
@@ -129,9 +129,9 @@ var CookieUtils =
                             var tempDate = new Date(cookie[name] * 1000);
                             if (value != tempDate.toGMTString())
                             {
-                                FBTrace.sysout("cookies.parseFromString: ERROR, " + 
-                                    "from: " + value + 
-                                    ", to: " + tempDate.toGMTString() + 
+                                FBTrace.sysout("cookies.parseFromString: ERROR, " +
+                                    "from: " + value +
+                                    ", to: " + tempDate.toGMTString() +
                                     ", cookie: " + string);
                             }
                         }

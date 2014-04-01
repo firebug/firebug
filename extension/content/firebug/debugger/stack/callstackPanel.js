@@ -42,7 +42,7 @@ var TraceError = FBTrace.toError();
  *
  * The content of this panel is synchronized with ThreadClient's stack frame cache using
  * 'framesadded' and 'framescleared' events. These events are re-sent from {@link DebuggerTool},
- * which is registered ThreadClient's listener. 
+ * which is registered ThreadClient's listener.
  */
 function CallstackPanel() {}
 CallstackPanel.prototype = Obj.extend(Panel,
@@ -216,7 +216,7 @@ CallstackPanel.prototype = Obj.extend(Panel,
         // Update visibility of stack frame arguments.
         var name = "showStackFrameArguments";
         this.updateOption(name, Options.get(name));
- 
+
         if (trace && trace.frames.length != 0)
         {
             var rep = Firebug.getRep(trace, this.context);

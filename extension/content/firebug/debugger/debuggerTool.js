@@ -462,7 +462,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
     },
 
     // xxxHonza: used to get boolean result of evaluated breakpoint condition
-    // should be somewhere is an API library so, we can share it. 
+    // should be somewhere is an API library so, we can share it.
     isFalse: function(descriptor)
     {
         if (!descriptor || typeof(descriptor) != "object")

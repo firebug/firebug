@@ -40,7 +40,7 @@ var {domplate, A, SPAN, FOR, TAG, DIV} = Domplate;
 
 /**
  * @module The module implements the following commands:
- * 
+ *
  * 'debug' Adds a breakpoint on the first line of a function.
  * 'undebug' Removes the breakpoint on the first line of a function.
  * 'monitor' Turns on logging for all calls to a function.

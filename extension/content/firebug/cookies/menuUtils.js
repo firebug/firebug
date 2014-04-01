@@ -9,7 +9,7 @@ function(Obj, Options) {
 // ********************************************************************************************* //
 // Menu Utils
 
-var MenuUtils = 
+var MenuUtils =
 {
     optionMenu: function(context, label, tooltiptext, domain, option)
     {
@@ -54,7 +54,7 @@ var MenuUtils =
             case 3: // use p3p settings
             Options.setPref(domain, option, 0);
             return;
-        } 
+        }
     },
 
     onBlockCurrent: function()

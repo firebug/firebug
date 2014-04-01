@@ -22,7 +22,7 @@ const ioService = Xpcom.CCSV("@mozilla.org/network/io-service;1", "nsIIOService"
 function Cookie(cookie, action)
 {
     this.cookie = cookie;
-    this.action = action; 
+    this.action = action;
     this.rawHost = makeStrippedHost(cookie.host);
 }
 
@@ -40,7 +40,7 @@ Cookie.prototype =
             (this.cookie.maxAge ? "; Max-Age=" + this.cookie.maxAge : "") +
             ((this.cookie.path) ? "; path=" + this.cookie.path : "; path=/") +
             (noDomain ? "" : ((this.cookie.host) ? "; domain=" + this.cookie.host : "")) +
-            ((this.cookie.isSecure) ? "; Secure" : "") + 
+            ((this.cookie.isSecure) ? "; Secure" : "") +
             ((this.cookie.isHttpOnly) ? "; HttpOnly" : "");
     },
 
@@ -101,7 +101,7 @@ Cookie.prototype =
 
             // Simple test if the source is XML (to avoid errors in the Firefox Error console)
             if (value.indexOf("<") != 0)
-                return null; 
+                return null;
 
             var parser = Xpcom.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
             var doc = parser.parseFromString(value, "text/xml");
@@ -113,7 +113,7 @@ Cookie.prototype =
             // Error handling
             var nsURI = "http://www.mozilla.org/newlayout/xml/parsererror.xml";
             if (docElem.namespaceURI == nsURI && docElem.nodeName == "parsererror")
-                return null; 
+                return null;
 
             return (this.xml = docElem);
         }

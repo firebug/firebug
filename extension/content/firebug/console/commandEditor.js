@@ -261,7 +261,7 @@ var CommandEditor = Obj.extend(Module,
         var selection;
         if (this.editor)
         {
-            selection = this.editor.getSelection(); 
+            selection = this.editor.getSelection();
             return selection.start === selection.end;
         }
         return true;
@@ -321,7 +321,7 @@ var CommandEditor = Obj.extend(Module,
         }
     },
 
-    // Method used for the hack of issue 6824 (Randomly get "Unresponsive Script Warning" with 
+    // Method used for the hack of issue 6824 (Randomly get "Unresponsive Script Warning" with
     // commandEditor.html). Adds or removes the .CommandEditor-Hidden class.
     // IMPORTANT: that method should only be used within the Firebug code, and may be removed soon.
     addOrRemoveClassCommandEditorHidden: function(addClass)
@@ -493,7 +493,7 @@ TextEditor.prototype =
         var end = this.textBox.selectionEnd;
 
         return this.textBox.value.substring(start, end);
-    } 
+    }
 };
 
 // ********************************************************************************************* //

@@ -109,7 +109,7 @@ var CookieObserver = Obj.extend(BaseObserver,
 
     /**
      * @param {String} activeUri This object represents currently active host. Notice that there
-     *      can be more active hosts (activeHosts map) on one page in case 
+     *      can be more active hosts (activeHosts map) on one page in case
      *      of embedded iframes or/and previous redirects.
      *      Properties:
      *      host: www.example.com
@@ -117,10 +117,10 @@ var CookieObserver = Obj.extend(BaseObserver,
      *
      * @param {String} host: Represents the host of a cookie for which
      *      we are checking if it should be displayed for the active URI.
-     * 
+     *
      * @param {String} path: Represents the path of a cookie for which
      *      we are checking if it should be displayed for the active URI.
-     * 
+     *
      * @returns {Boolean} If the method returns true the host/path belongs
      *      to the activeUri.
      */
@@ -201,7 +201,7 @@ var CookieObserver = Obj.extend(BaseObserver,
         var rawHost = CookieUtils.makeStrippedHost(host);
 
         // Test the current main URI first.
-        // The location isn't nsIURI, so make a fake object (aka nsIURI). 
+        // The location isn't nsIURI, so make a fake object (aka nsIURI).
         var fakeUri = {host: location.host, path: location.pathname};
         if (this.isHostFromURI(fakeUri, rawHost, path))
             return true;
@@ -216,7 +216,7 @@ var CookieObserver = Obj.extend(BaseObserver,
             return false;
 
         // Now test if the cookie doesn't belong to some of the
-        // activeHosts (redirects, frames).    
+        // activeHosts (redirects, frames).
         var activeHosts = context.cookies.activeHosts;
         for (var activeHost in activeHosts)
         {
@@ -321,7 +321,7 @@ var CookieObserver = Obj.extend(BaseObserver,
 
         // Create group log for list of rejected cookies.
         var groupRow = Firebug.Console.openGroup(
-            [new CookieEvents.CookieRejectedEvent(context, uri)], 
+            [new CookieEvents.CookieRejectedEvent(context, uri)],
             context, "cookiesRejected", null, true, null, true);
 
         // The console can be disabled (since FB 1.2).

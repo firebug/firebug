@@ -245,7 +245,7 @@ Search.ReversibleRegExp = function(regex, flags)
     this.exec = function(text, reverse, caseSensitive, lastMatch)
     {
         // Ensure we have a regex
-        var key = (reverse ? "r" : "n") + (caseSensitive ? "n" : "i") 
+        var key = (reverse ? "r" : "n") + (caseSensitive ? "n" : "i")
             + (Firebug.searchUseRegularExpression ? "r" : "n");
 
         if (!re[key])

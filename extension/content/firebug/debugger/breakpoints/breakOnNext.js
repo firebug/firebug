@@ -27,7 +27,7 @@ var Trace = FBTrace.to("DBG_BREAKONNEXT");
 /**
  * @module Implements core logic for BON (Break On Next JS execution) feature. Instances
  * of the {@link Panel} object can customize this feature using the following API.
- * 
+ *
  * {@link Panel.supportsBreakOnNext}
  * {@link Panel.breakOnNext}
  * {@link Panel.shouldBreakOnNext}

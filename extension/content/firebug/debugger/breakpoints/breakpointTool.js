@@ -543,7 +543,7 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             // xxxHonza: Don't display the error message. It can happen
             // that dynamic breakpoint (a breakpoint in dynamically created script)
             // is being removed. Such breakpoint doesn't have corresponding
-            // {@link BreakpointClient} for now. 
+            // {@link BreakpointClient} for now.
             //
             //TraceError.sysout("breakpointTool.removeBreakpoint; ERROR removing " +
             //    "non existing breakpoint. " + url + ", " + lineNumber);

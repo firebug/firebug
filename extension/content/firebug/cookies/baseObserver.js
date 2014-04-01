@@ -15,7 +15,7 @@ const Ci = Components.interfaces;
 
 var BaseObserver =
 {
-    QueryInterface : function (aIID) 
+    QueryInterface : function (aIID)
     {
         if (aIID.equals(Ci.nsIObserver) ||
             aIID.equals(Ci.nsISupportsWeakReference) ||

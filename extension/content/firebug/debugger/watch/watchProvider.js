@@ -80,7 +80,7 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
         // If the debugger is resumed the {@link WatchPanel} displays list of user expressions
         // and the current global scope, top level window or an iframe set using cd().
         // The window is labeled as 'window'. It could be a bit better to use 'this' but,
-        // the expanded state would be remembered and used even for the case when the 
+        // the expanded state would be remembered and used even for the case when the
         // debugger is halted ('this' is one of the scopes).
         // xxxHonza: there must be a way how to provide better ID - not a label during
         // the tree restoration process.

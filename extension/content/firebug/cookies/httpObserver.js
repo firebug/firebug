@@ -30,13 +30,13 @@ const panelName = "cookies";
 /**
  * @class Represents an observer for http-on-modify-request and
  * http-on-examine-response events that are dispatched
- * by Firefox when network request is executed and returned. 
+ * by Firefox when network request is executed and returned.
  */
 var HttpObserver = Obj.extend(BaseObserver,
 /** @lends HttpObserver */
 {
     // nsIObserver
-    observe: function(aSubject, aTopic, aData) 
+    observe: function(aSubject, aTopic, aData)
     {
         try {
             aSubject = aSubject.QueryInterface(Ci.nsIHttpChannel);
@@ -53,7 +53,7 @@ var HttpObserver = Obj.extend(BaseObserver,
         }
     },
 
-    onModifyRequest: function(request) 
+    onModifyRequest: function(request)
     {
         var name = request.URI.spec;
         var origName = request.originalURI.spec;
@@ -75,7 +75,7 @@ var HttpObserver = Obj.extend(BaseObserver,
 
         // At this moment (specified by all the conditions) FB context doesn't exists yet.
         // But the page already started loading and there are things to monitor.
-        // This is why the temporary context is created. It's used as a place where to 
+        // This is why the temporary context is created. It's used as a place where to
         // store information (cookie events and hosts). All this info will be copied into
         // the real FB context when it's created (see initContext).
         if ((request.loadFlags & Ci.nsIHttpChannel.LOAD_DOCUMENT_URI) &&
@@ -117,7 +117,7 @@ var HttpObserver = Obj.extend(BaseObserver,
         // The context doesn't have to exist due to the activation support.
         if (!context)
         {
-            if (FBTrace.DBG_COOKIES) 
+            if (FBTrace.DBG_COOKIES)
                 FBTrace.sysout("cookies.onModifyRequest: context is NOT available for:" +
                     request.URI.host + ", tabId: " + tabId);
             return;
@@ -177,7 +177,7 @@ var HttpObserver = Obj.extend(BaseObserver,
         // The context doesn't have to exist due to the activation support.
         if (!context)
         {
-            if (FBTrace.DBG_COOKIES) 
+            if (FBTrace.DBG_COOKIES)
                 FBTrace.sysout("cookies.onExamineResponse: context is NOT available for:" +
                     request.URI.host + ", tabId: " + tabId);
             return;

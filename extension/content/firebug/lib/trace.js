@@ -63,7 +63,7 @@ var tracer = fbTraceScope.FBTrace;
 
 /**
  * Support for scoped logging.
- * 
+ *
  * // The log will be displayed only if DBG_MYMODULE option is on. 'DBG_MYMODULE' preference
  * // will be automatically created and appear in the FBTrace console (after restart).
  * FBTrace = FBTrace.to("DBG_MYMODULE");

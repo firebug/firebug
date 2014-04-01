@@ -456,7 +456,7 @@ var NetUtils =
             stream.setInputStream(inputStream);
             var encodedResponse = btoa(stream.readBytes(stream.available()));
             var dataURI = "data:" + file.request.contentType + ";base64," + encodedResponse;
-        
+
             var tabBrowser = Firefox.getTabBrowser();
             tabBrowser.selectedTab = tabBrowser.addTab(dataURI);
         }

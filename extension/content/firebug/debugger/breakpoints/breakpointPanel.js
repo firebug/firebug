@@ -153,7 +153,7 @@ BreakpointPanel.prototype = Obj.extend(Panel,
             FirebugReps.Warning.tag.replace({object: "NoBreakpointsWarning"}, this.panelNode);
         }
 
-        Trace.sysout("breakpointPanel.refresh; " + breakpoints.length + ", " + 
+        Trace.sysout("breakpointPanel.refresh; " + breakpoints.length + ", " +
             errorBreakpoints.length + ", " + monitors.length,
             [breakpoints, errorBreakpoints, monitors]);
 

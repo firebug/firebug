@@ -62,7 +62,7 @@ var CSSPanelMutationObserver = Obj.extend(Module,
         if (panel.name != "stylesheet" || panel.location == null)
             return;
 
-        // The CSS panel is visible let's observe mutations. 
+        // The CSS panel is visible let's observe mutations.
         this.startObserveMutations(panel);
     },
 

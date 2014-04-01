@@ -351,7 +351,7 @@ function deployJsdoc()
         <copy todir="${deployJsdocDir}">
             <fileset dir="${releaseDir}/jsdoc"/>
         </copy>
-  
+
         <echo message="JSDoc deployed to: " + version + release + " to ${deployXpiDir}"/>
          */
     }

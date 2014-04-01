@@ -125,7 +125,7 @@ var CookieClipboard = Obj.extend(Object,
 
         trans.getTransferData(this.cookieFlavour, str, strLength);
 
-        if (!str.value) 
+        if (!str.value)
             return null;
 
         str = str.value.QueryInterface(Ci.nsISupportsString);

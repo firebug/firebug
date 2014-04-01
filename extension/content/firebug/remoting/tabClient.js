@@ -69,7 +69,7 @@ TabClient.prototype = Obj.extend(new EventSource(),
     // Set to true if backend thread is attached.
     threadAttached: false,
 
-    // Set to true if detach sequence is in progress. 
+    // Set to true if detach sequence is in progress.
     detachInProgress: false,
 
     // Reference to the built-in {@link TabClient} object associated with

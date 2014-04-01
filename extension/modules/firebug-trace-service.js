@@ -216,7 +216,7 @@ TracerWrapper.prototype =
 
             // https://bugzil.la/795961 ?
             win.addEventListener("load", function onLoad(evt)
-            { 
+            {
                 // load listener not necessary once https://bugzil.la/800677 is fixed
                 var win = evt.currentTarget;
                 win.removeEventListener("load", onLoad, false);

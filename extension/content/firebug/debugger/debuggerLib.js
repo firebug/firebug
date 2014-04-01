@@ -246,7 +246,7 @@ DebuggerLib.getThreadDebuggeeGlobalForFrame = function(frame)
         if (frame.type === "call")
             return frame.callee.global;
 
-        // Even though |frame.this| returns a debuggee window, it is not the Debuggee 
+        // Even though |frame.this| returns a debuggee window, it is not the Debuggee
         // global instance. So rather return |frame.this.global|.
         if (frame.type === "global")
             return frame.this.global;

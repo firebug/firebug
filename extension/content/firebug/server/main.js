@@ -12,7 +12,7 @@ var Firebug = Cu.import("chrome://firebug/content/moduleConfig.js", {}).Firebug;
 // Expose require also in the server mode (extensions might also need it).
 Firebug.require = require;
 
-// xxxHonza: get the same config as Firebug uses, but what about the 
+// xxxHonza: get the same config as Firebug uses, but what about the
 // stuff in firebug main? It should be moved into the config I guess.
 var config = Firebug.getModuleLoaderConfig();
 

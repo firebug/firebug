@@ -21,7 +21,7 @@ var Xpcom = {};
 /**
  * Returns required XPCOM service
  * @param {Object} cName Name of the service.
- * @param {Object} ifaceName Name of the required interface 
+ * @param {Object} ifaceName Name of the required interface
  */
 Xpcom.CCSV = function(cName, ifaceName)
 {

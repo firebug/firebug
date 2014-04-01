@@ -530,7 +530,7 @@ Firebug.A11yModel = Obj.extend(Module,
                         return;
                     }
                 break;
- 
+
                 case KeyEvent.DOM_VK_RETURN:
                 case KeyEvent.DOM_VK_SPACE:
                     if (isTab && target.tabMenu)
@@ -917,7 +917,7 @@ Firebug.A11yModel = Obj.extend(Module,
                     }
                     else if (!goLeft)
                     {
-    
+
                         var focusItems = this.getFocusObjects(target);
                         if (focusItems.length > 0)
                         {

@@ -752,7 +752,7 @@ DomplateLoop.prototype = copyObject(DomplateTag.prototype,
         {
             // We have a function with optional aruments or just one variable
             var part = this.iter.parts[0];
-            
+
             // Join our function arguments or variables
             // If the user has supplied multiple variables without a function
             // this will create an invalid result and we should probably add an

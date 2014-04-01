@@ -54,7 +54,7 @@ var ToggleSidePanels = Obj.extend(Module,
     {
         Module.initialize.apply(this, arguments);
 
-        // Register as a listener for 'updateSidePanels' event. 
+        // Register as a listener for 'updateSidePanels' event.
         Firebug.registerUIListener(this);
 
         // Register a command handlers for XUL buttons dynamically, so we don't have to

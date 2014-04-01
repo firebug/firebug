@@ -1094,7 +1094,7 @@ SourceEditor.prototype =
         return lineNo - 1;
     },
 
-    // Method used for the hack of issue 6824 (Randomly get "Unresponsive Script Warning" with 
+    // Method used for the hack of issue 6824 (Randomly get "Unresponsive Script Warning" with
     // commandEditor.html). Adds or removes the .CommandEditor-Hidden class.
     // IMPORTANT: that method should only be used within the Firebug code, and may be removed soon.
     addOrRemoveClassCommandEditorHidden: function(addClass)

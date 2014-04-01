@@ -166,7 +166,7 @@ var TableRep = domplate(Rep,
         }
 
         // Typically map of objects (or object with object properties, i.e. tabular data),
-        // columns generated according to the first property object (aka first row). 
+        // columns generated according to the first property object (aka first row).
         var arr = [];
         for (var p in obj)
         {
@@ -348,7 +348,7 @@ var TableRep = domplate(Rep,
         var firstRow = this.getFirstRow(data);
 
         // Generic objects (with no tabular structure) are displayed as two column table:
-        // property names and property values. 
+        // property names and property values.
         if (typeof(firstRow) != "object")
         {
             Trace.sysout("tableRep.getHeaderColumns; Create columns for generic object");

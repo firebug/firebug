@@ -569,7 +569,7 @@ var ErrorMessageUpdater = Obj.extend(Module,
                     Css.removeClass(message, "breakForError");
             }
         }
-    }, 
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Error Source Update

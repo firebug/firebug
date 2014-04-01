@@ -9,8 +9,8 @@ function(CookieUtils) {
 // Cookie Event objects
 
 /**
- * This object represents a "cookie-changed" event (repObject). 
- * There are three types of cookie modify events: 
+ * This object represents a "cookie-changed" event (repObject).
+ * There are three types of cookie modify events:
  * "changed", "added" and "deleted".
  * Appropriate type is specified by action parameter.
  */

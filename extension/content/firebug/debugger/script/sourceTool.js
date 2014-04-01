@@ -285,7 +285,7 @@ function DynamicSourceCollector(sourceTool)
 
 /**
  * xxxHonza: workaround for missing RDP 'newSource' packets.
- * 
+ *
  * This object uses backend Debugger instance |threadActor.dbg| to hook script creation
  * (onNewScript callback). This way we can collect even all dynamically created scripts
  * (which are currently not send over RDP) and populate the current {@link TabContext}

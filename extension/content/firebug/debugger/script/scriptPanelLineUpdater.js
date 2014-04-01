@@ -25,7 +25,7 @@ var delay = 1492;
  * @Module This module is responsible for regular update of executable lines (the green numbers
  * displayed in the left hand side column). Scripts that are not rooted can be garbage collected
  * and this updater ensures that the line-column is up to date.
- * 
+ *
  * 1) The updater is active only if the Script panel is currently displayed.
  * 2) The updater updates only visible lines (viewport)
  *

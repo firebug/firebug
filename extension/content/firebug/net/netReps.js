@@ -1595,7 +1595,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Rep, new EventSource(),
 
         return postData;
     },
-    
+
     onChangeSort: function(event)
     {
         var target = event.target;
@@ -1639,7 +1639,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Rep, new EventSource(),
             ),
             DIV({"class": "netHeadersGroup collapsed", "data-pref": "netRequestHeadersVisible"},
                 DIV({"class": "netInfoHeadersGroup netInfoRequestHeadersTitle"},
-                    SPAN({"class": "netHeader twisty", 
+                    SPAN({"class": "netHeader twisty",
                         onclick: "$toggleHeaderContent"},
                         Locale.$STR("RequestHeaders")),
                     SPAN({"class": "netHeadersViewSource request collapsed", onclick: "$onViewSource",
@@ -1654,7 +1654,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Rep, new EventSource(),
             ),
             DIV({"class": "netHeadersGroup collapsed", "data-pref": "netCachedHeadersVisible"},
                 DIV({"class": "netInfoHeadersGroup netInfoCachedResponseHeadersTitle"},
-                    SPAN({"class": "netHeader twisty", 
+                    SPAN({"class": "netHeader twisty",
                         onclick: "$toggleHeaderContent"},
                         Locale.$STR("CachedResponseHeaders"))
                 ),
@@ -1665,7 +1665,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Rep, new EventSource(),
             ),
             DIV({"class": "netHeadersGroup collapsed", "data-pref": "netPostRequestHeadersVisible"},
                 DIV({"class": "netInfoHeadersGroup netInfoPostRequestHeadersTitle"},
-                    SPAN({"class": "netHeader twisty", 
+                    SPAN({"class": "netHeader twisty",
                         onclick: "$toggleHeaderContent"},
                     Locale.$STR("PostRequestHeaders"))
                 ),
@@ -1687,9 +1687,9 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Rep, new EventSource(),
     {
         var target = event.target;
         var headerGroup = Dom.getAncestorByClass(target, "netHeadersGroup");
-        
+
         Css.toggleClass(headerGroup, "opened");
-        if (Css.hasClass(headerGroup, "opened")) 
+        if (Css.hasClass(headerGroup, "opened"))
         {
             headerGroup.setAttribute("aria-expanded", "true");
             Options.set(headerGroup.dataset.pref, true);

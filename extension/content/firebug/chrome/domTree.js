@@ -68,7 +68,7 @@ DomTree.prototype = domplate(
         ),
 
     loop:
-        FOR("member", "$members", 
+        FOR("member", "$members",
             TAG("$member|getRowTag", {member: "$member"})),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -305,7 +305,7 @@ DomTree.prototype = domplate(
     getType: function(object)
     {
         // xxxHonza: A type provider (or a decorator) should be used here.
-        // (see also a comment in {@WatchTree.getType} 
+        // (see also a comment in {@WatchTree.getType}
         return "dom";
     },
 

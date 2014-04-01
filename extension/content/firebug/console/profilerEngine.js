@@ -157,7 +157,7 @@ ProfilerEngine.prototype =
 
         // Computing own-execution-time is a little more trickier.
         // 1) Younger frames are putting theirs total execution time to parent frames, where the
-        // sum is computed. Consequently, the own execution time is computed as follows: 
+        // sum is computed. Consequently, the own execution time is computed as follows:
         // own-execution-time = total-execution-time - nested-execution-time;
         // 2) Frames with no nested calls will have: nested-execution-time == 0 and so,
         // own-execution-time == total-execution-time

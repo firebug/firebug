@@ -264,7 +264,7 @@ Firebug.Activation = Obj.extend(Module,
 
                 return shortURI;
 
-                // This makes a.co.uk -> co.uk, mail.cn.mozilla.com -> cn.mozilla.com and 
+                // This makes a.co.uk -> co.uk, mail.cn.mozilla.com -> cn.mozilla.com and
                 // blog.getfirebug.com -> getfirebug.com, which is wrong. See issue 2202.)
                 /*
                 var host = shortURI.host;
