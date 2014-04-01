@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 3230: Pseudo-classes are not persistently shown in Style side panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #content::after {
+            content: "";
+            display: block;
+            visibility: hidden;
+            clear: both;
+            line-height: 0;
+            height: 0;
+        }
+
+        #element1,
+        #element2 {
+            width: 100px;
+            height: 100px;
+            float: left;
+            margin: 5px;
+        }
+
+        #element1 {
+            background-image: linear-gradient(-45deg, #788CFF, #B4C8FF);
+        }
+
+        #element2 {
+            background-image: linear-gradient(-45deg, #FF8C78, #FFC8B4);
+        }
+
+        #element1:hover {
+            background-image: linear-gradient(-45deg, #78FF8C, #B4FFC8);
+        }
+
+        #element2:hover {
+            background-image: linear-gradient(-45deg, #FFFF8C, #FFFFC8);
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>
+                <a href="http://code.google.com/p/fbug/issues/detail?id=3230">Issue 3230</a>:
+                Pseudo-classes are not persistently shown in Style side panel
+            </h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element1"></div>
+                <div id="element2"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>
+                        Switch to the <em>HTML</em> panel and there to the <em>Style</em> side
+                        panel
+                    </li>
+                    <li>
+                        Inspect the blue <code>&lt;div&gt;</code> (<code>#element1</code>) above
+                    </li>
+                    <li>
+                        Set the <em>Style</em> side panel option <em>:hover</em><br/>
+                        <span class="ok">
+                            &rArr; The <code>&lt;div&gt;</code> should be green now.
+                        </span>
+                    </li>
+                    <li>
+                        Hover the red <code>&lt;div&gt;</code> (<code>#element2</code>) above<br/>
+                        <span class="ok">
+                            &rArr; The left <code>&lt;div&gt;</code> (<code>#element1</code>)
+                            should still be green.
+                        </span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        The pseudo-class options inside the <em>Style</em> side panel should be
+                        persistent.
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>
