@@ -5,12 +5,11 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
         <script type="text/javascript">
-            (function aFunction()
-            {
-                // Showing a comment line just to set a breakpoint at!
+            function aFunction() {
+                // A omment line just to set a breakpoint at!
 
                 return (true == true);
-            }());
+            };
         </script>
     </head>
     <body>
@@ -25,12 +24,8 @@
                 <ol>
                     <li>Open Firebug on this page</li>
                     <li>Switch to the Script panel and enable it.</li>
-                    <li>As there is a <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=853847">platform bug</a>, press F5 to reload the page.
-                        <br />
-                        <span class="info"><strong>Only by reloading the page can ensure against being broken with the platform bug. See: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=853847">bug #853847</a></strong></span>
-                    </li>
                     <li>
-                        Click on the breakpoint column at line 10 (A line just to show a comment).
+                        Click on the breakpoint column at line 9 <em>"A omment line just to set a breakpoint at!"</em>.
                     </li>
 
                 </ol>
