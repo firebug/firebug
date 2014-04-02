@@ -88,7 +88,7 @@ Firebug.Spy = Obj.extend(Module,
     {
         context.spies = [];
 
-        if (Firebug.showXMLHttpRequests && Firebug.Console.isAlwaysEnabled())
+        if (Options.get("showXMLHttpRequests") && Firebug.Console.isAlwaysEnabled())
             this.attachObserver(context, context.window);
 
         Trace.sysout("spy.initContext " + contexts.length + " ", context.getName());
@@ -121,7 +121,7 @@ Firebug.Spy = Obj.extend(Module,
 
     watchWindow: function(context, win)
     {
-        if (Firebug.showXMLHttpRequests && Firebug.Console.isAlwaysEnabled())
+        if (Options.get("showXMLHttpRequests") && Firebug.Console.isAlwaysEnabled())
             this.attachObserver(context, win);
     },
 
@@ -362,7 +362,7 @@ var SpyHttpObserver =
             spy.requestHeaders = getRequestHeaders(spy);
 
         // If it's enabled log the request into the console tab.
-        if (Firebug.showXMLHttpRequests && Firebug.Console.isAlwaysEnabled())
+        if (Options.get("showXMLHttpRequests") && Firebug.Console.isAlwaysEnabled())
         {
             spy.logRow = Firebug.Console.log(spy, spy.context, "spy", null, true);
             Css.setClass(spy.logRow, "loading");

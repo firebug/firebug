@@ -1511,7 +1511,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             if (styleSheets.length)
             {
                 var sheet = styleSheets[0];
-                return (Firebug.filterSystemURLs &&
+                return (Options.get("filterSystemURLs") &&
                     Url.isSystemURL(Css.getURLForStyleSheet(sheet))) ? null : sheet;
             }
         }
@@ -1589,8 +1589,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
     search: function(text, reverse)
     {
-        var curDoc = this.searchCurrentDoc(!Firebug.searchGlobal, text, reverse);
-        if (!curDoc && Firebug.searchGlobal)
+        var searchGlobal = Options.get("searchGlobal");
+        var curDoc = this.searchCurrentDoc(!searchGlobal, text, reverse);
+        if (!curDoc && searchGlobal)
         {
             return this.searchOtherDocs(text, reverse) ||
                 this.searchCurrentDoc(true, text, reverse);

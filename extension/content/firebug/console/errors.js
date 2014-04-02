@@ -6,6 +6,7 @@ define([
     "firebug/lib/array",
     "firebug/lib/css",
     "firebug/lib/object",
+    "firebug/lib/options",
     "firebug/lib/string",
     "firebug/lib/xpcom",
     "firebug/console/console",
@@ -16,7 +17,7 @@ define([
     "firebug/chrome/reps",
     "firebug/debugger/breakpoints/breakpointStore",
 ],
-function(Firebug, FBTrace, Arr, Css, Obj, Str, Xpcom, Console, ErrorMessageObj,
+function(Firebug, FBTrace, Arr, Css, Obj, Options, Str, Xpcom, Console, ErrorMessageObj,
     ErrorStackTraceObserver, Win, Module, FirebugReps, BreakpointStore) {
 
 "use strict";
@@ -333,14 +334,15 @@ var Errors = Obj.extend(Module,
         if (object.columnNumber > 0)
             error.colNumber = object.columnNumber;
 
+        var showStackTrace = Options.get("showStackTrace");
         var errorStackTrace = ErrorStackTraceObserver.getAndConsumeStackTrace(context);
         if (errorStackTrace)
         {
             error.correctWithStackTrace(errorStackTrace);
-            if (!Firebug.showStackTrace)
+            if (!showStackTrace)
                 error.trace = null;
         }
-        else if (Firebug.showStackTrace && !context.isPanelEnabled("script"))
+        else if (showStackTrace && !context.isPanelEnabled("script"))
         {
             error.missingTraceBecauseNoDebugger = true;
         }
@@ -350,7 +352,7 @@ var Errors = Obj.extend(Module,
             Trace.sysout("errors.observe logScriptError " +
                 (errorStackTrace ? "have " : "NO ") +
                 "stack trace, is " +
-                (Firebug.showStackTrace ? "" : "not ") +
+                (showStackTrace ? "" : "not ") +
                 "shown, errorStackTrace error object: ",
                 {object: object, errorStackTrace: errorStackTrace});
         }
@@ -689,7 +691,7 @@ function whyNotShown(url, categoryList, isWarning)
 
     if (!categoryList)
     {
-        return Firebug.showChromeErrors ? null :
+        return Options.get("showChromeErrors") ? null :
             "no category, assume chrome, showChromeErrors false";
     }
 
@@ -697,23 +699,23 @@ function whyNotShown(url, categoryList, isWarning)
     for (var i=0; i<categories.length; ++i)
     {
         var category = categories[i];
-        if (category == "CSS" && !Firebug.showCSSErrors)
+        if (category == "CSS" && !Options.get("showCSSErrors"))
         {
             return "showCSSErrors";
         }
         else if ((category == "HTML" || category == "XML" || category == "malformed-xml") &&
-            !Firebug.showXMLErrors)
+            !Options.get("showXMLErrors"))
         {
             return "showXMLErrors";
         }
         else if ((category == "javascript" || category == "JavaScript" || category == "DOM")
-            && !isWarning && !Firebug.showJSErrors)
+            && !isWarning && !Options.get("showJSErrors"))
         {
             return "showJSErrors";
         }
         else if ((category == "javascript" || category == "JavaScript" || category == "DOM" ||
                 category == "DOM:HTML")
-            && isWarning && !Firebug.showJSWarnings)
+            && isWarning && !Options.get("showJSWarnings"))
         {
             return "showJSWarnings";
         }
@@ -724,7 +726,7 @@ function whyNotShown(url, categoryList, isWarning)
         }
     }
 
-    if (isChrome && !Firebug.showChromeErrors)
+    if (isChrome && !Options.get("showChromeErrors"))
         return "showChromeErrors";
 
     return null;

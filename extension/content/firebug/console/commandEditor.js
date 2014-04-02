@@ -124,7 +124,7 @@ var CommandEditor = Obj.extend(Module,
         var lastLineNo = this.editor.lastLineNo();
         this.editor.setCursor(lastLineNo, this.editor.getCharCount(lastLineNo));
 
-        Firebug.chrome.applyTextSize(Firebug.textSize);
+        Firebug.chrome.applyTextSize(Options.get("textSize"));
 
         if (FBTrace.DBG_COMMANDEDITOR)
             FBTrace.sysout("commandEditor.onEditorLoad; SourceEditor loaded");

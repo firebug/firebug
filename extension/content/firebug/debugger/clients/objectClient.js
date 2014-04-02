@@ -5,12 +5,13 @@ define([
     "firebug/lib/object",
     "firebug/lib/promise",
     "firebug/lib/array",
+    "firebug/lib/options",
     "firebug/lib/wrapper",
     "firebug/debugger/rdp",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/clients/grip",
 ],
-function (FBTrace, Obj, Promise, Arr, Wrapper, RDP, DebuggerLib, Grip) {
+function (FBTrace, Obj, Promise, Arr, Options, Wrapper, RDP, DebuggerLib, Grip) {
 
 // ********************************************************************************************* //
 // Object Grip
@@ -230,7 +231,7 @@ ObjectClient.Property.prototype = Obj.descend(Grip.prototype,
         if (this.value instanceof ObjectClient)
             return this.value.hasProperties();
 
-        return (typeof this.value === "string" && this.value.length > Firebug.stringCropLength);
+        return (typeof this.value === "string" && this.value.length > Options.get("stringCropLength"));
     },
 
     getChildren: function()
