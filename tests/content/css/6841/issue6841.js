@@ -55,10 +55,11 @@ function runTest()
                 tasks.push(testCompletion, "content", "ur", "url()");
                 tasks.push(testCompletion, "content", "un", "unset");
                 tasks.push(testCompletion, "font", "cal", "cal");
-                tasks.run(function()
-                {
-                    FBTest.testDone();
-                }, 0);
+
+                // Miscellaneous other auto-completion tests:
+                tasks.push(testCompletion, "border", "url(s", "url(s");
+
+                tasks.run(FBTest.testDone, 0);
             });
         });
     });
