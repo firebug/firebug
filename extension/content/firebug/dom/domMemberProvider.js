@@ -144,13 +144,8 @@ DOMMemberProvider.prototype =
                     {
                         add("userClass", userClasses);
                     }
-<<<<<<< Upstream, based on origin/master
-                    else if (!Firebug.showUserFuncs && Firebug.showInlineEventHandlers &&
-                        isInlineEventHandler)
-=======
                     else if (!Options.get("showUserFuncs") && Options.get("showInlineEventHandlers") &&
-                        Dom.isInlineEventHandler(name))
->>>>>>> 9621022 Issue 4536 (Cache options) http://code.google.com/p/fbug/issues/detail?id=4536
+                        isInlineEventHandler)
                     {
                         add("userFunction", domHandlers);
                     }
