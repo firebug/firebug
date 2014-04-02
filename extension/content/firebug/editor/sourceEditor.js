@@ -77,8 +77,9 @@ SourceEditor.DefaultConfig =
     value: "",
     mode: "htmlmixed",
     theme: "firebug",
-    indentUnit: Options.get("tabSize"),
-    tabSize: Options.get("tabSize"),
+    indentUnit: (Options.get("replaceTabs") == 0 ? 4 : Options.get("replaceTabs")),
+    tabSize: (Options.get("replaceTabs") == 0 ? 4 : Options.get("replaceTabs")),
+    indentWithTabs: Options.get("replaceTabs") == 0,
     smartIndent: true,
     extraKeys: {},
     lineWrapping: false,
@@ -624,7 +625,7 @@ SourceEditor.prototype =
 
     tab: function()
     {
-        this.editorObject.execCommand("indentMore");
+        this.editorObject.execCommand((Options.get("replaceTabs") != 0 ? "indentMore" : "defaultTab"));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
