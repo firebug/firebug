@@ -416,10 +416,11 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
                 // xxxsz: There can be two kinds of error and warning messages,
                 // which have one type. So map the type to the classes, which match it.
                 // TODO: Merge different CSS class names for log message types
+
                 var classNames = [type];
-                if (type == "errorMessage")
-                    classNames = ["error"];
-                else if (type == "warning")
+                if (type === "error")
+                    classNames = ["error", "errorMessage"];
+                else if (type === "warning")
                     classNames = ["warn", "warningMessage"];
 
                 for (var i = 0, classNamesLen = classNames.length; i < classNamesLen; i++)
