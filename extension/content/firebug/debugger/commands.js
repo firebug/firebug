@@ -3,26 +3,113 @@
 /*global define:1, Components:true, Firebug:true*/
 
 define([
+    "firebug/firebug",
     "firebug/lib/trace",
+    "firebug/lib/object",
+    "firebug/lib/options",
+    "firebug/chrome/module",
     "firebug/debugger/rdp",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/breakpoints/breakpointStore"
 ],
-function(FBTrace, RDP, DebuggerLib, BreakpointStore) {
+function(Firebug, FBTrace, Obj, Options, Module, RDP, DebuggerLib, BreakpointStore) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cu = Components.utils;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+var Cu = Components.utils;
 
 Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
 
 var Trace = FBTrace.to("DBG_DEBUGGER_COMMANDS");
 var TraceError = FBTrace.toError();
+
+// ********************************************************************************************* //
+// Commands Module Implementation
+
+/**
+ * @module This module is responsible for dynamic (un)registration of helper debug API.
+ * This API is available on the Command Line just like standard Command Line API
+ * and can be used to inspect various internal debugger objects.
+ *
+ * These commands are not intended to be used by standard Firebug users and they
+ * are disabled by default. If you want to use them you need to set the following
+ * preference to |true|. Use about:config to change the value.
+ *
+ * extensions.firebug.debugCommandLineAPI
+ */
+var Commands = Obj.extend(Module,
+/** @lends Commands */
+{
+    dispatchName: "Commands",
+
+    commands: [],
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Module
+
+    initialize: function()
+    {
+        Module.initialize.apply(this, arguments);
+
+        if (Options.get("debugCommandLineAPI"))
+            this.register();
+    },
+
+    shutdown: function()
+    {
+        Module.shutdown.apply(this, arguments);
+
+        this.unregister();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Options
+
+    updateOption: function(name, value)
+    {
+        if (name != "debugCommandLineAPI")
+            return;
+
+        // Dynamically register or unregister all commands as the preference
+        // changes its value.
+        if (value)
+            this.register();
+        else
+            this.unregister();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Commands
+
+    registerCommand: function(name, config)
+    {
+        this.commands.push({
+            name: name,
+            config: config
+        });
+    },
+
+    register: function()
+    {
+        Trace.sysout("commands.register; ", this.commands);
+
+        for (var cmd of this.commands)
+            Firebug.registerCommand(cmd.name, cmd.config);
+    },
+
+    unregister: function()
+    {
+        Trace.sysout("commands.unregister; ", this.commands);
+
+        for (var cmd of this.commands)
+            Firebug.unregisterCommand(cmd.name, cmd.config);
+    }
+});
 
 // ********************************************************************************************* //
 // Command Implementation
@@ -215,39 +302,49 @@ function getSource(context, args)
 }
 
 // ********************************************************************************************* //
+
+Commands.registerCommand("pauseGrip", {
+    handler: pauseGrip.bind(this),
+    description: "Helper command for accessing server side Grips. " +
+        "For debugging purposes only."
+});
+
+Commands.registerCommand("tabGrip", {
+    handler: tabGrip.bind(this),
+    description: "Helper command for accessing server side tab child Grips. " +
+        "For debugging purposes only."
+});
+
+Commands.registerCommand("threadPool", {
+    handler: threadPool.bind(this),
+    description: "Helper command for accessing server side thread pool. " +
+        "For debugging purposes only."
+});
+
+Commands.registerCommand("pausePool", {
+    handler: pausePool.bind(this),
+    description: "Helper command for accessing server side pause pool. " +
+        "For debugging purposes only."
+});
+
+Commands.registerCommand("breakpoints", {
+    handler: threadBreakpoints.bind(this),
+    description: "Helper command for accessing breakpoints on the server side. " +
+        "For debugging purposes only."
+});
+
+Commands.registerCommand("getSource", {
+    handler: getSource.bind(this),
+    description: "Helper command for getting source from the server side. " +
+        "For debugging purposes only."
+});
+
+// ********************************************************************************************* //
 // Registration
 
-Firebug.registerCommand("pauseGrip", {
-    handler: pauseGrip.bind(this),
-    description: "Helper command for accessing server side Grips. For debugging purposes only."
-});
+Firebug.registerModule(Commands);
 
-Firebug.registerCommand("tabGrip", {
-    handler: tabGrip.bind(this),
-    description: "Helper command for accessing server side tab child Grips. For debugging purposes only."
-});
-
-Firebug.registerCommand("threadPool", {
-    handler: threadPool.bind(this),
-    description: "Helper command for accessing server side thread pool. For debugging purposes only."
-});
-
-Firebug.registerCommand("pausePool", {
-    handler: pausePool.bind(this),
-    description: "Helper command for accessing server side pause pool. For debugging purposes only."
-});
-
-Firebug.registerCommand("breakpoints", {
-    handler: threadBreakpoints.bind(this),
-    description: "Helper command for accessing breakpoints on the server side. For debugging purposes only."
-});
-
-Firebug.registerCommand("getSource", {
-    handler: getSource.bind(this),
-    description: "Helper command for getting source from the server side. For debugging purposes only."
-});
-
-return {};
+return Commands;
 
 // ********************************************************************************************* //
 });

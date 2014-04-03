@@ -36,6 +36,7 @@ pref("extensions.firebug.serverMode", false);
 // Command line
 pref("extensions.firebug.commandEditor", false);
 pref("extensions.firebug.alwaysShowCommandLine", false);
+pref("extensions.firebug.debugCommandLineAPI", false);
 
 // Search
 pref("extensions.firebug.searchCaseSensitive", false);
