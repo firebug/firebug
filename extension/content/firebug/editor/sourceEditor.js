@@ -47,6 +47,7 @@ var HIGHLIGHTED_LINE_CLASS = "CodeMirror-highlightedLine";
 var BP_WRAP_CLASS = "CodeMirror-breakpoint";
 
 var unhighlightDelay = 1300;
+var tabSize = Options.get("replaceTabs");
 
 // ********************************************************************************************* //
 // Source Editor Constructor
@@ -77,9 +78,9 @@ SourceEditor.DefaultConfig =
     value: "",
     mode: "htmlmixed",
     theme: "firebug",
-    indentUnit: (Options.get("replaceTabs") == 0 ? 4 : Options.get("replaceTabs")),
-    tabSize: (Options.get("replaceTabs") == 0 ? 4 : Options.get("replaceTabs")),
-    indentWithTabs: Options.get("replaceTabs") == 0,
+    indentUnit: tabSize || 4,
+    tabSize: tabSize || 4,
+    indentWithTabs: tabSize == 0,
     smartIndent: true,
     extraKeys: {},
     lineWrapping: false,
@@ -625,7 +626,7 @@ SourceEditor.prototype =
 
     tab: function()
     {
-        this.editorObject.execCommand((Options.get("replaceTabs") != 0 ? "indentMore" : "defaultTab"));
+        this.editorObject.execCommand("indentMore");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
