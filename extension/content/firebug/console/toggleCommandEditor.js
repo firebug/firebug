@@ -59,7 +59,7 @@ var ToggleCommandEditor = Obj.extend(Module,
 
     showPanel: function(browser, panel)
     {
-        if (panel.name == "console")
+        if (panel && panel.name == "console")
             this.updateButtonVisibility();
     },
 
