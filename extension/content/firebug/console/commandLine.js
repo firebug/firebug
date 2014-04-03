@@ -813,7 +813,7 @@ function evaluateExpression(execContextType, expr, context, thisValue, targetWin
             if (Console.isDefaultReturnValue(result))
                 return;
 
-            successConsoleFunction(result, context);
+            successConsoleFunction.apply(null, arguments);
         };
     }
 

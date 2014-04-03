@@ -260,6 +260,20 @@ DebuggerLib.getThreadDebuggeeGlobalForFrame = function(frame)
     return null;
 };
 
+/**
+ * Creates a grips for a given object (value).
+ *
+ * @param {TabContext} context
+ * @param {*} value The object to transform into a grip
+ *
+ * @return {Grip} The grip
+ */
+DebuggerLib.createValueGrip = function(context, value)
+{
+    var actor = DebuggerLib.getThreadActor(context.browser);
+    return actor.createValueGrip(value);
+};
+
 // ********************************************************************************************* //
 // Frames
 

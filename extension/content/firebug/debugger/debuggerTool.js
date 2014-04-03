@@ -358,6 +358,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
         {
             if (callback)
                 callback();
+            this.dispatch("onResumeDebugger", [this.context, limit, response]);
         });
     },
 
@@ -504,10 +505,6 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
         });
     },
 });
-
-// ********************************************************************************************* //
-// Helpers
-
 
 // ********************************************************************************************* //
 // Registration

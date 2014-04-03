@@ -138,7 +138,10 @@ ClientProvider.prototype =
 
         if (object instanceof Grip)
         {
-            actor = object.getActor();
+            if (typeof object.grip === "object")
+                actor = object.getActor();
+            else
+                return object.grip;
         }
         else
         {
