@@ -103,7 +103,7 @@ var ToggleCommandEditor = Obj.extend(Module,
     // Helpers
 
     /**
-     * Update visibility of both XUL buttons (used to toggle the side panel box).
+     * Update visibility of XUL buttons.
      */
     updateButtonVisibility: function()
     {
@@ -127,8 +127,7 @@ var ToggleCommandEditor = Obj.extend(Module,
     },
 
     /**
-     * Update visibility of both XUL buttons (used to toggle the side panel box),
-     * so the proper icon is displayed.
+     * Update state of XUL buttons, so the proper icon is displayed.
      */
     updateButtonState: function()
     {
