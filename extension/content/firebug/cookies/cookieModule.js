@@ -418,7 +418,7 @@ Firebug.CookieModule = Obj.extend(ActivableModule,
 
         var panelNode = panel.panelNode;
         var className = "hideType-cookies";
-        var filterTypes = Firebug.consoleFilterTypes;
+        var filterTypes = Options.get("consoleFilterTypes");
 
         Css.setClass(panelNode, className);
 

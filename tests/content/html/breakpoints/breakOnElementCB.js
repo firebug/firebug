@@ -9,14 +9,16 @@ function runTest()
     var doNotFilter = FBTest.getPref("filterSystemURLs");
 
     FBTest.compare(false, doNotFilter, "Pref filterSystemURLs must not be set true");
-    FBTest.compare(false, FW.Firebug.filterSystemURLs, "Pref Firebug.filterSystemURLs must not be set true");
+    FBTest.compare(false, FW.Firebug.Options.get("filterSystemURLs"),
+        "Pref Firebug.filterSystemURLs must not be set true");
 
 
     FBTest.openNewTab(basePath + "html/breakpoints/breakOnElement.html", function(win)
     {
         var filter = FBTest.getPref("filterSystemURLs");
         FBTest.compare(false, filter, "Pref filterSystemURLs must not be set true");
-        FBTest.compare(false, FW.Firebug.filterSystemURLs, "Pref Firebug.filterSystemURLs must not be set true");
+        FBTest.compare(false, FW.Firebug.Options.get("filterSystemURLs"),
+            "Pref Firebug.filterSystemURLs must not be set true");
 
         FBTest.openFirebug(function()
         {

@@ -7,9 +7,10 @@ define([
     "firebug/lib/xpcom",
     "firebug/lib/url",
     "firebug/lib/http",
+    "firebug/lib/options",
     "firebug/lib/string"
 ],
-function(EventSource, Obj, Firebug, Xpcom, Url, Http, Str) {
+function(EventSource, Obj, Firebug, Xpcom, Url, Http, Options, Str) {
 
 // ********************************************************************************************* //
 // Constants
@@ -104,7 +105,7 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
         var c = Url.reChrome.test(url);
         if (c)
         {
-            if (Firebug.filterSystemURLs)
+            if (Options.get("filterSystemURLs"))
                 return ["Filtered chrome url "+url];  // ignore chrome
 
             // If the chrome.manifest has  xpcnativewrappers=no, platform munges the url

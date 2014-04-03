@@ -89,7 +89,7 @@ var StackFrameRep = domplate(Rep,
     {
         var fileName = Url.getFileName(frame.href);
 
-        var maxWidth = Firebug.sourceLinkLabelWidth;
+        var maxWidth = Options.get("sourceLinkLabelWidth");
         if (maxWidth > 0)
             var fileName = Str.cropString(fileName, maxWidth);
 

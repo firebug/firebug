@@ -266,7 +266,7 @@ var CommandLine = Obj.extend(Module,
         if (expr === "")
             return;
 
-        if (!Firebug.commandEditor || context.panelName !== "console")
+        if (!Options.get("commandEditor") || context.panelName !== "console")
         {
             this.clear(context);
             Firebug.Console.log(commandPrefix + expr, context, "command", FirebugReps.Command);
@@ -520,7 +520,7 @@ var CommandLine = Obj.extend(Module,
         this.setAutoCompleter();
         this.commandHistory = new Firebug.CommandHistory();
 
-        if (Firebug.commandEditor)
+        if (Options.get("commandEditor"))
             this.setMultiLine(true, Firebug.chrome);
     },
 
@@ -735,7 +735,7 @@ var CommandLine = Obj.extend(Module,
 
     getCommandLine: function(context)
     {
-        return (!this.isInOtherPanel(context) && Firebug.commandEditor) ?
+        return (!this.isInOtherPanel(context) && Options.get("commandEditor")) ?
             this.getCommandEditor():
             this.getSingleRowCommandLine();
     },
@@ -749,7 +749,7 @@ var CommandLine = Obj.extend(Module,
 
     getExpression: function(context)
     {
-        return (!this.isInOtherPanel(context) && Firebug.commandEditor) ?
+        return (!this.isInOtherPanel(context) && Options.get("commandEditor")) ?
             this.getCommandEditor().getExpression() :
             this.getSingleRowCommandLine().value;
     },

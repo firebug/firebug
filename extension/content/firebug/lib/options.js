@@ -11,17 +11,17 @@ function (Events, FBTrace) {
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
-const nsIPrefBranch = Ci.nsIPrefBranch;
-const PrefService = Cc["@mozilla.org/preferences-service;1"];
+var nsIPrefBranch = Ci.nsIPrefBranch;
+var PrefService = Cc["@mozilla.org/preferences-service;1"];
 
-const nsIPrefService = Ci.nsIPrefService;
-const prefService = PrefService.getService(nsIPrefService);
-const prefs = PrefService.getService(nsIPrefBranch);
+var nsIPrefService = Ci.nsIPrefService;
+var prefService = PrefService.getService(nsIPrefService);
+var prefs = PrefService.getService(nsIPrefBranch);
 
-const prefNames =  // XXXjjb TODO distribute to modules
+var prefNames =  // XXXjjb TODO distribute to modules
 [
     // Global
     "defaultPanelName", "throttleMessages", "textSize", "showInfoTips",
@@ -100,6 +100,7 @@ var Options =
 /** @lends Options */
 {
     prefDomain: "extensions.firebug",
+    prefCache: new Map(),
 
     getPrefDomain: function()
     {
@@ -150,7 +151,7 @@ var Options =
         var value = this.get(name);
 
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("options.observe name = value: "+name+"= "+value+"\n");
+            FBTrace.sysout("options.observe name = value: " + name + "= " + value + "\n");
 
         this.updatePref(name, value);
     },
@@ -165,6 +166,9 @@ var Options =
         {
             optionUpdateMap[name] = 1;
             Firebug[name] = value;
+
+            if (this.prefCache.has(name))
+                this.prefCache.set(name, value);
 
             Events.dispatch(this.listeners, "updateOption", [name, value]);
         }
@@ -211,15 +215,11 @@ var Options =
 
     initializePrefs: function()
     {
-        for (var i = 0; i < prefNames.length; ++i)
+        // Write the prefs into the global 'Firebug' scope for backwards compatibility
+        for (var i = 0; i < prefNames.length; i++)
             Firebug[prefNames[i]] = this.getPref(this.prefDomain, prefNames[i]);
 
         prefs.addObserver(this.prefDomain, this, false);
-
-        var basePrefNames = prefNames.length;
-
-        for (var i = basePrefNames; i < prefNames.length; ++i)
-            Firebug[prefNames[i]] = this.getPref(this.prefDomain, prefNames[i]);
 
         if (FBTrace.DBG_OPTIONS)
         {
@@ -238,7 +238,15 @@ var Options =
 
     get: function(name)
     {
-        return Options.getPref(this.prefDomain, name);
+        if (this.prefCache.has(prefName))
+            return this.prefCache.get(prefName);
+
+        var value =  Options.getPref(this.prefDomain, name);
+
+        var prefName = this.prefDomain + "." + name;
+        this.prefCache.set(prefName, value);
+
+        return value;
     },
 
     getPref: function(prefDomain, name)
@@ -256,8 +264,10 @@ var Options =
             value = prefs.getBoolPref(prefName);
 
         if (FBTrace.DBG_OPTIONS)
+        {
             FBTrace.sysout("options.getPref "+prefName+" has type "+
                 this.getPreferenceTypeName(type)+" and value "+value);
+        }
 
         return value;
     },
@@ -292,6 +302,9 @@ var Options =
     set: function(name, value)
     {
         Options.setPref(Options.prefDomain, name, value);
+
+        var prefName = Options.prefDomain + "." + name;
+        this.prefCache.set(prefName, value);
     },
 
     /**
@@ -311,7 +324,10 @@ var Options =
             return;
 
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("options.setPref type="+type+" name="+prefName+" value="+value);
+        {
+            FBTrace.sysout("options.setPref type=" + type + " name=" + prefName + " value=" +
+                value);
+        }
     },
 
     setPreference: function(prefName, value, type, prefBranch)

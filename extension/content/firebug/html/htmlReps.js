@@ -5,12 +5,13 @@ define([
     "firebug/firebug",
     "firebug/lib/array",
     "firebug/lib/domplate",
+    "firebug/lib/options",
     "firebug/lib/string",
     "firebug/lib/xml",
     "firebug/chrome/reps",
     "firebug/html/htmlLib",
 ],
-function(Firebug, Arr, Domplate, Str, Xml, FirebugReps, HTMLLib) {
+function(Firebug, Arr, Domplate, Options, Str, Xml, FirebugReps, HTMLLib) {
 
 "use strict";
 
@@ -83,7 +84,7 @@ var CompleteElement = domplate(FirebugReps.Element,
         if (node.contentDocument)
             return [node.contentDocument.documentElement];
 
-        if (Firebug.showTextNodesWithWhitespace)
+        if (Options.get("showTextNodesWithWhitespace"))
         {
             return Arr.cloneArray(node.childNodes);
         }
@@ -307,7 +308,7 @@ function getNodeTag(node, expandAll)
             return expandAll ? CompleteElement.tag : Element.tag;
         else if (HTMLLib.isEmptyElement(node))
             return getEmptyElementTag(node);
-        else if (Firebug.showCommentNodes && HTMLLib.hasCommentChildren(node))
+        else if (Options.get("showCommentNodes") && HTMLLib.hasCommentChildren(node))
             return expandAll ? CompleteElement.tag : Element.tag;
         else if (HTMLLib.hasNoElementChildren(node))
             return TextElement.tag;
@@ -318,7 +319,7 @@ function getNodeTag(node, expandAll)
         return TextNode.tag;
     else if (node instanceof window.CDATASection)
         return CDATANode.tag;
-    else if (node instanceof window.Comment && (Firebug.showCommentNodes || expandAll))
+    else if (node instanceof window.Comment && (Options.get("showCommentNodes") || expandAll))
         return CommentNode.tag;
     else if (node instanceof SourceText)
         return FirebugReps.SourceText.tag;

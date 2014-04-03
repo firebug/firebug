@@ -15,7 +15,8 @@ function runTest()
                 var doNotFilter = FBTest.getPref("filterSystemURLs");
 
                 FBTest.compare(true, doNotFilter, "Pref filterSystemURLs must be set true");
-                FBTest.compare(true, FW.Firebug.filterSystemURLs, "Pref Firebug.filterSystemURLs must be set true");
+                FBTest.compare(true, FW.Firebug.Options.get("filterSystemURLs"),
+                    "Pref Firebug.filterSystemURLs must be set true");
 
                 // A suite of asynchronous tests.
                 var testSuite = [];

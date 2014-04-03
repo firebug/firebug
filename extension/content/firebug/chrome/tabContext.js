@@ -8,6 +8,7 @@ define([
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/lib/css",
+    "firebug/lib/options",
     "firebug/lib/wrapper",
     "firebug/lib/promise",
     "arch/compilationunit",
@@ -15,7 +16,7 @@ define([
     "firebug/chrome/plugin",
     "firebug/debugger/debuggerLib",
 ],
-function(Firebug, FBTrace, Obj, Arr, Events, Url, Css, Wrapper, Promise,
+function(Firebug, FBTrace, Obj, Arr, Events, Url, Css, Options, Wrapper, Promise,
     CompilationUnit, Win, Plugin, DebuggerLib) {
 
 "use strict";
@@ -687,7 +688,7 @@ TabContext.prototype =
 
         if (!forceDelay)
         {
-            if (!Firebug.throttleMessages)
+            if (!Options.get("throttleMessages"))
             {
                 message.apply(object, args);
                 return false;

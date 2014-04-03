@@ -38,13 +38,13 @@ function checkCSSPanel(callback)
 
     var expectedValues = {
         authored: ["linear-gradient(135deg, rgb(180, 200, 255), #788cff) repeat scroll 0 0 " +
-            "rgba(0, 0, 0, 0)", "#f00", "green", "rgba(0, 0, 255, 1)"],
-        hex: ["linear-gradient(135deg, #B4C8FF, #788CFF) repeat scroll 0 0 rgba(0, 0, 0, 0)",
+            "blue", "#f00", "green", "rgba(0, 0, 255, 1)"],
+        hex: ["linear-gradient(135deg, #B4C8FF, #788CFF) repeat scroll 0 0 #0000FF",
             "#FF0000", "#008000", "#0000FF"],
         rgb: ["linear-gradient(135deg, rgb(180, 200, 255), rgb(120, 140, 255)) repeat scroll 0 " +
-            "0 rgba(0, 0, 0, 0)", "rgb(255, 0, 0)", "rgb(0, 128, 0)", "rgb(0, 0, 255)"],
+            "0 rgb(0, 0, 255)", "rgb(255, 0, 0)", "rgb(0, 128, 0)", "rgb(0, 0, 255)"],
         hsl: ["linear-gradient(135deg, hsl(224, 100%, 85%), hsl(231, 100%, 74%)) repeat scroll " +
-            "0 0 hsla(0, 0%, 0%, 0)", "hsl(0, 100%, 50%)", "hsl(120, 100%, 25%)",
+            "0 0 hsl(240, 100%, 50%)", "hsl(0, 100%, 50%)", "hsl(120, 100%, 25%)",
             "hsl(240, 100%, 50%)"]
     };
 
@@ -79,14 +79,14 @@ function checkStyleSidePanel(callback)
         var panel = FBTest.selectSidePanel("css");
         var expectedValues = {
             authored: ["rgba(0, 0, 255, 1)", "green", "linear-gradient(135deg, " +
-                "rgb(180, 200, 255), #788cff) repeat scroll 0 0 rgba(0, 0, 0, 0)", "#f00"],
+                "rgb(180, 200, 255), #788cff) repeat scroll 0 0 blue", "#f00"],
             hex: ["#0000FF", "#008000", "linear-gradient(135deg, #B4C8FF, #788CFF) repeat " +
-                "scroll 0 0 rgba(0, 0, 0, 0)", "#FF0000"],
+                "scroll 0 0 #0000FF", "#FF0000"],
             rgb: ["rgb(0, 0, 255)", "rgb(0, 128, 0)", "linear-gradient(135deg, " +
-                "rgb(180, 200, 255), rgb(120, 140, 255)) repeat scroll 0 0 rgba(0, 0, 0, 0)",
+                "rgb(180, 200, 255), rgb(120, 140, 255)) repeat scroll 0 0 rgb(0, 0, 255)",
                 "rgb(255, 0, 0)"],
             hsl: ["hsl(240, 100%, 50%)", "hsl(120, 100%, 25%)", "linear-gradient(135deg, " +
-                "hsl(224, 100%, 85%), hsl(231, 100%, 74%)) repeat scroll 0 0 hsla(0, 0%, 0%, 0)",
+                "hsl(224, 100%, 85%), hsl(231, 100%, 74%)) repeat scroll 0 0 hsl(240, 100%, 50%)",
                 "hsl(0, 100%, 50%)"]
         };
 
@@ -108,32 +108,40 @@ function checkComputedSidePanel(callback)
         var stylePropNames = panel.panelNode.getElementsByClassName("stylePropName");
 
         var expectedValues = {
-            authored: ["rgba(0,\u200B 0,\u200B 255,\u200B 1)", "green", "#f00"],
-            hex: ["#0000FF", "#008000", "#FF0000"],
-            rgb: ["rgb(0,\u200B 0,\u200B 255)", "rgb(0,\u200B 128,\u200B 0)",
-                "rgb(255,\u200B 0,\u200B 0)"],
-            hsl: ["hsl(240,\u200B 100%,\u200B 50%)", "hsl(120,\u200B 100%,\u200B 25%)",
-                "hsl(0,\u200B 100%,\u200B 50%)"]
+            color:
+            {
+                authored: ["rgba(0,\u200B 0,\u200B 255,\u200B 1)", "green", "#f00"],
+                hex: ["#0000FF", "#008000", "#FF0000"],
+                rgb: ["rgb(0,\u200B 0,\u200B 255)", "rgb(0,\u200B 128,\u200B 0)",
+                    "rgb(255,\u200B 0,\u200B 0)"],
+                hsl: ["hsl(240,\u200B 100%,\u200B 50%)", "hsl(120,\u200B 100%,\u200B 25%)",
+                    "hsl(0,\u200B 100%,\u200B 50%)"]
+            },
+            "background-color":
+            {
+                authored: ["blue"],
+                hex: ["#0000FF"],
+                rgb: ["rgb(0,\u200B 0,\u200B 255)"],
+                hsl: ["hsl(240,\u200B 100%,\u200B 50%)"]
+            }
         };
 
-        for (var prefValue in expectedValues)
+        for (var propName in expectedValues)
         {
-            FBTest.progress("Check with 'colorDisplay' set to '" + prefValue + "'");
-            FBTest.setPref("colorDisplay", prefValue);
-
-            var colorPropIndex = 0;
-            while (stylePropNames[colorPropIndex].textContent !== "color")
-                colorPropIndex++;
-
-            var computedStyle = FW.FBL.getAncestorByClass(stylePropNames[colorPropIndex],
-                "computedStyle");
-            var matchedSelectors = computedStyle.nextSibling;
-            var values = matchedSelectors.getElementsByClassName("stylePropValue");
-
-            for (var i = 0; i < values.length; i++)
+            for (var propValue in expectedValues[propName])
             {
-                FBTest.compare(expectedValues[prefValue][i], values[i].textContent,
-                    "The color value must be '" + expectedValues[prefValue][i] + "'");
+                FBTest.progress("Check with 'colorDisplay' set to '" + propValue + "'");
+                FBTest.setPref("colorDisplay", propValue);
+
+                var computedStyle = FBTest.getComputedProperty(propName);
+                var matchedSelectors = computedStyle.nextSibling;
+                var values = matchedSelectors.getElementsByClassName("stylePropValue");
+
+                for (var i = 0; i < values.length; i++)
+                {
+                    FBTest.compare(expectedValues[propName][propValue][i], values[i].textContent,
+                        "The '" + propName + "' value must be '" + expectedValues[propName][propValue][i] + "'");
+                }
             }
         }
 
@@ -145,10 +153,10 @@ function checkComputedSidePanel(callback)
 
 function checkColorValues(panelNode, checkedProps, expectedValues)
 {
-    for (var prefValue in expectedValues)
+    for (var propValue in expectedValues)
     {
-        FBTest.progress("Check with 'colorDisplay' set to '" + prefValue + "'");
-        FBTest.setPref("colorDisplay", prefValue);
+        FBTest.progress("Check with 'colorDisplay' set to '" + propValue + "'");
+        FBTest.setPref("colorDisplay", propValue);
 
         var values = panelNode.getElementsByClassName("cssPropValue");
 
@@ -160,10 +168,10 @@ function checkColorValues(panelNode, checkedProps, expectedValues)
 
             if (checkedProps.indexOf(propName.textContent) !== -1)
             {
-                FBTest.compare(expectedValues[prefValue][expectedValueIndex],
+                FBTest.compare(expectedValues[propValue][expectedValueIndex],
                     values[i].textContent,
                     "The property value must be '" +
-                    expectedValues[prefValue][expectedValueIndex] + "'");
+                    expectedValues[propValue][expectedValueIndex] + "'");
                 expectedValueIndex++;
             }
         }
