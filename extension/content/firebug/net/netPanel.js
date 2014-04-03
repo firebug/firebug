@@ -244,7 +244,7 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
     {
         if (this.table)
         {
-            if (Firebug.netShowBFCacheResponses)
+            if (Options.get("netShowBFCacheResponses"))
                 Css.setClass(this.table, "showBFCacheResponses");
             else
                 Css.removeClass(this.table, "showBFCacheResponses");
@@ -1259,7 +1259,7 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
             var file = phase.files[i];
 
             // Do not count BFCache responses if the user says so.
-            if (!Firebug.netShowBFCacheResponses && file.fromBFCache)
+            if (!Options.get("netShowBFCacheResponses") && file.fromBFCache)
                 continue;
 
             if (!categories || categories.indexOf(file.category) != -1)

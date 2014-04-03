@@ -162,11 +162,11 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         if (rules.length || sections.length)
         {
             // This removes overridden properties.
-            if (Firebug.onlyShowAppliedStyles)
+            if (Options.get("onlyShowAppliedStyles"))
                 this.removeOverriddenProps(rules, sections);
 
             // This removes user agent rules
-            if (!Firebug.showUserAgentCSS)
+            if (!Options.get("showUserAgentCSS"))
                 this.removeSystemRules(rules, sections);
         }
 

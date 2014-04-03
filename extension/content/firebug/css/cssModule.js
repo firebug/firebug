@@ -19,7 +19,7 @@ function(Firebug, Css, Events, Obj, Options, Xpcom, Module, CSSDirtyListener, Ed
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-var reSplitCSS = /(url\((".*"\)|".*|[^)]*\)?))|(rgba?\([^)]*\)?)|(#[\dA-Fa-f]+)|(hsla?\([^)]*\)?)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|"([^"]*)"?|'([^']*)'?|([^,\s\/!\(\)]+)|(!(.*)?)/;
+var reSplitCSS = /(url\((".*?"\)|".*|[^)]*\)?))|(rgba?\([^)]*\)?)|(#[\dA-Fa-f]+)|(hsla?\([^)]*\)?)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|"([^"]*)"?|'([^']*)'?|([^,\s\/!\(\)]+)|(!(.*)?)/;
 var reURL = /url\((")?(.*)?\1\)/;
 var reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 

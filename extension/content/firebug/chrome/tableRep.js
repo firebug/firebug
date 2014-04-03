@@ -8,9 +8,10 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/array",
+    "firebug/lib/options",
     "firebug/chrome/rep",
 ],
-function(Firebug, FBTrace, Domplate, Locale, Dom, Css, Arr, Rep) {
+function(Firebug, FBTrace, Domplate, Locale, Dom, Css, Arr, Options, Rep) {
 
 "use strict";
 
@@ -263,8 +264,8 @@ var TableRep = domplate(Rep,
 
         // Don't limit strings in the table. It should be mostly ok. In case of
         // complaints we need an option.
-        var prevValue = Firebug.stringCropLength;
-        Firebug.stringCropLength = -1;
+        var prevValue = Options.get("stringCropLength");
+        Options.set("stringCropLength", -1);
 
         try
         {
@@ -278,7 +279,7 @@ var TableRep = domplate(Rep,
 
             // Set vertical height for scroll bar.
             var tBody = row.querySelector(".dataTableTbody");
-            var maxHeight = Firebug.tabularLogMaxHeight;
+            var maxHeight = Options.get("tabularLogMaxHeight");
             if (maxHeight > 0 && tBody.clientHeight > maxHeight)
                 tBody.style.height = maxHeight + "px";
         }
@@ -288,7 +289,7 @@ var TableRep = domplate(Rep,
         }
         finally
         {
-            Firebug.stringCropLength = prevValue;
+            Options.set("stringCropLength", prevValue);
             delete this.columns;
         }
 
@@ -387,18 +388,18 @@ var TableRep = domplate(Rep,
     {
         if (typeof(object) == "function")
         {
-            if (Dom.isDOMMember(object, name) && !Firebug.showDOMFuncs)
+            if (Dom.isDOMMember(object, name) && !Options.get("showDOMFuncs"))
                 return false;
-            else if (!Firebug.showUserFuncs)
+            else if (!Options.get("showUserFuncs"))
                 return false;
         }
         else
         {
-            if (Dom.isDOMMember(object, name) && !Firebug.showDOMProps)
+            if (Dom.isDOMMember(object, name) && !Options.get("showDOMProps"))
                 return false;
-            else if (Dom.isDOMConstant(object, name) && !Firebug.showDOMConstants)
+            else if (Dom.isDOMConstant(object, name) && !Options.get("showDOMConstants"))
                 return false;
-            else if (!Firebug.showUserProps)
+            else if (!Options.get("showUserProps"))
                 return false;
         }
 

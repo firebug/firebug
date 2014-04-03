@@ -869,7 +869,7 @@ window.Firebug =
             // be careful, unMinimize func always sets placement to
             // inbrowser first then unminimizes. when we want to
             // unminimize in detached mode must call detachBar func.
-            if (Firebug.framePosition == "detached")
+            if (Options.get("framePosition") === "detached")
                 this.detachBar();
             else
                 Firebug.unMinimize();
@@ -905,7 +905,7 @@ window.Firebug =
     showContext: function(browser, context)
     {
         // user wants detached but we are not yet
-        if (Firebug.framePosition == "detached" && !Firebug.isDetached())
+        if (Options.get("framePosition") === "detached" && !Firebug.isDetached())
         {
             if (context && !Firebug.isMinimized()) // don't detach if it's minimized 2067
                 this.detachBar();  //   the placement will be set once the external window opens
@@ -997,7 +997,7 @@ window.Firebug =
         }
         // is minimized now but the last time that has been closed, was in detached mode,
         // so it should be returned to in browser mode because the user has pressed CTRL+F12.
-        else if (Firebug.framePosition == "detached" && Firebug.isMinimized())
+        else if (Options.get("framePosition") === "detached" && Firebug.isMinimized())
         {
             Firebug.unMinimize();
             Firebug.chrome.syncPositionPref();
@@ -1456,7 +1456,6 @@ window.Firebug =
                 if (Firebug.placement != i) // then we are changing the value
                 {
                     Firebug.placement = i;
-                    delete Firebug.previousPlacement;
                     Options.set("previousPlacement", Firebug.placement);
                     Firebug.StartButton.resetTooltip();
                 }
@@ -1473,10 +1472,7 @@ window.Firebug =
 
     openMinimized: function()
     {
-        if (!Firebug.previousPlacement)
-            Firebug.previousPlacement = Options.get("previousPlacement");
-
-        return (Firebug.previousPlacement && (Firebug.previousPlacement == PLACEMENT_MINIMIZED) );
+        return Options.get("previousPlacement") === PLACEMENT_MINIMIZED;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

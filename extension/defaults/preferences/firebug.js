@@ -1,7 +1,6 @@
 // For a detailed description of all preferences see http://getfirebug.com/wiki/index.php/Firebug_Preferences
 
 // Global
-pref("extensions.firebug.architecture", "inProcess");
 pref("extensions.firebug.defaultModuleList", "");
 
 pref("javascript.options.strict.debug", false);
@@ -183,6 +182,3 @@ pref("extensions.firebug.key.shortcut.toggleBreakOn", "accel alt b");
 
 // Accessibility
 pref("extensions.firebug.a11y.enable", false);
-
-// Known Issues
-pref("extensions.firebug.showSlowJSDMessage", true);
