@@ -16,11 +16,11 @@ define([
     "firebug/lib/array",
     "firebug/lib/system",
     "firebug/chrome/module",
-    "firebug/chrome/domTree",
+    "firebug/dom/domBaseTree",
     "firebug/dom/domMemberProvider",
 ],
 function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Http, Str, Json, Options,
-    Arr, System, Module, DomTree, DOMMemberProvider) {
+    Arr, System, Module, DomBaseTree, DOMMemberProvider) {
 
 "use strict";
 
@@ -229,7 +229,7 @@ JSONViewerModel.Preview = domplate(
             return;
 
         if (!body.jsonTree)
-            body.jsonTree = new DomTree();
+            body.jsonTree = new DomBaseTree();
 
         var input = {file: file, sorted: Options.get("sortJsonPreview")};
         var parentNode = this.bodyTag.replace(input, body, this);
