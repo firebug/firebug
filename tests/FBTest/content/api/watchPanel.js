@@ -76,7 +76,10 @@ this.setWatchExpressionValue = function(chrome, varName, expression, callback)
     var watchPanel = FBTest.getPanel("watches", true);
     var row = this.getWatchExpressionRow(chrome, varName);
     if (!row)
+    {
+        FBTest.ok(false, "the watch expression row is not found for: " + varName);
         return null;
+    }
 
     // Click to open a text editor.
     FBTest.dblclick(row);
