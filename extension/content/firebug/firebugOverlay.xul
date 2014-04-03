@@ -402,6 +402,15 @@
                                             class="fbToggleSidePanels toolbar-image-button fbInternational"
                                             tooltiptext="firebug.tip.Toggle_Side_Panels"/>
                                     </hbox>
+
+                                    <!-- Toggle visibility of the command editor -->
+                                    <hbox id="fbToggleCommandEditorBox" class="noTabStop">
+                                        <tooltip id="fbToggleCommandEditorTooltip"/>
+                                        <toolbarbutton id="fbToggleCommandEditor"
+                                            class="fbToggleCommandEditor toolbar-image-button fbInternational"
+                                            tooltip="fbToggleCommandEditorTooltip"/>
+                                    </hbox>
+
                                 </hbox>
                             </toolbar>
                         </toolbox>
@@ -485,6 +494,9 @@
                                     onmousedown="Firebug.CommandLine.commandHistory.show(this);"
                                     disabled="true"/>
                                 <toolbarspacer flex="1"/>
+                                <toolbarbutton id="fbToggleCommandEditor2"
+                                    tooltiptext="console.option.Show_Command_Line"
+                                    class="fbToggleCommandEditor toolbar-image-button fbInternational"/>
                             </hbox>
                             <hbox id="fbCommandEditor" flex="1">
                                 <browser id="fbCommandEditorBrowser" flex="1"
@@ -492,14 +504,6 @@
                                      disablehistory="true"
                                      type="content"
                                      src="resource://firebugui/commandEditor.html"/>
-                            </hbox>
-                            <hbox id="fbToggleCommandEditorBox">
-                                <box class="column"></box>
-                                <toolbarspacer flex="1"/>
-                                <toolbarbutton id="fbToggleCommandEditor"
-                                    tooltiptext="console.option.Show_Command_Line"
-                                    class="toolbarbutton-iconic fbInternational"
-                                    oncommand="Firebug.CommandLine.toggleCommandEditor(false)"/>
                             </hbox>
                         </vbox>
                     </deck>

@@ -68,15 +68,8 @@
 }
 
 #fbToggleCommandEditorBox {
-    background-color: white;
     padding: 0;
     margin: 0;
-}
-
-#fbToggleCommandEditorBox .column {
-    width: 31px;
-    background-color: rgb(238, 238, 238);
-    border-right: 1px solid rgb(221, 221, 221);
 }
 
 #fbToggleCommandEditor {
@@ -822,6 +815,40 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
 }
 
 #fbToggleSidePanelsBox2 {
+    -moz-box-align: center;
+    padding-bottom: 1px;
+}
+
+/*************************************************************************************************/
+/* Toggle Command Editor */
+
+.fbToggleCommandEditor {
+    list-style-image: url(chrome://firebug/skin/collapseSidePanelsVertical.svg);
+}
+
+.fbToggleCommandEditor.closed {
+    list-style-image: url(chrome://firebug/skin/expandSidePanelsVertical.svg);
+}
+
+#fbPanelPane:not([orient="vertical"]) .fbToggleCommandEditor {
+    margin-right: 2px;
+}
+
+.fbToggleCommandEditor:hover {
+    filter: url(resource://firebugui/filters.svg#darken);
+}
+
+.fbToggleCommandEditor:active {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
+    padding: 3px;
+}
+
+#fbToggleCommandEditorBox {
+    -moz-box-flex: 1;
+    -moz-box-pack: end;
+}
+
+.fbToggleCommandEditor {
     -moz-box-align: center;
     padding-bottom: 1px;
 }
