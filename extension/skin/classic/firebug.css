@@ -823,11 +823,11 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
 /* Toggle Command Editor */
 
 .fbToggleCommandEditor {
-    list-style-image: url(chrome://firebug/skin/collapseSidePanelsVertical.svg);
+    list-style-image: url(chrome://firebug/skin/collapseSidePanels.svg);
 }
 
 .fbToggleCommandEditor.closed {
-    list-style-image: url(chrome://firebug/skin/expandSidePanelsVertical.svg);
+    list-style-image: url(chrome://firebug/skin/expandSidePanels.svg);
 }
 
 #fbPanelPane:not([orient="vertical"]) .fbToggleCommandEditor {

@@ -352,11 +352,11 @@ panelTab[selected="true"] > panelTabMenu {
 /* Toggle Command Editor */
 
 .fbToggleCommandEditor {
-    list-style-image: url(chrome://firebug-os/skin/collapseSidePanelsVertical.svg);
+    list-style-image: url(chrome://firebug-os/skin/collapseSidePanels.svg);
 }
 
 .fbToggleCommandEditor.closed {
-    list-style-image: url(chrome://firebug-os/skin/expandSidePanelsVertical.svg);
+    list-style-image: url(chrome://firebug-os/skin/expandSidePanels.svg);
 }
 
 /************************************************************************************************/
