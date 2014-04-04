@@ -35,14 +35,14 @@ body > div {
     padding: 15px;
 }
 
-section#content {
+#content {
     background-image: linear-gradient(to top, #E6E6E6, #F0F0F0);
     border-radius: 8px;
     margin-bottom: 10px;
     padding: 10px;
 }
 
-section#output {
+#output {
     display: none;
     background-image: linear-gradient(to top, #F5F5F5, #FFFFFF);
     margin: 10px 0;
@@ -88,24 +88,20 @@ p {
     padding-left: 20px;
 }
 
-section#description p {
+#description p {
   font-style: italic;
 }
 
-section#description ul {
+#description ul {
     list-style-type: square;
     list-style-image: url(data:image/gif;base64,R0lGODlhBQAIAPcAAGOMnGOMnP///2OMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnGOMnP///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH5BAEAAAIALAAAAAAFAAgABwgSAAEIHEiwoEGC/xImFMCwocOAADs=);
 }
 
-section#description li.ok, section#description li span.ok {
+#description li.ok, #description li span.ok {
     color: #00B400;
 }
 
-section#description li span.info {
-    color: #31708f;
-}
-
-section#description li.error, section#description li span.error {
+#description li.error, #description li span.error {
     color: #DC0000;
 }
 
