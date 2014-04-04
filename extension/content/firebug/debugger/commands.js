@@ -29,7 +29,7 @@ var Trace = FBTrace.to("DBG_DEBUGGER_COMMANDS");
 var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
-// Commands Module Implementation
+// DebugCommands Module Implementation
 
 /**
  * @module This module is responsible for dynamic (un)registration of helper debug API.
@@ -42,10 +42,10 @@ var TraceError = FBTrace.toError();
  *
  * extensions.firebug.debugCommandLineAPI
  */
-var Commands = Obj.extend(Module,
-/** @lends Commands */
+var DebugCommands = Obj.extend(Module,
+/** @lends DebugCommands */
 {
-    dispatchName: "Commands",
+    dispatchName: "DebugCommands",
 
     commands: [],
 
@@ -303,37 +303,37 @@ function getSource(context, args)
 
 // ********************************************************************************************* //
 
-Commands.registerCommand("pauseGrip", {
+DebugCommands.registerCommand("pauseGrip", {
     handler: pauseGrip.bind(this),
     description: "Helper command for accessing server side Grips. " +
         "For debugging purposes only."
 });
 
-Commands.registerCommand("tabGrip", {
+DebugCommands.registerCommand("tabGrip", {
     handler: tabGrip.bind(this),
     description: "Helper command for accessing server side tab child Grips. " +
         "For debugging purposes only."
 });
 
-Commands.registerCommand("threadPool", {
+DebugCommands.registerCommand("threadPool", {
     handler: threadPool.bind(this),
     description: "Helper command for accessing server side thread pool. " +
         "For debugging purposes only."
 });
 
-Commands.registerCommand("pausePool", {
+DebugCommands.registerCommand("pausePool", {
     handler: pausePool.bind(this),
     description: "Helper command for accessing server side pause pool. " +
         "For debugging purposes only."
 });
 
-Commands.registerCommand("breakpoints", {
+DebugCommands.registerCommand("breakpoints", {
     handler: threadBreakpoints.bind(this),
     description: "Helper command for accessing breakpoints on the server side. " +
         "For debugging purposes only."
 });
 
-Commands.registerCommand("getSource", {
+DebugCommands.registerCommand("getSource", {
     handler: getSource.bind(this),
     description: "Helper command for getting source from the server side. " +
         "For debugging purposes only."
@@ -342,9 +342,9 @@ Commands.registerCommand("getSource", {
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(Commands);
+Firebug.registerModule(DebugCommands);
 
-return Commands;
+return DebugCommands;
 
 // ********************************************************************************************* //
 });
