@@ -422,8 +422,10 @@ DomBaseTree.prototype = domplate(BaseTree,
                 // it also requires the panel to have setPropertyValue and editProperty,
                 // which is all implemented by {@DomBasePanel}.
                 // Shouldn't the logic be rather part of the DomBasePanel?
+                // Check also null values since typeof(null) == "object", but we want
+                // edit null values (issue 7321).
                 var value = panel.provider.getValue(member.value);
-                if (typeof(value) == "object")
+                if (value !== null && typeof(value) == "object")
                     return;
 
                 // Read only values can't be edited.

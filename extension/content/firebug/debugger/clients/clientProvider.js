@@ -90,6 +90,11 @@ ClientProvider.prototype =
 
     getValue: function(object)
     {
+        // Avoid NPE later in the method. If the object is null or undefined
+        // just return it as the result value.
+        if (object === null || object == undefined)
+            return object;
+
         if (object instanceof ObjectClient)
         {
             // If the client object couldn't get data from the server, return the error
