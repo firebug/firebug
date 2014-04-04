@@ -92,7 +92,7 @@ ClientProvider.prototype =
     {
         // Avoid NPE later in the method. If the object is null or undefined
         // just return it as the result value.
-        if (object === null || object == undefined)
+        if (object == null)
             return object;
 
         if (object instanceof ObjectClient)
