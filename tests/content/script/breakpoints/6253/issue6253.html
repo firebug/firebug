@@ -6,13 +6,13 @@
         <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
         <script type="text/javascript">
             function aFunction() {
-                // A omment line just to set a breakpoint at!
+                // Set a breakpoint here
 
                 return (true == true);
             };
         </script>
     </head>
-    <body>
+    <body onload="aFunction()">
         <header>
             <h1>
                 <a href="https://code.google.com/p/fbug/issues/detail?id=6253">Issue 6253</a>: Auto-correction of breakpoints location
@@ -22,21 +22,20 @@
             <section id="description">
                 <h3>Steps to reproduce</h3>
                 <ol>
-                    <li>Open Firebug on this page</li>
-                    <li>Switch to the Script panel and enable it.</li>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>Script</em> panel and enable it.</li>
                     <li>
-                        Click on the breakpoint column at line 9 <em>"A omment line just to set a breakpoint at!"</em>.
+                        Click on the breakpoint column at line 9
+                        (<code>// Set a breakpoint here</code>).
                     </li>
 
                 </ol>
                 <h3>Expected result</h3>
                 <ul>
-                    <li>A breakpoint must be created at line 12, which is nearer executable line</li>
+                    <li>A breakpoint must be created at line 12, which is the nearest executable line.</li>
                 </ul>
             </section>
-            <footer>
-                @farshidbeheshti, farshid.beheshti@gmail.com
-            </footer>
+            <footer>@farshidbeheshti, farshid.beheshti@gmail.com</footer>
         </div>
     </body>
 </html>
