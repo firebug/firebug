@@ -65,6 +65,8 @@ textbox#fbCommandEditor {
 }
 
 .fbCommandLineCompletionPanel {
+    -moz-appearance: none;
+    background-color: #F0F0F0;
     border: 1px solid #BEBEBE;
     border-radius: 5px;
 
