@@ -37,18 +37,22 @@
 }
 
 #fbContentSplitter[orient=vertical] {
-    background: #bebebe;
-    border-bottom-width: 0;
-    min-height: 2px;
-    height: 2px;
-    margin-bottom: 0;
     position: relative;
+    background-color: #d1d1d1;
+}
+
+#fbContentSplitter[orient=vertical] {
+    min-height: 1px;
+    height: 1px;
+}
+#fbContentSplitter[orient=vertical][dir=reverse] {
+    min-height: 6px;
+    height: 6px;
 }
 
 #fbContentSplitter[orient=horizontal] {
-    background: #bebebe;
-    border-bottom-width: 0;
-    min-width: 2px;
-    width: 2px;
+    background-color: #d1d1d1;
+    min-width: 6px;
+    width: 6px;
     position: relative;
 }
