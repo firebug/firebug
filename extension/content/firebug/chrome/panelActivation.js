@@ -56,8 +56,8 @@ Firebug.PanelActivation = Obj.extend(Module,
     {
         // The "off" option is removed so make sure to convert previous value
         // into "none" if necessary.
-        if (Firebug.allPagesActivation == "off")
-            Firebug.allPagesActivation = "none";
+        if (Options.get("allPagesActivation") === "off")
+            Options.set("allPagesActivation", "none");
 
         // Update option menu item.
         this.updateAllPagesActivation();
@@ -275,22 +275,23 @@ Firebug.PanelActivation = Obj.extend(Module,
 
     toggleAll: function(state)
     {
+        var allPagesActivation = Options.get("allPagesActivation");
         Trace.sysout("panelActivation.toggleAll; state: " + state + " with allPagesActivation: " +
-            Firebug.allPagesActivation);
+            allPagesActivation);
 
         if (state == "on")
         {
-            if (Firebug.allPagesActivation == state) // then we were armed
-                Firebug.allPagesActivation = "none";
+            // Check if Firebug is enabled
+            if (allPagesActivation === state)
+                Options.set("allPagesActivation", "none");
             else
                 this.allOn();
         }
         else
         {
-            Firebug.allPagesActivation = "none";
+            Options.set("allPagesActivation", "none");
         }
 
-        Options.set("allPagesActivation", Firebug.allPagesActivation);
         this.updateAllPagesActivation();
     },
 
@@ -303,7 +304,7 @@ Firebug.PanelActivation = Obj.extend(Module,
     updateAllPagesActivation: function()
     {
         // don't show Off button if we are always on
-        var allOn = Firebug.allPagesActivation == "on";
+        var allOn = Options.get("allPagesActivation") === "on";
         Firebug.chrome.disableOff(allOn);
 
         Firebug.StartButton.resetTooltip();
@@ -311,8 +312,11 @@ Firebug.PanelActivation = Obj.extend(Module,
 
     allOn: function()
     {
-        Firebug.allPagesActivation = "on";  // In future we always create contexts,
-        Firebug.toggleBar(true);  // and we turn on for the current page
+        // In future always create contexts
+        Options.set("allPagesActivation", "on");
+
+        // Turn Firebug on for the current page
+        Firebug.toggleBar(true);
     }
 });
 

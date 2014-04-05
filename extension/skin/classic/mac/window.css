@@ -4,7 +4,6 @@
     padding-top: 0;
 }
 
-#fbToggleCommandLine,
-#fbToggleCommandEditor {
+#fbToggleCommandLine {
     width: 48px;
 }

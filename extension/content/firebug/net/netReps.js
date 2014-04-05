@@ -912,7 +912,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Rep, new EventSource(),
     getParamName: function(param)
     {
         var name = param.name;
-        var limit = Firebug.netParamNameLimit;
+        var limit = Options.get("netParamNameLimit");
         if (limit <= 0)
             return name;
 
@@ -1234,7 +1234,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Rep, new EventSource(),
     {
         // Get response text and make sure it doesn't exceed the max limit.
         var text = NetUtils.getResponseText(file, context);
-        var limit = Firebug.netDisplayedResponseLimit + 15;
+        var limit = Options.get("netDisplayedResponseLimit") + 15;
         var limitReached = text ? (text.length > limit) : false;
         if (limitReached)
             text = text.substr(0, limit) + "...";

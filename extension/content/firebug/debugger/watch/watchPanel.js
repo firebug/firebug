@@ -16,6 +16,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/wrapper",
     "firebug/debugger/stack/stackFrame",
+    "firebug/debugger/watch/returnValueModifier",
     "firebug/debugger/watch/watchEditor",
     "firebug/debugger/watch/watchTree",
     "firebug/debugger/watch/watchProvider",
@@ -25,8 +26,8 @@ define([
     "firebug/console/commandLine",
 ],
 function(Firebug, FBTrace, Obj, Domplate, Firefox, ToggleBranch, Events, Dom, Css, Arr, Menu,
-    Locale, Str, Wrapper, StackFrame, WatchEditor, WatchTree, WatchProvider, WatchExpression,
-    DOMBasePanel, ErrorCopy, CommandLine) {
+    Locale, Str, Wrapper, StackFrame, ReturnValueModifier, WatchEditor, WatchTree, WatchProvider,
+    WatchExpression, DOMBasePanel, ErrorCopy, CommandLine) {
 
 "use strict";
 
@@ -860,7 +861,47 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         else
             this.defaultTree.saveState(this.defaultToggles);
 
-        BasePanel.setPropertyValue.apply(this, arguments);
+        var member = row.domObject;
+        // If the user changes the frame result value, store the value
+        // in ReturnValueModifier. Otherwise, just redirect to the super class.
+        if (member && (member.value instanceof WatchProvider.FrameResultObject))
+            this.setPropertyReturnValue(value);
+        else
+            BasePanel.setPropertyValue.apply(this, arguments);
+    },
+
+    /**
+     * Evaluate the expression and store its result in ReturnValueModifier.
+     * ReturnValueModifier will store it (weakly referenced), and return it on frame completion.
+     *
+     * @param {string} value The expression entered by the user whose result is the value to store.
+     *
+     */
+    setPropertyReturnValue: function(value)
+    {
+        var onSuccess = (result, context) =>
+        {
+            Trace.sysout("watchPanel.setPropertyReturnValue; evaluate success", result);
+            ReturnValueModifier.setUserReturnValue(context, result);
+        };
+
+        var onFailure = (exc, context) =>
+        {
+            Trace.sysout("watchPanel.setPropertyReturnValue; evaluation FAILED " + exc, exc);
+            try
+            {
+                // See DomBasePanel.setPropertyValue for the explanation.
+                ReturnValueModifier.setUserReturnValue(context, value);
+            }
+            catch (exc)
+            {
+            }
+        };
+
+        var options = {noStateChange: true};
+        CommandLine.evaluate(value, this.context, null, null, onSuccess, onFailure, options);
+
+        this.refresh();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -876,6 +917,15 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         // Unwrapping
         return this.getObjectView(object);
+    },
+
+    getRowPropertyValue: function(row)
+    {
+        var member = row.domObject;
+        if (member && (member.value instanceof WatchProvider.FrameResultObject))
+            return this.provider.getValue(member.value);
+
+        return BasePanel.getRowPropertyValue.apply(this, arguments);
     },
 });
 

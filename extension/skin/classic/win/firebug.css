@@ -75,16 +75,11 @@ toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
     list-style-image: url(chrome://firebug/skin/win/up.svg);
 }
 
-#fbToggleCommandEditor {
-    list-style-image: url(chrome://firebug/skin/win/down.svg);
-}
-
 :-moz-any(#fbMinimizeButton,
           #fbDetachButton,
           #fbCloseButton,
           #fbCommandLineHistoryButton,
-          #fbToggleCommandLine,
-          #fbToggleCommandEditor):hover {
+          #fbToggleCommandLine):hover {
     filter: url(resource://firebugui/filters.svg#darken);
 }
 
@@ -92,8 +87,7 @@ toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
           #fbDetachButton,
           #fbCloseButton,
           #fbCommandLineHistoryButton,
-          #fbToggleCommandLine,
-          #fbToggleCommandEditor):active,
+          #fbToggleCommandLine):active,
 #fbCommandLineHistoryButton[checked="true"] {
     filter: url(resource://firebugui/filters.svg#deepDarken);
 }

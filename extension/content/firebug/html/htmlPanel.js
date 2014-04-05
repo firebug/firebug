@@ -545,7 +545,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         this.markChange();
 
-        var objectNodeBox = Firebug.scrollToMutations || Firebug.expandMutations ?
+        var objectNodeBox = Options.get("scrollToMutations") || Options.get("expandMutations") ?
             this.ioBox.createObjectBox(target) : this.ioBox.findObjectBox(target);
 
         if (!objectNodeBox)
@@ -627,7 +627,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         this.markChange();
 
-        var parentNodeBox = Firebug.scrollToMutations || Firebug.expandMutations ?
+        var parentNodeBox = Options.get("scrollToMutations") || Options.get("expandMutations") ?
             this.ioBox.createObjectBox(parent) : this.ioBox.findObjectBox(parent);
 
         if (!parentNodeBox)
@@ -638,7 +638,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             return;
         }
 
-        if (!Firebug.showFullTextNodes)
+        if (!Options.get("showFullTextNodes"))
             textValue = Str.cropMultipleLines(textValue);
 
         var parentTag = getNodeBoxTag(parentNodeBox);
@@ -692,7 +692,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
                 this.highlightMutation(textNodeBox, parentNodeBox, "mutated");
             }
-            else if (Firebug.scrollToMutations || Firebug.expandMutations)
+            else if (Options.get("scrollToMutations") || Options.get("expandMutations"))
             {
                 // We are not currently rendered but we are set to highlight
                 var objectBox = this.ioBox.createObjectBox(target);
@@ -717,9 +717,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         this.markChange();  // This invalidates the panels for every mutate
 
-        var parentNodeBox = Firebug.scrollToMutations || Firebug.expandMutations
-            ? this.ioBox.createObjectBox(parent)
-            : this.ioBox.findObjectBox(parent);
+        var parentNodeBox = Options.get("scrollToMutations") || Options.get("expandMutations") ?
+            this.ioBox.createObjectBox(parent) : this.ioBox.findObjectBox(parent);
 
         if (FBTrace.DBG_HTML)
             FBTrace.sysout("html.mutateNode parent:" + parent + " parentNodeBox:" +
@@ -728,8 +727,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (!parentNodeBox)
             return;
 
+        var showTextNodesWithWhitespace = Options.get("showTextNodesWithWhitespace");
+
         // Ignore whitespace nodes.
-        if (!Firebug.showTextNodesWithWhitespace && this.isWhitespaceText(target))
+        if (!showTextNodesWithWhitespace && this.isWhitespaceText(target))
             return;
 
         var newParentTag = HTMLReps.getNodeTag(parent);
@@ -755,8 +756,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 {
                     var childBox = this.ioBox.getChildObjectBox(parentNodeBox);
 
-                    var comments = Firebug.showCommentNodes;
-                    var whitespaces = Firebug.showTextNodesWithWhitespace;
+                    var comments = Options.get("showCommentNodes");
+                    var whitespaces = showTextNodesWithWhitespace;
 
                     // Get the right next sibling that match following criteria:
                     // 1) It's not a whitespace text node in case 'show whitespaces' is false.
@@ -796,7 +797,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
                 this.highlightMutation(newParentNodeBox, newParentNodeBox, "mutated");
 
-                if (!removal && (Firebug.scrollToMutations || Firebug.expandMutations))
+                if (!removal &&
+                    (Options.get("scrollToMutations") || Options.get("expandMutations")))
                 {
                     objectBox = this.ioBox.createObjectBox(target);
                     this.highlightMutation(objectBox, objectBox, "mutated");
@@ -817,7 +819,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
             this.highlightMutation(newParentNodeBox, newParentNodeBox, "mutated");
 
-            if (!removal && (Firebug.scrollToMutations || Firebug.expandMutations))
+            if (!removal && (Options.get("scrollToMutations") || Options.get("expandMutations")))
             {
                 objectBox = this.ioBox.createObjectBox(target);
                 this.highlightMutation(objectBox, objectBox, "mutated");
@@ -830,14 +832,17 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     highlightMutation: function(elt, objectBox, type)
     {
+        var highlightMutations = Options.get("highlightMutations");
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.highlightMutation Firebug.highlightMutations:" +
-                Firebug.highlightMutations, {elt: elt, objectBox: objectBox, type: type});
+        {
+            FBTrace.sysout("html.highlightMutation 'highlightMutations'=" +
+                highlightMutations, {elt: elt, objectBox: objectBox, type: type});
+        }
 
         if (!elt)
             return;
 
-        if (Firebug.scrollToMutations || Firebug.expandMutations)
+        if (Options.get("scrollToMutations") || Options.get("expandMutations"))
         {
             if (this.context.mutationTimeout)
             {
@@ -852,12 +857,12 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             {
                 ioBox.openObjectBox(objectBox);
 
-                if (Firebug.scrollToMutations)
+                if (Options.get("scrollToMutations"))
                     Dom.scrollIntoCenterView(objectBox, panelNode);
             }, 200);
         }
 
-        if (Firebug.highlightMutations)
+        if (highlightMutations)
             Css.setClassTimed(elt, type, this.context);
     },
 
@@ -1058,11 +1063,14 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             child = this.getFirstChild(node); // child is set to at the beginning of an iteration.
 
         if (FBTrace.DBG_HTML)
+        {
             FBTrace.sysout("getChildObject firstChild " + Css.getElementCSSSelector(child) +
-                " with Firebug.showTextNodesWithWhitespace " +
-                Firebug.showTextNodesWithWhitespace);
+                " with 'showTextNodesWithWhitespace'=" +
+                Options.get("showTextNodesWithWhitespace"));
+        }
 
-        if (Firebug.showTextNodesWithWhitespace)  // then the index is true to the node list
+        // In case white spaces are shown just print the child
+        if (Options.get("showTextNodesWithWhitespace"))
         {
             return child;
         }

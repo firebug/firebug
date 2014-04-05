@@ -9,7 +9,8 @@
 
 function runTest()
 {
-    FBTest.ok(FW.Firebug.activateSameOrigin, "activateSameOrigin must be true (default value) for this test case");
+    FBTest.ok(FW.Firebug.Options.get("activateSameOrigin"),
+        "activateSameOrigin must be true (default value) for this test case");
 
     FBTest.openNewTab(basePath + "net/1764/issue1764-1.html", function(win)
     {

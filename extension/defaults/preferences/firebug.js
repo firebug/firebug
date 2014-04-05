@@ -1,7 +1,6 @@
 // For a detailed description of all preferences see http://getfirebug.com/wiki/index.php/Firebug_Preferences
 
 // Global
-pref("extensions.firebug.architecture", "inProcess");
 pref("extensions.firebug.defaultModuleList", "");
 
 pref("javascript.options.strict.debug", false);
@@ -37,6 +36,7 @@ pref("extensions.firebug.serverMode", false);
 // Command line
 pref("extensions.firebug.commandEditor", false);
 pref("extensions.firebug.alwaysShowCommandLine", false);
+pref("extensions.firebug.debugCommandLineAPI", false);
 
 // Search
 pref("extensions.firebug.searchCaseSensitive", false);
@@ -183,6 +183,3 @@ pref("extensions.firebug.key.shortcut.toggleBreakOn", "accel alt b");
 
 // Accessibility
 pref("extensions.firebug.a11y.enable", false);
-
-// Known Issues
-pref("extensions.firebug.showSlowJSDMessage", true);

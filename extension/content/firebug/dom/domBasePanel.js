@@ -552,7 +552,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
         function failure(exc, context)
         {
-            Trace.sysout("domBasePanel.setPropertyValue; evaluate FAILED " + exc, exc);
+            Trace.sysout("domBasePanel.setPropertyValue; evaluation FAILED " + exc, exc);
 
             try
             {
@@ -566,10 +566,10 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
             }
         }
 
-        if (object && !(object instanceof StackFrame) && !(typeof(object) === "function"))
+        if (object && !(object instanceof StackFrame) && typeof(object) !== "function")
         {
-            CommandLine.evaluate(value, this.context, object, this.context.getCurrentGlobal(),
-                success, failure, {noStateChange: true});
+            CommandLine.evaluate(value, this.context, object, null, success, failure,
+                {noStateChange: true});
         }
         else if (this.context.stopped)
         {

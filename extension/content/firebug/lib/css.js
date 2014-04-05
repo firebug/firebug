@@ -336,7 +336,7 @@ Css.isColorKeyword = function(keyword)
         return false;
 
     if (!colorKeywordSet)
-        colorKeywordSet = new Set(getColorValues());
+        colorKeywordSet = new Set(getColorValues().map((color) => color.toLowerCase()));
 
     return colorKeywordSet.has(keyword.toLowerCase());
 };

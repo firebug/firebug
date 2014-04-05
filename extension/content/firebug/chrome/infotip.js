@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/lib/trace",
     "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
@@ -8,9 +9,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/dom",
-    "firebug/lib/trace",
+    "firebug/lib/options"
 ],
-function(Module, Obj, Firebug, Domplate, Locale, Events, Dom, FBTrace) {
+function(FBTrace, Module, Obj, Firebug, Domplate, Locale, Events, Dom, Options) {
 
 "use strict";
 
@@ -66,7 +67,7 @@ Firebug.InfoTip = Obj.extend(Module,
 
     showInfoTip: function(infoTip, panel, target, x, y, rangeParent, rangeOffset)
     {
-        if (!Firebug.showInfoTips)
+        if (!Options.get("showInfoTips"))
             return;
 
         var scrollParent = Dom.getOverflowParent(target);

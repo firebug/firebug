@@ -90,6 +90,11 @@ ClientProvider.prototype =
 
     getValue: function(object)
     {
+        // Avoid NPE later in the method. If the object is null or undefined
+        // just return it as the result value.
+        if (object == null)
+            return object;
+
         if (object instanceof ObjectClient)
         {
             // If the client object couldn't get data from the server, return the error
@@ -138,7 +143,10 @@ ClientProvider.prototype =
 
         if (object instanceof Grip)
         {
-            actor = object.getActor();
+            if (typeof object.grip === "object")
+                actor = object.getActor();
+            else
+                return object.grip;
         }
         else
         {

@@ -417,18 +417,15 @@ DomBaseTree.prototype = domplate(BaseTree,
                     return;
                 }
 
-                // Only primitive types can be edited.
+                // Read only values can't be edited.
+                if (member.readOnly)
+                    return;
+
                 // xxxHonza: this place requires the panel to have a provider property.
                 // it also requires the panel to have setPropertyValue and editProperty,
                 // which is all implemented by {@DomBasePanel}.
                 // Shouldn't the logic be rather part of the DomBasePanel?
                 var value = panel.provider.getValue(member.value);
-                if (typeof(value) == "object")
-                    return;
-
-                // Read only values can't be edited.
-                if (member.readOnly)
-                    return;
 
                 if (typeof(value) == "boolean")
                     panel.setPropertyValue(row, "" + !value);

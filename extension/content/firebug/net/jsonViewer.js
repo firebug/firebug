@@ -16,11 +16,11 @@ define([
     "firebug/lib/array",
     "firebug/lib/system",
     "firebug/chrome/module",
-    "firebug/chrome/domTree",
+    "firebug/dom/domBaseTree",
     "firebug/dom/domMemberProvider",
 ],
 function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Http, Str, Json, Options,
-    Arr, System, Module, DomTree, DOMMemberProvider) {
+    Arr, System, Module, DomBaseTree, DOMMemberProvider) {
 
 "use strict";
 
@@ -208,7 +208,7 @@ JSONViewerModel.Preview = domplate(
         Events.cancelEvent(event);
 
         Css.toggleClass(sortLink, "sorted");
-        Options.set("sortJsonPreview", !Firebug.sortJsonPreview);
+        Options.set("sortJsonPreview", !Options.get("sortJsonPreview"));
 
         var preview = Dom.getAncestorByClass(sortLink, "jsonPreview");
         var body = Dom.getAncestorByClass(sortLink, "netInfoJSONText");
@@ -229,9 +229,9 @@ JSONViewerModel.Preview = domplate(
             return;
 
         if (!body.jsonTree)
-            body.jsonTree = new DomTree();
+            body.jsonTree = new DomBaseTree();
 
-        var input = {file: file, sorted: Firebug.sortJsonPreview};
+        var input = {file: file, sorted: Options.get("sortJsonPreview")};
         var parentNode = this.bodyTag.replace(input, body, this);
         parentNode = parentNode.getElementsByClassName("jsonPreviewBody").item(0);
 
@@ -266,7 +266,7 @@ JSONProvider.prototype = Obj.extend(new DOMMemberProvider(),
         function sortName(a, b) { return a.name > b.name ? 1 : -1; }
 
         // Sort only if it isn't an array (issue 4382).
-        if (Firebug.sortJsonPreview && !Array.isArray(object, this.context.window))
+        if (Options.get("sortJsonPreview") && !Array.isArray(object, this.context.window))
             members.sort(sortName);
 
         return members;

@@ -11,10 +11,11 @@ define([
     "firebug/debugger/clients/clientProvider",
     "firebug/debugger/clients/scopeClient",
     "firebug/debugger/clients/grip",
+    "firebug/debugger/watch/returnValueModifier",
     "firebug/debugger/watch/watchExpression",
 ],
 function (FBTrace, Obj, Locale, Wrapper, DOMMemberProvider, DebuggerLib, StackFrame,
-    ClientProvider, ScopeClient, Grip, WatchExpression) {
+    ClientProvider, ScopeClient, Grip, ReturnValueModifier, WatchExpression) {
 
 "use strict";
 
@@ -69,7 +70,7 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
     getValue: function(object)
     {
         var localObject = this.getLocalObject(object);
-        if (localObject)
+        if (localObject != null)
             return localObject;
 
         return BaseProvider.getValue.apply(this, arguments);
@@ -215,22 +216,44 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
     },
 
     /**
-     * Adds the frame result (<exception> or <return value>) if it exists to the scopes
+     * Adds the frame result object (<exception> or <return value>) if it exists to the scopes
      * listed in the watch panel (even if it is not a scope).
      *
      * @param {object} stackFrame
      * @param {object} cache
+     *
+     * @return {WatchProvider.FrameResultObject} The object storing the name and the value of the
+     *  frame result object.
      */
     getFrameResultObject: function(stackFrame, cache)
     {
-        var frameResultObj = DebuggerLib.getFrameResultObject(stackFrame.context);
+        var frameResultObj = null;
+        var context = stackFrame.context;
+
+        var debuggerTool = context.getTool("debugger");
+        // Fetch the return value changed by the user (if they did so).
+        // Note: userReturnValue is null only if the value is not found (null is not a valid grip).
+        var userReturnValue = ReturnValueModifier.getUserReturnValueAsGrip(context);
+
+        // If the user hasn't changed the return value, get the initial frame result object.
+        if (userReturnValue == null)
+            frameResultObj = DebuggerLib.getFrameResultObject(context);
+        else
+            frameResultObj = {type: "return", value: userReturnValue};
+
+        Trace.sysout("WatchProvider.getFrameResultObject; frameResultObj", frameResultObj);
+
         if (!frameResultObj || !frameResultObj.type)
             return;
 
         // Create an object that represents the frame-result value in the {@link WatchPanel}.
         var clientObject = cache.getObject(frameResultObj.value);
+
+        // Make exceptions readonly.
+        var readOnly = (frameResultObj.type === "exception");
+
         var resultObject = new WatchProvider.FrameResultObject(
-            clientObject, frameResultObj.type);
+            clientObject, frameResultObj.type, readOnly);
 
         Trace.sysout("watchProvider.getFrameResultObject; object:", clientObject);
 
@@ -241,10 +264,10 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 // ********************************************************************************************* //
 // Return Value Object
 
-WatchProvider.FrameResultObject = function(value, type)
+WatchProvider.FrameResultObject = function(value, type, readOnly)
 {
     this.value = value;
-    this.readOnly = true;
+    this.readOnly = !!readOnly;
     this.name = Locale.$STR("watch.frameResultType." + type);
 }
 

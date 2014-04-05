@@ -11,12 +11,13 @@ function runTest()
             var watchPanel = FBTest.selectSidePanel("watches");
 
             // Test <return value>
-            tasks.push(triggerBreakpoint, btnTestReturn, 12);
+            tasks.push(triggerBreakpoint, btnTestReturn, 25);
             tasks.wrapAndPush(FBTest.clickStepOverButton);
             tasks.wrapAndPush(FBTest.clickStepOverButton);
-            tasks.push(waitForFrameResult, "<return value>", 42);
-            tasks.push(checkResultNonEditable, watchPanel);
+            tasks.push(waitForFrameResult, "<return value>", 0);
+            tasks.push(checkResultEditableThroughDoubleClick);
             tasks.wrapAndPush(FBTest.clickContinueButton);
+            tasks.wrapAndPush(verifyReturnValueChanged, win);
 
 
             // Test <exception>
@@ -69,54 +70,9 @@ function waitForFrameResult(callback, key, value)
     });
 }
 
-function checkResultNonEditable(callback, watchPanel)
+function checkResultEditableThroughDoubleClick(callback)
 {
-    FBTest.progress("=== Testing that the result value is not editable ===");
-    var resultValue = watchPanel.document.querySelector(".frameResultValueRow .memberValueCell");
-    FBTest.ok(resultValue, "Get the element for the result value");
-
-    checkResultNonEditableThroughDoubleClick(watchPanel, resultValue);
-    checkResultNonEditableThroughContextMenu(watchPanel, resultValue, function()
-    {
-        FBTest.progress("=== End Test ===");
-        callback();
-    });
-}
-
-function checkResultNonEditableThroughDoubleClick(watchPanel, resultValue)
-{
-    FBTest.dblclick(resultValue);
-
-    // If the editor appears, editorInput != null
-    var editorInput = watchPanel.document.querySelector(".completionInput");
-
-    FBTest.ok(!editorInput, "No editor should appear after double clicking");
-}
-
-function checkResultNonEditableThroughContextMenu(watchPanel, resultValue, callback)
-{
-    // Check that the context menu does not contain the "Edit Property..." item
-    var contextMenu = ContextMenuController.getContextMenu(resultValue);
-    function onPopupShown()
-    {
-        ContextMenuController.removeListener(resultValue, "popupshown", onPopupShown);
-        var menuItems = Array.slice(contextMenu.getElementsByTagName("menuitem"));
-        FBTest.ok(menuItems.length, "There should be context menu items");
-        contextMenu.hidePopup();
-
-        // xxxFlorent: TODO test that carefully
-        var editPropertyExists = menuItems.some(function(elt)
-        {
-            return elt.getAttribute("label") === FW.FBL.$STR("EditProperty");
-        });
-
-        FBTest.ok(!editPropertyExists, "The property should not be editable through the context "+
-            "menu");
-        callback();
-    }
-    ContextMenuController.addListener(resultValue, "popupshown", onPopupShown);
-    var eventDetails = {type: "contextmenu", button: 2};
-    FBTest.synthesizeMouse(resultValue, 2, 2, eventDetails);
+    FBTest.setWatchExpressionValue(null, "<return value>", "window", callback);
 }
 
 function checkExceptionProperties(callback, watchPanel)
@@ -156,4 +112,11 @@ function checkExceptionProperties(callback, watchPanel)
     });
     // Expand the properties.
     FBTest.click(exceptionElt.querySelector(".memberLabel"));
+}
+
+function verifyReturnValueChanged(win)
+{
+    var val = win.document.getElementById("testResultValueField").value
+    FBTest.compare(42, val, "The return value should have been changed and the value of the field" + 
+        " should be set to 42");
 }

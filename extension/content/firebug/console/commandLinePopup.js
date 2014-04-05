@@ -71,7 +71,7 @@ var CommandLinePopup = Obj.extend(Module,
         var chrome = Firebug.chrome;
         var visible = this.isVisible();
         var isConsole = (panel && panel.name == "console");
-        var showCommandEditor = Firebug.commandEditor;
+        var showCommandEditor = Options.get("commandEditor");
         var context = Firebug.currentContext;
 
         // Disable the console popup button (Firebug toolbar) if the Console panel
@@ -202,7 +202,7 @@ var CommandLinePopup = Obj.extend(Module,
             }
         }
 
-        if (Firebug.commandEditor)
+        if (Options.get("commandEditor"))
         {
             if (visible)
                 commandLine.value = Str.stripNewLines(commandEditor.value);

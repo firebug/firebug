@@ -538,6 +538,11 @@ Firebug.Debugger = Obj.extend(ActivableModule,
             if (scope.name === "this")
                 continue;
 
+            // scope.getProperties() raises an exception when the frame execution is complete
+            // (and the frame result value is displayed). So skip if the scope has no properties.
+            if (!scope.hasProperties())
+                continue;
+
             if (!scope.grip)
                 continue;
 
