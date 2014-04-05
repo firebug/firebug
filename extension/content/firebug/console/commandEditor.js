@@ -335,6 +335,9 @@ var CommandEditor = Obj.extend(Module,
 
     prettyPrint: function(context)
     {
+        if (/^\s*$/.test(this.getText()))
+            return;
+
         var worker = getPrettyPrintWorker();
         var id = "firebug-" + Obj.getUniqueId();
         var deferred = Promise.defer();
