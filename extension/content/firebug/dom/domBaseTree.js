@@ -98,7 +98,7 @@ DomBaseTree.prototype = domplate(BaseTree,
                 )
             ),
             TD({"class": "memberValueIcon", $readOnly: "$member.readOnly"},
-                DIV("&nbsp;")
+                DIV()
             ),
             TD({"class": "memberValueCell", $readOnly: "$member.readOnly",
                 role: "presentation"},
