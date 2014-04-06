@@ -269,6 +269,7 @@ WatchProvider.FrameResultObject = function(value, type, readOnly)
     this.value = value;
     this.readOnly = !!readOnly;
     this.name = Locale.$STR("watch.frameResultType." + type);
+    this.type = type;
 }
 
 /**
@@ -302,7 +303,21 @@ WatchProvider.FrameResultObject.prototype = Obj.descend(Grip.prototype,
 
     getChildren: function()
     {
-        return this.value.getProperties();
+        return this.value.getProperties().then((val) =>
+        {
+            // Make the property readonly only for exceptions.
+            // We don't iterate over the sub-children (for simplicity). So make sure we do that
+            // for exceptions only (for which we are sure they only have one-depth descendants)
+            // to be future proof.
+            if (this.type === "exception")
+            {
+                // Make all descendants of the exception readOnly.
+                for (var member of val)
+                    member.readOnly = true;
+            }
+
+            return val;
+        });
     }
 });
 

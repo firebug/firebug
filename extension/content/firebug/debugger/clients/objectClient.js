@@ -115,7 +115,7 @@ ObjectClient.prototype = Obj.descend(Grip.prototype,
     getPrototypeAndProperties: function(actor)
     {
         if (this.properties)
-            return this.properties;
+            return Promise.resolve(this.properties);
 
         var packet = {
             to: actor,
@@ -125,11 +125,7 @@ ObjectClient.prototype = Obj.descend(Grip.prototype,
         // 'null' and 'undefined' grips don't have cache reference (see ClientCache and
         // gripNull and gripUndefined constants).
         if (!this.cache)
-        {
-            var deferred = Promise.defer();
-            deferred.resolve([]);
-            return deferred.promise;
-        }
+            Promise.resolve([]);
 
         var self = this;
         return this.cache.request(packet).then(
