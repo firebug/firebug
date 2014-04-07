@@ -28,6 +28,10 @@
     font-weight: normal;
 }
 
+.memberValueIcon > div {
+    width: 15px;
+}
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Read Only Properties */
 
@@ -39,10 +43,6 @@
     background: url("chrome://firebug/skin/readOnlyProp.svg") no-repeat;
     background-position: 4px 4px;
     background-size: 10px 10px;
-}
-
-.memberValueIcon.readOnly > div {
-    width: 15px;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

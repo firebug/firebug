@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6673: Preview of 'currentcolor' is incorrect</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #container {
+            color: #788CFF;
+        }
+
+        #element {
+            width: 100px;
+            height: 100px;
+            background-color: currentColor;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6673">Issue 6673</a>: Preview of 'currentcolor' is incorrect</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="container"><div id="element"></div></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Style</em> side panel</li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> above</li>
+                    <li>
+                        Hover the <code>currentcolor</code> value of the
+                        <code>background-color</code> property within the <em>Style</em> side panel
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>An infotip should be shown displaying the blue color of the <code>&lt;div&gt;</code>.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>
