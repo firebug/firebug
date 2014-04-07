@@ -125,7 +125,7 @@ ObjectClient.prototype = Obj.descend(Grip.prototype,
         // 'null' and 'undefined' grips don't have cache reference (see ClientCache and
         // gripNull and gripUndefined constants).
         if (!this.cache)
-            Promise.resolve([]);
+            return Promise.resolve([]);
 
         var self = this;
         return this.cache.request(packet).then(
