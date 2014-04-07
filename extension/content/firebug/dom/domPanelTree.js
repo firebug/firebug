@@ -67,9 +67,7 @@ DomPanelTree.prototype = domplate(BaseTree,
             breakpoint: "$member.breakpoint",
             disabledBreakpoint: "$member.disabledBreakpoint"},
             TD({"class": "memberHeaderCell"},
-                DIV({"class": "sourceLine memberRowHeader", onclick: "$onClickBreakpointColumn"},
-                    "&nbsp;"
-               )
+                DIV({"class": "sourceLine memberRowHeader", onclick: "$onClickBreakpointColumn"})
             ),
             TD({"class": "memberLabelCell", style: "padding-left: $member.indent\\px",
                 role: "presentation"},
@@ -79,7 +77,7 @@ DomPanelTree.prototype = domplate(BaseTree,
                 )
             ),
             TD({"class": "memberValueIcon", $readOnly: "$member.readOnly"},
-                DIV("&nbsp;")
+                DIV()
             ),
             TD({"class": "memberValueCell", $readOnly: "$member.readOnly",
                 role: "presentation"},

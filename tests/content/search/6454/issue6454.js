@@ -7,11 +7,12 @@ function runTest()
             FBTest.selectPanel("html");
 
             var tasks = new FBTest.TaskList();
-            tasks.push(searchTest, "testing", false, 14);
-            tasks.push(searchTest, "testing", true, 7);
+            tasks.push(searchTest, "testing", false, 15);
+            tasks.push(searchTest, "testing", true, 8);
             tasks.push(searchTest, "Testing", false, 8);
             tasks.push(searchTest, "#test div", false, 5);
             tasks.push(searchTest, "/html/body", true, 4);
+            tasks.push(searchTest, "[class=testing]", true, 1);
             tasks.run(function()
             {
                 FBTest.testDone();
@@ -25,7 +26,8 @@ function searchTest(callback, text, caseSensitive, expectedMatches)
     executeSearchTest(text, false, caseSensitive, function(counter)
     {
         FBTest.compare(expectedMatches, counter, "There must be " + expectedMatches +
-            " matches when searching for \"" + text + "\"");
+            " " + (expectedMatches === 1 ? "match": "matches") + " when searching for '" +
+            text + "'");
         callback();
     });
 }

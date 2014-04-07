@@ -64,7 +64,8 @@ var DebugCommands = Obj.extend(Module,
     {
         Module.shutdown.apply(this, arguments);
 
-        this.unregister();
+        if (Options.get("debugCommandLineAPI"))
+            this.unregister();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

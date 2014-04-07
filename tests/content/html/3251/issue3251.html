@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 3251: Alt + double-clicking opens the selected node instead of the double-clicked node in Edit Mode</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #element {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(-45deg, #788CFF, #B4C8FF);
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>
+                <a href="http://code.google.com/p/fbug/issues/detail?id=3251">Issue 3251</a>:
+                Alt + double-clicking opens the selected node instead of the double-clicked node in
+                Edit Mode
+            </h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel</li>
+                    <li>
+                        Inspect the blue <code>&lt;div&gt;</code> (<code>#element</code>) above
+                    </li>
+                    <li>Select the <code>&lt;body&gt;</code> tag</li>
+                    <li>Hold down <kbd>Alt</kbd> and click on the <code>&lt;div&gt;</code></li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        The <em>HTML</em> panel should switch to the Edit Mode and display the
+                        contents of the <code>&lt;div&gt;</code>.
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

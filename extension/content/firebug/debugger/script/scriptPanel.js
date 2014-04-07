@@ -577,6 +577,18 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // is visible to the user. It's wrong in the case where the user just
         // executed an expression on the command line, which also causes 'framesadded'
         // to be received (through clearScopes). See also issue 7028.
+
+        // If frames are added make sure to update the selection (issue 7320)
+        this.selection = this.context.currentFrame;
+
+        // xxxHonza: Script panel side-panels derive the current selection object from
+        // the Script panel (see onSelectedSidePanel in chrome.js) and those selection
+        // should be also updated. How to do it properly?
+        // There doesn't seem to be a public problem with this, but the internal state
+        // should be correct.
+        // Note that the way how selection of side panels is derived from the main
+        // panel has been rather confusing over time, but extension might depend
+        // on it, so it's rather hard to change it.
     },
 
     framescleared: function()
