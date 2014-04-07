@@ -101,18 +101,19 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
 
             // Auto-correct shared breakpoint object if necessary and store the original
             // line so, listeners (like e.g. the Script panel) can update the UI.
-            var currentLine = bpClient.location.line - 1;
-            if (bp.lineNo != currentLine)
+            var correctedLine = bpClient.location.line - 1;
+            if (bp.lineNo != correctedLine)
             {
                 // The breakpoint line is going to be corrected, let's check if there isn't
-                // an existing breakpoint at the new line (see issue: 6253). This must be
-                // done before the correction.
-                var dupBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
+                // an existing breakpoint at the new line. Note: This must be done before
+                // the correction, since the value stored in the bp variable is by reference,
+                // so that would be always found and marked as duplicated to be removed.
+                var dupBp = BreakpointStore.findBreakpoint(bp.href, correctedLine);
 
                 // bpClient deals with 1-based line numbers. Firebug uses 0-based
                 // line numbers (indexes). Let's fix the line.
                 bp.params.originLineNo = bp.lineNo;
-                bp.lineNo = currentLine;
+                bp.lineNo = correctedLine;
 
                 // If an existing breakpoint has been found we need to remove the newly
                 // created one to avoid duplicities (two breakpoints at the same line).
