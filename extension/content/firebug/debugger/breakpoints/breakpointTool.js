@@ -274,7 +274,17 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             // due to debugger not being in pause state.
             var threadActor = DebuggerLib.getThreadActor(this.context.browser);
             Trace.sysout("breakpointTool.setBreakpoint; thread actor state: " +
-                threadActor.state);
+                threadActor.state + ", client state: " + thread.state);
+
+            // xxxHonza: I can't set a breakpoint sometimes because ThreadClient
+            // (context.activeThread) says state == paused, while the ThreadActor
+            // is *not* paused. This causes an exception on the server side.
+            if (thread.state == "paused" && threadActor.state != "paused")
+            {
+                // Let's see if anyone can find STR
+                FBTrace.sysout("breakpointTool.setBreakpoint; ERROR Client thread " +
+                    "is out of sync. Let me know how to reproduce this! Honza");
+            }
         }
 
         // Do not create two server side breakpoints at the same line.

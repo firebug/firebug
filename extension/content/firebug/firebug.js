@@ -670,15 +670,11 @@ window.Firebug =
 
     registerCommand: function(name, config)
     {
-        // xxxHonza: we should fire an event to avoid dependency on CommandLineExposed module.
-        // Fix as soon as issue 6855 is done
         return CommandLineExposed.registerCommand(name, config);
     },
 
     unregisterCommand: function(name)
     {
-        // xxxHonza: we should fire an event to avoid dependency on CommandLineExposed module.
-        // Fix as soon as issue 6855 is done
         return CommandLineExposed.unregisterCommand(name);
     },
 
