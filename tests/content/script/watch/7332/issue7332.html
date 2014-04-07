@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 7332: Cropped string can't be expanded in the Watch panel</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head
+<body>
+<script type="text/javascript">
+function onExecuteTest()
+{
+    var aaa = "Hello Firebug user! Hello Firebug user! Hello Firebug user!";
+    debugger;
+}
+</script>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=7332">Issue 7332</a>:
+        Cropped string can't be expanded in the Watch panel</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug and enable and the <em>Script</em> panel</li>
+            <li>Click this button <button id="executeTest"
+                onclick="onExecuteTest()">Click Me</button></li>
+            <li>The debugger should halt the execution at line</li>
+            <li>Select the Watch panel and expand the string <code>aaa</code>.
+                You should see the complete (not cropped) value.</li>
+        </ol>
+    </section>
+    <footer>Jan Odvarko, odvarko@gmail.com</footer>
+</div>
+</body>
+</html>
