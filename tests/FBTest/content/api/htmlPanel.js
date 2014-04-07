@@ -40,10 +40,11 @@ this.waitForHtmlMutation = function(chrome, tagName, callback)
             target: node,
             attributes: attributes,
             removed: true
-        }
-        // Now wait till the HTML panel unhighlight the element (removes the 'mutate' class)
+        };
+
+        // Now wait till the HTML panel unhighlights the element (removes the 'mutated' class)
         var unmutated = new MutationRecognizer(unhighlightConfig);
-        unmutated.onRecognizeAsync(function onUnMutate(node)
+        unmutated.onRecognizeAsync((node) =>
         {
             callback(node);
         });

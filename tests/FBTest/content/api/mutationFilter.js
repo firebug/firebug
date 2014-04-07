@@ -60,6 +60,9 @@ MutationFilter.prototype.filter = function(mutations)
         for (var name in attributes)
         {
             var attribute = mutation.target.attributes.getNamedItem(name);
+
+            // If we're searching for added attributes and the element doesn't contain the
+            // attribute, it's not the searched one.
             if (!removed && !attribute)
                 return false;
 
@@ -67,19 +70,31 @@ MutationFilter.prototype.filter = function(mutations)
             {
                 if (removed)
                 {
-                    var checkedClassNames = attributes[name].split(" ");
-                    for (var j = 0; j < checkedClassNames.length; j++)
-                    {
-                        if (mutation.oldValue.contains(checkedClassNames[j]))
-                            return false;
-                    }
-                }
-                else
-                {
+                    // In case we're searching for removed classes, go through all classes that
+                    // shall be matched and check whether the mutated element previously contained
+                    // them but now not anymore.
                     var checkedClassNames = attributes[name].split(" ");
                     var classList = mutation.target.classList;
                     for (var j = 0; j < checkedClassNames.length; j++)
                     {
+                        // If the element didn't contain one of the classes or still contains one
+                        // of them, it's not the searched element.
+                        if (!mutation.oldValue.contains(checkedClassNames[j]) ||
+                            classList.contains(checkedClassNames[j]))
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    // In case we're searching for added classes, go through all classes that
+                    // shall be matched and check whether the mutated element contains them.
+                    var checkedClassNames = attributes[name].split(" ");
+                    var classList = mutation.target.classList;
+                    for (var j = 0; j < checkedClassNames.length; j++)
+                    {
+                        // If the element doesn't contain the class, it's not the searched one.
                         if (!classList.contains(checkedClassNames[j]))
                             return false;
                     }
@@ -101,6 +116,7 @@ MutationFilter.prototype.filter = function(mutations)
         FBTrace.sysout("mutation "+mutation.type, mutation);
         switch (mutation.type)
         {
+            // If the mutation is related to a child, search for the element via an XPath
             case "childList":
                 if (!this.xpath)
                     this.xpath = this.createXPath();
@@ -115,16 +131,18 @@ MutationFilter.prototype.filter = function(mutations)
                 }
                 break;
 
+            // If the mutation is related to some attributes of an element, check these attributes
             case "attributes":
                 if (!this.attributes)
                     continue;
 
-                if (!checkAttributes(mutation, this.attributes))
+                if (!checkAttributes(mutation, this.attributes, this.removed))
                     continue;
 
                 return mutation.target;
                 break;
 
+            // If the mutation is related to the text content of an element, check the content
             case "characterData":
                 if (!this.text)
                     continue;
@@ -153,10 +171,18 @@ MutationFilter.prototype.getMutationObserverConfig = function()
     {
         config.attributes = true;
         config.attributeFilter = Object.keys(this.attributes);
+
+        if (this.removed)
+            config.attributeOldValue = true;
     }
 
     if (this.text)
+    {
         config.characterData = true;
+
+        if (this.removed)
+            config.characterDataOldValue = true;
+    }
 
     return config;
 };
