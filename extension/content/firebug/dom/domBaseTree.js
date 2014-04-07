@@ -116,10 +116,22 @@ DomBaseTree.prototype = domplate(BaseTree,
 
     hasChildren: function(member)
     {
+        // First, check out |hasChildren| flag, if it's set, this tree-item has children.
+        if (member.hasChildren)
+            return "hasChildren";
+
         // hasChildren class is set even for cropped strings (there are no real children),
-        // so the tree logic treat them as an expandable tree-items and the user can
+        // so the tree logic treats them as an expandable tree-items and the user can
         // 'expand' to see the entire string.
-        var isExpandable = member.hasChildren || this.isCropped(member.value);
+        // In order to figure out whether this item displays a cropped string we need
+        // to get its value - either directly using the |member.value| field or through
+        // associated provider (if it's available).
+        var value = member.value;
+        if (member.provider)
+            value = member.provider.getValue(member.value);
+
+        // Check out the value
+        var isExpandable = this.isCropped(value);
         return isExpandable ? "hasChildren" : "";
     },
 
@@ -389,8 +401,8 @@ DomBaseTree.prototype = domplate(BaseTree,
 
         // Row member object created by the tree widget.
         var member = row.repObject;
-
-        if (label && Css.hasClass(row, "hasChildren") && !(isString && inValueCell))
+        var hasChildren = Css.hasClass(row, "hasChildren");
+        if (label && hasChildren && !(isString && inValueCell))
         {
             // Basic row toggling is implemented in {@DomTree}
             BaseTree.onClick.apply(this, arguments);
