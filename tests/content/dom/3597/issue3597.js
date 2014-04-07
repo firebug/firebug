@@ -19,7 +19,7 @@ function runTest()
 
                         // The _testString must have 'string' type now.
                         FBTest.compare(
-                            /_testString\s+\"\{\"childObj\"\:\{\"a\"\:5\,\"b\"\:4\,\"lastItem\"\:5\}\}/,
+                            /_testString\s*\"\{\"childObj\"\:\{\"a\"\:5\,\"b\"\:4\,\"lastItem\"\:5\}\}/,
                             row.textContent, "The object must be displayed as a string now");
 
                         FBTest.testDone();
