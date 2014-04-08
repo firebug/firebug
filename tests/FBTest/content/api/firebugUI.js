@@ -269,6 +269,13 @@ this.waitForTabAttach = function(callback)
         return;
     }
 
+    // xxxHonza: I have seen this once.
+    if (typeof callback != "function")
+    {
+        FBTest.sysout("waitForTabAttach; ERROR callback is not a function!");
+        return;
+    }
+
     // If Firebug is already attached to a tab execute the callback directly and bail out.
     if (FBTest.isFirebugAttached())
     {
