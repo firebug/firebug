@@ -75,9 +75,12 @@ var ErrorMessage = domplate(Rep,
                     TBODY(
                         TR(
                             TD(
-                                SPAN({"class": "$object|isBreakableError a11yFocus",
-                                    role: "checkbox", "aria-checked": "$object|hasErrorBreak",
-                                    title: Locale.$STR("console.Break On This Error")})
+                                SPAN({
+                                    "class": "$object|isBreakableError a11yFocus",
+                                    role: "checkbox",
+                                    "aria-checked": "$object|hasErrorBreak",
+                                    title: Locale.$STR("console.Break On This Error")
+                                })
                             ),
                             TD(
                                 A({"class": "errorSource a11yFocus"},
@@ -417,6 +420,7 @@ var ErrorMessage = domplate(Rep,
             items.push(
                 "-",
                 {
+                    id: "breakOnThisError",
                     label: "BreakOnThisError",
                     tooltiptext: "console.menu.tip.Break_On_This_Error",
                     type: "checkbox",
