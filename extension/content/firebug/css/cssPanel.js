@@ -1605,6 +1605,13 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         var scanRE = SearchBox.getTestingRegex(text);
         function scanDoc(styleSheet)
         {
+            if (!styleSheet)
+            {
+                // xxxHonza: I have seen an exception here
+                TraceError.sysout("cssPanel.searchOtherDocs; ERROR no style sheet!");
+                return false;
+            }
+
             // we don't care about reverse here as we are just looking for existence,
             // if we do have a result we will handle the reverse logic on display
             for (var i = 0; i < styleSheet.cssRules.length; i++)

@@ -104,6 +104,9 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             var correctedLine = bpClient.location.line - 1;
             if (bp.lineNo != correctedLine)
             {
+                Trace.sysout("breakpointTool.onAddBreakpoint; line correction " +
+                    bp.lineNo + " -> " + correctedLine);
+
                 // The breakpoint line is going to be corrected, let's check if there isn't
                 // an existing breakpoint at the new line. Note: This must be done before
                 // the correction, since the value stored in the bp variable is by reference,
