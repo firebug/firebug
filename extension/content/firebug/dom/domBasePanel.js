@@ -616,7 +616,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         if (name === "this")
             return;
 
-        // Toggle breakpoint on the clicked row. {@DOMModule} will peform the action
+        // Toggle breakpoint on the clicked row. {@DOMModule} will perform the action
         // and also fire corresponding event that should be handled by specific
         // panels to update the UI.
         var object = this.getRowObject(row);
@@ -638,7 +638,11 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
     populateReadOnlyInfoTip: function(infoTip, target)
     {
-        var member = Firebug.getRepObject(target);
+        // We can't use Firebug.getRepObject to find the |member| object since
+        // tree rows are using repIgnore flag (to properly populate context menus).
+        // (see also issue 7337)
+        var row = Dom.getAncestorByClass(target, "memberRow");
+        var member = row.repObject;
         if (!member.descriptor)
         {
             // xxxHonza: this happens quite often why?

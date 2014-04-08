@@ -1758,11 +1758,6 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         return path;
     },
 
-    getPopupObject: function(target)
-    {
-        return Firebug.getRepObject(target);
-    },
-
     getTooltipObject: function(target)
     {
         if (Dom.getAncestorByClass(target, "nodeLabelBox") ||

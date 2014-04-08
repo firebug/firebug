@@ -267,8 +267,11 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         var frameResultNode = this.panelNode.querySelector(".frameResultValueRow");
         if (frameResultNode)
         {
-            var frameResultObject = Firebug.getRepObject(frameResultNode);
-            var frameResultValue = frameResultObject.value;
+            // We can't use Firebug.getRepObject to find the |member| object since
+            // tree rows are using repIgnore flag.
+            var row = Dom.getAncestorByClass(frameResultNode, "memberRow");
+            var frameResultValue = row.repObject.value;
+
             // Put the flag on the ClientObject (which is cached) representing the return value.
             // Issue 7025: doUpdateSelection is called twice, first from watchPanel.onStartDebugging
             // and second from watchPanel.framesadded. Each time, the watch panel is rebuilt.
@@ -696,7 +699,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         if (panel.name == "watches" && path.length == 1)
             return;
 
-        items.push({
+        items.push("-", {
            id: "fbAddWatch",
            label: "AddWatch",
            tooltiptext: "watch.tip.Add_Watch",
@@ -727,7 +730,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
                 items[editWatchIndex].label = "EditWatch";
                 items[editWatchIndex].tooltiptext = "watch.tip.Edit_Watch";
             }
-    
+
             if (deleteWatchIndex !== -1)
             {
                 items[deleteWatchIndex].label = "DeleteWatch";
@@ -770,23 +773,8 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     {
         Trace.sysout("watchPanel.getPopupObject; target:", target);
 
-        // Right clicking on watch panel label doesn't produce "Inspect in..." options.
-        // (returning undefined from this method avoids these options).
-        var memberLabel = Dom.getAncestorByClass(target, "memberLabelCell");
-        if (memberLabel)
-            return;
-
-        // Right clicking on a template with associated object (repObject)
-        // allows to inspect the object. This is the default behavior.
-        var repObject = BasePanel.getPopupObject.apply(this, arguments);
-        if (repObject)
-            return this.getObjectView(repObject);
-
-        // Some members displayed in the panel can be for client objects e.g. the scope
-        // list (i.e. JSD2 environments sent over RDP).
-        var row = Dom.getAncestorByClass(target, "memberRow");
-        if (row)
-            return this.getRealRowObject(row);
+        var object = BasePanel.getPopupObject.apply(this, arguments);
+        return object ? this.getObjectView(object) : object;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

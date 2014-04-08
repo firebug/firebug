@@ -58,6 +58,7 @@ DomTree.prototype = domplate(
             _domObject: "$member",
             _repObject: "$member",
             $hasChildren: "$member|hasChildren",
+            $repIgnore: true,
             level: "$member.level"},
             TD({"class": "memberLabelCell", style: "padding-left: $member|getIndent\\px"},
                 SPAN({"class": "memberLabel $member.type\\Label"}, "$member|getLabel")
