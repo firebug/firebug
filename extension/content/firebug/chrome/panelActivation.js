@@ -117,7 +117,7 @@ Firebug.PanelActivation = Obj.extend(Module,
 
     isPanelEnabled: function(panelType)
     {
-        if (typeof(panelType) == "string")
+        if (typeof panelType == "string")
             panelType = Firebug.getPanelType(panelType);
 
         if (!panelType)
@@ -128,7 +128,7 @@ Firebug.PanelActivation = Obj.extend(Module,
 
         // Panel "class" object is used to decide whether a panel is disabled
         // or not (i.e.: isEnabled is a static method of Panel)
-        return panelType ? panelType.prototype.isEnabled() : false;
+        return panelType.prototype.isEnabled();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

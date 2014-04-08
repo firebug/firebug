@@ -15,10 +15,6 @@ function(FBTrace, Wrapper, Xpcom) {
 
 var Cu = Components.utils;
 
-var comparator = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
-var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
-var pre27 = (comparator.compare(appInfo.version, "27.0*") < 0);
-
 var global = Cu.getGlobalForObject({});
 Cu.import("resource://gre/modules/jsdebugger.jsm", {}).addDebuggerToGlobal(global);
 
@@ -94,22 +90,11 @@ DebuggerLib.getInactiveDebuggeeGlobal = function(context, global)
     return dbgGlobal;
 };
 
-// temporary version-dependent check, should be removed when minVersion = 27
-DebuggerLib._closureInspectionRequiresDebugger = function()
-{
-    return !pre27;
-};
-
 /**
  * Runs a callback with a debugger for a global temporarily enabled.
  */
 DebuggerLib.withTemporaryDebugger = function(context, global, callback)
 {
-    // Pre Fx27, cheat and pass a disabled debugger, because closure inspection
-    // works with disabled debuggers, and that's all we need this API for.
-    if (!DebuggerLib._closureInspectionRequiresDebugger())
-        return callback(DebuggerLib.getInactiveDebuggeeGlobal(context, global));
-
     var dbg = getInactiveDebuggerForContext(context);
     if (dbg.hasDebuggee(global))
         return callback(DebuggerLib.getInactiveDebuggeeGlobal(context, global));
