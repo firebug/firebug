@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5216: &quot;Break On This Error&quot; missing from the context menu</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function causeException()
+        {
+            undefinedFunction();
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5216">Issue 5216</a>:
+            &quot;Break On This Error&quot; missing from the context menu</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="causeException" onclick="causeException()">Cause exception</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>
+                        Click the <em>Cause exception</em> button above<br/>
+                        <span class="ok">
+                            &rArr; An error should be listed within the <em>Console</em> panel.
+                        </span>
+                    </li>
+                    <li>
+                        Right-click the error<br/>
+                        <span class="ok">
+                            &rArr; There should be an option called <em>Break on This Error</em>
+                            within the context menu.
+                        </span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        The context menu for an error message should contain an option for adding
+                        an error breakpoint for it.
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>
