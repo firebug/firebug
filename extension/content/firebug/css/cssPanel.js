@@ -1660,6 +1660,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
             row = this.currentSearch.findNext(wrapSearch, false, reverse,
                 SearchBox.isCaseSensitive(text));
+
+            if (this.editing)
+                row = Dom.getAncestorByClass(row, "firebug-line");
         }
         else
         {
@@ -1668,8 +1671,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 this.currentSearch = new Search.TextSearch(this.stylesheetEditor.box);
                 row = this.currentSearch.find(text, reverse, SearchBox.isCaseSensitive(text));
 
+
                 if (row)
                 {
+                    if (this.editing)
+                        row = Dom.getAncestorByClass(row, "firebug-line").parentNode;
+
                     sel = this.document.defaultView.getSelection();
                     sel.removeAllRanges();
                     sel.addRange(this.currentSearch.range);
