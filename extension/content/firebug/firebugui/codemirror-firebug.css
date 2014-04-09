@@ -152,3 +152,26 @@
     color: green;
     font-weight: bold;
 }
+
+/*************************************************************************************************/
+/* Auto-completion */
+
+/* xxxsz: Workaround to let the popup look like the Completion List Popup.
+   This can be removed when both popups share the same element structure. */
+.CodeMirror-hints {
+    font-size: inherit;
+    /* xxxsz: This should be set dynamically, i.e. regard the text size setting of the UI */
+    font-size-adjust: 0.547;
+    -moz-user-select: none;
+    -moz-border-top-colors: #BEBEBE #F0F0F0 #F0F0F0 #BEBEBE;
+    -moz-border-right-colors: #BEBEBE #F0F0F0 #F0F0F0 #BEBEBE;
+    -moz-border-bottom-colors: #BEBEBE #F0F0F0 #F0F0F0 #BEBEBE;
+    -moz-border-left-colors: #BEBEBE #F0F0F0 #F0F0F0 #BEBEBE;
+    border-width: 4px;
+    border-radius: 5px;
+    padding: 0;
+}
+
+.CodeMirror-hint {
+    border-radius: 0;
+}

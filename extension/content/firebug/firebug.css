@@ -70,7 +70,7 @@ textbox#fbCommandEditor {
     border: 1px solid #BEBEBE;
     border-radius: 5px;
 
-    font-size: 12px;
+    font-size: 10px;
 
     /* Remove xul panel shadow */
     -moz-window-shadow: none !important;
