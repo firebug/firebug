@@ -79,13 +79,17 @@
 /* Gutters */
 
 .cm-s-firebug .CodeMirror-gutter {
-    padding-right:4px;
-    width:.5em;
     cursor: default;
+}
+
+.cm-s-firebug .CodeMirror-gutter.breakpoints {
+    width: 16px;
 }
 
 .cm-s-firebug .CodeMirror-gutter-elt {
     padding-left: 3px;
+    padding-right: 4px;
+    min-width: 1ch;
 }
 
 /*************************************************************************************************/

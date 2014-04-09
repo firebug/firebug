@@ -94,7 +94,7 @@ Firebug.SVGViewerModel = Obj.extend(Module,
 
         tabBody.updated = true;
 
-        this.insertSVG(tabBody, file.responseText);
+        this.insertSVG(tabBody, NetUtils.getResponseText(file, context));
     },
 
     insertSVG: function(parentNode, text)
