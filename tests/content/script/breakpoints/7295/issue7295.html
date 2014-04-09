@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 7295: Detaching and attaching backend thread without page-reload disables breakpoints</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    <script type="text/javascript">
+    function onExecuteTest()
+    {
+        return "Hello";
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>
+            <a href="https://code.google.com/p/fbug/issues/detail?id=7295">Issue 7295</a>:
+                Detaching and attaching backend thread without page-reload disables breakpoints
+        </h1>
+    </header>
+    <div>
+        <section id="description">
+            <h3>Steps to reproduce</h3>
+            <ol>
+                <li>Open Firebug and enable the Script panel</li>
+                <li>Create a breakpoint on line 10</li>
+                <li>Disable and immediatelly enable the Script panel</li>
+                <li>Click this button, the braekpoint must hit:
+                    <button id="testButton" onclick="onExecuteTest()">Click Me</button></li>
+            </ol>
+        </section>
+        <footer>Jan Odvarko, odvarko@gmail.com</footer>
+    </div>
+</body>
+</html>
