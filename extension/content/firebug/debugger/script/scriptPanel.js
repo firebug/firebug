@@ -133,6 +133,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         Firebug.unregisterUIListener(this);
 
+        // Stop marking executable lines.
+        if (this.context.markExeLinesTimeout)
+        {
+            this.context.clearTimeout(this.context.markExeLinesTimeout);
+            this.context.markExeLinesTimeout = null;
+        }
+
         BasePanel.destroy.apply(this, arguments);
     },
 

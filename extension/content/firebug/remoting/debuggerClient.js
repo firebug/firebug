@@ -404,6 +404,8 @@ var DebuggerClient = Obj.extend(Firebug.Module,
     onThreadDetached: function(context)
     {
         this.dispatch("onThreadDetached", [context]);
+
+        Firebug.dispatchEvent(context.browser, "onThreadDetached");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
