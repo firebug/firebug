@@ -11,6 +11,8 @@ define([
 ],
 function (Firebug, FBTrace, Obj, Tool, DebuggerLib, BreakpointStore, DebuggerClient) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
@@ -74,6 +76,13 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         // are set on the backend (see also issue 7290). See also issue 7295 that might be
         // related.
         // this.context.breakpointClients = [];
+
+        // Breakpoints need to be disabled on the server side when detach happens
+        // (see also issue 7295).
+        // xxxHonza: this is a workaround for bug:
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=991688
+        var threadActor = DebuggerLib.getThreadActor(this.context.browser);
+        threadActor.disableAllBreakpoints();
 
         BreakpointStore.removeListener(this);
     },
