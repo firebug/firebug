@@ -103,7 +103,16 @@ this.enableNetPanel = function(callback)
  */
 this.disableScriptPanel = function(callback)
 {
-    this.setPanelState(FW.Firebug.Debugger, "script", callback, false);
+    function onCallback(win)
+    {
+        FBTest.waitForThreadDetach(function()
+        {
+            callback(win);
+        });
+    }
+
+    var cb = callback ? onCallback : null;
+    this.setPanelState(FW.Firebug.Debugger, "script", cb, false);
 };
 
 /**

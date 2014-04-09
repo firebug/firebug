@@ -462,6 +462,34 @@ FBTest.waitForThreadAttach = function(callback)
     DebuggerController.addListener(browser, listener);
 }
 
+FBTest.waitForThreadDetach = function(callback)
+{
+    if (!callback)
+    {
+        FBTest.sysout("waitForThreadDetach; ERROR no callback!");
+        return;
+    }
+
+    var browser = FW.Firebug.currentContext.browser;
+    var attached = FW.Firebug.DebuggerClient.isThreadAttached(browser);
+    if (!attached)
+    {
+        callback();
+        return;
+    }
+
+    var listener =
+    {
+        onThreadDetached: function()
+        {
+            FBTest.sysout("waitForThreadDetach; On thread detached");
+            callback();
+        },
+    };
+
+    DebuggerController.addListener(browser, listener);
+}
+
 // ********************************************************************************************* //
 // Stepping
 
