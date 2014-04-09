@@ -46,7 +46,7 @@ function runTest()
                         var breakpointRow = breakpointsPanel.panelNode.
                             getElementsByClassName("breakpointRow");
                         FBTest.compare(breakpointRow.length, 1, "There must be " +
-                            "the breakpoint in the Breakpoints side panel");
+                            "a breakpoint row in the Breakpoints side panel");
 
                         FBTest.testDone();
                     });
