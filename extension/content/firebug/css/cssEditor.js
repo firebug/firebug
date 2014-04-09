@@ -96,7 +96,7 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
 
                     if (value && value != "null")
                     {
-                        var parsedValue = parsePriority(value);
+                        var parsedValue = CSSModule.parsePriority(value);
                         CSSModule.setProperty(rule, propName, parsedValue.value,
                             parsedValue.priority);
                     }
@@ -291,7 +291,7 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
             var baseText = rule.style ? rule.style.cssText : rule.cssText;
             var prop = Dom.getAncestorByClass(target, "cssProp");
             var propValue = Dom.getChildByClass(prop, "cssPropValue").textContent;
-            var parsedValue = parsePriority(propValue);
+            var parsedValue = CSSModule.parsePriority(propValue);
 
             if (previous)
                 CSSModule.removeProperty(rule, previous);

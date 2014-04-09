@@ -902,7 +902,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         var map = disabledMap.get(rule);
 
         var propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
-        var parsedValue = parsePriority(propValue);
+        var parsedValue = CSSModule.parsePriority(propValue);
 
         CSSModule.disableProperty(Css.hasClass(row, "disabledStyle"), rule,
             propName, parsedValue, map, this.context);
@@ -1857,15 +1857,6 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
 // ********************************************************************************************* //
 // Local Helpers
-
-function parsePriority(value)
-{
-    var rePriority = /(.*?)\s*(!important)?$/;
-    var m = rePriority.exec(value);
-    var propValue = m ? m[1] : "";
-    var priority = m && m[2] ? "important" : "";
-    return {value: propValue, priority: priority};
-}
 
 function getPropertyValue(style, propName)
 {
