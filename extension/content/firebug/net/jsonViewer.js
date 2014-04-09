@@ -229,7 +229,7 @@ JSONViewerModel.Preview = domplate(
             return;
 
         if (!body.jsonTree)
-            body.jsonTree = new DomBaseTree();
+            body.jsonTree = new DomBaseTree(context);
 
         var input = {file: file, sorted: Options.get("sortJsonPreview")};
         var parentNode = this.bodyTag.replace(input, body, this);
