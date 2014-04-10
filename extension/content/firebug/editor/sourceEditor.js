@@ -9,9 +9,10 @@ define([
     "firebug/lib/css",
     "firebug/lib/wrapper",
     "firebug/lib/array",
+    "firebug/lib/options",
     "firebug/editor/sourceSearch"
 ],
-function(Firebug, FBTrace, Obj, Http, Dom, Css, Wrapper, Arr, SourceSearch) {
+function(Firebug, FBTrace, Obj, Http, Dom, Css, Wrapper, Arr, Options, SourceSearch) {
 
 "use strict";
 
@@ -46,6 +47,7 @@ var HIGHLIGHTED_LINE_CLASS = "CodeMirror-highlightedLine";
 var BP_WRAP_CLASS = "CodeMirror-breakpoint";
 
 var unhighlightDelay = 1300;
+var tabSize = Options.get("replaceTabs");
 
 // ********************************************************************************************* //
 // Source Editor Constructor
@@ -76,8 +78,9 @@ SourceEditor.DefaultConfig =
     value: "",
     mode: "htmlmixed",
     theme: "firebug",
-    indentUnit: 2,
-    tabSize: 4,
+    indentUnit: tabSize || 4,
+    tabSize: tabSize || 4,
+    indentWithTabs: tabSize == 0,
     smartIndent: true,
     extraKeys: {},
     lineWrapping: false,
