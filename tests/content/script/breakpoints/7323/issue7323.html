@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html>
     <head>
-        <title>Issue 6253: Auto-correction of breakpoints location</title>
+        <title>Issue 7323: Breakpoint auto-correction doesn't work correctly</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
         <script type="text/javascript">
@@ -15,7 +15,7 @@
     <body onload="aFunction()">
         <header>
             <h1>
-                <a href="https://code.google.com/p/fbug/issues/detail?id=6253">Issue 6253</a>: Auto-correction of breakpoints location
+                <a href="https://code.google.com/p/fbug/issues/detail?id=7323">Issue 7323</a>: Breakpoint auto-correction doesn't work correctly
             </h1>
         </header>
         <div>
@@ -28,11 +28,10 @@
                         Click on the breakpoint column at line 9
                         (<code>// Set a breakpoint here</code>).
                     </li>
-
                 </ol>
                 <h3>Expected result</h3>
                 <ul>
-                    <li>A breakpoint must be created at line 12, which is the nearest executable line.</li>
+                    <li>A breakpoint must be created at line 11, which is the nearest executable line (See Issue #6253). Also there must be a row for the breakpoint in the Breakpoints side panel, now.</li>
                 </ul>
             </section>
             <footer>@farshidbeheshti, farshid.beheshti@gmail.com</footer>

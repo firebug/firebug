@@ -1,10 +1,10 @@
 function runTest()
 {
-    FBTest.openNewTab(basePath + "script/breakpoints/6253/issue6253.html", (win) =>
+    FBTest.openNewTab(basePath + "script/breakpoints/7323/issue7323.html", (win) =>
     {
         FBTest.enableScriptPanel(function(win)
         {
-            FBTest.setBreakpoint(null, "issue6253.html", 9, null, (row) =>
+            FBTest.setBreakpoint(null, "issue7323.html", 9, null, (row) =>
             {
                 // In first try, It's likely pass the test if there is no problem,
                 // but test the chance a second time if test fails to make sure
@@ -37,6 +37,16 @@ function runTest()
 
                         FBTest.ok(breakpointHasMoved,
                             "Breakpoint must be set at line 11 now");
+
+                        // Go to breakpoints side panel.
+                        FBTest.selectPanel("script");
+                        var breakpointsPanel = FBTest.selectSidePanel("breakpoints");
+
+                        // Make sure the breakpoint is displayed in breakpoint side panel
+                        var breakpointRow = breakpointsPanel.panelNode.
+                            getElementsByClassName("breakpointRow");
+                        FBTest.compare(breakpointRow.length, 1, "There must be " +
+                            "a breakpoint row in the Breakpoints side panel");
 
                         FBTest.testDone();
                     });
