@@ -11,7 +11,7 @@ define([
     "firebug/css/autoCompleter",
     "firebug/css/cssModule",
     "firebug/css/cssReps",
-    "firebug/editor/inlineEditor"
+    "firebug/editor/inlineEditor",
 ],
 function(Firebug, FBTrace, Css, Dom, Domplate, Events, Xml, CSSAutoCompleter, CSSModule, CSSReps,
     InlineEditor) {
@@ -158,15 +158,15 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
             rule instanceof window.MozCSSKeyframesRule))
         {
             target.textContent = value;
-            
+
             if (FBTrace.DBG_CSS)
             {
                 FBTrace.sysout("CSSEditor.saveEdit: @keyframes rule name: " +
                     previousValue + "->" + value);
             }
-            
+
             rule.name = value;
-            
+
             var saveSuccess = (rule.name == value);
             this.box.setAttribute("saveSuccess", saveSuccess);
         }
