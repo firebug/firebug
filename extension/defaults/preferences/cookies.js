@@ -9,6 +9,7 @@ pref("extensions.firebug.cookies.lastSortedColumn", "");
 pref("extensions.firebug.cookies.hiddenColumns", "colRawValue colStatus colSize");
 pref("extensions.firebug.cookies.removeConfirmation", true);
 pref("extensions.firebug.cookies.removeSessionConfirmation", true);
+pref("extensions.firebug.cookies.jsonClipboardExport", false);
 
 // Firebug tracing support
 pref("extensions.firebug.DBG_COOKIES", false);
