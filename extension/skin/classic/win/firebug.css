@@ -38,7 +38,8 @@ toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
     padding: 4px 5px 2px 7px;
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
+/* Buttons */
 
 .toolbarbutton-iconic {
     -moz-appearance: none;
@@ -96,7 +97,8 @@ toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
     filter: url(resource://firebugui/filters.svg#grayscale);
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
+/* Command Editor */
 
 #fbCommandEditor {
     -moz-appearance: none;
@@ -118,6 +120,9 @@ toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
     background-image: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
 }
 
+/*************************************************************************************************/
+/* Window buttons */
+
 /* Set proper height of window buttons (close, min, detach) */
 #fbWindowButtons.innerToolbar {
     margin-right: 4px;
@@ -128,7 +133,8 @@ toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
     margin: 0;
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
+/* Panel toolbar */
 
 #fbPanelBar1-tabBoxBackground,
 #fbPanelBar2-tabBoxBackground {
@@ -145,7 +151,8 @@ toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
     background-image: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
+/* Panel tabs */
 
 .panelTabs {
     -moz-box-align: end;
@@ -239,7 +246,8 @@ panelTab[selected="true"] > panelTabMenu {
     text-decoration: none;
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
+/* Ancestor path */ 
 
 #fbPanelStatus {
     margin: 0 5px 0 0;
@@ -251,7 +259,7 @@ panelTab[selected="true"] > panelTabMenu {
     color: graytext;
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
 /* Location list */
 
 .menuHeader {
@@ -259,8 +267,7 @@ panelTab[selected="true"] > panelTabMenu {
     font-weight: bold;
 }
 
-
-/************************************************************************************************/
+/*************************************************************************************************/
 /* Scrollable TabBar + TabList */
 
 panelBarArrowscrollbox > .scrollbutton-up,
@@ -283,9 +290,8 @@ panelBarArrowscrollbox > .scrollbutton-down {
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-
 /* Tab scrollbox arrow and all-tabs buttons */
+
 panelBarArrowscrollbox > .scrollbutton-up,
 panelBarArrowscrollbox > .scrollbutton-down {
     -moz-appearance: none;

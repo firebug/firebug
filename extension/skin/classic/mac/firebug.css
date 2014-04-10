@@ -181,6 +181,7 @@
 }
 
 /*************************************************************************************************/
+/* Buttons */
 
 /* Don't display label and remove padding for all the following toolbar buttons */
 #fbFirebugMenu,
@@ -268,9 +269,10 @@
 }
 
 /********************************************************************************************/
+/* Panel tabs */
 
 .panelTabBox {
-    border-bottom: 1px solid #bebebe;
+    border-bottom: 1px solid #BEBEBE;
     padding-left: 6px;
     overflow: hidden;
 }
@@ -360,6 +362,7 @@ panelTab[selected="true"] > panelTabMenu {
 }
 
 /************************************************************************************************/
+/* Ancestor path */
 
 #fbPanelStatus {
     margin: 2px 5px 3px 0;
@@ -378,12 +381,16 @@ panelTab[selected="true"] > panelTabMenu {
     color: #565656;
 }
 
+/************************************************************************************************/
+/* Location list */
+
 .menuHeader {
     margin: 2px 16px;
     color: #565656;
 }
 
 /************************************************************************************************/
+/* Buttons */
 
 .toolbarbutton,
 .toolbar-text-button,
@@ -476,14 +483,14 @@ toolbarbutton[type="menu"] > toolbarbutton {
 
 .toolbar-text-button .toolbarbutton-text,
 .toolbar-text-menubutton .toolbarbutton-text {
-  margin: 0 !important;
+    margin: 0 !important;
 }
 
 .toolbar-text-button > .toolbarbutton-text,
 .toolbar-text-menubutton > .toolbarbutton-text {
-  display: -moz-box !important;
-  height: 16px !important;
-  padding-top: 1px;
+    display: -moz-box !important;
+    height: 16px !important;
+    padding-top: 1px;
 }
 
 .toolbar-text-button > .toolbarbutton-menu-dropmarker,
@@ -592,10 +599,6 @@ panelTab[selected="true"]:active > panelTabMenu .menuTarget {
 }
 
 /************************************************************************************************/
-
-#fbMigrationOk {
-    font-family: monospace;
-}
 
 #fbCommandEditorBrowser {
     position: relative;

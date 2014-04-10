@@ -4,16 +4,16 @@
 /* overrides to revert personas. see http://code.google.com/p/fbug/issues/detail?id=2704 */
 /* TODO is this still needed ? /
 #fbContentBox:-moz-lwtheme {
-  background-color: -moz-dialog;
-  color: -moz-dialogtext;
+    background-color: -moz-dialog;
+    color: -moz-dialogtext;
 }
 
 #fbContentBox:-moz-lwtheme toolbox {
-  -moz-appearance: toolbox;
+    -moz-appearance: toolbox;
 }
 
 #fbContentBox:-moz-lwtheme toolbar {
-  -moz-appearance: toolbar;
+    -moz-appearance: toolbar;
 }
 
 /* end overrides */
@@ -217,7 +217,7 @@
 }
 
 /*************************************************************************************************/
-/* Panel Tabs */
+/* Panel tabs */
 
 panelTab {
     margin: 1px 0 0 0;
@@ -633,14 +633,14 @@ toolbarbutton[type="menu-button"] {
 }
 
 toolbarbutton[type=menu-button] > .toolbarbutton-menubutton-button {
-  -moz-appearance: none;
-  border-radius: 0;
-  padding: 1px 6px;
-  -moz-border-end: 1px solid rgba(0, 0, 0, 0.15);
+    -moz-appearance: none;
+    border-radius: 0;
+    padding: 1px 6px;
+    -moz-border-end: 1px solid rgba(0, 0, 0, 0.15);
 }
 
 toolbarbutton[type=menu-button]:hover > .toolbarbutton-menubutton-button {
-  -moz-border-end: 1px solid rgba(0, 0, 0, 0.2);
+    -moz-border-end: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 toolbarbutton[type=menu-button][open="true"]:not([disabled="true"]) > .toolbarbutton-menubutton-dropmarker {
@@ -733,26 +733,6 @@ toolbarbutton[disabled="true"] {
 #fbBreakOnNextButton[panelName="html"] #fbBreakOnImageMutate {
     visibility: visible;
     list-style-image: url(chrome://firebug/skin/breakOn/breakOnMutate.svg);
-}
-
-/*************************************************************************************************/
-
-#fbMigrator {
-    border: 2px solid  #FF9933;
-    -moz-border-top-colors: #FF9933;
-    -moz-border-bottom-colors: #FF9933;
-    -moz-border-left-colors: #FF9933;
-    -moz-border-right-colors: #FF9933;
-    background-color: transparent;
-    opacity: 1.0;
-    padding-bottom: 5px;
-}
-
-#fbMigrationOk {
-    font-family: monospace;
-    font-size: 14px;
-    color: #FF9933;
-    font-weight: bold;
 }
 
 /*************************************************************************************************/
