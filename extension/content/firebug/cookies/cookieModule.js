@@ -1049,19 +1049,20 @@ Firebug.CookieModule = Obj.extend(ActivableModule,
             {
                 if (Css.hasClass(row, "cookieRow") && row.repObject)
                 {
-                    //JSON.stringify was adding a backslash before each quote
-                    //in the JSON output, which is not the intended output
+                    // JSON.stringify was adding a backslash before each quote
+                    // in the JSON output, which is not the intended output
                     //
-                    //To bypass this, Firebug's .toJSON function is called on each
-                    //cookie as it is inserted into the array and the backslashes
-                    //are removed.
+                    // To bypass this, Firebug's .toJSON function is called on each
+                    // cookie as it is inserted into the array and the backslashes
+                    // are removed.
                     var formattedCookie = row.repObject.toJSON();
                     formattedCookie = formattedCookie.replace(/\\"/g,'\"');
                     cookieArray.push(formattedCookie);
                 }
             }
-            //Call toString on the array since all elements are JSON already
-            //Prepend and append square bracked to the string and copy to clipboard
+
+            // Call toString on the array since all elements are JSON already
+            // Prepend and append square bracked to the string and copy to clipboard
             System.copyToClipboard("[" + cookieArray.toString() + "]");
         }
         catch (err)
@@ -1070,6 +1071,7 @@ Firebug.CookieModule = Obj.extend(ActivableModule,
                 FBTrace.sysout("cookies.onExportJsonForClipboard EXCEPTION", err);
         }
     },
+
     onFilter: function(context, pref)
     {
         var value = Options.get(pref);
@@ -1099,11 +1101,14 @@ Firebug.CookieModule = Obj.extend(ActivableModule,
         return true;
     },
 
-    //Show or Hide JSONexport in Cookie Menu
+    /**
+     * Show or Hide JSONexport in Cookie Menu
+     */
     exportJsonHandler: function(menu, context)
     {
         var menuItem = menu.ownerDocument.getElementById("fcExportJsonForClipboard");
-        //collapse JSONexport menu option if the preference is false, show if true
+
+        // collapse JSONexport menu option if the preference is false, show if true
         var showJSONexport = !Options.get(JSONexport)
         Dom.collapse(menuItem, showJSONexport);
     },
