@@ -30,7 +30,7 @@ function verifyResult(callback, expected, array, sorted)
 {
     var resultArray = FW.FBL.unique(array, sorted);
     FBTest.compare(expected.toString(), resultArray.toString(),
-        "Item(s) must be correctly inserted into the array");
+        "Duplicate item(s) must be removed from the array");
 
     callback();
 }
