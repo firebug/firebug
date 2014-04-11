@@ -27,8 +27,12 @@ Arr.isArrayLike = function(obj)
             return false;
         if (Array.isArray(obj))
             return true;
-        if (typeof obj.splice === "function") // jQuery etc.
+
+        // This handles jQuery etc.
+        // xxxsz: That's rather a hack. We should find a better approach for this.
+        if (typeof obj.splice === "function")
             return true;
+
         var str = Object.prototype.toString.call(obj);
         if (str === "[object HTMLCollection]" || str === "[object NodeList]" ||
             str === "[object DOMTokenList]" || str === "[object Arguments]")
