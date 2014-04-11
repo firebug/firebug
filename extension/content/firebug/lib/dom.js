@@ -117,17 +117,10 @@ Dom.getElementsByAttribute = function(node, attrName, attrValue)
         // xxxsz: Firefox 31 added support for CSS.escape() (See https://bugzil.la/955860)
         // So the check and the code afterwards can be removed as soon as Firefox 31 is the
         // minimum supported version
-        if (CSS && CSS.escape)
+        if (typeof CSS !== "undefined" && CSS.escape)
             return CSS.escape(string);
 
-        var escapes = new Map();
-        escapes.set("\\", "\\\\");
-        escapes.set("\"", "\\\"");
-        escapes.set("'", "\\'");
-        var escapedString = string;
-        escapes.forEach((value, key) => escapedString = escapedString.replace(key, value, "g"));
-
-        return escapedString;
+        return string.replace(/[\\'"]/g, (x) => "\\" + x);
     }
 
     if (!node || typeof node !== "object" ||
