@@ -109,6 +109,24 @@ Dom.getElementsByClass = function(node, className)  // className, className, ...
 
 Dom.getElementsByAttribute = function(node, attrName, attrValue)
 {
+    function escape(string)
+    {
+        if (typeof string !== "string")
+            return string;
+
+        if (CSS && CSS.escape)
+            return CSS.escape(string);
+
+        var escapes = new Map();
+        escapes.set("\\", "\\\\");
+        escapes.set("\"", "\\\"");
+        escapes.set("'", "\\'");
+        var escapedString = string;
+        escapes.forEach((value, key) => escapedString = escapedString.replace(key, value, "g"));
+
+        return escapedString;
+    }
+
     if (!node || typeof node !== "object" ||
         !(node instanceof Element || node instanceof Document || node instanceof DocumentFragment))
     {
@@ -116,7 +134,7 @@ Dom.getElementsByAttribute = function(node, attrName, attrValue)
     }
 
     var selector = attrValue !== undefined ?
-        "[" + attrName + "='" + attrValue.replace("\"", "\\\"") + "']" : "[" + attrName + "]";
+        "[" + attrName + "='" + escape(attrValue) + "']" : "[" + attrName + "]";
     return node.querySelectorAll(selector);
 };
 

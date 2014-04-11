@@ -1,14 +1,14 @@
 function runTest()
 {
     var div = document.createElement("div");
-    div.setAttribute("data-test", "\"value with quotes\"");
+    div.setAttribute("data-test", "\"value with quotes and backslash '\\'\"");
     div.setAttribute("data-test2", "");
     document.body.appendChild(div);
 
     verifyResult(2, document, "id");
     verifyResult(1, document, "id", "testTitle");
     verifyResult(1, document, "data-test");
-    verifyResult(1, document, "data-test", "\"value with quotes\"");
+    verifyResult(1, document, "data-test", "\"value with quotes and backslash '\\'\"");
     verifyResult(1, document, "data-test2", "");
     verifyResult(2, document.body, "id");
     verifyResult(1, document.body, "id", "testTitle");
