@@ -90,41 +90,36 @@ Dom.getTopAncestorByTagName = function(node, tagName)
     return topNode;
 };
 
-/* @Deprecated  Use native Firefox: node.getElementsByClassName(names).item(0) */
+/**
+ * @Deprecated Use native Firefox function node.getElementsByClassName(classes)[0]
+ */
 Dom.getElementByClass = function(node, className)  // className, className, ...
 {
     return Dom.getElementsByClass.apply(this,arguments).item(0);
 };
 
-/* @Deprecated  Use native Firefox: node.getElementsByClassName(names) */
+/**
+ * @Deprecated Use native Firefox function node.getElementsByClassName(classes)
+ */
 Dom.getElementsByClass = function(node, className)  // className, className, ...
 {
     var args = Arr.cloneArray(arguments); args.splice(0, 1);
     return node.getElementsByClassName(args.join(" "));
 };
 
+/**
+ * @Deprecated Use native Firefox function node.querySelectorAll("[attrName='attValue']")
+ */
 Dom.getElementsByAttribute = function(node, attrName, attrValue)
 {
-    function iteratorHelper(node, attrName, attrValue, result)
+    if (!node || typeof node !== "object" ||
+        !(node instanceof Element || node instanceof Document || node instanceof DocumentFragment))
     {
-        // xxxFlorent: sadly, Documents and DocumentFragments do not have firstElementChild
-        // properties currently.
-        // xxxSimon: They do since Firefox 25
-        for (var child = node.firstChild; child; child = child.nextSibling)
-        {
-            if (child.nodeType !== Node.ELEMENT_NODE)
-                continue;
-
-            if (child.getAttribute(attrName) == attrValue)
-                result.push(child);
-
-            iteratorHelper(child, attrName, attrValue, result);
-        }
+        return [];
     }
 
-    var result = [];
-    iteratorHelper(node, attrName, attrValue, result);
-    return result;
+    var selector = attrValue ? "[" + attrName + "='" + attrValue + "']" : "[" + attrName + "]";
+    return node.querySelectorAll(selector);
 };
 
 Dom.isAncestor = function(node, potentialAncestor)
