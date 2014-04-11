@@ -26,9 +26,11 @@ function runTest()
 
                     // Verify stack trace.
                     var traceNode = errorNode.querySelector(".errorTrace");
+                    var scriptName = FW.FBL.cropString("issue2914-innerFrame.html",
+                        FBTest.getPref("sourceLinkLabelWidth"));
                     FBTest.compare(
-                        "logError()" + FW.FBL.$STRF("Line", ["issue2...me.html", 11]) +
-                            "issue2914-innerFrame.html()" + FW.FBL.$STRF("Line", ["issue2...me.html", 13]),
+                        "logError()" + FW.FBL.$STRF("Line", [scriptName, 11]) +
+                            "issue2914-innerFrame.html()" + FW.FBL.$STRF("Line", [scriptName, 13]),
                         traceNode.textContent,
                         "The stack trace must be properly displayed.");
 

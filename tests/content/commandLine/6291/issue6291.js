@@ -15,7 +15,7 @@ function runTest()
                 var atobCommand = "atob('b');";
                 var expected = {
                     sourceCode: atobCommand,
-                    scriptName: "/* " + FW.FBL.$STR("commandline.errorSourceHeader").substr(0, 3) +
+                    scriptName: "/* " + FW.FBL.$STR("commandline.errorSourceHeader").substr(0, 4) +
                         "...b('b');",
                     lineNo: 2
                 };
