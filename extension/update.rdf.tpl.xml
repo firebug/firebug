@@ -11,7 +11,7 @@
           <targetApplication>
             <r:Description>
               <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
-              <minVersion>30.0a</minVersion>
+              <minVersion>30.0a1</minVersion>
               <maxVersion>31.0</maxVersion>
               <updateLink>https://getfirebug.com/releases/firebug/@VERSION@/@LEAF@</updateLink>
               <updateInfoURL>http://getfirebug.com/updateInfo/firebug2.0.xml</updateInfoURL>

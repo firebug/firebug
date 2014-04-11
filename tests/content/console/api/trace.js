@@ -18,7 +18,7 @@ var frames3 = [
     ["rec", ["left=1"], "trace.html", 94],
     ["rec", ["left=2"], "trace.html", 94],
     ["onExecuteTest", [], "trace.html", 88],
-    ["onclick", ["event=click", "clientX=0,", "clientY=0"], "testBu...te Test", 1],
+    ["onclick", ["event=click", "clientX=0,", "clientY=0"], "testBut...te Test", 1],
 ];
 
 function runTest()

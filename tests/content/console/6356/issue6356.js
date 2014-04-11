@@ -24,7 +24,7 @@ function test1(callback, win)
     FBTest.waitForDisplayedElement("console", config, function(row)
     {
         row = row.getElementsByClassName("objectBox-array")[0];
-        var expected = /Object\[input\#myInput\s*property value\s*\=\s*\"1\. This is very long va\.\.\. definitely be cropped\.\"\s*attribute value\s*\=\s*\"2\. This is also a very \.\.\.e need to make shorter\.\"\]/;
+        var expected = /Object\[input\#myInput\s*property value\s*\=\s*\"1\. This is very long val\.\.\. definitely be cropped\.\"\s*attribute value\s*\=\s*\"2\. This is also a very l\.\.\.e need to make shorter\.\"\]/;
 
         FBTest.compare(expected, row.textContent, "The log must match: " +
             row.textContent);

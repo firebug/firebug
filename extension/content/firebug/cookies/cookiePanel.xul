@@ -17,6 +17,7 @@
         <command id="cmd_firebug_cookieShowRejectedCookies" oncommand="Firebug.CookieModule.onFilter(Firebug.currentContext, 'cookies.showRejectedCookies')"/>
         <command id="cmd_firebug_cookieExportAll" oncommand="Firebug.CookieModule.onExportAll(Firebug.currentContext)"/>
         <command id="cmd_firebug_cookieExportForSite" oncommand="Firebug.CookieModule.onExportForSite(Firebug.currentContext)"/>
+        <command id="cmd_firebug_cookieExportJsonForClipboard" oncommand="Firebug.CookieModule.onExportJsonForClipboard(Firebug.currentContext)"/>
     </commandset>
 
     <keyset id="mainKeyset">
@@ -47,7 +48,7 @@
                 <!-- General cookies actions -->
                 <toolbarbutton id="fcCookiesMenu" label="cookies.menu.Cookies" type="menu"
                     class="fbInternational">
-                    <menupopup id="fcCookiesMenuPopup">
+                    <menupopup id="fcCookiesMenuPopup" onpopupshowing="return Firebug.CookieModule.exportJsonHandler(this, Firebug.currentContext)">
 
                         <!-- Create cookies -->
                         <tooltip id="fcCreateCookieTooltip"
@@ -83,6 +84,11 @@
                         <menuitem id="fcExportForSite" class="fbInternational"
                             label="cookies.export.Export For Site"
                             tooltip="fcExportForSiteTooltip" command="cmd_firebug_cookieExportForSite"/>
+                        <tooltip id="fcExportJsonForClipboardTooltip"
+                            onpopupshowing="return Firebug.CookieModule.onExportJsonForClipboardTooltip(this, Firebug.currentContext)"/>
+                        <menuitem id="fcExportJsonForClipboard" class="fbInternational"
+                            label="cookies.export.Export JSON to Clipboard"
+                            tooltip="fcExportJsonForClipboardTooltip" command="cmd_firebug_cookieExportJsonForClipboard"/>
                     </menupopup>
                 </toolbarbutton>
 

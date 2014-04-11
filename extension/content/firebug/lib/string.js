@@ -421,10 +421,10 @@ Str.escapeJS = function(value)
         .replace(/\n/gm, "\\n").replace('"', '\\"', "g");
 };
 
-Str.cropString = function(text, limit, alterText)
+Str.cropString = function(text, limit, alternativeText)
 {
-    if (!alterText)
-        alterText = "...";
+    if (!alternativeText)
+        alternativeText = "...";
 
     // Make sure it's a string.
     text = String(text);
@@ -437,11 +437,18 @@ Str.cropString = function(text, limit, alterText)
     if (limit <= 0)
         return text;
 
-    var halfLimit = (limit / 2);
-    halfLimit -= 2; // adjustment for alterText's increase in size
+    // Set the limit at least to the length of the alternative text
+    // plus one character of the original text.
+    if (limit <= alternativeText.length)
+        limit = alternativeText.length + 1;
+
+    var halfLimit = (limit - alternativeText.length) / 2;
 
     if (text.length > limit)
-        return text.substr(0, halfLimit) + alterText + text.substr(text.length-halfLimit);
+    {
+        return text.substr(0, Math.ceil(halfLimit)) + alternativeText +
+            text.substr(text.length - Math.floor(halfLimit));
+    }
 
     return text;
 };

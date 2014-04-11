@@ -35,10 +35,15 @@ var serverURI = driverBaseURI;
  *                              Test, which is not targeted for the current OS is marked as "fails".
  */
 var testList = [
+    {group: "lib/array",          uri: "lib/array/arrayInsert.js",                desc: "Verify Arr.arrayInsert() is working as expected" },
+    {group: "lib/array",          uri: "lib/array/isArrayLike.js",                desc: "Verify Arr.isArrayLike() is working as expected" },
+    {group: "lib/array",          uri: "lib/array/unique.js",                     desc: "Verify Arr.unique() is working as expected" },
     {group: "lib/css",            uri: "lib/css/classes.js",                      desc: "Verify Css.setClass(), Css.hasClass() and Css.removeClass() are working as expected" },
+    {group: "lib/dom",            uri: "lib/dom/getElementsByAttribute.js",       desc: "Verify Dom.getElementsByAttribute() is working as expected" },
     {group: "lib/search",         uri: "lib/search/literalRegExp.js",             desc: "Verify Search.LiteralRegExp() is working as expected" },
     {group: "lib/search",         uri: "lib/search/textSearch.js",                desc: "Verify Search.TextSearch() is working as expected", testPage: "lib/search/textSearch.htm" },
     {group: "lib/storage",        uri: "lib/storage/storageService.js",           desc: "Verify modules/storageService is working as expected" },
+    {group: "lib/string",         uri: "lib/string/cropString.js",                desc: "Verify Str.cropString() is working as expected" },
     {group: "lib/string",         uri: "lib/string/formatTime.js",                desc: "Verify Str.formatTime() is working as expected" },
     {group: "lib/string",         uri: "lib/string/formatSize.js",                desc: "Verify Str.formatSize() is working as expected" },
     {group: "lib/url",            uri: "lib/url/absoluteURL.js",                  desc: "Verify Url.absoluteURLs() is working as expected" },

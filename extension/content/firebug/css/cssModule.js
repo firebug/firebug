@@ -361,6 +361,15 @@ Firebug.CSSModule = Obj.extend(Module, Firebug.EditorSelector,
         return ret;
     },
 
+    parsePriority: function(value)
+    {
+        var rePriority = /(.*?)\s*(!important)?$/;
+        var m = rePriority.exec(value);
+        var propValue = m ? m[1] : "";
+        var priority = m && m[2] ? "important" : "";
+        return {value: propValue, priority: priority};
+    },
+
     parseURLValue: function(value)
     {
         var m = reURL.exec(value);

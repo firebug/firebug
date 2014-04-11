@@ -117,6 +117,7 @@ panelTab:not([selected="true"]):hover {
 
 /*************************************************************************************************/
 /* Buttons */
+
 toolbarbutton,
 toolbarbutton[type=menu-button] > .toolbarbutton-menubutton-button {
     padding: 2px 6px;

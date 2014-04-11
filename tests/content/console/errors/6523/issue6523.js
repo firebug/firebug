@@ -17,7 +17,7 @@ function runTest()
                     var row = panelNode.querySelector(".logRow.logRow-errorMessage");
 
                     // Verify displayed text.
-                    var reTextContent = /\s*b\s*throw new Error\(\"b\"\)\;\s*issue6...me\.html\s*\(line\s*17(,\s*col\s*8)?\)\s*/;
+                    var reTextContent = /\s*b\s*throw new Error\(\"b\"\)\;\s*issue65...me\.html\s*\(line\s*17(,\s*col\s*8)?\)\s*/;
                     FBTest.compare(reTextContent, row.textContent, "Text content must match.");
 
                     // Show stack trace.
