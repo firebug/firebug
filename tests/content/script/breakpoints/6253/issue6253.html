@@ -20,6 +20,11 @@
         </header>
         <div>
             <section id="description">
+                <p class="note">
+                    Note: This test also covers
+                    <a href="https://code.google.com/p/fbug/issues/detail?id=7323" title="Breakpoint auto-correction doesn't work correctly">issue 7323</a>.
+                </p>
+
                 <h3>Steps to reproduce</h3>
                 <ol>
                     <li>Open Firebug</li>
@@ -27,11 +32,20 @@
                     <li>
                         Click on the breakpoint column at line 9
                         (<code>// Set a breakpoint here</code>).
+                        <br />
+                        <span class="ok">=> The breakpoint must be Created at line 11, which is the nearest executable line.</span>
+                    </li>
+                    <li>Switch to the Breakpoint side panel.
+                        <br />
+                        <span class="ok">=> There must be a row for the breakpoint.</span>
+                    </li>
+                    <li>
+                        Reload the page.
                     </li>
                 </ol>
                 <h3>Expected result</h3>
                 <ul>
-                    <li>A breakpoint must be created at line 11, which is the nearest executable line. Also there must be a row for the breakpoint in the Breakpoints side panel, now.</li>
+                    <li>The breakpoint must get hit at line 11.</li>
                 </ul>
             </section>
             <footer>@farshidbeheshti, farshid.beheshti@gmail.com</footer>

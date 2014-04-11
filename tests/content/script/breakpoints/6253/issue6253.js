@@ -48,7 +48,15 @@ function runTest()
                         FBTest.compare(breakpointRow.length, 1, "There must be " +
                             "a breakpoint row in the Breakpoints side panel");
 
-                        FBTest.testDone();
+                        // Realod the page and wait for the script execution to
+                        // halt on the breakpoint at line 11.
+                        FBTest.waitForBreakInDebugger(null, 11, true, () =>
+                        {
+                            FBTest.progress("Breakpoint gets hint at line 11");
+                            FBTest.clickContinueButton();
+                            FBTest.testDone();
+                        });
+                        FBTest.reload();
                     });
                 }
             });
