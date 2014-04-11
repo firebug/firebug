@@ -20,10 +20,7 @@ function runTest()
     tasks.push(verifyResult, [new object("Peter"), new object("David"), new object("Frank")],
         [new object("Peter"), new object("Frank")], 1, [new object("David")]);
 
-    tasks.run(() =>
-    {
-        FBTest.testDone();
-    }, 0);
+    tasks.run(FBTest.testDone, 0);
 }
 
 function verifyResult(callback, expected, array, index, newItems)

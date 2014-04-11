@@ -23,10 +23,7 @@ function runTest()
     var frank = new object("Frank");
     tasks.push(verifyResult, [peter, david, frank], [peter, david, frank, david], false);
 
-    tasks.run(() =>
-    {
-        FBTest.testDone();
-    }, 0);
+    tasks.run(FBTest.testDone, 0);
 }
 
 function verifyResult(callback, expected, array, sorted)
