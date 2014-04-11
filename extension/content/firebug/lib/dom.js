@@ -133,6 +133,9 @@ Dom.isAncestor = function(node, potentialAncestor)
     return false;
 };
 
+/**
+ * @Deprecated Use native Firefox node.nextElementSibling
+ */
 Dom.getNextElement = function(node)
 {
     while (node && node.nodeType != Node.ELEMENT_NODE)
@@ -141,6 +144,9 @@ Dom.getNextElement = function(node)
     return node;
 };
 
+/**
+ * @Deprecated Use native Firefox node.previousElementSibling
+ */
 Dom.getPreviousElement = function(node)
 {
     while (node && node.nodeType != Node.ELEMENT_NODE)
