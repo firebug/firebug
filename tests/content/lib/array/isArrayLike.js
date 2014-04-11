@@ -35,6 +35,7 @@ function runTest()
     verifyResult(false, -Infinity);
     verifyResult(false, new object("Peter"));
     verifyResult(false, {hello: "Hello Firebug user!"});
+    verifyResult(false, {0: "Hi", length: 1});
 
     FBTest.testDone();
 }
