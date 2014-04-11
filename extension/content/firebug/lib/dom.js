@@ -107,18 +107,16 @@ Dom.getElementsByClass = function(node, className)  // className, className, ...
     return node.getElementsByClassName(args.join(" "));
 };
 
-/**
- * @Deprecated Use native Firefox function node.querySelectorAll("[attrName='attValue']")
- */
 Dom.getElementsByAttribute = function(node, attrName, attrValue)
 {
     if (!node || typeof node !== "object" ||
         !(node instanceof Element || node instanceof Document || node instanceof DocumentFragment))
     {
-        return [];
+        throw new Error("'node' is invalid");
     }
 
-    var selector = attrValue ? "[" + attrName + "='" + attrValue + "']" : "[" + attrName + "]";
+    var selector = attrValue !== undefined ?
+        "[" + attrName + "='" + attrValue.replace("\"", "\\\"") + "']" : "[" + attrName + "]";
     return node.querySelectorAll(selector);
 };
 
