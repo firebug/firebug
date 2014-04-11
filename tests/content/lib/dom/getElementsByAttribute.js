@@ -1,27 +1,26 @@
 function runTest()
 {
-    var tasks = new FBTest.TaskList();
-    tasks.push(verifyResult, 2, document, "id");
-    tasks.push(verifyResult, 1, document, "id", "testTitle");
-    tasks.push(verifyResult, 0, document, "test");
-    tasks.push(verifyResult, 2, document.body, "id");
-    tasks.push(verifyResult, 1, document.body, "id", "testTitle");
-    tasks.push(verifyResult, 0, document.body, "test");
+    verifyResult(2, document, "id");
+    verifyResult(1, document, "id", "testTitle");
+    verifyResult(0, document, "test");
+    verifyResult(2, document.body, "id");
+    verifyResult(1, document.body, "id", "testTitle");
+    verifyResult(0, document.body, "test");
     var docFrag = document.createDocumentFragment();
     var div = document.createElement("div");
     div.setAttribute("id", "test");
     docFrag.appendChild(div);
-    tasks.push(verifyResult, 1, docFrag, "id");
-    tasks.push(verifyResult, 1, docFrag, "id", "test");
-    tasks.push(verifyResult, 0, docFrag, "id", "hello");
-    tasks.push(verifyResult, 0, null, "id");
-    tasks.push(verifyResult, 0, "notANode", "id");
-    tasks.push(verifyResult, 0, {test: "hi"}, "id");
+    verifyResult(1, docFrag, "id");
+    verifyResult(1, docFrag, "id", "test");
+    verifyResult(0, docFrag, "id", "hello");
+    verifyResult(0, null, "id");
+    verifyResult(0, "notANode", "id");
+    verifyResult(0, {test: "hi"}, "id");
 
-    tasks.run(FBTest.testDone, 0);
+    FBTest.testDone();
 }
 
-function verifyResult(callback, expected, node, attrName, attrValue)
+function verifyResult(expected, node, attrName, attrValue)
 {
     var result = FW.FBL.getElementsByAttribute(node, attrName, attrValue);
     FBTrace.sysout("result " + (typeof result), result);
@@ -33,6 +32,4 @@ function verifyResult(callback, expected, node, attrName, attrValue)
             " with '" + attrName + "' as attribute name" +
             (attrValue ? " and '" + attrValue + "' as its value" : ""));
     }
-
-    callback();
 }

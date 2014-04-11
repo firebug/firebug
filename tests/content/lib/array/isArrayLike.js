@@ -21,30 +21,27 @@ function runTest()
         this.length = 0;
     }
 
-    var tasks = new FBTest.TaskList();
-    tasks.push(verifyResult, true, ["a"]);
-    tasks.push(verifyResult, true, document.getElementsByClassName("test"));
-    tasks.push(verifyResult, true, document.querySelectorAll("div"));
-    tasks.push(verifyResult, true, document.body.classList);
-    tasks.push(verifyResult, true, new jQuery());
-    tasks.push(verifyResult, false, "a");
-    tasks.push(verifyResult, false, 1);
-    tasks.push(verifyResult, false, null);
-    tasks.push(verifyResult, false, undefined);
-    tasks.push(verifyResult, false, NaN);
-    tasks.push(verifyResult, false, Infinity);
-    tasks.push(verifyResult, false, -Infinity);
-    tasks.push(verifyResult, false, new object("Peter"));
-    tasks.push(verifyResult, false, {hello: "Hello Firebug user!"});
+    verifyResult(true, ["a"]);
+    verifyResult(true, document.getElementsByClassName("test"));
+    verifyResult(true, document.querySelectorAll("div"));
+    verifyResult(true, document.body.classList);
+    verifyResult(true, new jQuery());
+    verifyResult(false, "a");
+    verifyResult(false, 1);
+    verifyResult(false, null);
+    verifyResult(false, undefined);
+    verifyResult(false, NaN);
+    verifyResult(false, Infinity);
+    verifyResult(false, -Infinity);
+    verifyResult(false, new object("Peter"));
+    verifyResult(false, {hello: "Hello Firebug user!"});
 
-    tasks.run(FBTest.testDone, 0);
+    FBTest.testDone();
 }
 
-function verifyResult(callback, expected, variable)
+function verifyResult(expected, variable)
 {
     var result = FW.FBL.isArrayLike(variable);
     FBTest.compare(expected, result,
         "Variable must" + (expected ? "" : " not") + " be an array-like object");
-
-    callback();
 }
