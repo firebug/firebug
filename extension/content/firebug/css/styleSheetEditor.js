@@ -131,6 +131,9 @@ StyleSheetEditor.prototype = domplate(BaseEditor,
 // ********************************************************************************************* //
 // Registration
 
+// used in Acebug
+Firebug.StyleSheetEditor = StyleSheetEditor;
+
 return StyleSheetEditor;
 
 // ********************************************************************************************* //
