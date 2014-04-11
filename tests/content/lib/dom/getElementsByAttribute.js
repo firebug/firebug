@@ -23,7 +23,6 @@ function runTest()
 function verifyResult(expected, node, attrName, attrValue)
 {
     var result = FW.FBL.getElementsByAttribute(node, attrName, attrValue);
-    FBTrace.sysout("result " + (typeof result), result);
     if (FBTest.ok(result instanceof NodeList || Array.isArray(result),
         "Returned value must be an array or a NodeList"))
     {
