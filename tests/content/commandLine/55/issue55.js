@@ -48,7 +48,7 @@ function runTest()
 
                     FBTest.synthesizeKey("VK_TAB", null, win);
 
-                    var indent = "  ";
+                    var indent = "    ";
                     FBTest.compare(indent + "document.get", commandEditor.value, "Text should be indented.");
                     FBTest.compare(len - 1 + indent.length, commandEditor.getSelection().start, "Selection start should remain.");
                     FBTest.compare(len + indent.length, commandEditor.getSelection().end, "Selection end should remain.");
@@ -63,7 +63,7 @@ function runTest()
                 tasks.push(testCompletion, input1, input1 + "ument1|");
                 tasks.push(testCompletion, "myobj.prop|;", "myobj.prop2|;", true);
                 tasks.push(testCompletion, "document.get|elementbyi;", "document.getElementById|;");
-                tasks.push(testCompletion, "|document.gete", "  |document.gete");
+                tasks.push(testCompletion, "|document.gete", "    |document.gete");
                 tasks.push(testSelectionIndent);
 
                 tasks.run(function()
