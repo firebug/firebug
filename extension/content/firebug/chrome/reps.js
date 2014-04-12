@@ -1763,7 +1763,7 @@ FirebugReps.CSSRule = domplate(Rep,
         if (rule instanceof CSSFontFaceRule)
             return Css.extractURLs(rule.style.getPropertyValue("src")).join(", ");
         else if (rule instanceof window.CSSImportRule)
-            return rule.href;
+            return rule.styleSheet.href;
 
         return "";
     }
