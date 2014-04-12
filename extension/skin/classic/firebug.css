@@ -147,10 +147,6 @@
     -moz-box-align: center;
 }
 
-#fbToolbarInner > hbox {
-    -moz-box-align: center;
-}
-
 .panelTabBox {
     height: calc(20rem + 8px);
     padding: 0;
@@ -178,6 +174,16 @@
 #fbPanelBar2-panelTabs > panelTab[selected="true"] {
     background-color: white;
     border-bottom: 1px solid white;
+}
+
+toolbarseparator {
+    -moz-appearance: none!important;
+    height: 25px;
+    width: 1px;
+    margin: 0 4px;
+    border: none;
+    background-image: linear-gradient(to bottom, rgba(10, 31, 51, 0), rgba(10, 31, 51, 0.35),
+        rgba(10, 31, 51, 0));
 }
 
 /*************************************************************************************************/
@@ -600,8 +606,10 @@ toolbarbutton {
 
 toolbarbutton:hover:not([disabled="true"]) {
     border-color: rgba(0, 0, 0, 0.2);
-    background: transparent linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2)) no-repeat;
-    box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.6) inset, 0 0 1px rgba(255, 255, 255, 0.6) inset, 0 0 2px rgba(0, 0, 0, 0.05);
+    background: transparent linear-gradient(rgba(255, 255, 255, 0.4),
+        rgba(255, 255, 255, 0.2)) no-repeat;
+    box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.6) inset, 0 0 1px rgba(255, 255, 255, 0.6) inset,
+        0 0 2px rgba(0, 0, 0, 0.05);
 }
 
 toolbarbutton:-moz-any([checked="true"],
@@ -620,7 +628,8 @@ toolbarbutton:-moz-any([checked="true"],
 
 toolbarbutton:hover:active:not([disabled="true"]) {
     border-color: rgba(0, 0, 0, 0.3);
-    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1) inset, 0 0 1px rgba(0, 0, 0, 0.1) inset, 0 0 2px rgba(0, 0, 0, 0.05);
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1) inset, 0 0 1px rgba(0, 0, 0, 0.1) inset,
+        0 0 2px rgba(0, 0, 0, 0.05);
 }
 
 toolbarbutton:hover:active:not([disabled="true"]):not([type=menu-button]) {

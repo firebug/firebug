@@ -138,7 +138,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         Firebug.Inspector.stopInspecting(true);
 
         this.showToolbarButtons("fbCSSButtons", true);
-        this.showToolbarButtons("fbLocationSeparator", true);
+        this.showToolbarButtons("fbLocationSeparator", false);
         this.showToolbarButtons("fbLocationButtons", true);
         this.showToolbarButtons("fbLocationList", true);
 

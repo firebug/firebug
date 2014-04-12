@@ -47,6 +47,10 @@ panelTab {
     margin-right: 2px;
 }
 
+toolbarseparator {
+    min-width: 0;
+}
+
 /*************************************************************************************************/
 /* Override Australis Styles coming from Win theme xxxHonza: fix me issue 471 */
 

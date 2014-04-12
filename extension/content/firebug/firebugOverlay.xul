@@ -224,33 +224,6 @@
                                             command="cmd_firebug_toggleHTMLEditing"/>
                                     </hbox>
 
-                                    <!-- Toolbar buttons for the CSS panel -->
-                                    <hbox id="fbCSSButtons" collapsed="true" class="noTabStop">
-                                        <toolbarbutton id="fbToggleCSSEditing"
-                                            label="firebug.Edit"
-                                            class="fbInternational"
-                                            tooltiptext="firebug.EditCSSTooltip"
-                                            command="cmd_firebug_togglecssEditMode"
-                                            type="menu-button">
-                                            <menupopup id="fbCSSEditorMenu"
-                                                onpopupshowing="Firebug.CSSModule.onOptionsShowing(this)">
-                                                <!-- id must be menu_firebug_+getEditOptionKey+mode -->
-                                                <menuitem id="menu_firebug_cssEditModeSource" mode="Source"
-                                                    label="firebug.css.sourceEdit"
-                                                    tooltiptext="firebug.css.sourceEdit.tooltip"
-                                                    oncommand="Firebug.CSSModule.onEditMode(event, this)"
-                                                    type="radio" autocheck="false"
-                                                    class="fbInternational"/>
-                                                <menuitem id="menu_firebug_cssEditModeLive" mode="Live"
-                                                    label="firebug.css.liveEdit"
-                                                    tooltiptext="firebug.css.liveEdit.tooltip"
-                                                    oncommand="Firebug.CSSModule.onEditMode(event, this)"
-                                                    type="radio" autocheck="false"
-                                                    class="fbInternational"/>
-                                            </menupopup>
-                                        </toolbarbutton>
-                                    </hbox>
-
                                     <hbox id="fbScriptButtons" collapsed="true" class="noTabStop">
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <tooltip id="fbScriptFilterMenuTooltip" role="presentation"
@@ -286,8 +259,8 @@
                                             class="toolbar-text-button fbInternational"
                                             tooltiptext="firebug.console.Do_Not_Clear_On_Reload2"
                                             command="cmd_firebug_togglePersistNet"/>
+                                        <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <hbox id="fbNetButtonsFilter" class="noTabStop">
-                                            <toolbarseparator/>
                                             <toolbarbutton id="fbNetFilter-all"
                                                 type="checkbox"
                                                 label="net.filter.label.All"
@@ -363,6 +336,34 @@
                                             class="noTabStop fbInternational"
                                             role="button" aria-haspopup="true"
                                             aria-label="a11y.labels.file selector"/>
+                                    </hbox>
+
+                                    <!-- Toolbar buttons for the CSS panel -->
+                                    <hbox id="fbCSSButtons" collapsed="true" class="noTabStop">
+                                        <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
+                                        <toolbarbutton id="fbToggleCSSEditing"
+                                            label="firebug.Edit"
+                                            class="fbInternational"
+                                            tooltiptext="firebug.EditCSSTooltip"
+                                            command="cmd_firebug_togglecssEditMode"
+                                            type="menu-button">
+                                            <menupopup id="fbCSSEditorMenu"
+                                                onpopupshowing="Firebug.CSSModule.onOptionsShowing(this)">
+                                                <!-- id must be menu_firebug_+getEditOptionKey+mode -->
+                                                <menuitem id="menu_firebug_cssEditModeSource" mode="Source"
+                                                    label="firebug.css.sourceEdit"
+                                                    tooltiptext="firebug.css.sourceEdit.tooltip"
+                                                    oncommand="Firebug.CSSModule.onEditMode(event, this)"
+                                                    type="radio" autocheck="false"
+                                                    class="fbInternational"/>
+                                                <menuitem id="menu_firebug_cssEditModeLive" mode="Live"
+                                                    label="firebug.css.liveEdit"
+                                                    tooltiptext="firebug.css.liveEdit.tooltip"
+                                                    oncommand="Firebug.CSSModule.onEditMode(event, this)"
+                                                    type="radio" autocheck="false"
+                                                    class="fbInternational"/>
+                                            </menupopup>
+                                        </toolbarbutton>
                                     </hbox>
 
                                     <!-- Status buttons, used e.g. by the HTML panel to show

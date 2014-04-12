@@ -195,9 +195,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // These buttons are visible only, if debugger is enabled.
         this.showToolbarButtons("fbBonButtons", active);
-        this.showToolbarButtons("fbLocationSeparator", active);
-        this.showToolbarButtons("fbDebuggerButtons", active);
+        this.showToolbarButtons("fbLocationSeparator", false);
         this.showToolbarButtons("fbLocationButtons", active);
+        this.showToolbarButtons("fbDebuggerButtons", active);
         this.showToolbarButtons("fbScriptButtons", active);
         this.showToolbarButtons("fbStatusButtons", active);
         this.showToolbarButtons("fbLocationList", active);

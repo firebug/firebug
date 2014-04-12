@@ -118,7 +118,6 @@
                         </menu>-->
                     </menupopup>
                 </toolbarbutton>
-                <toolbarseparator/>
 
                 <!-- Cookie permissions -->
                 <tooltip id="fcPermTooltip"
