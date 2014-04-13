@@ -51,6 +51,17 @@ toolbarseparator {
     min-width: 0;
 }
 
+.toolbarbutton-menubutton-dropmarker {
+    margin: 0;
+    padding: 0 6px;
+}
+
+toolbarbutton[type=menu-button]:not(:hover):not(:active):not([open]) > .toolbarbutton-menubutton-dropmarker::before {
+    height: 13px;
+    -moz-margin-start: -6px;
+    -moz-margin-end: 6px;
+}
+
 /*************************************************************************************************/
 /* Override Australis Styles coming from Win theme xxxHonza: fix me issue 471 */
 

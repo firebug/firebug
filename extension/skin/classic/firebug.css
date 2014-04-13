@@ -177,7 +177,7 @@
 }
 
 toolbarseparator {
-    -moz-appearance: none!important;
+    -moz-appearance: none !important;
     height: 25px;
     width: 1px;
     margin: 0 4px;
@@ -645,10 +645,28 @@ toolbarbutton[type=menu-button] > .toolbarbutton-menubutton-button {
     -moz-appearance: none;
     border-radius: 0;
     padding: 1px 6px;
-    -moz-border-end: 1px solid rgba(0, 0, 0, 0.15);
 }
 
-toolbarbutton[type=menu-button]:hover > .toolbarbutton-menubutton-button {
+.toolbarbutton-menu-dropmarker,
+.toolbarbutton-menubutton-dropmarker {
+    -moz-appearance: none !important;
+    list-style-image: url(chrome://firebug/skin/dropMarker.svg);
+    -moz-box-pack: center;
+    -moz-box-align: center;
+}
+
+toolbarbutton[type=menu-button]:not(:hover):not(:active):not([open]) > :-moz-any(.toolbarbutton-menu-dropmarker,
+                                                                                 .toolbarbutton-menubutton-dropmarker)::before {
+    content: "";
+    display: -moz-box;
+    width: 1px;
+    height: 15px;
+    -moz-margin-start: -7px;
+    -moz-margin-end: 7px;
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+toolbarbutton[type=menu-button]:-moz-any(:hover, [open]) > .toolbarbutton-menubutton-button {
     -moz-border-end: 1px solid rgba(0, 0, 0, 0.2);
 }
 
