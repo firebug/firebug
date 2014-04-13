@@ -139,6 +139,7 @@ var StatusPath = Obj.extend(Module,
         // the Script panel emphasizes the current frame).
         if (!panel || !currentObject)
         {
+            Dom.collapse(panelStatusSeparator, true);
             panelStatus.clear();
         }
         else
