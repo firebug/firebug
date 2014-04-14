@@ -62,18 +62,17 @@ ClientProvider.prototype =
     {
         var text;
 
-        if (object instanceof ObjectClient)
-            text = object.name;
-
-        if (object instanceof ObjectClient.Property)
-            text = object.name;
-
-        if (object && Obj.isFunction(object.getName))
+        if (object instanceof Grip)
+        {
             text = object.getName();
-
-        // Support for string type (children are String instances).
-        if (typeof(object) == "string")
+        }
+        else if (typeof(object) == "string")
+        {
+            // xxxHonza: is this what we want to have here?
+            // it causes getId to return value of string objects.
+            // Support for string type (children are String instances).
             text = object;
+        }
 
         if (!text)
             return text;
@@ -104,11 +103,8 @@ ClientProvider.prototype =
                 return new ErrorCopy(object.error.message);
         }
 
-        if (Obj.isFunction(object.getValue))
+        if (object instanceof Grip)
             return object.getValue();
-
-        if (object instanceof ObjectClient)
-            return object.value;
 
         return object;
     },

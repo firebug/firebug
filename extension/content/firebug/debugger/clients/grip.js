@@ -40,6 +40,18 @@ Grip.prototype =
 
         return this.grip["class"];
     },
+
+    getValue: function()
+    {
+        // The value must be provided by derived objects.
+        return this.value;
+    },
+
+    getName: function()
+    {
+        // The name must be provided by derived objects
+        return this.name;
+    },
 }
 
 // ********************************************************************************************* //
