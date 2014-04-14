@@ -59,8 +59,6 @@ DOMSidePanel.prototype = Obj.extend(BasePanel,
         this.provider = new DomProvider(this);
         this.tree = new DomPanelTree(this.context, this.provider,
             new DOMMemberProvider(this.context));
-        this.toggles = new ToggleBranch.ToggleBranch();
-        this.scrollTop = 0;
     },
 
     destroy: function(state)

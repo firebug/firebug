@@ -400,7 +400,6 @@ DOMPanel.prototype = Obj.extend(BasePanel,
             propertyPath: this.propertyPath,
             toggles: this.toggles
         });
-
     },
 
     findPathIndex: function(object)

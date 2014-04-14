@@ -87,6 +87,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
     initialize: function()
     {
         this.toggles = new ToggleBranch.ToggleBranch();
+        this.scrollTop = 0;
 
         Panel.initialize.apply(this, arguments);
     },
@@ -113,7 +114,13 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
     refresh: function()
     {
-        this.rebuild(true);
+        var scrollTop = this.panelNode.scrollTop;
+        var toggles = new ToggleBranch.ToggleBranch();
+        this.tree.saveState(toggles);
+
+        FBTrace.sysout("toggles ", toggles);
+
+        this.rebuild(false, scrollTop, toggles);
     },
 
     updateSelection: function(object)
@@ -323,6 +330,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         return Wrapper.unwrapObject(object);
     },
 
+    // xxxHonza: |update| argument is obsolete?
     rebuild: function(update, scrollTop, toggles)
     {
         Trace.sysout("domBasePanel.rebuild; scrollTop: " + scrollTop);
