@@ -755,12 +755,16 @@ FirebugReps.Arr = domplate(FirebugReps.ArrBase,
         OBJECTBOX({_repObject: "$object",
             $hasTwisty: "$object|hasSpecialProperties",
             onclick: "$onToggleProperties"},
-            SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
+            A({"class": "objectLink", onclick: "$onClickBracket"},
+                SPAN({"class": "arrayLeftBracket", role: "presentation"}, "[")
+            ),
             FOR("item", "$object|shortArrayIterator",
                 TAG("$item.tag", {object: "$item.object"}),
                 SPAN({"class": "arrayComma", role: "presentation"}, "$item.delim")
             ),
-            SPAN({"class": "arrayRightBracket"}, "]"),
+            A({"class": "objectLink", onclick: "$onClickBracket"},
+                SPAN({"class": "arrayRightBracket", role: "presentation"}, "]")
+            ),
             SPAN({"class": "arrayProperties", role: "group"})
         ),
 
