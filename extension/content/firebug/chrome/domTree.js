@@ -375,7 +375,7 @@ DomTree.prototype = domplate(
         {
             var row = rows[i];
             var member = row.repObject;
-            if (member.value == object)
+            if (member && member.value == object)
                 return row;
         }
 
