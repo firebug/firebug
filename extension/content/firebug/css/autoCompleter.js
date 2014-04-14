@@ -29,7 +29,8 @@ var CSSAutoCompleter =
         if (!cycle && expr)
         {
             // Make some good default suggestions.
-            var list = ["color", "clear", "display", "float", "overflow", "-moz-appearance"];
+            var list = ["color", "clear", "display", "float", "overflow",
+                "-moz-appearance", "border", "background", "background-color"];
             for (var i = 0; i < list.length; ++i)
             {
                 if (Str.hasPrefix(list[i], expr) && ret.indexOf(list[i]) !== -1)
