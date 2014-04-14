@@ -49,7 +49,7 @@ var {domplate, FOR, DIV, TEXTAREA} = Domplate;
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // CSSStyleSheetPanel (CSS Panel)
