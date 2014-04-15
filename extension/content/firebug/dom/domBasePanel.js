@@ -118,8 +118,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         var toggles = new ToggleBranch.ToggleBranch();
         this.tree.saveState(toggles);
 
-        FBTrace.sysout("toggles ", toggles);
-
         this.rebuild(false, scrollTop, toggles);
     },
 
