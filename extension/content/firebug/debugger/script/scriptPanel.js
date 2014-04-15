@@ -725,7 +725,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 return true;
 
             var lineNo = +m[1];
-            if (!isNaN(lineNo) && 0 < lineNo && lineNo <= this.editor.getLineCount())
+            if (!isNaN(lineNo) && 0 < lineNo && lineNo <= this.scriptView.editor.getLineCount())
             {
                 this.scrollToLine(lineNo, {highlight: true});
                 return true;
