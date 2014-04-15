@@ -76,10 +76,20 @@
 #fbToolbox,
 #fbCommandToolbar,
 #fbPanelSplitter > #fbPanelSplitterBox,
-#fbPanelBar1-tabBoxBackground,
 #fbPanelBar2-tabBoxBackground {
     border-bottom: 1px solid #bebebe;
+}
+
+#fbToolbox,
+#fbCommandToolbar,
+#fbPanelSplitter > #fbPanelSplitterBox,
+#fbPanelBar2-tabBoxBackground {
     background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
+}
+
+#fbPanelBar1-tabBoxBackground {
+    border-bottom: 1px solid #bebebe;
+    background: linear-gradient(#f1f1f1, #d2d2d2) no-repeat 0 0;
 }
 
 #fbToolbar {
@@ -95,10 +105,6 @@
 #fbPanelBar1-tabBox,
 #fbPanelBar2-tabBox {
     height: calc(22rem + 10px);
-}
-
-#fbPanelBar1-tabBox {
-    background: linear-gradient(#f1f1f1, #d2d2d2) no-repeat 0 0;
 }
 
 /* ensure the inner toolbar background looks the same as the other toolbars */
@@ -270,7 +276,7 @@
 /* Panel tabs */
 
 .panelTabBox {
-    border-bottom: 1px solid #BEBEBE;
+    /*border-bottom: 1px solid #BEBEBE;*/
     padding-left: 6px;
     overflow: hidden;
 }
