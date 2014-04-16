@@ -286,11 +286,11 @@ CookiePanel.prototype = Obj.extend(ActivablePanel,
     {
         return [
             MenuUtils.optionAllowGlobally(context, "cookies.AllowGlobally",
-                "cookies.tip.AllowGlobally", "network.cookie", "cookieBehavior"),
+                "cookies.tip.AllowGlobally2", "network.cookie", "cookieBehavior"),
             /*MenuUtils.optionMenu(context, "cookies.clearWhenDeny",
                 "cookies.tip.clearWhenDeny", Firebug.prefDomain, clearWhenDeny),*/
-            MenuUtils.optionMenu(context, "cookies.Confirm cookie removal",
-                "cookies.tip.Confirm cookie removal", Firebug.prefDomain, removeConfirmation)
+            MenuUtils.optionMenu(context, "cookies.Confirm_cookie_removal",
+                "cookies.tip.Confirm_cookie_removal2", Firebug.prefDomain, removeConfirmation)
         ];
     },
 

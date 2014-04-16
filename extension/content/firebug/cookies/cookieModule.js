@@ -979,7 +979,7 @@ Firebug.CookieModule = Obj.extend(ActivableModule,
     onExportForSiteShowTooltip: function(tooltip, context)
     {
         var host = context.window.location.host;
-        tooltip.label = Locale.$STRF("cookies.export.Export_For_Site_Tooltip", [host]);
+        tooltip.label = Locale.$STRF("cookies.export.Export_For_Site_Tooltip2", [host]);
         return true;
     },
 
@@ -1198,7 +1198,7 @@ Firebug.CookieModule = Obj.extend(ActivableModule,
 
         var cookies = [
             MenuUtils.optionMenu(context, "cookies.showCookieEvents",
-                "cookies.tip.showCookieEvents", Firebug.prefDomain, "cookies.logEvents"),
+                "cookies.tip.showCookieEvents2", Firebug.prefDomain, "cookies.logEvents"),
         ];
 
         // The option is disabled if the panel is disabled.
