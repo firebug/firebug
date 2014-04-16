@@ -319,7 +319,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             this.context.setTimeout(() =>
             {
                 this.defaultTree.expandObject(unwrappedScope);
-            }, 200);
+            });
         }
         else
         {
