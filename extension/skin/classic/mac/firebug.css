@@ -409,7 +409,7 @@ panelTab[selected="true"] > panelTabMenu {
 }
 
 .toolbarbutton-menubutton-dropmarker {
-    padding-top: 3px;
+    padding-top: 2px;
 }
 
 toolbarbutton[type=menu-button] > .toolbarbutton-menubutton-button {
@@ -420,6 +420,12 @@ toolbarbutton[type=menu-button] > .toolbarbutton-menubutton-button {
 toolbarbutton[type="menu"],
 toolbarbutton[type="menu"] > toolbarbutton {
     padding-left: 2px;
+}
+
+toolbarbutton[type=menu-button]:not(:hover):not(:active):not([open]) > :-moz-any(.toolbarbutton-menu-dropmarker,
+                                                                                 .toolbarbutton-menubutton-dropmarker)::before {
+    width: 1px;
+    background-color: transparent;
 }
 
 .toolbarbutton {
