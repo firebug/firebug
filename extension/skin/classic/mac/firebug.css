@@ -250,6 +250,11 @@
     filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
+#fbToggleCommandLine {
+    width: 13px !important;
+    margin-right: 8px !important;
+}
+
 #fbCommandLineHistoryButton[disabled] {
     filter: url(resource://firebugui/filters.svg#brightenedGrayscale);
 }
