@@ -35,11 +35,6 @@
     -moz-border-top-colors: #BBB9BA;
 }
 
-#fbContentSplitter {
-    border-color: #BBB9BA;
-    background: #f3f3f3 !important;
-}
-
 #fbPanelSplitter {
     background: #eeeeee !important;
     border-left: none;
