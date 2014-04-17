@@ -336,6 +336,9 @@ TabClient.prototype = Obj.extend(new EventSource(),
 
         this.activeThread = threadClient;
 
+        // This flag is set when "onThreadAttached" is sent for the first time.
+        this.onThreadAttachedEventSent = false;
+
         // Update existing context. Note that the context that caused the attach
         // can be already destroyed (e.g. if page refresh happened soon after load)
         // and new one created. This isn't a problem since the threadActor is created
@@ -343,10 +346,18 @@ TabClient.prototype = Obj.extend(new EventSource(),
         // tab will use the same tabActor anyway.
         var context = TabWatcher.getContextByWindow(this.window);
         if (context)
+        {
             context.activeThread = threadClient;
 
-        // Dispatch event to all listeners.
-        this.dispatch("onThreadAttached", [context]);
+            // Dispatch event to all listeners only if the context is already
+            // available. Otherwise, it'll be dispatched as soon as the context
+            // is initialized, which happens in {@link DebuggerClient.initContext}
+            this.dispatch("onThreadAttached", [context]);
+
+            // Further "onThreadAttached" events sent when the page is reloaded
+            // will use |reload| flag set to true, see {@link DebuggerClient.initContext}
+            this.onThreadAttachedEventSent = true;
+        }
 
         // The 'onThreadAttached' event has been handled by all listeners, and so all
         // 'debugger-attached' related steps are done. We can resume the debugger now.
