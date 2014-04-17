@@ -29,7 +29,7 @@
 
 #fbContentSplitter {
     position: relative;
-    background-color: #d2d2d2;
+    background: transparent none;
 }
 
 #fbContentSplitter[dir=reverse] {
@@ -37,11 +37,25 @@
 }
 
 #fbContentSplitter[orient=vertical] {
-    min-height: 6px;
-    height: 6px;
+    min-height: 3px;
+    height: 3px;
+    margin-top: -3px;
+    border-bottom: 1px solid #bebebe;
+}
+
+#fbContentSplitter[orient=vertical][dir=reverse] {
+    margin-top: 0;
+    margin-bottom: -3px;
 }
 
 #fbContentSplitter[orient=horizontal] {
-    min-width: 6px;
-    width: 6px;
+    min-width: 3px;
+    width: 3px;
+    margin-left: -3px;
+    border-right: 1px solid #bebebe;
+}
+
+#fbContentSplitter[orient=horizontal][dir=reverse] {
+    margin-left: 0;
+    margin-right: -3px;
 }
