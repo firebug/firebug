@@ -67,6 +67,20 @@ var StatusPath = Obj.extend(Module,
         this.executor();
     },
 
+    flush: function()
+    {
+        this.timeout = null;
+
+        if (this.clearFlag)
+            this.doClear();
+
+        if (this.updateFlag)
+            this.doUpdate();
+
+        this.clearFlag = false;
+        this.updateFlag = false;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Private API
 
@@ -97,20 +111,6 @@ var StatusPath = Obj.extend(Module,
             this.timeout = setTimeout(this.flush.bind(this), 100);
         else
             this.flush();
-    },
-
-    flush: function()
-    {
-        this.timeout = null;
-
-        if (this.clearFlag)
-            this.doClear();
-
-        if (this.updateFlag)
-            this.doUpdate();
-
-        this.clearFlag = false;
-        this.updateFlag = false;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
