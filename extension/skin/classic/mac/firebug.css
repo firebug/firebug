@@ -385,8 +385,9 @@ panelTab[selected="true"] > panelTabMenu {
 /* Location list */
 
 .menuHeader {
+    font-size: 14px;
+    font-weight: bold;
     margin: 2px 16px;
-    color: #565656;
 }
 
 /************************************************************************************************/
