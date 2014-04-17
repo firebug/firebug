@@ -130,6 +130,11 @@ HTMLModule.MutationBreakpoints =
         if (isAncestorIgnored(event.target))
             return false;
 
+        // Avoid breaking on user-initiated editing.
+        var panel = context.getPanel("html", true);
+        if (panel && panel.editing)
+            return false;
+
         context.breakOnNextMutate = false;
 
         this.breakWithCause(event, context, type);
