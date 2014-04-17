@@ -28,8 +28,8 @@
 }
 
 #fbContentSplitter {
-    border-color: threedShadow !important;
-    background-color: #FFFFFF;
+    position: relative;
+    background-color: #d2d2d2;
 }
 
 #fbContentSplitter[dir=reverse] {
@@ -37,22 +37,11 @@
 }
 
 #fbContentSplitter[orient=vertical] {
-    position: relative;
-    background-color: #d1d1d1;
-}
-
-#fbContentSplitter[orient=vertical] {
-    min-height: 1px;
-    height: 1px;
-}
-#fbContentSplitter[orient=vertical][dir=reverse] {
     min-height: 6px;
     height: 6px;
 }
 
 #fbContentSplitter[orient=horizontal] {
-    background-color: #d1d1d1;
     min-width: 6px;
     width: 6px;
-    position: relative;
 }
