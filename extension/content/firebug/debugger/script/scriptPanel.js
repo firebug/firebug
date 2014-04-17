@@ -1592,9 +1592,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             this.syncCommands(this.context);
             this.syncListeners(this.context);
 
-            // Update Break on Next lightning
-            //Firebug.Breakpoint.updatePanelTab(this, false);
-
             // issue 3463 and 4213
             Firebug.chrome.syncPanel("script");
             Firebug.chrome.focus();

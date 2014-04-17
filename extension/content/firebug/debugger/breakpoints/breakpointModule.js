@@ -279,6 +279,7 @@ var BreakpointModule = Obj.extend(Firebug.Module,
     breakNow: function(panel)
     {
         this.updatePanelTab(panel, false);
+        this.updateBreakOnNextState(panel, false);
         Firebug.Debugger.breakNow(panel.context);  // TODO BTI
     },
 });

@@ -16,10 +16,11 @@ define([
     "firebug/chrome/module",
     "firebug/chrome/rep",
     "firebug/debugger/breakpoints/breakpointGroup",
+    "firebug/debugger/breakpoints/breakpointModule",
     "firebug/html/htmlReps",
 ],
 function(Firebug, FBTrace, Arr, Css, Dom, Domplate, Events, Locale, Obj, Persist, Xpath,
-    Module, Rep, BreakpointGroup, HTMLReps) {
+    Module, Rep, BreakpointGroup, BreakpointModule, HTMLReps) {
 
 "use strict";
 
@@ -152,7 +153,7 @@ HTMLModule.MutationBreakpoints =
 
         Trace.sysout("htmlModule.breakWithCause;", context.breakingCause);
 
-        Firebug.Breakpoint.breakNow(context.getPanel("html", true));
+        BreakpointModule.breakNow(context.getPanel("html", true));
 
         return true;
     },
