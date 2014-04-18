@@ -9,7 +9,7 @@ define([
     "firebug/lib/system",
     "firebug/chrome/module",
 ],
-function(Firebug, FBTrace, Obj, Dom, String, System, Module) {
+function(Firebug, FBTrace, Obj, Dom, Str, System, Module) {
 
 "use strict";
 
@@ -20,6 +20,7 @@ var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_STATUSPATH");
 
 var statusCropSize = 20;
+var timeoutLen = 100;
 
 // ********************************************************************************************* //
 // StatusPath Implementation
@@ -69,7 +70,11 @@ var StatusPath = Obj.extend(Module,
 
     flush: function()
     {
-        this.timeout = null;
+        if (this.timeout)
+        {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+        }
 
         if (this.clearFlag)
             this.doClear();
@@ -93,9 +98,6 @@ var StatusPath = Obj.extend(Module,
         if (!panel)
             return;
 
-        if (this.timeout)
-            clearTimeout(this.timeout);
-
         // Asynchronous update is not necessary for every panel,
         // so it's up to the current panel what to do.
         var asyncUpdate = panel.objectPathAsyncUpdate;
@@ -108,9 +110,19 @@ var StatusPath = Obj.extend(Module,
             panelStatus.lastPanelName + " -> " + panel.name);
 
         if (asyncUpdate)
-            this.timeout = setTimeout(this.flush.bind(this), 100);
+        {
+            if (this.timeout)
+                clearTimeout(this.timeout);
+
+            this.timeout = setTimeout(() => {
+                this.timeout = null;
+                this.flush();
+            }, timeoutLen);
+        }
         else
+        {
             this.flush();
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -187,7 +199,7 @@ var StatusPath = Obj.extend(Module,
                         var object = Firebug.getRepObject(statusItems[i]);
                         var rep = Firebug.getRep(object, context);
                         var objectTitle = rep.getTitle(object, context);
-                        var title = String.cropMultipleLines(objectTitle, statusCropSize);
+                        var title = Str.cropMultipleLines(objectTitle, statusCropSize);
 
                         statusItems[i].label = title;
                     }
@@ -203,7 +215,7 @@ var StatusPath = Obj.extend(Module,
                         var object = path[i];
                         var rep = Firebug.getRep(object, context);
                         var objectTitle = rep.getTitle(object, context);
-                        var title = String.cropMultipleLines(objectTitle, statusCropSize);
+                        var title = Str.cropMultipleLines(objectTitle, statusCropSize);
 
                         panelStatus.addItem(title, object, rep, panel.statusSeparator);
                     }
