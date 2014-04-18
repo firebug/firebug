@@ -118,7 +118,7 @@
 /* Search Box */
 
 #fbSearchBox {
-    margin-top: 3px;
+    margin-top: 4px;
     margin-bottom: 4px;
 }
 
@@ -529,6 +529,10 @@ toolbarbutton:hover:not([disabled="true"]) {
     width: 23px;
     height: 23px;
     margin: 4px;
+}
+
+#fbToggleHTMLEditing {
+    margin-top: 7px;
 }
 
 /********************************************************************************************/
