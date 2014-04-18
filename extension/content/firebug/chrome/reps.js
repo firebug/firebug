@@ -260,12 +260,13 @@ FirebugReps.Func = domplate(Rep,
             System.copyToClipboard(fn.toSource());
     },
 
-    monitor: function(context, script, monitored)
+    monitor: function(context, script, monitored, mode)
     {
+        mode = mode || "monitor";
         if (monitored)
-            FunctionMonitor.unmonitorScript(context, script, "monitor");
+            FunctionMonitor.unmonitorScript(context, script, mode);
         else
-            FunctionMonitor.monitorScript(context, script, "monitor");
+            FunctionMonitor.monitorScript(context, script, mode);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -327,7 +328,8 @@ FirebugReps.Func = domplate(Rep,
 
     getScriptContextMenuItems: function(context, script, name)
     {
-        var monitored = FunctionMonitor.isScriptMonitored(context, script);
+        var monitored = FunctionMonitor.isScriptMonitored(context, script, "monitor");
+        var hasBreakpoint = FunctionMonitor.isScriptMonitored(context, script, "debug");
 
         var self = this;
         return [{
@@ -339,7 +341,18 @@ FirebugReps.Func = domplate(Rep,
             command: function()
             {
                 var checked = this.hasAttribute("checked");
-                self.monitor(context, script, !checked);
+                self.monitor(context, script, !checked, "monitor");
+            }
+        }, {
+            label: Locale.$STR("SetBreakpoint"),
+            tooltiptext: Locale.$STRF("dom.tip.setBreakpoint", [name]),
+            nol10n: true,
+            type: "checkbox",
+            checked: hasBreakpoint,
+            command: function()
+            {
+                var checked = this.hasAttribute("checked");
+                self.monitor(context, script, !checked, "debug");
             }
         }];
     },
