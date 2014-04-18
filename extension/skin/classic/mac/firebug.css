@@ -429,10 +429,6 @@ toolbarbutton[type=menu-button]:not(:hover):not(:active):not([open]) > :-moz-any
     background-color: transparent;
 }
 
-toolbarbutton:hover:not([disabled="true"]) {
-    border: 1px solid rgba(0, 0, 0, 0.2);
-}
-
 .toolbarbutton {
     font-weight: normal;
 }
