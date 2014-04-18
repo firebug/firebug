@@ -89,7 +89,7 @@
 
 #fbToolbar {
     font-size: 11px;
-    padding-left: 10px;
+    padding: 0 13px;
     border-bottom: none;
 }
 
@@ -523,6 +523,12 @@ toolbarbutton:hover:not([disabled="true"]) {
 .toolbar-text-button[disabled="true"] > .toolbarbutton-menu-dropmarker,
 .toolbar-text-menubutton[disabled="true"] > .toolbarbutton-menu-dropmarker {
     list-style-image: none;
+}
+
+#fbPanelBar1-buttons toolbarbutton {
+    width: 23px;
+    height: 23px;
+    margin: 4px;
 }
 
 /********************************************************************************************/
