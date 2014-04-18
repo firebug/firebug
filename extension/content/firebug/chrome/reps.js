@@ -239,7 +239,10 @@ FirebugReps.Func = domplate(Rep,
             var name = regularFn[1] || fn.displayName || "function";
             if ((name == "anonymous") && fn.displayName)
                 name = fn.displayName;
-            var args = regularFn[2];
+            var args = regularFn[2]
+                .replace(/([,\(])\s+/g, "$1")
+                .replace(/\s+([,\)])/g, "$1")
+                .replace(/,/g, ", ");
             result = name + args;
         }
         else
