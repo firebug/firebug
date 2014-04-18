@@ -8,8 +8,8 @@
 #nav-bar #firebug-error-badge {
     margin: 0;
     position: absolute;
-    left: -5px;
-    top: -5px;
+    top: 0;
+    left: -7px;
 }
 
 #firebug-error-label {
