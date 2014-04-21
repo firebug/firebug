@@ -378,6 +378,14 @@ panelTab[selected="true"] > panelTabMenu {
     overflow: hidden;
 }
 
+#fbPanelStatus:-moz-locale-dir(ltr) {
+    margin: 2px 5px 3px 0;
+}
+
+#fbPanelStatus:-moz-locale-dir(rtl) {
+    margin: 2px 0 3px 5px;
+}
+
 .panelStatusSeparator {
     margin: 0;
 }

@@ -737,9 +737,14 @@ toolbarbutton > toolbarbutton {
     padding: 0;
 }
 
-toolbarbutton[type="menu"],
-toolbarbutton[type="menu"] > toolbarbutton {
+toolbarbutton[type="menu"]:-moz-locale-dir(ltr),
+toolbarbutton[type="menu"]:-moz-locale-dir(ltr) > toolbarbutton {
     padding-right: 0;
+}
+
+toolbarbutton[type="menu"]:-moz-locale-dir(rtl),
+toolbarbutton[type="menu"]:-moz-locale-dir(rtl) > toolbarbutton {
+    padding-left: 0;
 }
 
 toolbarbutton[disabled="true"] {
