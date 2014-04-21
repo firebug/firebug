@@ -853,7 +853,6 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
 
 .fbToggleCommandEditor:active {
     filter: url(resource://firebugui/filters.svg#deepDarken);
-    padding: 3px;
 }
 
 #fbToggleCommandEditorBox {
