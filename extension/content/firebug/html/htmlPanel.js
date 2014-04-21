@@ -71,6 +71,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     stopEditing: function()
     {
         Editor.stopEditing();
+        this.resetSearch();
     },
 
     isEditing: function()
