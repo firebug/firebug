@@ -382,7 +382,8 @@ panelTab[selected="true"] > panelTabMenu {
 .menuHeader {
     font-size: 14px;
     font-weight: bold;
-    margin: 2px 21px;
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
 /************************************************************************************************/
