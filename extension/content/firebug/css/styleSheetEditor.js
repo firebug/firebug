@@ -31,6 +31,7 @@ function StyleSheetEditor(doc)
     var config = {
         mode: "css",
         readOnly: false,
+        lineWrapping: true,
         gutters: []
     };
     // Initialize source editor, then append to the box.
