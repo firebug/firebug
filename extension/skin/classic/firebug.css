@@ -847,11 +847,13 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
 /*************************************************************************************************/
 /* Toggle Side Panels */
 
-.fbToggleSidePanels {
+.fbToggleSidePanels:-moz-locale-dir(ltr),
+.fbToggleSidePanels.closed:-moz-locale-dir(rtl) {
     list-style-image: url(chrome://firebug/skin/collapseSidePanels.svg);
 }
 
-.fbToggleSidePanels.closed {
+.fbToggleSidePanels:-moz-locale-dir(rtl),
+.fbToggleSidePanels.closed:-moz-locale-dir(ltr) {
     list-style-image: url(chrome://firebug/skin/expandSidePanels.svg);
 }
 
@@ -893,11 +895,13 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
 /*************************************************************************************************/
 /* Toggle Command Editor */
 
-.fbToggleCommandEditor {
+.fbToggleCommandEditor:-moz-locale-dir(ltr),
+.fbToggleCommandEditor.closed:-moz-locale-dir(rtl) {
     list-style-image: url(chrome://firebug/skin/collapseSidePanels.svg);
 }
 
-.fbToggleCommandEditor.closed {
+.fbToggleCommandEditor:-moz-locale-dir(rtl),
+.fbToggleCommandEditor.closed:-moz-locale-dir(ltr) {
     list-style-image: url(chrome://firebug/skin/expandSidePanels.svg);
 }
 
