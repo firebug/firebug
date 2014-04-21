@@ -1673,7 +1673,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     search: function(text, reverse)
     {
         if (!text)
-            return;
+        {
+            delete this.lastSearch;
+            this.document.defaultView.getSelection().removeAllRanges();
+            return false;
+        }
 
         var search;
         if (text == this.searchText && this.lastSearch)
@@ -1693,7 +1697,9 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.search(text, reverse);
         }
 
-        return !search.noMatch && (loopAround ? "wraparound" : true);
+        if (search.noMatch)
+            return false;
+        return loopAround ? "wraparound" : true;
     },
 
     shouldIgnoreIntermediateSearchFailure: function(value)

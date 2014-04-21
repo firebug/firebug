@@ -1670,7 +1670,6 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 this.currentSearch = new Search.TextSearch(this.stylesheetEditor.box);
                 row = this.currentSearch.find(text, reverse, SearchBox.isCaseSensitive(text));
 
-
                 if (row)
                 {
                     if (this.editing)
