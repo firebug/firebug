@@ -131,8 +131,15 @@
 
 #fbToolbar {
     -moz-appearance: none;
-    padding: 0 0 0 4px;
     border: none;
+}
+
+#fbToolbar:-moz-locale-dir(ltr) {
+    padding: 0 0 0 4px;
+}
+
+#fbToolbar:-moz-locale-dir(rtl) {
+    padding: 0 4px 0 0;
 }
 
 #fbToolbarInner {
@@ -834,8 +841,12 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
     list-style-image: url(chrome://firebug/skin/expandSidePanels.svg);
 }
 
-#fbPanelPane:not([orient="vertical"]) .fbToggleSidePanels {
+#fbPanelPane:not([orient="vertical"]) .fbToggleSidePanels:-moz-locale-dir(ltr) {
     margin-right: 2px;
+}
+
+#fbPanelPane:not([orient="vertical"]) .fbToggleSidePanels:-moz-locale-dir(rtl) {
+    margin-left: 2px;
 }
 
 #fbPanelPane[orient="vertical"] .fbToggleSidePanels {
@@ -876,8 +887,12 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
     list-style-image: url(chrome://firebug/skin/expandSidePanels.svg);
 }
 
-#fbPanelPane:not([orient="vertical"]) .fbToggleCommandEditor {
+#fbPanelPane:not([orient="vertical"]) .fbToggleCommandEditor:-moz-locale-dir(ltr) {
     margin-right: 2px;
+}
+
+#fbPanelPane:not([orient="vertical"]) .fbToggleCommandEditor:-moz-locale-dir(rtl) {
+    margin-left: 2px;
 }
 
 .fbToggleCommandEditor:hover {
