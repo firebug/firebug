@@ -179,6 +179,12 @@
     border-radius: 0 10000px 10000px 0;
 }
 
+.fbsearch-options-buttons:hover,
+.fbsearch-options-buttons:active {
+    border-color: #96969d !important;
+    filter: none;
+}
+
 /*************************************************************************************************/
 /* Buttons */
 
@@ -430,7 +436,7 @@ toolbarbutton[type=menu-button]:not(:hover):not(:active):not([open]) > :-moz-any
     background-color: transparent;
 }
 
-toolbarbutton:hover:not([disabled="true"]) {
+toolbarbutton:hover:not(.fbsearch-options-buttons):not([disabled="true"]) {
     border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
