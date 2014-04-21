@@ -34,6 +34,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    flex: 1;
 }
 
 .breakpointBlockHead > .checkbox {
@@ -153,8 +154,7 @@
 
 .breakpointMutationType {
     flex-shrink: 0;
-    top: 4px;
     color: gray;
     margin-right: 20px;
-    margin-left: auto;
+    margin-left: 5px;
 }
