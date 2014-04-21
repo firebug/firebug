@@ -125,8 +125,15 @@ toolbarbutton[type="menu"] > .toolbarbutton-icon:not([src]) {
 
 /* Set proper height of window buttons (close, min, detach) */
 #fbWindowButtons.innerToolbar {
-    margin-right: 4px;
     padding: 4px 0 6px 0;
+}
+
+#fbWindowButtons.innerToolbar:-moz-locale-dir(ltr) {
+    margin-right: 4px;
+}
+
+#fbWindowButtons.innerToolbar:-moz-locale-dir(rtl) {
+    margin-left: 4px;
 }
 
 #fbWindowButtons > toolbarbutton {

@@ -62,7 +62,7 @@
 }
 
 #fbWindowButtons.innerToolbar {
-    padding: 7px 0 7px 0;   /* Set proper height of window buttons (close, min, detach) */
+    padding: 7px 0;   /* Set proper height of window buttons (close, min, detach) */
 }
 
 /*************************************************************************************************/

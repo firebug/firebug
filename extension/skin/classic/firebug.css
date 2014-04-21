@@ -325,8 +325,15 @@ panelTab[selected="true"][disabled="true"] {
 /* Search Box */
 
 #fbSearchBox {
-    margin: 3px 10px 3px 0;
     min-width: 100px;
+}
+
+#fbSearchBox:-moz-locale-dir(ltr) {
+    margin: 3px 10px 3px 0;
+}
+
+#fbSearchBox:-moz-locale-dir(rtl) {
+    margin: 3px 0 3px 10px;
 }
 
 .fbsearch-textbox[status="notfound"] {
