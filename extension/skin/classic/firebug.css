@@ -34,14 +34,20 @@
 
 .fbCommandLine {
     -moz-appearance: none;
-    margin: 0 0 0 4px !important;
     padding: 2px 0 !important;
     border: none;
-    direction: ltr;
     width: 100%;
     background: none repeat scroll 0% 0% transparent;
     position: relative;
     z-index: 3;
+}
+
+.fbCommandLine:-moz-locale-dir(ltr) {
+    margin: 0 0 0 4px !important;
+}
+
+.fbCommandLine:-moz-locale-dir(rtl) {
+    margin: 0 4px 0 0 !important;
 }
 
 #fbCommandLineMeasurer {
@@ -91,6 +97,7 @@
 .fbCommandHtmlBox {
     position: relative;
     margin-right: 7px;
+    direction: ltr;
 }
 
 .fbCommandHtmlBox .background {

@@ -84,6 +84,7 @@ textbox#fbCommandEditor {
     border: 1px solid #BEBEBE;
     border-radius: 3px;
     margin: 2px;
+    direction: ltr;
 }
 
 .fbPopupTitle {
