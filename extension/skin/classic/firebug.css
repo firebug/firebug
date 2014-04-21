@@ -331,13 +331,20 @@ panelTab[selected="true"][disabled="true"] {
     -moz-box-align: center;
     margin: 0;
     border: 1px solid #96969D;
-    border-radius: 2px 0 0 2px;
     font: message-box;
     font-size: 11px;
     font-size-adjust: inherit;
-    direction: ltr;
     height: 21px;
+}
+
+.fbsearch-textbox:-moz-locale-dir(ltr) {
+    border-radius: 2px 0 0 2px;
     padding: 0 2px 0 4px;
+}
+
+.fbsearch-textbox:-moz-locale-dir(rtl) {
+    border-radius: 0 2px 2px 0;
+    padding: 0 4px 0 2px;
 }
 
 .fbsearch-icon {
@@ -381,8 +388,19 @@ panelTab[selected="true"][disabled="true"] {
 
 .fbsearch-options-buttons.next {
     list-style-image: url("chrome://firebug/skin/searchNext.svg");
+}
+
+.fbsearch-options-buttons.next:-moz-locale-dir(ltr) {
     border-radius: 0 2px 2px 0;
     border-left: none;
+}
+
+.fbsearch-options-buttons.next:-moz-locale-dir(rtl) {
+    border-radius: 2px 0 0 2px;
+}
+
+.fbsearch-options-buttons.prev:-moz-locale-dir(rtl) {
+    border-right: none;
 }
 
 .fbsearch-options-buttons:hover {
