@@ -734,7 +734,6 @@
                         // For items implementing equals() (such as StackFrame).
                         // Also make sure we get an object from chrome.
                         if (itemObject instanceof Object &&
-                            !Components.utils.isDeadWrapper(itemObject) &&
                             itemObject.equals && itemObject.equals(object))
                         {
                             return item;
