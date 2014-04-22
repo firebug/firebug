@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 7373: Debugger breaks on monitored functions</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=7373">
+        Issue 7373</a>: Debugger breaks on monitored functions</h1>
+</header>
+<script>
+function executeTest()
+{
+    console.log("Hello");
+}
+</script>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug and enable the Script and Console panel</li>
+            <li>Go to the Script panel, open Command Line Popup and execute:<br/>
+                <code>monitor(executeTest)</code><br/>
+            </li>
+            <li>Click this button:
+                <button id="testButton" onclick="executeTest()">Execute Test</button></li>
+            <li>There should be a new log in the Console panel, the debugger
+                should <b>not</b> break.</li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+</body>
+</html>
