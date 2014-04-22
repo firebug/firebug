@@ -328,8 +328,17 @@ var DebuggerClient = Obj.extend(Firebug.Module,
             {
                 context.activeThread = tab.activeThread;
 
-                // If the thread is already attached send helper event.
-                this.dispatch("onThreadAttached", [context, true]);
+                // We might be sending the "onThreadAttached" for the first time now,
+                // which might happen when thread is attached sooner than the context
+                // is initialized, see {@link TabClient.onThreadAttached}
+                // Otherwise is sent when page is reloaded and the context recreated.
+                // the reload flag can be used to distinguish this.
+                // Note that the backend thread actor is shared across page reloads
+                // (it's there for entire tab life time, or till detached).
+                var reload = tab.onThreadAttachedEventSent;
+                this.dispatch("onThreadAttached", [context, reload]);
+
+                tab.onThreadAttachedEventSent = true;
             }
         }
         else

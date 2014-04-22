@@ -304,12 +304,28 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // Render the watch panel tree.
         this.defaultTree.replace(this.panelNode, input);
 
-        // Auto expand the global scope item.
         if (this.defaultToggles.isEmpty())
         {
             var scope = this.context.getCurrentGlobal();
             var unwrappedScope = Wrapper.getContentView(scope);
-            this.defaultTree.expandObject(unwrappedScope);
+
+            // Auto expand the global scope item after a timeout.
+
+            // xxxHonza: iterating DOM window properties that happens in
+            // {@link DOMMemberProvider} can cause reflow and break {@link TabContext}
+            // initialization after Firefox tab is reopened using "Undo Close Tab" action.
+            // See also: http://code.google.com/p/fbug/issues/detail?id=7340#c3
+            // This might eventually go away as soon as issue 6943 is implemented
+            // and the Watch panel updated asynchronously.
+            //
+            // It helps if the iteration is done after a timeout, but it's a hack
+            // and the real problem is rather in {@link TabWatcher}.
+            // This might happen for any UI widget that uses {@link DOMMemberProvider}
+            // See also issue 7364
+            this.context.setTimeout(() =>
+            {
+                this.defaultTree.expandObject(unwrappedScope);
+            });
         }
         else
         {

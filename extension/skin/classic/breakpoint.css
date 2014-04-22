@@ -26,7 +26,15 @@
 
 .breakpointBlockHead {
     position: relative;
+    display: flex;
     padding-top: 4px;
+}
+
+.breakpointBlockHead .objectLink {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
 }
 
 .breakpointBlockHead > .checkbox {
@@ -123,3 +131,30 @@
 }
 
 /************************************************************************************************/
+/* Breakpoint from html panel */
+
+.breakpointCode .twisty {
+    display: none;
+}
+
+.breakpointCode .nodeBox.containerNodeBox,
+.breakpointCode .nodeLabel {
+    padding-left: 0px;
+    margin-left: 0px;
+    font-family: monospace !important;
+}
+
+.breakpointCode .nodeTag,
+.breakpointCode .nodeAttr,
+.breakpointCode .nodeText,
+.breakpointCode .nodeValue,
+.breakpointCode .nodeLabel {
+    color: DarkGreen !important;
+}
+
+.breakpointMutationType {
+    flex-shrink: 0;
+    color: gray;
+    margin-right: 20px;
+    margin-left: 5px;
+}

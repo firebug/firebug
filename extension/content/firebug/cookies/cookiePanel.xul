@@ -76,18 +76,18 @@
 
                         <!-- Export cookies xxxHonza: remove this for now and wait for user feedback
                         <menuitem id="fcExportAll" class="fbInternational"
-                            label="cookies.export.Export All Cookies"
-                            tooltiptext="cookies.export.Export All Cookies Tooltip"
+                            label="cookies.export.Export_All_Cookies"
+                            tooltiptext="cookies.export.Export_All_Cookies_Tooltip2"
                             command="cmd_firebug_cookieExportAll"/> -->
                         <tooltip id="fcExportForSiteTooltip"
                             onpopupshowing="return Firebug.CookieModule.onExportForSiteShowTooltip(this, Firebug.currentContext)"/>
                         <menuitem id="fcExportForSite" class="fbInternational"
-                            label="cookies.export.Export For Site"
+                            label="cookies.export.Export_For_Site"
                             tooltip="fcExportForSiteTooltip" command="cmd_firebug_cookieExportForSite"/>
                         <tooltip id="fcExportJsonForClipboardTooltip"
                             onpopupshowing="return Firebug.CookieModule.onExportJsonForClipboardTooltip(this, Firebug.currentContext)"/>
                         <menuitem id="fcExportJsonForClipboard" class="fbInternational"
-                            label="cookies.export.Export JSON to Clipboard"
+                            label="cookies.export.Export_JSON_to_Clipboard"
                             tooltip="fcExportJsonForClipboardTooltip" command="cmd_firebug_cookieExportJsonForClipboard"/>
                     </menupopup>
                 </toolbarbutton>

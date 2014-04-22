@@ -82,7 +82,8 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         // xxxHonza: this is a workaround for bug:
         // https://bugzilla.mozilla.org/show_bug.cgi?id=991688
         var threadActor = DebuggerLib.getThreadActor(this.context.browser);
-        threadActor.disableAllBreakpoints();
+        if (threadActor)
+            threadActor.disableAllBreakpoints();
 
         BreakpointStore.removeListener(this);
     },

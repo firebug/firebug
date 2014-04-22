@@ -725,7 +725,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 return true;
 
             var lineNo = +m[1];
-            if (!isNaN(lineNo) && 0 < lineNo && lineNo <= this.editor.getLineCount())
+            if (!isNaN(lineNo) && 0 < lineNo && lineNo <= this.scriptView.editor.getLineCount())
             {
                 this.scrollToLine(lineNo, {highlight: true});
                 return true;
@@ -1157,10 +1157,22 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (bp.href != url)
             return;
 
-        Trace.sysout("scriptPanel.onBreakpointRemoved;", bp);
+        var bps = [];
+        this.getBreakpoints(bps);
+
+        // Don't remove the icon from the breakpoint column if there is still
+        // a breakpoint in the store (see also issue 7372).
+        for (var tempBp of bps)
+        {
+            if (tempBp.lineNo == bp.lineNo)
+                return;
+        }
 
         // Remove breakpoint from the UI.
         this.scriptView.removeBreakpoint(bp);
+
+        Trace.sysout("scriptPanel.onBreakpointRemoved;", bp);
+
         var editor = this.scriptView.getInternalEditor();
         if (editor && editor.debugLocation == bp.lineNo)
             this.scriptView.setDebugLocation(bp.lineNo, true);
@@ -1591,9 +1603,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             this.syncCommands(this.context);
             this.syncListeners(this.context);
-
-            // Update Break on Next lightning
-            //Firebug.Breakpoint.updatePanelTab(this, false);
 
             // issue 3463 and 4213
             Firebug.chrome.syncPanel("script");

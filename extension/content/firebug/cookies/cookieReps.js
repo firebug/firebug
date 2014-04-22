@@ -1059,7 +1059,7 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
                     TD({id: "colDomain", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("cookies.header.domain.tooltip")},
+                            title: Locale.$STR("cookies.header.domain.tooltip2")},
                         Locale.$STR("cookies.header.domain"))
                     ),
                     TD({id: "colRawSize", role: "columnheader",

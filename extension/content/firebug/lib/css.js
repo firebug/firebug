@@ -455,16 +455,22 @@ Css.getElementCSSPath = function(element)
 // ********************************************************************************************* //
 // CSS classes
 
-var classNameReCache={};
+var classNameReCache = {};
 
 Css.hasClass = function(node, name)
 {
-    if (!node || node.nodeType != Node.ELEMENT_NODE || !node.className || !name)
+    if (!node || node.nodeType != Node.ELEMENT_NODE || !node.className ||
+        typeof(node.className) != "string" || !name)
+    {
         return false;
+    }
 
     if (name.indexOf(" ") != -1)
     {
-        var classes = name.split(" "), len = classes.length, found=false;
+        var classes = name.split(" ");
+        var len = classes.length;
+        var found = false;
+
         for (var i = 0; i < len; i++)
         {
             var cls = classes[i].trim();
@@ -475,14 +481,23 @@ Css.hasClass = function(node, name)
                 found = true;
             }
         }
+
         return found;
     }
 
     var re;
     if (name.indexOf("-") == -1)
-        re = classNameReCache[name] = classNameReCache[name] || new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
-    else // XXXsroussey don't cache these, they are often setting values. Should be using setUserData/getUserData???
+    {
+        re = classNameReCache[name] = classNameReCache[name] ||
+            new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
+    }
+    else
+    {
+        // XXXsroussey don't cache these, they are often setting values.
+        // Should be using setUserData/getUserData???
         re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
+    }
+
     return node.className.search(re) != -1;
 };
 

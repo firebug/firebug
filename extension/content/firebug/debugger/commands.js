@@ -230,6 +230,7 @@ function threadBreakpoints(context, args)
         // when the DOM panel (used after clicking on the logged object)
         // is trying to display instances of {@link Breakpoint} using
         // {@link BreakpointRep}
+        var counter = 0;
         var result = {};
         BreakpointStore.enumerateBreakpoints(null, true, function(bp)
         {
@@ -241,14 +242,17 @@ function threadBreakpoints(context, args)
                 result[bp.href] = [];
 
             result[bp.href].push(newBp);
+            counter++;
         });
 
         // Log Firebug breakpoint objects.
-        Firebug.Console.logFormatted(["Breakpoint Store %o", result], context, "info");
+        Firebug.Console.logFormatted(["Breakpoint Store %d %o", counter, result],
+            context, "info");
 
         // Log breakpoint clients objects
-        Firebug.Console.logFormatted(["Breakpoint Clients %o", context.breakpointClients],
-            context, "info");
+        var length = context.breakpointClients.length;
+        Firebug.Console.logFormatted(["Breakpoint Clients %d %o", length,
+            context.breakpointClients], context, "info");
     }
     catch (e)
     {

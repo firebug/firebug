@@ -302,7 +302,8 @@ var BreakpointStore = Obj.extend(Module,
     {
         type = type || BP_NORMAL;
 
-        Trace.sysout("removeBreakpoint; " + url + " (" + lineNo + "), type: " + type);
+        Trace.sysout("BreakpointStore.removeBreakpoint; " + url + " (" +
+            lineNo + "), type: " + type);
 
         var bps = this.getBreakpoints(url);
         if (!bps)
@@ -480,12 +481,17 @@ var BreakpointStore = Obj.extend(Module,
      */
     getBreakpoints: function(url, dynamic)
     {
-        Trace.sysout("BreakpointStore.getBreakpoints; url = " + url);
+        var bps = [];
 
         if (url && !dynamic)
-            return this.breakpoints[url] || [];
+        {
+            bps = this.breakpoints[url] || [];
 
-        var bps = [];
+            Trace.sysout("BreakpointStore.getBreakpoints; " + url, bps);
+
+            return bps
+        }
+
         var urls = this.getBreakpointURLs();
 
         if (url && dynamic)
@@ -500,7 +506,8 @@ var BreakpointStore = Obj.extend(Module,
         for (var i = 0; i < urls.length; i++)
             bps.push.apply(bps, this.breakpoints[urls[i]] || []);
 
-        Trace.sysout("BreakpointStore.getBreakpointURLs; bps", bps);
+        Trace.sysout("BreakpointStore.getBreakpointURLs; " + url, bps);
+
         return bps;
     },
 

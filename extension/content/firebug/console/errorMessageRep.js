@@ -426,9 +426,7 @@ var ErrorMessage = domplate(Rep,
                     type: "checkbox",
                     checked: breakOnThisError,
                     command: Obj.bindFixed(this.breakOnThisError, this, error, context)
-                },
-                Menu.optionMenu("BreakOnAllErrors", "breakOnErrors",
-                    "console.menu.tip.Break_On_All_Errors")
+                }
             );
         }
 

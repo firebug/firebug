@@ -902,19 +902,19 @@ Firebug.TabWatcherUnloader = TabWatcherUnloader;
 // with Firebug UI opened (the same domain) to see the scenario.
 // Caused by accessing |this.panelNode.scrollTop|
 // So, do not reexecute locationChange if it's in progress.
-var stateInProgress = false;
+var locationInProgress = false;
 
 var TabProgressListener = Obj.extend(Http.BaseProgressListener,
 {
     onLocationChange: function(progress, request, uri)
     {
-        if (stateInProgress)
+        if (locationInProgress)
         {
             FBTrace.sysout("tabWatcher.onLocationChange; already IN-PROGRESS")
             return;
         }
 
-        stateInProgress = true;
+        locationInProgress = true;
 
         try
         {
@@ -925,7 +925,7 @@ var TabProgressListener = Obj.extend(Http.BaseProgressListener,
         }
         finally
         {
-            stateInProgress = false;
+            locationInProgress = false;
         }
     },
 
@@ -988,13 +988,14 @@ var TabProgressListener = Obj.extend(Http.BaseProgressListener,
 // ********************************************************************************************* //
 // Obsolete
 
+var stateInProgress = false;
 var FrameProgressListener = Obj.extend(Http.BaseProgressListener,
 {
     onStateChange: function(progress, request, flag, status)
     {
         if (stateInProgress)
         {
-            FBTrace.sysout("tabWatcher.onLocationChange; already IN-PROGRESS")
+            FBTrace.sysout("tabWatcher.onStateChange; already IN-PROGRESS")
             return;
         }
 
@@ -1041,6 +1042,16 @@ var FrameProgressListener = Obj.extend(Http.BaseProgressListener,
 
                 // xxxHonza: we need to use (win.location.href == "about:blank")
                 // Otherwise the DOM panel is updated too soon (when doc.readyState == "loading")
+                // xxxHonza: onLocationChange doesn't fire for reopened tabs
+                // (using Undo Closed Tab) menu action.
+                // xxxHonza: iterating DOM window properties that happens in
+                // {@link DOMMemberProvider} can cause reflow and break {@link TabContext}
+                // initialization after Firefox tab is reopened using "Undo Close Tab" action.
+                // See also: http://code.google.com/p/fbug/issues/detail?id=7340#c3
+                // If win.document.readyState == "interactive" condition is used than test
+                // script/3985/issue3985.js fails since the FBTest.reload (i.e. waitForWindowLoad)
+                // doesn't catch "MozAfterPaint" event (issue in FBTest API).
+                // See also issue 7364
                 if (win.parent == win && (win.location.href == aboutBlank))
                 {
                     Firebug.TabWatcher.watchTopWindow(win, win.location.href);

@@ -729,13 +729,16 @@
                     {
                         var itemObject = item.rep.getRealObject(item.repObject,
                             Firebug.currentContext);
-                        if (itemObject == object)
+                        if (itemObject === object)
                             return item;
                         // For items implementing equals() (such as StackFrame).
                         // Also make sure we get an object from chrome.
-                        if (XPCNativeWrapper(itemObject) === itemObject && itemObject &&
+                        if (itemObject instanceof Object &&
+                            !Components.utils.isDeadWrapper(itemObject) &&
                             itemObject.equals && itemObject.equals(object))
+                        {
                             return item;
+                        }
                     }
                 }
             ]]></body>
