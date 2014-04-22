@@ -575,8 +575,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         Trace.sysout("scriptPanel.framesadded;", stackTrace);
 
-        // Invoke breadcrumbs update.
+        // Invoke synchronous breadcrumbs update.
         Firebug.chrome.syncStatusPath();
+        StatusPath.flush();
 
         // Do not use: Firebug.chrome.select(this.context.currentFrame, "script");
         // at this moment. Since it invokes updateSelection, showStackFrame and

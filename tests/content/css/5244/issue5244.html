@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5244: Allow CSS rules other than CSSStyleRules to be inspected inside the CSS panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        @import 'test.css';
+        </style>
+        <script type="text/javascript">
+        var importRule = window.document.styleSheets[1].cssRules[0];
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5244">Issue 5244</a>: Allow CSS rules other than CSSStyleRules to be inspected inside the CSS panel</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>DOM</em> panel</li>
+                    <li>Right-click on the value of the variable <code>importRule</code> (<code>CSSImportRule test.css</code>)<br/>
+                        <span class="ok">
+                            &rArr; The context menu should offer an option
+                            <em>Inspect in CSS Panel</em>.
+                        </span>
+                    </li>
+                    <li>Click that option</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        Firebug should switch to the CSS panel and highlight the import rule
+                        <code>@import "test.css";</code>.
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>
