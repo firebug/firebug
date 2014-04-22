@@ -655,8 +655,7 @@ toolbarbutton[type=menu-button] > .toolbarbutton-menubutton-button {
     -moz-box-align: center;
 }
 
-toolbarbutton[type=menu-button]:not(:hover):not(:active):not([open]) > :-moz-any(.toolbarbutton-menu-dropmarker,
-                                                                                 .toolbarbutton-menubutton-dropmarker)::before {
+toolbarbutton[type=menu-button]:not(:hover):not(:active):not(:-moz-any([checked="true"], [selected="true"], [open="true"])) > :-moz-any(.toolbarbutton-menu-dropmarker, .toolbarbutton-menubutton-dropmarker)::before {
     content: "";
     display: -moz-box;
     width: 1px;
@@ -666,7 +665,7 @@ toolbarbutton[type=menu-button]:not(:hover):not(:active):not([open]) > :-moz-any
     background-color: rgba(0, 0, 0, 0.15);
 }
 
-toolbarbutton[type=menu-button]:-moz-any(:hover, [open]) > .toolbarbutton-menubutton-button {
+toolbarbutton[type=menu-button]:-moz-any(:hover, [checked="true"], [selected="true"], [open]) > .toolbarbutton-menubutton-button {
     -moz-border-end: 1px solid rgba(0, 0, 0, 0.2);
 }
 
