@@ -237,12 +237,19 @@ FirebugReps.Func = domplate(Rep,
         {
             // XXX use Debugger.Object.displayName here?
             var name = regularFn[1] || fn.displayName || "function";
-            if ((name == "anonymous") && fn.displayName)
+            if (name == "anonymous" && fn.displayName)
                 name = fn.displayName;
+
+            // What we get from safeToString(fn) is actual source code of fn,
+            // which can include e.g. unnecessary whitespace and comments around
+            // the arguments. For now we don't have a great solution for
+            // dealing with comments, but we can at least normalize whitespace
+            // into the format |f(a, b, c)| (see issue 7386).
             var args = regularFn[2]
                 .replace(/([,\(])\s+/g, "$1")
                 .replace(/\s+([,\)])/g, "$1")
                 .replace(/,/g, ", ");
+
             result = name + args;
         }
         else
