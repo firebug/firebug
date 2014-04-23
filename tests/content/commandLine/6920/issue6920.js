@@ -10,7 +10,7 @@ function runTest()
             var context = FW.Firebug.currentContext;
             CommandEditor.prettyPrint(context).then((code) =>
             {
-                var expected = "function test() {\n    return true;\n}\n";
+                var expected = "function test() {\n  return true;\n}\n";
                 FBTest.compare(expected, code, "The code must be formatted");
                 FBTest.testDone();
             });
