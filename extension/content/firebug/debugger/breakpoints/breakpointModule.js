@@ -232,7 +232,7 @@ var BreakpointModule = Obj.extend(Firebug.Module,
                 return false;
 
             // If there is normal disabled breakpoint, do not break.
-            if (bp.isNormal() && bp.isDisabled())
+            if (bp.isDisabled())
             {
                 Trace.sysout("breakpointModule.paused; Do not break on disabled breakpoint", bp);
                 return false;
