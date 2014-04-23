@@ -159,13 +159,13 @@ var FunctionMonitor = Obj.extend(Module,
         return (mode === "monitor" ? BreakpointStore.BP_MONITOR : BreakpointStore.BP_NORMAL);
     },
 
-    isScriptMonitored: function(context, script)
+    isScriptMonitored: function(context, script, mode)
     {
         var location = {line: script.startLine, url: script.url};
         location = DebuggerLib.getNextExecutableLine(context, location);
         if (!location)
             return false;
-        var type = BreakpointStore.BP_MONITOR;
+        var type = this.getBreakpointType(mode);
         return BreakpointStore.findBreakpoint(location.url, location.line - 1, type) != null;
     },
 

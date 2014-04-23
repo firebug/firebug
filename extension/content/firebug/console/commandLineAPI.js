@@ -40,19 +40,7 @@ CommandLineAPI.getCommandLineAPI = function(context)
             return start.querySelector(selector);
         }
 
-        var result = context.baseWindow.document.querySelector(selector);
-        if (result === null && (selector || "")[0] !== "#")
-        {
-            if (context.baseWindow.document.getElementById(selector))
-            {
-                // This should be removed in the next minor (non-bugfix) version
-                var msg = Locale.$STRF("warning.dollar_change", [selector]);
-                Firebug.Console.log(msg, context, "warn");
-                result = null;
-            }
-        }
-
-        return result;
+        return context.baseWindow.document.querySelector(selector);
     };
 
     // returns unwrapped elements from the page

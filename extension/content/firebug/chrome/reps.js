@@ -237,9 +237,19 @@ FirebugReps.Func = domplate(Rep,
         {
             // XXX use Debugger.Object.displayName here?
             var name = regularFn[1] || fn.displayName || "function";
-            if ((name == "anonymous") && fn.displayName)
+            if (name == "anonymous" && fn.displayName)
                 name = fn.displayName;
-            var args = regularFn[2];
+
+            // What we get from safeToString(fn) is actual source code of fn,
+            // which can include e.g. unnecessary whitespace and comments around
+            // the arguments. For now we don't have a great solution for
+            // dealing with comments, but we can at least normalize whitespace
+            // into the format |f(a, b, c)| (see issue 7386).
+            var args = regularFn[2]
+                .replace(/([,\(])\s+/g, "$1")
+                .replace(/\s+([,\)])/g, "$1")
+                .replace(/,/g, ", ");
+
             result = name + args;
         }
         else
@@ -260,12 +270,13 @@ FirebugReps.Func = domplate(Rep,
             System.copyToClipboard(fn.toSource());
     },
 
-    monitor: function(context, script, monitored)
+    monitor: function(context, script, monitored, mode)
     {
+        mode = mode || "monitor";
         if (monitored)
-            FunctionMonitor.unmonitorScript(context, script, "monitor");
+            FunctionMonitor.unmonitorScript(context, script, mode);
         else
-            FunctionMonitor.monitorScript(context, script, "monitor");
+            FunctionMonitor.monitorScript(context, script, mode);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -327,7 +338,8 @@ FirebugReps.Func = domplate(Rep,
 
     getScriptContextMenuItems: function(context, script, name)
     {
-        var monitored = FunctionMonitor.isScriptMonitored(context, script);
+        var monitored = FunctionMonitor.isScriptMonitored(context, script, "monitor");
+        var hasBreakpoint = FunctionMonitor.isScriptMonitored(context, script, "debug");
 
         var self = this;
         return [{
@@ -339,7 +351,18 @@ FirebugReps.Func = domplate(Rep,
             command: function()
             {
                 var checked = this.hasAttribute("checked");
-                self.monitor(context, script, !checked);
+                self.monitor(context, script, !checked, "monitor");
+            }
+        }, {
+            label: Locale.$STR("SetBreakpoint"),
+            tooltiptext: Locale.$STRF("dom.tip.setBreakpoint", [name]),
+            nol10n: true,
+            type: "checkbox",
+            checked: hasBreakpoint,
+            command: function()
+            {
+                var checked = this.hasAttribute("checked");
+                self.monitor(context, script, !checked, "debug");
             }
         }];
     },
