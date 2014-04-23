@@ -181,7 +181,8 @@ var BreakpointModule = Obj.extend(Firebug.Module,
         for (var i=0; i<panelTypes.length; ++i)
         {
             var panelType = panelTypes[i];
-            var panel = context.getPanel(panelType.prototype.name);
+            // Note: avoid eagerly creating all panels, by passing 'true' here.
+            var panel = context.getPanel(panelType.prototype.name, true);
             var shouldBreak = (panel && panel.shouldBreakOnNext()) ? true : false;
             this.updatePanelTab(panel, shouldBreak);
         }
