@@ -227,12 +227,17 @@ var BreakpointModule = Obj.extend(Firebug.Module,
                 return true;
             }
 
-            // Resume if it isn't "normal" breakpoint.
-            if (!bp.isNormal())
+            // Resume if it isn't "normal" nor "error" breakpoint.
+            if (!bp.isNormal() && !bp.isError())
+            {
+                Trace.sysout("breakpointModule.paused; Do not break on unknown breakpoint", bp);
                 return false;
+            }
 
             // If there is normal disabled breakpoint, do not break.
-            if (bp.isDisabled())
+            // xxxHonza: we might want to have support for disabled-error
+            // breakpoints in the future.
+            if (bp.isNormal() && bp.isDisabled())
             {
                 Trace.sysout("breakpointModule.paused; Do not break on disabled breakpoint", bp);
                 return false;
