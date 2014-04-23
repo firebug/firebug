@@ -266,6 +266,11 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
 
         Firebug.dispatchEvent(this.context.browser, "onResumed");
 
+        this.context.stoppedFrame = null;
+        this.context.currentFrame = null;
+        this.context.currentTrace = null;
+        this.context.currentPacket = null;
+
         // When Firebug is attached to the {@link ThreadClient} object the debugger is paused.
         // As soon as all initialization steps are done {@link TabClient} resumes the
         // debugger. In such case the {@link TabContext} object isn't stopped and there is no
@@ -277,10 +282,6 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
             this.context.clientCache.clear();
 
         this.context.stopped = false;
-        this.context.stoppedFrame = null;
-        this.context.currentFrame = null;
-        this.context.currentTrace = null;
-        this.context.currentPacket = null;
 
         this.dispatch("onStopDebugging", [this.context]);
     },

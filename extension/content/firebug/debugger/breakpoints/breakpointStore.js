@@ -393,7 +393,7 @@ var BreakpointStore = Obj.extend(Module,
             if (bp.lineNo != lineNo)
                 continue;
 
-            if (bp.type & type)
+            if (bp.type == -1 || bp.type & type)
                 return bp;
         }
 

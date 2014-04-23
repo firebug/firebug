@@ -69,33 +69,6 @@ var FunctionMonitor = Obj.extend(Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // DebuggerTool Listener
 
-    shouldResumeDebugger: function(context, event, packet)
-    {
-        var type = packet.why.type;
-        if (type != "breakpoint")
-            return false;
-
-        Trace.sysout("functionMonitor.shouldBreakDebugger;", packet);
-
-        var location = packet.frame.where;
-        var bps = BreakpointStore.getBreakpoints(location.url);
-
-        // Debugger resumes only if there is only BP_MONITOR breakpoint at the line.
-        // (i.e. if there is no other breakpoint than "monitor")
-        // Note that "monitor" breakpoints aren't for breaking, just for logging.
-        for (var i = 0; i < bps.length; i++)
-        {
-            var bp = bps[i];
-            if (bp.lineNo != location.line)
-                continue;
-
-            if (!(bp.type & BreakpointStore.BP_MONITOR))
-                return false;
-        }
-
-        return true;
-    },
-
     onDebuggerPaused: function(context, event, packet)
     {
         // The function monitor is only interested in 'breakpoint' type of interrupts.
