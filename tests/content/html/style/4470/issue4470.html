@@ -9,7 +9,7 @@
         min-height: 120px;
       }
 
-      .element {
+      #element1, #element2 {
         width: 100px;
         height: 100px;
         float: left;
@@ -17,11 +17,11 @@
       }
 
       #element1 {
-        background-image: linear-gradient(135deg, #788CFF, #B4C8FF);
+        background-image: linear-gradient(-45deg, #788CFF, #B4C8FF);
       }
 
       #element2 {
-        background-image: radial-gradient(135deg, #B4FFC8, #78FF8C);
+        background-image: radial-gradient(circle, #B4FFC8, #78FF8C);
       }  
       </style>
     </head>
@@ -31,8 +31,8 @@
         </header>
         <div>
             <section id="content">
-                <div id="element1" class="element"></div>
-                <div id="element2" class="element"></div>
+                <div id="element1"></div>
+                <div id="element2"></div>
             </section>
             <section id="description">
                 <h2>Case1: </h2>
@@ -42,7 +42,7 @@
                     <li>Switch to the <em>HTML</em> panel and there to the <em>Style</em> side panel</li>
                     <li>Inspect the blue <code>&lt;div&gt;</code> above (<code>#element1</code>)</li>
                     <li>
-                        Inside the Style side panel hover <code>-moz-linear-gradient</code> property<br/>
+                        Inside the Style side panel hover <code>linear-gradient</code> property<br/>
                         <span class="ok">&rArr; An infotip with a gradian color should be shown</span>
                     </li>
                 </ol>
@@ -57,7 +57,7 @@
                     <li>Switch to the <em>HTML</em> panel and there to the <em>Style</em> side panel</li>
                     <li>Inspect the green <code>&lt;div&gt;</code> above (<code>#element2</code>)</li>
                     <li>
-                        Inside the Style side panel hover <code>-moz-radial-gradient</code> property<br/>
+                        Inside the Style side panel hover <code>radial-gradient</code> property<br/>
                         <span class="ok">&rArr; An infotip with a gradian color should be shown</span>
                     </li>
                 </ol>
