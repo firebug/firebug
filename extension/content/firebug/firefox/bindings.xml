@@ -865,7 +865,7 @@
 
                 this.setAttribute("label", fileName != path ?
                     FBL.cropString(fileName, 80) : FBL.$STR("location.inline"));
-                this.setAttribute("location", val);
+                this.setAttribute("location", val.href || fileName);
                 if (FBTrace.DBG_LOCATIONS)
                 {
                     FBTrace.sysout("location setter label:" + this.getAttribute("label") +
