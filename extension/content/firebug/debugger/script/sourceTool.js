@@ -229,6 +229,8 @@ SourceTool.prototype = Obj.extend(new Tool(),
                     // Clear first to avoid duplicities.
                     script.clearBreakpoint(bp.params.dynamicHandler);
                     script.setBreakpoint(offsets[0], bp.params.dynamicHandler);
+
+                    Trace.sysout("sourceTool.onAddBreakpoint; set dynamic handler;", script);
                 }
             }
         }
@@ -461,6 +463,8 @@ BreakpointHitHandler.prototype =
 {
     hit: function(frame)
     {
+        Trace.sysout("sourceTool.hit; Dynamic breakpoint hit!", frame);
+
         if (this.bp && this.bp.condition)
         {
             // Copied from firebug/debugger/actors/breakpointActor
