@@ -384,14 +384,9 @@ DynamicSourceCollector.prototype =
         // in case of bigger dynamic web applications.
         if (Trace.active)
         {
-            var element = script.source.element;
-            if (element)
-                element = element.unsafeDereference();
-
             var introType = script.source.introductionType;
-
             Trace.sysout("sourceTool.addDynamicScript; " + script.source.url + ", " +
-                introType, script);
+                introType + ", " + script.source.elementAttributeName, script);
         }
 
         // Get an existing instance of {@link SourceFile} by URL. We don't want to create
