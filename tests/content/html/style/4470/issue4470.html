@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <title>Issue 4470: Preview for CSS gradients</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+      <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+      <style type="text/css">
+      #content {
+        min-height: 120px;
+      }
+
+      #element1, #element2 {
+        width: 100px;
+        height: 100px;
+        float: left;
+        margin: 10px;
+      }
+
+      #element1 {
+        background-image: linear-gradient(-45deg, #788CFF, #B4C8FF);
+      }
+
+      #element2 {
+        background-image: radial-gradient(circle, #B4FFC8, #78FF8C);
+      }  
+      </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4470">Issue 4470</a>: Preview for CSS gradients</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element1"></div>
+                <div id="element2"></div>
+            </section>
+            <section id="description">
+                <h2>Case1: </h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Style</em> side panel</li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> above (<code>#element1</code>)</li>
+                    <li>
+                        Inside the Style side panel hover <code>linear-gradient</code> property<br/>
+                        <span class="ok">&rArr; An infotip with a gradian color should be shown</span>
+                    </li>
+                </ol>
+                <h3>Expected Result</h3>
+                <ul>
+                    <li>An Infotips should be shown displaying the gradient</li>
+                </ul>
+                 <h2>Case2: </h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Style</em> side panel</li>
+                    <li>Inspect the green <code>&lt;div&gt;</code> above (<code>#element2</code>)</li>
+                    <li>
+                        Inside the Style side panel hover <code>radial-gradient</code> property<br/>
+                        <span class="ok">&rArr; An infotip with a gradian color should be shown</span>
+                    </li>
+                </ol>
+                <h3>Expected Result</h3>
+                <ul>
+                    <li>An Infotips should be shown displaying the gradient</li>
+                </ul>
+
+            </section>
+            <footer>
+                Abdeldjalil Belakhdar, zendyani@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>
