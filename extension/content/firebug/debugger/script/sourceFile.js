@@ -205,6 +205,11 @@ SourceFile.prototype =
     {
         var mimeType = NetUtils.getMimeType(this.contentType, this.href);
         return NetUtils.getCategory(mimeType);
+    },
+
+    getSourceLink: function()
+    {
+        return new SourceLink(this.href, null, "js");
     }
 }
 
