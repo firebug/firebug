@@ -7,11 +7,7 @@ function runTest()
             var tasks = new FBTest.TaskList();
             tasks.push(createErrorBreakpoint, win);
             tasks.push(breakOnError, win);
-
-            tasks.run(function()
-            {
-                FBTest.testDone();
-            });
+            tasks.run(FBTest.testDone);
         });
     });
 }
