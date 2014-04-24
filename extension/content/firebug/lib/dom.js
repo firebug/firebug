@@ -167,6 +167,24 @@ Dom.getPreviousElement = function(node)
     return node;
 };
 
+/**
+ * Returns the child index of a node within its parent
+ * 
+ * @param node Node for which to get the index
+ * @param [allNodes] specifies whether all node types or only elements should be considered
+ * @returns Index of the node
+ */
+Dom.getChildIndex = function(node, allNodes)
+{
+    var i = 0;
+    while (node = node.previousSibling)
+    {
+       if (allNodes || node.nodeType === Node.ELEMENT_NODE)
+           i++;
+    }
+    return i;
+};
+
 Dom.getBody = function(doc)
 {
     if (doc.body)
