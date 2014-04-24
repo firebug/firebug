@@ -38,7 +38,7 @@ var TraceError = FBTrace.toError();
  * user actions related to Console panel filter.
  */
 var ActivableConsole = Obj.extend(ActivableModule, ConsoleBase);
-Firebug.Console = Obj.extend(ActivableConsole,
+var Console = Obj.extend(ActivableConsole,
 /** @lends Firebug.Console */
 {
     dispatchName: "console",
@@ -127,7 +127,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
         // Attach the Console for the window and its iframes.
         Win.iterateWindows(context.window, function(win)
         {
-            Firebug.Console.injector.attachConsoleInjector(context, win);
+            Console.injector.attachConsoleInjector(context, win);
         });
 
         // Listen to DOMWindowCreated for future iframes. Also necessary when Firebug is enabled at
@@ -173,7 +173,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
     onSuspendFirebug: function()
     {
         Trace.sysout("console.onSuspendFirebug; isAlwaysEnabled: " +
-            Firebug.Console.isAlwaysEnabled());
+            Console.isAlwaysEnabled());
 
         if (Firebug.Errors.toggleWatchForErrors(false))
         {
@@ -192,7 +192,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
     {
         Trace.sysout("console.onResumeFirebug;");
 
-        var watchForErrors = Firebug.Console.isAlwaysEnabled() || Firebug.Console.hasObservers();
+        var watchForErrors = Console.isAlwaysEnabled() || Console.hasObservers();
         if (Firebug.Errors.toggleWatchForErrors(watchForErrors))
             this.setStatus();
 
@@ -236,7 +236,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
         this.syncFilterButtons(Firebug.chrome);
 
-        Events.dispatch(Firebug.Console.fbListeners, "onFiltersSet", [filterTypes]);
+        Events.dispatch(Console.fbListeners, "onFiltersSet", [filterTypes]);
     },
 
     syncFilterButtons: function(chrome)
@@ -367,9 +367,11 @@ function createDefaultReturnValueInstance()
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerActivableModule(Firebug.Console);
+Firebug.Console = Console;
 
-return Firebug.Console;
+Firebug.registerActivableModule(Console);
+
+return Console;
 
 // ********************************************************************************************* //
 });

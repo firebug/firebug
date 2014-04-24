@@ -14,11 +14,10 @@ define([
     "firebug/console/errorStackTraceObserver",
     "firebug/chrome/window",
     "firebug/chrome/module",
-    "firebug/chrome/reps",
     "firebug/debugger/breakpoints/breakpointStore",
 ],
 function(Firebug, FBTrace, Arr, Css, Obj, Options, Str, Xpcom, Console, ErrorMessageObj,
-    ErrorStackTraceObserver, Win, Module, FirebugReps, BreakpointStore) {
+    ErrorStackTraceObserver, Win, Module, BreakpointStore) {
 
 "use strict";
 
@@ -274,7 +273,6 @@ var Errors = Obj.extend(Module,
                     {
                         // Even chrome errors can be nicely formatted in the Console panel
                         this.logScriptError(context, object, isWarning);
-                        //Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
                     }
                     else
                     {

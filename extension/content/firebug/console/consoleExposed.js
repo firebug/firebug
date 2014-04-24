@@ -1,4 +1,6 @@
 /* See license.txt for terms of usage */
+/* jshint strict:false, esnext:true */
+/* global define:1, Components:1 */
 
 define([
     "firebug/firebug",
@@ -18,11 +20,10 @@ define([
     "firebug/debugger/stack/stackTrace",
     "firebug/debugger/debuggerLib",
     "firebug/dom/domBaseTree",
-    "firebug/trace/debug",
 ],
 function(Firebug, FBTrace, Locale, Options, Str, Url, Wrapper, FirebugReps, TableRep,
     Console, Errors, ErrorMessageObj, Profiler, StackFrame, StackTrace, DebuggerLib,
-    DomBaseTree, Debug) {
+    DomBaseTree) {
 
 // Note: since we are using .caller and .arguments for stack walking, we can not use strict mode.
 //"use strict";
@@ -36,45 +37,43 @@ var Trace = FBTrace.to("DBG_CONSOLE");
 // ********************************************************************************************* //
 
 /**
- * Returns a console object (bundled with passed window through closure). The object
- * provides all necessary APIs as described here: https://getfirebug.com/wiki/index.php/Console_API
+ * Returns a console object (bundled with passed window through closure), expected to be called
+ * into from a web page. The object provides all necessary APIs as described here:
+ * https://getfirebug.com/wiki/index.php/Console_API
  *
  * @param {Object} context
  * @param {Object} win
  */
 function createFirebugConsole(context, win)
 {
-    // Defined as a chrome object, but exposed into the web content scope.
-    var console = {
-        __exposedProps__: {}
-    };
+    var console = {};
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Exposed Properties
 
     console.log = function log()
     {
-        return logFormatted(arguments, "log", true);
+        return logFormatted(arguments, "log");
     };
 
     console.debug = function debug()
     {
-        return logFormatted(arguments, "debug", true);
+        return logFormatted(arguments, "debug");
     };
 
     console.info = function info()
     {
-        return logFormatted(arguments, "info", true);
+        return logFormatted(arguments, "info");
     };
 
     console.warn = function warn()
     {
-        return logFormatted(arguments, "warn", true);
+        return logFormatted(arguments, "warn");
     };
 
     console.exception = function exception()
     {
-        return logAssert("error", arguments);
+        return logAssert(arguments, "error");
     };
 
     console.assert = function assert(x)
@@ -85,32 +84,21 @@ function createFirebugConsole(context, win)
             for (var i = 1; i < arguments.length; i++)
                 rest.push(arguments[i]);
 
-            return logAssert("assert", rest);
+            return logAssert(rest, "assert");
         }
 
         return Console.getDefaultReturnValue();
     };
 
-    console.dir = function dir(o)
+    console.dir = function dir(obj)
     {
-        Console.log(o, context, "dir", null, null, null, function(row)
-        {
-            var logContent = row.getElementsByClassName("logContent").item(0);
-            var tree = new DomBaseTree(context);
-            tree.replace(logContent, {object: o}, true);
-        });
-
+        ConsoleHandler.dir(context, obj);
         return Console.getDefaultReturnValue();
     };
 
-    console.dirxml = function dirxml(o)
+    console.dirxml = function dirxml(obj)
     {
-        if (o instanceof Wrapper.getContentView(win).Window)
-            o = o.document.documentElement;
-        else if (o instanceof Wrapper.getContentView(win).Document)
-            o = o.documentElement;
-
-        Console.log(o, context, "dirxml", Firebug.HTMLPanel.SoloElement);
+        ConsoleHandler.dirxml(context, obj);
         return Console.getDefaultReturnValue();
     };
 
@@ -120,154 +108,100 @@ function createFirebugConsole(context, win)
         if (!trace)
             trace = getComponentsUserStack();
 
-        // This should never happen, but inform the user if it does.
-        if (!trace)
-            trace = "(No stack trace available)";
-
-        Console.log(trace, context, "stackTrace");
+        ConsoleHandler.trace(context, trace);
         return Console.getDefaultReturnValue();
     };
 
     console.group = function group()
     {
-        var sourceLink = getStackLink();
-        Console.openGroup(arguments, null, "group", null, false, sourceLink);
-        return Console.getDefaultReturnValue();
-    };
-
-    console.groupEnd = function()
-    {
-        Console.closeGroup(context);
+        ConsoleHandler.group(context, arguments, true, getStackLink());
         return Console.getDefaultReturnValue();
     };
 
     console.groupCollapsed = function()
     {
-        var sourceLink = getStackLink();
-
-        // noThrottle true can't be used here (in order to get the result row now)
-        // because there can be some logs delayed in the queue and they would end up
-        // in a different group.
-        // Use rather a different method that causes auto collapsing of the group
-        // when it's created.
-        Console.openCollapsedGroup(arguments, null, "group", null, false, sourceLink);
+        ConsoleHandler.group(context, arguments, false, getStackLink());
         return Console.getDefaultReturnValue();
     };
 
-    // xxxHonza: could we move the profiler methods into "firebug/console/commands/profiler"?
+    console.groupEnd = function()
+    {
+        ConsoleHandler.groupEnd(context);
+        return Console.getDefaultReturnValue();
+    };
+
     console.profile = function(title)
     {
-        Profiler.commandLineProfileStart(context, title);
+        ConsoleHandler.profile(context, title ? String(title) : null);
         return Console.getDefaultReturnValue();
     };
 
     console.profileEnd = function()
     {
-        Profiler.commandLineProfileEnd(context);
+        ConsoleHandler.profileEnd(context);
         return Console.getDefaultReturnValue();
     };
 
     console.count = function(key)
     {
-        var strKey = String(key);
-        var emptyKey = false;
-        if (key === null || key === undefined || strKey === "")
-        {
-            emptyKey = true;
-            strKey = getStackFrameId();
-            if (!strKey)
-                return Console.getDefaultReturnValue();
-        }
-
-        var id = emptyKey + " " + strKey;
-
-        if (!context.frameCounters)
-            context.frameCounters = {};
-
-        if (!context.frameCounters[id])
-        {
-            var logRow = logFormatted(["0"], null, true, true);
-            context.frameCounters[id] = {logRow: logRow, count: 0};
-        }
-
-        var frameCounter = context.frameCounters[id];
-        frameCounter.count++;
-
-        var label = (emptyKey ? "" : strKey + " ") + frameCounter.count;
-
-        var node = frameCounter.logRow.getElementsByClassName("objectBox-text")[0];
-        node.firstChild.nodeValue = label;
-
+        var strKey = (key == null ? "" : String(key));
+        ConsoleHandler.count(context, strKey, getStackLink());
         return Console.getDefaultReturnValue();
     };
 
     console.clear = function()
     {
-        Console.clear(context);
+        ConsoleHandler.clear(context, win);
         return Console.getDefaultReturnValue();
     };
+
+    var timeCounters = new Map();
 
     console.time = function(name, reset)
     {
         if (!name)
             return Console.getDefaultReturnValue();
 
-        var time = new Date().getTime();
+        var key = String(name);
 
-        if (!this.timeCounters)
-            this.timeCounters = {};
+        if (!timeCounters.has(key) || reset)
+            timeCounters.set(key, Date.now());
 
-        var key = "KEY" + name.toString();
-
-        if (!reset && this.timeCounters[key])
-            return Console.getDefaultReturnValue();
-
-        this.timeCounters[key] = time;
         return Console.getDefaultReturnValue();
     };
 
     console.timeEnd = function(name)
     {
-        var time = new Date().getTime();
-        var diff = undefined;
-
-        if (!this.timeCounters)
+        if (!name)
             return Console.getDefaultReturnValue();
 
-        var key = "KEY" + name.toString();
+        var key = String(name);
 
-        var timeCounter = this.timeCounters[key];
-        if (timeCounter)
+        var time = timeCounters.get(key);
+        if (time)
         {
-            diff = time - timeCounter;
-            var label = name + ": " + diff + "ms";
+            timeCounters.delete(key);
 
-            this.info(label);
+            var diff = Date.now() - time;
+            ConsoleHandler.timeEnd(context, name, diff, getStackLink());
 
-            delete this.timeCounters[key];
+            return diff;
         }
 
-        return diff;
+        return undefined;
     };
 
     console.timeStamp = function(label)
     {
-        label = label || "";
-
-        Trace.sysout("consoleExposed.timeStamp; " + label);
-
-        var now = new Date();
-        Firebug.NetMonitor.addTimeStamp(context, now.getTime(), label);
-
-        var formattedTime = now.getHours() + ":" + now.getMinutes() + ":" +
-            now.getSeconds() + "." + now.getMilliseconds();
-
-        return logFormatted([formattedTime, label], "timeStamp");
+        if (typeof label !== "string")
+            label = "";
+        ConsoleHandler.timeStamp(context, label, Date.now());
+        return Console.getDefaultReturnValue();
     };
 
     console.table = function(data, columns)
     {
-        TableRep.log(data, columns, context);
+        ConsoleHandler.table(context, data, columns);
         return Console.getDefaultReturnValue();
     };
 
@@ -275,77 +209,42 @@ function createFirebugConsole(context, win)
     {
         if (arguments.length == 1)
         {
-            return logAssert("error", arguments);  // add more info based on stack trace
+            return logAssert(arguments, "error");
         }
         else
         {
+            // XXX(simon) why do we do this? (it breaks the frontend abstraction, too)
             Errors.increaseCount(context);
-            return logFormatted(arguments, "error", true);  // user already added info
+            return logFormatted(arguments, "error");
         }
     };
 
-    // Expose only these properties to the content scope (read only).
-    console.__exposedProps__.log = "r";
-    console.__exposedProps__.debug = "r";
-    console.__exposedProps__.info = "r";
-    console.__exposedProps__.warn = "r";
-    console.__exposedProps__.exception = "r";
-    console.__exposedProps__.assert = "r";
-    console.__exposedProps__.dir = "r";
-    console.__exposedProps__.dirxml = "r";
-    console.__exposedProps__.trace = "r";
-    console.__exposedProps__.group = "r";
-    console.__exposedProps__.groupEnd = "r";
-    console.__exposedProps__.groupCollapsed = "r";
-    console.__exposedProps__.time = "r";
-    console.__exposedProps__.timeEnd = "r";
-    console.__exposedProps__.timeStamp = "r";
-    console.__exposedProps__.profile = "r";
-    console.__exposedProps__.profileEnd = "r";
-    console.__exposedProps__.count = "r";
-    console.__exposedProps__.clear = "r";
-    console.__exposedProps__.table = "r";
-    console.__exposedProps__.error = "r";
-
-    // DBG console.uid = Math.random();
+    // Expose those properties to the content scope (read only).
+    var expose = Object.keys(console);
+    console.__exposedProps__ = {};
+    for (var i = 0; i < expose.length; i++)
+        console.__exposedProps__[expose[i]] = "r";
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Helpers (not accessible from web content)
 
-    function logFormatted(args, className, linkToSource, noThrottle)
+    function logFormatted(args, className)
     {
-        var sourceLink = null;
-
-        // Using JSD to get user stack is time consuming, so there is a pref.
-        if (Options.get("preferJSDSourceLinks"))
-        {
-            var stack = getJSDUserStack();
-            if (stack && stack.toSourceLink)
-                sourceLink = stack.toSourceLink();
-        }
-
-        if (!sourceLink)
-            sourceLink = linkToSource ? getStackLink() : null;
-
-        var ignoreReturnValue = Console.getDefaultReturnValue();
-        var rc = Console.logFormatted(args, context, className, noThrottle, sourceLink);
-        return rc ? rc : ignoreReturnValue;
+        ConsoleHandler.log(context, args, className, getStackLink());
+        return Console.getDefaultReturnValue();
     }
 
-    function logAssert(category, args)
+    function logAssert(args, category)
     {
-        Errors.increaseCount(context);
+        var error = args && args[0];
 
-        var msg = (!args || !args.length || args.length == 0) ?
-            [Locale.$STR("Assertion")] : args[0];
-
-        // If there's no error message, there's also no stack trace. See Issue 4700.
         var trace;
-        if (msg && msg.stack)
+        var stack = error && error.stack;
+        if (typeof stack === "string")
         {
-            trace = StackTrace.parseToStackTrace(msg.stack, context);
+            trace = StackTrace.parseToStackTrace(stack, context);
 
-            Trace.sysout("logAssert trace from msg.stack", trace);
+            Trace.sysout("logAssert trace from error.stack", trace);
         }
         else
         {
@@ -363,26 +262,16 @@ function createFirebugConsole(context, win)
         if (!trace || !trace.frames || !trace.frames.length)
             trace = null;
 
-        var url = msg && msg.fileName ? msg.fileName : win.location.href;
+        var fileName = error && error.fileName;
+        if (typeof fileName !== "string")
+            fileName = win.location.href;
 
         // we may have only the line popped above
-        var lineNo = (trace && msg && msg.lineNumber) ? msg.lineNumber : 0;
-        var errorObject = new ErrorMessageObj(msg, url, lineNo, null, category, context, trace);
-        if (trace)
-            errorObject.correctWithStackTrace(trace);
+        var lineNo = error && error.lineNumber;
+        if (typeof lineNo !== "number" || (lineNo|0) !== lineNo)
+            lineNo = 0;
 
-        errorObject.resetSource();
-
-        if (args.length > 1)
-        {
-            errorObject.objects = [];
-            for (var i = 1; i < args.length; i++)
-                errorObject.objects.push(args[i]);
-        }
-
-        var row = Console.log(errorObject, context, "errorMessage");
-        if (row)
-            row.scrollIntoView();
+        ConsoleHandler.logError(context, args, category, fileName, lineNo, trace);
 
         return Console.getDefaultReturnValue();
     }
@@ -415,6 +304,14 @@ function createFirebugConsole(context, win)
 
     function getStackLink()
     {
+        // Using JSD to get user stack is time consuming, so there is a pref.
+        if (Options.get("preferJSDSourceLinks"))
+        {
+            var stack = getJSDUserStack();
+            if (stack && stack.toSourceLink)
+                return stack.toSourceLink();
+        }
+
         var sourceLink = StackFrame.getFrameSourceLink(getComponentsStackDump());
 
         // xxxFlorent: should be reverted if we integrate
@@ -509,21 +406,145 @@ function createFirebugConsole(context, win)
         return StackFrame.removeChromeFrames(trace);
     }
 
-    function getStackFrameId(inputFrame)
-    {
-        for (var frame = Components.stack; frame; frame = frame.caller)
-        {
-            if (frame.languageName == "JavaScript"
-                && !(frame.filename && frame.filename.indexOf("://firebug/") > 0))
-            {
-                return frame.filename + "/" + frame.lineNumber;
-            }
-        }
-        return null;
-    }
-
     return console;
 }
+
+/**
+ * Frontend surface of the console API, called into by the console created by createFirebugConsole.
+ */
+var ConsoleHandler =
+{
+    log: function(context, args, type, sourceLink)
+    {
+        Console.logFormatted(args, context, type, false, sourceLink);
+    },
+
+    logError: function(context, args, type, fileName, lineNo, trace)
+    {
+        var msg = args.length ? args[0] : [Locale.$STR("Assertion")];
+        var errorObject = new ErrorMessageObj(msg, fileName, lineNo, null, type, context, trace);
+
+        if (trace)
+            errorObject.correctWithStackTrace(trace);
+        errorObject.resetSource();
+
+        var otherArgs = [].slice.call(args, 1);
+        if (otherArgs.length)
+            errorObject.objects = otherArgs;
+
+        Errors.increaseCount(context);
+        Console.log(errorObject, context, "errorMessage");
+    },
+
+    trace: function(context, trace)
+    {
+        // This should never happen, but inform the user if it does.
+        if (!trace)
+            trace = "(No stack trace available)";
+
+        Console.log(trace, context, "stackTrace");
+    },
+
+    dir: function(context, obj)
+    {
+        Console.log(obj, context, "dir", null, false, null, function(row)
+        {
+            var logContent = row.getElementsByClassName("logContent").item(0);
+            var tree = new DomBaseTree(context);
+            tree.replace(logContent, {object: obj}, true);
+        });
+    },
+
+    dirxml: function(context, obj)
+    {
+        if (obj instanceof Window)
+            obj = obj.document.documentElement;
+        else if (obj instanceof Document)
+            obj = obj.documentElement;
+
+        Console.log(obj, context, "dirxml", Firebug.HTMLPanel.SoloElement);
+    },
+
+    count: function(context, strKey, sourceLink)
+    {
+        var id;
+        if (strKey)
+            id = "/" + strKey;
+        else if (sourceLink)
+            id = "#" + sourceLink.href + "/" + sourceLink.line;
+        else
+            return;
+
+        if (!context.frameCounters)
+            context.frameCounters = {};
+        if (!context.frameCounters[id])
+        {
+            var row = Console.logFormatted(["0"], context, null, true, sourceLink);
+            context.frameCounters[id] = {logRow: row, count: 0};
+        }
+
+        var frameCounter = context.frameCounters[id];
+        frameCounter.count++;
+
+        var label = (strKey ? strKey + " " : "") + frameCounter.count;
+
+        var node = frameCounter.logRow.getElementsByClassName("objectBox-text")[0];
+        node.firstChild.nodeValue = label;
+    },
+
+    group: function(context, args, open, sourceLink)
+    {
+        if (open)
+            Console.openGroup(args, null, "group", null, false, sourceLink);
+        else
+            Console.openCollapsedGroup(args, null, "group", null, false, sourceLink);
+    },
+
+    groupEnd: function(context)
+    {
+        Console.closeGroup(context);
+    },
+
+    clear: function(context, win)
+    {
+        Console.clear(context);
+    },
+
+    timeEnd: function(context, name, diff, sourceLink)
+    {
+        var label = name + ": " + diff + "ms";
+
+        Console.logFormatted([label], context, "info", false, sourceLink);
+    },
+
+    timeStamp: function(context, label, time)
+    {
+        Trace.sysout("consoleExposed.timeStamp; " + label);
+
+        Firebug.NetMonitor.addTimeStamp(context, time, label);
+
+        var date = new Date(time);
+        var formattedTime = date.getHours() + ":" + date.getMinutes() + ":" +
+            date.getSeconds() + "." + date.getMilliseconds();
+
+        Console.logFormatted([formattedTime, label], context, "timeStamp");
+    },
+
+    table: function(context, data, columns)
+    {
+        TableRep.log(data, columns, context);
+    },
+
+    profile: function(context, title)
+    {
+        Profiler.commandLineProfileStart(context, title);
+    },
+
+    profileEnd: function(context)
+    {
+        Profiler.commandLineProfileEnd(context);
+    },
+};
 
 // ********************************************************************************************* //
 // Registration

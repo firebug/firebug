@@ -4,9 +4,8 @@ define([
     "firebug/firebug",
     "firebug/console/console",
     "firebug/console/consoleExposed",
-    "firebug/console/errors",
 ],
-function(Firebug, Console) {
+function(Firebug, Console, ConsoleExposed) {
 
 // ********************************************************************************************* //
 // Constants
@@ -37,7 +36,7 @@ Firebug.Console.injector =
                 return;
             }
             // Get the 'console' object (this comes from chrome scope).
-            var console = Firebug.ConsoleExposed.createFirebugConsole(context, win);
+            var console = ConsoleExposed.createFirebugConsole(context, win);
 
             // Do not expose the chrome object as is but, rather do a wrapper, see below.
             //win.wrappedJSObject.console = console;
