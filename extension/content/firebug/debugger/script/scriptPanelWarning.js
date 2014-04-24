@@ -160,14 +160,15 @@ var WarningRep = domplate(Rep,
     {
         var args = {
             pageTitle: Locale.$STR("script.warning.no_system_source_debugging"),
-            suggestion: Locale.$STR("script.suggestion.no_system_source_debugging")
+            suggestion: Locale.$STR("script.suggestion.no_system_source_debugging2")
         };
 
         var box = this.tag.replace(args, parentNode, this);
         var description = box.getElementsByClassName("disabledPanelDescription").item(0);
 
         FirebugReps.Description.render(args.suggestion, description,
-            Obj.bindFixed(Firebug.chrome.visitWebsite, this, "issue5110"));
+            [Obj.bindFixed(Firebug.chrome.visitWebsite, this, "issue5110"),
+                 Obj.bindFixed(Firebug.chrome.visitWebsite, this, "browserToolbox")]);
 
         return box;
     },

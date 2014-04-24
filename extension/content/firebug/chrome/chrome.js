@@ -53,7 +53,8 @@ const firebugURLs =
     issues: "http://code.google.com/p/fbug/issues/list?can=1",
     donate: "https://getfirebug.com/getinvolved",
     extensions: "https://getfirebug.com/wiki/index.php/Firebug_Extensions",
-    issue5110: "http://code.google.com/p/fbug/issues/detail?id=5110"
+    issue5110: "http://code.google.com/p/fbug/issues/detail?id=5110",
+    browserToolbox: "https://developer.mozilla.org/docs/Tools/Browser_Toolbox"
 };
 
 // ********************************************************************************************* //

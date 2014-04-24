@@ -180,6 +180,15 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             this.showEmptyMembers();
     },
 
+    hide: function()
+    {
+        BasePanel.hide.apply(this, arguments);
+
+        Trace.sysout("watchPanel.hide;");
+
+        this.defaultTree.saveState(this.defaultToggles);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Content
 
@@ -300,6 +309,11 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         // Evaluate watch expressions.
         this.evalWatchesLocally();
+
+        // Either use the remembered state (from previous page session)
+        // or save the current state (e.g. when the user does refresh.
+        if (this.defaultToggles.isEmpty())
+            this.defaultTree.saveState(this.defaultToggles);
 
         // Render the watch panel tree.
         this.defaultTree.replace(this.panelNode, input);
@@ -862,10 +876,9 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // So, make sure to persist the proper tree state.
         if (this.selection instanceof StackFrame)
             this.tree.saveState(this.toggles);
-        else
-            this.defaultTree.saveState(this.defaultToggles);
 
         var member = row.domObject;
+
         // If the user changes the frame result value, store the value
         // in ReturnValueModifier. Otherwise, just redirect to the super class.
         if (member && (member.value instanceof WatchProvider.FrameResultObject))

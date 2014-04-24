@@ -280,6 +280,9 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
             // Save changed property names here instead of in saveEdit, because otherwise
             // unrelated properties might get discarded (see issue 5204).
             var previous = this.initialValue;
+            if (value === previous)
+                return true;
+
             if (FBTrace.DBG_CSS)
             {
                 FBTrace.sysout("CSSEditor.endEditing: renaming property " + previous + " -> " +

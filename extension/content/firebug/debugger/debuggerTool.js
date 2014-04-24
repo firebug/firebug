@@ -85,7 +85,7 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
             if (currContext && currContext != this.context)
             {
                 var panel = currContext.getPanel("script");
-                if (panel && panel === Firebug.chrome.getSelectedPanel())
+                if (panel && panel.isSelected())
                 {
                     var state = Firebug.getPanelState(panel);
                     panel.show(state);

@@ -285,7 +285,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // Clear the stack on the panel toolbar, but only if the Script panel is
         // the currently selected panel.
-        if (Firebug.chrome.getSelectedPanel() == this)
+        if (this.isSelected())
             StatusPath.clear();
 
         this.updateInfoTip();
@@ -1666,11 +1666,14 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // event and cause {@linke NavigationHistory} to be updated (issue 6950).
         // Also, explicit executing of syncLocationList here is not ideal (are there any
         // other options?)
-        if (!this.location)
+        // Do the update location only if the panel is the selected one at the moment.
+        if (!this.location && this.isSelected())
         {
             this.location = this.getDefaultLocation();
+
             Trace.sysout("scriptPanel.newSource; this.location.getURL() = " +
                 this.location.getURL());
+
             this.updateLocation(this.location);
             Firebug.chrome.syncLocationList();
         }

@@ -498,7 +498,7 @@ BreakpointHitHandler.prototype =
 }
 
 // ********************************************************************************************* //
-// StackFrame builder Decorator
+// StackFrame Patch
 
 var originalBuildStackFrame = StackFrame.buildStackFrame;
 
@@ -569,7 +569,7 @@ function buildStackFrame(frame, context)
 StackFrame.buildStackFrame = buildStackFrame;
 
 // ********************************************************************************************* //
-// ErrorStackTraceObserver
+// ErrorStackTraceObserver Patch
 
 /**
  * Monkey path the {@link ErrorStackTraceObserver} that is responsible for collecting
@@ -585,6 +585,23 @@ ErrorStackTraceObserver.getSourceFile = function(context, script)
 
     return originalGetSourceFile.apply(ErrorStackTraceObserver, arguments);
 }
+
+// ********************************************************************************************* //
+// SourceFile Patch
+
+var originalSourceLinkForScript = SourceFile.getSourceLinkForScript;
+SourceFile.getSourceLinkForScript = function(script, context)
+{
+    var introType = script.source.introductionType;
+    var scriptType = dynamicTypesMap[introType];
+    if (scriptType)
+    {
+        var sourceFile = getSourceFileByScript(context, script);
+        return sourceFile.getSourceLink();
+    }
+
+    return originalSourceLinkForScript.apply(SourceFile, arguments);
+};
 
 // ********************************************************************************************* //
 // Script Helpers
