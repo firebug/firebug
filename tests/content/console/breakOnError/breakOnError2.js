@@ -27,10 +27,6 @@ function createErrorBreakpoint(callback, win)
 
 function breakOnError(callback, win)
 {
-    FBTest.waitForBreakInDebugger(null, 1, false, function(row)
-    {
-        callback();
-    });
-
+    FBTest.waitForBreakInDebugger(null, 1, false, callback);
     FBTest.clickContentButton(win, "testButton");
 }
