@@ -2384,15 +2384,20 @@ FirebugReps.Description = domplate(Rep,
     tag:
         SPAN({"class": "descriptionBox", onclick: "$onClickLink"}),
 
-    render: function(text, parentNode, listener)
+    render: function(text, parentNode, listeners)
     {
         var params = {};
         params.onClickLink = function(event)
         {
             // Only clicks on links are passed to the original listener.
             var localName = event.target.localName;
-            if (listener && localName && localName.toLowerCase() == "a")
-                listener(event);
+            if (listeners && localName && localName.toLowerCase() == "a")
+            {
+                if (Array.isArray(listeners))
+                    listeners[Dom.getChildIndex(event.target)](event);
+                else
+                    listeners(event);
+            }
         };
 
         var rootNode = this.tag.replace(params, parentNode, this);
