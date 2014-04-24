@@ -7,11 +7,7 @@ function runTest()
             var tasks = new FBTest.TaskList();
             tasks.push(createErrorBreakpoint, win);
             tasks.push(breakOnError, win);
-
-            tasks.run(function()
-            {
-                FBTest.testDone();
-            });
+            tasks.run(FBTest.testDone);
         });
     });
 }
@@ -31,10 +27,6 @@ function createErrorBreakpoint(callback, win)
 
 function breakOnError(callback, win)
 {
-    FBTest.waitForBreakInDebugger(null, 1, false, function(row)
-    {
-        callback();
-    });
-
+    FBTest.waitForBreakInDebugger(null, 1, false, callback);
     FBTest.clickContentButton(win, "testButton");
 }
