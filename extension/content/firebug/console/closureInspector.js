@@ -37,6 +37,11 @@ var ClosureInspector =
         try
         {
             var ret = scope.getVariable(name);
+            if (ret && ret.optimizedOut)
+                return OptimizedAway;
+
+            // Try to detect optimized-away values. This round-about method is
+            // needed for Firefox versions prior to 31 (when bug 716647 landed).
             if (ret !== undefined)
                 return ret;
 
