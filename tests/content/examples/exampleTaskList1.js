@@ -3,32 +3,34 @@ function runTest()
     // Create a task list object.
     var tasks = new FBTest.TaskList();
 
-    // Append a task into the list.
-    tasks.push(function(callback) {
-        FBTest.progress("Task 1 executed");
+    // Append some tasks into the list.
+    tasks.push(task1, "arg1", "arg2");
+    tasks.push(task2);
 
-        setTimeout(function()
-        {
-            // TODO: test implementation (after an async operation)
-            // Continue with other tests.
-            callback();
-        }, 100);
-    });
+    // Run all, with 0 timeout in between (optional argument).
+    tasks.run(FBTest.testDone, 0);
+}
 
-    // Append another task into the list
-    tasks.push(function(callback) {
-        FBTest.progress("Task 2 executed");
+function task1(callback, arg1, arg2)
+{
+    FBTest.progress("Task 1 executed: " + arg1 + ", " + arg2);
 
-        setTimeout(function()
-        {
-            // TODO: test implementation (after an async operation)
-            // Continue with other tests.
-            callback();
-        }, 100);
-    });
+    setTimeout(function()
+    {
+        // TODO: test implementation (after an async operation)
+        // Continue with other tests.
+        callback();
+    }, 100);
+}
 
-    // Run all.
-    tasks.run(function() {
-        FBTest.testDone();
-    });
+function task2(callback)
+{
+    FBTest.progress("Task 2 executed");
+
+    setTimeout(function()
+    {
+        // TODO: test implementation (after an async operation)
+        // Continue with other tests.
+        callback();
+    }, 100);
 }

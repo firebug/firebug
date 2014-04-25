@@ -115,19 +115,15 @@ var BreakOnNext = Obj.extend(Module,
             line: context.currentFrame.getLineNumber()
         };
 
-        // In case of an event handler break even if the line isn't executable.
-        // xxxHonza: is this Firebug or platform bug?
         var nativeFrame = DebuggerLib.getCurrentFrame(context);
-        if (isFrameInlineEvent(nativeFrame))
-        {
-            Trace.sysout("breakOnNext.shouldResumeDebugger; hit inline event handler.");
-            return false;
-        }
 
         // Don't break if the current line is not executable. Currently, the debugger might break on
         // a function definition when stepping from an inline event handler into a function.
         // See also https://bugzilla.mozilla.org/show_bug.cgi?id=969816
-        if (!DebuggerLib.isExecutableLine(context, location))
+        // ---
+        // In case of an event handler break even if the line isn't executable.
+        // xxxHonza: is this Firebug or platform bug?
+        if (!DebuggerLib.isExecutableLine(context, location) && !isFrameInlineEvent(nativeFrame))
         {
             Trace.sysout("breakOnNext.shouldResumeDebugger; hit a non-executable line => step in");
             context.resumeLimit = {type: "step"};

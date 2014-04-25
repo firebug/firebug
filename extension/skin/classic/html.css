@@ -219,31 +219,3 @@
 .useA11y .nodeLabelBox:focus {
     outline: none;
 }
-
-/************************************************************************************************/
-
-.breakpointCode .twisty {
-    display: none;
-}
-
-.breakpointCode .nodeBox.containerNodeBox,
-.breakpointCode .nodeLabel {
-    padding-left: 0px;
-    margin-left: 0px;
-    font-family: monospace !important;
-}
-
-.breakpointCode .nodeTag,
-.breakpointCode .nodeAttr,
-.breakpointCode .nodeText,
-.breakpointCode .nodeValue,
-.breakpointCode .nodeLabel {
-    color: DarkGreen !important;
-}
-
-.breakpointMutationType {
-    position: absolute;
-    top: 4px;
-    right: 20px;
-    color: gray;
-}

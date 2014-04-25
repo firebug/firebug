@@ -753,27 +753,18 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
 
     appendFormatted: function(objects, row, rep)
     {
-        function logText(text, row)
+        function addHintText(text, row)
         {
             var nodeSpan = row.ownerDocument.createElement("span");
-            Css.setClass(nodeSpan, "logRowHint");
-            var node = row.ownerDocument.createTextNode(text);
+            nodeSpan.classList.add("logRowHint");
+            nodeSpan.textContent = text;
             row.appendChild(nodeSpan);
-            nodeSpan.appendChild(node);
         }
 
-        function logTextNode(text, row)
+        function addText(text, row)
         {
-            var nodeSpan = row.ownerDocument.createElement("span");
-            if (text === "" || text === null || typeof(text) == "undefined")
-                Css.setClass(nodeSpan, "logRowHint");
-
-            if (text === "")
-                text = Locale.$STR("console.msg.an_empty_string");
-
-            var node = row.ownerDocument.createTextNode(text);
-            row.appendChild(nodeSpan);
-            nodeSpan.appendChild(node);
+            var tag = FirebugReps.Text.getWhitespaceCorrectedTag(text);
+            return tag.append({object: text}, row);
         }
 
         function addStyle(node, css)
@@ -792,29 +783,25 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
         if (!objects || !objects.length)
         {
             // Make sure the log-row has proper height (even if empty).
-            logText(Locale.$STR("console.msg.nothing_to_output"), row);
+            addHintText(Locale.$STR("console.msg.nothing_to_output"), row);
             return;
         }
 
         var format = objects[0];
         var objIndex = 1;
 
-        if (typeof(format) != "string")
+        if (typeof format != "string")
         {
             format = "";
             objIndex = 0;
         }
         else
         {
-            // So, we have only a string...
-            if (objects.length === 1)
+            // If we have a single, empty string, log an informative note about that.
+            if (objects.length === 1 && !format)
             {
-                // ...and it has no characters.
-                if (format.length < 1)
-                {
-                    logText(Locale.$STR("console.msg.an_empty_string"), row);
-                    return;
-                }
+                addHintText(Locale.$STR("console.msg.an_empty_string"), row);
+                return;
             }
         }
 
@@ -845,7 +832,7 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
         {
             var node;
             var part = parts[i];
-            if (part && typeof(part) == "object")
+            if (part && typeof part == "object")
             {
                 var object = objects[objIndex];
                 if (part.type == "%c")
@@ -866,8 +853,7 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
             }
             else
             {
-                var tag = FirebugReps.Text.getWhitespaceCorrectedTag(part);
-                node = tag.append({object: part}, row);
+                node = addText(part, row);
             }
 
             // Apply custom style if available.
@@ -879,11 +865,13 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
 
         for (var i = objIndex; i < objects.length; ++i)
         {
-            logTextNode(" ", row);
+            row.appendChild(row.ownerDocument.createTextNode(" "));
 
             var object = objects[i];
-            if (typeof(object) == "string")
-                logTextNode(object, row);
+            if (object === "")
+                addHintText(Locale.$STR("console.msg.an_empty_string"), row);
+            else if (typeof object == "string")
+                addText(object, row);
             else
                 this.appendObject(object, row);
         }

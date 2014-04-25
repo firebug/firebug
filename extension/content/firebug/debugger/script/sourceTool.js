@@ -229,6 +229,8 @@ SourceTool.prototype = Obj.extend(new Tool(),
                     // Clear first to avoid duplicities.
                     script.clearBreakpoint(bp.params.dynamicHandler);
                     script.setBreakpoint(offsets[0], bp.params.dynamicHandler);
+
+                    Trace.sysout("sourceTool.onAddBreakpoint; set dynamic handler;", script);
                 }
             }
         }
@@ -384,14 +386,9 @@ DynamicSourceCollector.prototype =
         // in case of bigger dynamic web applications.
         if (Trace.active)
         {
-            var element = script.source.element;
-            if (element)
-                element = element.unsafeDereference();
-
             var introType = script.source.introductionType;
-
             Trace.sysout("sourceTool.addDynamicScript; " + script.source.url + ", " +
-                introType, script);
+                introType + ", " + script.source.elementAttributeName, script);
         }
 
         // Get an existing instance of {@link SourceFile} by URL. We don't want to create
@@ -466,6 +463,8 @@ BreakpointHitHandler.prototype =
 {
     hit: function(frame)
     {
+        Trace.sysout("sourceTool.hit; Dynamic breakpoint hit!", frame);
+
         if (this.bp && this.bp.condition)
         {
             // Copied from firebug/debugger/actors/breakpointActor
@@ -499,7 +498,7 @@ BreakpointHitHandler.prototype =
 }
 
 // ********************************************************************************************* //
-// StackFrame builder Decorator
+// StackFrame Patch
 
 var originalBuildStackFrame = StackFrame.buildStackFrame;
 
@@ -570,7 +569,7 @@ function buildStackFrame(frame, context)
 StackFrame.buildStackFrame = buildStackFrame;
 
 // ********************************************************************************************* //
-// ErrorStackTraceObserver
+// ErrorStackTraceObserver Patch
 
 /**
  * Monkey path the {@link ErrorStackTraceObserver} that is responsible for collecting
@@ -586,6 +585,24 @@ ErrorStackTraceObserver.getSourceFile = function(context, script)
 
     return originalGetSourceFile.apply(ErrorStackTraceObserver, arguments);
 }
+
+// ********************************************************************************************* //
+// SourceFile Patch
+
+var originalSourceLinkForScript = SourceFile.getSourceLinkForScript;
+SourceFile.getSourceLinkForScript = function(script, context)
+{
+    var introType = script.source.introductionType;
+    var scriptType = dynamicTypesMap[introType];
+    if (scriptType)
+    {
+        var sourceFile = getSourceFileByScript(context, script);
+        if (sourceFile)
+            return sourceFile.getSourceLink();
+    }
+
+    return originalSourceLinkForScript.apply(SourceFile, arguments);
+};
 
 // ********************************************************************************************* //
 // Script Helpers

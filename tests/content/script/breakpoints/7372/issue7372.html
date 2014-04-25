@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 7372: Turning off "Log Calls" for a line hides breakpoints on that line</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=7372">
+        Issue 7372</a>: Turning off "Log Calls" for a line hides breakpoints on that line</h1>
+</header>
+<script>
+function executeTest()
+{
+    console.log("Hello");
+}
+</script>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug and enable the Script and Console panel</li>
+            <li>Go to the Script panel, open Command Line Popup and execute step by step<br/>
+                (you can also watch the Breakpoints side panel):<br/>
+                <code>debug(executeTest)</code><br/>
+                <code>monitor(executeTest)</code><br/>
+                <code>unmonitor(executeTest)</code>
+            </li>
+            <li>The breakpoint for <i>executeTest</i> should be still displayed in
+                the Script panel, but it is not -> BUG.</li>
+        </ol>
+    </section>
+    <br/>
+    <button onclick="executeTest()">Execute Test</button>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+</body>
+</html>

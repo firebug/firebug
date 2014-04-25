@@ -903,6 +903,16 @@ var Panel = Obj.extend(new EventSource(),
     set selection(val)
     {
         this._selection = val;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    /**
+     * Returns true if this panel is currently selected, otherwise false.
+     */
+    isSelected: function()
+    {
+        return Firebug.chrome.getSelectedPanel() === this;
     }
 });
 

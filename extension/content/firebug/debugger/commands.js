@@ -249,8 +249,10 @@ function threadBreakpoints(context, args)
         Firebug.Console.logFormatted(["Breakpoint Store %d %o", counter, result],
             context, "info");
 
+        Trace.sysout("Client breakpoint store", BreakpointStore.breakpoints);
+
         // Log breakpoint clients objects
-        var length = context.breakpointClients.length;
+        var length = context.breakpointClients ? context.breakpointClients.length : 0;
         Firebug.Console.logFormatted(["Breakpoint Clients %d %o", length,
             context.breakpointClients], context, "info");
     }

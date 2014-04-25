@@ -155,15 +155,12 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
     getShowClosuresMenuItem: function()
     {
-        var requireScriptPanel = DebuggerLib._closureInspectionRequiresDebugger();
         var label = Locale.$STR("ShowClosures");
         var tooltip = Locale.$STR("dom.option.tip.Show_Closures2");
-        if (requireScriptPanel)
-            tooltip = Locale.$STRF("script.Script_panel_must_be_enabled", [tooltip]);
+        tooltip = Locale.$STRF("script.Script_panel_must_be_enabled", [tooltip]);
         var menuItem = Menu.optionMenu(label, "showClosures", tooltip);
         menuItem.nol10n = true;
-        if (requireScriptPanel && !PanelActivation.isPanelEnabled(Firebug.getPanelType("script")))
-            menuItem.disabled = true;
+        menuItem.disabled = !PanelActivation.isPanelEnabled("script");
         return menuItem;
     },
 

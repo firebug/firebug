@@ -40,6 +40,7 @@ function HTMLEditor(doc)
     var config = {
         mode: "htmlmixed",
         readOnly: false,
+        lineWrapping: true,
         gutters: []
     };
 

@@ -179,8 +179,8 @@ DOMMemberProvider.prototype =
                 }
             }
 
-            if (this.shouldShowClosures() &&
-                (isScope || (typeof object === "function" && this.context)))
+            if (this.context && this.shouldShowClosures() &&
+                (isScope || typeof object === "function"))
             {
                 this.maybeAddClosureMember(object, "proto", proto, level, isScope);
             }
@@ -281,12 +281,7 @@ DOMMemberProvider.prototype =
 
     shouldShowClosures: function()
     {
-        if (!Options.get("showClosures"))
-            return false;
-        var requireScriptPanel = DebuggerLib._closureInspectionRequiresDebugger();
-        if (requireScriptPanel && !PanelActivation.isPanelEnabled(Firebug.getPanelType("script")))
-            return false;
-        return true;
+        return Options.get("showClosures") && PanelActivation.isPanelEnabled("script");
     },
 
     hasChildren: function(value)
@@ -321,7 +316,7 @@ DOMMemberProvider.prototype =
         }
 
         // Special case for closure inspection.
-        if (typeof value === "function" && this.shouldShowClosures() && this.context)
+        if (typeof value === "function" && this.context && this.shouldShowClosures())
         {
             try
             {

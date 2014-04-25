@@ -100,7 +100,7 @@ pref("extensions.firebug.breakOnErrors", false);
 pref("extensions.firebug.trackThrowCatch", false);
 pref("extensions.firebug.script.enableSites", false);
 pref("extensions.firebug.scriptsFilter", "all");
-pref("extensions.firebug.replaceTabs", 4);
+pref("extensions.firebug.replaceTabs", 2);
 pref("extensions.firebug.filterSystemURLs", true);
 pref("extensions.firebug.maxScriptLineLength", 10000);
 pref("extensions.firebug.breakOnExceptions", false);

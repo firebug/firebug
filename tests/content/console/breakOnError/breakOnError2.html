@@ -15,17 +15,11 @@
 
 <ol>
 <li>Open Firebug and enable the Console and the Script panels</li>
-<li>Switch to the Console panel and click <code style="color:green">Break On All Errors</code>.</li>
-<li>Press this button <button id="testButton" onclick="onExecuteTest()">Execute Test</button></li>
-<li>Firebug should switch to the Script panel and halt in the debugger.</li>
+<li>Press this button <button id="testButton" onclick="nonExistingFunc()">Execute Test</button></li>
+<li>Switch to the Console panel and create a breakpoint for the log</li>
+<li>Press the button above again</li>
+<li>Firebug should switch to the Script panel and halt in the debugger</li>
 </ol>
-
-<script type="text/javascript">
-function onExecuteTest()
-{
-  var j = t234();
-}
-</script>
 
 </body>
 </html>

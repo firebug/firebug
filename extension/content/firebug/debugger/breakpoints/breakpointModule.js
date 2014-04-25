@@ -217,7 +217,7 @@ var BreakpointModule = Obj.extend(Firebug.Module,
         if (type == "breakpoint")
         {
             var location = packet.frame.where;
-            var bp = BreakpointStore.findBreakpoint(location.url, location.line - 1);
+            var bp = BreakpointStore.findBreakpoint(location.url, location.line - 1, -1);
 
             // xxxHonza: hack, breakpoints in dynamic scripts are using different URLs., fix me.
             if (!bp)
@@ -227,7 +227,16 @@ var BreakpointModule = Obj.extend(Firebug.Module,
                 return true;
             }
 
+            // Resume if it isn't "normal" nor "error" breakpoint.
+            if (!bp.isNormal() && !bp.isError())
+            {
+                Trace.sysout("breakpointModule.paused; Do not break on unknown breakpoint", bp);
+                return false;
+            }
+
             // If there is normal disabled breakpoint, do not break.
+            // xxxHonza: we might want to have support for disabled-error
+            // breakpoints in the future.
             if (bp.isNormal() && bp.isDisabled())
             {
                 Trace.sysout("breakpointModule.paused; Do not break on disabled breakpoint", bp);
@@ -279,6 +288,7 @@ var BreakpointModule = Obj.extend(Firebug.Module,
     breakNow: function(panel)
     {
         this.updatePanelTab(panel, false);
+        this.updateBreakOnNextState(panel, false);
         Firebug.Debugger.breakNow(panel.context);  // TODO BTI
     },
 });
