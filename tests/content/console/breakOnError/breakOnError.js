@@ -4,7 +4,7 @@ function runTest()
     {
         FBTest.enablePanels(["console", "script"], function()
         {
-            FBTest.waitForBreakInDebugger(null, 28, false, function(row)
+            FBTest.waitForBreakInDebugger(null, 26, false, function(row)
             {
                 // Resume debugger.
                 FBTest.clickContinueButton();
