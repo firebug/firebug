@@ -165,7 +165,7 @@ function createFirebugConsole(context, win)
         var key = String(name);
 
         if (!timeCounters.has(key) || reset)
-            timeCounters.set(key, Date.now());
+            timeCounters.set(key, win.performance.now());
 
         return Console.getDefaultReturnValue();
     };
@@ -182,7 +182,7 @@ function createFirebugConsole(context, win)
         {
             timeCounters.delete(key);
 
-            var diff = Date.now() - time;
+            var diff = win.performance.now() - time;
             ConsoleHandler.timeEnd(context, name, diff, getStackLink());
 
             return diff;
@@ -512,7 +512,7 @@ var ConsoleHandler =
 
     timeEnd: function(context, name, diff, sourceLink)
     {
-        var label = name + ": " + diff + "ms";
+        var label = name + ": " + diff.toFixed(2) + "ms";
 
         Console.logFormatted([label], context, "info", false, sourceLink);
     },
