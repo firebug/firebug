@@ -551,7 +551,8 @@ var ConsoleHandler =
 
 Firebug.ConsoleExposed =
 {
-    createFirebugConsole: createFirebugConsole
+    createFirebugConsole: createFirebugConsole,
+    ConsoleHandler: ConsoleHandler,
 };
 
 return Firebug.ConsoleExposed;
