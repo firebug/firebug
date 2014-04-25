@@ -255,11 +255,20 @@ panelTab[selected="true"] > panelTabMenu {
 }
 
 .panelStatusSeparator {
-    margin: 0;
-    color: graytext;
+    width: 5px;
+    height: 7px;
 }
 
-/*************************************************************************************************/
+#fbPanelStatus[direction="left"] > .panelStatusSeparator {
+    background: url(chrome://firebug/skin/statusPathSeparator.svg) no-repeat center;
+    transform: scaleX(-1);
+}
+
+#fbPanelStatus[direction="right"] > .panelStatusSeparator {
+    background: url(chrome://firebug/skin/statusPathSeparator.svg) no-repeat center;
+}
+
+/************************************************************************************************/
 /* Location list */
 
 .menuHeader {
