@@ -24,7 +24,7 @@ function monitor(callback, win)
             DebuggerController.removeListener(browser, listener);
 
             FBTest.clearConsole();
-            FBTest.compare(28, bp.lineNo, "The breakpoint must be created on the right line");
+            FBTest.compare(31, bp.lineNo, "The breakpoint must be created on the right line");
             FBTest.compare(2 /*BP_MONITOR*/, bp.type, "The breakpoint must be BP_MONITOR");
 
             FBTest.waitForDisplayedText("console", "Hello World!", () =>
@@ -45,7 +45,7 @@ function monitor(callback, win)
                 var frames = box.getElementsByClassName("objectBox-stackFrame");
                 if (FBTest.compare(2, frames.length, "There must be two stack frames"))
                 {
-                    FBTest.compare("onExecuteTest()monitor.html (line 29)",
+                    FBTest.compare("onExecuteTest()monitor.html (line 32)",
                         frames[0].textContent,
                         "Proper frame must be displayed");
 
@@ -77,7 +77,7 @@ function unmonitor(callback, win)
             DebuggerController.removeListener(browser, listener);
 
             FBTest.clearConsole();
-            FBTest.compare(28, bp.lineNo, "Proper breakpoint must be removed");
+            FBTest.compare(31, bp.lineNo, "Proper breakpoint must be removed");
             FBTest.compare(2 /*BP_MONITOR*/, bp.type, "The breakpoint must be BP_MONITOR");
 
             FBTest.waitForDisplayedText("console", "Hello World!", () =>
