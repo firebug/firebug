@@ -20,12 +20,11 @@ define([
     "firebug/chrome/activablePanel",
     "firebug/console/commandLine",
     "firebug/console/errorMessageObj",
-    "firebug/debugger/debuggerLib",
-    "firebug/debugger/breakpoints/breakpointStore",
+    "firebug/debugger/breakpoints/breakOnError",
 ],
 function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Search, Options, Wrapper,
     Xpcom, Menu, FirebugReps, SearchBox, PanelNotification, ActivablePanel, CommandLine,
-    ErrorMessageObj, DebuggerLib, BreakpointStore) {
+    ErrorMessageObj, BreakOnError) {
 
 "use strict";
 
@@ -295,12 +294,6 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
             else
                 Css.setClass(this.panelNode, "hideArguments");
         }
-    },
-
-    getBreakOnNextTooltip: function(enabled)
-    {
-        return (enabled ? Locale.$STR("console.Disable Break On All Errors") :
-            Locale.$STR("console.Break On All Errors"));
     },
 
     /**
@@ -1074,134 +1067,22 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // DebuggerTool Listener
-
-    onDebuggerPaused: function(context, event, packet)
-    {
-        // Check the packet type, only "exception" is interesting in this case.
-        var type = packet.why.type;
-        if (type != "exception")
-            return;
-
-        if (!this.shouldBreakOnNext() && !Options.get("breakOnExceptions"))
-        {
-            Trace.sysout("consolePanel.onDebuggerPaused; Break on error not active.");
-            return;
-        }
-
-        // Reset the break-on-next-error flag after an exception break happens.
-        // xxxHonza: this is how the other BON implementations work, but we could reconsider it.
-        // Another problem is that the debugger breaks in every frame by default, which
-        // is avoided by reseting of the flag.
-        this.breakOnNext(false);
-
-        // At this point, the BON flag is reset and can't be used anymore in |shouldResumeDebugger|.
-        // So add a custom flag in packet.why so we know that the debugger is paused because of
-        // either the Console's "Break On Next" or the Script's "Break On Exceptions" option.
-        packet.why.fbPauseDueToBONError = true;
-
-        // Get the exception object.
-        var exc = DebuggerLib.getObject(context, packet.why.exception.actor);
-        if (!exc)
-            return;
-
-        Trace.sysout("consolePanel.onDebuggerPaused;", {exc: exc, packet: packet});
-
-        // Convert to known structure, so FirebugReps.ErrorMessage.copyError() works.
-        var error = {
-            message: exc + "",
-            href: exc.fileName,
-            lineNo: exc.lineNumber
-        };
-
-        var lineNo = exc.lineNumber - 1;
-        var url = exc.fileName;
-
-        // Make sure the break notification popup appears.
-        context.breakingCause =
-        {
-            message: error.message,
-            copyAction: Obj.bindFixed(FirebugReps.ErrorMessage.copyError,
-                FirebugReps.ErrorMessage, error),
-
-            skipAction: function addSkipperAndGo()
-            {
-                // Create a breakpoint that never hits, but prevents BON for the error.
-                var bp = BreakpointStore.addBreakpoint(url, lineNo);
-                BreakpointStore.disableBreakpoint(url, lineNo);
-
-                Firebug.Debugger.resume(context);
-            },
-        };
-    },
-
-    shouldResumeDebugger: function(context, event, packet)
-    {
-        var type = packet.why.type;
-        if (type != "exception")
-            return false;
-
-        // Get the exception object.
-        var exc = DebuggerLib.getObject(context, packet.why.exception.actor);
-        if (!exc)
-            return false;
-
-        // If 'Break On Exceptions' or 'Break On All Errors' are not set, ignore (return true).
-        // Otherwise, don't resume the debugger. The user wants to break and see
-        // where the error happens.
-        if (!packet.why.fbPauseDueToBONError)
-        {
-            Trace.sysout("consolePanel.shouldResumeDebugger; Do not break, " +
-                "packet.why.fbPauseDueToBONError == false");
-            return true;
-        }
-
-        if (BreakpointStore.isBreakpointDisabled(exc.fileName, exc.lineNumber - 1))
-        {
-            Trace.sysout("consolePanel.shouldResumeDebugger; Do not break, disabled BP found.");
-            return true;
-        }
-
-        var preview = packet.why.exception.preview;
-        if (!preview)
-        {
-            TraceError.sysout("consolePanel.shouldResumeDebugger; ERROR preview info isn't" +
-                "available for the exception", packet);
-            return false;
-        }
-
-        Trace.sysout("consolePanel.shouldResumeDebugger; error preview:", preview);
-
-        // This is to avoid repeated break-on-error in every frame when an error happens.
-        // Break only if the original location of the exception is the same as the
-        // location of the current frame.
-        if (preview.lineNumber != packet.frame.where.line ||
-            preview.columnNumber != packet.frame.where.column)
-        {
-            Trace.sysout("consolePanel.shouldResumeDebugger; Do not break, we did already");
-            return true;
-        }
-
-        return false;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Break On Error
 
     shouldBreakOnNext: function()
     {
-        return this.context.breakOnErrors;
+        return BreakOnError.shouldBreakOnNext(this.context);
     },
 
     breakOnNext: function(breaking, callback)
     {
-        Trace.sysout("consolePanel.breakOnNext;");
+        BreakOnError.breakOnNext(this.context, breaking, callback);
+    },
 
-        this.context.breakOnErrors = breaking;
-
-        // Set the flag on the server.
-        var tool = this.context.getTool("debugger");
-        tool.updateBreakOnErrors(callback);
+    getBreakOnNextTooltip: function(enabled)
+    {
+        return (enabled ? Locale.$STR("console.Disable Break On All Errors") :
+            Locale.$STR("console.Break On All Errors"));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
