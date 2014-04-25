@@ -146,6 +146,8 @@ var StatusPath = Obj.extend(Module,
         var panel = panelBar1.selectedPanel;
         var currentObject = panel ? panel.getCurrentObject() : null;
 
+        panelStatus.setAttribute("direction", panel.statusSeparator === ">" ? "right" : "left");
+
         // The |currentObject| is the one that should be emphasized in the path. It's
         // usually the current selection, but can be different (e.g. if the debugger is halted
         // the Script panel emphasizes the current frame).

@@ -681,11 +681,7 @@
                     var box = document.createElement("hbox");
                     box.setAttribute("role", "separator");
                     box.setAttribute("align", "center");
-                    var sep = document.createElement("label");
-                    sep.setAttribute("class", "panelStatusSeparator");
-                    sep.setAttribute("value", separator);
-                    sep.setAttribute("role", "presentation");
-                    box.appendChild(sep);
+                    box.setAttribute("class", "panelStatusSeparator");
                     this.appendChild(box);
                 }
 
