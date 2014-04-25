@@ -597,7 +597,8 @@ SourceFile.getSourceLinkForScript = function(script, context)
     if (scriptType)
     {
         var sourceFile = getSourceFileByScript(context, script);
-        return sourceFile.getSourceLink();
+        if (sourceFile)
+            return sourceFile.getSourceLink();
     }
 
     return originalSourceLinkForScript.apply(SourceFile, arguments);
