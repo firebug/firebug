@@ -341,12 +341,12 @@ of an error log is affected (higher than other logs). */
     opacity: 0.1;
 }
 
-.breakpoint-waiting  .errorBreak{
+.breakpointWaiting .errorBreak {
     background: url(chrome://firebug/skin/loading.svg) no-repeat center center;
     margin: 0 4px 0 0;
     width: 14px;
     height: 14px;
-    opacity:1;
+    opacity: 1;
 }
 
 .errorUnbreakable {

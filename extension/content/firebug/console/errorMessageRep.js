@@ -395,7 +395,7 @@ var ErrorMessage = domplate(Rep,
         {
             // Show a throbber and wait until the breakpoint is
             // set on the server.
-            Css.setClass(target, "breakpoint-waiting");
+            target.classList.add("breakpointWaiting");
             Errors.setErrorBreakpoint(context, url, error.lineNo - 1);
         }
     },
@@ -576,17 +576,17 @@ var ErrorMessageUpdater = Obj.extend(Module,
                 if (isSet)
                 {
                     // Replace the throbber icon with the red breakpoint icon.
-                    Css.removeClass(message, "breakpoint-waiting");
-                    Css.setClass(message, "breakForError");
+                    message.classList.remove("breakpointWaiting");
+                    message.classList.add("breakForError");
                 }
                 else
                 {
                     // xxxFarshid:Not sure if it's really needed. Thinking of
                     // the case an error happens on the server preventing from
                     // setting a breakpoint properly.
-                    Css.removeClass(message, "breakpoint-waiting");
+                    message.classList.remove("breakpointWaiting");
 
-                    Css.removeClass(message, "breakForError");
+                    message.classList.remove("breakForError");
                 }
             }
         }
