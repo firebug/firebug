@@ -266,6 +266,9 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
 WatchProvider.FrameResultObject = function(value, type, readOnly)
 {
+    // Call the constructor of the super class and provide value as the grip object.
+    Grip.call(this, value);
+    // Extend the object with other properties.
     this.value = value;
     this.readOnly = !!readOnly;
     this.name = Locale.$STR("watch.frameResultType." + type);

@@ -401,6 +401,7 @@ DomTree.prototype = domplate(
     resolvePromise: function(promise, object)
     {
         var result;
+        Trace.sysout("domTree.resolvePromise;");
 
         // This flag is used to differentiate sync and async scenario.
         var sync = true;

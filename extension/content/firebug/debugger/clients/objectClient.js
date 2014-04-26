@@ -4,14 +4,12 @@ define([
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/promise",
-    "firebug/lib/array",
     "firebug/lib/options",
-    "firebug/lib/wrapper",
     "firebug/debugger/rdp",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/clients/grip",
 ],
-function (FBTrace, Obj, Promise, Arr, Options, Wrapper, RDP, DebuggerLib, Grip) {
+function (FBTrace, Obj, Promise, Options, RDP, DebuggerLib, Grip) {
 
 // ********************************************************************************************* //
 // Object Grip
@@ -156,7 +154,8 @@ ObjectClient.prototype = Obj.descend(Grip.prototype,
                 else
                 {
                     // Parse returned properties.
-                    self.properties = self.parseProperties(response.ownProperties);
+                    self.properties = self.parseProperties(response.ownProperties,
+                        response.safeGetterValues);
                 }
 
                 return self.properties;
@@ -176,11 +175,23 @@ ObjectClient.prototype = Obj.descend(Grip.prototype,
         return new ObjectClient.Property(name, desc, this.cache);
     },
 
-    parseProperties: function(props)
+    parseProperties: function(ownProps, safeGetterValues)
     {
         var result = [];
-        for (var name in props)
-            result.push(this.createProperty(name, props[name], this.cache));
+        for (var name in ownProps)
+        {
+            var desc;
+            // Get the value of the property. If the descriptor of the property doesn't have a value
+            // but a getter, the latter would be in the form of a Function grip. Instead, use
+            // safeGetterValues which stores the results of calling these getters.
+            if (ownProps && ownProps[name].hasOwnProperty("value"))
+                desc = ownProps[name];
+            else if (safeGetterValues && safeGetterValues[name] &&
+                safeGetterValues[name].hasOwnProperty("getterValue"))
+                desc = safeGetterValues[name];
+
+            result.push(this.createProperty(name, desc, this.cache));
+        }
         return result;
     },
 });
@@ -212,11 +223,18 @@ ObjectClient.Property = function(name, desc, cache)
     this.name = name;
 
     if (desc)
-        this.value = cache ? cache.getObject(desc.value) : desc;
+    {
+        if (!cache)
+            this.value = desc;
+        else if (desc.hasOwnProperty("value"))
+            this.value = cache.getObject(desc.value);
+        else if (desc.hasOwnProperty("getterValue"))
+            this.value = cache.getObject(desc.getterValue);
+    }
 
     this.desc = desc;
     this.cache = cache;
-}
+};
 
 ObjectClient.Property.prototype = Obj.descend(Grip.prototype,
 {
