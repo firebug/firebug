@@ -38,7 +38,7 @@
 
         <!-- Copy content directory -->
         <copy todir="${build.dir}/content">
-            <fileset dir="content">
+            <fileset dir="content" includes="**">
                 <include name="*.js"/>
                 <include name="*.css"/>
                 <include name="*.xml"/>
