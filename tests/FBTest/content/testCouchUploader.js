@@ -119,7 +119,7 @@ FBTestApp.TestCouchUploader =
         var uri = Firebug.getPref("extensions.fbtest", "databaseURL");
         var name = Firebug.getPref("extensions.fbtest", "databaseName");
 
-        remoteFBL.openNewTab("http://getfirebug.com/testresults/" +
+        remoteFBL.openNewTab("https://getfirebug.com/testresults/" +
             "?dburi=" + uri +
             "&dbname=" + name +
             "&userheaderid=" + headerid);
@@ -215,7 +215,7 @@ FBTestApp.TestCouchUploader =
                 if (versions.has(version))
                     return "Mac OS X " + versions.get(version);
                 break;
-                
+
             case "Linux":
                 // Check for Fedora
                 var reFedora = /fc(\d+)/;
