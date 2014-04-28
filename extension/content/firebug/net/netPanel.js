@@ -387,16 +387,19 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
             }
         );
 
-        if (NetUtils.textFileCategories.hasOwnProperty(file.category))
+        file.categories.forEach((category) =>
         {
-            items.push(
-                {
-                    label: "CopyResponse",
-                    tooltiptext: "net.tip.Copy_Response",
-                    command: Obj.bindFixed(this.copyResponse, this, file)
-                }
-            );
-        }
+            if (category in NetUtils.textFileCategories)
+            {
+                items.push(
+                    {
+                        label: "CopyResponse",
+                        tooltiptext: "net.tip.Copy_Response",
+                        command: Obj.bindFixed(this.copyResponse, this, file)
+                    }
+                );
+            }
+        });
 
         items.push(
             {
@@ -416,16 +419,19 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
             }
         );
 
-        if (NetUtils.textFileCategories.hasOwnProperty(file.category))
+        file.categories.forEach((category) =>
         {
-            items.push(
-                {
-                    label: "Open_Response_In_New_Tab",
-                    tooltiptext: "net.tip.Open_Response_In_New_Tab",
-                    command: Obj.bindFixed(NetUtils.openResponseInTab, this, file)
-                }
-            );
-        }
+            if (category in NetUtils.textFileCategories)
+            {
+                items.push(
+                    {
+                        label: "Open_Response_In_New_Tab",
+                        tooltiptext: "net.tip.Open_Response_In_New_Tab",
+                        command: Obj.bindFixed(NetUtils.openResponseInTab, this, file)
+                    }
+                );
+            }
+        });
 
         items.push("-");
 
@@ -1006,11 +1012,12 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
 
             if (file.mimeType)
             {
-                // Force update category.
-                file.category = null;
+                // Force update categories
+                file.categories = null;
                 for (var category in NetUtils.fileCategories)
-                    Css.removeClass(row, "category-" + category);
-                Css.setClass(row, "category-" + NetUtils.getFileCategory(file));
+                    row.classList.remove("category-" + category);
+                var categories = NetUtils.getFileCategories(file);
+                categories.forEach((category) => row.classList.add("category-" + category));
             }
 
             var remoteIPLabel = row.querySelector(".netRemoteAddressCol .netAddressLabel");
@@ -1262,7 +1269,8 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
             if (!Options.get("netShowBFCacheResponses") && file.fromBFCache)
                 continue;
 
-            if (!categories || categories.indexOf(file.category) != -1)
+            if (!categories || (file.categories && file.categories.some((category) =>
+                categories.indexOf(category) !== -1)))
             {
                 if (file.loaded)
                 {
