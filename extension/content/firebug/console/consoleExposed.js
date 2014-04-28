@@ -37,7 +37,7 @@ var Trace = FBTrace.to("DBG_CONSOLE");
 
 /**
  * Returns a console object (bundled with passed window through closure). The object
- * provides all necessary APIs as described here: http://getfirebug.com/wiki/index.php/Console_API
+ * provides all necessary APIs as described here: https://getfirebug.com/wiki/index.php/Console_API
  *
  * @param {Object} context
  * @param {Object} win

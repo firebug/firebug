@@ -1,4 +1,4 @@
-// For a detailed description of all preferences see http://getfirebug.com/wiki/index.php/Firebug_Preferences
+// For a detailed description of all preferences see https://getfirebug.com/wiki/index.php/Firebug_Preferences
 
 // Global
 pref("extensions.firebug.defaultModuleList", "");

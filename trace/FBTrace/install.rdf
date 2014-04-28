@@ -37,7 +37,7 @@
     <em:name>FBTrace</em:name>
     <em:description>Tracing Console for Firebug.</em:description>
     <em:creator>Jan Odvarko</em:creator>
-    <em:homepageURL>http://getfirebug.com/releases/extensions/</em:homepageURL>
+    <em:homepageURL>https://getfirebug.com/releases/extensions/</em:homepageURL>
 
     <em:updateURL>https://getfirebug.com/releases/fbtrace/@VERSION@/update.rdf</em:updateURL>
   </Description>

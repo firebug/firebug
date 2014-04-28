@@ -2,7 +2,7 @@
   "name": "Firebug",
   "description": "Web Development Evolved.",
   "version": "2.0a1",
-  "homepage" : "http://getfirebug.com/",
+  "homepage" : "https://getfirebug.com/",
   "engines": {
     "node": ">= 0.6.6"
   },

@@ -111,7 +111,7 @@ var HelpEntry = domplate(
             return;
         }
 
-        var helpUrl = "http://getfirebug.com/wiki/index.php/" + object.name;
+        var helpUrl = "https://getfirebug.com/wiki/index.php/" + object.name;
         if (object.helpUrl)
             helpUrl = object.helpUrl;
 
@@ -314,7 +314,7 @@ function onExecuteCommand(context)
 // Registration
 
 Firebug.registerCommand("help", {
-    helpUrl: "http://getfirebug.com/wiki/index.php/help",
+    helpUrl: "https://getfirebug.com/wiki/index.php/help",
     handler: onExecuteCommand,
     description: Locale.$STR("console.cmd.help.help"),
     getter: true,

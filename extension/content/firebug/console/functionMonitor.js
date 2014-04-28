@@ -372,25 +372,25 @@ function unmonitor(context, args)
 
 Firebug.registerCommand("debug", {
     handler: debug.bind(this),
-    helpUrl: "http://getfirebug.com/wiki/index.php/debug",
+    helpUrl: "https://getfirebug.com/wiki/index.php/debug",
     description: Locale.$STR("console.cmd.help.debug")
 });
 
 Firebug.registerCommand("undebug", {
     handler: undebug.bind(this),
-    helpUrl: "http://getfirebug.com/wiki/index.php/undebug",
+    helpUrl: "https://getfirebug.com/wiki/index.php/undebug",
     description: Locale.$STR("console.cmd.help.undebug")
 });
 
 Firebug.registerCommand("monitor", {
     handler: monitor.bind(this),
-    helpUrl: "http://getfirebug.com/wiki/index.php/monitor",
+    helpUrl: "https://getfirebug.com/wiki/index.php/monitor",
     description: Locale.$STR("console.cmd.help.monitor")
 });
 
 Firebug.registerCommand("unmonitor", {
     handler: unmonitor.bind(this),
-    helpUrl: "http://getfirebug.com/wiki/index.php/unmonitor",
+    helpUrl: "https://getfirebug.com/wiki/index.php/unmonitor",
     description: Locale.$STR("console.cmd.help.unmonitor")
 });
 
