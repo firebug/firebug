@@ -23,16 +23,25 @@
   - All BZ locales should be stored in "bz-locale" directory.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-<project name="firebug" basedir="." default="build">
+<project name="Firebug" basedir="." default="build">
+    <scriptdef language="javascript" name="lower">
+        <attribute name="string" />
+        <attribute name="to" />
+
+        project.setProperty(attributes.get("to"),
+                            attributes.get("string").toLowerCase());
+    </scriptdef>
+
+    <lower string="${ant.project.name}" to="project.name"/>
 
     <!-- Properties -->
-    <property file="content/firebug/branch.properties"/>
+    <property file="content/${project.name}/branch.properties"/>
 
     <!-- Directories -->
     <property name="build.dir" value="./build"/>
     <property name="release.dir" value="./release"/>
-    <property name="deploy-xpi.dir" value="${GETFIREBUG}/releases/firebug/${VERSION}"/>
-    <property name="deploy-jsdoc.dir" value="${GETFIREBUG}/developer/api/firebug${VERSION}"/>
+    <property name="deploy-xpi.dir" value="${GETFIREBUG}/releases/${project.name}/${VERSION}"/>
+    <property name="deploy-jsdoc.dir" value="${GETFIREBUG}/developer/api/${project.name}${VERSION}"/>
     <property name="bz-locale.dir" value="./bz-locale"/>
 
     <available file="${GETFIREBUG}" property="deploy.dir.available"/>
@@ -54,7 +63,7 @@
         <antcall target="prepare-build" />
 
         <!-- Copy install.rdf with updated release version info -->
-        <replace file="${build.dir}/install.rdf" propertyFile="content/firebug/branch.properties">
+        <replace file="${build.dir}/install.rdf" propertyFile="content/${project.name}/branch.properties">
             <replacefilter token="@VERSION@" property="VERSION"/>
             <replacefilter token="@RELEASE@" property="RELEASE"/>
         </replace>
@@ -63,21 +72,21 @@
         <delete file="${build.dir}/chrome.bz.tpl.manifest"/>
 
         <!-- Create XPI for getfirebug.com -->
-        <antcall target="createFirebugXPI">
-            <param name="file-name" value="firebug-${VERSION}${RELEASE}.xpi"/>
+        <antcall target="createXPI">
+            <param name="file-name" value="${project.name}-${VERSION}${RELEASE}.xpi"/>
         </antcall>
 
         <antcall target="disableUpdate" />
 
         <!-- Create XPI for AMO -->
-        <antcall target="createFirebugXPI">
-            <param name="file-name" value="firebug-${VERSION}${RELEASE}-amo.xpi"/>
+        <antcall target="createXPI">
+            <param name="file-name" value="${project.name}-${VERSION}${RELEASE}-amo.xpi"/>
         </antcall>
 
         <delete dir="${build.dir}"/>
         <antcall target="deploy" />
 
-        <echo message="Firebug version: ${VERSION}${RELEASE} in ${release.dir}"/>
+        <echo message="${ant.project.name} version: ${VERSION}${RELEASE} in ${release.dir}"/>
     </target>
 
     <!-- Build Babelzilla Release -->
@@ -98,7 +107,7 @@
         </copy>
 
         <!-- Modify version number (append BZ) -->
-        <replace file="${build.dir}/install.rdf" propertyFile="content/firebug/branch.properties">
+        <replace file="${build.dir}/install.rdf" propertyFile="content/${project.name}/branch.properties">
             <replacefilter token="@VERSION@" value="${VERSION}" />
             <replacefilter token="@RELEASE@" value="${RELEASE}-bz" />
         </replace>
@@ -107,13 +116,13 @@
         <delete dir="${build.dir}/${bz-locale.dir}" />
 
         <!-- Create XPI for getfirebug.com -->
-        <antcall target="createFirebugXPI">
-            <param name="file-name" value="firebug-${VERSION}${RELEASE}-bz.xpi" />
+        <antcall target="createXPI">
+            <param name="file-name" value="${project.name}-${VERSION}${RELEASE}-bz.xpi" />
         </antcall>
 
         <delete dir="${build.dir}" />
 
-        <echo message="Firebug Release for Babelzilla: ${VERSION}${RELEASE}-bz in ${release.dir}" />
+        <echo message="${ant.project.name} release for Babelzilla: ${VERSION}${RELEASE}-bz in ${release.dir}" />
     </target>
 
     <!-- Prepare build files -->
@@ -149,33 +158,31 @@
         <delete dir="${build.dir}" includes="*.xml" />
     </target>
 
-    <!-- Create final firebug.xpi file -->
-    <target name="createFirebugXPI">
-
+    <!-- Create final XPI file -->
+    <target name="createXPI">
         <!-- Compress files (ZIP) -->
         <zip destfile="${release.dir}/${file-name}"
             basedir="${build.dir}" update="true" />
 
         <!-- Copy update.rdf file with updated release version info -->
         <copy file="update.rdf.tpl.xml" tofile="${release.dir}/update.rdf"/>
-        <replace file="${release.dir}/update.rdf" propertyFile="content/firebug/branch.properties">
+        <replace file="${release.dir}/update.rdf" propertyFile="content/${project.name}/branch.properties">
             <replacefilter token="@VERSION@" property="VERSION"/>
             <replacefilter token="@RELEASE@" property="RELEASE"/>
-            <replacefilter token="@LEAF@" value="firebug-${VERSION}${RELEASE}.xpi"/>
+            <replacefilter token="@LEAF@" value="${project.name}-${VERSION}${RELEASE}.xpi"/>
         </replace>
     </target>
 
     <!-- Deploy xpi & update.rdf files - if target available -->
     <target name="deploy" if="deploy.dir.available">
         <copy file="${release.dir}/update.rdf" todir="${deploy-xpi.dir}" overwrite="true"/>
-        <copy file="${release.dir}/firebug-${VERSION}${RELEASE}.xpi" todir="${deploy-xpi.dir}" overwrite="true"/>
-        <copy file="${release.dir}/firebug-${VERSION}${RELEASE}-amo.xpi" todir="${deploy-xpi.dir}" overwrite="true"/>
-        <echo message="XPI deployed to: ${VERSION}${RELEASE} to ${deploy-xpi.dir}"/>
+        <copy file="${release.dir}/${project.name}-${VERSION}${RELEASE}.xpi" todir="${deploy-xpi.dir}" overwrite="true"/>
+        <copy file="${release.dir}/${project.name}-${VERSION}${RELEASE}-amo.xpi" todir="${deploy-xpi.dir}" overwrite="true"/>
+        <echo message="XPI for ${VERSION}${RELEASE} deployed to: ${deploy-xpi.dir}"/>
     </target>
 
     <!-- Deploy if target available -->
     <target name="deploy-jsdoc" if="deploy.dir.available">
-
         <!-- Deploy jsdoc -->
         <copy todir="${deploy-jsdoc.dir}">
             <fileset dir="${release.dir}/jsdoc"/>
@@ -184,10 +191,9 @@
         <echo message="JSDoc deployed to: ${VERSION}${RELEASE} to ${deploy-xpi.dir}"/>
     </target>
 
-    <!-- Support for generating docs from Firebug source code using js-doc-toolkit
+    <!-- Support for generating docs from source code using js-doc-toolkit
         See the output in $svn/jsdoc/out directory -->
     <target name="jsdoc" depends="build" description="Generate documentation">
-
         <property name="jsdoc.dir" value="../../jsdoc/"/>
         <property name="jsdoc-toolkit.dir" value="${jsdoc.dir}/jsdoc-toolkit-2.3.0/"/>
         <property name="jsdoc-output.dir" value="${release.dir}/jsdoc/"/>
@@ -201,14 +207,14 @@
             classpathref="jsdoctoolkit"
             classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit"/>
 
-        <echo message="Generate doc from Firebug source."/>
+        <echo message="Generate docs from ${ant.project.name} source."/>
 
         <!-- Clean the output direcotory -->
         <delete dir="${jsdoc-output.dir}"/>
 
         <!-- Parse all source files -->
         <jsdoctoolkit jsdochome="${jsdoc-toolkit.dir}"
-            template="firebug"
+            template="${project.name}"
             outputdir="${jsdoc-output.dir}"
             inputdir="." />
 
@@ -219,9 +225,8 @@
     <!-- Remove update URL, this is necessary for AMO -->
     <target name="disableUpdate">
         <replaceregexp file="${build.dir}/install.rdf"
-            match="(.*)https://getfirebug.com/releases/firebug/${VERSION}/update.rdf(.*)"
+            match="(.*)https://getfirebug.com/releases/${project.name}/${VERSION}/update.rdf(.*)"
             replace=""
             byline="true" />
     </target>
-
 </project>
