@@ -1254,7 +1254,7 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
         var fileCount = 0;
         var minTime = 0, maxTime = 0;
 
-        for (var i=0; i<phase.files.length; i++)
+        for (var i = 0; i < phase.files.length; i++)
         {
             var file = phase.files[i];
 
@@ -1444,12 +1444,18 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
         this.filterCategories = filterCategories;
 
         var panelNode = this.panelNode;
+
+        if (filterCategories.join(" ") !== "all")
+            panelNode.classList.add("filtering");
+        else
+            panelNode.classList.remove("filtering");
+
         for (var category in NetUtils.fileCategories)
         {
-            if (filterCategories.join(" ") != "all" && filterCategories.indexOf(category) == -1)
-                Css.setClass(panelNode, "hideCategory-" + category);
+            if (filterCategories.join(" ") !== "all" && filterCategories.indexOf(category) !== -1)
+                panelNode.classList.add("showCategory-" + category);
             else
-                Css.removeClass(panelNode, "hideCategory-" + category);
+                panelNode.classList.remove("showCategory-" + category);
         }
     },
 
