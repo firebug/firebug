@@ -855,12 +855,8 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
     list-style-image: url(chrome://firebug/skin/expandSidePanels.svg);
 }
 
-#fbPanelPane:not([orient="vertical"]) .fbToggleSidePanels:-moz-locale-dir(ltr) {
-    margin-right: 2px;
-}
-
-#fbPanelPane:not([orient="vertical"]) .fbToggleSidePanels:-moz-locale-dir(rtl) {
-    margin-left: 2px;
+#fbPanelPane:not([orient="vertical"]) .fbToggleSidePanels {
+    -moz-margin-end: 2px;
 }
 
 #fbPanelPane[orient="vertical"] .fbToggleSidePanels {
@@ -903,12 +899,8 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
     list-style-image: url(chrome://firebug/skin/expandSidePanels.svg);
 }
 
-#fbPanelPane:not([orient="vertical"]) .fbToggleCommandEditor:-moz-locale-dir(ltr) {
-    margin-right: 2px;
-}
-
-#fbPanelPane:not([orient="vertical"]) .fbToggleCommandEditor:-moz-locale-dir(rtl) {
-    margin-left: 2px;
+#fbPanelPane:not([orient="vertical"]) .fbToggleCommandEditor {
+    -moz-margin-end: 2px;
 }
 
 .fbToggleCommandEditor:hover {
