@@ -50,6 +50,10 @@ var {domplate, DIV, TEXTAREA} = Domplate;
 
 var KeyEvent = window.KeyEvent;
 
+// Tracing helpers
+var Trace = FBTrace.to("DBG_HTML");
+var TraceError = FBTrace.toError();
+
 // ********************************************************************************************* //
 
 function HTMLPanel() {}
@@ -175,9 +179,8 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
             {
                 if (win == subwin)
                 {
-                    if (FBTrace.DBG_HTML)
-                        FBTrace.sysout("html.watchWindow found subwin.location.href="+
-                            win.location.href);
+                    Trace.sysout("html.watchWindow found subwin.location.href=" +
+                        win.location.href);
 
                     htmlPanel.mutateDocumentEmbedded(win, false);
                 }
@@ -197,9 +200,8 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
             {
                 if (win == subwin)
                 {
-                    if (FBTrace.DBG_HTML)
-                        FBTrace.sysout("html.unwatchWindow found subwin.location.href="+
-                            win.location.href);
+                    Trace.sysout("html.unwatchWindow found subwin.location.href=" +
+                        win.location.href);
 
                     htmlPanel.mutateDocumentEmbedded(win, true);
                 }
@@ -271,8 +273,7 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     updateSelection: function(object)
     {
-        if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.updateSelection " + object, object);
+        Trace.sysout("html.updateSelection " + object, object);
 
         if (this.ioBox.sourceRow)
             this.ioBox.sourceRow.removeAttribute("exe_line");
@@ -338,9 +339,11 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 var parentNode = this.getParentObject(object);
 
                 if (FBTrace.DBG_ERRORS && FBTrace.DBG_HTML)
-                    FBTrace.sysout("html.updateSelect no objectBox for object:"+
-                        Css.getElementCSSSelector(object) + " trying "+
+                {
+                    FBTrace.sysout("html.updateSelect no objectBox for object:" +
+                        Css.getElementCSSSelector(object) + " trying " +
                         Css.getElementCSSSelector(parentNode));
+                }
 
                 this.updateSelection(parentNode);
                 return;
@@ -361,9 +364,8 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
             if (this.inspectorHistory.length > 5)
                 this.inspectorHistory.pop();
 
-            if (FBTrace.DBG_HTML)
-                FBTrace.sysout("html.stopInspecting: inspectoryHistory updated",
-                    this.inspectorHistory);
+            Trace.sysout("html.stopInspecting: inspectoryHistory updated",
+                this.inspectorHistory);
         }
 
         this.ioBox.highlight(null);
@@ -1198,14 +1200,13 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
         // Due to the delay call this may or may not exist in the tree anymore
         if (!this.ioBox.isInExistingRoot(target))
         {
-            if (FBTrace.DBG_HTML)
-                FBTrace.sysout("mutateAttr: different tree " + target, target);
+            Trace.sysout("mutateAttr: different tree " + target, target);
             return;
         }
 
-        if (FBTrace.DBG_HTML)
+        if (Trace.active)
         {
-            FBTrace.sysout("html.mutateAttr target:" + target + " attrName:" + attrName +
+            Trace.sysout("html.mutateAttr target:" + target + " attrName:" + attrName +
                 " attrValue: " + attrValue + " removal: " + removal, target);
         }
 
@@ -1223,9 +1224,8 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             var nodeAttr = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
 
-            if (FBTrace.DBG_HTML)
-                FBTrace.sysout("mutateAttr " + removal + " " + attrName + "=" + attrValue +
-                    " node: " + nodeAttr, nodeAttr);
+            Trace.sysout("mutateAttr " + removal + " " + attrName + "=" + attrValue +
+                " node: " + nodeAttr, nodeAttr);
 
             if (nodeAttr && nodeAttr.childNodes.length > 3)
             {
@@ -1248,11 +1248,8 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 var attributes = Array.prototype.slice.call(target.attributes);
                 var attr = attributes.filter(filterAttributeByName)[0];
 
-                if (FBTrace.DBG_HTML)
-                {
-                    FBTrace.sysout("mutateAttr attribute node " + removal + " " + attrName +
-                        "=" + attrValue + " node: " + attr, attr);
-                }
+                Trace.sysout("mutateAttr attribute node " + removal + " " + attrName +
+                    "=" + attrValue + " node: " + attr, attr);
 
                 if (attr)
                 {
@@ -1285,8 +1282,7 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
         // Due to the delay call this may or may not exist in the tree anymore
         if (!this.ioBox.isInExistingRoot(target))
         {
-            if (FBTrace.DBG_HTML)
-                FBTrace.sysout("mutateText: different tree " + target, target);
+            Trace.sysout("mutateText: different tree " + target, target);
             return;
         }
 
@@ -1297,9 +1293,8 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         if (!parentNodeBox)
         {
-            if (FBTrace.DBG_HTML)
-                FBTrace.sysout("html.mutateText failed to update text, parent node " +
-                    "box does not exist");
+            Trace.sysout("html.mutateText failed to update text, parent node " +
+                "box does not exist");
             return;
         }
 
@@ -1309,8 +1304,7 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
         var parentTag = getNodeBoxTag(parentNodeBox);
         if (parentTag == HTMLPanel.TextElement.tag)
         {
-            if (FBTrace.DBG_HTML)
-                FBTrace.sysout("html.mutateText target: " + target + " parent: " + parent);
+            Trace.sysout("html.mutateText target: " + target + " parent: " + parent);
 
             // Rerender the entire parentNodeBox. Proper entity-display logic will
             // be automatically applied according to the preferences.
@@ -1325,11 +1319,8 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
             var nodeText = HTMLLib.getTextElementTextBox(newParentNodeBox);
             if (!nodeText.firstChild)
             {
-                if (FBTrace.DBG_HTML)
-                {
-                    FBTrace.sysout("html.mutateText failed to update text, " +
-                        "TextElement firstChild does not exist");
-                }
+                Trace.sysout("html.mutateText failed to update text, " +
+                    "TextElement firstChild does not exist");
                 return;
             }
 
@@ -1341,11 +1332,8 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
             var childBox = this.ioBox.getChildObjectBox(parentNodeBox);
             if (!childBox)
             {
-                if (FBTrace.DBG_HTML)
-                {
-                    FBTrace.sysout("html.mutateText failed to update text, " +
-                        "no child object box found");
-                }
+                Trace.sysout("html.mutateText failed to update text, " +
+                    "no child object box found");
                 return;
             }
 
@@ -1368,15 +1356,13 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     mutateNode: function(target, parent, nextSibling, removal)
     {
-        if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.mutateNode target:" + target + " parent:" + parent +
-                (removal ? "REMOVE" : ""));
+        Trace.sysout("html.mutateNode target:" + target + " parent:" + parent +
+            (removal ? "REMOVE" : ""));
 
         // Due to the delay call this may or may not exist in the tree anymore
         if (!removal && !this.ioBox.isInExistingRoot(target))
         {
-            if (FBTrace.DBG_HTML)
-                FBTrace.sysout("mutateNode: different tree " + target, target);
+            Trace.sysout("mutateNode: different tree " + target, target);
             return;
         }
 
@@ -1385,9 +1371,7 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
         var parentNodeBox = Options.get("scrollToMutations") || Options.get("expandMutations") ?
             this.ioBox.createObjectBox(parent) : this.ioBox.findObjectBox(parent);
 
-        if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.mutateNode parent:" + parent + " parentNodeBox:" +
-                parentNodeBox);
+        Trace.sysout("html.mutateNode parent:" + parent + " parentNodeBox:" + parentNodeBox);
 
         if (!parentNodeBox)
             return;
@@ -1498,11 +1482,8 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
     highlightMutation: function(elt, objectBox, type)
     {
         var highlightMutations = Options.get("highlightMutations");
-        if (FBTrace.DBG_HTML)
-        {
-            FBTrace.sysout("html.highlightMutation 'highlightMutations'=" +
-                highlightMutations, {elt: elt, objectBox: objectBox, type: type});
-        }
+        Trace.sysout("html.highlightMutation 'highlightMutations'=" +
+            highlightMutations, {elt: elt, objectBox: objectBox, type: type});
 
         if (!elt)
             return;
@@ -1536,9 +1517,9 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     createObjectBox: function(object, isRoot)
     {
-        if (FBTrace.DBG_HTML)
+        if (Trace.active)
         {
-            FBTrace.sysout("html.createObjectBox(" + Css.getElementCSSSelector(object) +
+            Trace.sysout("html.createObjectBox(" + Css.getElementCSSSelector(object) +
                 ", isRoot:" + (isRoot? "true" : "false")+")");
         }
 
@@ -1558,10 +1539,6 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (node.nodeName == "#document")
             return null;
 
-        //if (FBTrace.DBG_HTML)
-        //    FBTrace.sysout("html.getParentObject for "+node.nodeName+" parentNode:"+
-        //        Css.getElementCSSSelector(parentNode));
-
         if (parentNode)
         {
             if (parentNode.nodeType == Node.DOCUMENT_NODE)
@@ -1571,20 +1548,16 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     if (parentNode.defaultView == this.context.window)
                         return parentNode;
 
-                    if (FBTrace.DBG_HTML)
-                    {
-                        FBTrace.sysout("getParentObject; node is document node"+
-                            ", frameElement:" + parentNode.defaultView.frameElement);
-                    }
+                    Trace.sysout("getParentObject; node is document node"+
+                        ", frameElement:" + parentNode.defaultView.frameElement);
 
                     return parentNode.defaultView.frameElement;
                 }
                 else
                 {
                     var skipParent = this.getEmbedConnection(parentNode);
-                    if (FBTrace.DBG_HTML)
-                        FBTrace.sysout("getParentObject skipParent:" +
-                            (skipParent ? skipParent.nodeName : "none"));
+                    Trace.sysout("getParentObject skipParent:" +
+                        (skipParent ? skipParent.nodeName : "none"));
 
                     if (skipParent)
                         return skipParent;
@@ -1594,8 +1567,7 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
             }
             else if (!parentNode.localName)
             {
-                if (FBTrace.DBG_HTML)
-                    FBTrace.sysout("getParentObject: null localName must be window, no parentObject");
+                Trace.sysout("getParentObject: null localName must be window, no parentObject");
                 return null;
             }
             else
@@ -1639,10 +1611,12 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
         // store our adopted child in a side table
         this.embeddedBrowserParents.push(node);
 
-        if (FBTrace.DBG_HTML)
-            FBTrace.sysout("Found skipChild " + Css.getElementCSSSelector(skipChild) +
+        if (Trace.active)
+        {
+            Trace.sysout("Found skipChild " + Css.getElementCSSSelector(skipChild) +
                 " for  " + Css.getElementCSSSelector(node) + " with node.contentDocument " +
                 node.contentDocument);
+        }
 
         return skipChild;
     },
@@ -1670,11 +1644,13 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
             return;
         }
 
-        if (FBTrace.DBG_HTML)
-            FBTrace.sysout("getChildObject " + node.tagName + " index " + index +
+        if (Trace.active)
+        {
+            Trace.sysout("getChildObject " + node.tagName + " index " + index +
                 " previousSibling: " +
                 (previousSibling ? Css.getElementCSSSelector(previousSibling) : "null"),
                 {node: node, previousSibling:previousSibling});
+        }
 
         if (this.isSourceElement(node))
         {
@@ -1727,9 +1703,9 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
         else
             child = this.getFirstChild(node); // child is set to at the beginning of an iteration.
 
-        if (FBTrace.DBG_HTML)
+        if (Trace.active)
         {
-            FBTrace.sysout("getChildObject firstChild " + Css.getElementCSSSelector(child) +
+            Trace.sysout("getChildObject firstChild " + Css.getElementCSSSelector(child) +
                 " with 'showTextNodesWithWhitespace'=" +
                 Options.get("showTextNodesWithWhitespace"));
         }
@@ -1832,8 +1808,7 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     onMutateText: function(event)
     {
-        if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.onMutateText; ", event);
+        Trace.sysout("html.onMutateText; ", event);
 
         HTMLModule.MutationBreakpoints.onMutateText(event, this.context);
         this.updateMutationBreakpointListeners();
