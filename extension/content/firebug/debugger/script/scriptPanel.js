@@ -673,10 +673,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             var options = sourceLink.getOptions();
 
             // Make sure the current execution line is marked if the current frame
-            // is coming from the same location.
+            // is coming from the same location. Otherwise the 'debug location' flag
+            // must be removed.
             var frame = this.context.currentFrame;
             if (frame && frame.href == this.location.href)
                 this.setDebugLocation(frame.line - 1, true);
+            else
+                options.debugLocation = false;
 
             // If the location object is SourceLink automatically scroll to the
             // specified line. Otherwise make sure to reset the scroll position
