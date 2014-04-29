@@ -14,7 +14,10 @@ define([
     "firebug/editor/editor",
     "firebug/console/autoCompleter",
 ],
-function(Obj, FBTrace, Firebug, PanelActivation, Locale, Events, Dom, Arr, Menu, BreakpointStore) {
+function(Obj, FBTrace, Firebug, PanelActivation, Locale, Events, Dom, Arr, Menu,
+    BreakpointStore) {
+
+"use strict"
 
 // ********************************************************************************************* //
 // Constants
@@ -181,6 +184,7 @@ var BreakpointModule = Obj.extend(Firebug.Module,
         for (var i=0; i<panelTypes.length; ++i)
         {
             var panelType = panelTypes[i];
+
             // Note: avoid eagerly creating all panels, by passing 'true' here.
             var panel = context.getPanel(panelType.prototype.name, true);
             var shouldBreak = (panel && panel.shouldBreakOnNext()) ? true : false;
