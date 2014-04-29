@@ -64,7 +64,7 @@ SourceSearch.prototype =
             var start = rev ? {line: editor.lastLine()} : null;
             start = this.editor.cloneIntoCMScope(start);
 
-            cursor = editor.getSearchCursor(text, start, rev);
+            cursor = editor.getSearchCursor(text, start, options.ignoreCase);
             if (!cursor.find(rev))
                 return;
 

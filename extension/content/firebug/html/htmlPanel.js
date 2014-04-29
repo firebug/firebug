@@ -36,12 +36,16 @@ define([
     "firebug/chrome/searchBox",
     "firebug/html/insideOutBox",
     "firebug/html/inspector",
-    "firebug/html/layout"
+    "firebug/html/layout",
+    "firebug/html/htmlEditorSearch",
 ],
 function(Firebug, FBTrace, Panel, Obj, Domplate, Locale, AttributeEditor, HTMLEditor, HTMLLib,
     HTMLModule, HTMLReps, TextDataEditor, TextNodeEditor, Events, SourceLink, Css, Dom, Win,
     Options, Str, Xml, Arr, Persist, Menu, Url, CSSModule, CSSReps, CSSSelectorEditor,
-    BaseEditor, Editor, InlineEditor, SearchBox, InsideOutBox, Inspector) {
+    BaseEditor, Editor, InlineEditor, SearchBox, InsideOutBox, Inspector, Layout,
+    HTMLEditorSearch) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -394,7 +398,13 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
         else
         {
             var doc = this.context.window.document;
-            search = this.lastSearch = new HTMLLib.NodeSearch(text, doc, this.panelNode, this.ioBox);
+
+            if (this.isEditing())
+                search = new HTMLEditorSearch(reverse, text, this.localEditors["html"]);
+            else
+                search = new HTMLLib.NodeSearch(text, doc, this.panelNode, this.ioBox);
+
+            this.lastSearch = search;
         }
 
         var loopAround = search.find(reverse, SearchBox.isCaseSensitive(text));
@@ -406,7 +416,13 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         if (search.noMatch)
             return false;
+
         return loopAround ? "wraparound" : true;
+    },
+
+    resetSearch: function()
+    {
+        delete this.lastSearch;
     },
 
     shouldIgnoreIntermediateSearchFailure: function(value)
@@ -734,12 +750,13 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.stopEditing();
         else
             this.editNode(this.selection);
+
+        this.resetSearch();
     },
 
     stopEditing: function()
     {
         Editor.stopEditing();
-        this.resetSearch();
     },
 
     isEditing: function()
@@ -756,10 +773,7 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
             Css.nonEditableTags.hasOwnProperty(this.selection.localName));
     },
 
-    resetSearch: function()
-    {
-        delete this.lastSearch;
-    },
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     select: function(object, forceUpdate, noEditChange)
     {
