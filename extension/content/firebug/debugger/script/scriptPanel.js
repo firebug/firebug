@@ -694,7 +694,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         Trace.sysout("debugger.SourceLoaded; " + sourceFile.href);
 
-        if (this.location.href != sourceFile.href)
+        if (!this.location || this.location.href != sourceFile.href)
             return;
 
         this.scriptView.showSource(sourceFile.lines.join(""), "js");
@@ -1357,7 +1357,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         var sourceFile = this.getSourceFile();
         var category = sourceFile.getCategory();
-        if (category == "js")
+
+        // Pretty printing can be done only for source files that have
+        // corresponding server side script actor. Note that dynamic scripts
+        // are currently collected on the client side (a workaround) since
+        // RDP doesn't support it yet.
+        if (category == "js" && sourceFile.actor)
         {
             items.push("-",
             {
