@@ -17,19 +17,20 @@ function(Firebug, FBTrace, Obj, Css, Dom, Str, Xml, Events, Options, Module, Com
 
 "use strict"
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 var Trace = FBTrace.to("DBG_COMMANDLINE");
 var TraceError = FBTrace.toError();
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Implementation
 
 /**
  * @module Command Line availability in other panels.
  */
 var CommandLinePopup = Obj.extend(Module,
+/** @lends CommandLinePopup */
 {
     dispatchName: "commandLinePopup",
 
@@ -112,7 +113,7 @@ var CommandLinePopup = Obj.extend(Module,
             this.showPopupPanel(panel.context);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     setPopupBrowserStyle: function(chrome)
     {
@@ -136,10 +137,17 @@ var CommandLinePopup = Obj.extend(Module,
         if (panel && panel.name == "console")
             return;
 
+        // If the Console panel is disabled bail out
+        var consolePanelType = Firebug.getPanelType("console");
+        if (!consolePanelType.prototype.isEnabled())
+            return;
+
         Trace.sysout("commandLinePopup.toggle;");
 
         var newState = !this.isVisible();
-        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleCommandPopup", "checked", newState);
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleCommandPopup",
+            "checked", newState);
+
         Options.set("alwaysShowCommandLine", newState);
 
         this.updateVisibility(newState, context, {isToggle: true});
@@ -220,7 +228,8 @@ var CommandLinePopup = Obj.extend(Module,
 
     isVisible: function()
     {
-        var checked = Firebug.chrome.getGlobalAttribute("cmd_firebug_toggleCommandPopup", "checked");
+        var checked = Firebug.chrome.getGlobalAttribute(
+            "cmd_firebug_toggleCommandPopup", "checked");
         return (checked == "true") ? true : false;
     },
 
@@ -270,5 +279,5 @@ CommandLine.Popup = CommandLinePopup;
 
 return CommandLinePopup;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });
