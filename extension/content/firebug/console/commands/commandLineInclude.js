@@ -699,7 +699,7 @@ function isValidJS(codeToCheck)
 Firebug.registerCommand("include", {
     handler: onCommand,
     description: Locale.$STR("console.cmd.help.include"),
-    helpUrl: "http://getfirebug.com/wiki/index.php/include"
+    helpUrl: "https://getfirebug.com/wiki/index.php/include"
 });
 
 Firebug.registerRep(CommandLineIncludeRep);

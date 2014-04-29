@@ -2,26 +2,42 @@
 
 <!-- In order to build the extension run: $ant build (in the extension dir)
     The final xpi file should be located in a release directory -->
-<project name="tracingConsole" basedir="." default="build">
+<project name="FBTrace" basedir="." default="build">
+    <scriptdef language="javascript" name="lower">
+        <attribute name="string" />
+        <attribute name="to" />
+
+        project.setProperty(attributes.get("to"),
+                            attributes.get("string").toLowerCase());
+    </scriptdef>
+
+    <lower string="${ant.project.name}" to="project.name"/>
 
     <!-- Properties -->
     <property file="ant.properties"/>
 
     <!-- Directories -->
-    <property name="build.dir" value="release"/>
-    <property name="deploy-xpi.dir" value="${GETFIREBUG}/releases/fbtrace/${VERSION}"/>
+    <property name="build.dir" value="./build"/>
+    <property name="release.dir" value="./release"/>
+    <property name="deploy-xpi.dir" value="${GETFIREBUG}/releases/${project.name}/${VERSION}"/>
 
     <available file="${GETFIREBUG}" property="deploy.dir.available"/>
+
+    <!-- Output build info -->
+    <target name="echo">
+        <echo message="Build directory: ${build.dir}"/>
+        <echo message="Deploy directory ${GETFIREBUG} available: ${deploy.dir.available}"/>
+    </target>
 
     <!-- Clean -->
     <target name="clean">
         <delete dir="${build.dir}"/>
+        <delete dir="${release.dir}"/>
     </target>
 
     <!-- Build -->
     <target name="build" depends="clean">
-
-        <!-- Copy defaults directory -->
+        <!-- Copy components directory -->
         <copy todir="${build.dir}/components">
             <fileset dir="components">
                <include name="**/*.js"/>
@@ -31,7 +47,7 @@
         <!-- Copy defaults directory -->
         <copy todir="${build.dir}/defaults">
             <fileset dir="defaults">
-               <include name="**/*.js"/>
+                <include name="**/*.js"/>
             </fileset>
         </copy>
 
@@ -54,14 +70,14 @@
             </fileset>
         </copy>
 
-        <!-- Copy defaults directory -->
+        <!-- Copy icons directory -->
         <copy todir="${build.dir}/icons">
             <fileset dir="icons">
                <include name="**/*.ico"/>
             </fileset>
         </copy>
 
-        <!-- Copy defaults directory -->
+        <!-- Copy modules directory -->
         <copy todir="${build.dir}/modules">
             <fileset dir="modules">
                <include name="**/*.js"/>
@@ -81,32 +97,34 @@
             <replacefilter token="@RELEASE@" property="RELEASE"/>
         </replace>
 
-        <!-- Create final tracingConsole.xpi file -->
-        <zip destfile="${build.dir}/fbTrace-${VERSION}${RELEASE}.xpi"
+        <!-- Create final XPI file -->
+        <zip destfile="${release.dir}/${project.name}-${VERSION}${RELEASE}.xpi"
             basedir="${build.dir}" update="true" />
 
         <!-- Generate update.rdf file -->
-        <replace file="${build.dir}/update.rdf" propertyFile="ant.properties">
+        <copy file="update.rdf" tofile="${release.dir}/update.rdf"/>
+        <replace file="${release.dir}/update.rdf" propertyFile="ant.properties">
             <replacefilter token="@VERSION@" property="VERSION"/>
             <replacefilter token="@RELEASE@" property="RELEASE"/>
         </replace>
 
-        <!-- Final build message -->
-        <echo message="FBTrace version: ${VERSION}${RELEASE}"/>
+        <!-- Final version message -->
+        <echo message="${ant.project.name} version: ${VERSION}${RELEASE}"/>
 
         <!-- Deploy -->
         <antcall target="deploy" />
+
+        <!-- Tighten up -->
+        <delete dir="${build.dir}"/>
     </target>
 
     <!-- Deploy if target available -->
     <target name="deploy" if="deploy.dir.available">
 
         <!-- Deploy xpi & update.rdf files -->
-        <copy file="${build.dir}/update.rdf" todir="${deploy-xpi.dir}" overwrite="true"/>
-        <copy file="${build.dir}/fbTrace-${VERSION}${RELEASE}.xpi" todir="${deploy-xpi.dir}" overwrite="true"/>
+        <copy file="${release.dir}/update.rdf" todir="${deploy-xpi.dir}" overwrite="true"/>
+        <copy file="${release.dir}/${project.name}-${VERSION}${RELEASE}.xpi" todir="${deploy-xpi.dir}" overwrite="true"/>
 
-        <!-- Final deploy message -->
-        <echo message="fbTrace-${VERSION}${RELEASE} deployed to: ${deploy-xpi.dir}"/>
+        <echo message="XPI for ${VERSION}${RELEASE} deployed to: ${deploy-xpi.dir}"/>
     </target>
-
 </project>

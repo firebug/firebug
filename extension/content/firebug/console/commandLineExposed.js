@@ -48,7 +48,7 @@ var unsortedCompletionList = true;
 /**
  * Returns a command line object (bundled with passed window through closure). The object
  * provides all necessary APIs as described here:
- * http://getfirebug.com/wiki/index.php/Command_Line_API
+ * https://getfirebug.com/wiki/index.php/Command_Line_API
  *
  * @param {Object} context
  * @param {Object} win

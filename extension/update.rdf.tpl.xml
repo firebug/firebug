@@ -14,7 +14,7 @@
               <minVersion>30.0a1</minVersion>
               <maxVersion>31.0</maxVersion>
               <updateLink>https://getfirebug.com/releases/firebug/@VERSION@/@LEAF@</updateLink>
-              <updateInfoURL>http://getfirebug.com/updateInfo/firebug2.0.xml</updateInfoURL>
+              <updateInfoURL>https://getfirebug.com/updateInfo/firebug2.0.xml</updateInfoURL>
             </r:Description>
           </targetApplication>
         </r:Description>

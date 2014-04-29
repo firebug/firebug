@@ -1,7 +1,7 @@
 @font-face {
     font-family: 'TitilliumMaps';
-    src: url('http://getfirebug.com/fonts/TitilliumMaps26L001.eot');
-    src: local('☺'), url('http://getfirebug.com/fonts/TitilliumMaps26L001.woff') format('woff'), url('http://getfirebug.com/fonts/TitilliumMaps26L001.ttf') format('truetype');
+    src: url('https://getfirebug.com/fonts/TitilliumMaps26L001.eot');
+    src: local('☺'), url('https://getfirebug.com/fonts/TitilliumMaps26L001.woff') format('woff'), url('https://getfirebug.com/fonts/TitilliumMaps26L001.ttf') format('truetype');
     font-weight: bold;
 }
 

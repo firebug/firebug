@@ -1,21 +1,30 @@
 <?xml version="1.0" ?>
 
-<!-- In order to build FBTest extension run: $ant build
+<!-- In order to build the extension run: $ant build (in the extension dir)
     The final xpi file should be located in a release directory -->
-<project name="fbtest" basedir="." default="build">
+<project name="FBTest" basedir="." default="build">
+    <scriptdef language="javascript" name="lower">
+        <attribute name="string" />
+        <attribute name="to" />
 
-    <!-- Properties -->
-    <property file="content/fbtest.properties"/>
+        project.setProperty(attributes.get("to"),
+                            attributes.get("string").toLowerCase());
+    </scriptdef>
+
+    <lower string="${ant.project.name}" to="project.name"/>
+
+	  <!-- Properties -->
+    <property file="content/${project.name}.properties"/>
 
     <!-- Directories -->
-    <property name="build.dir" value="release"/>
+    <property name="build.dir" value="./build"/>
     <property name="release.dir" value="./release"/>
-    <property name="deploy-xpi.dir" value="${GETFIREBUG}/releases/fbtest/${VERSION}"/>
-    <property name="deploy-jsdoc.dir" value="${GETFIREBUG}/developer/api/fbtest${VERSION}"/>
+    <property name="deploy-xpi.dir" value="${GETFIREBUG}/releases/${project.name}/${VERSION}"/>
+    <property name="deploy-jsdoc.dir" value="${GETFIREBUG}/developer/api/${project.name}${VERSION}"/>
 
     <available file="${GETFIREBUG}" property="deploy.dir.available"/>
 
-    <!-- echo -->
+    <!-- Output build info -->
     <target name="echo">
         <echo message="Build directory: ${build.dir}"/>
         <echo message="Deploy directory ${GETFIREBUG} available: ${deploy.dir.available}"/>
@@ -24,11 +33,11 @@
     <!-- Clean -->
     <target name="clean">
         <delete dir="${build.dir}"/>
+        <delete dir="${release.dir}"/>
     </target>
 
     <!-- Build -->
     <target name="build" depends="clean">
-
         <!-- Copy components directory -->
         <copy todir="${build.dir}/components">
             <fileset dir="components">
@@ -38,7 +47,7 @@
 
         <!-- Copy content directory -->
         <copy todir="${build.dir}/content">
-            <fileset dir="content">
+            <fileset dir="content" includes="**">
                 <include name="*.js"/>
                 <include name="*.css"/>
                 <include name="*.xml"/>
@@ -84,36 +93,40 @@
         <copy file="license.txt" todir="${build.dir}"/>
         <copy file="update.rdf" todir="${build.dir}"/>
 
-        <!-- Update release version from fbtest.properties file -->
-        <replace file="${build.dir}/install.rdf" propertyFile="content/fbtest.properties">
+        <!-- Update release version from PROPERTIES file -->
+        <replace file="${build.dir}/install.rdf" propertyFile="content/${project.name}.properties">
             <replacefilter token="@VERSION@" property="VERSION"/>
             <replacefilter token="@RELEASE@" property="RELEASE"/>
         </replace>
 
-        <!-- Create final fbTest.xpi file -->
-        <zip destfile="${build.dir}/fbTest-${VERSION}${RELEASE}.xpi"
+        <!-- Create final XPI file -->
+        <zip destfile="${release.dir}/${project.name}-${VERSION}${RELEASE}.xpi"
             basedir="${build.dir}" update="true" />
 
         <!-- Generate update.rdf file -->
-        <replace file="${build.dir}/update.rdf" propertyFile="content/fbtest.properties">
+        <copy file="update.rdf" tofile="${release.dir}/update.rdf"/>
+        <replace file="${release.dir}/update.rdf" propertyFile="content/${project.name}.properties">
             <replacefilter token="@VERSION@" property="VERSION"/>
             <replacefilter token="@RELEASE@" property="RELEASE"/>
         </replace>
 
         <!-- Final version message -->
-        <echo message="FBTest version: ${VERSION}${RELEASE}"/>
+        <echo message="${ant.project.name} version: ${VERSION}${RELEASE}"/>
 
         <!-- Deploy -->
         <antcall target="deploy" />
+
+        <!-- Tighten up -->
+        <delete dir="${build.dir}"/>
     </target>
 
     <!-- Deploy if target available -->
     <target name="deploy" if="deploy.dir.available">
-
         <!-- Deploy xpi & update.rdf files -->
-        <copy file="${build.dir}/update.rdf" todir="${deploy-xpi.dir}" overwrite="true"/>
-        <copy file="${build.dir}/fbTest-${VERSION}${RELEASE}.xpi" todir="${deploy-xpi.dir}" overwrite="true"/>
-        <echo message="XPI deployed to: ${VERSION}${RELEASE} to ${deploy-xpi.dir}"/>
+        <copy file="${release.dir}/update.rdf" todir="${deploy-xpi.dir}" overwrite="true"/>
+        <copy file="${release.dir}/${ant.project.name}-${VERSION}${RELEASE}.xpi" todir="${deploy-xpi.dir}" overwrite="true"/>
+
+        <echo message="XPI for ${VERSION}${RELEASE} deployed to: ${deploy-xpi.dir}"/>
     </target>
 
     <!-- Deploy if target available -->
@@ -143,7 +156,7 @@
             classpathref="jsdoctoolkit"
             classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit"/>
 
-        <echo message="Generate doc from FBTest source ($svn/jsdoc/out/)."/>
+        <echo message="Generate docs from ${ant.project.name} source ($svn/jsdoc/out/)."/>
 
         <!-- Clean the output direcotory -->
         <delete dir="${jsdoc-output.dir}"/>

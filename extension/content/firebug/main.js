@@ -53,7 +53,7 @@ catch (err)
 // ********************************************************************************************* //
 
 // Backward compatibility (some modules changed location)
-// http://getfirebug.com/wiki/index.php/Extension_Migration
+// https://getfirebug.com/wiki/index.php/Extension_Migration
 // http://code.google.com/p/fbug/issues/detail?id=5199
 var paths = {};
 paths["firebug/css/cssComputedElementPanel"] = "firebug/css/computedPanel";
