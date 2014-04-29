@@ -52,13 +52,679 @@ var KeyEvent = window.KeyEvent;
 
 // ********************************************************************************************* //
 
-Firebug.HTMLPanel = function() {};
-
+function HTMLPanel() {}
 var WalkingPanel = Obj.extend(Panel, HTMLLib.ElementWalkerFunctions);
-
-Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
+HTMLPanel.prototype = Obj.extend(WalkingPanel,
 {
+    name: "html",
+    searchable: true,
+    searchPlaceholder: "search.html.Search_by_text_or_CSS_selector",
+    breakable: true,
+    dependents: ["css", "computed", "layout", "dom", "domSide", "watch"],
+    inspectorHistory: new Array(5),
+    enableA11y: true,
+    order: 20,
     inspectable: true,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
+
+    initialize: function()
+    {
+        this.onMutationObserve = this.onMutationObserve.bind(this);
+        this.onMutateText = this.onMutateText.bind(this);
+        this.onMutateAttr = this.onMutateAttr.bind(this);
+        this.onMutateNode = this.onMutateNode.bind(this);
+        this.onClick = this.onClick.bind(this);
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onKeyPress = this.onKeyPress.bind(this);
+
+        Panel.initialize.apply(this, arguments);
+
+        CSSModule.addListener(this);
+    },
+
+    destroy: function(state)
+    {
+        Persist.persistObjects(this, state);
+
+        Panel.destroy.apply(this, arguments);
+
+        delete this.embeddedBrowserParents;
+        delete this.embeddedBrowserDocument;
+
+        // xxxHonza: I don't know why this helps, but it helps to release the
+        // page compartment (at least by observing about:memory);
+        // Note that inspectorHistory holds references to page elements.
+        for (var i=0; i<this.inspectorHistory.length; i++)
+            delete this.inspectorHistory[i];
+        delete this.inspectorHistory;
+
+        CSSModule.removeListener(this);
+        this.unregisterMutationListeners();
+    },
+
+    initializeNode: function(oldPanelNode)
+    {
+        if (!this.ioBox)
+            this.ioBox = new InsideOutBox(this, this.panelNode);
+
+        Events.addEventListener(this.panelNode, "click", this.onClick, false);
+        Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
+
+        Panel.initializeNode.apply(this, arguments);
+    },
+
+    destroyNode: function()
+    {
+        Events.removeEventListener(this.panelNode, "click", this.onClick, false);
+        Events.removeEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
+
+        Events.removeEventListener(this.panelNode.ownerDocument, "keypress",
+            this.onKeyPress, true);
+
+        if (this.ioBox)
+        {
+            this.ioBox.destroy();
+            delete this.ioBox;
+        }
+
+        Panel.destroyNode.apply(this, arguments);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    show: function(state)
+    {
+        this.showToolbarButtons("fbHTMLButtons", true);
+        this.showToolbarButtons("fbStatusButtons", true);
+
+        Events.addEventListener(this.panelNode.ownerDocument, "keypress", this.onKeyPress, true);
+
+        if (this.context.loaded)
+        {
+            this.registerMutationListeners();
+
+            Persist.restoreObjects(this, state);
+        }
+    },
+
+    hide: function()
+    {
+        // clear the state that is tracking the infotip so it is reset after next show()
+        delete this.infoTipURL;
+
+        Events.removeEventListener(this.panelNode.ownerDocument, "keypress", this.onKeyPress, true);
+    },
+
+    watchWindow: function(context, win)
+    {
+        var self = this;
+        setTimeout(function() {
+            self.watchWindowDelayed(context, win);
+        }, 100);
+    },
+
+    watchWindowDelayed: function(context, win)
+    {
+        if (this.context.window && this.context.window != win)
+        {
+            // then I guess we are an embedded window
+            var htmlPanel = this;
+            Win.iterateWindows(this.context.window, function(subwin)
+            {
+                if (win == subwin)
+                {
+                    if (FBTrace.DBG_HTML)
+                        FBTrace.sysout("html.watchWindow found subwin.location.href="+
+                            win.location.href);
+
+                    htmlPanel.mutateDocumentEmbedded(win, false);
+                }
+            });
+        }
+
+        this.registerMutationListeners(win);
+    },
+
+    unwatchWindow: function(context, win)
+    {
+        if (this.context.window && this.context.window != win)
+        {
+            // then I guess we are an embedded window
+            var htmlPanel = this;
+            Win.iterateWindows(this.context.window, function(subwin)
+            {
+                if (win == subwin)
+                {
+                    if (FBTrace.DBG_HTML)
+                        FBTrace.sysout("html.unwatchWindow found subwin.location.href="+
+                            win.location.href);
+
+                    htmlPanel.mutateDocumentEmbedded(win, true);
+                }
+            });
+        }
+
+        this.unregisterMutationListeners(win);
+    },
+
+    mutateDocumentEmbedded: function(win, remove)
+    {
+        //xxxHonza: win.document.documentElement is null if this method is synchronously
+        // called after watchWindow. This is why watchWindowDelayed is introduced.
+        // See issue 3342
+
+        // document.documentElement - Returns the Element that is a direct child of document.
+        // For HTML documents, this normally the HTML element.
+        var target = win.document.documentElement;
+        var parent = win.frameElement;
+        var nextSibling = this.findNextSibling(target || parent);
+        try
+        {
+            this.mutateNode(target, parent, nextSibling, remove);
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("html.mutateDocumentEmbedded FAILS " + exc, exc);
+        }
+    },
+
+    supportsObject: function(object, type)
+    {
+        if (object instanceof window.Element || object instanceof window.Text ||
+            object instanceof window.CDATASection)
+        {
+            return 2;
+        }
+        else if (object instanceof SourceLink && object.type == "css" &&
+            !Url.reCSS.test(object.href))
+        {
+            return 2;
+        }
+        else
+        {
+            return 0;
+        }
+    },
+
+    updateOption: function(name, value)
+    {
+        var options = new Set();
+        options.add("showCommentNodes");
+        options.add("entityDisplay");
+        options.add("showTextNodesWithWhitespace");
+        options.add("showFullTextNodes");
+
+        if (options.has(name))
+        {
+            this.resetSearch();
+            Dom.clearNode(this.panelNode);
+            if (this.ioBox)
+                this.ioBox.destroy();
+
+            this.ioBox = new InsideOutBox(this, this.panelNode);
+            this.ioBox.select(this.selection, true, true);
+        }
+    },
+
+    updateSelection: function(object)
+    {
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("html.updateSelection " + object, object);
+
+        if (this.ioBox.sourceRow)
+            this.ioBox.sourceRow.removeAttribute("exe_line");
+
+        // && object.type == "css" and !Url.reCSS(object.href) by supports
+        if (object instanceof SourceLink)
+        {
+            var sourceLink = object;
+            var stylesheet = Css.getStyleSheetByHref(sourceLink.href, this.context);
+            if (stylesheet)
+            {
+                var ownerNode = stylesheet.ownerNode;
+
+                if (FBTrace.DBG_CSS)
+                {
+                    FBTrace.sysout("html panel updateSelection stylesheet.ownerNode=" +
+                        stylesheet.ownerNode + " href:" + sourceLink.href);
+                }
+
+                if (ownerNode)
+                {
+                    var objectbox = this.ioBox.select(ownerNode, true, true, this.noScrollIntoView);
+
+                    // XXXjjb seems like this could be bad for errors at the end of long files
+                    // first source row in style
+                    var sourceRow = objectbox.getElementsByClassName("sourceRow").item(0);
+                    for (var lineNo = 1; lineNo < sourceLink.line; lineNo++)
+                    {
+                        if (!sourceRow) break;
+                        sourceRow = Dom.getNextByClass(sourceRow,  "sourceRow");
+                    }
+
+                    if (FBTrace.DBG_CSS)
+                    {
+                        FBTrace.sysout("html panel updateSelection sourceLink.line=" +
+                            sourceLink.line + " sourceRow=" +
+                            (sourceRow ? sourceRow.innerHTML : "undefined"));
+                    }
+
+                    if (sourceRow)
+                    {
+                        this.ioBox.sourceRow = sourceRow;
+                        this.ioBox.sourceRow.setAttribute("exe_line", "true");
+
+                        Dom.scrollIntoCenterView(sourceRow);
+
+                        // sourceRow isn't an objectBox, but the function should work anyway...
+                        this.ioBox.selectObjectBox(sourceRow, false);
+                    }
+                }
+            }
+        }
+        else if (Inspector.inspecting)
+        {
+            this.ioBox.highlight(object);
+        }
+        else
+        {
+            var found = this.ioBox.select(object, true, false, this.noScrollIntoView);
+            if (!found)
+            {
+                // Look up for an enclosing parent. NB this will mask failures in createObjectBoxes
+                var parentNode = this.getParentObject(object);
+
+                if (FBTrace.DBG_ERRORS && FBTrace.DBG_HTML)
+                    FBTrace.sysout("html.updateSelect no objectBox for object:"+
+                        Css.getElementCSSSelector(object) + " trying "+
+                        Css.getElementCSSSelector(parentNode));
+
+                this.updateSelection(parentNode);
+                return;
+            }
+
+            this.inspectorHistory.unshift(object);
+            if (this.inspectorHistory.length > 5)
+                this.inspectorHistory.pop();
+        }
+    },
+
+    stopInspecting: function(object, canceled)
+    {
+        if (object != this.inspectorHistory)
+        {
+            // Manage history of selection for later access in the command line.
+            this.inspectorHistory.unshift(object);
+            if (this.inspectorHistory.length > 5)
+                this.inspectorHistory.pop();
+
+            if (FBTrace.DBG_HTML)
+                FBTrace.sysout("html.stopInspecting: inspectoryHistory updated",
+                    this.inspectorHistory);
+        }
+
+        this.ioBox.highlight(null);
+
+        if (!canceled)
+            this.ioBox.select(object, true);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Search
+
+    search: function(text, reverse)
+    {
+        if (!text)
+        {
+            delete this.lastSearch;
+            this.document.defaultView.getSelection().removeAllRanges();
+            return false;
+        }
+
+        var search;
+        if (text == this.searchText && this.lastSearch)
+        {
+            search = this.lastSearch;
+        }
+        else
+        {
+            var doc = this.context.window.document;
+            search = this.lastSearch = new HTMLLib.NodeSearch(text, doc, this.panelNode, this.ioBox);
+        }
+
+        var loopAround = search.find(reverse, SearchBox.isCaseSensitive(text));
+        if (loopAround)
+        {
+            this.resetSearch();
+            this.search(text, reverse);
+        }
+
+        if (search.noMatch)
+            return false;
+        return loopAround ? "wraparound" : true;
+    },
+
+    shouldIgnoreIntermediateSearchFailure: function(value)
+    {
+        // Ignore failures for values that, according to the auto-completion system,
+        // can be extended into valid selectors, or that are obviously incomplete
+        // selectors.
+        var editor = new CSSSelectorEditor();
+        var range = editor.getAutoCompleteRange(value, value.length);
+        var preExpr = value.slice(0, range.start);
+        var expr = value.slice(range.start);
+
+        if (preExpr.lastIndexOf("[") > preExpr.lastIndexOf("]"))
+            return true;
+        if (preExpr.lastIndexOf("(") > preExpr.lastIndexOf(")"))
+            return true;
+
+        var list = editor.getAutoCompleteList(preExpr, expr, "", range, false, this.context, {});
+        return list && list.some(function(x)
+        {
+            return x.startsWith(expr);
+        });
+    },
+
+    getSearchOptionsMenuItems: function()
+    {
+        return [
+            SearchBox.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
+                "search.tip.Case_Sensitive"),
+            SearchBox.searchOptionMenu("search.Use_Regular_Expression",
+                "searchUseRegularExpression", "search.tip.Use_Regular_Expression")
+        ];
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getDefaultSelection: function()
+    {
+        try
+        {
+            var doc = this.context.window.document;
+            return doc.body ? doc.body : Dom.getPreviousElement(doc.documentElement.lastChild);
+        }
+        catch (exc)
+        {
+            return null;
+        }
+    },
+
+    getObjectPath: function(element)
+    {
+        var path = [];
+        for (; element; element = this.getParentObject(element))
+        {
+            // Ignore the document itself, it shouldn't be displayed in
+            // the object path (aka breadcrumbs).
+            if (element instanceof window.Document)
+                continue;
+
+            // Ignore elements without parent
+            if (!element.parentNode)
+                continue;
+
+            path.push(element);
+        }
+        return path;
+    },
+
+    getTooltipObject: function(target)
+    {
+        if (Dom.getAncestorByClass(target, "nodeLabelBox") ||
+            Dom.getAncestorByClass(target, "nodeCloseLabelBox"))
+        {
+            return Firebug.getRepObject(target);
+        }
+    },
+
+    getOptionsMenuItems: function()
+    {
+        return [
+            Menu.optionMenu("ShowFullText", "showFullTextNodes",
+                "html.option.tip.Show_Full_Text"),
+            Menu.optionMenu("ShowWhitespace", "showTextNodesWithWhitespace",
+                "html.option.tip.Show_Whitespace"),
+            Menu.optionMenu("ShowComments", "showCommentNodes",
+                "html.option.tip.Show_Comments"),
+            "-",
+            {
+                label: "html.option.Show_Entities_As_Symbols",
+                tooltiptext: "html.option.tip.Show_Entities_As_Symbols",
+                type: "radio",
+                name: "entityDisplay",
+                id: "entityDisplaySymbols",
+                command: Obj.bind(this.setEntityDisplay, this, "symbols"),
+                checked: Options.get("entityDisplay") == "symbols"
+            },
+            {
+                label: "html.option.Show_Entities_As_Names",
+                tooltiptext: "html.option.tip.Show_Entities_As_Names",
+                type: "radio",
+                name: "entityDisplay",
+                id: "entityDisplayNames",
+                command: Obj.bind(this.setEntityDisplay, this, "names"),
+                checked: Options.get("entityDisplay") == "names"
+            },
+            {
+                label: "html.option.Show_Entities_As_Unicode",
+                tooltiptext: "html.option.tip.Show_Entities_As_Unicode",
+                type: "radio",
+                name: "entityDisplay",
+                id: "entityDisplayUnicode",
+                command: Obj.bind(this.setEntityDisplay, this, "unicode"),
+                checked: Options.get("entityDisplay") == "unicode"
+            },
+            "-",
+            Menu.optionMenu("HighlightMutations", "highlightMutations",
+                "html.option.tip.Highlight_Mutations"),
+            Menu.optionMenu("ExpandMutations", "expandMutations",
+                "html.option.tip.Expand_Mutations"),
+            Menu.optionMenu("ScrollToMutations", "scrollToMutations",
+                "html.option.tip.Scroll_To_Mutations"),
+            "-",
+            Menu.optionMenu("ShadeBoxModel", "shadeBoxModel",
+                "inspect.option.tip.Shade_Box_Model"),
+            Menu.optionMenu("ShowQuickInfoBox","showQuickInfoBox",
+                "inspect.option.tip.Show_Quick_Info_Box")
+        ];
+    },
+
+    getContextMenuItems: function(node, target)
+    {
+        if (!node)
+            return null;
+
+        var items = [];
+
+        if (node.nodeType == Node.ELEMENT_NODE)
+        {
+            items.push(
+                "-",
+                {
+                    label: "NewAttribute",
+                    id: "htmlNewAttribute",
+                    tooltiptext: "html.tip.New_Attribute",
+                    command: Obj.bindFixed(this.editNewAttribute, this, node)
+                }
+            );
+
+            var attrBox = Dom.getAncestorByClass(target, "nodeAttr");
+            if (Dom.getAncestorByClass(target, "nodeAttr"))
+            {
+                var attrName = attrBox.childNodes[1].textContent;
+
+                items.push(
+                    {
+                        id: "fbEditAttribute",
+                        label: Locale.$STRF("EditAttribute", [attrName]),
+                        tooltiptext: Locale.$STRF("html.tip.Edit_Attribute", [attrName]),
+                        nol10n: true,
+                        command: Obj.bindFixed(this.editAttribute, this, node, attrName)
+                    },
+                    {
+                        id: "fbDeleteAttribute",
+                        label: Locale.$STRF("DeleteAttribute", [attrName]),
+                        tooltiptext: Locale.$STRF("html.tip.Delete_Attribute", [attrName]),
+                        nol10n: true,
+                        command: Obj.bindFixed(this.deleteAttribute, this, node, attrName)
+                    }
+                );
+            }
+
+            if (!Css.nonEditableTags.hasOwnProperty(node.localName))
+            {
+                var type;
+
+                if (Xml.isElementHTMLOrXHTML(node))
+                    type = "HTML";
+                else if (Xml.isElementMathML(node))
+                    type = "MathML";
+                else if (Xml.isElementSVG(node))
+                    type = "SVG";
+                else if (Xml.isElementXUL(node))
+                    type = "XUL";
+                else
+                    type = "XML";
+
+                items.push("-",
+                {
+                    id: "fbEditNode",
+                    label: Locale.$STRF("html.Edit_Node", [type]),
+                    tooltiptext: Locale.$STRF("html.tip.Edit_Node", [type]),
+                    nol10n: true,
+                    acceltext: (Locale.getFormattedKey(window, "accel", "E")),
+                    command: Obj.bindFixed(this.editNode, this, node)
+                });
+
+                if (!Css.nonDeletableTags.hasOwnProperty(node.localName))
+                {
+                    items.push({
+                        id: "fbDeleteElement",
+                        label: "DeleteElement",
+                        tooltiptext: "html.Delete_Element",
+                        acceltext: Locale.getFormattedKey(window, null, null, "VK_DELETE"),
+                        command: Obj.bindFixed(this.deleteNode, this, node)
+                    });
+                }
+            }
+
+            var objectBox = Dom.getAncestorByClass(target, "nodeBox");
+            var nodeChildBox = this.ioBox.getChildObjectBox(objectBox);
+            if (nodeChildBox)
+            {
+                items.push(
+                    "-",
+                    {
+                        id: "fbExpandContractAll",
+                        label: "html.label.Expand/Contract_All",
+                        tooltiptext: "html.tip.Expand/Contract_All",
+                        acceltext: Locale.getFormattedKey(window, null, "*"),
+                        command: Obj.bind(this.toggleAll, this, node)
+                    }
+                );
+            }
+        }
+        else
+        {
+            var nodeLabel = Locale.$STR("html.Node");
+            items.push(
+                "-",
+                {
+                    id: "fbEditNode",
+                    label: Locale.$STRF("html.Edit_Node", [nodeLabel]),
+                    tooltiptext: Locale.$STRF("html.tip.Edit_Node", [nodeLabel]),
+                    nol10n: true,
+                    command: Obj.bindFixed(this.editNode, this, node)
+                },
+                {
+                    id: "fbDeleteNode",
+                    label: "DeleteNode",
+                    tooltiptext: "html.Delete_Node",
+                    command: Obj.bindFixed(this.deleteNode, this, node)
+                }
+            );
+        }
+
+        HTMLModule.MutationBreakpoints.getContextMenuItems(this.context, node, target, items);
+
+        return items;
+    },
+
+    showInfoTip: function(infoTip, target, x, y)
+    {
+        if (!Css.hasClass(target, "nodeValue"))
+            return;
+
+        var node = Firebug.getRepObject(target);
+        if (node && node.nodeType == Node.ELEMENT_NODE)
+        {
+            var nodeName = node.localName.toUpperCase();
+            var attribute = Dom.getAncestorByClass(target, "nodeAttr");
+            var attributeName = attribute.getElementsByClassName("nodeName").item(0).textContent;
+
+            if ((nodeName == "IMG" || nodeName == "INPUT") && attributeName == "src")
+            {
+                var url = node.src;
+
+                // This state cleared in hide()
+                if (url == this.infoTipURL)
+                    return true;
+
+                this.infoTipURL = url;
+                return CSSReps.CSSInfoTip.populateImageInfoTip(infoTip, url);
+            }
+        }
+    },
+
+    getEditor: function(target, value)
+    {
+        if (Css.hasClass(target, "nodeName") || Css.hasClass(target, "nodeValue") ||
+            Css.hasClass(target, "nodeBracket"))
+        {
+            if (!this.attrEditor)
+                this.attrEditor = new HTMLPanel.Editors.Attribute(this.document);
+
+            return this.attrEditor;
+        }
+        else if (Css.hasClass(target, "nodeComment") || Css.hasClass(target, "nodeCDATA"))
+        {
+            if (!this.textDataEditor)
+                this.textDataEditor = new HTMLPanel.Editors.TextData(this.document);
+
+            return this.textDataEditor;
+        }
+        else if (Css.hasClass(target, "nodeText"))
+        {
+            if (!this.textNodeEditor)
+                this.textNodeEditor = new HTMLPanel.Editors.TextNode(this.document);
+
+            return this.textNodeEditor;
+        }
+    },
+
+    getInspectorVars: function()
+    {
+        var vars = {};
+        for (var i=0; i<this.inspectorHistory.length; i++)
+            vars["$"+i] = this.inspectorHistory[i] || null;
+
+        return vars;
+    },
+
+    setEntityDisplay: function(event, type)
+    {
+        Options.set("entityDisplay", type);
+
+        var menuItem = event.target;
+        menuItem.setAttribute("checked", "true");
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     toggleEditing: function()
     {
@@ -232,8 +898,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             {
                 // look for special purpose editor (inserted by an extension),
                 // otherwise use our html editor
-                var SpecializedEditor = Firebug.HTMLPanel.Editors[type] ||
-                    Firebug.HTMLPanel.Editors.html;
+                var SpecializedEditor = HTMLPanel.Editors[type] || HTMLPanel.Editors.html;
                 editor = this.localEditors[type] = new SpecializedEditor(this.document);
             }
 
@@ -591,8 +1256,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
                 if (attr)
                 {
-                    nodeAttr = Firebug.HTMLPanel.AttrNode.tag.replace({attr: attr},
-                        this.document);
+                    nodeAttr = HTMLPanel.AttrNode.tag.replace({attr: attr}, this.document);
 
                     var labelBox = objectNodeBox.querySelector("*> .nodeLabel > .nodeLabelBox");
                     var bracketBox = labelBox.querySelector("*> .nodeBracket");
@@ -643,7 +1307,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             textValue = Str.cropMultipleLines(textValue);
 
         var parentTag = getNodeBoxTag(parentNodeBox);
-        if (parentTag == Firebug.HTMLPanel.TextElement.tag)
+        if (parentTag == HTMLPanel.TextElement.tag)
         {
             if (FBTrace.DBG_HTML)
                 FBTrace.sysout("html.mutateText target: " + target + " parent: " + parent);
@@ -1360,665 +2024,6 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // extends Panel
-
-    name: "html",
-    searchable: true,
-    searchPlaceholder: "search.html.Search_by_text_or_CSS_selector",
-    breakable: true,
-    dependents: ["css", "computed", "layout", "dom", "domSide", "watch"],
-    inspectorHistory: new Array(5),
-    enableA11y: true,
-    order: 20,
-
-    initialize: function()
-    {
-        this.onMutationObserve = this.onMutationObserve.bind(this);
-        this.onMutateText = this.onMutateText.bind(this);
-        this.onMutateAttr = this.onMutateAttr.bind(this);
-        this.onMutateNode = this.onMutateNode.bind(this);
-        this.onClick = this.onClick.bind(this);
-        this.onMouseDown = this.onMouseDown.bind(this);
-        this.onKeyPress = this.onKeyPress.bind(this);
-
-        Panel.initialize.apply(this, arguments);
-        CSSModule.addListener(this);
-    },
-
-    destroy: function(state)
-    {
-        Persist.persistObjects(this, state);
-
-        Panel.destroy.apply(this, arguments);
-
-        delete this.embeddedBrowserParents;
-        delete this.embeddedBrowserDocument;
-
-        // xxxHonza: I don't know why this helps, but it helps to release the
-        // page compartment (at least by observing about:memory);
-        // Note that inspectorHistory holds references to page elements.
-        for (var i=0; i<this.inspectorHistory.length; i++)
-            delete this.inspectorHistory[i];
-        delete this.inspectorHistory;
-
-        CSSModule.removeListener(this);
-        this.unregisterMutationListeners();
-    },
-
-    initializeNode: function(oldPanelNode)
-    {
-        if (!this.ioBox)
-            this.ioBox = new InsideOutBox(this, this.panelNode);
-
-        Events.addEventListener(this.panelNode, "click", this.onClick, false);
-        Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
-
-        Panel.initializeNode.apply(this, arguments);
-    },
-
-    destroyNode: function()
-    {
-        Events.removeEventListener(this.panelNode, "click", this.onClick, false);
-        Events.removeEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
-
-        Events.removeEventListener(this.panelNode.ownerDocument, "keypress",
-            this.onKeyPress, true);
-
-        if (this.ioBox)
-        {
-            this.ioBox.destroy();
-            delete this.ioBox;
-        }
-
-        Panel.destroyNode.apply(this, arguments);
-    },
-
-    show: function(state)
-    {
-        this.showToolbarButtons("fbHTMLButtons", true);
-        this.showToolbarButtons("fbStatusButtons", true);
-
-        Events.addEventListener(this.panelNode.ownerDocument, "keypress", this.onKeyPress, true);
-
-        if (this.context.loaded)
-        {
-            this.registerMutationListeners();
-
-            Persist.restoreObjects(this, state);
-        }
-    },
-
-    hide: function()
-    {
-        // clear the state that is tracking the infotip so it is reset after next show()
-        delete this.infoTipURL;
-
-        Events.removeEventListener(this.panelNode.ownerDocument, "keypress", this.onKeyPress, true);
-    },
-
-    watchWindow: function(context, win)
-    {
-        var self = this;
-        setTimeout(function() {
-            self.watchWindowDelayed(context, win);
-        }, 100);
-    },
-
-    watchWindowDelayed: function(context, win)
-    {
-        if (this.context.window && this.context.window != win)
-        {
-            // then I guess we are an embedded window
-            var htmlPanel = this;
-            Win.iterateWindows(this.context.window, function(subwin)
-            {
-                if (win == subwin)
-                {
-                    if (FBTrace.DBG_HTML)
-                        FBTrace.sysout("html.watchWindow found subwin.location.href="+
-                            win.location.href);
-
-                    htmlPanel.mutateDocumentEmbedded(win, false);
-                }
-            });
-        }
-
-        this.registerMutationListeners(win);
-    },
-
-    unwatchWindow: function(context, win)
-    {
-        if (this.context.window && this.context.window != win)
-        {
-            // then I guess we are an embedded window
-            var htmlPanel = this;
-            Win.iterateWindows(this.context.window, function(subwin)
-            {
-                if (win == subwin)
-                {
-                    if (FBTrace.DBG_HTML)
-                        FBTrace.sysout("html.unwatchWindow found subwin.location.href="+
-                            win.location.href);
-
-                    htmlPanel.mutateDocumentEmbedded(win, true);
-                }
-            });
-        }
-
-        this.unregisterMutationListeners(win);
-    },
-
-    mutateDocumentEmbedded: function(win, remove)
-    {
-        //xxxHonza: win.document.documentElement is null if this method is synchronously
-        // called after watchWindow. This is why watchWindowDelayed is introduced.
-        // See issue 3342
-
-        // document.documentElement - Returns the Element that is a direct child of document.
-        // For HTML documents, this normally the HTML element.
-        var target = win.document.documentElement;
-        var parent = win.frameElement;
-        var nextSibling = this.findNextSibling(target || parent);
-        try
-        {
-            this.mutateNode(target, parent, nextSibling, remove);
-        }
-        catch (exc)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("html.mutateDocumentEmbedded FAILS " + exc, exc);
-        }
-    },
-
-    supportsObject: function(object, type)
-    {
-        if (object instanceof window.Element || object instanceof window.Text ||
-            object instanceof window.CDATASection)
-        {
-            return 2;
-        }
-        else if (object instanceof SourceLink && object.type == "css" &&
-            !Url.reCSS.test(object.href))
-        {
-            return 2;
-        }
-        else
-        {
-            return 0;
-        }
-    },
-
-    updateOption: function(name, value)
-    {
-        var options = new Set();
-        options.add("showCommentNodes");
-        options.add("entityDisplay");
-        options.add("showTextNodesWithWhitespace");
-        options.add("showFullTextNodes");
-
-        if (options.has(name))
-        {
-            this.resetSearch();
-            Dom.clearNode(this.panelNode);
-            if (this.ioBox)
-                this.ioBox.destroy();
-
-            this.ioBox = new InsideOutBox(this, this.panelNode);
-            this.ioBox.select(this.selection, true, true);
-        }
-    },
-
-    updateSelection: function(object)
-    {
-        if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.updateSelection " + object, object);
-
-        if (this.ioBox.sourceRow)
-            this.ioBox.sourceRow.removeAttribute("exe_line");
-
-        // && object.type == "css" and !Url.reCSS(object.href) by supports
-        if (object instanceof SourceLink)
-        {
-            var sourceLink = object;
-            var stylesheet = Css.getStyleSheetByHref(sourceLink.href, this.context);
-            if (stylesheet)
-            {
-                var ownerNode = stylesheet.ownerNode;
-
-                if (FBTrace.DBG_CSS)
-                {
-                    FBTrace.sysout("html panel updateSelection stylesheet.ownerNode=" +
-                        stylesheet.ownerNode + " href:" + sourceLink.href);
-                }
-
-                if (ownerNode)
-                {
-                    var objectbox = this.ioBox.select(ownerNode, true, true, this.noScrollIntoView);
-
-                    // XXXjjb seems like this could be bad for errors at the end of long files
-                    // first source row in style
-                    var sourceRow = objectbox.getElementsByClassName("sourceRow").item(0);
-                    for (var lineNo = 1; lineNo < sourceLink.line; lineNo++)
-                    {
-                        if (!sourceRow) break;
-                        sourceRow = Dom.getNextByClass(sourceRow,  "sourceRow");
-                    }
-
-                    if (FBTrace.DBG_CSS)
-                    {
-                        FBTrace.sysout("html panel updateSelection sourceLink.line=" +
-                            sourceLink.line + " sourceRow=" +
-                            (sourceRow ? sourceRow.innerHTML : "undefined"));
-                    }
-
-                    if (sourceRow)
-                    {
-                        this.ioBox.sourceRow = sourceRow;
-                        this.ioBox.sourceRow.setAttribute("exe_line", "true");
-
-                        Dom.scrollIntoCenterView(sourceRow);
-
-                        // sourceRow isn't an objectBox, but the function should work anyway...
-                        this.ioBox.selectObjectBox(sourceRow, false);
-                    }
-                }
-            }
-        }
-        else if (Inspector.inspecting)
-        {
-            this.ioBox.highlight(object);
-        }
-        else
-        {
-            var found = this.ioBox.select(object, true, false, this.noScrollIntoView);
-            if (!found)
-            {
-                // Look up for an enclosing parent. NB this will mask failures in createObjectBoxes
-                var parentNode = this.getParentObject(object);
-
-                if (FBTrace.DBG_ERRORS && FBTrace.DBG_HTML)
-                    FBTrace.sysout("html.updateSelect no objectBox for object:"+
-                        Css.getElementCSSSelector(object) + " trying "+
-                        Css.getElementCSSSelector(parentNode));
-
-                this.updateSelection(parentNode);
-                return;
-            }
-
-            this.inspectorHistory.unshift(object);
-            if (this.inspectorHistory.length > 5)
-                this.inspectorHistory.pop();
-        }
-    },
-
-    stopInspecting: function(object, canceled)
-    {
-        if (object != this.inspectorHistory)
-        {
-            // Manage history of selection for later access in the command line.
-            this.inspectorHistory.unshift(object);
-            if (this.inspectorHistory.length > 5)
-                this.inspectorHistory.pop();
-
-            if (FBTrace.DBG_HTML)
-                FBTrace.sysout("html.stopInspecting: inspectoryHistory updated",
-                    this.inspectorHistory);
-        }
-
-        this.ioBox.highlight(null);
-
-        if (!canceled)
-            this.ioBox.select(object, true);
-    },
-
-    search: function(text, reverse)
-    {
-        if (!text)
-        {
-            delete this.lastSearch;
-            this.document.defaultView.getSelection().removeAllRanges();
-            return false;
-        }
-
-        var search;
-        if (text == this.searchText && this.lastSearch)
-        {
-            search = this.lastSearch;
-        }
-        else
-        {
-            var doc = this.context.window.document;
-            search = this.lastSearch = new HTMLLib.NodeSearch(text, doc, this.panelNode, this.ioBox);
-        }
-
-        var loopAround = search.find(reverse, SearchBox.isCaseSensitive(text));
-        if (loopAround)
-        {
-            this.resetSearch();
-            this.search(text, reverse);
-        }
-
-        if (search.noMatch)
-            return false;
-        return loopAround ? "wraparound" : true;
-    },
-
-    shouldIgnoreIntermediateSearchFailure: function(value)
-    {
-        // Ignore failures for values that, according to the auto-completion system,
-        // can be extended into valid selectors, or that are obviously incomplete
-        // selectors.
-        var editor = new CSSSelectorEditor();
-        var range = editor.getAutoCompleteRange(value, value.length);
-        var preExpr = value.slice(0, range.start);
-        var expr = value.slice(range.start);
-
-        if (preExpr.lastIndexOf("[") > preExpr.lastIndexOf("]"))
-            return true;
-        if (preExpr.lastIndexOf("(") > preExpr.lastIndexOf(")"))
-            return true;
-
-        var list = editor.getAutoCompleteList(preExpr, expr, "", range, false, this.context, {});
-        return list && list.some(function(x)
-        {
-            return x.startsWith(expr);
-        });
-    },
-
-    getSearchOptionsMenuItems: function()
-    {
-        return [
-            SearchBox.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
-                "search.tip.Case_Sensitive"),
-            SearchBox.searchOptionMenu("search.Use_Regular_Expression",
-                "searchUseRegularExpression", "search.tip.Use_Regular_Expression")
-        ];
-    },
-
-    getDefaultSelection: function()
-    {
-        try
-        {
-            var doc = this.context.window.document;
-            return doc.body ? doc.body : Dom.getPreviousElement(doc.documentElement.lastChild);
-        }
-        catch (exc)
-        {
-            return null;
-        }
-    },
-
-    getObjectPath: function(element)
-    {
-        var path = [];
-        for (; element; element = this.getParentObject(element))
-        {
-            // Ignore the document itself, it shouldn't be displayed in
-            // the object path (aka breadcrumbs).
-            if (element instanceof window.Document)
-                continue;
-
-            // Ignore elements without parent
-            if (!element.parentNode)
-                continue;
-
-            path.push(element);
-        }
-        return path;
-    },
-
-    getTooltipObject: function(target)
-    {
-        if (Dom.getAncestorByClass(target, "nodeLabelBox") ||
-            Dom.getAncestorByClass(target, "nodeCloseLabelBox"))
-        {
-            return Firebug.getRepObject(target);
-        }
-    },
-
-    getOptionsMenuItems: function()
-    {
-        return [
-            Menu.optionMenu("ShowFullText", "showFullTextNodes",
-                "html.option.tip.Show_Full_Text"),
-            Menu.optionMenu("ShowWhitespace", "showTextNodesWithWhitespace",
-                "html.option.tip.Show_Whitespace"),
-            Menu.optionMenu("ShowComments", "showCommentNodes",
-                "html.option.tip.Show_Comments"),
-            "-",
-            {
-                label: "html.option.Show_Entities_As_Symbols",
-                tooltiptext: "html.option.tip.Show_Entities_As_Symbols",
-                type: "radio",
-                name: "entityDisplay",
-                id: "entityDisplaySymbols",
-                command: Obj.bind(this.setEntityDisplay, this, "symbols"),
-                checked: Options.get("entityDisplay") == "symbols"
-            },
-            {
-                label: "html.option.Show_Entities_As_Names",
-                tooltiptext: "html.option.tip.Show_Entities_As_Names",
-                type: "radio",
-                name: "entityDisplay",
-                id: "entityDisplayNames",
-                command: Obj.bind(this.setEntityDisplay, this, "names"),
-                checked: Options.get("entityDisplay") == "names"
-            },
-            {
-                label: "html.option.Show_Entities_As_Unicode",
-                tooltiptext: "html.option.tip.Show_Entities_As_Unicode",
-                type: "radio",
-                name: "entityDisplay",
-                id: "entityDisplayUnicode",
-                command: Obj.bind(this.setEntityDisplay, this, "unicode"),
-                checked: Options.get("entityDisplay") == "unicode"
-            },
-            "-",
-            Menu.optionMenu("HighlightMutations", "highlightMutations",
-                "html.option.tip.Highlight_Mutations"),
-            Menu.optionMenu("ExpandMutations", "expandMutations",
-                "html.option.tip.Expand_Mutations"),
-            Menu.optionMenu("ScrollToMutations", "scrollToMutations",
-                "html.option.tip.Scroll_To_Mutations"),
-            "-",
-            Menu.optionMenu("ShadeBoxModel", "shadeBoxModel",
-                "inspect.option.tip.Shade_Box_Model"),
-            Menu.optionMenu("ShowQuickInfoBox","showQuickInfoBox",
-                "inspect.option.tip.Show_Quick_Info_Box")
-        ];
-    },
-
-    getContextMenuItems: function(node, target)
-    {
-        if (!node)
-            return null;
-
-        var items = [];
-
-        if (node.nodeType == Node.ELEMENT_NODE)
-        {
-            items.push(
-                "-",
-                {
-                    label: "NewAttribute",
-                    id: "htmlNewAttribute",
-                    tooltiptext: "html.tip.New_Attribute",
-                    command: Obj.bindFixed(this.editNewAttribute, this, node)
-                }
-            );
-
-            var attrBox = Dom.getAncestorByClass(target, "nodeAttr");
-            if (Dom.getAncestorByClass(target, "nodeAttr"))
-            {
-                var attrName = attrBox.childNodes[1].textContent;
-
-                items.push(
-                    {
-                        id: "fbEditAttribute",
-                        label: Locale.$STRF("EditAttribute", [attrName]),
-                        tooltiptext: Locale.$STRF("html.tip.Edit_Attribute", [attrName]),
-                        nol10n: true,
-                        command: Obj.bindFixed(this.editAttribute, this, node, attrName)
-                    },
-                    {
-                        id: "fbDeleteAttribute",
-                        label: Locale.$STRF("DeleteAttribute", [attrName]),
-                        tooltiptext: Locale.$STRF("html.tip.Delete_Attribute", [attrName]),
-                        nol10n: true,
-                        command: Obj.bindFixed(this.deleteAttribute, this, node, attrName)
-                    }
-                );
-            }
-
-            if (!Css.nonEditableTags.hasOwnProperty(node.localName))
-            {
-                var type;
-
-                if (Xml.isElementHTMLOrXHTML(node))
-                    type = "HTML";
-                else if (Xml.isElementMathML(node))
-                    type = "MathML";
-                else if (Xml.isElementSVG(node))
-                    type = "SVG";
-                else if (Xml.isElementXUL(node))
-                    type = "XUL";
-                else
-                    type = "XML";
-
-                items.push("-",
-                {
-                    id: "fbEditNode",
-                    label: Locale.$STRF("html.Edit_Node", [type]),
-                    tooltiptext: Locale.$STRF("html.tip.Edit_Node", [type]),
-                    nol10n: true,
-                    acceltext: (Locale.getFormattedKey(window, "accel", "E")),
-                    command: Obj.bindFixed(this.editNode, this, node)
-                });
-
-                if (!Css.nonDeletableTags.hasOwnProperty(node.localName))
-                {
-                    items.push({
-                        id: "fbDeleteElement",
-                        label: "DeleteElement",
-                        tooltiptext: "html.Delete_Element",
-                        acceltext: Locale.getFormattedKey(window, null, null, "VK_DELETE"),
-                        command: Obj.bindFixed(this.deleteNode, this, node)
-                    });
-                }
-            }
-
-            var objectBox = Dom.getAncestorByClass(target, "nodeBox");
-            var nodeChildBox = this.ioBox.getChildObjectBox(objectBox);
-            if (nodeChildBox)
-            {
-                items.push(
-                    "-",
-                    {
-                        id: "fbExpandContractAll",
-                        label: "html.label.Expand/Contract_All",
-                        tooltiptext: "html.tip.Expand/Contract_All",
-                        acceltext: Locale.getFormattedKey(window, null, "*"),
-                        command: Obj.bind(this.toggleAll, this, node)
-                    }
-                );
-            }
-        }
-        else
-        {
-            var nodeLabel = Locale.$STR("html.Node");
-            items.push(
-                "-",
-                {
-                    id: "fbEditNode",
-                    label: Locale.$STRF("html.Edit_Node", [nodeLabel]),
-                    tooltiptext: Locale.$STRF("html.tip.Edit_Node", [nodeLabel]),
-                    nol10n: true,
-                    command: Obj.bindFixed(this.editNode, this, node)
-                },
-                {
-                    id: "fbDeleteNode",
-                    label: "DeleteNode",
-                    tooltiptext: "html.Delete_Node",
-                    command: Obj.bindFixed(this.deleteNode, this, node)
-                }
-            );
-        }
-
-        HTMLModule.MutationBreakpoints.getContextMenuItems(this.context, node, target, items);
-
-        return items;
-    },
-
-    showInfoTip: function(infoTip, target, x, y)
-    {
-        if (!Css.hasClass(target, "nodeValue"))
-            return;
-
-        var node = Firebug.getRepObject(target);
-        if (node && node.nodeType == Node.ELEMENT_NODE)
-        {
-            var nodeName = node.localName.toUpperCase();
-            var attribute = Dom.getAncestorByClass(target, "nodeAttr");
-            var attributeName = attribute.getElementsByClassName("nodeName").item(0).textContent;
-
-            if ((nodeName == "IMG" || nodeName == "INPUT") && attributeName == "src")
-            {
-                var url = node.src;
-
-                // This state cleared in hide()
-                if (url == this.infoTipURL)
-                    return true;
-
-                this.infoTipURL = url;
-                return CSSReps.CSSInfoTip.populateImageInfoTip(infoTip, url);
-            }
-        }
-    },
-
-    getEditor: function(target, value)
-    {
-        if (Css.hasClass(target, "nodeName") || Css.hasClass(target, "nodeValue") ||
-            Css.hasClass(target, "nodeBracket"))
-        {
-            if (!this.attrEditor)
-                this.attrEditor = new Firebug.HTMLPanel.Editors.Attribute(this.document);
-
-            return this.attrEditor;
-        }
-        else if (Css.hasClass(target, "nodeComment") || Css.hasClass(target, "nodeCDATA"))
-        {
-            if (!this.textDataEditor)
-                this.textDataEditor = new Firebug.HTMLPanel.Editors.TextData(this.document);
-
-            return this.textDataEditor;
-        }
-        else if (Css.hasClass(target, "nodeText"))
-        {
-            if (!this.textNodeEditor)
-                this.textNodeEditor = new Firebug.HTMLPanel.Editors.TextNode(this.document);
-
-            return this.textNodeEditor;
-        }
-    },
-
-    getInspectorVars: function()
-    {
-        var vars = {};
-        for (var i=0; i<this.inspectorHistory.length; i++)
-            vars["$"+i] = this.inspectorHistory[i] || null;
-
-        return vars;
-    },
-
-    setEntityDisplay: function(event, type)
-    {
-        Options.set("entityDisplay", type);
-
-        var menuItem = event.target;
-        menuItem.setAttribute("checked", "true");
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Break on Mutate
 
     breakOnNext: function(breaking, callback)
@@ -2041,10 +2046,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             Locale.$STR("html.Break On Mutate"));
     }
 });
+
 // ********************************************************************************************* //
 // Editors
 
-Firebug.HTMLPanel.Editors = {
+HTMLPanel.Editors = {
     html: HTMLEditor,
     Attribute: AttributeEditor,
     TextNode: TextNodeEditor,
@@ -2078,12 +2084,14 @@ function getNodeBoxTag(nodeBox)
 "HTMLDocType", "HTMLHtmlElement", "TextElement", "EmptyElement", "XEmptyElement",
 "AttrNode", "TextNode", "CDATANode", "CommentNode"].forEach(function(name)
 {
-    Firebug.HTMLPanel[name] = HTMLReps[name];
+    HTMLPanel[name] = HTMLReps[name];
 });
 
-Firebug.registerPanel(Firebug.HTMLPanel);
+Firebug.registerPanel(HTMLPanel);
 
-return HTMLModule;
+Firebug.HTMLPanel = HTMLPanel;
+
+return HTMLPanel;
 
 // ********************************************************************************************* //
 });
