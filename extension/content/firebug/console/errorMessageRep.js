@@ -573,19 +573,16 @@ var ErrorMessageUpdater = Obj.extend(Module,
             // use zero based numbers.
             if (error.href == bp.href && error.lineNo - 1 == bp.lineNo)
             {
+                // Removes the throbber icon in any case(the breakpoint is
+                // set successfully or an error on the server prevented it).
+                message.classList.remove("breakpointWaiting");
+
                 if (isSet)
                 {
-                    // Replace the throbber icon with the red breakpoint icon.
-                    message.classList.remove("breakpointWaiting");
                     message.classList.add("breakForError");
                 }
                 else
                 {
-                    // xxxFarshid:Not sure if it's really needed. Thinking of
-                    // the case an error happens on the server preventing from
-                    // setting a breakpoint properly.
-                    message.classList.remove("breakpointWaiting");
-
                     message.classList.remove("breakForError");
                 }
             }
