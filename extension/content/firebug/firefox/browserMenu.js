@@ -8,7 +8,15 @@ function(BrowserOverlayLib) {
 // ********************************************************************************************* //
 // Constants
 
-var {$menupopupOverlay, $, $menupopup, $menu, $menuseparator, $menuitem} = BrowserOverlayLib;
+var {$menupopupOverlay, $, $menupopup, $menu, $menuseparator, $menuitem, $el} = BrowserOverlayLib;
+
+var Cu = Components.utils;
+
+var xpcomUtilsScope = {};
+Cu.import("resource://gre/modules/XPCOMUtils.jsm", xpcomUtilsScope);
+
+xpcomUtilsScope.XPCOMUtils.defineLazyModuleGetter(this, "ShortcutUtils",
+  "resource://gre/modules/ShortcutUtils.jsm");
 
 // ********************************************************************************************* //
 // GlobalCommands Implementation
@@ -20,6 +28,7 @@ var BrowserMenu =
         this.overlayStartButtonMenu(doc);
         this.overlayFirebugMenu(doc);
         this.overlayFirefoxMenu(doc);
+        this.overlayPanelUIMenu(doc);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -507,6 +516,65 @@ var BrowserMenu =
                 })
             ])
         ]);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // PanelUI Overlay (Australis)
+
+    /**
+     * Append Firebug menu into the new Panel UI introduced in Firefox 29 (Australis)
+     * The panel doesn't support sub-menus, so there is only an item opening/hiding Firebug UI.
+     */
+    overlayPanelUIMenu: function(doc)
+    {
+        var panelUIButton = doc.getElementById("PanelUI-menu-button");
+        panelUIButton.addEventListener("mousedown", function onClick(event)
+        {
+            var devButton = doc.getElementById("PanelUI-developer");
+            devButton.addEventListener("ViewShowing", function onShowing(event)
+            {
+                devButton.removeEventListener("ViewShowing", onShowing, true);
+                BrowserMenu.onDeveloperViewShowing(doc);
+            }, true);
+        }, true);
+    },
+
+    onDeveloperViewShowing: function(doc)
+    {
+        if (doc.getElementById("panelUI_firebug_menu"))
+            return;
+
+        var win = doc.defaultView;
+
+        var collapsed = "true";
+        if (win.Firebug.chrome)
+        {
+            var fbContentBox = win.Firebug.chrome.$("fbContentBox");
+            collapsed = fbContentBox.getAttribute("collapsed");
+        }
+
+        var placement = win.Firebug.getPlacement ? win.Firebug.getPlacement() : "";
+
+        var hiddenUI = (collapsed == "true" || placement == "minimized");
+        var label = hiddenUI ? "firebug.ShowFirebug" : "firebug.HideFirebug";
+        var tooltiptext = hiddenUI ? "firebug.menu.tip.Open_Firebug" :
+            "firebug.menu.tip.Minimize_Firebug";
+
+        var separator = $menuseparator(doc);
+        var shortcut = doc.getElementById("key_firebug_toggleFirebug");
+        var menuItem = $el(doc, "toolbarbutton", {
+            id: "panelUI_firebug_menu",
+            label: label,
+            tooltiptext: tooltiptext,
+            command: "cmd_firebug_toggleFirebug",
+            key: "key_firebug_toggleFirebug",
+            shortcut: ShortcutUtils.prettifyShortcut(shortcut),
+            "class": "subviewbutton fbInternational"
+        });
+
+        var menuItems = doc.getElementById("PanelUI-developerItems");
+        menuItems.insertBefore(separator, menuItems.children[0]);
+        menuItems.insertBefore(menuItem, menuItems.children[0]);
     }
 };
 
