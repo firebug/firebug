@@ -280,8 +280,8 @@ var ErrorMessage = domplate(Rep,
         var target = event.currentTarget;
         if (Css.hasClass(event.target, "errorBreak"))
         {
-            var panel = Firebug.getElementPanel(event.target);
-            this.breakOnThisError(target.repObject, panel.context);
+            var panel = Firebug.getElementPanel(target);
+            this.toggleErrorBreakpoint(target, panel.context);
             return;
         }
         else if (Css.hasClass(event.target, "errorSourceCode"))
@@ -370,26 +370,34 @@ var ErrorMessage = domplate(Rep,
         System.copyToClipboard(message.join(Str.lineBreak()));
     },
 
-    breakOnThisError: function(error, context)
+    toggleErrorBreakpoint: function(target, context)
     {
+        var error = Firebug.getRepObject(target);
         var url = error.href;
         // SourceFile should not use URL fragment (issue 7251)
         //var url = Url.normalizeURL(error.href);
 
-        Trace.sysout("errorMessageRep.breakOnThisError; " + url, error);
+        Trace.sysout("errorMessageRep.toggleErrorBreakpoint; " + url, error);
 
         var compilationUnit = context.getCompilationUnit(url);
         if (!compilationUnit)
         {
-            TraceError.sysout("errorMessageRep.breakOnThisError; ERROR No source file!",
+            TraceError.sysout("errorMessageRep.toggleErrorBreakpoint; ERROR No source file!",
                 context);
             return;
         }
 
         if (this.hasErrorBreak(error))
+        {
             Errors.clearErrorBreakpoint(url, error.lineNo - 1);
+        }
         else
+        {
+            // Show a throbber and wait until the breakpoint is
+            // set on the server.
+            target.classList.add("breakpointWaiting");
             Errors.setErrorBreakpoint(context, url, error.lineNo - 1);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -425,7 +433,7 @@ var ErrorMessage = domplate(Rep,
                     tooltiptext: "console.menu.tip.Break_On_This_Error",
                     type: "checkbox",
                     checked: breakOnThisError,
-                    command: Obj.bindFixed(this.breakOnThisError, this, error, context)
+                    command: Obj.bindFixed(this.toggleErrorBreakpoint, this, target, context)
                 }
             );
         }
@@ -565,10 +573,18 @@ var ErrorMessageUpdater = Obj.extend(Module,
             // use zero based numbers.
             if (error.href == bp.href && error.lineNo - 1 == bp.lineNo)
             {
+                // Removes the throbber icon in any case(the breakpoint is
+                // set successfully or an error on the server prevented it).
+                message.classList.remove("breakpointWaiting");
+
                 if (isSet)
-                    Css.setClass(message, "breakForError");
+                {
+                    message.classList.add("breakForError");
+                }
                 else
-                    Css.removeClass(message, "breakForError");
+                {
+                    message.classList.remove("breakForError");
+                }
             }
         }
     },
