@@ -23,6 +23,14 @@ var Cu = Components.utils;
 
 Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
 
+// xxxHonza: Firefox 32 changes the location of BreakpointActor object,
+// but implements support for server side breakpoint condition evaluation
+// so the reset of this module is not necessary.
+// This entire module can be removed as soon as Firefox 32 is the minimum
+// requirement
+if (typeof DebuggerServer.BreakpointActor == "undefined")
+    return {};
+
 var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_BREAKPOINTS");
 
