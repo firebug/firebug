@@ -1365,7 +1365,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // corresponding server side script actor. Note that dynamic scripts
         // are currently collected on the client side (a workaround) since
         // RDP doesn't support it yet.
-        if (category == "js" && sourceFile.actor)
+        if (category === "js" && sourceFile.actor)
         {
             items.push("-",
             {
