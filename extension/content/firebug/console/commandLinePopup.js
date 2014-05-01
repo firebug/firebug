@@ -15,7 +15,7 @@ define([
 ],
 function(Firebug, FBTrace, Obj, Css, Dom, Str, Xml, Events, Options, Module, CommandLine) {
 
-"use strict"
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
