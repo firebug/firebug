@@ -383,10 +383,20 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     search: function(text, reverse)
     {
+        var htmlEditor = this.localEditors["html"];
+
         if (!text)
         {
-            delete this.lastSearch;
             this.document.defaultView.getSelection().removeAllRanges();
+
+            if (htmlEditor)
+            {
+                var start = this.lastSearch.start;
+                htmlEditor.editor.editorObject.setCursor(start, start);
+            }
+
+            delete this.lastSearch;
+
             return false;
         }
 
@@ -400,7 +410,7 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
             var doc = this.context.window.document;
 
             if (this.isEditing())
-                search = new HTMLEditorSearch(reverse, text, this.localEditors["html"]);
+                search = new HTMLEditorSearch(reverse, text, htmlEditor);
             else
                 search = new HTMLLib.NodeSearch(text, doc, this.panelNode, this.ioBox);
 
