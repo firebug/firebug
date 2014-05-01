@@ -458,7 +458,7 @@ var BreakpointStore = Obj.extend(Module,
 
         this.save(url);
 
-        this.dispatch("onModifyBreakpoint", [bp]);
+        this.dispatch("onModifyBreakpointCondition", [bp]);
     },
 
     isBreakpointDisabled: function(url, lineNo)

@@ -175,8 +175,19 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         });
     },
 
-    onModifyBreakpoint: function(bp)
+    onModifyBreakpointCondition: function(bp)
     {
+        var client = this.getBreakpointClient(bp.href, bp.lineNo);
+        if (client && typeof client.setCondition == "function")
+        {
+            // xxxHonza: this call creates a new breakpoints and doesn't remove
+            // the old one
+            client.setCondition(this.context.activeThread, bp.condition).then(() =>
+            {
+                Trace.sysout("breakpoinTool.onModifyBreakpointCondition; Condition set");
+            })
+        }
+
         this.dispatch("onBreakpointModified", [this.context, bp]);
     },
 
@@ -193,6 +204,7 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
 
         return deferred.promise;
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // SourceTool
 
