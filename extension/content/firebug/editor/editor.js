@@ -889,7 +889,8 @@ function getNextOutsider(element, group)
 
 function insertTab()
 {
-    Dom.insertTextIntoElement(currentEditor.input, Firebug.Editor.tabCharacter);
+    if (currentEditor.input)
+        Dom.insertTextIntoElement(currentEditor.input, Firebug.Editor.tabCharacter);
 }
 
 // ********************************************************************************************* //
