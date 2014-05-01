@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- See license.txt for terms of usage -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   version="1.1"
+   width="16"
+   height="16"
+   viewBox="0 0 16 16"
+   id="svg2">
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient4123">
+      <stop
+         id="stop4125"
+         style="stop-color:#787878;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop4127"
+         style="stop-color:#a0a0a0;stop-opacity:1"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient4117">
+      <stop
+         id="stop4119"
+         style="stop-color:#8c8c8c;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop4121"
+         style="stop-color:#b4b4b4;stop-opacity:1"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient4107">
+      <stop
+         id="stop4109"
+         style="stop-color:#282828;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop4111"
+         style="stop-color:#3c3c3c;stop-opacity:1"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient4099">
+      <stop
+         id="stop4101"
+         style="stop-color:#000000;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop4103"
+         style="stop-color:#282828;stop-opacity:1"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       x1="13.7289"
+       y1="12.828645"
+       x2="9.1457796"
+       y2="9.9641943"
+       id="linearGradient4105"
+       xlink:href="#linearGradient4099"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       x1="12.767263"
+       y1="13.647058"
+       x2="9.1662407"
+       y2="11.43734"
+       id="linearGradient4113"
+       xlink:href="#linearGradient4107"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       x1="9.4117651"
+       y1="9.2276211"
+       x2="3.089514"
+       y2="4.3785167"
+       id="linearGradient4115"
+       xlink:href="#linearGradient4117"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       x1="10.250639"
+       y1="8.2250643"
+       x2="3.6828644"
+       y2="3.2122762"
+       id="linearGradient4129"
+       xlink:href="#linearGradient4123"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(0,-1036.3622)"
+     id="layer1">
+    <path
+       d="M 6,2.1992188 A 3.8,3.8 0 0 0 2.1992188,6 3.8,3.8 0 0 0 6,9.8007812 3.8,3.8 0 0 0 8.3242188,9.0039062 L 9.21875,9.8984375 9.8984375,9.2167969 9.0019531,8.3222656 A 3.8,3.8 0 0 0 9.8007812,6 3.8,3.8 0 0 0 6,2.1992188 Z m 0,0.5 A 3.3,3.2999997 0 0 1 9.3007812,6 3.3,3.2999997 0 0 1 6,9.3007812 3.3,3.2999997 0 0 1 2.6992188,6 3.3,3.2999997 0 0 1 6,2.6992188 Z"
+       transform="translate(0,1036.3622)"
+       id="path4062"
+       style="color:#000000;color-interpolation:sRGB;color-interpolation-filters:linearRGB;fill:url(#linearGradient4115);fill-opacity:1;fill-rule:nonzero;stroke:url(#linearGradient4129);stroke-width:0.40000004;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;clip-rule:nonzero" />
+    <path
+       d="M 10.027344,9.0878906 9.0878906,10.027344 12.859375,13.800781 13.800781,12.859375 10.027344,9.0878906 Z"
+       transform="translate(0,1036.3622)"
+       id="rect4064"
+       style="color:#000000;color-interpolation:sRGB;color-interpolation-filters:linearRGB;fill:url(#linearGradient4113);fill-opacity:1;fill-rule:nonzero;stroke:url(#linearGradient4105);stroke-width:0.40000001;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;paint-order:normal;marker:none;visibility:visible;display:inline;overflow:visible;isolation:auto;mix-blend-mode:normal;enable-background:accumulate;clip-rule:nonzero;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto" />
+  </g>
+</svg>
