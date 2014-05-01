@@ -11,7 +11,7 @@
     font-size: 11px;
     border: none;
     height: calc(22rem + 10px);
-    padding-left: 25px;
+    padding: 0 13px;
 }
 
 #fbCommandArrow,
@@ -261,7 +261,7 @@
 }
 
 #fbToggleSidePanelsBox2 {
-    padding-bottom: 0;
+    padding: 0 13px;
 }
 
 /********************************************************************************************/
@@ -436,7 +436,7 @@ toolbarbutton[type=menu-button]:not(:hover):not(:active):not([open]) > :-moz-any
     background-color: transparent;
 }
 
-toolbarbutton:hover:not(.fbsearch-options-buttons):not([disabled="true"]) {
+toolbarbutton:not(.fbsearch-options-buttons):not(.toolbarbutton-menubutton-button):not([disabled="true"]):hover {
     border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
