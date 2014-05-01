@@ -399,9 +399,12 @@
                 var optionsPopup = document.getElementById("fbSearchOptionsPanel");
                 var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
                     "searchBox");
+
                 if (!optionsPopup || !searchBox)
                     return;
+
                 searchBox.focus();
+
                 if (optionsPopup.state == "open" && this.value.length == 0)
                 {
                     optionsPopup.hidePopup();
@@ -410,7 +413,9 @@
                 {
                     this.value = "";
                     this.status = "noSearch";
+
                     Firebug.Search.setPlaceholder();
+                    Firebug.Search.update(Firebug.currentContext);
                 }
             }
             else if (event.keyCode == KeyEvent.DOM_VK_RETURN)
