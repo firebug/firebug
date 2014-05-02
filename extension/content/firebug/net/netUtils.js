@@ -25,6 +25,10 @@ const Cr = Components.results;
 const Cu = Components.utils;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "Curl", "resource:///modules/devtools/Curl.jsm");
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const mimeExtensionMap =
 {
@@ -165,7 +169,7 @@ const requestProps =
     "requestSucceeded": 1,
     "responseStatus": 1,
     "responseStatusText": 1,
-    "status": 1,
+    "status": 1
 };
 
 // ********************************************************************************************* //
@@ -555,17 +559,48 @@ var NetUtils =
         return Wrapper.cloneIntoContentScope(global, clone);
     },
 
+    getHttpVersion: function(responseHeadersText)
+    {
+        let match = responseHeadersText.match(/^HTTP\/\d+\.\d+/i);
+        if (!match)
+            return null;
+        return match[0];
+    },
+
+    createCurlData: function(file)
+    {
+        return {
+            url: file.href,
+            method: file.method,
+            headers: file.requestHeaders,
+            httpVersion: this.getHttpVersion(file.responseHeadersText),
+            postDataText: this.getPostText(file, this.context, true)
+        };
+    },
+
     generateCurlCommand: function(file, addCompressedArgument)
     {
-        var command = ["curl"];
+        var command = null;
+
+        // Use the devtools' shared Curl.jsm available in version >= 31 to generate the command.
+        // TODO: Remove if statement when the minimum platform version is >= 31. See issue 7397
+        if (System.checkPlatformVersion("31") >= 0) {
+            command = Curl.generateCommand(this.createCurlData(file));
+            if (addCompressedArgument)
+                command += " --compressed";
+
+            return command;
+        }
+
+        // TODO: Remove this section when minimum version is >= 31. See issue 7397
+        command = ["curl"];
         var ignoredHeaders = {};
         var inferredMethod = "GET";
 
         // The cURL command is expected to run on the same platform that Firefox runs
         // (it may be different from the inspected page platform).
-        var win = Cc["@mozilla.org/appshell/appShellService;1"]
-            .getService(Ci.nsIAppShellService).hiddenDOMWindow;
-        var escapeString = (System.isWin(win) ? this.escapeStringWin : this.escapeStringPosix);
+        var escapeString = (System.getPlatformName() == "WINNT" ?
+            this.escapeStringWin : this.escapeStringWin);
 
         // Create data
         var data = [];
@@ -631,6 +666,10 @@ var NetUtils =
         return command.join(" ");
     },
 
+    /**
+     * Removes binary data from the multipart payload text.
+     * TODO: Remove when minimum platform version >= 31. See issue 7397
+     */
     removeBinaryDataFromMultipartPostText: function (postText)
     {
         var textWithoutBinaryData = "";
@@ -677,26 +716,34 @@ var NetUtils =
     /**
      * Escape util function for POSIX oriented operating systems.
      * Credit: Google DevTools
+     *
+     * TODO: Can be removed when minimum platform version >= 31. See issue 7397
      */
-    escapeStringPosix: function(str) {
-        function escapeCharacter(x) {
+    escapeStringPosix: function(str)
+    {
+        function escapeCharacter(x)
+        {
             let code = x.charCodeAt(0);
-            if (code < 256) {
+            if (code<256)
+            {
                 // Add leading zero when needed to not care about the next character.
-                return code < 16 ? "\\x0" + code.toString(16) : "\\x" + code.toString(16);
+                return code<16 ? "\\x0" + code.toString(16) : "\\x" + code.toString(16);
             }
             code = code.toString(16);
             return "\\u" + ("0000" + code).substr(code.length, 4);
         }
 
-        if (/[^\x20-\x7E]|\'/.test(str)) {
+        if (/[^\x20-\x7E]|\'/.test(str))
+        {
             // Use ANSI-C quoting syntax.
             return "$\'" + str.replace(/\\/g, "\\\\")
                 .replace(/\'/g, "\\\'")
                 .replace(/\n/g, "\\n")
                 .replace(/\r/g, "\\r")
                 .replace(/[^\x20-\x7E]/g, escapeCharacter) + "'";
-        } else {
+        }
+        else
+        {
             // Use single quote syntax.
             return "'" + str + "'";
         }
@@ -705,8 +752,11 @@ var NetUtils =
     /**
      * Escape util function for Windows systems.
      * Credit: Google DevTools
+     *
+     * TODO: Can be removed when minimum platform version >= 31. See issue 7397
      */
-    escapeStringWin: function(str) {
+    escapeStringWin: function(str)
+    {
         /* Replace quote by double quote (but not by \") because it is
          recognized by both cmd.exe and MS Crt arguments parser.
 
@@ -726,7 +776,6 @@ var NetUtils =
             .replace(/\\/g, "\\\\")
             .replace(/[\r\n]+/g, "\"^$&\"") + "\"";
     }
-
 };
 
 // ********************************************************************************************* //
