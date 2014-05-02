@@ -184,6 +184,20 @@ System.checkFirebugVersion = function(expectedVersion)
     return versionChecker.compare(version, expectedVersion);
 };
 
+
+System.checkPlatformVersion = function(expectedVersion)
+{
+    if (!expectedVersion)
+        return 1;
+
+    var version = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).version;
+    var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1",
+        "nsIVersionComparator");
+
+    return versionChecker.compare(version, expectedVersion);
+};
+
+
 // ********************************************************************************************* //
 // JS Modules
 
