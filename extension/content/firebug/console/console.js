@@ -14,15 +14,24 @@ define([
     "firebug/chrome/panelNotification",
     "firebug/chrome/activableModule",
     "firebug/console/consoleBase",
+    "firebug/debugger/script/sourceLink",
+    "firebug/debugger/stack/stackFrame",
+    "firebug/debugger/stack/stackTrace",
+    "firebug/dom/domBaseTree",
     "firebug/remoting/debuggerClient",
 ],
 function(Firebug, FBTrace, Obj, Events, Locale, Search, Xml, Options, Win, Firefox,
-    PanelNotification, ActivableModule, ConsoleBase, DebuggerClient) {
+    PanelNotification, ActivableModule, ConsoleBase, SourceLink, StackFrame, StackTrace,
+    DomBaseTree, DebuggerClient) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
+
+var Cu = Components.utils;
+var scope = Cu.import("resource://gre/modules/devtools/Loader.jsm", {});
+var {ConsoleAPIListener} = scope.devtools.require("devtools/toolkit/webconsole/utils");
 
 // Note: createDefaultReturnValueInstance() is a local helper (see below).
 var defaultReturnValue = createDefaultReturnValueInstance();
@@ -38,7 +47,7 @@ var TraceError = FBTrace.toError();
  * user actions related to Console panel filter.
  */
 var ActivableConsole = Obj.extend(ActivableModule, ConsoleBase);
-Firebug.Console = Obj.extend(ActivableConsole,
+var Console = Obj.extend(ActivableConsole,
 /** @lends Firebug.Console */
 {
     dispatchName: "console",
@@ -112,6 +121,11 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
             context.consoleOnDOMWindowCreated = null;
         }
+        if (context && context.consoleApiListener)
+        {
+            context.consoleApiListener.destroy();
+            context.consoleApiListener = null;
+        }
     },
 
     /**
@@ -124,10 +138,22 @@ Firebug.Console = Obj.extend(ActivableConsole,
      */
     attachConsoleToWindows: function(context)
     {
+        if (context.consoleApiListener)
+            return;
+
+        // Setup a listener for the built-in console API, to catch console API
+        // calls from web workers (and calls made on a copy of "console" taken
+        // from before Firebug was enabled, for that sake).
+        var processApiCall = this.processConsoleApiCall.bind(this, context);
+        context.consoleApiListener = new ConsoleAPIListener(context.window, {
+            onConsoleAPICall: processApiCall
+        });
+        context.consoleApiListener.init();
+
         // Attach the Console for the window and its iframes.
         Win.iterateWindows(context.window, function(win)
         {
-            Firebug.Console.injector.attachConsoleInjector(context, win);
+            Console.injector.attachConsoleInjector(context, win);
         });
 
         // Listen to DOMWindowCreated for future iframes. Also necessary when Firebug is enabled at
@@ -137,10 +163,127 @@ Firebug.Console = Obj.extend(ActivableConsole,
             context.consoleOnDOMWindowCreated = function(ev)
             {
                 if (ev && ev.target)
-                    Firebug.Console.injector.attachConsoleInjector(context, ev.target.defaultView);
+                    Console.injector.attachConsoleInjector(context, ev.target.defaultView);
             };
             context.browser.addEventListener("DOMWindowCreated", context.consoleOnDOMWindowCreated);
         }
+    },
+
+    processConsoleApiCall: function(context, ev)
+    {
+        Trace.sysout("console.processConsoleApiCall", ev);
+        var level = ev.level;
+        var args = ev.arguments;
+
+        var sourceLink = ev.filename ? new SourceLink(ev.filename, ev.lineNumber, "js") : null;
+        var handler = Firebug.ConsoleExposed.ConsoleHandler;
+
+        function getTrace()
+        {
+            if (!ev.stacktrace)
+                return null;
+            var trace = new StackTrace();
+            for (let fr of ev.stacktrace)
+            {
+                trace.frames.push(new StackFrame({href: fr.filename},
+                    fr.lineNumber, fr.functionName, [], null, null, context));
+            }
+            return trace;
+        }
+
+        switch (level)
+        {
+        case "log":
+        case "info":
+        case "warn":
+        case "debug":
+            var logArgs = this.convertApiCallArguments(args, ev.styles);
+            handler.log(context, logArgs, level, sourceLink);
+            break;
+
+        case "time":
+            // Do nothing - we'll act on timeEnd.
+            break;
+
+        case "timeEnd":
+            handler.timeEnd(context, ev.timer.name, ev.timer.duration, sourceLink);
+            break;
+
+        case "error":
+        case "exception":
+        case "assert":
+            var type = (level === "assert" ? "assert" : "error");
+            var logArgs = args.map(this.convertApiCallArgument.bind(this));
+            handler.logError(context, logArgs, type, ev.filename, ev.lineNumber, getTrace());
+            break;
+
+        case "trace":
+            handler.trace(context, getTrace());
+            break;
+
+        case "group":
+        case "groupCollapsed":
+            handler.group(context, args, (level === "group"), sourceLink);
+            break;
+
+        case "groupEnd":
+            handler.groupEnd(context);
+            break;
+
+        case "dir":
+            handler.dir(context, args[0]);
+            break;
+
+        case "count":
+            var key = args[0];
+            var strKey = (key == null ? "" : String(key));
+            handler.count(context, strKey, sourceLink);
+            break;
+
+        default:
+            Trace.sysout("console.processConsoleApiCall; unhandled console API " + level);
+        }
+    },
+
+    /*
+     * Convert arguments gotten from the built-in console listener into a form
+     * that Console.logFormatted can understand. Sort of a hack, but way better
+     * than maintaining two separate console formatters.
+     */
+    convertApiCallArguments: function(args, styles)
+    {
+        if (!args.length)
+            return args;
+        var formatStr = "";
+        var res = [];
+        for (var i = 0; i < styles.length; i++)
+        {
+            if (styles[i])
+            {
+                formatStr += "%c";
+                res.push(styles[i]);
+            }
+            var thing = this.convertApiCallArgument(args[i]);
+            formatStr += (typeof thing === "string" ? "%s" : "%o");
+            res.push(thing);
+        }
+        res.unshift(formatStr);
+
+        for (var i = styles.length; i < args.length; i++)
+            res.push(this.convertApiCallArgument(args[i]));
+
+        return res;
+    },
+
+    convertApiCallArgument: function(val)
+    {
+        // For the web worker console, some complex objects 'obj' get converted
+        // into new String(obj.toString()). There is not much we can do about
+        // this, but at least convert it back to a string so that the display
+        // doesn't look horrendous.
+        if (typeof val === "object" && Object.prototype.toString.call(val) === "[object String]")
+            return String(val);
+        return val;
     },
 
     togglePersist: function(context)
@@ -173,7 +316,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
     onSuspendFirebug: function()
     {
         Trace.sysout("console.onSuspendFirebug; isAlwaysEnabled: " +
-            Firebug.Console.isAlwaysEnabled());
+            Console.isAlwaysEnabled());
 
         if (Firebug.Errors.toggleWatchForErrors(false))
         {
@@ -192,7 +335,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
     {
         Trace.sysout("console.onResumeFirebug;");
 
-        var watchForErrors = Firebug.Console.isAlwaysEnabled() || Firebug.Console.hasObservers();
+        var watchForErrors = Console.isAlwaysEnabled() || Console.hasObservers();
         if (Firebug.Errors.toggleWatchForErrors(watchForErrors))
             this.setStatus();
 
@@ -236,7 +379,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
         this.syncFilterButtons(Firebug.chrome);
 
-        Events.dispatch(Firebug.Console.fbListeners, "onFiltersSet", [filterTypes]);
+        Events.dispatch(Console.fbListeners, "onFiltersSet", [filterTypes]);
     },
 
     syncFilterButtons: function(chrome)
@@ -367,9 +510,11 @@ function createDefaultReturnValueInstance()
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerActivableModule(Firebug.Console);
+Firebug.Console = Console;
 
-return Firebug.Console;
+Firebug.registerActivableModule(Console);
+
+return Console;
 
 // ********************************************************************************************* //
 });

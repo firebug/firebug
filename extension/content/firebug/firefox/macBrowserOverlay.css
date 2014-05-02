@@ -8,8 +8,8 @@
 #nav-bar #firebug-error-badge {
     margin: 0;
     position: absolute;
-    left: -5px;
-    top: -5px;
+    top: 0;
+    left: -7px;
 }
 
 #firebug-error-label {
@@ -28,8 +28,8 @@
 }
 
 #fbContentSplitter {
-    border-color: threedShadow !important;
-    background-color: #FFFFFF;
+    position: relative;
+    background: transparent none;
 }
 
 #fbContentSplitter[dir=reverse] {
@@ -37,18 +37,25 @@
 }
 
 #fbContentSplitter[orient=vertical] {
-    background: transparent;
-    border-bottom-width: 0;
-    min-height: 7px;
-    height: 7px;
-    margin-bottom: -7px;
-    position: relative;
+    min-height: 3px;
+    height: 3px;
+    margin-top: -3px;
+    border-bottom: 1px solid #bebebe;
+}
+
+#fbContentSplitter[orient=vertical][dir=reverse] {
+    margin-top: 0;
+    margin-bottom: -3px;
 }
 
 #fbContentSplitter[orient=horizontal] {
-    border-right: 1px solid !important;
-    border-left: none;
-    min-width: 5px;
-    max-width: 5px;
-    background-color: -moz-dialog;
+    min-width: 3px;
+    width: 3px;
+    margin-left: -3px;
+    border-right: 1px solid #bebebe;
+}
+
+#fbContentSplitter[orient=horizontal][dir=reverse] {
+    margin-left: 0;
+    margin-right: -3px;
 }

@@ -76,10 +76,10 @@ var ConsoleBase =
             context = Firebug.currentContext;
 
         if (!context)
+        {
             TraceError.sysout("console.logRow; has no context, skipping objects", objects);
-
-        if (!context)
             return;
+        }
 
         if (noThrottle || !context)
         {
