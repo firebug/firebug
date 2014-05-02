@@ -589,8 +589,6 @@ var NetUtils =
             if (addCompressedArgument)
                 command += " --compressed";
 
-          console.log("use jsm");
-
             return command;
         }
 
