@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 2154: Make the console API available in web workers</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <script>
+        w = new Worker("data:,onmessage = function(e) { eval(e.data); }");
+    </script>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=2154">Issue 2154</a>: Make the console API available in web workers</h1>
+        </header>
+        <div>
+            <input onkeydown="if (event.which === 13) w.postMessage(value)">
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Run the following commands either within <code>w.postMessage("...")</code> in the command line,
+                    or by typing them into the input box above and pressing return:
+                    <ul>
+                        <li>console.log('hi')
+                        <li>console.log('HI %o', {a: 1})
+                        <li>console.log('HI %c there', 'color:red')
+                        <li>console.warn('hi')
+                        <li>console.info('hi')
+                        <li>console.debug('hi')
+                        <li>console.dir({a:123})
+                        <li>console.time('a'); setTimeout(console.timeEnd.bind(console, 'a'), 100)
+                        <li>console.group('abc'); console.groupEnd()
+                        <li>console.groupCollapsed(123); console.groupEnd()
+                        <li>console.count()
+                        <li>console.assert(true, 'fail'); console.assert(false)
+                        <li>console.error('what')
+                        <li>console.exception(new Error('what'))
+                    </ul>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        The console API should behave roughly the same in web workers as on normal web pages.
+                    </li>
+                </ul>
+            </section>
+            <footer>Simon Lindholm, simon.lindholm10@gmail.com</footer>
+        </div>
+    </body>
+</html>
