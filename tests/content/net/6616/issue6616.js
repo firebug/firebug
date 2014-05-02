@@ -23,13 +23,19 @@ function runTest()
                     }
 
                     var tasks = new FBTest.TaskList();
+                    var expected = new RegExp("curl \'" + basePath + "net\/6616\/issue6616.php\'" +
+                        "( -H \'.*?\')+$");
+                    var expectedCompressed = new RegExp("curl \'" + basePath + "net\/6616\/issue6616.php\'" +
+                        "( -H \'.*?\')+ --compressed$");
 
-                    tasks.push(verifyCopiedCURL, executeContextMenuCommand, false,
-                        new RegExp("curl \'" + basePath + "net\/6616\/issue6616.php\' -X " +
-                            "POST( -H \'.*?\')+$"));
-                    tasks.push(verifyCopiedCURL, executeContextMenuCommand, true,
-                        new RegExp("curl \'" + basePath + "net\/6616\/issue6616.php\' -X " +
-                            "POST( -H \'.*?\')+ --compressed$"));
+                    if (FBTest.isWindows())
+                    {
+                        expected = new RegExp("curl \"" + basePath + "net\/6616\/issue6616.php\" .+$");
+                        expectedCompressed = new RegExp("curl \"" + basePath + "net\/6616\/issue6616.php\" .+ --compressed$");
+                    }
+
+                    tasks.push(verifyCopiedCURL, executeContextMenuCommand, false, expected);
+                    tasks.push(verifyCopiedCURL, executeContextMenuCommand, true, expectedCompressed);
 
                     tasks.run(function ()
                     {
