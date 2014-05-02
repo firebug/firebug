@@ -373,12 +373,22 @@ function createCanvas(width, height)
 // ********************************************************************************************* //
 // OS
 
-this.isMac = function()
+this.getOS = function()
 {
     var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
         .getService(Ci.nsIAppShellService).hiddenDOMWindow;
-    return (hiddenWindow.navigator.platform.indexOf("Mac") >= 0);
-}
+    return hiddenWindow.navigator.platform;
+};
+
+this.isWindows = function()
+{
+    return this.getOS().indexOf("Win") >= 0;
+};
+
+this.isMac = function()
+{
+    return this.getOS().indexOf("Mac") >= 0;
+};
 
 // ********************************************************************************************* //
 }).apply(FBTest);
