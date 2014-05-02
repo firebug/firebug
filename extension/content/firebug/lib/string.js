@@ -673,33 +673,10 @@ Str.toFixedLocaleString = function(number, decimals)
     if (isNaN(parseFloat(number)))
         throw new Error("Value '" + number + "' of the 'number' parameter is not a number");
 
-    // Check whether 'decimals' is a valid number
-    if (isNaN(parseFloat(decimals)))
-        throw new Error("Value '" + decimals + "' of the 'decimals' parameter is not a number");
-
-    var precision = Math.pow(10, decimals);
-    var formattedNumber = (Math.round(number * precision) / precision).toLocaleString();
-    var decimalMark = (0.1).toLocaleString().match(/\D/);
-    var decimalsCount = (formattedNumber.lastIndexOf(decimalMark) == -1) ?
-        0 : formattedNumber.length - formattedNumber.lastIndexOf(decimalMark) - 1;
-
-    // Append decimals if needed
-    if (decimalsCount < decimals)
-    {
-        // If the number doesn't have any decimals, add the decimal mark
-        if (decimalsCount == 0)
-            formattedNumber += decimalMark;
-
-        // Append additional decimals
-        for (var i=0, count = decimals - decimalsCount; i<count; ++i)
-            formattedNumber += "0";
-    }
-
-    return formattedNumber;
+    return new Intl.NumberFormat(undefined,
+        {minimumFractionDigits: decimals, maximumFractionDigits: decimals}).format(number);
 };
 
-// xxxsz: May be refactored when Firefox implements the ECMAScript Internationalization API
-// See https://bugzil.la/853301
 Str.formatNumber = Deprecated.method("use <number>.toLocaleString() instead",
     function(number) { return number.toLocaleString(); });
 
