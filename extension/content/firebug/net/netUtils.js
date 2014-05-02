@@ -11,9 +11,10 @@ define([
     "firebug/lib/http",
     "firebug/lib/options",
     "firebug/lib/string",
-    "firebug/lib/xml"
+    "firebug/lib/xml",
+    "firebug/lib/system"
 ],
-function(Firebug, Locale, Events, Url, Firefox, Wrapper, Xpcom, Http, Options, Str, Xml) {
+function(Firebug, Locale, Events, Url, Firefox, Wrapper, Xpcom, Http, Options, Str, Xml, System) {
 
 // ********************************************************************************************* //
 // Constants
@@ -560,36 +561,11 @@ var NetUtils =
         var ignoredHeaders = {};
         var inferredMethod = "GET";
 
-        function escapeCharacter(x)
-        {
-            var code = x.charCodeAt(0);
-            if (code < 256)
-            {
-                // Add leading zero when needed to not care about the next character.
-                return code < 16 ? "\\x0" + code.toString(16) : "\\x" + code.toString(16);
-            }
-            code = code.toString(16);
-            return "\\u" + ("0000" + code).substr(code.length, 4);
-        }
-
-        function escape(str)
-        {
-            // String has unicode characters or single quotes
-            if (/[^\x20-\x7E]|'/.test(str))
-            {
-                // Use ANSI-C quoting syntax
-                return "$\'" + str.replace(/\\/g, "\\\\")
-                    .replace(/'/g, "\\\'")
-                    .replace(/\n/g, "\\n")
-                    .replace(/\r/g, "\\r")
-                    .replace(/[^\x20-\x7E]/g, escapeCharacter) + "'";
-            }
-            else
-            {
-                // Use single quote syntax.
-                return "'" + str + "'";
-            }
-        }
+        // The cURL command is expected to run on the same platform that Firefox runs
+        // (it may be different from the inspected page platform).
+        var win = Cc["@mozilla.org/appshell/appShellService;1"]
+            .getService(Ci.nsIAppShellService).hiddenDOMWindow;
+        var escapeString = (System.isWin(win) ? this.escapeStringWin : this.escapeStringPosix);
 
         // Create data
         var data = [];
@@ -603,7 +579,7 @@ var NetUtils =
             var params = lines[lines.length - 1];
 
             data.push("--data");
-            data.push(escape(params));
+            data.push(escapeString(params));
 
             // Ignore content length as cURL will resolve this
             ignoredHeaders["Content-Length"] = true;
@@ -613,14 +589,14 @@ var NetUtils =
         else if (postText && isMultipartRequest)
         {
             data.push("--data-binary");
-            data.push(escape(this.removeBinaryDataFromMultipartPostText(postText)));
+            data.push(escapeString(this.removeBinaryDataFromMultipartPostText(postText)));
 
             ignoredHeaders["Content-Length"] = true;
             inferredMethod = "POST";
         }
 
         // Add URL
-        command.push(escape(file.href));
+        command.push(escapeString(file.href));
 
         // Fix method if request is not a GET or POST request
         if (file.method != inferredMethod)
@@ -642,7 +618,7 @@ var NetUtils =
                 continue;
 
             command.push("-H");
-            command.push(escape(header.name + ": " + header.value));
+            command.push(escapeString(header.name + ": " + header.value));
         }
 
         // Add data
@@ -696,6 +672,59 @@ var NetUtils =
         textWithoutBinaryData += boundaryString + "--\r\n";
 
         return textWithoutBinaryData;
+    },
+
+    /**
+     * Escape util function for POSIX oriented operating systems.
+     * Credit: Google DevTools
+     */
+    escapeStringPosix: function(str) {
+        function escapeCharacter(x) {
+            let code = x.charCodeAt(0);
+            if (code < 256) {
+                // Add leading zero when needed to not care about the next character.
+                return code < 16 ? "\\x0" + code.toString(16) : "\\x" + code.toString(16);
+            }
+            code = code.toString(16);
+            return "\\u" + ("0000" + code).substr(code.length, 4);
+        }
+
+        if (/[^\x20-\x7E]|\'/.test(str)) {
+            // Use ANSI-C quoting syntax.
+            return "$\'" + str.replace(/\\/g, "\\\\")
+                .replace(/\'/g, "\\\'")
+                .replace(/\n/g, "\\n")
+                .replace(/\r/g, "\\r")
+                .replace(/[^\x20-\x7E]/g, escapeCharacter) + "'";
+        } else {
+            // Use single quote syntax.
+            return "'" + str + "'";
+        }
+    },
+
+    /**
+     * Escape util function for Windows systems.
+     * Credit: Google DevTools
+     */
+    escapeStringWin: function(str) {
+        /* Replace quote by double quote (but not by \") because it is
+         recognized by both cmd.exe and MS Crt arguments parser.
+
+         Replace % by "%" because it could be expanded to an environment
+         variable value. So %% becomes "%""%". Even if an env variable ""
+         (2 doublequotes) is declared, the cmd.exe will not
+         substitute it with its value.
+
+         Replace each backslash with double backslash to make sure
+         MS Crt arguments parser won't collapse them.
+
+         Replace new line outside of quotes since cmd.exe doesn't let
+         to do it inside.
+         */
+        return "\"" + str.replace(/"/g, "\"\"")
+            .replace(/%/g, "\"%\"")
+            .replace(/\\/g, "\\\\")
+            .replace(/[\r\n]+/g, "\"^$&\"") + "\"";
     }
 
 };
