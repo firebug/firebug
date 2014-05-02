@@ -584,10 +584,12 @@ var NetUtils =
 
         // Use the devtools' shared Curl.jsm available in version >= 31 to generate the command.
         // TODO: Remove if statement when the minimum platform version is >= 31. See issue 7397
-        if (System.checkPlatformVersion("31") >= 0) {
+        if (System.isPlatformVersionAtLeast("31")) {
             command = Curl.generateCommand(this.createCurlData(file));
             if (addCompressedArgument)
                 command += " --compressed";
+
+          console.log("use jsm");
 
             return command;
         }

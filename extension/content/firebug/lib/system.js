@@ -184,17 +184,24 @@ System.checkFirebugVersion = function(expectedVersion)
     return versionChecker.compare(version, expectedVersion);
 };
 
+// ********************************************************************************************* //
+// Platform version check
 
-System.checkPlatformVersion = function(expectedVersion)
+/**
+ * Checks if the given version number is larger or equal than the current
+ * platform version
+ *
+ * @param {string} versionToCheck
+ *        https://developer.mozilla.org/en-US/docs/Toolkit_version_format
+ * @returns {boolean}
+ */
+System.isPlatformVersionAtLeast = function(versionToCheck)
 {
-    if (!expectedVersion)
-        return 1;
+  var platformVersion = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).version;
+  var versionComparator = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1",
+      "nsIVersionComparator");
 
-    var version = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).version;
-    var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1",
-        "nsIVersionComparator");
-
-    return versionChecker.compare(version, expectedVersion);
+  return versionComparator.compare(platformVersion, versionToCheck) >= 0;
 };
 
 
