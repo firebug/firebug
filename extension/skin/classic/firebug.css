@@ -432,6 +432,22 @@ textbox[type="fbSearchBox"] > panel {
 }
 
 /*************************************************************************************************/
+/* Ancestor path */ 
+
+.panelStatusSeparator {
+    width: 5px;
+    height: 7px;
+}
+
+#fbPanelStatus > .panelStatusSeparator {
+    background: url(chrome://firebug/skin/statusPathSeparator.svg) no-repeat center;
+}
+
+#fbPanelStatus[direction="left"] > .panelStatusSeparator {
+    transform: scaleX(-1);
+}
+
+/*************************************************************************************************/
 
 #fbCommandBox {
     border-top: 1px solid #CCCCCC;
