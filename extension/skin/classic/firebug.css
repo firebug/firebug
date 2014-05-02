@@ -37,7 +37,6 @@
     margin: 0 0 0 4px !important;
     padding: 2px 0 !important;
     border: none;
-    direction: ltr;
     width: 100%;
     background: none repeat scroll 0% 0% transparent;
     position: relative;
@@ -91,6 +90,7 @@
 .fbCommandHtmlBox {
     position: relative;
     margin-right: 7px;
+    direction: ltr;
 }
 
 .fbCommandHtmlBox .background {
@@ -131,8 +131,15 @@
 
 #fbToolbar {
     -moz-appearance: none;
-    padding: 0 0 0 4px;
     border: none;
+}
+
+#fbToolbar:-moz-locale-dir(ltr) {
+    padding: 0 0 0 4px;
+}
+
+#fbToolbar:-moz-locale-dir(rtl) {
+    padding: 0 4px 0 0;
 }
 
 #fbToolbarInner {
@@ -311,8 +318,15 @@ panelTab[selected="true"][disabled="true"] {
 /* Search Box */
 
 #fbSearchBox {
-    margin: 3px 10px 3px 0;
     min-width: 100px;
+}
+
+#fbSearchBox:-moz-locale-dir(ltr) {
+    margin: 3px 10px 3px 0;
+}
+
+#fbSearchBox:-moz-locale-dir(rtl) {
+    margin: 3px 0 3px 10px;
 }
 
 .fbsearch-textbox[status="notfound"] {
@@ -331,13 +345,20 @@ panelTab[selected="true"][disabled="true"] {
     -moz-box-align: center;
     margin: 0;
     border: 1px solid #96969D;
-    border-radius: 2px 0 0 2px;
     font: message-box;
     font-size: 11px;
     font-size-adjust: inherit;
-    direction: ltr;
     height: 21px;
+}
+
+.fbsearch-textbox:-moz-locale-dir(ltr) {
+    border-radius: 2px 0 0 2px;
     padding: 0 2px 0 4px;
+}
+
+.fbsearch-textbox:-moz-locale-dir(rtl) {
+    border-radius: 0 2px 2px 0;
+    padding: 0 4px 0 2px;
 }
 
 .fbsearch-icon {
@@ -381,8 +402,19 @@ panelTab[selected="true"][disabled="true"] {
 
 .fbsearch-options-buttons.next {
     list-style-image: url("chrome://firebug/skin/searchNext.svg");
+}
+
+.fbsearch-options-buttons.next:-moz-locale-dir(ltr) {
     border-radius: 0 2px 2px 0;
     border-left: none;
+}
+
+.fbsearch-options-buttons.next:-moz-locale-dir(rtl) {
+    border-radius: 2px 0 0 2px;
+}
+
+.fbsearch-options-buttons.prev:-moz-locale-dir(rtl) {
+    border-right: none;
 }
 
 .fbsearch-options-buttons:hover {
@@ -443,7 +475,8 @@ textbox[type="fbSearchBox"] > panel {
     background: url(chrome://firebug/skin/statusPathSeparator.svg) no-repeat center;
 }
 
-#fbPanelStatus[direction="left"] > .panelStatusSeparator {
+#fbPanelStatus[direction="left"]:-moz-locale-dir(ltr) > .panelStatusSeparator,
+#fbPanelStatus[direction="right"]:-moz-locale-dir(rtl) > .panelStatusSeparator {
     transform: scaleX(-1);
 }
 
@@ -698,9 +731,14 @@ toolbarbutton > toolbarbutton {
     padding: 0;
 }
 
-toolbarbutton[type="menu"],
-toolbarbutton[type="menu"] > toolbarbutton {
+toolbarbutton[type="menu"]:-moz-locale-dir(ltr),
+toolbarbutton[type="menu"]:-moz-locale-dir(ltr) > toolbarbutton {
     padding-right: 0;
+}
+
+toolbarbutton[type="menu"]:-moz-locale-dir(rtl),
+toolbarbutton[type="menu"]:-moz-locale-dir(rtl) > toolbarbutton {
+    padding-left: 0;
 }
 
 toolbarbutton[disabled="true"] {
@@ -808,16 +846,18 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
 /*************************************************************************************************/
 /* Toggle Side Panels */
 
-.fbToggleSidePanels {
+.fbToggleSidePanels:-moz-locale-dir(ltr),
+.fbToggleSidePanels.closed:-moz-locale-dir(rtl) {
     list-style-image: url(chrome://firebug/skin/collapseSidePanels.svg);
 }
 
-.fbToggleSidePanels.closed {
+.fbToggleSidePanels:-moz-locale-dir(rtl),
+.fbToggleSidePanels.closed:-moz-locale-dir(ltr) {
     list-style-image: url(chrome://firebug/skin/expandSidePanels.svg);
 }
 
 #fbPanelPane:not([orient="vertical"]) .fbToggleSidePanels {
-    margin-right: 2px;
+    -moz-margin-end: 2px;
 }
 
 #fbPanelPane[orient="vertical"] .fbToggleSidePanels {
@@ -850,16 +890,18 @@ panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
 /*************************************************************************************************/
 /* Toggle Command Editor */
 
-.fbToggleCommandEditor {
+.fbToggleCommandEditor:-moz-locale-dir(ltr),
+.fbToggleCommandEditor.closed:-moz-locale-dir(rtl) {
     list-style-image: url(chrome://firebug/skin/collapseSidePanels.svg);
 }
 
-.fbToggleCommandEditor.closed {
+.fbToggleCommandEditor:-moz-locale-dir(rtl),
+.fbToggleCommandEditor.closed:-moz-locale-dir(ltr) {
     list-style-image: url(chrome://firebug/skin/expandSidePanels.svg);
 }
 
 #fbPanelPane:not([orient="vertical"]) .fbToggleCommandEditor {
-    margin-right: 2px;
+    -moz-margin-end: 2px;
 }
 
 .fbToggleCommandEditor:hover {

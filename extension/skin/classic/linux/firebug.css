@@ -125,13 +125,12 @@ panelTab:not([selected="true"]):hover {
 /* Search Box */
 
 .fbsearch-textbox {
-    border: 1px solid #96969D;
+    border-color: #96969D;
 }
 
 .fbsearch-options-buttons,
 .fbsearch-options-buttons:hover:not([disabled="true"]) {
-    border: 1px solid #96969D;
-    border-left-width: 0;
+    border-color: #96969D;
 }
 
 /*************************************************************************************************/
