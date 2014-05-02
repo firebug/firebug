@@ -475,7 +475,8 @@ textbox[type="fbSearchBox"] > panel {
     background: url(chrome://firebug/skin/statusPathSeparator.svg) no-repeat center;
 }
 
-#fbPanelStatus[direction="left"] > .panelStatusSeparator {
+#fbPanelStatus[direction="left"]:-moz-locale-dir(ltr) > .panelStatusSeparator,
+#fbPanelStatus[direction="right"]:-moz-locale-dir(rtl) > .panelStatusSeparator {
     transform: scaleX(-1);
 }
 

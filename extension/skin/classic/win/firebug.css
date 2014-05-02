@@ -257,15 +257,11 @@ panelTab[selected="true"] > panelTabMenu {
 /* Ancestor path */ 
 
 #fbPanelStatus {
+    margin-top: 0;
+    -moz-margin-end: 5px;
+    margin-bottom: 0
+    -moz-margin-start: 0;
     overflow: hidden;
-}
-
-#fbPanelStatus:-moz-locale-dir(ltr) {
-    margin: 0 5px 0 0;
-}
-
-#fbPanelStatus:-moz-locale-dir(rtl) {
-    margin: 0 0 0 5px;
 }
 
 /************************************************************************************************/
