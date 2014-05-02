@@ -22,16 +22,19 @@ function runTest()
 function verifyResult(number, decimals)
 {
     // Check whether 'number' is a valid number
-    if (isNaN(parseFloat(number)) || (typeof decimals !== "undefined" && isNaN(parseFloat(decimals))) || decimals < 0)
+    if (isNaN(parseFloat(number)) ||
+        (typeof decimals !== "undefined" && isNaN(parseFloat(decimals))) || decimals < 0)
     {
         try
         {
             FW.FBL.toFixedLocaleString(number, decimals);
-            FBTest.ok(false, "Invalid argument(s) number='" + number + "' and decimals='" + decimals + "' don't throw an exception");
+            FBTest.ok(false, "Invalid argument(s) number='" + number + "' and decimals='" +
+                decimals + "' don't throw an exception");
         }
         catch (e)
         {
-            FBTest.compare(expected, result, "Invalid argument(s) throw an exception: " + e.message);
+            FBTest.compare(expected, result, "Invalid argument(s) throw an exception: " +
+                e.message);
         }
     }
     else
