@@ -193,55 +193,55 @@ var Console = Obj.extend(ActivableConsole,
 
         switch (level)
         {
-        case "log":
-        case "info":
-        case "warn":
-        case "debug":
-            var logArgs = this.convertApiCallArguments(args, ev.styles);
-            handler.log(context, logArgs, level, sourceLink);
-            break;
+            case "log":
+            case "info":
+            case "warn":
+            case "debug":
+                var logArgs = this.convertApiCallArguments(args, ev.styles);
+                handler.log(context, logArgs, level, sourceLink);
+                break;
 
-        case "time":
-            // Do nothing - we'll act on timeEnd.
-            break;
+            case "time":
+                // Do nothing - we'll act on timeEnd.
+                break;
 
-        case "timeEnd":
-            handler.timeEnd(context, ev.timer.name, ev.timer.duration, sourceLink);
-            break;
+            case "timeEnd":
+                handler.timeEnd(context, ev.timer.name, ev.timer.duration, sourceLink);
+                break;
 
-        case "error":
-        case "exception":
-        case "assert":
-            var type = (level === "assert" ? "assert" : "error");
-            var logArgs = args.map(this.convertApiCallArgument.bind(this));
-            handler.logError(context, logArgs, type, ev.filename, ev.lineNumber, getTrace());
-            break;
+            case "error":
+            case "exception":
+            case "assert":
+                var type = (level === "assert" ? "assert" : "error");
+                var logArgs = args.map(this.convertApiCallArgument.bind(this));
+                handler.logError(context, logArgs, type, ev.filename, ev.lineNumber, getTrace());
+                break;
 
-        case "trace":
-            handler.trace(context, getTrace());
-            break;
+            case "trace":
+                handler.trace(context, getTrace());
+                break;
 
-        case "group":
-        case "groupCollapsed":
-            handler.group(context, args, (level === "group"), sourceLink);
-            break;
+            case "group":
+            case "groupCollapsed":
+                handler.group(context, args, (level === "group"), sourceLink);
+                break;
 
-        case "groupEnd":
-            handler.groupEnd(context);
-            break;
+            case "groupEnd":
+                handler.groupEnd(context);
+                break;
 
-        case "dir":
-            handler.dir(context, args[0]);
-            break;
+            case "dir":
+                handler.dir(context, args[0]);
+                break;
 
-        case "count":
-            var key = args[0];
-            var strKey = (key == null ? "" : String(key));
-            handler.count(context, strKey, sourceLink);
-            break;
+            case "count":
+                var key = args[0];
+                var strKey = (key == null ? "" : String(key));
+                handler.count(context, strKey, sourceLink);
+                break;
 
-        default:
-            Trace.sysout("console.processConsoleApiCall; unhandled console API " + level);
+            default:
+                Trace.sysout("console.processConsoleApiCall; unhandled console API " + level);
         }
     },
 
