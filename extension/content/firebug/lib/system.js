@@ -191,7 +191,7 @@ System.checkFirebugVersion = function(expectedVersion)
  * Checks if the given version number is larger or equal than the current
  * platform version
  *
- * @param {string} versionToCheck
+ * @param {string|number} versionToCheck
  *        https://developer.mozilla.org/en-US/docs/Toolkit_version_format
  * @returns {boolean}
  */
@@ -203,7 +203,6 @@ System.isPlatformVersionAtLeast = function(versionToCheck)
 
   return versionComparator.compare(platformVersion, versionToCheck) >= 0;
 };
-
 
 // ********************************************************************************************* //
 // JS Modules
