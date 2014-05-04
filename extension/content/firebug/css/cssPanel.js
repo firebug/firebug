@@ -44,7 +44,7 @@ function(Firebug, FBTrace, Arr, Css, Dom, Domplate, Events, Locale, Obj, Options
 // ********************************************************************************************* //
 // Constants
 
-var {domplate, FOR, DIV, TEXTAREA} = Domplate;
+var {domplate, FOR, DIV} = Domplate;
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
@@ -271,10 +271,6 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         if (!this.stylesheetEditor)
             this.stylesheetEditor = new StyleSheetEditor(this.document);
 
-        var styleSheet = this.location.editStyleSheet
-            ? this.location.editStyleSheet.sheet
-            : this.location;
-
         this.stylesheetEditor.styleSheet = this.location;
         Editor.startEditing(this.panelNode, css, this.stylesheetEditor);
 
@@ -336,9 +332,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             if (!this.location)
                 return;
 
-            var styleSheet = this.location.editStyleSheet
-                ? this.location.editStyleSheet.sheet
-                : this.location;
+            var styleSheet = this.location.editStyleSheet ?
+                this.location.editStyleSheet.sheet :
+                this.location;
 
             this.currentCSSEditor = CSSModule.getCurrentEditor();
             try
@@ -576,9 +572,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         {
             var lines = style.cssText.match(/(?:[^;\(]*(?:\([^\)]*?\))?[^;\(]*)*;?/g);
             var propRE = /\s*([^:\s]*)\s*:\s*(.*?)\s*(! important)?;?$/;
-            var line;
-            var i=0;
-            while(line = lines[i++])
+            for (var line of lines)
             {
                 m = propRE.exec(line);
                 if(!m)
@@ -626,9 +620,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             for (var i = 0; i < props.length; ++i)
                 propMap[props[i].name] = true;
 
-            for (var i = 0; i < moreProps.length; ++i)
+            for (var prop of moreProps)
             {
-                var prop = moreProps[i];
                 if (propMap.hasOwnProperty(prop.name))
                 {
                     // A (probably enabled) property with the same name as this
@@ -662,16 +655,26 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
     translateName: function(name, value)
     {
         // Don't show these proprietary Mozilla properties
-        if ((value == "-moz-initial"
-            && (name == "-moz-background-clip" || name == "-moz-background-origin"
-                || name == "-moz-background-inline-policy"))
-        || (value == "physical"
-            && (name == "margin-left-ltr-source" || name == "margin-left-rtl-source"
-                || name == "margin-right-ltr-source" || name == "margin-right-rtl-source"))
-        || (value == "physical"
-            && (name == "padding-left-ltr-source" || name == "padding-left-rtl-source"
-                || name == "padding-right-ltr-source" || name == "padding-right-rtl-source")))
+        if (value == "-moz-initial" &&
+            (name == "-moz-background-clip" || name == "-moz-background-origin" ||
+            name == "-moz-background-inline-policy"))
+        {
             return null;
+        }
+
+        if (value == "physical" &&
+           (name == "margin-left-ltr-source" || name == "margin-left-rtl-source" ||
+            name == "margin-right-ltr-source" || name == "margin-right-rtl-source"))
+        {
+            return null;
+        }
+
+        if (value == "physical" &&
+           (name == "padding-left-ltr-source" || name == "padding-left-rtl-source" ||
+           name == "padding-right-ltr-source" || name == "padding-right-rtl-source"))
+        {
+            return null;
+        }
 
         // Translate these back to the form the user probably expects
         if (name == "margin-left-value")
@@ -980,8 +983,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         if (Events.isDoubleClick(event) && !this.clickedDisableButton(event))
         {
             var row = Dom.getAncestorByClass(event.target, "cssRule");
-            if (row && !Dom.getAncestorByClass(event.target, "cssPropName")
-                && !Dom.getAncestorByClass(event.target, "cssPropValue"))
+            if (row && !Dom.getAncestorByClass(event.target, "cssPropName") &&
+                !Dom.getAncestorByClass(event.target, "cssPropValue"))
             {
                 this.insertPropertyRow(row);
                 Events.cancelEvent(event);
@@ -1444,7 +1447,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                         var rule = Firebug.getRepObject(prop);
                         var baseURL = this.getStylesheetURL(rule, true);
                         var relURL = CSSModule.parseURLValue(cssValueInfo.value);
-                        var absURL = Url.isDataURL(relURL) ? relURL : Url.absoluteURL(relURL, baseURL);
+
+                        var absURL = Url.isDataURL(relURL) ?
+                            relURL :
+                            Url.absoluteURL(relURL, baseURL);
+
                         var repeat = CSSModule.parseRepeatValue(text);
 
                         this.infoTipType = "image";
@@ -1455,7 +1462,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                     break;
 
                 case "fontFamily":
-                    return CSSReps.CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValueInfo.value);
+                    return CSSReps.CSSInfoTip.populateFontFamilyInfoTip(this.context, infoTip,
+                        cssValueInfo.value);
             }
 
             delete this.infoTipType;
@@ -1473,9 +1481,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
     getEditor: function(target, value)
     {
-        if (target == this.panelNode
-            || Css.hasClass(target, "cssSelector") || Css.hasClass(target, "cssRule")
-            || Css.hasClass(target, "cssSheet"))
+        if (target == this.panelNode ||
+            Css.hasClass(target, "cssSelector") || Css.hasClass(target, "cssRule") ||
+            Css.hasClass(target, "cssSheet"))
         {
             if (!this.ruleEditor)
                 this.ruleEditor = new CSSRuleEditor(this.document);
@@ -1832,7 +1840,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         var priority = styleRule.style.getPropertyPriority(propName);
         var text = value + (priority ? " !" + priority : "");
 
-        if (text != "")
+        if (text !== "")
             return formatColor(text);
 
         var disabledMap = this.getDisabledMap(this.context);
@@ -1918,7 +1926,7 @@ function getOriginalStyleSheetCSS(sheet, context)
     {
         // In the case, that there are no rules, the cache will return a message
         // to reload the source (see issue 4251)
-        return sheet.cssRules.length != 0 ? context.sourceCache.load(sheet.href).join("") : "";
+        return sheet.cssRules.length !== 0 ? context.sourceCache.load(sheet.href).join("") : "";
     }
 }
 

@@ -331,20 +331,6 @@ Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
         if (responseText.length > addRawBytes)
             responseText = responseText.substr(responseText.length - addRawBytes);
 
-        try
-        {
-            responseText = Str.convertToUnicode(responseText, win.document.characterSet);
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_CACHE)
-                FBTrace.sysout("tabCache.storePartialResponse EXCEPTION " +
-                    Http.safeGetRequestName(request), err);
-
-            // Even responses that are not converted are stored into the cache.
-            // return false;
-        }
-
         // Size of each response is limited.
         var limitNotReached = true;
         var responseSizeLimit = Options.get("cache.responseLimit");
@@ -352,7 +338,6 @@ Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
         {
             limitNotReached = false;
             responseText = responseText.substr(0, responseSizeLimit - response.size);
-
             this.limitedResponses[url] = true;
 
             if (FBTrace.DBG_CACHE)
@@ -366,7 +351,7 @@ Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
         response.rawSize = newRawSize;
 
         // Store partial content into the cache.
-        this.store(url, responseText);
+        this.store(url, responseText, true);
 
         // Return false if furhter parts of this response should be ignored.
         return limitNotReached;
@@ -420,8 +405,21 @@ Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
         return this.cache[url];
     },
 
-    loadFromCache: function(url, method, file)
+    /**
+     * Returns the content of a response of a request from the FF cache.
+     *
+     * @param {string} url The URL of the request.
+     * @param {string} [method] The method ("GET", "POST"...)
+     * @param {*} [file] The file.
+     * @param {object} [options] List of options:
+     *      - {boolean} getRaw: If set to true, return the raw (non-charset-converted) content
+     *                          of the cache.
+     *
+     * @return {string} The content of the cache.
+     */
+    loadFromCache: function(url, method, file, options)
     {
+        var getRaw = options && options.getRaw;
         // The ancestor implementation (SourceCache) uses ioService.newChannel, which
         // can result in additional request to the server (in case the response can't
         // be loaded from the Firefox cache) - known as the double-load problem.
@@ -447,8 +445,6 @@ Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
                 Ci.nsICachingChannel.LOAD_ONLY_FROM_CACHE |
                 Ci.nsICachingChannel.LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
 
-            var charset = "UTF-8";
-
             if (!this.context.window)
             {
                 if (FBTrace.DBG_ERRORS)
@@ -457,10 +453,6 @@ Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
                         "is undefined");
                 }
             }
-
-            var doc = this.context.window ? this.context.window.document : null;
-            if (doc)
-                charset = doc.characterSet;
 
             stream = channel.open();
 
@@ -478,19 +470,22 @@ Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
             if (!Firebug.TabCacheModel.shouldCacheRequest(channel))
             {
                 if (FBTrace.DBG_CACHE)
-                    FBTrace.sysout("tabCache.loadFromCache; The resource from this URL is not text: " + url);
+                    FBTrace.sysout("tabCache.loadFromCache; The resource from this URL is not "+
+                        "text: " + url);
 
                 stream.close();
                 return [Locale.$STR("message.The resource from this URL is not text") + ": " + url];
             }
 
-            responseText = Http.readFromStream(stream, charset);
+            responseText = Http.readFromStream(stream);
 
             if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.loadFromCache (response coming from FF Cache) " +
                     url, responseText);
 
-            responseText = this.store(url, responseText);
+            responseText = this.store(url, responseText, true);
+            if (!getRaw)
+                responseText = this.convertCachedData(url);
         }
         catch (err)
         {
@@ -546,8 +541,9 @@ Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
         var url = Http.safeGetRequestName(request);
         delete this.responses[url];
 
-        var lines = this.cache[this.removeAnchor(url)];
-        var responseText = lines ? lines.join("") : "";
+        // For not penalizing the performance, we don't load from the cache when the resource is not
+        // found.
+        var responseText = this.loadText(url, null, null, {"dontLoadFromCache": true});
 
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.channel.stopRequest: " + Http.safeGetRequestName(request),

@@ -701,7 +701,8 @@ CSSComputedPanel.prototype = Obj.extend(Panel,
                     break;
 
                 case "fontFamily":
-                    return CSSReps.CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
+                    return CSSReps.CSSInfoTip.populateFontFamilyInfoTip(this.context, infoTip,
+                        cssValue.value);
             }
 
             delete this.infoTipType;
