@@ -84,7 +84,17 @@ Fonts.getFontInfo = function(context, win, identifier)
     if (!context)
         context = Firebug.currentContext;
 
-    var doc = win ? win.document : context.window.document;
+    if (!win)
+    {
+        var inspectedElement = context.inspectedNode;
+        if (inspectedElement)
+            win = inspectedElement.ownerDocument.defaultView;
+        else
+            win = context.getCurrentGlobal();
+    }
+
+    var doc = win.document;
+
     if (!doc)
     {
         if (FBTrace.DBG_ERRORS)
@@ -106,6 +116,9 @@ Fonts.getFontInfo = function(context, win, identifier)
             return fonts[i];
         }
     }
+
+    if (win.frameElement && win.frameElement.seamless)
+        return Fonts.getFontInfo(context, win.parent, identifier);
 
     return false;
 };

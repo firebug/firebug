@@ -107,6 +107,7 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
         for (var i=0; i<this.inspectorHistory.length; i++)
             delete this.inspectorHistory[i];
         delete this.inspectorHistory;
+        delete this.context.inspectedNode;
 
         CSSModule.removeListener(this);
         this.unregisterMutationListeners();
@@ -353,9 +354,7 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 return;
             }
 
-            this.inspectorHistory.unshift(object);
-            if (this.inspectorHistory.length > 5)
-                this.inspectorHistory.pop();
+            this.insertNodeInHistory(object);
         }
     },
 
@@ -364,9 +363,7 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (object != this.inspectorHistory)
         {
             // Manage history of selection for later access in the command line.
-            this.inspectorHistory.unshift(object);
-            if (this.inspectorHistory.length > 5)
-                this.inspectorHistory.pop();
+            this.insertNodeInHistory(object);
 
             Trace.sysout("html.stopInspecting: inspectoryHistory updated",
                 this.inspectorHistory);
@@ -376,6 +373,14 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         if (!canceled)
             this.ioBox.select(object, true);
+    },
+
+    insertNodeInHistory: function(object)
+    {
+        this.inspectorHistory.unshift(object);
+        if (this.inspectorHistory.length > 5)
+            this.inspectorHistory.pop();
+        this.context.inspectedNode = object;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
