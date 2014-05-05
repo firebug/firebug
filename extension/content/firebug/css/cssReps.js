@@ -153,7 +153,7 @@ var CSSInfoTip = Obj.extend(InfoTip,
         ];
 
         var win = context.getCurrentGlobal();
-        var htmlPanel = context.getPanel("html");
+        var htmlPanel = context.getPanel("html", true);
         if (htmlPanel.selection)
             win = htmlPanel.selection.ownerDocument.defaultView;
 

@@ -120,7 +120,7 @@ Firebug.FontViewerModel = Obj.extend(Module,
     {
         var context = Firebug.currentContext;
         var win = context.getCurrentGlobal();
-        var htmlPanel = context.getPanel("html");
+        var htmlPanel = context.getPanel("html", true);
 
         if (htmlPanel && htmlPanel.selection)
             win = htmlPanel.selection.ownerDocument.defaultView;
