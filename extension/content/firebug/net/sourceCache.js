@@ -39,15 +39,15 @@ const NS_BINDING_ABORTED = 0x804b0002;
 Firebug.SourceCache = function(context)
 {
     this.context = context;
-    this.cache = {};
-    this.cacheRaw = {};
+    this.cache = new Map();
+    this.cacheRaw = new Map();
 };
 
 Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
 {
     isCached: function(url)
     {
-        return (this.cache[url] ? true : false);
+        return this.cache.has(url);
     },
 
     /**
@@ -82,31 +82,21 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
     {
         options = options || {};
         if (FBTrace.DBG_CACHE)
-        {
             FBTrace.sysout("sourceCache.load: " + url);
-
-            if (!this.cache.hasOwnProperty(url) && this.cache[url])
-                FBTrace.sysout("sourceCache.load; ERROR - hasOwnProperty returns false, " +
-                    "but the URL is cached: " + url, this.cache[url]);
-        }
 
         var urlNoAnchor = this.removeAnchor(url);
 
-        // xxxHonza: sometimes hasOwnProperty return false even if the URL is obviously there.
-        //if (this.cache.hasOwnProperty(url))
-        var response = this.cache[urlNoAnchor];
+        var response = this.cache.get(urlNoAnchor);
         if (response)
             return response;
 
-        response = this.cacheRaw[urlNoAnchor];
+        response = this.cacheRaw.get(urlNoAnchor);
         if (response)
             return this.convertCachedData(urlNoAnchor);
 
         if (FBTrace.DBG_CACHE)
         {
-            var urls = [];
-            for (var prop in this.cache)
-                urls.push(prop);
+            var urls = [].slice.call(this.cache.keys());
 
             FBTrace.sysout("sourceCache.load: Not in the Firebug internal cache", urls);
         }
@@ -117,8 +107,9 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
             var src = d.encodedContent;
             var data = decodeURIComponent(src);
             var lines = Str.splitLines(data);
-            this.cache[url] = lines;
-            // For fonts, data URLs don't need to be stored as raw.
+            this.cache.set(url, lines);
+            // Data URLs don't need to be stored as raw, and we only use cacheRaw for fonts.
+            // So don't populate cacheRaw here.
             // this.cacheRaw[url] = src;
 
             return lines;
@@ -129,7 +120,7 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
         {
             var src = url.substring(Url.reJavascript.lastIndex);
             var lines = Str.splitLines(src);
-            this.cache[url] = lines;
+            this.cache.set(url, lines);
             // Do not cache as raw (only useful when dealing with fonts).
             // this.cacheRaw[url] = src;
 
@@ -207,10 +198,10 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
         url = this.removeAnchor(url);
 
         // If `this.cacheRaw[url]` doesn't exist, attempt to return the content from the FF cache.
-        if (!this.cacheRaw[url])
-            return this.loadFromCache(url, null, null, {"getRaw": true});
+        if (!this.cacheRaw.has(url))
+            return this.loadFromCache(url, null, null, {getRaw: true});
 
-        return this.cacheRaw[url];
+        return this.cacheRaw.get(url);
     },
 
     /**
@@ -233,14 +224,17 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
 
         // We need to invalidate the transformed cache data because
         // it does not fit with cacheRaw anymore.
-        delete this.cache[url];
+        this.cache.delete(url);
 
-        if (!this.cacheRaw[url] || !append)
-            this.cacheRaw[url] = "";
+        var rawTextToStore;
+        if (!this.cacheRaw.has(url) || !append)
+            rawTextToStore = rawText;
+        else
+            rawTextToStore = this.cacheRaw.get(url) + rawText;
 
-        this.cacheRaw[url] += rawText;
+        this.cacheRaw.set(url, rawTextToStore);
 
-        return this.cacheRaw[url];
+        return rawTextToStore;
     },
 
     /**
@@ -275,7 +269,7 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
     convertCachedData: function(url)
     {
         url = this.removeAnchor(url);
-        var text = this.cacheRaw[url];
+        var text = this.cacheRaw.get(url);
         var doc = this.context.window.document;
         var charset = doc ? doc.characterSet : "UTF-8";
         if (FBTrace.DBG_CACHE)
@@ -284,7 +278,7 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
                 " to " + charset);
         }
         var convertedText = Str.convertFromUnicode(text, charset);
-        return this.cache[url] = Str.splitLines(convertedText);
+        return this.cache.set(url, Str.splitLines(convertedText));
     },
 
     loadFromLocal: function(url)
@@ -300,7 +294,7 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
 
             // Don't cache locale files to get latest version (issue 1328)
             // Local files can be currently fetched any time.
-            //this.cache[url] = lines;
+            //this.cache.set(url, lines);
 
             return lines;
         }
@@ -441,7 +435,8 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
                 " store url=" + url);
         }
 
-        return this.cache[url] = lines;
+        this.cache.set(url, lines);
+        return lines;
     },
 
     invalidate: function(url)
@@ -451,8 +446,8 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("sourceCache.invalidate; " + url);
 
-        delete this.cache[url];
-        delete this.cacheRaw[url];
+        this.cache.delete(url);
+        this.cacheRaw.delete(url);
     },
 
     getLine: function(url, lineNo)
