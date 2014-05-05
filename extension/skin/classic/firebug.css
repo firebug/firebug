@@ -196,6 +196,17 @@ toolbarseparator {
 /*************************************************************************************************/
 /* Toolbar buttons */
 
+.toolbarbutton-iconic {
+    -moz-appearance: none;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+.toolbarbutton-iconic > .toolbarbutton-icon {
+    padding: 0;
+}
+
 #fbPanelBar1-buttons toolbarbutton {
     width: 26px;
     height: 26px;
@@ -222,7 +233,7 @@ toolbarseparator {
     padding: 3px 7px;
 }
 
-/*************************************************************************************************/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Window buttons */
 
 #fbWindowButtons > toolbarbutton {

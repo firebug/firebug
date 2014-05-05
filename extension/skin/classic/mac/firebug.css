@@ -462,12 +462,12 @@ toolbarbutton[type=menu-button]:not(:hover):not(:active):not([open]) > :-moz-any
     background-color: transparent;
 }
 
-toolbarbutton:not(.fbsearch-options-buttons):not(.toolbarbutton-menubutton-button):not([disabled="true"]):hover {
+toolbarbutton:not([disabled="true"]):hover {
     border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
-.toolbarbutton {
-    font-weight: normal;
+toolbarbutton.toolbarbutton-menubutton-button:hover {
+    border: none;
 }
 
 .toolbar-text-button > .toolbarbutton-text {
