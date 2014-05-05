@@ -421,6 +421,11 @@ DynamicSourceCollector.prototype =
         // {@link BreakpointTool.newSource}.
         this.registerScript(sourceFile, script);
 
+        // Restore breakpoints in dynamic scripts (including child scripts).
+        this.restoreBreakpoints(script);
+        for (var s of script.getChildScripts())
+            this.restoreBreakpoints(s);
+
         // New source file created, so let the rest of the system to deal with it just
         // like with any other (non dynamic) source file.
         this.sourceTool.dispatch("newSource", [sourceFile]);
@@ -445,6 +450,22 @@ DynamicSourceCollector.prototype =
         var bps = BreakpointStore.getBreakpoints(sourceFile.href);
         for (var bp of bps)
             this.sourceTool.onAddBreakpoint(bp);
+    },
+
+    restoreBreakpoints: function(script)
+    {
+        var threadActor = DebuggerLib.getThreadActor(this.context.browser);
+        if (!threadActor._allowSource(script.url))
+            return false;
+
+        var endLine = script.startLine + script.lineCount - 1;
+        for (var bp of threadActor.breakpointStore.findBreakpoints({url: script.url}))
+        {
+            if (bp.line >= script.startLine && bp.line <= endLine)
+                threadActor._setBreakpoint(bp);
+        }
+
+        return true;
     }
 };
 
