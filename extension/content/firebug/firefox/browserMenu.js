@@ -1,9 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/lib/trace",
     "firebug/firefox/browserOverlayLib",
 ],
-function(BrowserOverlayLib) {
+function(FBTrace, BrowserOverlayLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -17,6 +18,8 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm", xpcomUtilsScope);
 
 xpcomUtilsScope.XPCOMUtils.defineLazyModuleGetter(this, "ShortcutUtils",
   "resource://gre/modules/ShortcutUtils.jsm");
+
+var TraceError = FBTrace.toError();
 
 // ********************************************************************************************* //
 // GlobalCommands Implementation
@@ -527,15 +530,17 @@ var BrowserMenu =
      */
     overlayPanelUIMenu: function(doc)
     {
-        var panelUIButton = doc.getElementById("PanelUI-menu-button");
-        panelUIButton.addEventListener("mousedown", function onClick(event)
+        var devButton = doc.getElementById("PanelUI-developer");
+        if (!devButton)
         {
-            var devButton = doc.getElementById("PanelUI-developer");
-            devButton.addEventListener("ViewShowing", function onShowing(event)
-            {
-                devButton.removeEventListener("ViewShowing", onShowing, true);
-                BrowserMenu.onDeveloperViewShowing(doc);
-            }, true);
+            TraceError.sysout("browserMenu.overlayPanelUIMenu; ERROR PanelUI-developer " +
+                "button doesn't exist");
+            return;
+        }
+
+        devButton.addEventListener("ViewShowing", function onShowing(event)
+        {
+            BrowserMenu.onDeveloperViewShowing(doc);
         }, true);
     },
 
