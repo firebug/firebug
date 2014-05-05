@@ -118,7 +118,14 @@ Firebug.FontViewerModel = Obj.extend(Module,
      */
     parseFont: function(file)
     {
-        return Fonts.getFontInfo(Firebug.currentContext, null, file.href);
+        var context = Firebug.currentContext;
+        var win = context.getCurrentGlobal();
+        var htmlPanel = context.getPanel("html");
+
+        if (htmlPanel && htmlPanel.selection)
+            win = htmlPanel.selection.ownerDocument.defaultView;
+
+        return Fonts.getFontInfo(context, win, file.href);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -209,7 +209,7 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
      *
      * @param {string} url The url of the request.
      * @param {string} rawText The raw response text.
-     * @param {Boolean} append If set to true, don't invalidate the cache,
+     * @param {Boolean} append If set to true, don't invalidate the raw cache,
      *                         and append the data to it.
      *
      * @return {string} The stored text.

@@ -819,7 +819,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
             // Delay exec until after the event has processed and the state has been updated
             setTimeout(timeoutRunner, 0);
-      }
+        }
     }
 });
 

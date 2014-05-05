@@ -16,7 +16,6 @@ function(FBTrace, Options, Deprecated, Xpcom, System) {
 
 const Ci = Components.interfaces;
 const Cc = Components.classes;
-const Cu = Components.utils;
 
 const entityConverter = Xpcom.CCSV("@mozilla.org/intl/entityconverter;1", "nsIEntityConverter");
 
@@ -324,42 +323,6 @@ function escapeGroupsForEntities(str, lists, type)
 
 Str.escapeGroupsForEntities = escapeGroupsForEntities;
 
-function unescapeEntities(str, lists)
-{
-    var re = getEscapeRegexp("reverse", lists),
-        split = String(str).split(re),
-        len = split.length,
-        results = [],
-        cur, r, i, ri = 0, l, list;
-
-    if (!len)
-        return str;
-
-    lists = [].concat(lists);
-    for (i = 0; i < len; i++)
-    {
-        cur = split[i];
-        if (cur == '')
-            continue;
-
-        for (l = 0; l < lists.length; l++)
-        {
-            list = lists[l];
-            r = entityConversionLists.reverse[list.group][cur];
-            if (r)
-            {
-                results[ri] = r;
-                break;
-            }
-        }
-
-        if (!r)
-            results[ri] = cur;
-        ri++;
-    }
-    return results.join('') || '';
-}
-
 // ********************************************************************************************* //
 // String escaping
 
@@ -376,8 +339,6 @@ Str.escapeHTML = Deprecated.method("use appropriate escapeFor... function",
     Str.deprecateEscapeHTML);
 Str.unescapeHTML = Deprecated.method("use appropriate unescapeFor... function",
     Str.deprecatedUnescapeHTML);
-
-var escapeForSourceLine = Str.escapeForSourceLine = createSimpleEscape("text", "normal");
 
 var unescapeWhitespace = createSimpleEscape("whitespace", "reverse");
 
@@ -525,10 +486,8 @@ Str.splitLines = function(text)
     if (!text)
         return [];
 
-    const reSplitLines2 = /.*(:?\r\n|\n|\r)?/mg;
-    var lines;
     var str = text.match ? text : text + "";
-    lines = str.match(reSplitLines2);
+    var lines = str.match(/.*(:?\r\n|\n|\r)?/mg);
     lines.pop();
     return lines;
 };
@@ -922,9 +881,9 @@ Str.safeToString = function(ob)
     {
         if (!ob)
             return ""+ob;
-        if (ob && (typeof (ob["toString"]) == "function") )
+        if (ob && (typeof ob.toString == "function") )
             return ob.toString();
-        if (ob && typeof (ob["toSource"]) == "function")
+        if (ob && typeof ob.toSource == "function")
             return ob.toSource();
        /* https://bugzilla.mozilla.org/show_bug.cgi?id=522590 */
         var str = "[";
@@ -946,7 +905,7 @@ Str.safeToString = function(ob)
 Str.capitalize = function(string)
 {
     return string.charAt(0).toUpperCase() + string.slice(1);
-}
+};
 
 // ********************************************************************************************* //
 

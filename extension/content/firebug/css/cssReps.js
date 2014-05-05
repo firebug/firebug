@@ -70,7 +70,7 @@ var CSSInfoTip = Obj.extend(InfoTip,
             var h = img.naturalHeight;
             var repeat = img.dataset.repeat;
 
-            if (repeat == "repeat-x" || (w == 1 && h > 1))
+            if (repeat === "repeat-x" || (w === 1 && h > 1))
             {
                 Dom.collapse(img, true);
                 Dom.collapse(bgImg, false);
@@ -81,7 +81,7 @@ var CSSInfoTip = Obj.extend(InfoTip,
                 else
                     bgImg.style.height = h + "px";
             }
-            else if (repeat == "repeat-y" || (h == 1 && w > 1))
+            else if (repeat === "repeat-y" || (h === 1 && w > 1))
             {
                 Dom.collapse(img, true);
                 Dom.collapse(bgImg, false);
@@ -92,7 +92,7 @@ var CSSInfoTip = Obj.extend(InfoTip,
                 else
                     bgImg.style.width = w + "px";
             }
-            else if (repeat == "repeat" || (w == 1 && h == 1))
+            else if (repeat === "repeat" || (w === 1 && h === 1))
             {
                 Dom.collapse(img, true);
                 Dom.collapse(bgImg, false);
@@ -152,7 +152,12 @@ var CSSInfoTip = Obj.extend(InfoTip,
            "font-size:18px;"
         ];
 
-        var fontObject = Fonts.getFontInfo(context, null,
+        var win = context.getCurrentGlobal();
+        var htmlPanel = context.getPanel("html");
+        if (htmlPanel.selection)
+            win = htmlPanel.selection.ownerDocument.defaultView;
+
+        var fontObject = Fonts.getFontInfo(context, win,
             fontName.replace(/^(["'])?(.*?)\1$/g, "$2"));
 
         if (FBTrace.DBG_INFOTIP)
@@ -170,11 +175,13 @@ var CSSInfoTip = Obj.extend(InfoTip,
         if (fontObject && !Url.isDataURL(fontObject.URI))
             data = context.sourceCache.loadRaw(fontObject.URI);
 
-        styleNode.textContent = getFontFaceCSS(fontObject ? fontObject : fontName, data);
+        styleNode.textContent = getFontFaceCSS(fontObject || fontName, data);
 
         if (FBTrace.DBG_INFOTIP)
+        {
             FBTrace.sysout("populateFontFamilyInfoTip; Font face applied for infotip",
                 styleNode.textContent);
+        }
 
         return true;
     },
@@ -509,6 +516,12 @@ function getFontFaceCSS(font, data)
     var fontFaceCSS = "";
     var fontName = "";
     var urlString = "";
+
+    function escape(str)
+    {
+        return str.replace(/"/g, '\\"');
+    }
+
     if (typeof font === "object")
     {
         if (Url.isDataURL(font.URI))
@@ -533,15 +546,15 @@ function getFontFaceCSS(font, data)
         }
         else
         {
-            fontName = font.CSSFamilyName;
+            fontName = escape(font.CSSFamilyName);
         }
     }
     else
     {
-        fontName = font;
+        fontName = escape(font);
     }
 
-    fontFaceCSS += " .infoTipFontFace {font-family: " + fontName + ";}";
+    fontFaceCSS += " .infoTipFontFace {font-family: \"" + fontName + "\";}";
 
     return fontFaceCSS;
 }

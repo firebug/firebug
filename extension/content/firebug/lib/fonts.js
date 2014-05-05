@@ -85,13 +85,7 @@ Fonts.getFontInfo = function(context, win, identifier)
         context = Firebug.currentContext;
 
     if (!win)
-    {
-        var inspectedElement = context.inspectedNode;
-        if (inspectedElement)
-            win = inspectedElement.ownerDocument.defaultView;
-        else
-            win = context.getCurrentGlobal();
-    }
+        win = context.getCurrentGlobal();
 
     var doc = win.document;
 

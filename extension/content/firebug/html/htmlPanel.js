@@ -107,7 +107,6 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
         for (var i=0; i<this.inspectorHistory.length; i++)
             delete this.inspectorHistory[i];
         delete this.inspectorHistory;
-        delete this.context.inspectedNode;
 
         CSSModule.removeListener(this);
         this.unregisterMutationListeners();
@@ -380,7 +379,6 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
         this.inspectorHistory.unshift(object);
         if (this.inspectorHistory.length > 5)
             this.inspectorHistory.pop();
-        this.context.inspectedNode = object;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
