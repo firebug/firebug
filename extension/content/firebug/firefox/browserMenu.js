@@ -543,15 +543,21 @@ var BrowserMenu =
      */
     overlayPanelUIMenu: function(doc)
     {
-        var panelUIButton = doc.getElementById("PanelUI-menu-button");
-        panelUIButton.addEventListener("mousedown", function onClick(event)
+        var devButton = doc.getElementById("PanelUI-developer");
+        if (!devButton)
         {
-            var devButton = doc.getElementById("PanelUI-developer");
-            devButton.addEventListener("ViewShowing", function onShowing(event)
+            if (FBTrace.DBG_ERRORS)
             {
-                devButton.removeEventListener("ViewShowing", onShowing, true);
-                BrowserMenu.onDeveloperViewShowing(doc);
-            }, true);
+                FBTrace.sysout("browserMenu.overlayPanelUIMenu; ERROR PanelUI-developer " +
+                    "button doesn't exist");
+            }
+
+            return;
+        }
+
+        devButton.addEventListener("ViewShowing", function onShowing(event)
+        {
+            BrowserMenu.onDeveloperViewShowing(doc);
         }, true);
     },
 
