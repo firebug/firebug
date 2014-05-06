@@ -400,7 +400,7 @@ panelTab[selected="true"] > panelTabMenu {
     -moz-margin-end: 5px;
     margin-bottom: 3px;
     -moz-margin-start: 0;
-    padding: 0 5px;
+    padding: 0;
     overflow: hidden;
 }
 
