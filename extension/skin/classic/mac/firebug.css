@@ -11,7 +11,7 @@
     font-size: 11px;
     border: none;
     height: calc(22rem + 10px);
-    padding: 0 13px !important;
+    padding: 0 0 0 7px !important;
 }
 
 #fbCommandArrow,
@@ -89,7 +89,7 @@
 
 #fbToolbar {
     font-size: 11px;
-    padding: 0 7px !important;
+    padding: 0 0 0 7px !important;
     border-bottom: none;
 }
 
@@ -280,7 +280,7 @@
 }
 
 #fbToggleSidePanelsBox2 {
-    padding: 0;
+    padding: 0 0 1px 0;
 }
 
 /********************************************************************************************/
