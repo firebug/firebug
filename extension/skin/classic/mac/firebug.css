@@ -89,7 +89,7 @@
 
 #fbToolbar {
     font-size: 11px;
-    padding: 0 13px !important;
+    padding: 0 7px !important;
     border-bottom: none;
 }
 
@@ -280,7 +280,7 @@
 }
 
 #fbToggleSidePanelsBox2 {
-    padding: 0 13px;
+    padding: 0;
 }
 
 /********************************************************************************************/
@@ -301,7 +301,7 @@
 /* Panel tabs */
 
 .panelTabBox {
-    -moz-padding-start: 6px;
+    -moz-padding-start: 0;
     overflow: hidden;
 }
 
