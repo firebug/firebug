@@ -73,7 +73,13 @@
     width: 20px;
 }
 
-.logRow:not(.logRow-log) > div > .logCounter {
+.logRow-info,
+.logRow-warn,
+.logRow-error,
+.logRow-assert,
+.logRow-warningMessage,
+.logRow-loading,
+.logRow-errorMessage {
     padding-left: 22px;
 }
 
