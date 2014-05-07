@@ -119,13 +119,27 @@ Firebug.FontViewerModel = Obj.extend(Module,
     parseFont: function(file)
     {
         var context = Firebug.currentContext;
-        var win = context.getCurrentGlobal();
-        var htmlPanel = context.getPanel("html", true);
-
-        if (htmlPanel && htmlPanel.selection)
-            win = htmlPanel.selection.ownerDocument.defaultView;
-
-        return Fonts.getFontInfo(context, win, file.href);
+        // xxxFlorent: context.window should always be the toppest inner-window, isn't it?
+        // xxxFlorent: Is there a way to get the <style> element requesting this font?
+        var rootWin = context.window.top;
+        var fontObject = null;
+        try
+        {
+            Win.iterateWindows(rootWin, function(win)
+            {
+                fontObject = Fonts.getFontInfo(context, win, file.href);
+                // If the fontObject has been found, throw StopIteration to stop the iterations.
+                if (fontObject)
+                    throw StopIteration;
+            });
+        }
+        catch (ex)
+        {
+            // Ignore if the exception if StopIteration. Otherwise, throw the exception.
+            if (ex !== StopIteration)
+                throw ex;
+        }
+        return fontObject;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

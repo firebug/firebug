@@ -721,8 +721,14 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     getCurrentColor: function()
     {
-        var cs = this.selection.ownerDocument.defaultView.getComputedStyle(this.selection);
+        var win = this.getWindow();
+        var cs = win.getComputedStyle(this.selection);
         return cs.getPropertyValue("color");
+    },
+
+    getWindow: function()
+    {
+        return this.selection.ownerDocument.defaultView;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

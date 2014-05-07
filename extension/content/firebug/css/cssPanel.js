@@ -1462,8 +1462,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                     break;
 
                 case "fontFamily":
+                    var win = this.getWindow();
                     return CSSReps.CSSInfoTip.populateFontFamilyInfoTip(this.context, infoTip,
-                        cssValueInfo.value);
+                        cssValueInfo.value, win);
             }
 
             delete this.infoTipType;
@@ -1472,6 +1473,13 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
             return false;
         }
+    },
+
+    getWindow: function()
+    {
+        if (!this.location)
+            this.location = this.getDefaultLocation();
+        return this.location.ownerNode.ownerDocument.defaultView;
     },
 
     getCurrentColor: function()

@@ -109,19 +109,6 @@ Dom.getElementsByClass = function(node, className)  // className, className, ...
 
 Dom.getElementsByAttribute = function(node, attrName, attrValue)
 {
-    function escape(string)
-    {
-        if (typeof string !== "string")
-            return string;
-
-        // xxxsz: Firefox 31 added support for CSS.escape() (See https://bugzil.la/955860)
-        // So the check and the code afterwards can be removed as soon as Firefox 31 is the
-        // minimum supported version
-        if (typeof CSS !== "undefined" && CSS.escape)
-            return CSS.escape(string);
-
-        return string.replace(/[\\'"]/g, (x) => "\\" + x);
-    }
 
     if (!node || typeof node !== "object" ||
         !(node instanceof Element || node instanceof Document || node instanceof DocumentFragment))
@@ -130,7 +117,7 @@ Dom.getElementsByAttribute = function(node, attrName, attrValue)
     }
 
     var selector = attrValue !== undefined ?
-        "[" + attrName + "='" + escape(attrValue) + "']" : "[" + attrName + "]";
+        "[" + attrName + "='" + Css.escape(attrValue) + "']" : "[" + attrName + "]";
     return node.querySelectorAll(selector);
 };
 

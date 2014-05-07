@@ -42,7 +42,7 @@ try
 {
     // Firefox 24
     // waiting for: https://bugzilla.mozilla.org/show_bug.cgi?id=867595
-    var scope = {}
+    var scope = {};
     Cu.import("resource://gre/modules/devtools/Loader.jsm", scope);
     var {CssLogic} = scope.devtools.require("devtools/styleinspector/css-logic");
 }
@@ -701,8 +701,12 @@ CSSComputedPanel.prototype = Obj.extend(Panel,
                     break;
 
                 case "fontFamily":
+                    var win = this.selection ?
+                        this.selection.ownerDocument.defaultView :
+                        this.context.window;
+
                     return CSSReps.CSSInfoTip.populateFontFamilyInfoTip(this.context, infoTip,
-                        cssValue.value);
+                        cssValue.value, win);
             }
 
             delete this.infoTipType;

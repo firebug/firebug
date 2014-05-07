@@ -142,7 +142,7 @@ var CSSInfoTip = Obj.extend(InfoTip,
         }
     }),
 
-    populateFontFamilyInfoTip: function(context, infoTip, fontName)
+    populateFontFamilyInfoTip: function(context, infoTip, fontName, win)
     {
         var fontStyles = [
            "font-size:12px;",
@@ -152,10 +152,7 @@ var CSSInfoTip = Obj.extend(InfoTip,
            "font-size:18px;"
         ];
 
-        var win = context.getCurrentGlobal();
-        var htmlPanel = context.getPanel("html", true);
-        if (htmlPanel.selection)
-            win = htmlPanel.selection.ownerDocument.defaultView;
+        win = win || context.window;
 
         var fontObject = Fonts.getFontInfo(context, win,
             fontName.replace(/^(["'])?(.*?)\1$/g, "$2"));
@@ -517,11 +514,6 @@ function getFontFaceCSS(font, data)
     var fontName = "";
     var urlString = "";
 
-    function escape(str)
-    {
-        return str.replace(/"/g, '\\"');
-    }
-
     if (typeof font === "object")
     {
         if (Url.isDataURL(font.URI))
@@ -546,12 +538,12 @@ function getFontFaceCSS(font, data)
         }
         else
         {
-            fontName = escape(font.CSSFamilyName);
+            fontName = Css.escape(font.CSSFamilyName);
         }
     }
     else
     {
-        fontName = escape(font);
+        fontName = Css.escape(font);
     }
 
     fontFaceCSS += " .infoTipFontFace {font-family: \"" + fontName + "\";}";

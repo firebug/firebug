@@ -326,10 +326,14 @@ Str.escapeGroupsForEntities = escapeGroupsForEntities;
 // ********************************************************************************************* //
 // String escaping
 
-var escapeForTextNode = Str.escapeForTextNode = createSimpleEscape("text", "normal");
-var escapeForElementAttribute = Str.escapeForElementAttribute = createSimpleEscape("attributes", "normal");
+var escapeForTextNode = createSimpleEscape("text", "normal");
+var escapeForElementAttribute = createSimpleEscape("attributes", "normal");
+
 Str.escapeForHtmlEditor = createSimpleEscape("editor", "normal");
 Str.escapeForCss = createSimpleEscape("css", "normal");
+Str.escapeForTextNode = escapeForTextNode;
+Str.escapeForSourceLine = escapeForTextNode;
+Str.escapeForElementAttribute = escapeForElementAttribute;
 
 // deprecated compatibility functions
 Str.deprecateEscapeHTML = createSimpleEscape("text", "normal");
