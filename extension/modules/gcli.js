@@ -9,6 +9,10 @@ var Cu = Components.utils;
 
 var EXPORTED_SYMBOLS = ["FirebugGCLICommands"];
 
+var scope = {};
+Cu["import"]("resource://firebug/firebug-trace-service.js", scope);
+var FBTrace = scope.traceConsoleService.getTracer("extensions.firebug");
+
 // ********************************************************************************************* //
 // GCLI
 
@@ -21,7 +25,7 @@ try
 catch (err)
 {
     if (FBTrace.DBG_ERRORS)
-        FBTrace.sysout("GCLI not available");
+        FBTrace.sysout("ERROR GCLI not available");
 }
 
 // Load the Locale module and make sure Firebug string bundle is registered
