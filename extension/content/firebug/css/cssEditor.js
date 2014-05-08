@@ -559,7 +559,7 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
         if (Math.abs(amt) === 100)
             amt = (amt < 0 ? -64 : 64);
 
-        var isUpper = (expr.toUpperCase() === expr);
+        var isUpper = !expr.match(/^\d+$/) && (expr.toUpperCase() === expr);
 
         for (var pos = offset; pos < offsetEnd; pos += 2)
         {
