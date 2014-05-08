@@ -42,8 +42,8 @@ function runTest()
                 var editor = panel.panelNode.getElementsByClassName("textEditorInner").item(0);
                 if (FBTest.ok(editor, "Editor must be available now"))
                 {
-                    // Enter '-moz-linear-gradient(135deg, #FF788C, #FFB4C8)' and verify display
-                    FBTest.sendString("-moz-linear-gradient(135deg, #FF8C78, #FFC8B4)", editor);
+                    // Enter '-moz-linear-gradient(135deg, #ff788c, #ffb4c8)' and verify display
+                    FBTest.sendString("-moz-linear-gradient(135deg, #ff8c78, #ffc8b4)", editor);
                     var element = win.document.getElementById("element");
                     var csElement = win.getComputedStyle(element);
 

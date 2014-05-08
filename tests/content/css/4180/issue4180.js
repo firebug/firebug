@@ -11,7 +11,7 @@ function runTest()
                 var values = panel.panelNode.querySelectorAll(".cssPropValue");
 
                 FBTest.compare(
-                    "#8C8CFF -moz-linear-gradient(135deg, #788CFF, #B4C8FF) repeat scroll 0 0",
+                    "#8c8cff -moz-linear-gradient(135deg, #788cff, #b4c8ff) repeat scroll 0 0",
                     values[0].innerHTML,
                     "The values must be in the order: background-color, background-image, " +
                         "background-repeat, background-attachment, background-position."

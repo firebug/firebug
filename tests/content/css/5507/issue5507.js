@@ -39,8 +39,8 @@ function checkCSSPanel(callback)
     var expectedValues = {
         authored: ["linear-gradient(135deg, rgb(180, 200, 255), #788cff) repeat scroll 0 0 " +
             "blue", "#f00", "green", "rgba(0, 0, 255, 1)"],
-        hex: ["linear-gradient(135deg, #B4C8FF, #788CFF) repeat scroll 0 0 #0000FF",
-            "#FF0000", "#008000", "#0000FF"],
+        hex: ["linear-gradient(135deg, #b4c8ff, #788cff) repeat scroll 0 0 #0000ff",
+            "#ff0000", "#008000", "#0000ff"],
         rgb: ["linear-gradient(135deg, rgb(180, 200, 255), rgb(120, 140, 255)) repeat scroll 0 " +
             "0 rgb(0, 0, 255)", "rgb(255, 0, 0)", "rgb(0, 128, 0)", "rgb(0, 0, 255)"],
         hsl: ["linear-gradient(135deg, hsl(224, 100%, 85%), hsl(231, 100%, 74%)) repeat scroll " +
@@ -55,7 +55,7 @@ function checkCSSPanel(callback)
 
     var expectedValues = {
         authored: ["linear-gradient(135deg, rgb(180, 200, 255), #788cff)"],
-        hex: ["linear-gradient(135deg, #B4C8FF, #788CFF)"],
+        hex: ["linear-gradient(135deg, #b4c8ff, #788cff)"],
         rgb: ["linear-gradient(135deg, rgb(180, 200, 255), rgb(120, 140, 255))"],
         hsl: ["linear-gradient(135deg, hsl(224, 100%, 85%), hsl(231, 100%, 74%))"]
     };
@@ -80,8 +80,8 @@ function checkStyleSidePanel(callback)
         var expectedValues = {
             authored: ["rgba(0, 0, 255, 1)", "green", "linear-gradient(135deg, " +
                 "rgb(180, 200, 255), #788cff) repeat scroll 0 0 blue", "#f00"],
-            hex: ["#0000FF", "#008000", "linear-gradient(135deg, #B4C8FF, #788CFF) repeat " +
-                "scroll 0 0 #0000FF", "#FF0000"],
+            hex: ["#0000ff", "#008000", "linear-gradient(135deg, #b4c8ff, #788cff) repeat " +
+                "scroll 0 0 #0000ff", "#ff0000"],
             rgb: ["rgb(0, 0, 255)", "rgb(0, 128, 0)", "linear-gradient(135deg, " +
                 "rgb(180, 200, 255), rgb(120, 140, 255)) repeat scroll 0 0 rgb(0, 0, 255)",
                 "rgb(255, 0, 0)"],
@@ -111,7 +111,7 @@ function checkComputedSidePanel(callback)
             color:
             {
                 authored: ["rgba(0,\u200B 0,\u200B 255,\u200B 1)", "green", "#f00"],
-                hex: ["#0000FF", "#008000", "#FF0000"],
+                hex: ["#0000ff", "#008000", "#ff0000"],
                 rgb: ["rgb(0,\u200B 0,\u200B 255)", "rgb(0,\u200B 128,\u200B 0)",
                     "rgb(255,\u200B 0,\u200B 0)"],
                 hsl: ["hsl(240,\u200B 100%,\u200B 50%)", "hsl(120,\u200B 100%,\u200B 25%)",
@@ -120,7 +120,7 @@ function checkComputedSidePanel(callback)
             "background-color":
             {
                 authored: ["blue"],
-                hex: ["#0000FF"],
+                hex: ["#0000ff"],
                 rgb: ["rgb(0,\u200B 0,\u200B 255)"],
                 hsl: ["hsl(240,\u200B 100%,\u200B 50%)"]
             }
