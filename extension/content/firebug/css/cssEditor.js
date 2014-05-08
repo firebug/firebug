@@ -573,8 +573,8 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
             while (mid.length < 2)
                 mid = "0" + mid;
 
-            // Make the incremented part upper-case if the original value can be
-            // seen as such. Otherwise, the lower-case result from .toString() is used.
+            // Make the incremented part uppercase if the original value is certain to be
+            // uppercase (e.g. #AAAAAA). Otherwise use the lowercase result from .toString().
             if (isUpper)
                 mid = mid.toUpperCase();
 
