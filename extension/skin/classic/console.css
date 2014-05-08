@@ -81,6 +81,11 @@
 .logRow-loading,
 .logRow-errorMessage {
     padding-left: 22px;
+    width:calc(100% - 22px);
+}
+
+.logGroupLabel{
+	width:calc(100% - 22px);
 }
 
 .logCounter[count] {
