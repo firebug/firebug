@@ -21,5 +21,5 @@ function verifyResult(expected, color)
 {
     var result = FW.FBL.rgbToHSL(color);
     FBTest.compare(expected, result,
-        "RGB color must be correctly converted to hexadecimal format");
+        "RGB color must be correctly converted to HSL format");
 }
