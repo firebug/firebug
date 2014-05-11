@@ -1462,7 +1462,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                     break;
 
                 case "fontFamily":
-                    var win = this.getWindow();
+                    var win = this.getWindow(styleRule);
                     return CSSReps.CSSInfoTip.populateFontFamilyInfoTip(this.context, infoTip,
                         cssValueInfo.value, win);
             }
@@ -1475,11 +1475,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         }
     },
 
-    getWindow: function()
+    getWindow: function(rule)
     {
-        if (!this.location)
-            this.location = this.getDefaultLocation();
-        return this.location.ownerNode.ownerDocument.defaultView;
+        var element = rule.parentStyleSheet.ownerNode;
+        return element ?
+            element.ownerDocument.defaultView :
+            null;
     },
 
     getCurrentColor: function()

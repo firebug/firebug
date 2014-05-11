@@ -514,6 +514,19 @@ function getFontFaceCSS(font, data)
     var fontName = "";
     var urlString = "";
 
+    // xxxFlorent: [Fx31][BGZ955860] Remove this as soon as bugzilla https://bugzil.la/955860
+    // (implement Css.escape()) is fixed.
+    function escape(str)
+    {
+        if (typeof str !== "string")
+            return str;
+
+        if (CSS.escape)
+            return CSS.escape(str);
+
+        return str.replace(/[\\'"]/g, (x) => "\\" + x);
+    }
+
     if (typeof font === "object")
     {
         if (Url.isDataURL(font.URI))
@@ -538,12 +551,12 @@ function getFontFaceCSS(font, data)
         }
         else
         {
-            fontName = Css.escape(font.CSSFamilyName);
+            fontName = escape(font.CSSFamilyName);
         }
     }
     else
     {
-        fontName = Css.escape(font);
+        fontName = escape(font);
     }
 
     fontFaceCSS += " .infoTipFontFace {font-family: \"" + fontName + "\";}";

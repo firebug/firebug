@@ -1044,17 +1044,6 @@ Css.rgbToHSL = function(value)
         });
 };
 
-// [Fx31][BGZ955860] Remove this as soon as bugzilla https://bugzil.la/955860
-// (implement Css.escape()) is fixed.
-// This function is a kind-of basic polyfill to the CSS.escape() function.
-Css.escape = CSS.escape || function(string)
-{
-    if (typeof string !== "string")
-        return string;
-
-    return string.replace(/[\\'"]/g, (x) => "\\" + x);
-};
-
 // ********************************************************************************************* //
 // CSS Data
 
