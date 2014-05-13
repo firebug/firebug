@@ -23,7 +23,6 @@
 #fbInspectButton {
     margin-bottom: 1px;
     padding: 0px;
-    opacity: 0.8;
 
     /* The default styling does not always keep button size content or image
        position constant, e.g. when [checked="true"].  These numbers were
@@ -36,10 +35,9 @@
 
 #fbBreakOnNextButton {
     margin-bottom: 1px;
-    opacity: 0.8;
     padding-right: 2px;
     padding-left: 2px;
-        /* The default styling does not always keep button size contant or image
+        /* The default styling does not always keep button size constant or image
        position constant, e.g. when [checked="true"].  These numbers were
        chosen to keep them constant against the default winstripe styling. */
     padding-top: 4px;
