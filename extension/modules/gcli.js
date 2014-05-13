@@ -20,7 +20,7 @@ var scope = {};
 
 try
 {
-    Cu.import("resource:///modules/devtools/gcli.jsm", scope);
+    Cu.import("resource://gre/modules/devtools/gcli.jsm", scope);
 }
 catch (err)
 {
