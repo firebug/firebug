@@ -208,14 +208,8 @@ toolbarseparator {
 }
 
 #fbPanelBar1-buttons toolbarbutton {
-    width: 26px;
-    height: 26px;
-    margin: 1px 3px 1px 0;
-    padding: 0px;
-    padding-top: 4px;
-    padding-bottom: 2px;
-    -moz-padding-start: 4px;
-    -moz-padding-end: 2px;
+    margin: 1px 3px 2px 0;
+    padding: 4px 3px 3px 4px;
 }
 
 #fbPanelBar1-buttons #fbNavigateBackButton {
@@ -224,9 +218,7 @@ toolbarseparator {
 
 #fbBreakOnNextButton,
 .toolbar-image-button {
-    width: 23px;
-    height: 23px;
-    padding: 1px;
+    padding: 3px 2px 2px 3px;
 }
 
 .toolbarbutton-menu-dropmarker {
