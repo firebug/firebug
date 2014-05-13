@@ -20,7 +20,6 @@
 #firebug-button {
     -moz-binding: url("chrome://firebug/content/firefox/start-button/startButton.xml#start-button");
     list-style-image: url(chrome://firebug/skin/firebugSmall.svg) !important;
-    filter: url(resource://firebugui/filters.svg#grayscale);
 }
 
 #firebug-button[firebugActive="true"] {
