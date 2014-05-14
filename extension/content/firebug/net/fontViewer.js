@@ -134,7 +134,7 @@ Firebug.FontViewerModel = Obj.extend(Module,
         }
         catch (ex)
         {
-            // Ignore if the exception if stopIteration. Otherwise, throw the exception.
+            // Ignore if the exception is stopIteration. Otherwise, throw the exception.
             if (ex !== stopIteration)
                 throw ex;
         }
