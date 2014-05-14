@@ -68,9 +68,9 @@
 }
 
 .logCounter {    
-	padding-left:2px;
+    padding-left:2px;
     width: 20px;
-	display: table-cell;
+    display: table-cell;
     vertical-align: middle;
 }
 
@@ -78,7 +78,7 @@
 .logGroupBody  > div > .logCounter,
 .logRow-table  > div > .logCounter
 {
-	display: none;
+    display: none;
 }
 .logGroupLabel{
 	width:calc(100% - 22px);
