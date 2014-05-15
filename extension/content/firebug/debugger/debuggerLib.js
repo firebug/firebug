@@ -223,6 +223,7 @@ DebuggerLib.getThreadDebuggeeGlobalForContext = function(context, global)
 
 DebuggerLib.getThreadDebuggeeGlobalForFrame = function(frame)
 {
+    // For Firefox 29 and up this should always work (bug 958646).
     if (frame.script && frame.script.global)
         return frame.script.global;
 

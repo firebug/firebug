@@ -13,8 +13,7 @@ define([
     "firebug/console/console",
     "firebug/chrome/tableRep",
 ],
-function(Firebug, Module, FBTrace, Obj, Locale, Wrapper, Events, Domplate, Console,
-    TableRep) {
+function(Firebug, Module, FBTrace, Obj, Locale, Wrapper, Events, Domplate, Console, TableRep) {
 
 "use strict";
 
@@ -303,7 +302,7 @@ function getListenerMap(listeners)
             map[li.type] = [];
 
         map[li.type].push({
-            listener: li.func,
+            listener: li.listenerObject,
             useCapture: li.capturing,
             target: li.target,
         });
