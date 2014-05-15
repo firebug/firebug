@@ -67,14 +67,21 @@
     display: none;
 }
 
-.logCounter {
-    display: none;
-    padding: 2px 0 2px 5px;
+.logCounter {    
+    padding-left:2px;
     width: 20px;
+    display: table-cell;
 }
 
-.logCounter[count] {
-    display: table-cell;
+.logRow-group > div > .logCounter,
+.logGroupBody > div > .logCounter,
+.logRow-table > div > .logCounter,
+.logRow-spy > div > .logCounter
+{
+    display: none;
+}
+.logGroupLabel{
+	width:calc(100% - 22px);
 }
 
 .logCounterValue:empty {
@@ -106,17 +113,7 @@
 .logRow-loading,
 .logRow-errorMessage {
     background-repeat: no-repeat;
-    background-position: 4px center;
-}
-
-.logRow-info > div > .logContent,
-.logRow-warn > div > .logContent,
-.logRow-error > div > .logContent,
-.logRow-assert > div > .logContent,
-.logRow-warningMessage > div > .logContent,
-.logRow-loading > div > .logContent,
-.logRow-errorMessage > div > .logContent {
-    padding-left: 22px;
+    background-position: 4px 4px;
 }
 
 .logRow-assert,

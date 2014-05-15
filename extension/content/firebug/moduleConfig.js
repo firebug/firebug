@@ -44,6 +44,7 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/chrome/panelSelector",
         "firebug/chrome/tableRep",
         "firebug/html/htmlPanel",
+        "firebug/html/eventsPanel",
         "firebug/dom/domPanel",
         "firebug/dom/domSidePanel",
         "firebug/console/commandLinePopup",
