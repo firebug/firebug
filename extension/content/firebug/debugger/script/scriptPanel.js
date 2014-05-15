@@ -1232,6 +1232,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     /**
      * The method handles 'onEditorContextMenu' fired by {@link ScriptView}.
+     * xxxHonza: should be probably removed.
      */
     onEditorContextMenu: function(event, items)
     {
@@ -1242,6 +1243,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     getContextMenuItems: function(object, target)
     {
+        var info = this.scriptView.getContextMenuInfo();
+
         var items = [];
 
         // The target must be the textarea used by CodeMirror (thus we're sure that the right-click
@@ -1258,6 +1261,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         if (!isCodeTarget)
             return;
+
+        // The target provided by {@link FirebugChrome} is wrong, we need to use the
+        // one from {@link SourceEditor}. See {@link SourceEditor.onInit} for more details.
+        target = info.target;
 
         var lineNo = this.scriptView.getLineIndex(target);
         var text = this.scriptView.getSelectedText();
@@ -1385,6 +1392,34 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         var popupMenu = document.getElementById("fbScriptViewPopup");
         if (popupMenu.state === "open")
             popupMenu.hidePopup();
+    },
+
+    getPopupObject: function(target)
+    {
+        var isCodeTarget = (target.tagName === "TEXTAREA" &&
+            Dom.getAncestorByClass(target, "CodeMirror"));
+
+        if (!isCodeTarget)
+            return Firebug.getRepObject(target);
+
+        var info = this.scriptView.getContextMenuInfo();
+        if (!info.rangeParent)
+            return Firebug.getRepObject(target);
+
+        var rangeOffset = info.rangeOffset || 0;
+        var expr = getExpressionAt(info.rangeParent.data, rangeOffset);
+        if (!expr || !expr.expr)
+            return Firebug.getRepObject(target);
+
+        var deferred = Promise.defer();
+        var success = (result, context) => deferred.resolve(result);
+        var failure = (result, context) => deferred.resolve(null);
+
+        CommandLine.evaluate(expr.expr, this.context, null,
+            this.context.getCurrentGlobal(),
+            success, failure, {noStateChange: true});
+
+        return deferred.promise;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1742,18 +1777,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             var tag = rep.shortTag ? rep.shortTag : rep.tag;
 
             tag.replace({object: result}, infoTip);
-
-            // If the menu is never displayed, the contextMenuObject is not reset
-            // (back to null) and is reused at the next time the user opens the
-            // context menu, which is wrong.
-            // This line was appended when fixing:
-            // http://code.google.com/p/fbug/issues/detail?id=1700
-            // The object should be returned by getPopupObject(),
-            // that is called when the context menu is showing.
-            // The problem is, that the "onContextShowing" event doesn't have the
-            // rangeParent field set and so it isn't possible to get the
-            // expression under the cursor (see getExpressionAt).
-            //Firebug.chrome.contextMenuObject = result;
 
             self.infoTipExpr = expr;
         }

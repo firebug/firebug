@@ -1393,17 +1393,15 @@ var FirebugChrome =
         // Make sure the Copy action is only available if there is actually something
         // selected in the panel.
         var sel = target.ownerDocument.defaultView.getSelection();
-        if (!this.contextMenuObject &&
-            !FirebugChrome.$("cmd_copy").getAttribute("disabled") &&
-            !sel.isCollapsed)
+        if (!FirebugChrome.$("cmd_copy").getAttribute("disabled") && !sel.isCollapsed)
         {
             var menuitem = Menu.createMenuItem(popup, {label: "Copy"});
             menuitem.setAttribute("command", "cmd_copy");
         }
 
         var object;
-        if (this.contextMenuObject)
-            object = this.contextMenuObject;
+        if (event.firebugPopupObject)
+            object = event.firebugPopupObject;
         else if (target && target.ownerDocument == document)
             object = Firebug.getRepObject(target);
         else if (target && panel)
@@ -1412,7 +1410,17 @@ var FirebugChrome =
             // xxxHonza: What about a node from a different document? Is that OK?
             object = Firebug.getRepObject(target);
 
-        this.contextMenuObject = null;
+        if (isPromise(object))
+        {
+            object.then((object) =>
+            {
+                this.onContextShowing({
+                    target: event.target,
+                    firebugPopupObject: object,
+                })
+            });
+            return;
+        }
 
         var rep = Firebug.getRep(object, Firebug.currentContext);
         var realObject = rep ? rep.getRealObject(object, Firebug.currentContext) : null;
@@ -1427,7 +1435,6 @@ var FirebugChrome =
                 realRep: realRep,
                 target: target,
                 chromeDoc: target.ownerDocument == document,
-                contextMenuObject: this.contextMenuObject,
                 panel: panel,
             });
         }
@@ -1526,25 +1533,8 @@ var FirebugChrome =
 
         var tooltip = FirebugChrome.$("fbTooltip");
         var target = win.document.tooltipNode;
-
         var panel = target ? Firebug.getElementPanel(target) : null;
-
         var object;
-
-        /* XXXjjb: This causes the Script panel to show the function body over and over.
-         * We need to clear it at least, but actually we need to understand why the tooltip
-         * should show the context menu object at all. One thing the contextMenuObject supports
-         * is peeking at function bodies when stopped at a breakpoint.
-         * That case could be supported with clearing the contextMenuObject, but we don't
-         * know if that breaks something else. So maybe a popupMenuObject should be set
-         * on the context if that is what we want to support.
-         * The other complication is that there seems to be another tooltip.
-        if (this.contextMenuObject)
-        {
-            object = this.contextMenuObject;
-            FBTrace.sysout("tooltip by contextMenuObject");
-        }
-        else*/
 
         if (target && target.ownerDocument == document)
             object = Firebug.getRepObject(target);
@@ -2099,6 +2089,9 @@ function onPanelMouseUp(event)
     }
 }
 
+// ********************************************************************************************* //
+// Helpers
+
 function onMainTabBoxMouseDown(event)
 {
     if (Firebug.isInBrowser())
@@ -2128,6 +2121,11 @@ function fatalError(summary, exc)
     Components.utils.reportError(summary);
 
     throw exc;
+}
+
+function isPromise(object)
+{
+    return object && typeof object.then == "function";
 }
 
 return FirebugChrome;

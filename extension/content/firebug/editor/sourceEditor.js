@@ -205,12 +205,14 @@ SourceEditor.prototype =
         });
 
         // xxxHonza: 'contextmenu' event provides wrong target (clicked) element.
-        // So, handle 'mousedown' first to remember the clicked element and use
-        // it within the getContextMenu item
+        // So, handle 'mousedown' first to remember the clicked element, etc. and
+        // allow to use it through getContextMenuInfo.
         var scroller = this.editorObject.display.scroller;
         scroller.addEventListener("mousedown", function(event)
         {
             self.currentTarget = event.target;
+            self.rangeParent = event.rangeParent;
+            self.rangeOffset = event.rangeOffset;
         });
 
         Trace.sysout("sourceEditor.init; ", this.view);
@@ -570,6 +572,16 @@ SourceEditor.prototype =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Commands
+
+    // xxxHonza: see onInit for more details
+    getContextMenuInfo: function()
+    {
+        return {
+            target: this.currentTarget,
+            rangeParent: this.rangeParent,
+            rangeOffset: this.rangeOffset,
+        }
+    },
 
     getContextMenuItems: function()
     {
@@ -1063,13 +1075,6 @@ SourceEditor.prototype =
 
     getLineIndex: function(target)
     {
-        // xxxHonza: the target provided by 'contextmenu' event is wrong and so,
-        // use the one from 'mousedown'
-        if (this.currentTarget)
-            target = this.currentTarget;
-
-        this.currentTarget = null;
-
         var lineElement;
 
         if (Css.hasClass(target, "breakpoint"))
