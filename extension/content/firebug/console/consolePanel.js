@@ -84,10 +84,10 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
         logRowTag:
             DIV({"class": "$className", role: "listitem"},
                 DIV(
-                    DIV({"class": "logContent"}),
                     DIV({"class": "logCounter"},
                         SPAN({"class": "logCounterValue"})
-                    )
+                    ),
+                    DIV({"class": "logContent"})
                 )
             ),
 
