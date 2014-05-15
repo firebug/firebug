@@ -159,6 +159,7 @@
                 this.selectPanel(panelName);
                 var scrollBox = this.getElementsByClassName("panelbar-arrowscrollbox").item(0);
                 scrollBox.ensureVisibleTab(tab);
+                scrollBox.adjustTabSize();
             ]]></body>
         </method>
 
