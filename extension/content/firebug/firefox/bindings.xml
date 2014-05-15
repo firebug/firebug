@@ -434,6 +434,7 @@
                     tab = tab.nextSibling;
                 }
                 this.initialized = true;
+                this.adjustTabSize();
             ]]></body>
         </method>
 
