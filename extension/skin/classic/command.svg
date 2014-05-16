@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- See license.txt for terms of usage -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   version="1.1"
+   width="14"
+   height="14"
+   id="svg2">
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient3782">
+      <stop
+         id="stop3784"
+         style="stop-color:#234ccd;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop3786"
+         style="stop-color:#5d7de3;stop-opacity:1"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3774">
+      <stop
+         id="stop3776"
+         style="stop-color:#1e3faa;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop3778"
+         style="stop-color:#3a61de;stop-opacity:1"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       x1="2.0017023"
+       y1="12.252236"
+       x2="-0.098722465"
+       y2="6.7552357"
+       id="linearGradient3780"
+       xlink:href="#linearGradient3774"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(5.8412939,1034.646)" />
+    <linearGradient
+       x1="3.3086739"
+       y1="11.177202"
+       x2="1.4681491"
+       y2="6.4559803"
+       id="linearGradient3788"
+       xlink:href="#linearGradient3782"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(5.8412939,1034.646)" />
+  </defs>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(-1.3412939,-1037.146)"
+     id="layer1">
+    <path
+       d="m 6.8412938,1040.0523 -0.4375,0.406 2.46875,3.6875 -2.46875,3.6875 0.4375,0.4065 3.4375002,-4.094 z"
+       id="rect2985"
+       style="fill:url(#linearGradient3788);fill-opacity:1;stroke:url(#linearGradient3780);stroke-width:0.40000001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+  </g>
+</svg>

@@ -105,13 +105,7 @@
     white-space: pre-wrap;
 }
 
-:-moz-any(.logRow-info,
-          .logRow-warn,
-          .logRow-error,
-          .logRow-assert,
-          .logRow-warningMessage,
-          .logRow-loading,
-          .logRow-errorMessage) .logCounter {
+:-moz-any(.logRow) .logCounter {
     background-repeat: no-repeat;
     background-position: 4px 3px;
 }
@@ -147,6 +141,10 @@
 .logRow-assert,
 .logRow-errorMessage {
     color: #FF0000;
+}
+
+:-moz-any(.logRow-command) .logCounter:not([count]) {
+    background-image: url(chrome://firebug/skin/command.svg);
 }
 
 :-moz-any(.logRow-info) .logCounter:not([count]) {

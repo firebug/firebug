@@ -542,7 +542,7 @@
 
             <!-- Command Line (static) Arrow -->
             <vbox pack="center">
-                <html:div id="fbCommandArrow">&gt;&gt;&gt;</html:div>
+                <html:div id="fbCommandArrow"></html:div>
             </vbox>
 
             <!-- Command Line Input -->

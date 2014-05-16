@@ -9,7 +9,6 @@
 /*************************************************************************************************/
 /* Command Line */
 
-#fbCommandArrow,
 .fbCommandLine {
     font-size: 11px;
 }
@@ -29,10 +28,6 @@
 
 #fbCommandEditorHistoryButton[disabled="true"] {
     color: graytext;
-}
-
-#fbCommandArrow {
-    font-size: 12px;
 }
 
 #fbCommandBox {
