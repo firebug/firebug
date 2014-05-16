@@ -1411,15 +1411,17 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!expr || !expr.expr)
             return Firebug.getRepObject(target);
 
-        var deferred = Promise.defer();
-        var success = (result, context) => deferred.resolve(result);
-        var failure = (result, context) => deferred.resolve(null);
+        var evalResult;
+        var success = (result, context) => { evalResult = result; }
+        var failure = (result, context) => { }
 
         CommandLine.evaluate(expr.expr, this.context, null,
             this.context.getCurrentGlobal(),
             success, failure, {noStateChange: true});
 
-        return deferred.promise;
+        // xxxHonza: a promise should be returned since CommandLine.evaluate might
+        // be asynchronous in the future.
+        return evalResult;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

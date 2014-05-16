@@ -1410,18 +1410,6 @@ var FirebugChrome =
             // xxxHonza: What about a node from a different document? Is that OK?
             object = Firebug.getRepObject(target);
 
-        if (isPromise(object))
-        {
-            object.then((object) =>
-            {
-                this.onContextShowing({
-                    target: event.target,
-                    firebugPopupObject: object,
-                })
-            });
-            return;
-        }
-
         var rep = Firebug.getRep(object, Firebug.currentContext);
         var realObject = rep ? rep.getRealObject(object, Firebug.currentContext) : null;
         var realRep = realObject ? Firebug.getRep(realObject, Firebug.currentContext) : null;
@@ -2121,11 +2109,6 @@ function fatalError(summary, exc)
     Components.utils.reportError(summary);
 
     throw exc;
-}
-
-function isPromise(object)
-{
-    return object && typeof object.then == "function";
 }
 
 return FirebugChrome;
