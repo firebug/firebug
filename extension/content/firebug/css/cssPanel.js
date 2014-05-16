@@ -1462,7 +1462,13 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                     break;
 
                 case "fontFamily":
-                    var win = Css.getDocumentForStyleSheet(styleRule.parentStyleSheet).defaultView;
+                    // The rep for element.style returns the element itself (and not the
+                    // CSS2Properties object). In this case, just get the ownerDocument and the
+                    // defaultView directly.
+                    var win = styleRule.ownerDocument ?
+                        styleRule.ownerDocument.defaultView :
+                        Css.getDocumentForStyleSheet(styleRule).defaultView;
+
                     return CSSReps.CSSInfoTip.populateFontFamilyInfoTip(this.context, infoTip,
                         cssValueInfo.value, win);
             }

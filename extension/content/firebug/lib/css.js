@@ -888,16 +888,23 @@ Css.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
     return ret;
 };
 
-Css.getDocumentForStyleSheet = function(styleSheet)
+/**
+ * Get the document including directly or indirectly the style sheet or the rule.
+ *
+ * @param {CSSRule or CSSStyleSheet} styleSheetOrRule The style sheet or the rule.
+ *
+ * @return The document.
+ */
+Css.getDocumentForStyleSheet = function(styleSheetOrRule)
 {
-    if (!styleSheet)
+    if (!styleSheetOrRule)
         return;
 
-    while (styleSheet.parentStyleSheet && !styleSheet.ownerNode)
-        styleSheet = styleSheet.parentStyleSheet;
+    while (styleSheetOrRule.parentStyleSheet && !styleSheetOrRule.ownerNode)
+        styleSheetOrRule = styleSheetOrRule.parentStyleSheet;
 
-    if (styleSheet.ownerNode)
-        return styleSheet.ownerNode.ownerDocument;
+    if (styleSheetOrRule.ownerNode)
+        return styleSheetOrRule.ownerNode.ownerDocument;
 };
 
 // ********************************************************************************************* //
