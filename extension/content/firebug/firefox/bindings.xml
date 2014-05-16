@@ -159,7 +159,6 @@
                 this.selectPanel(panelName);
                 var scrollBox = this.getElementsByClassName("panelbar-arrowscrollbox").item(0);
                 scrollBox.ensureVisibleTab(tab);
-                scrollBox.adjustTabSize();
             ]]></body>
         </method>
 
@@ -254,6 +253,9 @@
                 }
 
                 this.dispatch("selectPanel");
+
+                var scrollBox = this.getElementsByClassName("panelbar-arrowscrollbox").item(0);
+                scrollBox.adjustTabSize();
 
                 return panel;
             ]]></body>
@@ -396,13 +398,9 @@
                     {
                         var tab = tabs[i];
 
-                        // originalWidth expandos disappear after another scrollbox has been
-                        // used; I have no idea why. Let's reconstruct them. (Issue 7455.)
+                        // If the tab is new, set its originalWidth property here.
                         if (!tab.originalWidth)
-                        {
-                            tab.style.maxWidth = "none";
                             tab.originalWidth = tab.boxObject.width;
-                        }
 
                         tab.style.maxWidth = tab.selected == "true" ? "none" : tabWidth + "px";
                         if (tab.originalWidth <= tabWidth)
