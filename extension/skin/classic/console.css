@@ -68,7 +68,7 @@
 }
 
 .logCounter {    
-    padding-left:2px;
+    padding-left: 3px;
     width: 20px;
     display: table-cell;
 }
@@ -105,15 +105,15 @@
     white-space: pre-wrap;
 }
 
-.logRow-info,
-.logRow-warn,
-.logRow-error,
-.logRow-assert,
-.logRow-warningMessage,
-.logRow-loading,
-.logRow-errorMessage {
+:-moz-any(.logRow-info,
+          .logRow-warn,
+          .logRow-error,
+          .logRow-assert,
+          .logRow-warningMessage,
+          .logRow-loading,
+          .logRow-errorMessage) .logCounter {
     background-repeat: no-repeat;
-    background-position: 4px 4px;
+    background-position: 4px 3px;
 }
 
 .logRow-assert,
@@ -149,22 +149,22 @@
     color: #FF0000;
 }
 
-.logRow-info {
+:-moz-any(.logRow-info) .logCounter:not([count]) {
     background-image: url(chrome://firebug/skin/info.svg);
 }
 
-.logRow-loading {
+:-moz-any(.logRow-loading) .logCounter:not([count]) {
     background-image: url(chrome://firebug/skin/loading.svg);
 }
 
-.logRow-warn,
-.logRow-warningMessage {
+:-moz-any(.logRow-warn,
+          .logRow-warningMessage) .logCounter:not([count]) {
     background-image: url(chrome://firebug/skin/warning.svg);
 }
 
-.logRow-error,
-.logRow-assert,
-.logRow-errorMessage {
+:-moz-any(.logRow-error,
+          .logRow-assert,
+          .logRow-errorMessage) .logCounter:not([count]) {
     background-image: url(chrome://firebug/skin/error.svg);
 }
 
