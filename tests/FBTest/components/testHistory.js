@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 // Test list history
@@ -26,13 +26,13 @@ const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBran
 
 Components.utils["import"]("resource://gre/modules/XPCOMUtils.jsm");
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Test URL History, nsIAutoCompleteSearch
 
 function History() {}
 History.prototype =
 {
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // XPCOM
 
     QueryInterface: XPCOMUtils.generateQI([
@@ -40,7 +40,7 @@ History.prototype =
         Ci.nsIAutoCompleteSearch
     ]),
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // nsIAutoCompleteSearch
 
     startSearch: function(searchString, searchParam, previousResult, listener)
@@ -76,7 +76,7 @@ function trimSpaces(text)
     return text.replace(/^\s*|\s*$/g,"");
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Implements nsIAutoCompleteResult
 
 function SearchResult(searchString, searchResult, defaultIndex, results)
@@ -95,32 +95,44 @@ SearchResult.prototype =
     results: [],
     errorDescription: "",
 
-    get matchCount() {
+    get matchCount()
+    {
         return this.results.length;
     },
 
-    getValueAt: function(index) {
+    getValueAt: function(index)
+    {
         return this.results[index];
     },
 
-    getCommentAt: function(index) {
+    getCommentAt: function(index)
+    {
         return "";
     },
 
-    getStyleAt: function(index) {
+    getStyleAt: function(index)
+    {
         return null;
     },
 
-    getImageAt: function (index) {
+    getImageAt: function (index)
+    {
         return "";
     },
 
-    removeValueAt: function(index, removeFromDb) {
+    removeValueAt: function(index, removeFromDb)
+    {
         this.results.splice(index, 1);
     },
 
-    getLabelAt: function(index) {
+    getLabelAt: function(index)
+    {
         return this.results[index];
+    },
+
+    getFinalCompleteValueAt: function(index)
+    {
+        return this.getValueAt(index);
     },
 
     QueryInterface: function(aIID)
@@ -133,7 +145,7 @@ SearchResult.prototype =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Helper
 
 function extend(l, r)
@@ -146,7 +158,7 @@ function extend(l, r)
     return newOb;
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 function TestHistory()
@@ -162,7 +174,7 @@ TestHistory.prototype = extend(History.prototype,
     contractID: TEST_CONTRACT_ID,
 });
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// ********************************************************************************************* //
 
 function TestCaseHistory()
 {
@@ -177,7 +189,7 @@ TestCaseHistory.prototype = extend(History.prototype,
     contractID: CASE_CONTRACT_ID,
 });
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// ********************************************************************************************* //
 
 function TestDriverHistory()
 {
@@ -192,7 +204,7 @@ TestDriverHistory.prototype = extend(History.prototype,
     contractID: DRIVER_CONTRACT_ID,
 });
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// ********************************************************************************************* //
 
 var components = [TestHistory, TestCaseHistory, TestDriverHistory];
 
@@ -200,3 +212,5 @@ if (XPCOMUtils.generateNSGetFactory)
     var NSGetFactory = XPCOMUtils.generateNSGetFactory(components);
 else
     var NSGetModule = XPCOMUtils.generateNSGetModule(components);
+
+// ********************************************************************************************* //

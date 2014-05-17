@@ -213,6 +213,11 @@ ScriptView.prototype = Obj.extend(new EventSource(),
         popup.openPopupAtScreen(event.screenX, event.screenY, true);
     },
 
+    getContextMenuInfo: function()
+    {
+        return this.editor.getContextMenuInfo();
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Search
 

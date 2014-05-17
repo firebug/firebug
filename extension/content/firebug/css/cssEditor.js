@@ -559,7 +559,7 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
         if (Math.abs(amt) === 100)
             amt = (amt < 0 ? -64 : 64);
 
-        var isUpper = (expr.toUpperCase() === expr);
+        var isUpper = expr.toLowerCase() !== expr;
 
         for (var pos = offset; pos < offsetEnd; pos += 2)
         {
@@ -573,10 +573,8 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
             while (mid.length < 2)
                 mid = "0" + mid;
 
-            // Make the incremented part upper-case if the original value can be
-            // seen as such (this should happen even for, say, #444444, because
-            // upper-case hex-colors are the default). Otherwise, the lower-case
-            // result from .toString is used.
+            // Make the incremented part uppercase if the original value is certain to be
+            // uppercase (e.g. #AAAAAA). Otherwise use the lowercase result from .toString().
             if (isUpper)
                 mid = mid.toUpperCase();
 

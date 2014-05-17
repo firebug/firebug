@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test for disabling/enabling event listeners</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1>Disabling/enabling event listeners</h1>
+        </header>
+        <div>
+            <div id="test">
+                <span id="testspan" onclick="handler(1)">inspect me</span>
+                <div id="out"></div>
+            </div>
+
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Events</em> side panel</li>
+                    <li>Inspect the element #testspan -&gt; there should be two "click" event listeners</li>
+                    <li>Click the element on the page -&gt; the output 12 should appear, indicating that both
+                    event listeners ran</li>
+                    <li>Disable the first listener, and click the element again -&gt; the output should be 2</li>
+                    <li>Enable the first listener again, and click the element -&gt; the output should be 12</li>
+                    <li>Disable the second listener, and click the element -&gt; the output should be 1</li>
+                    <li>Enable the second listener, and click the element -&gt; the output should be 12</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        It should be possible to enable and disable event listeners (including event handlers),
+                        and their order should be preserved when doing so.
+                    </li>
+                </ul>
+            </section>
+            <footer>Simon Lindholm, simon.lindholm10@gmail.com</footer>
+        </div>
+<script>
+var runHandlers = [];
+function handler(n)
+{
+    runHandlers.push(n);
+    document.getElementById("out").textContent += n;
+}
+function fetchHandlers()
+{
+    return runHandlers.splice(0).join("");
+}
+
+document.getElementById("testspan").addEventListener("click", () => handler(2));
+</script>
+    </body>
+</html>

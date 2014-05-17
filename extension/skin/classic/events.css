@@ -1,0 +1,110 @@
+/* See license.txt for terms of usage */
+
+.panelNode-html-events {
+    overflow-x: hidden;
+}
+
+.listenerSection {
+    padding-bottom: 6px;
+}
+
+.listenerLabeledSection:not(.opened) > .listenerSection,
+.listenerCategory:not(.opened) > .listenerLineGroup {
+    display: none;
+}
+
+.listenerInheritHeader, .listenerCategoryHeader {
+    margin: 0;
+}
+
+.listenerInheritLabel, .listenerCategoryLabel {
+    margin-left: 12px;
+    font-weight: bold;
+}
+.listenerInheritLabel::after {
+    content: ' ';
+}
+
+.listenerCategoryHeader {
+    padding: 0 0 0 4px;
+    background: none;
+}
+.listenerCategoryHeader > .twisty {
+    margin-top: -1px;
+}
+.listenerCategory {
+    margin-top: 1em;
+    color: #000000;
+}
+
+.listenerCategory:first-child {
+    margin-top: 6px;
+}
+
+.listenerIndent {
+    padding-left: 2em;
+    cursor: pointer;
+    line-height: 1.4;
+}
+
+.listenerLineGroup.disabled > .wrappedListener > .listenerIndent {
+    opacity: 0.25;
+}
+.wrappedListener > .listenerIndent::after {
+    content: "";
+    margin-left: 1ch;
+    padding-right: 2ch;
+    background: transparent url(chrome://firebug/skin/wrappedListener.svg) no-repeat 3px 3px;
+}
+
+.listenerLine {
+    position: relative;
+    overflow: hidden; /* contain the floats */
+}
+
+.listenerLineGroup {
+    margin-left: 6px;
+}
+
+.listenerLineGroup.disabled > .originalListener > .listenerIndent {
+    background: transparent url(chrome://firebug/skin/disable.svg) no-repeat 2px 1px;
+    filter: url(resource://firebugui/filters.svg#grayscale);
+}
+
+.listenerLineGroup > .originalListener:hover > .listenerIndent {
+    background: transparent url(chrome://firebug/skin/disable.svg) no-repeat 2px 1px;
+}
+
+.listenerCapturing {
+    font-style: italic;
+    color: #787878;
+}
+
+.listenerLineGroup.disabled > .originalListener > .listenerCapturing {
+    opacity: 0.25;
+}
+
+.listenerLine > .objectLink-sourceLink {
+    position: static;
+    float: right;
+    margin-right: 1px;
+}
+
+.listenerLine > .selector {
+    font-family: monospace;
+}
+
+.listenerLineGroup.disabled > .listenerLine > .listenerIndent,
+.listenerLineGroup.disabled > .listenerLine > .objectLink,
+.listenerLineGroup.disabled > .listenerLine > .selector {
+    color: #CCCCCC;
+}
+
+.noOwnListenersText {
+    padding-top: 6px;
+    margin: 0 5px;
+    font-family: Lucida Grande, Tahoma, sans-serif;
+    font-weight: bold;
+    color:  #888888;
+}
+

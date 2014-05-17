@@ -335,14 +335,22 @@ DynamicSourceCollector.prototype =
         if (introType == "scriptElement")
         {
             // xxxHonza: another workaround, a script element is appended
-            // dynamically if the parent document state is already set to 'complete'.
-            // Also <script> elements with external scripts (src attribute set) are
+            // dynamically if the parent document state is set to 'complete' or 'interactive'.
+            //
+            // <script> elements with external scripts (src attribute set) are
             // not considered as dynamic scripts here (we'll get 'newScript' event
             // from the backend for those).
+            //
+            // xxxHonza: if an iframe with an external script is reloaded (and so, new script
+            // created) we don't get the event from the backend, even if it's standard <script>.
             var element = script.source.element.unsafeDereference();
             var state = element.ownerDocument.readyState;
             var srcAttr = element.getAttribute("src");
-            if (state != "complete" || srcAttr)
+
+            Trace.sysout("sourceTool.onNewScript; scriptElement added, doc-state: " +
+                state + ", src-attr: " + srcAttr, script);
+
+            if ((state != "complete" && state != "interactive") || srcAttr)
             {
                 Trace.sysout("sourceTool.onNewScript; Could be dynamic script, " +
                     "but we can't be sure. See bug 983297 " + script.url + ", " +
@@ -421,6 +429,11 @@ DynamicSourceCollector.prototype =
         // {@link BreakpointTool.newSource}.
         this.registerScript(sourceFile, script);
 
+        // Restore breakpoints in dynamic scripts (including child scripts).
+        this.restoreBreakpoints(script);
+        for (var s of script.getChildScripts())
+            this.restoreBreakpoints(s);
+
         // New source file created, so let the rest of the system to deal with it just
         // like with any other (non dynamic) source file.
         this.sourceTool.dispatch("newSource", [sourceFile]);
@@ -445,6 +458,22 @@ DynamicSourceCollector.prototype =
         var bps = BreakpointStore.getBreakpoints(sourceFile.href);
         for (var bp of bps)
             this.sourceTool.onAddBreakpoint(bp);
+    },
+
+    restoreBreakpoints: function(script)
+    {
+        var threadActor = DebuggerLib.getThreadActor(this.context.browser);
+        if (!threadActor._allowSource(script.url))
+            return false;
+
+        var endLine = script.startLine + script.lineCount - 1;
+        for (var bp of threadActor.breakpointStore.findBreakpoints({url: script.url}))
+        {
+            if (bp.line >= script.startLine && bp.line <= endLine)
+                threadActor._setBreakpoint(bp);
+        }
+
+        return true;
     }
 };
 

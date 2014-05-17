@@ -1,6 +1,7 @@
 function runTest()
 {
-    FBTest.openNewTab(basePath + "script/breakpoints/5525/issue5525.html", function(win)
+    var url = basePath + "script/breakpoints/5525/issue5525.html";
+    FBTest.openNewTab(url, function(win)
     {
         FBTest.enablePanels(["console", "script"], function(win)
         {
@@ -9,26 +10,35 @@ function runTest()
             {
                 var panel = FBTest.getSelectedPanel();
                 var row = panel.panelNode.getElementsByClassName("logRow-errorMessage")[0];
+                var source = panel.panelNode.querySelector(
+                    ".logRow-errorMessage .errorSourceCode");
 
                 // Verify displayed text.
-                var reTextContent = /\s*undefinedVariable is not defined\s*var test = undefinedVariable;\s*issue5525.html\s*\(line 12\)/;
-                FBTest.compare(reTextContent, row.textContent, "Text content must match.");
+                var reTextContent = /\s*var test = undefinedVariable;s*/;
+                FBTest.compare(reTextContent, source.textContent, "Text content must match.");
 
-                // Create error breakpoint
+                // Create error breakpoint by clickin on the error-breakpoint circle.
                 var br = row.getElementsByClassName("errorBreak")[0];
                 FBTest.click(br);
 
-                // Switch to the Script and Breakpoints panels.
-                FBTest.selectPanel("script");
-                var panel = FBTest.selectSidePanel("breakpoints");
+                // Now wait till the breakpoint is (asynchronously) created
+                // on the server side.
+                FBTest.waitForBreakpoint(url, 12, () =>
+                {
+                    FBTest.progress("breakpoint created");
 
-                // Check content of the Breakpoints panel
-                var panelNode = panel.panelNode;
-                var rows = panelNode.getElementsByClassName("breakpointRow");
-                FBTest.compare(rows.length, 1, "There must be one breakpoint");
+                    // Switch to the Script and Breakpoints panels.
+                    FBTest.selectPanel("script");
+                    var panel = FBTest.selectSidePanel("breakpoints");
 
-                // Finish test
-                FBTest.testDone();
+                    // Check content of the Breakpoints panel
+                    var panelNode = panel.panelNode;
+                    var rows = panelNode.getElementsByClassName("breakpointRow");
+                    FBTest.compare(1, rows.length, "There must be one breakpoint");
+
+                    // Finish test
+                    FBTest.testDone();
+                });
             });
 
             FBTest.clickContentButton(win, "testButton");

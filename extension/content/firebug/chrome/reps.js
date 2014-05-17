@@ -1811,7 +1811,8 @@ FirebugReps.Window = domplate(Rep,
     {
         try
         {
-            return (win && win.location && !win.closed) ? Url.getFileName(win.location.href) : "";
+            return (win && win.location && !win.closed) ?
+                Str.cropString(Url.getFileName(win.location.href)) : "";
         }
         catch (exc)
         {

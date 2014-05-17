@@ -84,10 +84,10 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
         logRowTag:
             DIV({"class": "$className", role: "listitem"},
                 DIV(
-                    DIV({"class": "logContent"}),
                     DIV({"class": "logCounter"},
                         SPAN({"class": "logCounterValue"})
-                    )
+                    ),
+                    DIV({"class": "logContent"})
                 )
             ),
 
@@ -96,7 +96,7 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
                 TABLE({width: "100%", cellpadding: 0, cellspacing: 0},
                     TBODY(
                         TR(
-                            TD({"class": "consolPanelNotification"})
+                            TD({"class": "consolePanelNotification"})
                         )
                     )
                 )
@@ -706,7 +706,7 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
         };
 
         var container = this.template.limitTag.replace({}, row);
-        container = container.querySelector(".consolPanelNotification");
+        container = container.querySelector(".consolePanelNotification");
 
         this.limit = PanelNotification.render(container, config);
 

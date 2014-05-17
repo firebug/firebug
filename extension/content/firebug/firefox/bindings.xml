@@ -254,6 +254,9 @@
 
                 this.dispatch("selectPanel");
 
+                var scrollBox = this.getElementsByClassName("panelbar-arrowscrollbox").item(0);
+                scrollBox.adjustTabSize();
+
                 return panel;
             ]]></body>
         </method>
@@ -361,20 +364,20 @@
                 switch (event.type)
                 {
                     case "resize":
-                        this.adjustTabSize(event);
+                        this.adjustTabSize();
                     break;
                 }
             ]]></body>
         </method>
 
         <method name="adjustTabSize">
-            <parameter name="event"/>
             <body><![CDATA[
                 if (!this.initialized)
                     return;
 
                 // Don't shrink at all, if the pref is set to zero or less
-                if (Firebug.Options.get("panelTabMinWidth") <= 0)
+                var minWidth = Firebug.Options.get("panelTabMinWidth");
+                if (minWidth <= 0)
                     return;
 
                 var totalWidth = parseInt(this.scrollbox.boxObject.width, 10);
@@ -389,12 +392,16 @@
                 while (tabs.length && availableSpace > 0)
                 {
                     var noSpace = true;
-                    var tabWidth = Math.max(Firebug.Options.get("panelTabMinWidth"),
-                        availableSpace / tabs.length);
+                    var tabWidth = Math.max(minWidth, availableSpace / tabs.length);
 
                     for (var i=0; i<tabs.length; i++)
                     {
                         var tab = tabs[i];
+
+                        // If the tab is new, set its originalWidth property here.
+                        if (!tab.originalWidth)
+                            tab.originalWidth = tab.boxObject.width;
+
                         tab.style.maxWidth = tab.selected == "true" ? "none" : tabWidth + "px";
                         if (tab.originalWidth <= tabWidth)
                         {
@@ -425,6 +432,7 @@
                     tab = tab.nextSibling;
                 }
                 this.initialized = true;
+                this.adjustTabSize();
             ]]></body>
         </method>
 

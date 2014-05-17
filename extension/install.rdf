@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>firebug@software.joehewitt.com</em:id>
-    <em:version>2.0b4</em:version>
+    <em:version>2.0b6</em:version>
     <em:type>2</em:type>
     <em:bootstrap>true</em:bootstrap>
 
@@ -58,7 +58,7 @@
     <em:contributor>Belakhdar Abdeldjalil</em:contributor>
     <em:contributor>Jakob Kaltenbrunner</em:contributor>
 
-    <em:iconURL>chrome://firebug/skin/firebug64.png</em:iconURL>
+    <em:iconURL>chrome://firebug/skin/firebugBig.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
     <em:updateURL>https://getfirebug.com/releases/firebug/2.0/update.rdf</em:updateURL>
 

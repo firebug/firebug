@@ -40,7 +40,6 @@ function(Firebug, FBTrace, Obj, Locale, Events, Url, Dom, System, Str, Persist, 
 
 var Cc = Components.classes;
 
-var commandPrefix = ">>> ";
 var Trace = FBTrace.to("DBG_COMMANDLINE");
 var TraceError = FBTrace.toError();
 
@@ -269,12 +268,12 @@ var CommandLine = Obj.extend(Module,
         if (!Options.get("commandEditor") || context.panelName !== "console")
         {
             this.clear(context);
-            Firebug.Console.log(commandPrefix + expr, context, "command", FirebugReps.Command);
+            Firebug.Console.log(expr, context, "command", FirebugReps.Command);
         }
         else
         {
             var shortExpr = Str.cropString(Str.stripNewLines(expr), 100);
-            Firebug.Console.log(commandPrefix + shortExpr, context, "command",
+            Firebug.Console.log(shortExpr, context, "command",
                 FirebugReps.Command);
         }
 

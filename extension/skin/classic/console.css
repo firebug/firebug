@@ -67,14 +67,21 @@
     display: none;
 }
 
-.logCounter {
-    display: none;
-    padding: 2px 0 2px 5px;
+.logCounter {    
+    padding-left: 3px;
     width: 20px;
+    display: table-cell;
 }
 
-.logCounter[count] {
-    display: table-cell;
+.logRow-group > div > .logCounter,
+.logGroupBody > div > .logCounter,
+.logRow-table > div > .logCounter,
+.logRow-spy > div > .logCounter
+{
+    display: none;
+}
+.logGroupLabel{
+	width:calc(100% - 22px);
 }
 
 .logCounterValue:empty {
@@ -98,25 +105,9 @@
     white-space: pre-wrap;
 }
 
-.logRow-info,
-.logRow-warn,
-.logRow-error,
-.logRow-assert,
-.logRow-warningMessage,
-.logRow-loading,
-.logRow-errorMessage {
+:-moz-any(.logRow) .logCounter {
     background-repeat: no-repeat;
-    background-position: 4px center;
-}
-
-.logRow-info > div > .logContent,
-.logRow-warn > div > .logContent,
-.logRow-error > div > .logContent,
-.logRow-assert > div > .logContent,
-.logRow-warningMessage > div > .logContent,
-.logRow-loading > div > .logContent,
-.logRow-errorMessage > div > .logContent {
-    padding-left: 22px;
+    background-position: 4px 3px;
 }
 
 .logRow-assert,
@@ -152,22 +143,26 @@
     color: #FF0000;
 }
 
-.logRow-info {
+:-moz-any(.logRow-command) .logCounter:not([count]) {
+    background-image: url(chrome://firebug/skin/command.svg);
+}
+
+:-moz-any(.logRow-info) .logCounter:not([count]) {
     background-image: url(chrome://firebug/skin/info.svg);
 }
 
-.logRow-loading {
+:-moz-any(.logRow-loading) .logCounter:not([count]) {
     background-image: url(chrome://firebug/skin/loading.svg);
 }
 
-.logRow-warn,
-.logRow-warningMessage {
+:-moz-any(.logRow-warn,
+          .logRow-warningMessage) .logCounter:not([count]) {
     background-image: url(chrome://firebug/skin/warning.svg);
 }
 
-.logRow-error,
-.logRow-assert,
-.logRow-errorMessage {
+:-moz-any(.logRow-error,
+          .logRow-assert,
+          .logRow-errorMessage) .logCounter:not([count]) {
     background-image: url(chrome://firebug/skin/error.svg);
 }
 

@@ -338,6 +338,14 @@ var TraceConsole =
     {
         prefService.savePrefFile(null);
 
+        var canceled = Cc["@mozilla.org/supports-PRBool;1"].createInstance(Ci.nsISupportsPRBool);
+
+        Services.obs.notifyObservers(canceled, "quit-application-requested", "restart");
+
+        // Somebody canceled the quit request
+        if (canceled.data)
+            return false;
+
         Cc["@mozilla.org/toolkit/app-startup;1"].getService(Ci.nsIAppStartup).
             quit(Ci.nsIAppStartup.eRestart | Ci.nsIAppStartup.eAttemptQuit);
     },

@@ -18,7 +18,7 @@ function runTest()
                 }
 
                 var expectedValue = new RegExp("#element\\s*\\{(.|[(\r\n])*?" +
-                    "-moz-linear-gradient\\(135deg,\\s*#788CFF,\\s*#B4C8FF\\);(.|[(\r\n])*?\\}");
+                    "-moz-linear-gradient\\(135deg,\\s*#788cff,\\s*#b4c8ff\\);(.|[(\r\n])*?\\}");
                 FBTest.waitForClipboard(expectedValue, executeContextMenuCommand,
                     function(copiedValue)
                 {

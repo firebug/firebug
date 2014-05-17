@@ -174,6 +174,8 @@ var Console = Obj.extend(ActivableConsole,
         Trace.sysout("console.processConsoleApiCall", ev);
         var level = ev.level;
         var args = ev.arguments;
+        // In Firefox 30 and below 'styles' does not exist.
+        var styles = ev.styles || [];
 
         var sourceLink = ev.filename ? new SourceLink(ev.filename, ev.lineNumber, "js") : null;
         var handler = Firebug.ConsoleExposed.ConsoleHandler;
@@ -197,7 +199,7 @@ var Console = Obj.extend(ActivableConsole,
             case "info":
             case "warn":
             case "debug":
-                var logArgs = this.convertApiCallArguments(args, ev.styles);
+                var logArgs = this.convertApiCallArguments(args, styles);
                 handler.log(context, logArgs, level, sourceLink);
                 break;
 
