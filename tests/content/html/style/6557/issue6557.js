@@ -11,11 +11,17 @@ function runTest()
         var tasks = new FBTest.TaskList();
 
         var [remotefont, localfont] = win.document.querySelectorAll("#remotefont, #localfont");
+        var iframe = win.document.getElementById("iframe");
+        var iframeLocalFont = iframe.contentWindow.document.getElementById("localfont_iframe");
 
         tasks.push(FBTest.selectElementInHtmlPanel.bind(null, remotefont));
         tasks.push(previewFontFamily, sidePanel, "Konstytucyja", base64Konstytucyja);
 
         tasks.push(FBTest.selectElementInHtmlPanel.bind(null, localfont));
+        tasks.push(previewFontFamily, sidePanel, "DeLarge", base64DeLarge);
+
+        // TODO test for https://code.google.com/p/fbug/issues/detail?id=6557#c91
+        tasks.push(FBTest.selectElementInHtmlPanel.bind(null, iframeLocalFont));
         tasks.push(previewFontFamily, sidePanel, "DeLarge", base64DeLarge);
 
         tasks.run(function()

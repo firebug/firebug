@@ -27,6 +27,7 @@
 
                 <p id="remotefont">I am a remote font</p>
                 <p id="localfont">I am a local font (using data-url)</p>
+                <iframe src="issue6557_iframe.html" style="height:20px;" id="iframe"></iframe>
             </section>
             <section id="description">
                 <h3>Steps to reproduce</h3>
@@ -39,6 +40,9 @@
                     <li>In the style panel, hover "DeLarge" (the value of the font-family property)
                         <br/>&#x21b3; The preview should display a text with the "DeLarge" font</li>
                     </li>
+                    <li>Inspect the paragraph in the iframe, whose text is: <b>"Test from an iframe"</b></li>
+                    <li>In the style panel, hover "DeLarge" (the value of the font-family property)
+                        <br/>&#x21b3; The preview should display a text with the "Gentium italic" font</li>
                 </ol>
             </section>
             <footer>
