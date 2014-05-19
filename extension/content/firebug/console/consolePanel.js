@@ -211,9 +211,26 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
 
         this.showCommandLine(true);
 
-        // Don't steal the focus if the document is not loaded (see issue 6589).
-        if (this.context.window.document.readyState === "complete")
+        // Is true when the user has switched to a different panel.
+        // Is false when they has switched to a different Firefox tab with the same Firebug panel.
+        // Note: is also true when the user opens Firebug for the first time on the webpage
+        // (previousPanelName is undefined in this case).
+        var hasSwitchedPanel = (this.context.panelName !== this.context.previousPanelName);
+
+        // Cover these three cases:
+        // - Opening Firebug should focus Command Line (issue 6620)
+        // - Switching to Console panel without Firebug being focused should focus the Command Line
+        //    (issue 6619)
+        // - The Command Line in detached mode should not steal the focus when switching tabs
+        //    (issue 7465)
+        //
+        // xxxFlorent: FIXME? Opening Firebug twice in detached mode on the same webpage doesn't
+        // give the Focus to the Command Line.
+        if (this.context.window.document.readyState === "complete" &&
+            !(Firebug.isDetached() && !hasSwitchedPanel))
+        {
             CommandLine.focus(this.context);
+        }
 
         this.showToolbarButtons("fbConsoleButtons", true);
 
