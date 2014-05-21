@@ -280,6 +280,22 @@ TabContext.prototype =
 
     destroy: function(state)
     {
+        state.panelState = {};
+
+        // Inherit panelStates that have not been restored yet
+        if (this.persistedState)
+        {
+            for (var panelName in this.persistedState.panelState)
+                state.panelState[panelName] = this.persistedState.panelState[panelName];
+        }
+
+        // Destroy all panels in this context.
+        for (var panelName in this.panelMap)
+        {
+            var panelType = Firebug.getPanelType(panelName);
+            this.destroyPanel(panelType, state);
+        }
+
         // All existing timeouts need to be cleared. This is why it's recommended
         // to always create timeouts through the context object. It ensures that
         // all timeouts and intervals are cleared when the context is destroyed.
@@ -325,22 +341,6 @@ TabContext.prototype =
         // "TypeError: can't access dead object"
         // We should avoid these exceptions (even if they are not representing memory leaks)
         this.unregisterAllListeners();
-
-        state.panelState = {};
-
-        // Inherit panelStates that have not been restored yet
-        if (this.persistedState)
-        {
-            for (var panelName in this.persistedState.panelState)
-                state.panelState[panelName] = this.persistedState.panelState[panelName];
-        }
-
-        // Destroy all panels in this context.
-        for (var panelName in this.panelMap)
-        {
-            var panelType = Firebug.getPanelType(panelName);
-            this.destroyPanel(panelType, state);
-        }
 
         Trace.sysout("tabContext.destroy; " + this.getName() + " set state ", state);
     },
