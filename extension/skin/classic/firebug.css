@@ -21,15 +21,15 @@
 /*************************************************************************************************/
 /* Command Line */
 
-#fbCommandArrow,
 .fbCommandLine {
     font-family: monospace;
     font-size: 10px;
 }
 
 #fbCommandArrow {
-    margin-left: 7px;
-    color: #0000FF;
+    width: 16px;
+    height: 16px;
+    background: url(chrome://firebug/skin/command.svg) no-repeat 3px;
 }
 
 .fbCommandLine {

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5440: Integrate EventBug into Firebug</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script src="jquery-1.5.js"></script>
+        <script>jq15 = jQuery.noConflict(true);</script>
+        <script src="jquery-1.9.js"></script>
+        <script>jq19 = jQuery.noConflict(true);</script>
+        <style>
+            img {
+                margin: 6px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5440">Issue 5440</a>:
+                    Integrate EventBug into Firebug</h1>
+        </header>
+        <div>
+            <div id="test">
+                <span id="testspan" onmouseout="this.style.color = 'black';">span</span>
+                <div id="testdiv">div</div>
+                <code id="testcode">code</code>
+            </div>
+
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug, and enable the Script panel</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Events</em> side panel</li>
+                    <li>Inspect the #testdiv element, and confirm that the Events panel shows the following:
+                    <div><img src="testdiv.png"></div></li>
+                    <li>Inspect the #testspan element, and confirm that the Events panel shows the following:
+                    <div><img src="testspan.png"></div></li>
+                </ol>
+            </section>
+            <footer>Simon Lindholm, simon.lindholm10@gmail.com</footer>
+        </div>
+<script>
+function funA() { alert("a"); }
+var funB = alert.bind(window, "b");
+var funC = function() { this.style.color = "hotpink"; };
+
+// This mimics what library functions usually look like.
+function indirection(where)
+{
+    return function()
+    {
+        return where.apply(this, arguments);
+    };
+}
+document.getElementById("testspan").addEventListener("mouseover", indirection(funC), true);
+
+jq19("#test").on("click", "> div", funA);
+jq19("#test").on("click", funB);
+jq15("#test").live("click", funA);
+jq15("#test").bind("click", funB);
+
+document.getElementById("testcode").addEventListener("click", {
+    handleEvent: function() { alert("hi"); }
+});
+document.getElementById("testcode").addEventListener("mousedown", {}); // invalid
+document.getElementById("testcode").addEventListener("mouseup", {
+    handleEvent: "invalid"
+});
+document.getElementById("testcode").addEventListener("mouseup", function(msg) {
+    alert(msg);
+}.bind(null, "hi"));
+</script>
+    </body>
+</html>

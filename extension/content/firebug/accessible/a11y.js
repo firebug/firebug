@@ -41,6 +41,7 @@ Firebug.A11yModel = Obj.extend(Module,
         this.onNavigablePanelKeyPress = Obj.bind(this.onNavigablePanelKeyPress, this);
         this.onConsoleMouseDown = Obj.bind(this.onConsoleMouseDown, this);
         this.onLayoutKeyPress = Obj.bind(this.onLayoutKeyPress, this);
+        this.onEventsKeyPress = Obj.bind(this.onEventsKeyPress, this);
         this.onCSSKeyPress = Obj.bind(this.onCSSKeyPress, this);
         this.onCSSMouseDown = Obj.bind(this.onCSSMouseDown, this);
         this.onHTMLKeyPress = Obj.bind(this.onHTMLKeyPress, this);
@@ -316,6 +317,12 @@ Firebug.A11yModel = Obj.extend(Module,
                 Events.addEventListener(panel.panelNode, "blur", this.onNetBlur, true);
                 Events.addEventListener(panel.panelNode, "mousedown", this.onNetMouseDown, false);
                 break;
+
+            case "html-events":
+                panelA11y.manageFocus = true;
+                Events.addEventListener(panel.panelNode, "keypress", this.onEventsKeyPress, false);
+                Events.addEventListener(panel.panelNode, "focus", this.onPanelFocus, true);
+                break;
         }
     },
 
@@ -348,7 +355,6 @@ Firebug.A11yModel = Obj.extend(Module,
                 Events.removeEventListener(panel.panelNode, "keypress", this.onCSSKeyPress, false);
                 Events.removeEventListener(panel.panelNode, "mousedown", this.onCSSMouseDown, false);
                 Events.removeEventListener(panel.panelNode, "focus", this.onPanelFocus, true);
-                Events.removeEventListener(panel.panelNode, "blur", this.onPanelBlur, true);
                 Events.removeEventListener(panel.panelNode, "contextmenu", this.onCSSPanelContextMenu,
                     false);
                 break;
@@ -373,6 +379,12 @@ Firebug.A11yModel = Obj.extend(Module,
                 Events.removeEventListener(panel.panelNode, "focus", this.onNetFocus, true);
                 Events.removeEventListener(panel.panelNode, "blur", this.onNetBlur, true);
                 Events.removeEventListener(panel.panelNode, "mousedown", this.onNetMouseDown, false);
+                break;
+
+            case "html-events":
+                Events.removeEventListener(panel.panelNode, "keypress", this.onEventsKeyPress,
+                    false);
+                Events.removeEventListener(panel.panelNode, "focus", this.onPanelFocus, true);
                 break;
         }
     },
@@ -1383,6 +1395,40 @@ Firebug.A11yModel = Obj.extend(Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Events Panel
+
+    modifyEventsRow: function(panel, row, inTabOrder)
+    {
+        var panelA11y = this.getPanelA11y(panel);
+        if (!panelA11y || !row)
+            return;
+
+        if (this.isOuterFocusRow(row, true))
+            this.makeFocusable(row, inTabOrder);
+    },
+
+    onEventsKeyPress: function(event)
+    {
+        var target = event.target;
+        var keyCode = event.keyCode || (event.type == "keypress" ? event.charCode : null);
+        if (!this.isFocusRow(target) || event.altKey)
+            return;
+
+        var panel = Firebug.getElementPanel(target);
+        var panelA11y = this.getPanelA11y(panel);
+        if (!panelA11y)
+            return;
+
+        if (keyCode === KeyEvent.DOM_VK_SPACE && target.classList.contains("listenerLineGroup"))
+        {
+            panel.toggleDisableRow(target);
+            Events.cancelEvent(event);
+        }
+
+        this.onNavigablePanelKeyPress(event);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // CSS Panel
 
     onCSSKeyPress: function(event)
@@ -1585,8 +1631,8 @@ Firebug.A11yModel = Obj.extend(Module,
         //no refocus needed, just make first rule the panel's tab stop
         row = rootNode.getElementsByClassName("focusRow").item(0);
         this.modifyPanelRow(panel, row, true);
-        return;
     },
+
     //applies a11y changes (keyboard and screen reader related) to an individual row
     //To improve performance, this only happens when absolutely necessary, e.g. when the user navigates to the row in question
 
@@ -1631,7 +1677,6 @@ Firebug.A11yModel = Obj.extend(Module,
                     row.textContent);
             }
         }
-        return;
     },
 
     onCSSPanelContextMenu: function(event)
@@ -2575,7 +2620,6 @@ Firebug.A11yModel = Obj.extend(Module,
                 }
             }, this);
         }
-        else return;
     },
 
     getNetAncestorRow: function(elem, useSubRow)
@@ -2826,6 +2870,10 @@ Firebug.A11yModel = Obj.extend(Module,
             case "net":
                 this.modifyNetRow(panel, row, inTabOrder);
                 break;
+
+            case "html-events":
+                this.modifyEventsRow(panel, row, inTabOrder);
+                break;
         }
         Css.setClass(row, "a11yModified");
     },
@@ -2868,7 +2916,7 @@ Firebug.A11yModel = Obj.extend(Module,
         var target = event.target;
         if (this.isTabWorthy(target) && target !== this.getPanelTabStop(panel))
             this.setPanelTabStop(panel, target);
-        if (target.getAttribute("role").match(/gridcell|rowheader|columnheader/))
+        if (/gridcell|rowheader|columnheader/.test(target.getAttribute("role")))
         {
             var cell = (target.nodeName.toLowerCase() == "td" ||
                 (target.nodeName.toLowerCase() == "th" ? target : target.parentNode));
@@ -2908,9 +2956,8 @@ Firebug.A11yModel = Obj.extend(Module,
         if (Dom.isElement(elem) && (noVisiCheck || this.isVisibleByStyle(elem)))
         {
             Firebug.currentContext.setTimeout(function() {
-                    elem.focus();
-                }, needsMoreTime ? 500 : 10
-            );
+                elem.focus();
+            }, needsMoreTime ? 500 : 10);
         }
     },
 

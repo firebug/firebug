@@ -1076,6 +1076,19 @@ FirebugReps.Element = domplate(Rep,
         }
     },
 
+    // xxxHonza: Used by FireQuery 1.4.1
+    getSelectorClass: function(elt)
+    {
+        try
+        {
+            return elt.classList.length > 0 ? ("." + elt.classList[0]) : "";
+        }
+        catch (err)
+        {
+            return "";
+        }
+    },
+
     attrIterator: function(elt)
     {
         var attrs = [];
