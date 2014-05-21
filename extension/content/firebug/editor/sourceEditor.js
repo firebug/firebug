@@ -552,6 +552,13 @@ SourceEditor.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    clearHistory: function()
+    {
+        this.editorObject.clearHistory();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // CodeMirror internals
 
     getDocument: function()
