@@ -111,12 +111,13 @@ code {
 }
 
 code.key, kbd {
-    background-color: #F9F9F9;
-    border: 1px solid gray;
-    border-radius: 4px 4px 4px 4px;
+    background-color: #F0F0F0;
+    border: 1px solid #B4B4B4;
+    border-radius: 4px;
     font-family: "Trebuchet MS",helvetica,sans-serif;
     line-height: 1.8em;
-    padding: 2px 4px;
+    padding: 0 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(255, 255, 255, 0.7) inset;
 }
 
 code.result {
