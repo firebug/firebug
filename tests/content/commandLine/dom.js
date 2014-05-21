@@ -57,7 +57,7 @@ function runTest()
 
                 // Assignment
                 taskList.push(executeAndVerify, "var blah = 'oink';",
-                    ">>> var blah = 'oink';",
+                    "var blah = 'oink';",
                     "span", "objectBox objectBox-text");
 
                 taskList.push(executeAndVerify, "blah", "\"oink\"",

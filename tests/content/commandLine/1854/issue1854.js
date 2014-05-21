@@ -17,8 +17,8 @@ function runTest()
                     var config = {tagName: "div", classes: "logRow logRow-command"};
                     FBTest.waitForDisplayedElement("console", config, function(row)
                     {
-                        FBTest.compare(">>> debug(showOutput)", row.textContent,
-                            "The command line should display: >>> debug(showOutput)");
+                        FBTest.compare("debug(showOutput)", row.textContent,
+                            "The command line should display: debug(showOutput)");
 
                         FBTest.waitForBreakpoint(url, 11, function()
                         {
