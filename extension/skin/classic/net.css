@@ -5,19 +5,24 @@
 }
 
 /*************************************************************************************************/
+/* Filtering */
 
-.hideCategory-undefined .category-undefined,
-.hideCategory-html .category-html,
-.hideCategory-css .category-css,
-.hideCategory-js .category-js,
-.hideCategory-image .category-image,
-.hideCategory-xhr .category-xhr,
-.hideCategory-plugin .category-plugin,
-.hideCategory-media .category-media,
-.hideCategory-font .category-font,
-.hideCategory-txt .category-txt,
-.hideCategory-bin .category-bin {
-    display: none !important;
+.filtering .netRow:not(.netHeaderRow):not(.netSummaryRow) {
+    display: none;
+}
+
+.showCategory-undefined .category-undefined,
+.showCategory-html .category-html,
+.showCategory-css .category-css,
+.showCategory-js .category-js,
+.showCategory-image .category-image,
+.showCategory-xhr .category-xhr,
+.showCategory-plugin .category-plugin,
+.showCategory-media .category-media,
+.showCategory-font .category-font,
+.showCategory-txt .category-txt,
+.showCategory-bin .category-bin {
+    display: table-row !important;
 }
 
 /*************************************************************************************************/

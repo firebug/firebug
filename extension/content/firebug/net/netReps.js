@@ -410,7 +410,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Rep, new EventSource(),
 {
     fileTag:
         FOR("file", "$files",
-            TR({"class": "netRow $file.file|getCategory focusRow outerFocusRow",
+            TR({"class": "netRow $file.file|getCategories focusRow outerFocusRow",
                 onclick: "$onClick", "role": "row", "aria-expanded": "false",
                 $hasHeaders: "$file.file|hasRequestHeaders",
                 $history: "$file.file.history",
@@ -474,7 +474,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Rep, new EventSource(),
         ),
 
     netInfoTag:
-        TR({"class": "netInfoRow $file|getCategory outerFocusRow", "role" : "row"},
+        TR({"class": "netInfoRow $file|getCategories outerFocusRow", "role" : "row"},
             TD({"class": "sourceLine netRowHeader"}),
             TD({"class": "netInfoCol", colspan: 8, "role" : "gridcell"})
         ),
@@ -602,11 +602,11 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Rep, new EventSource(),
         }
     },
 
-    getCategory: function(file)
+    getCategories: function(file)
     {
-        var category = NetUtils.getFileCategory(file);
-        if (category)
-            return "category-" + category;
+        var categories = NetUtils.getFileCategories(file);
+        if (categories.length !== 0)
+            return categories.map((category) => "category-" + category).join(" ");
 
         return "category-undefined";
     },
@@ -952,7 +952,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Rep, new EventSource(),
                 return headers[i].value == 0;
         }
 
-        return file.category in NetUtils.binaryFileCategories || file.responseText == "";
+        return (file.categories && file.categories.some((category) => category in NetUtils.binaryFileCategories)) ||
+            file.responseText == "";
     },
 
     hideHtml: function(file)
@@ -1147,7 +1148,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Rep, new EventSource(),
                 FBTrace.sysout("netInfoResponseTab", {netInfoBox: netInfoBox, file: file});
             if (!netInfoBox.responsePresented)
             {
-                if (file.category == "image")
+                if (file.categories && file.categories.indexOf("image") !== -1)
                 {
                     netInfoBox.responsePresented = true;
 
@@ -1157,7 +1158,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Rep, new EventSource(),
                     Dom.clearNode(responseTextBox);
                     responseTextBox.appendChild(responseImage, responseTextBox);
                 }
-                else if (!(NetUtils.binaryCategoryMap.hasOwnProperty(file.category)))
+                else if (!file.categories || !file.categories.some((category) => category in NetUtils.binaryCategoryMap))
                 {
                     this.setResponseText(file, netInfoBox, responseTextBox, context);
                 }

@@ -367,24 +367,45 @@ var NetUtils =
     },
 
     /**
-     * Returns a category for specific request (file). The logic is as follows:
-     * 1) Use file-extension to guess the mime type. This is prefered since
-     *    mime-types in HTTP requests are often wrong.
-     *    This part is based on mimeExtensionMap map.
-     * 2) If the file extension is missing or unknown, try to get the mime-type
+     * Returns the most appropriate category for a specific request (file).
+     * The logic is as follows:
+     * 1) If the request is an XHR, return 'xhr' as category
+     * 2) Otherwise use the file extension to guess the MIME type.
+     *    This is prefered since MIME types in HTTP requests are often wrong.
+     *    This part is based on the 'mimeExtensionMap' map.
+     * 3) If the file extension is missing or unknown, try to get the MIME type
      *    from the HTTP request object.
-     * 3) If there is still no mime-type, return empty category name.
-     * 4) Use the mime-type and look up the right category.
-     *    This part is based on mimeCategoryMap map.
+     * 4) If there is still no MIME type, return an empty category name.
+     * 5) Use the MIME type and look up the right category.
+     *    This part is based on the 'mimeCategoryMap' map.
      */
     getFileCategory: function(file)
     {
-        if (file.category)
-            return file.category;
+        return this.getFileCategories(file)[0];
+    },
+    
+    /**
+     * Returns the categories for a specific request (file).
+     * The logic is as follows:
+     * 1) If the request is an XHR, add 'xhr' as category
+     * 2) Use the file extension to guess the MIME type.
+     *    This is prefered since MIME types in HTTP requests are often wrong.
+     *    This part is based on the 'mimeExtensionMap' map.
+     * 3) If the file extension is missing or unknown, try to get the MIME type
+     *    from the HTTP request object.
+     * 4) If there is still no MIME type, return an empty category name.
+     * 5) Use the MIME type and look up the right category.
+     *    This part is based on the 'mimeCategoryMap' map.
+     */
+    getFileCategories: function(file)
+    {
+        if (file.categories)
+            return file.categories;
 
+        var categories = [];
         // All XHRs have its own category.
         if (file.isXHR)
-            return file.category = "xhr";
+            categories.push("xhr");
 
         // Guess mime-type according to the file extension. Using file extension
         // is prefered way since mime-types in HTTP requests are often wrong.
@@ -397,10 +418,12 @@ var NetUtils =
 
         // No mime-type, no category.
         if (!mimeType)
-            return "";
+            return categories;
 
         // Finally, get the category according to the mime type.
-        return file.category = mimeCategoryMap[mimeType];
+        categories.push(mimeCategoryMap[mimeType]);
+
+        return file.categories = categories;
     },
 
     getCategory: function(mimeType)
