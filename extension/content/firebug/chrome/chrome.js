@@ -953,6 +953,9 @@ var FirebugChrome =
         }
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Status Path
+
     clearStatusPath: function()
     {
         StatusPath.clear();
@@ -962,6 +965,14 @@ var FirebugChrome =
     {
         StatusPath.update();
     },
+
+    // xxxHonza: used by FireDiff 1.2.1
+    getPanelStatusElements: function()
+    {
+        return this.getElementById("fbPanelStatus");
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     toggleOrient: function(preferredValue)
     {

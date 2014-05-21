@@ -35,8 +35,8 @@ function runTest()
                     FBTest.waitForDisplayedElement("console", config, function(row)
                     {
                         var rows = panelNode.getElementsByClassName("logRow");
-                        FBTest.compare(">>> document.cookie", rows[rows.length - 3].textContent,
-                            "The console should display: >>> document.cookie");
+                        FBTest.compare("document.cookie", rows[rows.length - 3].textContent,
+                            "The console should display: document.cookie");
                         FBTest.compare(new RegExp("Name\\\s*Value\\\s*Raw Value\\\s*Domain\\\s*" +
                                 "Raw Size\\\s*Size\\\s*Path\\\s*Expires\\\s*Max. Age\\\s*HttpOnly\\\s*" +
                                 "Security\\\s*issue4979\\\s*value\\\s*value\\\s*14 B\\\s*14 B"),

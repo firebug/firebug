@@ -26,8 +26,8 @@ function createBreakpoint(callback)
     var config = {tagName: "div", classes: "logRow logRow-command"};
     FBTest.waitForDisplayedElement("console", config, function(row)
     {
-        FBTest.compare(">>> debug(onExecuteTest)", row.textContent,
-            "The command line should display: >>> debug(onExecuteTest)");
+        FBTest.compare("debug(onExecuteTest)", row.textContent,
+            "The command line should display: debug(onExecuteTest)");
         callback();
     });
 
