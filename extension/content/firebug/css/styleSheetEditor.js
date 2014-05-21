@@ -75,6 +75,10 @@ StyleSheetEditor.prototype = domplate(BaseEditor,
         // match CSSModule.getEditorOptionKey
         var command = Firebug.chrome.$("cmd_firebug_togglecssEditMode");
         command.setAttribute("checked", true);
+
+        // Clear undo history in the editor (Ctrl+Z should do nothing at the
+        // beginning, see also issue 7382);
+        this.editor.clearHistory();
     },
 
     hide: function()
