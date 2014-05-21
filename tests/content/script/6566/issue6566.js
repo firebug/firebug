@@ -26,7 +26,7 @@ function monitorFunction(callback)
     var config = {tagName: "div", classes: "logRow logRow-command"};
     FBTest.waitForDisplayedElement("console", config, function(row)
     {
-        FBTest.compare(">>> monitor(onExecuteTest)", row.textContent, "The output must match");
+        FBTest.compare("monitor(onExecuteTest)", row.textContent, "The output must match");
         callback();
     });
 
