@@ -384,9 +384,12 @@ Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.storeSplitLines: " + url, lines);
 
-        var currLines = this.cache[url];
+        var currLines = this.cache.get(url);
         if (!currLines)
-            currLines = this.cache[url] = [];
+        {
+            currLines = [];
+            this.cache.set(url, currLines);
+        }
 
         // Join the last line with the new first one to make the source code
         // lines properly formatted...
@@ -400,9 +403,9 @@ Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
 
         // Append new lines (if any) into the array for specified url.
         if (lines.length)
-            this.cache[url] = currLines.concat(lines);
+            this.cache.set(url, currLines.concat(lines));
 
-        return this.cache[url];
+        return this.cache.get(url);
     },
 
     /**
