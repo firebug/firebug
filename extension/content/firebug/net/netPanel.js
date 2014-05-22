@@ -387,19 +387,16 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
             }
         );
 
-        file.categories.forEach((category) =>
+        if (file.categories.some((category) => category in NetUtils.textFileCategories))
         {
-            if (category in NetUtils.textFileCategories)
-            {
-                items.push(
-                    {
-                        label: "CopyResponse",
-                        tooltiptext: "net.tip.Copy_Response",
-                        command: Obj.bindFixed(this.copyResponse, this, file)
-                    }
-                );
-            }
-        });
+            items.push(
+                {
+                    label: "CopyResponse",
+                    tooltiptext: "net.tip.Copy_Response",
+                    command: Obj.bindFixed(this.copyResponse, this, file)
+                }
+            );
+        }
 
         items.push(
             {
@@ -419,19 +416,16 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
             }
         );
 
-        file.categories.forEach((category) =>
+        if (file.categories.some((category) => category in NetUtils.textFileCategories))
         {
-            if (category in NetUtils.textFileCategories)
-            {
-                items.push(
-                    {
-                        label: "Open_Response_In_New_Tab",
-                        tooltiptext: "net.tip.Open_Response_In_New_Tab",
-                        command: Obj.bindFixed(NetUtils.openResponseInTab, this, file)
-                    }
-                );
-            }
-        });
+            items.push(
+                {
+                    label: "Open_Response_In_New_Tab",
+                    tooltiptext: "net.tip.Open_Response_In_New_Tab",
+                    command: Obj.bindFixed(NetUtils.openResponseInTab, this, file)
+                }
+            );
+        }
 
         items.push("-");
 
@@ -1452,15 +1446,16 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
         this.filterCategories = filterCategories;
 
         var panelNode = this.panelNode;
+        var filtering = filterCategories.join(" ") !== "all";
 
-        if (filterCategories.join(" ") !== "all")
+        if (filtering)
             panelNode.classList.add("filtering");
         else
             panelNode.classList.remove("filtering");
 
         for (var category in NetUtils.fileCategories)
         {
-            if (filterCategories.join(" ") !== "all" && filterCategories.indexOf(category) !== -1)
+            if (filtering && filterCategories.indexOf(category) !== -1)
                 panelNode.classList.add("showCategory-" + category);
             else
                 panelNode.classList.remove("showCategory-" + category);

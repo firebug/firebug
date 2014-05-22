@@ -583,10 +583,6 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Rep, new EventSource(),
             if (!netInfoBox.selectedTab)
                 Firebug.NetMonitor.NetInfoBody.selectTabByName(netInfoBox, "Headers");
 
-            var category = NetUtils.getFileCategory(row.repObject);
-            if (category)
-                Css.setClass(netInfoBox, "category-" + category);
-
             row.setAttribute("aria-expanded", "true");
         }
         else
