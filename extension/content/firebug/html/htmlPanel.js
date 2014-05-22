@@ -961,6 +961,10 @@ HTMLPanel.prototype = Obj.extend(WalkingPanel,
             editor.innerEditMode = true;
         }
 
+        // Make sure the Inspector highlighter markup is not part
+        // of the edited HTML (see also issue 7034).
+        Inspector.highlightObject(null);
+
         var html = editor.innerEditMode ? node.innerHTML : Xml.getElementHTML(node);
         html = Str.escapeForHtmlEditor(html);
 
