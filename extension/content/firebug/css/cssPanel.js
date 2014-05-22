@@ -99,6 +99,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         // Create an updater for asynchronous update (watching embedded iframe loads).
         var callback = this.updateDefaultLocation.bind(this);
         this.updater = new CSSPanelUpdater(this.context, callback);
+
+        CSSModule.addListener(this);
     },
 
     destroy: function(state)
@@ -111,6 +113,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
         if (this.updater)
             this.updater.destroy();
+
+        CSSModule.removeListener(this);
 
         Panel.destroy.apply(this, arguments);
     },
@@ -208,6 +212,23 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 this.updateDefaultLocation();
             }
         }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // CSSModule Listener
+
+    onCSSInsertRule: function(styleSheet, cssText, ruleIndex)
+    {
+        // Make sure toolbar buttons and location list are properly updated
+        // if a new stylesheet has been just appended (see also issue 6931).
+        this.showToolbarButtons("fbCSSButtons", true);
+        this.showToolbarButtons("fbLocationSeparator", false);
+        this.showToolbarButtons("fbLocationButtons", true);
+        this.showToolbarButtons("fbLocationList", true);
+
+        CSSModule.updateEditButton();
+
+        Firebug.chrome.syncLocationList();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
