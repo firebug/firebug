@@ -305,7 +305,12 @@ TabClient.prototype = Obj.extend(new EventSource(),
         var threadActorObj = DebuggerLib.getThreadActor(this.browser);
         threadActorObj.global = this.window.wrappedJSObject;
 
-        this.client.attachThread(this.threadActor, this.onThreadAttached.bind(this));
+        // xxxHonza: The useSourceMaps options might be used by issue 5765 
+        var options = {
+            //useSourceMaps: true
+        };
+
+        this.tabClient.attachThread(options, this.onThreadAttached.bind(this));
     },
 
     onThreadAttached: function(response, threadClient)
