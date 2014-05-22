@@ -219,6 +219,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
     onCSSInsertRule: function(styleSheet, cssText, ruleIndex)
     {
+        if (!this.isSelected())
+            return;
+
         // Make sure toolbar buttons and location list are properly updated
         // if a new stylesheet has been just appended (see also issue 6931).
         this.showToolbarButtons("fbCSSButtons", true);
