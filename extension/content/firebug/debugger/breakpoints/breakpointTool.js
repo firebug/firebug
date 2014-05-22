@@ -180,6 +180,41 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         this.dispatch("onBreakpointModified", [this.context, bp]);
     },
 
+    onModifyCondition: function(bp)
+    {
+        var client = this.getBreakpointClient(bp.href, bp.lineNo);
+
+        if (!client)
+        {
+            TraceError.sysout("breakpointTool.onModifyCondition; ERROR no client!");
+            return;
+        }
+
+        var condition = bp.condition || "";
+
+        Trace.sysout("breakpointTool.onModifyCondition; set bp condition: " +
+            condition, bp);
+
+        // xxxHonza: BreakpointClient.setCondition() has been introduced in
+        // Firefox 31 [Fx31], and so use internal implementation cloned from
+        // Firefox 32 in that case.
+        var set;
+        if (client.setCondition)
+            set = client.setCondition.bind(client, this.context.activeThread, bp.condition);
+        else
+            set = setCondition.bind(this, this.context, client, bp.condition);
+
+        set().then((newBpClient) =>
+        {
+            Trace.sysout("breakpointTool.onModifyCondition; Done", newBpClient);
+
+            this.removeBreakpointClient(bp.href, bp.lineNo);
+            this.context.breakpointClients.push(newBpClient);
+
+            this.dispatch("onBreakpointModified", [this.context, bp]);
+        });
+    },
+
     onRemoveAllBreakpoints: function(bps)
     {
         Trace.sysout("breakpointTool.onRemoveAllBreakpoints; (" + bps.length + ")", bps);
@@ -317,9 +352,12 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
 
         function doSetBreakpoint(callback)
         {
+            var bp = BreakpointStore.findBreakpoint(url, lineNumber);
+
             var location = {
                 url: url,
-                line: lineNumber + 1
+                line: lineNumber + 1,
+                condition: bp.condition,
             };
 
             Trace.sysout("breakpointTool.doSetBreakpoint; (" + lineNumber + ")", location);
@@ -684,6 +722,57 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         //return JSDebugger.fbs.getBreakpointCondition(url, lineNumber);
     },
 });
+
+// ********************************************************************************************* //
+// Set Condition
+
+/**
+ * Set the condition of this breakpoint.
+ * xxxHonza: cloned from dbg-client.jsm and modifed [Fx32].
+ */
+function setCondition(context, bpClient, aCondition)
+{
+    let threadClient = context.activeThread;
+    let root = bpClient._client.mainRoot;
+    let deferred = context.defer();
+
+    if (root.traits.conditionalBreakpoints) {
+      let info = {
+        url: bpClient.location.url,
+        line: bpClient.location.line,
+        column: bpClient.location.column,
+        condition: aCondition
+      };
+
+      // Remove the current breakpoint and add a new one with the
+      // condition.
+      bpClient.remove(aResponse => {
+        if (aResponse && aResponse.error) {
+          deferred.reject(aResponse);
+          return;
+        }
+
+        threadClient.setBreakpoint(info, (aResponse, aNewBreakpoint) => {
+          if (aResponse && aResponse.error) {
+            deferred.reject(aResponse);
+          } else {
+            deferred.resolve(aNewBreakpoint);
+          }
+        });
+      });
+    } else {
+      // The property shouldn't even exist if the condition is blank
+      if(aCondition === "") {
+        delete bpClient.conditionalExpression;
+      }
+      else {
+        bpClient.conditionalExpression = aCondition;
+      }
+      deferred.resolve(bpClient);
+    }
+
+    return deferred.promise;
+}
 
 // ********************************************************************************************* //
 // Registration
