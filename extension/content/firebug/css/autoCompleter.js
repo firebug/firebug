@@ -29,7 +29,7 @@ var CSSAutoCompleter =
         if (!cycle && expr)
         {
             // Make some good default suggestions.
-            var list = ["color", "clear", "display", "float", "overflow",
+            var list = ["color", "clear", "display", "float", "margin", "overflow", "padding",
                 "-moz-appearance", "border", "background", "background-color"];
             for (var i = 0; i < list.length; ++i)
             {
