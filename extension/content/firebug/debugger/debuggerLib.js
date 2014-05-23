@@ -47,9 +47,8 @@ DebuggerLib.unwrapDebuggeeValue = function(obj)
 };
 
 /**
- * Gets or creates the debuggee value of the given global object (the
- * context's current global if none specified), within the inactive debugger.
- * This is mostly useful for evaluating code in that global.
+ * Gets or creates the debuggee value of the given global object, within the
+ * inactive debugger. This is mostly useful for evaluating code in that global.
  *
  * @param {*} context The Firebug context
  * @param {Window} global The global object
@@ -58,8 +57,6 @@ DebuggerLib.unwrapDebuggeeValue = function(obj)
  */
 DebuggerLib.getInactiveDebuggeeGlobal = function(context, global)
 {
-    global = global || context.getCurrentGlobal();
-
     if (!context.inactiveDbgGlobalWeakMap)
         context.inactiveDbgGlobalWeakMap = new WeakMap();
     var dbgGlobal = context.inactiveDbgGlobalWeakMap.get(global.document);
@@ -202,7 +199,7 @@ DebuggerLib.getThreadDebugger = function(context)
 
 /**
  * Returns the debugger's Debugger.Object associated with a frame within the
- * passed context. If no frame is specified, the context's current global is used.
+ * passed context.
  *
  * @param {*} context
  * @param {Window} global
@@ -217,7 +214,6 @@ DebuggerLib.getThreadDebuggeeGlobalForContext = function(context, global)
         return null;
 
     var dbgGlobal = threadActor.globalDebugObject;
-    global = global || context.getCurrentGlobal();
     return dbgGlobal.makeDebuggeeValue(global).unwrap().global;
 };
 
@@ -530,21 +526,21 @@ DebuggerLib.getFrameResultObject = function(context)
  */
 DebuggerLib.breakNow = function(context)
 {
-    var actor = DebuggerLib.getThreadActor(context.browser);
-    var frame = actor.dbg.getNewestFrame();
+    var dbg = DebuggerLib.getThreadDebugger(context);
+    var frame = dbg.getNewestFrame();
     if (frame)
     {
         return frame.eval("debugger;");
     }
     else
     {
-        // getInactiveDebuggeeGlobal uses the current global (i.e. stopped frame, current
-        // iframe or top level window associated with the context object).
-        // There can be cases (e.g. BON XHR) where the current window is an iframe, but
-        // the event the debugger breaks on - comes from top level window (or vice versa).
-        // For now there are not known problems, but we might want to use the second
-        // argument of the getInactiveDebuggeeGlobal() and pass explicit global object.
-        var dbgGlobal = this.getInactiveDebuggeeGlobal(context);
+        // We use the current global (i.e. stopped frame, current iframe or top level window
+        // associated with the context object). There can be cases (e.g. BON XHR) where
+        // the current window is an iframe, but the event the debugger breaks on - comes
+        // from top level window (or vice versa).  For now there are no known problems,
+        // but we might want to change what global to use here.
+        var global = context.getCurrentGlobal();
+        var dbgGlobal = this.getInactiveDebuggeeGlobal(context, global);
         return dbgGlobal.evalInGlobal("debugger;");
     }
 };
