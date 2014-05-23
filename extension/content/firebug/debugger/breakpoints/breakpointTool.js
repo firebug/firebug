@@ -357,7 +357,7 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             var location = {
                 url: url,
                 line: lineNumber + 1,
-                condition: bp.condition,
+                condition: bp ? bp.condition : null,
             };
 
             Trace.sysout("breakpointTool.doSetBreakpoint; (" + lineNumber + ")", location);
