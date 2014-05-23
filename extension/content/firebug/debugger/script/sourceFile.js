@@ -17,6 +17,7 @@ function(Firebug, FBTrace, Events, Str, Url, DebuggerLib, SourceLink, NetUtils) 
 // ********************************************************************************************* //
 // Constants
 
+var Cu = Components.utils;
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
@@ -223,7 +224,8 @@ SourceFile.getSourceFileByUrl = function(context, url)
 
 SourceFile.findScriptForFunctionInContext = function(context, fn)
 {
-    var dbgGlobal = DebuggerLib.getThreadDebuggeeGlobalForContext(context);
+    var global = Cu.getGlobalForObject(fn);
+    var dbgGlobal = DebuggerLib.getThreadDebuggeeGlobalForContext(context, global);
     if (!dbgGlobal)
     {
         Trace.sysout("sourceFile.findScriptForFunctionInContext; no debugger");
