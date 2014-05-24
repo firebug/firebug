@@ -47,8 +47,8 @@ function runTest()
                     });
 
                     // Wait for a 300 milliseconds to make sure the debugger
-                    // doesn't break on the condition editor when it doesn't
-                    // meet the condition.
+                    // doesn't break on the conditional breakkpoint when it
+                    // doesn't meet the condition.
                     var timeOut = setTimeout(() =>
                     {
                         FBTest.ok(!debuggerBreakIn, "The debugger must not break at the " +
