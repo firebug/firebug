@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 7470: Breakpoint conditions are disregarded</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+            function logIt() {
+                console.log('A call to console.log() API');
+            };
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1>
+                <a href="https://code.google.com/p/fbug/issues/detail?id=7470">Issue 7470</a>: Breakpoint conditions are disregarded.
+            </h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>Script</em> panel and enable it.</li>
+                    <li>Right click on the breakpoint column at line #9
+                        (<code> console.log('A call to console.log() API'); </code>)
+                        <br />
+                        <span class="ok">=> The condition editor should appear.</span>
+                    </li>
+                    <li>Type <em>false</em> in the editor and hit the enter/return key.</li>
+                    <li>Click the <em>log It</em> button
+                        <button id="btnLogIt" onclick="logIt();">Log it</button>
+                        <br />
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The conditional breakpoint, at line #9, must <b>not</b> get hit.</li>
+                </ul>
+            </section>
+            <footer>@farshidbeheshti, farshid.beheshti@gmail.com</footer>
+        </div>
+    </body>
+</html>

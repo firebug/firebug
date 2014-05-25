@@ -357,7 +357,7 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             var location = {
                 url: url,
                 line: lineNumber + 1,
-                condition: bp.condition,
+                condition: bp ? bp.condition : null,
             };
 
             Trace.sysout("breakpointTool.doSetBreakpoint; (" + lineNumber + ")", location);
@@ -730,45 +730,48 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
  * Set the condition of this breakpoint.
  * xxxHonza: cloned from dbg-client.jsm and modifed [Fx32].
  */
-function setCondition(context, bpClient, aCondition)
+function setCondition(context, bpClient, condition)
 {
-    let threadClient = context.activeThread;
-    let root = bpClient._client.mainRoot;
-    let deferred = context.defer();
+    var threadClient = context.activeThread;
+    var root = bpClient._client.mainRoot;
+    var deferred = context.defer();
 
-    if (root.traits.conditionalBreakpoints) {
-      let info = {
-        url: bpClient.location.url,
-        line: bpClient.location.line,
-        column: bpClient.location.column,
-        condition: aCondition
-      };
+    if (root.traits.conditionalBreakpoints)
+    {
+        var info = {
+            url: bpClient.location.url,
+            line: bpClient.location.line,
+            column: bpClient.location.column,
+            condition: condition
+        };
 
-      // Remove the current breakpoint and add a new one with the
-      // condition.
-      bpClient.remove(aResponse => {
-        if (aResponse && aResponse.error) {
-          deferred.reject(aResponse);
-          return;
-        }
+        // Remove the current breakpoint and add a new one with the condition.
+        bpClient.remove((response) =>
+        {
+            if (response && response.error)
+            {
+                deferred.reject(response);
+                return;
+            }
 
-        threadClient.setBreakpoint(info, (aResponse, aNewBreakpoint) => {
-          if (aResponse && aResponse.error) {
-            deferred.reject(aResponse);
-          } else {
-            deferred.resolve(aNewBreakpoint);
-          }
+            threadClient.setBreakpoint(info, (response, newBreakpoint) =>
+            {
+                if (response && response.error)
+                    deferred.reject(response);
+                else
+                    deferred.resolve(newBreakpoint);
+            });
         });
-      });
-    } else {
-      // The property shouldn't even exist if the condition is blank
-      if(aCondition === "") {
-        delete bpClient.conditionalExpression;
-      }
-      else {
-        bpClient.conditionalExpression = aCondition;
-      }
-      deferred.resolve(bpClient);
+    }
+    else
+    {
+        // The property shouldn't even exist if the condition is blank
+        if (condition === "")
+            delete bpClient.conditionalExpression;
+        else
+            bpClient.conditionalExpression = condition;
+
+        deferred.resolve(bpClient);
     }
 
     return deferred.promise;
