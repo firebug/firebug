@@ -169,7 +169,7 @@ var CSSInfoTip = Obj.extend(InfoTip,
 
         var data = "";
         // Note: In case of Data URL, don't attempt to get the content from the cache.
-        if (fontObject && !Url.isDataURL(fontObject.URI))
+        if (fontObject && fontObject.URI && !Url.isDataURL(fontObject.URI))
             data = context.sourceCache.loadRaw(fontObject.URI);
 
         styleNode.textContent = getFontFaceCSS(fontObject || fontName, data);
