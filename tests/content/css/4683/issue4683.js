@@ -24,12 +24,12 @@ function runTest()
 
 function verdanaHover(callback)
 {
-    executeTest("#fontFamilyTest1", "Verdana", callback);
+    executeTest("#fontFamilyTest1", "\"Verdana\"", callback);
 }
 
 function comicSansMSHover(callback)
 {
-    executeTest("#fontFamilyTest2", "Courier New", callback);
+    executeTest("#fontFamilyTest2", "\"Courier New\"", callback);
 }
 
 //************************************************************************************************
