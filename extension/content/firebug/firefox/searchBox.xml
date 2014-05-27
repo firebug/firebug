@@ -74,7 +74,10 @@
             optionsPopup.addEventListener("popupshowing", function runOnce()
             {
                 optionsPopup.removeEventListener("popupshowing", runOnce, false);
-                optionsPopup.setAttribute("noautohide", true);
+
+                // xxxHonza: Workaround for Linux, see issue 7003 for more details
+                if (!FBL.isLinux(window))
+                    optionsPopup.setAttribute("noautohide", true);
             }, false);
         ]]></constructor>
 

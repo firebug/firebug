@@ -146,12 +146,18 @@ System.getStringDataFromClipboard = function()
 
 System.isMac = function(win)
 {
+    FBTrace.sysout("isMaC", win)
     return win.navigator.platform.search("Mac") != -1;
 }
 
 System.isWin = function(win)
 {
     return win.navigator.platform.search("Win") != -1;
+}
+
+System.isLinux = function(win)
+{
+    return win.navigator.platform.search("Linux") != -1;
 }
 
 // ********************************************************************************************* //
