@@ -20,6 +20,8 @@
         <command id="cmd_firebug_toggleHTMLEditing" oncommand="Firebug.currentContext.getPanel('html').toggleEditing()"/>
         <command id="cmd_firebug_togglecssEditMode" oncommand="Firebug.currentContext.getPanel('stylesheet').toggleEditing()"/>
 
+        <command id="cmd_firebug_toggleScriptPrettyPrinting" oncommand="Firebug.currentContext.getPanel('script').togglePrettyPrint()"/>
+
         <command id="cmd_firebug_focusCommandLine" oncommand="if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.CommandLine.focus(Firebug.currentContext, {select: true})"/>
         <command id="cmd_firebug_focusFirebugSearch" oncommand="if (Firebug.currentContext) Firebug.Search.onSearchCommand(document);"/>
         <command id="cmd_firebug_focusWatchEditor" oncommand="if (Firebug.currentContext) Firebug.chrome.focusWatch(Firebug.currentContext);"/>

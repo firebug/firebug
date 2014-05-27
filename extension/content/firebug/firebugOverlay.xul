@@ -248,6 +248,11 @@
                                                     class="fbInternational"/>
                                             </menupopup>
                                         </toolbarbutton>
+                                        <toolbarbutton id="fbToggleScriptPrettyPrinting"
+                                            type="checkbox"
+                                            class="toolbar-image-button fbInternational"
+                                            tooltiptext="script.tip.PrettyPrint"
+                                            command="cmd_firebug_toggleScriptPrettyPrinting"/>
                                     </hbox>
 
                                     <hbox id="fbNetButtons" collapsed="true" class="noTabStop">
