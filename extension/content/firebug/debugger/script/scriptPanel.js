@@ -214,6 +214,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.showToolbarButtons("fbLocationSeparator", false);
         this.showToolbarButtons("fbLocationButtons", active);
         this.showToolbarButtons("fbDebuggerButtons", active);
+        this.showToolbarButtons("fbScriptsButtons", active);
         this.showToolbarButtons("fbScriptButtons", active);
         this.showToolbarButtons("fbStatusButtons", active);
         this.showToolbarButtons("fbLocationList", active);
