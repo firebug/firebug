@@ -1309,7 +1309,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         items.push({
             label: "EditBreakpointCondition",
             tooltiptext: "breakpoints.tip.Edit_Breakpoint_Condition",
-            command: Obj.bindFixed(this.editBreakpointCondition, this, lineNo)
+            command: Obj.bindFixed(this.initializeEditBreakpointCondition, this, lineNo)
         });
 
         if (this.context.stopped)
