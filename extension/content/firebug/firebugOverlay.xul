@@ -370,7 +370,7 @@
                                         <toolbarbutton id="fbToggleScriptPrettyPrinting"
                                             type="checkbox"
                                             class="toolbar-image-button fbInternational"
-                                            tooltiptext="script.tip.PrettyPrint"
+                                            tooltiptext="script.prettyPrintTooltip"
                                             command="cmd_firebug_toggleScriptPrettyPrinting"/>
                                     </hbox>
 
@@ -493,7 +493,7 @@
                                     oncommand="Firebug.CommandLine.copyBookmarklet(Firebug.currentContext)"/>
                                 <toolbarbutton id="fbCmdLinePrettyPrintButton" label="script.PrettyPrint"
                                     class="toolbar-text-button fbInternational"
-                                    tooltiptext="script.tip.PrettyPrint"
+                                    tooltiptext="commandEditor.prettyPrintTooltip"
                                     oncommand="Firebug.CommandEditor.prettyPrint(Firebug.currentContext)"/>
                                 <toolbarbutton id="fbCommandEditorHistoryButton"
                                     label="firebug.History"
