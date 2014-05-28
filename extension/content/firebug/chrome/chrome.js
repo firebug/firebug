@@ -460,6 +460,12 @@ var FirebugChrome =
         panelBar1.browser.contentWindow.focus();
     },
 
+    blur: function()
+    {
+        win.blur();
+        panelBar1.browser.contentWindow.blur();
+    },
+
     isFocused: function()
     {
         return wm.getMostRecentWindow(null) == win;
