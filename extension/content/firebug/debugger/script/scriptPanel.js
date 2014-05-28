@@ -550,7 +550,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (sourceLink instanceof SourceLink)
             this.showSource(sourceLink);
 
-        this.setPrettyPrintState();
+        if (object)
+            this.setPrettyPrintState();
 
         Events.dispatch(this.fbListeners, "onUpdateScriptLocation", [this, sourceLink]);
     },
