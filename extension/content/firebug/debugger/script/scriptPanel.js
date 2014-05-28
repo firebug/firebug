@@ -1749,20 +1749,27 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!viewContent)
             return;
 
-        // See http://code.google.com/p/fbug/issues/detail?id=889
-        // Idea from: Jonathan Zarate's rikaichan extension (http://www.polarcloud.com/rikaichan/)
-        if (!rangeParent)
-            return false;
+        // First try to get selected expression under the cursor.
+        var text = this.scriptView.getSelectedTextFrom(x, y);
+        if (!text)
+        {
+            // See http://code.google.com/p/fbug/issues/detail?id=889
+            // Idea from: Jonathan Zarate's rikaichan extension (http://www.polarcloud.com/rikaichan/)
+            if (!rangeParent)
+                return false;
 
-        rangeOffset = rangeOffset || 0;
-        var expr = getExpressionAt(rangeParent.data, rangeOffset);
-        if (!expr || !expr.expr)
-            return false;
+            rangeOffset = rangeOffset || 0;
+            var expr = getExpressionAt(rangeParent.data, rangeOffset);
+            if (!expr || !expr.expr)
+                return false;
 
-        if (expr.expr == this.infoTipExpr)
+            text = expr.expr;
+        }
+
+        if (text == this.infoTipExpr)
             return true;
         else
-            return this.populateInfoTip(infoTip, expr.expr);
+            return this.populateInfoTip(infoTip, text);
     },
 
     populateInfoTip: function(infoTip, expr)

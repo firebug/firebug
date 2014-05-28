@@ -553,6 +553,23 @@ ScriptView.prototype = Obj.extend(new EventSource(),
     {
         return this.editor;
     },
+
+    getSelectedTextFrom: function(x, y)
+    {
+        var doc = this.editor.view.ownerDocument;
+        var selection = doc.querySelectorAll(".CodeMirror-selected");
+        if (selection.length)
+        {
+            for (var i=0; i<selection.length; i++)
+            {
+                var node = selection[i];
+                var pos = Dom.getLTRBWH(node);
+
+                if (x > pos.left && x < pos.right && y > pos.top && y < pos.bottom)
+                    return this.editor.getSelectedText();
+            }
+        }
+    }
 });
 
 // ********************************************************************************************* //
