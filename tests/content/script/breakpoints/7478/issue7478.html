@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <title> Issue 7478: Breakpoint condition editor doesn't open when called from Script panel context menu</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+            function logIt() {
+                console.log('A call to console.log() API');
+            };
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1>
+                <a href="https://code.google.com/p/fbug/issues/detail?id=7478">
+                Issue 7478
+                </a>: Breakpoint condition editor doesn't open when called from Script panel context menu
+            </h1>
+        </header>
+        <div>
+            <section id="description">
+                <p class="note">
+                    Note: This test also covers
+                    <a href="https://code.google.com/p/fbug/issues/detail?id=7479"
+                        title="The item 'Edit Breakpoint Condition..' does
+                        nothing in spite of is enabled in the Script panel's popup menu.">
+                        Issue 7479
+                    </a>.
+                </p>
+
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the Script panel and enable it.</li>
+                    <li>
+                        Right click inside the Script panel at line #9.
+                        (<code> console.log('A call to console.log() API'); </code>).
+                    </li>
+                    <li>
+                        Select the item <i>Edit Breakpoint Condition...</i>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The breakpoint condition editor should open at line #9.</li>
+                </ul>
+            </section>
+            <footer>@farshidbeheshti, farshid.beheshti@gmail.com</footer>
+        </div>
+    </body>
+</html>
