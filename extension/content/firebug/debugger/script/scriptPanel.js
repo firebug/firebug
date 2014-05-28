@@ -1759,7 +1759,16 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 return false;
 
             rangeOffset = rangeOffset || 0;
-            var expr = getExpressionAt(rangeParent.data, rangeOffset);
+            var row = Dom.getAncestorByClass(rangeParent, "firebug-line");
+            var expr = null;
+            if (row)
+            {
+                var range = rangeParent.ownerDocument.createRange();
+                range.setStart(row, 0);
+                range.setEnd(rangeParent, rangeOffset);
+                expr = getExpressionAt(range.startContainer.textContent, range.toString().length);
+            }
+
             if (!expr || !expr.expr)
                 return false;
 
