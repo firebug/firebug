@@ -597,15 +597,6 @@ toolbarbutton.toolbarbutton-menubutton-button:hover {
 }
 
 /* issue 2780, moved from upper level firebug.css, RMC */
-
-.toolbar-image-button {
-    -moz-appearance: none;
-    margin: 0 2px;
-    border: none;
-    padding: 0 !important;
-    background: transparent !important;
-}
-
 .toolbar-image-button > .toolbarbutton-icon {
     padding: 0 !important;
 }
