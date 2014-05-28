@@ -1650,6 +1650,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             this.syncCommands(this.context);
             this.syncListeners(this.context);
 
+            // Handling focus events causes Firebug UI to freeze (see issue 7480),
+            // so, release the focus from the browser window it'll be focused
+            // again on the line below.
+            Firebug.chrome.blur();
+
             // issue 3463 and 4213
             Firebug.chrome.syncPanel("script");
             Firebug.chrome.focus();
