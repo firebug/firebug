@@ -6,29 +6,32 @@ function runTest()
         FBTest.enableScriptPanel((win) =>
         {
             var LINE_NUMBER = 9;
-            var lineNode = FBTest.getSourceLineNode(LINE_NUMBER);
-            var target = lineNode.getElementsByClassName("firebug-line").item(0);
-            FBTest.progress("Waiting for the context menu to show....");
-            FBTest.showScriptPanelContextMenu(target, (contextMenu) =>
+            var chrome = FW.Firebug.chrome;
+            FBTest.selectSourceLine(url, LINE_NUMBER, "js", chrome, (lineNode) =>
             {
-                FBTest.progress("The context menu is shown");
-                for (var i = 0; i < contextMenu.children.length; i++)
+                var target = lineNode.getElementsByClassName("firebug-line").item(0);
+                FBTest.progress("Waiting for the context menu to show....");
+                FBTest.showScriptPanelContextMenu(target, (contextMenu) =>
                 {
-                    var menuItem = contextMenu.children[i];
-                    if (menuItem.label == 'Edit Breakpoint Condition...')
+                    FBTest.progress("The context menu is shown");
+                    for (var i = 0; i < contextMenu.children.length; i++)
                     {
-                        menuItem.doCommand();
-                        FBTest.waitForBreakpoint(url, LINE_NUMBER, () =>
+                        var menuItem = contextMenu.children[i];
+                        if (menuItem.label == 'Edit Breakpoint Condition...')
                         {
-                            var scriptPanel = FBTest.selectPanel("script");
-                            var conditionEditor = scriptPanel.
-                                panelNode.querySelector(".conditionEditor");
+                            menuItem.doCommand();
+                            FBTest.waitForBreakpoint(url, LINE_NUMBER, () =>
+                            {
+                                var scriptPanel = FBTest.selectPanel("script");
+                                var conditionEditor = scriptPanel.
+                                    panelNode.querySelector(".conditionEditor");
 
-                            FBTest.ok(conditionEditor, "The condtion editor should display to the user.");
-                            FBTest.testDone();
-                        });
+                                FBTest.ok(conditionEditor, "The condtion editor should display to the user.");
+                                FBTest.testDone();
+                            });
+                        }
                     }
-                }
+                });
             });
         });
     });
