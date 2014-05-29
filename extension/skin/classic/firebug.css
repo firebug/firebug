@@ -525,7 +525,7 @@ textbox[type="fbSearchBox"] > panel {
 }
 
 #fbToggleScriptPrettyPrinting[disabled=true] {
-    filter: url(resource://firebugui/filters.svg#grayscale);
+    filter: url(resource://firebugui/filters.svg#brightenedGrayscale);
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
