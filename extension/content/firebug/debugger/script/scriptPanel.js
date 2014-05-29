@@ -550,9 +550,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (sourceLink instanceof SourceLink)
             this.showSource(sourceLink);
 
-        if (object)
-            this.setPrettyPrintState();
-
         Events.dispatch(this.fbListeners, "onUpdateScriptLocation", [this, sourceLink]);
     },
 
@@ -712,6 +709,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // 3) Get the type/category from the content type.
             var sourceFile = SourceFile.getSourceFileByUrl(this.context, sourceLink.href);
             var category = sourceFile.getCategory();
+
+            this.setPrettyPrintState();
 
             // Display the source.
             this.scriptView.showSource(lines.join(""), category);
