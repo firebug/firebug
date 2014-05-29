@@ -208,12 +208,7 @@ SourceEditor.prototype =
         // So, handle 'mousedown' first to remember the clicked element, etc. and
         // allow to use it through getContextMenuInfo.
         var scroller = this.editorObject.display.scroller;
-        scroller.addEventListener("mousedown", function(event)
-        {
-            self.currentTarget = event.target;
-            self.rangeParent = event.rangeParent;
-            self.rangeOffset = event.rangeOffset;
-        });
+        scroller.addEventListener("mousedown", this.onMouseDown.bind(this));
 
         Trace.sysout("sourceEditor.init; ", this.view);
 
@@ -231,6 +226,27 @@ SourceEditor.prototype =
     isInitialized: function()
     {
         return (this.editorObject != null);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Events
+
+    onMouseDown: function(event)
+    {
+        var target = event.target;
+
+        // Click info object can be retrieved through getContextMenuInfo method.
+        this.clickInfo = {};
+
+        this.clickInfo.currentTarget = target;
+        this.clickInfo.rangeParent = event.rangeParent;
+        this.clickInfo.rangeOffset = event.rangeOffset;
+
+        var scrollParent = Dom.getOverflowParent(target);
+        var scrollX = event.clientX + (scrollParent ? scrollParent.scrollLeft : 0);
+
+        this.clickInfo.x = scrollX;
+        this.clickInfo.y = event.clientY;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -583,11 +599,7 @@ SourceEditor.prototype =
     // xxxHonza: see onInit for more details
     getContextMenuInfo: function()
     {
-        return {
-            target: this.currentTarget,
-            rangeParent: this.rangeParent,
-            rangeOffset: this.rangeOffset,
-        }
+        return this.clickInfo;
     },
 
     getContextMenuItems: function()

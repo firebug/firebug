@@ -1406,16 +1406,17 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!info.rangeParent)
             return Firebug.getRepObject(target);
 
-        var rangeOffset = info.rangeOffset || 0;
-        var expr = getExpressionAt(info.rangeParent.data, rangeOffset);
-        if (!expr || !expr.expr)
+        var expr = this.getExpressionUnderCursor(info.x, info.y,
+            info.rangeParent, info.rangeOffset);
+
+        if (!expr)
             return Firebug.getRepObject(target);
 
         var evalResult;
         var success = (result, context) => { evalResult = result; }
         var failure = (result, context) => { }
 
-        CommandLine.evaluate(expr.expr, this.context, null,
+        CommandLine.evaluate(expr, this.context, null,
             this.context.getCurrentGlobal(),
             success, failure, {noStateChange: true});
 
@@ -1749,32 +1750,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!viewContent)
             return;
 
-        // First try to get selected expression under the cursor.
-        var text = this.scriptView.getSelectedTextFrom(x, y);
-        if (!text)
-        {
-            // See http://code.google.com/p/fbug/issues/detail?id=889
-            // Idea from: Jonathan Zarate's rikaichan extension (http://www.polarcloud.com/rikaichan/)
-            if (!rangeParent)
-                return false;
-
-            rangeOffset = rangeOffset || 0;
-            var row = Dom.getAncestorByClass(rangeParent, "firebug-line");
-            var expr = null;
-            if (row)
-            {
-                var range = rangeParent.ownerDocument.createRange();
-                range.setStart(row, 0);
-                range.setEnd(rangeParent, rangeOffset);
-                expr = getExpressionAt(range.startContainer.textContent, range.toString().length);
-            }
-
-            if (!expr || !expr.expr)
-                return false;
-
-            text = expr.expr;
-        }
-
+        var text = this.getExpressionUnderCursor(x, y, rangeParent, rangeOffset);
         if (text == this.infoTipExpr)
             return true;
         else
@@ -1839,6 +1815,39 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.infoTipExpr = expr;
 
         return true;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getExpressionUnderCursor: function(x, y, rangeParent, rangeOffset)
+    {
+        // First try to get selected expression under the cursor.
+        var text = this.scriptView.getSelectedTextFrom(x, y);
+        if (!text)
+        {
+            // See http://code.google.com/p/fbug/issues/detail?id=889
+            // Idea from: Jonathan Zarate's rikaichan extension (http://www.polarcloud.com/rikaichan/)
+            if (!rangeParent)
+                return false;
+
+            rangeOffset = rangeOffset || 0;
+            var row = Dom.getAncestorByClass(rangeParent, "firebug-line");
+            var expr = null;
+            if (row)
+            {
+                var range = rangeParent.ownerDocument.createRange();
+                range.setStart(row, 0);
+                range.setEnd(rangeParent, rangeOffset);
+                expr = getExpressionAt(range.startContainer.textContent, range.toString().length);
+            }
+
+            if (!expr || !expr.expr)
+                return false;
+
+            text = expr.expr;
+        }
+
+        return text;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
