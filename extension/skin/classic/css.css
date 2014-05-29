@@ -170,10 +170,11 @@
 
 .cssProp:-moz-any(.editGroup:hover,
                   .disabledStyle) > .cssPropIndent {
-    background: transparent url(chrome://firebug/skin/disable.svg) no-repeat 2px 1px;
+    background: transparent url(chrome://firebug/skin/disable.svg) no-repeat 2px center;
 }
 
-.cssProp.editGroup > span:first-child {
+.cssProp.editGroup > .cssPropIndent {
+    display: inline-block;
     cursor: pointer;
 }
 
