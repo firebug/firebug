@@ -224,7 +224,7 @@
                                             command="cmd_firebug_toggleHTMLEditing"/>
                                     </hbox>
 
-                                    <hbox id="fbScriptButtons" collapsed="true" class="noTabStop">
+                                    <hbox id="fbScriptsButtons" collapsed="true" class="noTabStop">
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <tooltip id="fbScriptFilterMenuTooltip" role="presentation"
                                             onpopupshowing="return Firebug.Debugger.onScriptFilterMenuTooltipShowing(this, Firebug.currentContext)"/>
@@ -366,6 +366,14 @@
                                         </toolbarbutton>
                                     </hbox>
 
+                                    <hbox id="fbScriptButtons" collapsed="true" class="noTabStop">
+                                        <toolbarbutton id="fbToggleScriptPrettyPrinting"
+                                            type="checkbox"
+                                            class="toolbar-image-button fbInternational"
+                                            tooltiptext="script.prettyPrintTooltip"
+                                            command="cmd_firebug_toggleScriptPrettyPrinting"/>
+                                    </hbox>
+
                                     <!-- Status buttons, used e.g. by the HTML panel to show
                                         a parent list of the currently selected element. -->
                                     <hbox id="fbStatusButtons" flex="100" collapsed="true">
@@ -485,7 +493,7 @@
                                     oncommand="Firebug.CommandLine.copyBookmarklet(Firebug.currentContext)"/>
                                 <toolbarbutton id="fbCmdLinePrettyPrintButton" label="script.PrettyPrint"
                                     class="toolbar-text-button fbInternational"
-                                    tooltiptext="script.tip.PrettyPrint"
+                                    tooltiptext="commandEditor.prettyPrintTooltip"
                                     oncommand="Firebug.CommandEditor.prettyPrint(Firebug.currentContext)"/>
                                 <toolbarbutton id="fbCommandEditorHistoryButton"
                                     label="firebug.History"

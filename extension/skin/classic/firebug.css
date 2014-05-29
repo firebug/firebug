@@ -517,7 +517,18 @@ textbox[type="fbSearchBox"] > panel {
     filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
-/*************************************************************************************************/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Script formatting buttons */
+
+#fbToggleScriptPrettyPrinting {
+    list-style-image: url(chrome://firebug/skin/prettyPrint.svg);
+}
+
+#fbToggleScriptPrettyPrinting[disabled=true] {
+    filter: url(resource://firebugui/filters.svg#brightenedGrayscale);
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Debugger buttons */
 
 #fbDebuggerButtons {
@@ -569,7 +580,7 @@ textbox[type="fbSearchBox"] > panel {
 }
 
 
-/*************************************************************************************************/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Script history buttons */
 
 #fbNavigateBackButton:-moz-locale-dir(ltr),
@@ -609,7 +620,7 @@ textbox[type="fbSearchBox"] > panel {
     font-weight: bold;
 }
 
-/*************************************************************************************************/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Command Line Popup */
 
 #fbCommandPopupButton {

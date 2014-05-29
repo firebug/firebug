@@ -214,6 +214,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.showToolbarButtons("fbLocationSeparator", false);
         this.showToolbarButtons("fbLocationButtons", active);
         this.showToolbarButtons("fbDebuggerButtons", active);
+        this.showToolbarButtons("fbScriptsButtons", active);
         this.showToolbarButtons("fbScriptButtons", active);
         this.showToolbarButtons("fbStatusButtons", active);
         this.showToolbarButtons("fbLocationList", active);
@@ -708,6 +709,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // 3) Get the type/category from the content type.
             var sourceFile = SourceFile.getSourceFileByUrl(this.context, sourceLink.href);
             var category = sourceFile.getCategory();
+
+            this.setPrettyPrintState();
 
             // Display the source.
             this.scriptView.showSource(lines.join(""), category);
@@ -1407,25 +1410,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             )
         }
 
-        var sourceFile = this.getSourceFile();
-        var category = sourceFile.getCategory();
-
-        // Pretty printing can be done only for source files that have
-        // corresponding server side script actor. Note that dynamic scripts
-        // are currently collected on the client side (a workaround) since
-        // RDP doesn't support it yet.
-        if (category === "js" && sourceFile.actor)
-        {
-            items.push("-",
-            {
-                label: "script.PrettyPrint",
-                tooltiptext: "script.tip.PrettyPrint",
-                type: "checkbox",
-                checked: sourceFile.isPrettyPrinted,
-                command: Obj.bindFixed(this.togglePrettyPrint, this)
-            });
-        }
-
         return items;
     },
 
@@ -1571,6 +1555,21 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 chrome.keyIgnore(this.keyListeners[i]);
             delete this.keyListeners;
         }
+    },
+
+    // Update the pretty-print button to reflect ability of the selection to be reformatted
+    setPrettyPrintState: function()
+    {
+        var sourceFile = this.getSourceFile();
+        var category = sourceFile.getCategory();
+
+        // Pretty printing can be done only for source files that have
+        // corresponding server side script actor. Note that dynamic scripts
+        // are currently collected on the client side (a workaround) since
+        // RDP doesn't support it yet.
+        var prettyPrintButton = Firebug.chrome.$("fbToggleScriptPrettyPrinting");
+        prettyPrintButton.disabled = (category !== "js" || !sourceFile.actor);
+        prettyPrintButton.checked = (!prettyPrintButton.disabled && sourceFile.isPrettyPrinted);
     },
 
     syncListeners: function(context)
