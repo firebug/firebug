@@ -37,9 +37,10 @@ var Trace = FBTrace.to("DBG_BREAKNOTIFICATION");
  *   elements: target
  *   objects: prevValue, newValue
  */
-function BreakNotification(cause)
+function BreakNotification(cause, listener)
 {
     this.cause = cause;
+    this.listener = listener;
 }
 
 BreakNotification.prototype = domplate(Rep,
@@ -300,6 +301,8 @@ BreakNotification.prototype = domplate(Rep,
 
         // xxxHonza: disable the animation, the interval seems to be frozen during debugger break.
         this.box.style.top = "0";
+
+        this.listener.onNotificationShow(this);
         return;
 
         // Animation
@@ -332,6 +335,8 @@ BreakNotification.prototype = domplate(Rep,
         // xxxHonza: disable the animation, the interval seems to be frozen during debugger break.
         if (this.box.parentNode)
             this.box.parentNode.removeChild(this.box);
+
+        this.listener.onNotificationHide(this);
         return;
 
         // Animation
@@ -361,7 +366,7 @@ BreakNotification.prototype = domplate(Rep,
 // ********************************************************************************************* //
 // Public API
 
-BreakNotification.show = function(context, parentNode, breakType)
+BreakNotification.show = function(context, parentNode, breakType, listener)
 {
     Trace.sysout("BreakNotification.show");
 
@@ -374,7 +379,7 @@ BreakNotification.show = function(context, parentNode, breakType)
     if (!context.breakingCause)
         return;
 
-    var box = new BreakNotification(context.breakingCause);
+    var box = new BreakNotification(context.breakingCause, listener);
     box.show(parentNode);
 
     // Remember the box, we need to hide it when the debugger is resumed.

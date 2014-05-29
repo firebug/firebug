@@ -116,6 +116,22 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Firebug.registerUIListener(this);
     },
 
+    initializeNode : function()
+    {
+        this.onResizer = this.onResize.bind(this);
+        this.resizeEventTarget = Firebug.chrome.$("fbContentBox");
+        Events.addEventListener(this.panelNode, "resize", this.onResizer, true);
+
+        BasePanel.initializeNode.apply(this, arguments);
+    },
+
+    destroyNode : function()
+    {
+        Events.removeEventListener(this.panelNode, "resize", this.onResizer, true);
+
+        BasePanel.destroyNode.apply(this, arguments);
+    },
+
     destroy: function(state)
     {
         // We want the location (compilationUnit) to persist, not the selection (e.g. stackFrame).
@@ -238,6 +254,32 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // The page has been just loaded and there might be some new scripts after all.
         if (!this.location)
             this.navigate(null);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Editor Size Update
+
+    onResize: function()
+    {
+        var editor = this.panelNode.querySelector(".CodeMirror");
+        if (!editor)
+            return;
+
+        var box = this.panelNode.querySelector(".notificationBox");
+        if (!box)
+            editor.style.height = "";
+        else
+            editor.style.height = (this.panelNode.clientHeight - box.clientHeight) + "px";
+    },
+
+    onNotificationShow: function()
+    {
+        this.onResize();
+    },
+
+    onNotificationHide: function()
+    {
+        this.onResize();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1666,7 +1708,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             this.highlight(true);
 
             // Display break notification box.
-            BreakNotification.show(this.context, this.panelNode, packet.why.type);
+            BreakNotification.show(this.context, this.panelNode, packet.why.type, this);
         }
         catch (exc)
         {
