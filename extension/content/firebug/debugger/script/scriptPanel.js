@@ -1751,6 +1751,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             return;
 
         var text = this.getExpressionUnderCursor(x, y, rangeParent, rangeOffset);
+        if (!text)
+            return false;
+
         if (text == this.infoTipExpr)
             return true;
         else
