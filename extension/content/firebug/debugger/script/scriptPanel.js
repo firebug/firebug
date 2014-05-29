@@ -1354,14 +1354,14 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                     id: "contextMenuStepOut",
                     command: Obj.bindFixed(debuggr.stepOut, debuggr, this.context),
                     acceltext: "Shift+F11"
-                },
+                }/*,
                 {
                     label: "firebug.RunUntil",
                     tooltiptext: "script.tip.Run_Until",
                     id: "contextMenuRunUntil",
                     command: Obj.bindFixed(debuggr.runUntil, debuggr, this.context,
                         compilationUnit, lineNo)
-                }
+                }*/
             )
         }
 
