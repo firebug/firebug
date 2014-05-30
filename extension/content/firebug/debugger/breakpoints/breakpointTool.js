@@ -371,8 +371,11 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
 
             // Send RDP packet to set a breakpoint on the server side. The callback will be
             // executed as soon as we receive a response.
-            self.context.activeThread.setBreakpoint(location,
-                self.onSetBreakpoint.bind(self, callback));
+            if (!isNormalDisabledBreakpoint(bp))
+            {
+                self.context.activeThread.setBreakpoint(location,
+                    self.onSetBreakpoint.bind(self, callback));
+            }
         }
 
         // If the debuggee is paused, just set the breakpoint.
@@ -586,8 +589,7 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             // server-side. Also check that we only remove normal breakpoints, and not mix-typed
             // ones, because we would still need them server-side (such as monitor breakpoints).
             var bp = BreakpointStore.findBreakpoint(url, lineNumber);
-            var isNormalDisabledBP = (bp && bp.disabled && bp.type === BreakpointStore.BP_NORMAL);
-            if (!isNormalDisabledBP)
+            if (!isNormalDisabledBreakpoint(bp))
             {
                 Trace.sysout("breakpointTool.removeBreakpoint; Can't remove BP it's still " +
                     "in the store! " + url + " (" + lineNumber + ")");
@@ -783,6 +785,20 @@ function setCondition(context, bpClient, condition)
     }
 
     return deferred.promise;
+}
+
+// ********************************************************************************************* //
+// Helpers
+
+/**
+ * Returns true if the breakpoint is disabled and is exclusively a BP_NORMAL one.
+ * @param {Breakpoint} bp The Breakpoint as defined in debugger/breakpoints/breakpoint.js
+ *
+ * @return {boolean}
+ */
+function isNormalDisabledBreakpoint(bp)
+{
+    return (bp && bp.disabled && bp.type === BreakpointStore.BP_NORMAL);
 }
 
 // ********************************************************************************************* //
