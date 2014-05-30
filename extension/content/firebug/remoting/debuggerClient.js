@@ -468,12 +468,15 @@ var DebuggerClient = Obj.extend(Firebug.Module,
                     return;
 
                 TraceConn.sysout("PACKET RECEIVED; " + JSON.stringify(packet), packet);
-                self.client.onPacket.apply(self.client, arguments);
+
+                if (self.client)
+                    self.client.onPacket.apply(self.client, arguments);
             },
 
             onClosed: function(status)
             {
-                self.client.onClosed(packet);
+                if (self.client)
+                    self.client.onClosed(packet);
             }
         };
 
