@@ -98,9 +98,9 @@ var BrowserToolbar =
         // toolbarpalette check is for seamonkey, where it is in the document
         if ((!$(doc, "firebug-badged-button") ||
             $(doc, "firebug-badged-button").parentNode.tagName == "toolbarpalette") &&
-            !Options.get("toolbarCustomizationDone"))
+            !Options.get("toolbarCustomizationDone2"))
         {
-            Options.set("toolbarCustomizationDone", true);
+            Options.set("toolbarCustomizationDone2", true);
 
             // Get the current navigation bar button set (a string of button IDs) and append
             // ID of the Firebug start button into it.

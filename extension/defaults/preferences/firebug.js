@@ -21,7 +21,7 @@ pref("extensions.firebug.currentVersion", "");
 pref("extensions.firebug.showFirstRunPage", true);
 pref("extensions.firebug.useDefaultLocale", false);
 pref("extensions.firebug.activateSameOrigin", true);
-pref("extensions.firebug.toolbarCustomizationDone", false);
+pref("extensions.firebug.toolbarCustomizationDone2", false);
 pref("extensions.firebug.showBreakNotification", true);
 pref("extensions.firebug.stringCropLength", 50);
 pref("extensions.firebug.hideDefaultInspector", false);

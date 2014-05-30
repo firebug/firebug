@@ -28,7 +28,7 @@ var prefNames =  // XXXjjb TODO distribute to modules
     "commandEditor", "textWrapWidth", "framePosition", "showErrorCount",
     "activateSameOrigin", "allPagesActivation",
     "panelTabMinWidth", "sourceLinkLabelWidth", "currentVersion",
-    "useDefaultLocale", "toolbarCustomizationDone",
+    "useDefaultLocale", "toolbarCustomizationDone2",
     "showBreakNotification", "stringCropLength", "showFirstRunPage",
 
     // Search
