@@ -582,13 +582,21 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         // breakpoint at the line.
         if (BreakpointStore.hasAnyBreakpoint(url, lineNumber))
         {
-            Trace.sysout("breakpointTool.removeBreakpoint; Can't remove BP it's still " +
-                "in the store! " + url + " (" + lineNumber + ")");
+            // A disabled breakpoint remains in the breakpoint store but has to be removed
+            // server-side. Also check that we only remove normal breakpoints, and not mix-typed
+            // ones, because we would still need them server-side (such as monitor breakpoints).
+            var bp = BreakpointStore.findBreakpoint(url, lineNumber);
+            var isNormalDisabledBP = (bp && bp.disabled && bp.type === BreakpointStore.BP_NORMAL);
+            if (!isNormalDisabledBP)
+            {
+                Trace.sysout("breakpointTool.removeBreakpoint; Can't remove BP it's still " +
+                    "in the store! " + url + " (" + lineNumber + ")");
 
-            // xxxHonza: the callback expects a packet as an argument, it should not.
-            if (callback)
-                callback({});
-            return;
+                // xxxHonza: the callback expects a packet as an argument, it should not.
+                if (callback)
+                    callback({});
+                return;
+            }
         }
 
         // We need to get the breakpoint client object for this context. The client
