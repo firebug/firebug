@@ -583,9 +583,9 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         if (BreakpointStore.hasAnyBreakpoint(url, lineNumber))
         {
             // A disabled breakpoint remains in the breakpoint store but has to be removed
-            // server-side if it is not combined with some special breakpoint types.
+            // server-side if its type is not combined with some special breakpoint types.
             var bp = BreakpointStore.findBreakpoint(url, lineNumber);
-            if (!(bp.disabled && bp.type === BreakpointStore.BP_NORMAL))
+            if (!(bp && bp.disabled && bp.type === BreakpointStore.BP_NORMAL))
             {
                 Trace.sysout("breakpointTool.removeBreakpoint; Can't remove BP it's still " +
                     "in the store! " + url + " (" + lineNumber + ")");
