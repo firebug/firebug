@@ -99,6 +99,12 @@
     padding: 0;
 }
 
+/* See issue 7444 */
+#firebug-button .badge {
+    display: none;
+    margin: 0;
+}
+
 /*************************************************************************************************/
 /* Firebug Menu & Firefox context menu */
 
