@@ -102,7 +102,8 @@
 
 .layoutLabelPosition,
 .layoutBoxSizing,
-.layoutZIndex {
+.layoutZIndex,
+.layoutDisplay {
     display: block;
 }
 
@@ -118,6 +119,9 @@
 
 .layoutZIndex {
     float: right;
+}
+.layoutDisplay {    
+    left: 90px;
 }
 
 .layoutLabelLeft {
