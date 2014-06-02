@@ -79,6 +79,10 @@ ConditionEditor.prototype = domplate(JSEditor.prototype,
             var bottom = offset.y + sourceLine.offsetHeight;
 
             var y = bottom - this.box.offsetHeight;
+
+            if(!panel.scrollTop)
+                panel.scrollTop = 0;
+
             if (y < panel.scrollTop)
             {
                 y = offset.y;
