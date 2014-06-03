@@ -205,7 +205,7 @@
 
 /* Display breakpoint disc */
 .cookieRow .cookieRowHeader {
-    background-position: 5px 3px;
+    background-position: 3px 1px;
 }
 
 .cookieRow[breakpoint="true"] .cookieRowHeader {
