@@ -1235,10 +1235,11 @@ var FirebugChrome =
         {
             // Set the relative font size of the root element (<html> or <window>)
             // so that 'rem' units can be used for sizing relative to the font size.
-            // 1rem equals 1px times the zoom level. This doesn't affect any of the
+            // 1rem equals 10px times the zoom level. This doesn't affect any of the
             // UI, because <body>, #fbContentBox, etc. override the font-size.
-
-            doc.documentElement.style.fontSize = zoom + "px";
+            // Do set if to some reasonable font-size, though, so we don't break
+            // completely with extensions like "Theme Font & Size Changer".
+            doc.documentElement.style.fontSize = (zoom*10) + "px";
         };
 
         // scale the aspect relative to 11pt Lucida Grande
