@@ -256,7 +256,7 @@ panelTab[selected="true"] {
 panelTab:not([selected="true"]):hover {
     border: 1px solid #C8C8C8;
     border-bottom: 1px solid transparent;
-    backround-color: transparent;
+    background-color: transparent;
 }
 
 panelTab[selected="true"] > panelTabMenu .menuTarget,
