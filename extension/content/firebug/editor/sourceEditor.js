@@ -184,7 +184,19 @@ SourceEditor.prototype =
         // cannot use plain cloneIntoCMScope).
         var newConfig = new this.win.Object();
         for (var prop in config)
-            newConfig[prop] = Wrapper.cloneIntoContentScope(this.win, config[prop]);
+        {
+            try
+            {
+                newConfig[prop] = Wrapper.cloneIntoContentScope(
+                    this.win, config[prop]);
+            }
+            catch (err)
+            {
+                TraceError.sysout("sourceEditor.onInit; EXCEPTION when " +
+                    "cloning " + prop + ", ERROR: " + err, err);
+            }
+        }
+
         Cu.makeObjectPropsNormal(newConfig);
 
         var self = this;
