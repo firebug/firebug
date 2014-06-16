@@ -1045,7 +1045,6 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
             // Make sure that entire content of the Console panel is hidden when
             // the panel is disabled.
             CommandLine.setMultiLine(false, Firebug.chrome, commandEditor);
-            CommandLine.blur(this.context);
             Dom.collapse(Firebug.chrome.$("fbCommandBox"), true);
         }
     },
