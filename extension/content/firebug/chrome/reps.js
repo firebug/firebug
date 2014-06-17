@@ -427,6 +427,8 @@ FirebugReps.Obj = domplate(Rep,
 
     propIterator: function (object, max)
     {
+        var obj = Wrapper.unwrapObject(object);
+
         function isInterestingProp(t, value)
         {
             return (t == "boolean" || t == "number" || (t == "string" && value) ||
@@ -434,20 +436,20 @@ FirebugReps.Obj = domplate(Rep,
         }
 
         // Work around https://bugzilla.mozilla.org/show_bug.cgi?id=945377
-        if (Object.prototype.toString.call(object) === "[object Generator]")
-            object = Object.getPrototypeOf(object);
+        if (Object.prototype.toString.call(obj) === "[object Generator]")
+            obj = Object.getPrototypeOf(obj);
 
         // Object members with non-empty values are preferred since it gives the
         // user a better overview of the object.
         var props = [];
-        this.getProps(props, object, max, isInterestingProp);
+        this.getProps(props, obj, max, isInterestingProp);
 
         if (props.length <= max)
         {
             // There are not enough props yet (or at least, not enough props to
             // be able to know whether we should print "more..." or not).
             // Let's display also empty members and functions.
-            this.getProps(props, object, max, function(t, value)
+            this.getProps(props, obj, max, function(t, value)
             {
                 return !isInterestingProp(t, value);
             });
@@ -680,7 +682,8 @@ FirebugReps.ArrBase = domplate(FirebugReps.Obj,
         }
 
         var n = 0;
-        var props = Object.getOwnPropertyNames(array);
+        var obj = Wrapper.unwrapObject(array);
+        var props = Object.getOwnPropertyNames(obj);
         for (var i=0; i<props.length; i++)
         {
             var p = props[i];
@@ -706,11 +709,12 @@ FirebugReps.ArrBase = domplate(FirebugReps.Obj,
 
             Css.toggleClass(target, "opened");
 
+            var obj = Wrapper.unwrapObject(target.repObject);
             var propBox = target.getElementsByClassName("arrayProperties").item(0);
             if (Css.hasClass(target, "opened"))
             {
                 Firebug.DOMPanel.DirTable.tag.replace(
-                    {object: target.repObject, toggles: this.toggles}, propBox);
+                    {object: obj, toggles: this.toggles}, propBox);
             }
             else
             {

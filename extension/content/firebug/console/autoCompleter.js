@@ -1069,6 +1069,7 @@ function codeMirrorAutoComplete(context, allowGlobal, attemptedCompletionOut, so
 
     var applyCompletion = function(cm, data, completion)
     {
+        cm = Wrapper.unwrapObject(cm);
         completer.completions.index = completion.index;
         var startOfLine = completer.getCompletionValue();
         cm.setLine(line, startOfLine + wholeLine.substr(offset));
