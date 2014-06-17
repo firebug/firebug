@@ -917,7 +917,7 @@ SourceEditor.prototype =
      * Save the cursor position so it can be restored when switching back to the
      * Console panel.
      *
-     * Should be used to save the selection without bluring (see issue 7524).
+     * Should be used to save the selection without blurring (see issue 7524).
      */
     saveCursorLocation: function()
     {

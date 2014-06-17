@@ -287,7 +287,7 @@ var CommandEditor = Obj.extend(Module,
 
     blur: function()
     {
-        // When bluring, save the selection (see issue 7273).
+        // When blurring, save the selection (see issue 7273).
         if (this.editor)
             this.editor.blur(true);
     },
@@ -296,7 +296,7 @@ var CommandEditor = Obj.extend(Module,
      * Save the cursor position so it can be restored when switching back to the
      * Console panel.
      *
-     * Should be used to save the selection without bluring (see issue 7524).
+     * Should be used to save the selection without blurring (see issue 7524).
      */
     saveCursorLocation: function()
     {
