@@ -436,6 +436,10 @@ var CommandLine = Obj.extend(Module,
         // We are just closing the view.
         if (saveMultiLine)
         {
+            // Save the cursor position before switching to another panel,
+            // so switching back to the Console panel restores the cursor position (see issue 7273).
+            commandEditor.saveCursorLocation();
+
             commandLine.value = commandEditor.value;
 
             // Specify that the Command Editor is hidden, so we remove the padding
