@@ -1309,7 +1309,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // The target provided by {@link FirebugChrome} is wrong, we need to use the
         // one from {@link SourceEditor}. See {@link SourceEditor.onInit} for more details.
-        target = info.target;
+        target = info.currentTarget;
 
         var lineNo = this.scriptView.getLineIndex(target);
         var text = this.scriptView.getSelectedText();
