@@ -10,7 +10,7 @@
 #fbCommandToolbar {
     font-size: 11px;
     border: none;
-    height: calc(22rem + 10px);
+    height: calc(2.2rem + 10px);
     padding: 0 0 0 7px !important;
 }
 
@@ -44,7 +44,7 @@
 
 #fbPanelSplitter > #fbPanelSplitterBox {
     visibility: visible;
-    height: calc(22rem + 10px);
+    height: calc(2.2rem + 10px);
     width: 6px;
     background-color: -moz-dialog;
     cursor: default;
@@ -98,14 +98,14 @@
 
 #fbPanelBar1-tabBox,
 #fbPanelBar2-tabBox {
-    height: calc(22rem + 10px);
+    height: calc(2.2rem + 10px);
 }
 
 /* ensure the inner toolbar background looks the same as the other toolbars */
 #fbToolbarInner.innerToolbar {
     -moz-margin-start: -5px;
     -moz-margin-end: 0;
-    height: calc(22rem + 9px);
+    height: calc(2.2rem + 9px);
     background-color: transparent;
 }
 

@@ -66,6 +66,7 @@ Wrapper.cloneIntoContentScope = function(global, obj)
         return obj;
     global = Wrapper.wrapObject(global);
     var newObj = (Array.isArray(obj) ? new global.Array() : new global.Object());
+    newObj = XPCNativeWrapper.unwrap(newObj);
     for (var prop in obj)
     {
         var desc = Object.getOwnPropertyDescriptor(obj, prop);

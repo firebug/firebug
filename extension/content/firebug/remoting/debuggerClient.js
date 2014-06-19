@@ -476,7 +476,7 @@ var DebuggerClient = Obj.extend(Firebug.Module,
             onClosed: function(status)
             {
                 if (self.client)
-                    self.client.onClosed(packet);
+                    self.client.onClosed(status);
             }
         };
 

@@ -960,7 +960,8 @@ Dom.DOMMemberTester = function(object)
 
     this.isDOMConstant = function(name)
     {
-        return (isNative && name.toUpperCase() === name && name.toLowerCase() !== name);
+        return (isNative && name.toUpperCase() === name && name.toLowerCase() !== name &&
+            typeof wrappedObject[name] === "number");
     };
 };
 

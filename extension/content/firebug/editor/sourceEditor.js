@@ -185,6 +185,7 @@ SourceEditor.prototype =
         var newConfig = new this.win.Object();
         for (var prop in config)
             newConfig[prop] = Wrapper.cloneIntoContentScope(this.win, config[prop]);
+
         Cu.makeObjectPropsNormal(newConfig);
 
         var self = this;
@@ -640,6 +641,7 @@ SourceEditor.prototype =
         var self = this;
         var contentHintFunction = function(editor)
         {
+            editor = Wrapper.unwrapObject(editor);
             var ret = hintFunction(self, editor);
             if (!ret)
                 return;
@@ -897,8 +899,19 @@ SourceEditor.prototype =
     blur: function(saveCursorLocation)
     {
         if (saveCursorLocation)
-            this.savedCursorLocation = this.getSelection();
+            this.saveCursorLocation();
         this.win.blur();
+    },
+
+    /**
+     * Save the cursor position so it can be restored when switching back to the
+     * Console panel.
+     *
+     * Should be used to save the selection without blurring (see issue 7524).
+     */
+    saveCursorLocation: function()
+    {
+        this.savedCursorLocation = this.getSelection();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
