@@ -471,7 +471,7 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         {
             var result;
 
-            var dbgGlobal = DebuggerLib.getInactiveDebuggeeGlobal(context);
+            var dbgGlobal = frame.script.global;
             scope = dbgGlobal.makeDebuggeeValue(scope);
 
             if (scope)
