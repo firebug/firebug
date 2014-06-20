@@ -49,6 +49,13 @@ function (Firebug, FBTrace, Obj, Str, Url, Xpath, Tool, ErrorStackTraceObserver,
 var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_SOURCETOOL");
 
+var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
+    .getService(Components.interfaces.nsIXULAppInfo);
+var versionComparator = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
+    .getService(Components.interfaces.nsIVersionComparator);
+var fx30 = (versionComparator.compare(appInfo.version, "30a1") >= 0 &&
+        versionComparator.compare(appInfo.version, "30.*") <= 0);
+
 var dynamicTypesMap = {
     "eval": CompilationUnit.EVAL,
     "Function": CompilationUnit.EVAL,
@@ -322,12 +329,31 @@ DynamicSourceCollector.prototype =
 
     onNewScript: function(script)
     {
-        var dbg = DebuggerLib.getThreadDebugger(this.context);
-
-        if (script.url == "debugger eval code")
-            return this.originalOnNewScript.apply(dbg, arguments);
+        var context = this.context;
+        var dbg = DebuggerLib.getThreadDebugger(context);
 
         var introType = script.source.introductionType;
+        var original = this.originalOnNewScript;
+        if (fx30 && introType === "eval")
+        {
+            // Work around issue 7359 (variables references inside functions inside
+            // direct eval getting miscompiled) by postponing 'getChildScripts'
+            // until after we return.
+            var threadActor = DebuggerLib.getThreadActor(context.browser);
+            original = function()
+            {
+                threadActor._addScript(script);
+                threadActor.sources.sourcesForScript(script);
+                context.setTimeout(function()
+                {
+                    for (let s of script.getChildScripts())
+                        threadActor._addScript(s);
+                }, 0);
+            };
+        }
+
+        if (script.url == "debugger eval code")
+            return original.apply(dbg, arguments);
 
         // xxxHonza: ugh, I don't know how to distinguish between static scriptElement
         // scripts and those who are dynamically created.
@@ -356,7 +382,7 @@ DynamicSourceCollector.prototype =
                     "but we can't be sure. See bug 983297 " + script.url + ", " +
                     introType, script);
 
-                return this.originalOnNewScript.apply(dbg, arguments);
+                return original.apply(dbg, arguments);
             }
         }
 
@@ -379,7 +405,7 @@ DynamicSourceCollector.prototype =
         }
 
         // Don't forget to execute the original logic.
-        this.originalOnNewScript.apply(dbg, arguments);
+        original.apply(dbg, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -430,9 +456,23 @@ DynamicSourceCollector.prototype =
         this.registerScript(sourceFile, script);
 
         // Restore breakpoints in dynamic scripts (including child scripts).
+        // As above, we do this asynchronously for eval scripts in Firefox 30 because of
+        // issue 7359. This might mean that some breakpoints don't get hit on page load,
+        // but better that than malfunctioning scripts.
         this.restoreBreakpoints(script);
-        for (var s of script.getChildScripts())
-            this.restoreBreakpoints(s);
+        if (fx30 && script.source.introductionType === "eval")
+        {
+            this.context.setTimeout(() =>
+            {
+                for (var s of script.getChildScripts())
+                    this.restoreBreakpoints(s);
+            }, 0);
+        }
+        else
+        {
+            for (var s of script.getChildScripts())
+                this.restoreBreakpoints(s);
+        }
 
         // New source file created, so let the rest of the system to deal with it just
         // like with any other (non dynamic) source file.
