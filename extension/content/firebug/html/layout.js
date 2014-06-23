@@ -65,7 +65,10 @@ LayoutPanel.prototype = Obj.extend(Panel,
                             Locale.$STR("a11y.layout.box-sizing") + ": " + "$boxSizing"),
                         SPAN({"class": "layoutZIndex", $invisible: "$zIndex|isInvisible",
                                 "aria-label": Locale.$STR("a11y.layout.z-index")},
-                            "z: " + "$zIndex")
+                            "z: " + "$zIndex"), 	 
+                        SPAN({"class": "layoutDisplay layoutCaption", 	
+                                "aria-label": Locale.$STR("a11y.layout.display")},
+                            "display: " + "$display")
                     ),
 
                     DIV({"class": "layoutLabelTop layoutLabel",
@@ -335,6 +338,7 @@ LayoutPanel.prototype = Obj.extend(Panel,
 
         var position = style.getPropertyCSSValue("position").cssText;
         args.position = position;
+        args.display = style.getPropertyCSSValue("display").cssText;
         args.outerLabel = "";
 
         if (Xml.isElementSVG(element) || Xml.isElementMathML(element) || Xml.isElementXUL(element))
@@ -387,6 +391,7 @@ LayoutPanel.prototype = Obj.extend(Panel,
                 layoutBoxSizing: {label: Locale.$STR("a11y.layout.box-sizing"),
                     value: "boxSizing"},
                 layoutZIndex: {label: "z", value: "zIndex"},
+                layoutDisplay: {label: "display", value: "display"},
                 layoutLabelOuterTop: {value: "outerTop"},
                 layoutLabelOuterRight: {value: "outerRight"},
                 layoutLabelOuterBottom: {value: "outerBottom"},
