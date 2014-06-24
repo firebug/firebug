@@ -133,6 +133,18 @@ Firebug.Debugger = Obj.extend(ActivableModule,
         persistedState.breakpointClients = context.breakpointClients;
     },
 
+    closeFirebug: function(context)
+    {
+        Trace.sysout("debugger.closeFirebug; context ID: " + context.getId());
+
+        // Do not persist breakpoint client object across Firebug
+        // shutdown/open. The RDP connection is closed on shutdown and
+        // all client objects need to be recreated (they are valid only
+        // across page refreshes).
+        // (see issue 6901 and issue 7496)
+        context.persistedState.breakpointClients = null;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // DebuggerClient
 

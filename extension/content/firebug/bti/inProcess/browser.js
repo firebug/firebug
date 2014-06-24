@@ -247,11 +247,6 @@ Browser.prototype.closeContext = function(context, userCommands)
             result = true;
         }
 
-        // Firebug is closing, clean up the persisted content. The persisted state should
-        // not be used after re-activating Firebug (see also issue issue 6901, breakpoint
-        // client objects need to be recreated).
-        delete browser.persistedState;
-
         return result;
     }
 };

@@ -825,6 +825,8 @@ window.Firebug =
         // Focus the browser window again
         Firebug.currentContext.window.focus();
 
+        Events.dispatch(modules, "closeFirebug", [Firebug.currentContext]);
+
         Firebug.connection.closeContext(Firebug.currentContext, userCommands);
         Firebug.StartButton.resetTooltip();
     },
