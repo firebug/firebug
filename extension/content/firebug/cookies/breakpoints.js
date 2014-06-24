@@ -219,7 +219,7 @@ Breakpoints.BreakpointTemplate = Domplate.domplate(Rep,
 
     getType: function(bp)
     {
-        return Locale.$STR("Break On Cookie Change");
+        return Locale.$STR("cookies.Break On Cookie");
     },
 
     isDisabled: function(bp)
