@@ -7,6 +7,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/url",
     "firebug/lib/xpath",
+    "firebug/lib/xpcom",
     "firebug/chrome/tool",
     "firebug/console/errorStackTraceObserver",
     "firebug/debugger/breakpoints/breakpointStore",
@@ -17,11 +18,17 @@ define([
     "firebug/remoting/debuggerClient",
     "arch/compilationunit",
 ],
-function (Firebug, FBTrace, Obj, Str, Url, Xpath, Tool, ErrorStackTraceObserver,
+function (Firebug, FBTrace, Obj, Str, Url, Xpath, Xpcom, Tool, ErrorStackTraceObserver,
     BreakpointStore, BreakpointTool, SourceFile, StackFrame, DebuggerLib,
     DebuggerClient, CompilationUnit) {
 
 "use strict";
+
+// ********************************************************************************************* //
+// Constants
+
+const nsICryptoHash = Components.interfaces.nsICryptoHash;
+const HashService = Xpcom.CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
 
 // ********************************************************************************************* //
 // Documentation
@@ -414,7 +421,7 @@ DynamicSourceCollector.prototype =
     {
         // Dynamic scripts use unique URL that is composed from script's location
         // such as line and column number.
-        var url = computeDynamicUrl(script);
+        var url = computeDynamicUrl(script, this.context);
 
         // Tracing logs the script object itself and it can take a lot of memory
         // in case of bigger dynamic web applications.
@@ -710,7 +717,7 @@ function hasChildScript(scripts, script)
     return false;
 }
 
-function computeDynamicUrl(script)
+function computeDynamicUrl(script, context)
 {
     // If //# sourceURL is provided just use it. Use introduction URL as the
     // base URL if sourceURL is relative.
@@ -747,26 +754,65 @@ function computeDynamicUrl(script)
     if (element)
         element = element.unsafeDereference();
 
-    var id = getElementId(script);
+    var uniqueUrl = url;
 
+    var id = getElementId(script);
     var type = script.source.introductionType;
     switch (type)
     {
     case "eventHandler":
-        return url + id + " " + element.textContent;
+        uniqueUrl = url + id + " " + element.textContent;
 
     case "scriptElement":
         // xxxHonza: how else we could identify a <script> based Script if ID attribute
         // is not set and the xpath is like script[2]?
-        return url + id;
+        uniqueUrl = url + id;
 
     case "eval":
     case "Function":
         // xxxHonza: TODO These URLs are already unique, but will be removed (see Bug 977255)
-        return url;
+        uniqueUrl = url;
     }
 
-    return url;
+    // Workaround for issue 7521. Make sure dynamic scripts always have
+    // unique URL if the source differs.
+    // It solves the problem where eval on the same location (i.e. wrapped
+    // within a fucntion) is used to generate different scripts.
+    var sourceFile = context.getSourceFile(uniqueUrl);
+    if (sourceFile)
+    {
+        // Use hash of the script source as unique idetifier.
+        var hash = getSourceHash(script.source.text);
+
+        if (!context.uniqueUrlHashMap)
+        {
+            context.uniqueUrlMap = new Map();
+            context.uniqueUrlCounter = 0;
+        }
+
+        var index = context.uniqueUrlMap.get(hash);
+        if (typeof index == "undefined")
+        {
+            index = ++context.uniqueUrlCounter;
+            context.uniqueUrlMap.set(hash, index);
+        }
+
+        uniqueUrl += " (" + index + ")";
+    }
+
+    return uniqueUrl;
+}
+
+function getSourceHash(source)
+{
+    HashService.init(nsICryptoHash.MD5);
+
+    var byteArray = [];
+    for (var j = 0; j < source.length; j++)
+        byteArray.push(source.charCodeAt(j));
+
+    HashService.update(byteArray, byteArray.length);
+    return HashService.finish(true);
 }
 
 function getElementId(script)
