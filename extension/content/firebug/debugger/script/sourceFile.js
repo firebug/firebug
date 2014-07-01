@@ -140,8 +140,27 @@ SourceFile.prototype =
         }
 
         // This is the only place where source (the text) is loaded for specific URL.
+        // To avoid double POSTs or missing cookies we use sourceCache for the top
+        // window load (issue 7401).
         var sourceClient = threadClient.source(this);
-        sourceClient.source(this.onSourceLoaded.bind(this));
+        var sourceCache = this.context.sourceCache;
+        var url = this.href;
+        if (url === this.context.window.location.href &&
+            sourceCache.isCached(sourceCache.removeAnchor(url)))
+        {
+            // Use a timeout to call onSourceLoaded asynchronously, otherwise
+            // syntax highlighing breaks somehow.
+            setTimeout(() => {
+                this.onSourceLoaded({
+                    source: sourceCache.loadText(url),
+                    contentType: "text/html",
+                });
+            });
+        }
+        else
+        {
+            sourceClient.source(this.onSourceLoaded.bind(this));
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
