@@ -25,12 +25,6 @@ function (Firebug, FBTrace, Obj, Str, Url, Xpath, Xpcom, Tool, ErrorStackTraceOb
 "use strict";
 
 // ********************************************************************************************* //
-// Constants
-
-const nsICryptoHash = Components.interfaces.nsICryptoHash;
-const HashService = Xpcom.CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
-
-// ********************************************************************************************* //
 // Documentation
 
 /**
@@ -53,15 +47,18 @@ const HashService = Xpcom.CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
 // ********************************************************************************************* //
 // Constants
 
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+
 var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_SOURCETOOL");
 
-var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
-    .getService(Components.interfaces.nsIXULAppInfo);
-var versionComparator = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
-    .getService(Components.interfaces.nsIVersionComparator);
+var appInfo = Cc["@mozilla.org/xre/app-info;1"]
+    .getService(Ci.nsIXULAppInfo);
+var versionComparator = Cc["@mozilla.org/xpcom/version-comparator;1"]
+    .getService(Ci.nsIVersionComparator);
 var fx30 = (versionComparator.compare(appInfo.version, "30a1") >= 0 &&
-        versionComparator.compare(appInfo.version, "30.*") <= 0);
+    versionComparator.compare(appInfo.version, "30.*") <= 0);
 
 var dynamicTypesMap = {
     "eval": CompilationUnit.EVAL,
@@ -428,7 +425,7 @@ DynamicSourceCollector.prototype =
         if (Trace.active)
         {
             var introType = script.source.introductionType;
-            Trace.sysout("sourceTool.addDynamicScript; " + script.source.url + ", " +
+            Trace.sysout("sourceTool.addDynamicScript; " + url + ", " +
                 introType + ", " + script.source.elementAttributeName, script);
         }
 
@@ -781,10 +778,10 @@ function computeDynamicUrl(script, context)
     var sourceFile = context.getSourceFile(uniqueUrl);
     if (sourceFile)
     {
-        // Use hash of the script source as unique idetifier.
+        // Use hash of the script source as unique identifier.
         var hash = getSourceHash(script.source.text);
 
-        if (!context.uniqueUrlHashMap)
+        if (!context.uniqueUrlMap)
         {
             context.uniqueUrlMap = new Map();
             context.uniqueUrlCounter = 0;
@@ -803,16 +800,22 @@ function computeDynamicUrl(script, context)
     return uniqueUrl;
 }
 
+// ********************************************************************************************* //
+
 function getSourceHash(source)
 {
-    HashService.init(nsICryptoHash.MD5);
+    var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].
+        createInstance(Ci.nsIScriptableUnicodeConverter);
+    converter.charset = "UTF-8";
 
-    var byteArray = [];
-    for (var j = 0; j < source.length; j++)
-        byteArray.push(source.charCodeAt(j));
+    var result = {};
+    var data = converter.convertToByteArray(source, result);
+    var ch = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
 
-    HashService.update(byteArray, byteArray.length);
-    return HashService.finish(true);
+    ch.init(ch.MD5);
+    ch.update(data, data.length);
+
+    return ch.finish(true);
 }
 
 function getElementId(script)
