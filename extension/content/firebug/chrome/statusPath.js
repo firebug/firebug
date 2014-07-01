@@ -143,7 +143,11 @@ var StatusPath = Obj.extend(Module,
         var panelStatus = Firebug.chrome.getElementById("fbPanelStatus");
         var panelStatusSeparator = Firebug.chrome.getElementById("fbStatusSeparator");
         var panelBar1 = Firebug.chrome.getElementById("fbPanelBar1");
+
         var panel = panelBar1.selectedPanel;
+        if (!panel)
+          return;
+
         var currentObject = panel ? panel.getCurrentObject() : null;
 
         panelStatus.setAttribute("direction", panel.statusSeparator === ">" ? "right" : "left");
