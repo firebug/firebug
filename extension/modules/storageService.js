@@ -254,7 +254,10 @@ var ObjectPersister =
     writeObject: function(leafName, obj, win)
     {
         if (this.isPrivateBrowsing(win))
-            throw new Error("No storage is written while in private browsing mode");
+            return;
+
+        // xxxHonza: see https://code.google.com/p/fbug/issues/detail?id=7561#c8
+        //throw new Error("No storage is written while in private browsing mode");
 
         if (ObjectPersister.flushTimeout)
             return;
