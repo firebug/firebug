@@ -1872,6 +1872,11 @@ FirebugReps.Window = domplate(Rep,
     {
         if (Firebug.viewChrome)
         {
+            // XrayWrapper.toString will change, so the following
+            // condition will stop work.
+            // See: https://bugzilla.mozilla.org/show_bug.cgi?id=1033927
+            // It should be just fine since viewChrome is not something
+            // Firebug should support anyway.
             if (win.toString().indexOf('XrayWrapper') !== -1)
                 return "XrayWrapper[Window]";
         }
