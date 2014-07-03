@@ -7,7 +7,7 @@
 /*************************************************************************************************/
 /* Filtering */
 
-.filtering .netRow:not(.netHeaderRow):not(.netSummaryRow) {
+.filtering .netRow:not(.netHeaderRow):not(.netSummaryRow):not(.netPageRow):not(.netPageSeparatorRow) {
     display: none;
 }
 
