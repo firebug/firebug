@@ -736,7 +736,7 @@ NetProgress.prototype =
             return;
 
         var phase = this.context.netProgress.currentPhase;
-        var timeStamp = phase.addTimeStamp("MozAfterPaint", "netPaintBar");
+        var timeStamp = phase.addTimeStamp(Locale.$STR("requestinfo.AfterPaint"), "netPaintBar");
         timeStamp.time = time;
 
         // Return the first file, so the layout is updated. I can happen that the
@@ -775,7 +775,7 @@ NetProgress.prototype =
         // Keep the information also in the phase for now, NetExport and other could need it.
         firstPhase.windowLoadTime = time;
 
-        var timeStamp = firstPhase.addTimeStamp("load", "netWindowLoadBar");
+        var timeStamp = firstPhase.addTimeStamp(Locale.$STR("requestinfo.WindowLoad"), "netWindowLoadBar");
         timeStamp.time = time;
 
         // Return the first file, so the layout is updated. I can happen that the
@@ -798,7 +798,7 @@ NetProgress.prototype =
         // Keep the information also in the phase for now, NetExport and other could need it.
         firstPhase.contentLoadTime = time;
 
-        var timeStamp = firstPhase.addTimeStamp("DOMContentLoaded", "netContentLoadBar");
+        var timeStamp = firstPhase.addTimeStamp(Locale.$STR("requestinfo.ContentLoad"), "netContentLoadBar");
         timeStamp.time = time;
 
         return null;
