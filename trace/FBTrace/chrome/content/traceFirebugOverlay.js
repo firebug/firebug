@@ -27,8 +27,12 @@ var Ci = Components.interfaces;
 var Cu = Components.utils;
 
 // For "Open Firebug Tracing" menu item (in Firebug).
-var Locale = Cu.import("resource://firebug/locale.js").Locale;
-Locale.registerStringBundle("chrome://fbtrace/locale/firebug-tracing.properties");
+try {
+  var Locale = Cu.import("resource://firebug/locale.js").Locale;
+  Locale.registerStringBundle("chrome://fbtrace/locale/firebug-tracing.properties");
+}
+catch (err) {
+}
 
 this.initialize = function()
 {
