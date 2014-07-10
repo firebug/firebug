@@ -72,9 +72,9 @@ Locale.$STR = function(name, bundle)
         try
         {
             if (bundle)
-                return validate(bundle.getString(strKey));
+                return bundle.getString(strKey);
             else
-                return validate(Locale.getStringBundle().GetStringFromName(strKey));
+                return Locale.getStringBundle().GetStringFromName(strKey);
         }
         catch (err)
         {
@@ -88,7 +88,7 @@ Locale.$STR = function(name, bundle)
         // The en-US string should be always available.
         var defaultBundle = Locale.getDefaultStringBundle();
         if (defaultBundle)
-            return validate(defaultBundle.GetStringFromName(strKey));
+            return defaultBundle.GetStringFromName(strKey);
     }
     catch (err)
     {
@@ -114,9 +114,9 @@ Locale.$STRF = function(name, args, bundle)
         try
         {
             if (bundle)
-                return validate(bundle.getFormattedString(strKey, args));
+                return bundle.getFormattedString(strKey, args);
             else
-                return validate(Locale.getStringBundle().formatStringFromName(strKey, args, args.length));
+                return Locale.getStringBundle().formatStringFromName(strKey, args, args.length);
         }
         catch (err)
         {
@@ -130,7 +130,7 @@ Locale.$STRF = function(name, args, bundle)
         // The en-US string should be always available.
         var defaultBundle = Locale.getDefaultStringBundle();
         if (defaultBundle)
-            return validate(defaultBundle.formatStringFromName(strKey, args, args.length));
+            return defaultBundle.formatStringFromName(strKey, args, args.length);
     }
     catch (err)
     {
@@ -168,10 +168,10 @@ Locale.$STRP = function(name, args, index, bundle)
     // Get proper plural form from the string (depends on the current Firefox locale).
     var translatedString = Locale.$STRF(name, args, bundle);
     if (translatedString.search(";") > 0)
-        return validate(getPluralForm(args[index], translatedString));
+        return getPluralForm(args[index], translatedString);
 
     // translatedString contains no ";", either rule 0 or getString fails
-    return validate(translatedString);
+    return translatedString;
 };
 
 /*
@@ -317,12 +317,6 @@ Locale.getFormattedKey = function(win, modifiers, key, keyConstant)
 
 // ********************************************************************************************* //
 // Helpers
-
-// Replace forbidden characters(see bug 6630)
-function validate(str)
-{
-    return String(str).replace(/"/g, '\'');
-}
 
 // This module needs to be independent of any other modules, so this is mainly a copy of
 // Str.capitalize().

@@ -866,7 +866,10 @@ function parseParts(str)
 
     // No matches found at all so we return the whole string
     if (!index)
-        return str;
+    {
+        // Double quotes in strings need to be escaped (see issue 6710)
+        return str.replace("\\", "\\\\", "g").replace('"', '\\"', "g");
+    }
 
     // If we have data after our last matched index we append it here as the final step
     var post = str.substr(index);
