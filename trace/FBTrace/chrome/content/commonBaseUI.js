@@ -22,6 +22,11 @@ var Ci = Components.interfaces;
 var Cu = Components.utils;
 
 // ********************************************************************************************* //
+// Variables
+
+var timerUpdateButtons = -1;
+
+// ********************************************************************************************* //
 // CommonBaseUI
 
 var CommonBaseUI = {
@@ -41,7 +46,6 @@ var CommonBaseUI = {
 
         // This IFRAME is the container for all logs.
         var logTabIframe = parentNode.getElementsByClassName("traceInfoLogsFrame").item(0);
-        var self = this;
 
         logTabIframe.addEventListener("load", function(event)
         {
@@ -78,11 +82,44 @@ var CommonBaseUI = {
             var button = parentNode.ownerDocument.getElementById(optionName);
             if (button)
                 button.setAttribute("checked", optionValue?"true":"false");
-            else
+            else if (timerUpdateButtons === -1)
+            {
                 FBTrace.sysout("traceModule onPrefChange no button with name "+optionName+
-                    " in parentNode", parentNode);
+                    " in parentNode; regenerate options panel", parentNode);
+
+                timerUpdateButtons = setTimeout(() => {
+                    timerUpdateButtons = -1;
+                    CommonBaseUI.generateOptionsButton(optionsBody);
+                });
+            }
         });
 
+        this.generateOptionsButton(optionsBody);
+
+        try
+        {
+            // Initialize global options
+            var globalBody = parentNode.querySelector(".traceInfoGlobalText");
+            if (globalBody)
+                GlobalTab.render(globalBody);
+        }
+        catch (e)
+        {
+            window.dump("FBTrace; globalOptions EXCEPTION " + e + "\n");
+        }
+
+        // Select default tab.
+        rep.selectTabByName(parentNode, "Logs");
+
+        this.optionsController.addObserver();
+    },
+
+    generateOptionsButton: function(optionsBody)
+    {
+        // Empty optionsBody if we regenerate the Options.
+        optionsBody.innerHTML = "";
+
+        var doc = optionsBody.ownerDocument;
         var menuitems = this.optionsController.getOptionsMenuItems();
         for (var i=0; i<menuitems.length; i++)
         {
@@ -101,23 +138,6 @@ var CommonBaseUI = {
 
             optionsBody.appendChild(button);
         }
-
-        try
-        {
-            // Initialize global options
-            var globalBody = parentNode.querySelector(".traceInfoGlobalText");
-            if (globalBody)
-                GlobalTab.render(globalBody);
-        }
-        catch (e)
-        {
-            window.dump("FBTrace; globalOptions EXCEPTION " + e + "\n");
-        }
-
-        // Select default tab.
-        rep.selectTabByName(parentNode, "Logs");
-
-        this.optionsController.addObserver();
     },
 };
 
