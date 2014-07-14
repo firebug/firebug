@@ -80,11 +80,8 @@ ClientProvider.prototype =
         // Make sure it's a string
         text += "";
 
-        // Cropping is usually based on extensions.firebug.stringCropLength preference
-        // But 50 chars (default value) is not short enough.
-        // xxxHonza: Do we need a new one like e.g.: extensions.firebug.stringCropLengthSmall?
-        // (see issue 5898)
-        return Str.cropString(text, 25);
+        // Do not crop the string. See issue 7591.
+        return text;
     },
 
     getValue: function(object)
