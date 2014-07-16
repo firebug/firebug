@@ -516,15 +516,20 @@ var CommandLine = Obj.extend(Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Module
 
-    initialize: function()
+    initializeUI: function()
     {
-        Module.initialize.apply(this, arguments);
-
         this.setAutoCompleter();
         this.commandHistory = new Firebug.CommandHistory();
 
         if (Options.get("commandEditor"))
             this.setMultiLine(true, Firebug.chrome);
+
+        this.onCommandLineInput = Obj.bind(this.onCommandLineInput, this);
+        this.onCommandLineKeyUp = Obj.bind(this.onCommandLineKeyUp, this);
+        this.onCommandLineKeyDown = Obj.bind(this.onCommandLineKeyDown, this);
+        this.onCommandLineKeyPress = Obj.bind(this.onCommandLineKeyPress, this);
+        this.onCommandLinePaste = Obj.bind(this.onCommandLinePaste, this);
+        this.attachListeners();
     },
 
     // (Re)create the auto-completer for the small command line.
@@ -546,16 +551,6 @@ var CommandLine = Obj.extend(Module,
         };
 
         this.autoCompleter = new Firebug.JSAutoCompleter(commandLine, completionBox, options);
-    },
-
-    initializeUI: function()
-    {
-        this.onCommandLineInput = Obj.bind(this.onCommandLineInput, this);
-        this.onCommandLineKeyUp = Obj.bind(this.onCommandLineKeyUp, this);
-        this.onCommandLineKeyDown = Obj.bind(this.onCommandLineKeyDown, this);
-        this.onCommandLineKeyPress = Obj.bind(this.onCommandLineKeyPress, this);
-        this.onCommandLinePaste = Obj.bind(this.onCommandLinePaste, this);
-        this.attachListeners();
     },
 
     attachListeners: function()
