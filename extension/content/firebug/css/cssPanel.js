@@ -551,13 +551,13 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                         isSystemSheet: isSystemSheet
                     });
                 }
-                else if (rule instanceof window.CSSNameSpaceRule)
+                // Workaround for https://bugzil.la/754772
+                // All types of CSS rules are currently recognized as CSSNameSpaceRules,
+                // so we explicitly need to check whether the rule's type is NAMESPACE_RULE
+                // to ensure that the rule is really an @namespace rule
+                else if (rule instanceof window.CSSNameSpaceRule &&
+                    rule.type === window.CSSRule.NAMESPACE_RULE)
                 {
-                    // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=754772
-                    // MozCSSKeyframesRules, MozCSSKeyframeRules and CSSPageRules are recognized
-                    // as CSSNameSpaceRules, so explicitly check whether the rule is not a
-                    // MozCSSKeyframesRule, a MozCSSKeyframeRule or a CSSPageRule
-
                     var reNamespace = /^@namespace ((.+) )?url\("(.*?)"\);$/;
                     var namespace = rule.cssText.match(reNamespace);
                     var prefix = namespace[2] || "";

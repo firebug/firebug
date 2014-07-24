@@ -1730,7 +1730,12 @@ FirebugReps.CSSRule = domplate(Rep,
         {
             return "CSSPageRule";
         }
-        else if (rule instanceof window.CSSNameSpaceRule)
+        // Workaround for https://bugzil.la/754772
+        // All types of CSS rules are currently recognized as CSSNameSpaceRules,
+        // so we explicitly need to check whether the rule's type is NAMESPACE_RULE
+        // to ensure that the rule is really an @namespace rule
+        else if (rule instanceof window.CSSNameSpaceRule &&
+            rule.type === window.CSSRule.NAMESPACE_RULE)
         {
             return "CSSNameSpaceRule";
         }
@@ -1781,7 +1786,12 @@ FirebugReps.CSSRule = domplate(Rep,
         {
             return rule.selectorText || "";
         }
-        else if (rule instanceof window.CSSNameSpaceRule)
+        // Workaround for https://bugzil.la/754772
+        // All types of CSS rules are currently recognized as CSSNameSpaceRules,
+        // so we explicitly need to check whether the rule's type is NAMESPACE_RULE
+        // to ensure that the rule is really an @namespace rule
+        else if (rule instanceof window.CSSNameSpaceRule &&
+            rule.type === window.CSSRule.NAMESPACE_RULE)
         {
             var reNamespace = /^@namespace (.+ )?url\("(.*?)"\);$/;
             var namespace = rule.cssText.match(reNamespace);
