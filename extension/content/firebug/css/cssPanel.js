@@ -551,6 +551,17 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                         isSystemSheet: isSystemSheet
                     });
                 }
+                else if (rule instanceof window.CSSCounterStyleRule)
+                {
+                    props = this.parseCSSProps(rule);
+                    this.sortProperties(props);
+                    rules.push({
+                        tag: CSSReps.CSSCounterStyleRuleTag.tag,
+                        rule: rule,
+                        props: props,
+                        isSystemSheet: isSystemSheet
+                    });
+                }
                 // Workaround for https://bugzil.la/754772
                 // All types of CSS rules are currently recognized as CSSNameSpaceRules,
                 // so we explicitly need to check whether the rule's type is NAMESPACE_RULE
@@ -1850,11 +1861,22 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
     getCSSText: function(styleRule, propName)
     {
-        var value = (Options.get("colorDisplay") === "authored" &&
-                styleRule.style.getAuthoredPropertyValue) ?
-            styleRule.style.getAuthoredPropertyValue(propName) : styleRule.style.getPropertyValue(propName);
-        var priority = styleRule.style.getPropertyPriority(propName);
-        var text = value + (priority ? " !" + priority : "");
+        var value = "";
+        var priority = "";
+        var text = "";
+        if (styleRule.style)
+        {
+            value = (Options.get("colorDisplay") === "authored" &&
+                    styleRule.style.getAuthoredPropertyValue) ?
+                styleRule.style.getAuthoredPropertyValue(propName) : styleRule.style.getPropertyValue(propName);
+            priority = styleRule.style.getPropertyPriority(propName);
+            text = value + (priority ? " !" + priority : "");
+        }
+        else
+        {
+            value = styleRule[propName];
+            text = value;
+        }
 
         if (text != "")
             return formatColor(text);
@@ -1898,8 +1920,15 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
 function getPropertyValue(style, propName)
 {
-    return (Options.get("colorDisplay") === "authored" && style.getAuthoredPropertyValue) ?
-        style.getAuthoredPropertyValue(propName) : style.getPropertyValue(propName);
+    if (style instanceof window.CSSRule)
+    {
+        return style[propName];
+    }
+    else
+    {
+        return (Options.get("colorDisplay") === "authored" && style.getAuthoredPropertyValue) ?
+            style.getAuthoredPropertyValue(propName) : style.getPropertyValue(propName);
+    }
 }
 
 function formatColor(color)

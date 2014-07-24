@@ -257,6 +257,24 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
 
             rule.encoding = value;
         }
+        else if (rule instanceof window.CSSCounterStyleRule)
+        {
+            var prop = Dom.getAncestorByClass(target, "cssProp");
+            var propName = "";
+
+            if (prop)
+            {
+                propName = Dom.getChildByClass(prop, "cssPropName").textContent;
+                target.textContent = value;
+            }
+
+            if (FBTrace.DBG_CSS)
+                FBTrace.sysout("CSSEditor.saveEdit: @counter-style: " + previousValue + "->" + value);
+
+            rule[propName] = value;
+            var saveSuccess = rule[propName] === value;
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
 
         Firebug.Inspector.repaint();
 

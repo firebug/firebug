@@ -283,7 +283,8 @@ var CSSMediaRuleTag = domplate(CSSDomplateBase,
             ),
             DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
                 role:"presentation"},
-                "}")
+                "}"
+            )
         )
 });
 
@@ -305,7 +306,8 @@ var CSSSupportsRuleTag = domplate(CSSDomplateBase,
             ),
             DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
                 role:"presentation"},
-            "}")
+                "}"
+            )
         )
 });
 
@@ -326,7 +328,8 @@ var CSSKeyframesRuleTag = domplate(CSSDomplateBase,
                 )
             ),
             DIV({role:"presentation"},
-                "}")
+                "}"
+            )
         )
 });
 
@@ -375,6 +378,31 @@ var CSSNamespaceRuleTag = domplate(CSSDomplateBase,
         return prefix == "" ? "" : " ";
     }
 });
+
+var CSSCounterStyleRuleTag = domplate(CSSDomplateBase,
+    {
+        tag:
+            DIV({"class": "cssRule focusRow cssCounterStyleRule", _repObject: "$rule.rule"},
+                DIV({"class": "cssHead focusRow", role : "listitem"},
+                    SPAN({"class": "cssRuleName"}, "@counter-style"),
+                    SPAN({"class": "separator"}, " "),
+                    SPAN({"class": "cssCounterStyleRuleName", $editable: "$rule|isEditable"},
+                    "$rule.rule.name"),
+                    SPAN(" {")
+                ),
+                DIV({role: "group"},
+                    DIV({"class": "cssPropertyListBox", _rule: "$rule", role: "listbox"},
+                        FOR("prop", "$rule.props",
+                            TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
+                        )
+                    )
+                ),
+                DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                    role:"presentation"},
+                    "}"
+                )
+            )
+    });
 
 var CSSFontFaceRuleTag = domplate(CSSDomplateBase,
 {
@@ -451,7 +479,8 @@ var CSSDocumentRuleTag = domplate(CSSDomplateBase,
             ),
             DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
                 role:"presentation"},
-            "}")
+                "}"
+            )
         )
 });
 
@@ -528,6 +557,7 @@ return {
     CSSKeyframesRuleTag: CSSKeyframesRuleTag,
     CSSKeyframeRuleTag: CSSKeyframeRuleTag,
     CSSNamespaceRuleTag: CSSNamespaceRuleTag,
+    CSSCounterStyleRuleTag: CSSCounterStyleRuleTag,
     CSSFontFaceRuleTag: CSSFontFaceRuleTag,
     CSSPageRuleTag: CSSPageRuleTag,
     CSSDocumentRuleTag: CSSDocumentRuleTag,
