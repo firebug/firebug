@@ -79,11 +79,9 @@ Firebug.PanelActivation = Obj.extend(Module,
         // the 'fbToolbox', so there is no line below the panel tab.
         Dom.collapse(Firebug.chrome.$("fbToolbox"), !panel);
 
-	// Search box is not displayed for disabled panels.
+	// Search box is not displayed for disabled panels. Collapse the element.
 	var searchBox = Firebug.chrome.$("fbSearchBox");
-	searchBox.collapsed = !panel;
-	
-	
+	Dom.collapse(searchBox, !panel);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
