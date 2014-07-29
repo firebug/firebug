@@ -7,6 +7,7 @@ define([
     "firebug/lib/events",
     "firebug/lib/locale",
     "firebug/lib/search",
+    "firebug/lib/wrapper",
     "firebug/lib/xml",
     "firebug/lib/options",
     "firebug/chrome/window",
@@ -20,7 +21,7 @@ define([
     "firebug/dom/domBaseTree",
     "firebug/remoting/debuggerClient",
 ],
-function(Firebug, FBTrace, Obj, Events, Locale, Search, Xml, Options, Win, Firefox,
+function(Firebug, FBTrace, Obj, Events, Locale, Search, Wrapper, Xml, Options, Win, Firefox,
     PanelNotification, ActivableModule, ConsoleBase, SourceLink, StackFrame, StackTrace,
     DomBaseTree, DebuggerClient) {
 
@@ -279,6 +280,10 @@ var Console = Obj.extend(ActivableConsole,
 
     convertApiCallArgument: function(val)
     {
+        // All objects are cloned, so unwrapping here is harmless. However it
+        // seems to be needed to avoid Opaque wrappers for Errors, for some
+        // reason...
+        val = Wrapper.unwrapObject(val);
         // For the web worker console, some complex objects 'obj' get converted
         // into new String(obj.toString()). There is not much we can do about
         // this, but at least convert it back to a string so that the display
