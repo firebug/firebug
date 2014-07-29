@@ -681,19 +681,14 @@ FirebugReps.ArrBase = domplate(FirebugReps.Obj,
            return x === y.toString();
         }
 
-        var n = 0;
         var obj = Wrapper.unwrapObject(array);
         var props = Object.getOwnPropertyNames(obj);
         for (var i=0; i<props.length; i++)
         {
             var p = props[i];
 
-            // Valid indexes are skipped
-            if (isInteger(p))
-                continue;
-
-            // Ignore standard 'length' property, anything else is custom.
-            if (p != "length")
+            // Valid indices and 'length' are skipped, anything else is custom.
+            if (!isInteger(p) && p != "length")
                 return true;
         }
 
