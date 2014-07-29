@@ -6,9 +6,10 @@ define([
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/lib/domplate",
+    "firebug/lib/wrapper",
     "firebug/html/inspector",
 ],
-function(Firebug, FBTrace, Locale, Str, Domplate, Inspector) {
+function(Firebug, FBTrace, Locale, Str, Domplate, Wrapper, Inspector) {
 
 "use strict";
 
@@ -78,9 +79,13 @@ var Rep = Domplate.domplate(
             return "null object";
         }
 
+        // Unwrap the object, to be able to interrogate it more thoroughly.
+        // (Mainly relevant for object wrappers of Object or Opaque type.)
+        object = Wrapper.unwrapObject(object);
+
         try
         {
-            if (object.constructor && typeof(object.constructor) == 'function')
+            if (object.constructor && typeof object.constructor == 'function')
             {
                 var ctorName = object.constructor.name;
 
@@ -92,7 +97,7 @@ var Rep = Domplate.domplate(
         }
         catch (e)
         {
-            TraceError.sysout("rep.getTitle; EXCEPTION " + e, e);
+            TraceError.sysout("rep.getTitle; EXCEPTION ", e);
         }
 
         var label = Str.safeToString(object); // e.g. [object XPCWrappedNative [object foo]]

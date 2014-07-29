@@ -236,12 +236,13 @@ FirebugReps.Func = domplate(Rep,
         if (regularFn)
         {
             // XXX use Debugger.Object.displayName here?
-            var name = regularFn[1] || fn.displayName || "function";
-            if (name == "anonymous" && fn.displayName)
-                name = fn.displayName;
+            var displayName = Wrapper.unwrapObject(fn).displayName;
+            var name = regularFn[1] || displayName || "function";
+            if (name == "anonymous" && displayName)
+                name = displayName;
 
-            // What we get from safeToString(fn) is actual source code of fn,
-            // which can include e.g. unnecessary whitespace and comments around
+            // What we get from fnText is actual source code of fn, which
+            // can include e.g. unnecessary whitespace and comments around
             // the arguments. For now we don't have a great solution for
             // dealing with comments, but we can at least normalize whitespace
             // into the format |f(a, b, c)| (see issue 7386).
@@ -266,7 +267,7 @@ FirebugReps.Func = domplate(Rep,
 
     copySource: function(fn)
     {
-        if (fn && typeof (fn['toSource']) == 'function')
+        if (fn && typeof fn.toSource == 'function')
             System.copyToClipboard(fn.toSource());
     },
 
@@ -404,7 +405,7 @@ FirebugReps.Obj = domplate(Rep,
     getTitleTag: function(object)
     {
         var title;
-        if (typeof(object) == "string")
+        if (typeof object == "string")
             title = object;
         else
             title = this.getTitle(object);
@@ -498,7 +499,7 @@ FirebugReps.Obj = domplate(Rep,
                     continue;
                 }
 
-                var t = typeof(value);
+                var t = typeof value;
                 if (filter(t, value))
                 {
                     var rep = Firebug.getRep(value);
@@ -518,10 +519,7 @@ FirebugReps.Obj = domplate(Rep,
         }
         catch (exc)
         {
-            // Sometimes we get exceptions when trying to read from certain objects, like
-            // StorageList, but don't let that gum up the works
-            // XXXjjb also History.previous fails because object is a web-page object
-            // which does not have permission to read the history
+            // Iteration can sometimes fail, e.g. for proxies.
         }
     },
 
@@ -595,7 +593,7 @@ FirebugReps.ArrBase = domplate(FirebugReps.Obj,
 
     supportsObject: function(object, type)
     {
-        return this.isArray(object);
+        return this.isArray(Wrapper.unwrapObject(object));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -612,6 +610,7 @@ FirebugReps.ArrBase = domplate(FirebugReps.Obj,
 
     arrayIterator: function(array, max)
     {
+        array = Wrapper.unwrapObject(array);
         var items = [];
         for (var i = 0; i < array.length && i <= max; ++i)
         {
@@ -640,7 +639,7 @@ FirebugReps.ArrBase = domplate(FirebugReps.Obj,
         if (array.length > max + 1)
         {
             items[max] = {
-                object: (array.length-max) + " " + Locale.$STR("firebug.reps.more") + "...",
+                object: (array.length - max) + " " + Locale.$STR("firebug.reps.more") + "...",
                 tag: FirebugReps.Caption.tag,
                 delim: ""
             };
@@ -849,9 +848,8 @@ FirebugReps.ArrayLikeObject = domplate(FirebugReps.ArrBase,
 
     getTitle: function(obj, context)
     {
-        const re = /\[object ([^\]]*)/;
         var label = Object.prototype.toString.call(obj);
-        var m = re.exec(label);
+        var m = /^\[object ([^\]]*)]$/.exec(label);
         return (m ? m[1] : label);
     },
 
@@ -1532,15 +1530,20 @@ FirebugReps.RegExp = domplate(Rep,
 
     supportsObject: function(object, type)
     {
-        return Object.prototype.toString.call(object) === "[object RegExp]";
+        // Xrays to RegExp objects are not implemented yet (https://bugzil.la/1014991),
+        // so we need to unwrap for this comparison to be sensible (otherwise we only see
+        // "[object Opaque]").
+        var obj = Wrapper.unwrapObject(object);
+        return Object.prototype.toString.call(obj) === "[object RegExp]";
     },
 
-    getSource: function(object)
+    getSource: function(regexp)
     {
-        var source = "/" + object.source + "/";
-        source += object.ignoreCase ? "i" : "";
-        source += object.global ? "g" : "";
-        source += object.multiline ? "m" : "";
+        var obj = Wrapper.unwrapObject(regexp);
+        var source = "/" + obj.source + "/";
+        source += obj.ignoreCase ? "i" : "";
+        source += obj.global ? "g" : "";
+        source += obj.multiline ? "m" : "";
         return source;
     }
 });
@@ -1823,7 +1826,7 @@ FirebugReps.CSSRule = domplate(Rep,
 FirebugReps.Window = domplate(Rep,
 {
     tag:
-        OBJECTLINK("$object|getWindowTitle ",
+        OBJECTLINK("$object|getTitle ",
             SPAN({"class": "objectPropValue"},
                 "$object|getLocation"
             )
@@ -1870,21 +1873,6 @@ FirebugReps.Window = domplate(Rep,
 
     getTitle: function(win, context)
     {
-        return "window";
-    },
-
-    getWindowTitle: function(win)
-    {
-        if (Firebug.viewChrome)
-        {
-            // XrayWrapper.toString will change, so the following
-            // condition will stop work.
-            // See: https://bugzilla.mozilla.org/show_bug.cgi?id=1033927
-            // It should be just fine since viewChrome is not something
-            // Firebug should support anyway.
-            if (win.toString().indexOf('XrayWrapper') !== -1)
-                return "XrayWrapper[Window]";
-        }
         return "Window";
     },
 
@@ -2256,14 +2244,7 @@ FirebugReps.ApplicationCache = domplate(Rep,
 
     summarizeCache: function(applicationCache)
     {
-        try
-        {
-            return applicationCache.mozItems.length + " items in offline cache";
-        }
-        catch(exc)
-        {
-            return "https://bugzilla.mozilla.org/show_bug.cgi?id=422264";
-        }
+        return applicationCache.mozItems.length + " items in offline cache";
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -2508,7 +2489,7 @@ FirebugReps.Date = domplate(Rep,
 
     supportsObject: function(object, type)
     {
-        return object && object.constructor && object.constructor.name == "Date";
+        return (Object.prototype.toString.call(object) === "[object Date]");
     },
 });
 
@@ -2692,7 +2673,8 @@ Firebug.registerRep(
 
 Firebug.setDefaultReps(FirebugReps.Func, FirebugReps.Obj);
 
-return Firebug.Reps = FirebugReps;
+Firebug.Reps = FirebugReps;
+return FirebugReps;
 
 // ********************************************************************************************* //
 });
