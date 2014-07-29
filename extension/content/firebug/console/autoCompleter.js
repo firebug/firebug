@@ -1968,7 +1968,7 @@ function propChainBuildComplete(out, context, tempExpr, result)
                 result = "";
 
             // Convert the primitive into its scope's matching object type.
-            result = out.window.Object(result);
+            result = Wrapper.unwrapObject(out.window.Object(result));
         }
         setCompletionsFromObject(out, result, context);
     };
