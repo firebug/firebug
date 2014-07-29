@@ -341,6 +341,7 @@ function createFirebugConsole(context, win)
         var frame = Components.stack;
         while (frame)
         {
+            var unwrappedFunc = Wrapper.unwrapObject(func);
             var fileName = frame.filename;
             if (fileName)
             {
@@ -357,7 +358,7 @@ function createFirebugConsole(context, win)
                         }
                         else
                         {
-                            var argValues = Array.prototype.slice.call(func.arguments);
+                            var argValues = Array.prototype.slice.call(unwrappedFunc.arguments);
                             var argNames =
                                 StackFrame.guessFunctionArgNamesFromSource(String(func));
 
@@ -384,7 +385,7 @@ function createFirebugConsole(context, win)
             {
                 try
                 {
-                    func = func.caller;
+                    func = Wrapper.wrapObject(unwrappedFunc.caller);
                     if (seenFunctions.has(func))
                     {
                         // Recursion; we cannot go on unfortunately.
