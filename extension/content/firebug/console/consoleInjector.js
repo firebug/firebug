@@ -2,10 +2,11 @@
 
 define([
     "firebug/firebug",
+    "firebug/lib/wrapper",
     "firebug/console/console",
     "firebug/console/consoleExposed",
 ],
-function(Firebug, Console, ConsoleExposed) {
+function(Firebug, Wrapper, Console, ConsoleExposed) {
 
 // ********************************************************************************************* //
 // Constants
@@ -38,35 +39,18 @@ Firebug.Console.injector =
             // Get the 'console' object (this comes from chrome scope).
             var console = ConsoleExposed.createFirebugConsole(context, win);
 
-            // Do not expose the chrome object as is but, rather do a wrapper, see below.
-            //win.wrappedJSObject.console = console;
-            //return;
-
-            // Construct a script string that defines a function. This function returns
-            // an object that wraps every 'console' method. This function will be evaluated
-            // in a window content sandbox and return a wrapper for the 'console' object.
-            // Note that this wrapper appends an additional frame that shouldn't be displayed
-            // to the user.
-            //
-            // Since we are using .caller and .arguments for stack walking, the function must
-            // not be in strict mode.
-            var expr = "(function(x) { return {\n";
-            for (var p in console)
+            // Create a content-owned "console" object, to be exported into the page.
+            // We need to use unsafeCloneFunctionIntoContentScope here, since we don't
+            // want `console.log(crossOriginWindow)` to throw.
+            var sandbox = Cu.Sandbox(win, {wantXrays: false});
+            var exposedConsole = Wrapper.unwrapObject(new win.Object());
+            for (var prop in console)
             {
-                var func = console[p];
-                if (typeof(func) == "function")
-                {
-                    expr += p + ": function() { return Function.apply.call(x." + p +
-                        ", x, arguments); },\n";
-                }
+                if (!console.hasOwnProperty(prop) || typeof console[prop] !== "function")
+                    continue;
+                exposedConsole[prop] =
+                    Wrapper.unsafeCloneFunctionIntoContentScope(win, sandbox, console[prop]);
             }
-            expr += "};})";
-
-            // Evaluate the function in the window sandbox/scope and execute. The return value
-            // is a wrapper for the 'console' object.
-            var sandbox = Cu.Sandbox(win);
-            var getConsoleWrapper = Cu.evalInSandbox(expr, sandbox);
-            var exposedConsole = getConsoleWrapper(console);
 
             // Store the context and the exposedConsole in a WeakMap.
             wmExposedConsoles.set(winDoc, {

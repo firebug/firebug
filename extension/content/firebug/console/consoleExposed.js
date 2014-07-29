@@ -38,7 +38,7 @@ var Trace = FBTrace.to("DBG_CONSOLE");
 
 /**
  * Returns a console object (bundled with passed window through closure), expected to be called
- * into from a web page. The object provides all necessary APIs as described here:
+ * into (indirectly) from a web page. The object provides all necessary APIs as described here:
  * https://getfirebug.com/wiki/index.php/Console_API
  *
  * @param {Object} context
@@ -218,12 +218,6 @@ function createFirebugConsole(context, win)
             return logFormatted(arguments, "error");
         }
     };
-
-    // Expose those properties to the content scope (read only).
-    var expose = Object.keys(console);
-    console.__exposedProps__ = {};
-    for (var i = 0; i < expose.length; i++)
-        console.__exposedProps__[expose[i]] = "r";
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Helpers (not accessible from web content)

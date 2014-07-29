@@ -81,6 +81,34 @@ Wrapper.cloneIntoContentScope = function(global, obj)
     return newObj;
 };
 
+/**
+ * Create a clone of a function usable from within a content global similarly to
+ * cloneIntoContentScope, except that it accepts even cross-origin objects
+ * as arguments. A sandbox, which must be created with:
+ * `Cu.Sandbox(win, {wantXrays: false})`, is used for the marshalling.
+ */
+Wrapper.unsafeCloneFunctionIntoContentScope = function(win, sandbox, func)
+{
+    // Delegate from the sandbox, which accepts anything, to chrome space by
+    // passing the arguments object as a single argument, which is then
+    // unwrapped. Since checking for dangerous objects only goes one level
+    // deep, this avoids problems with arguments getting denied entry.
+    // Return a bound function, so as to get "[native code]" in the function
+    // stringification.
+    function chromeForwarder(args)
+    {
+        var unwrappedArgs = XPCNativeWrapper.unwrap(args);
+        var wrappedArgs = [];
+        for (var i = 0; i < unwrappedArgs.length; i++)
+            wrappedArgs.push(XPCNativeWrapper(unwrappedArgs[i]));
+        return func.apply(null, wrappedArgs);
+    }
+
+    var expr = "(function(x) { return function() { return x(arguments); }.bind(null); })";
+    var makeContentForwarder = Cu.evalInSandbox(expr, sandbox);
+    return makeContentForwarder(cloneFunction(win, chromeForwarder));
+};
+
 // ********************************************************************************************* //
 
 // XXX Obsolete, but left for extension compatibility.
@@ -93,6 +121,14 @@ Wrapper.shouldIgnore = function(name)
 function isPrimitive(obj)
 {
     return !(obj && (typeof obj === "object" || typeof obj === "function"));
+}
+
+function cloneFunction(win, func)
+{
+    var obj = XPCNativeWrapper.unwrap(new win.Object());
+    Object.defineProperty(obj, "f", {value: func});
+    Cu.makeObjectPropsNormal(obj);
+    return obj.f;
 }
 
 // ********************************************************************************************* //
