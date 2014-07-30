@@ -446,7 +446,7 @@ var ConsoleHandler =
         {
             var logContent = row.getElementsByClassName("logContent").item(0);
             var tree = new DomBaseTree(context);
-            tree.replace(logContent, {object: obj}, true);
+            tree.replace(logContent, {object: Wrapper.unwrapObject(obj)}, true);
         });
     },
 
@@ -525,8 +525,9 @@ var ConsoleHandler =
         Console.logFormatted([formattedTime, label], context, "timeStamp");
     },
 
-    table: function(context, data, columns)
+    table: function(context, obj, columns)
     {
+        var data = Wrapper.unwrapObject(obj);
         TableRep.log(data, columns, context);
     },
 
