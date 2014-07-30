@@ -13,9 +13,12 @@ function runTest()
             // Note: Test for the FW.Firebug.getConsoleByGlobal() function.
             var oriIframeConsoleInstance = FW.Firebug.getConsoleByGlobal(iframe.contentWindow);
 
+            // Store the old console on the content window, so it doesn't get hueyfix'd away.
+            wrappedWin.wrappedJSObject._origIframeConsole = oriIframeConsoleInstance;
+
             tasks.push(reloadIframe, iframe);
 
-            tasks.push(testGetConsoleByGlobal, iframe, oriIframeConsoleInstance);
+            tasks.push(testGetConsoleByGlobal, iframe, wrappedWin);
 
             tasks.wrapAndPush(checkConsole, wrappedWin, "false", "window._console should NOT refer to "+
                 "the exposed Firebug console");
@@ -64,8 +67,9 @@ function reloadIframe(callback, iframe)
 }
 
 // Tests the value returned by Firebug.getConsoleByGlobal();
-function testGetConsoleByGlobal(callback, iframe, oriIframeConsoleInstance)
+function testGetConsoleByGlobal(callback, iframe, wrappedWin)
 {
+    var oriIframeConsoleInstance = wrappedWin.wrappedJSObject._origIframeConsole;
     var newIframeConsoleInstance = FW.Firebug.getConsoleByGlobal(iframe.contentWindow);
     FBTest.ok(newIframeConsoleInstance, "newIframeConsoleInstance should be non-null");
     FBTest.ok(oriIframeConsoleInstance, "oriIframeConsoleInstance should be non-null");
