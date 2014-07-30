@@ -4,7 +4,9 @@ define([
 ],
 function() {
 
-"use strict";
+// Note: .caller and .arguments are used for stack walking past
+// unsafeCloneFunctionIntoContentScope, so we can not use strict mode here.
+//"use strict";
 
 // ********************************************************************************************* //
 // Constants
