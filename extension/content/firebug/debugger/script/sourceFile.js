@@ -140,27 +140,39 @@ SourceFile.prototype =
         }
 
         // This is the only place where source (the text) is loaded for specific URL.
-        // To avoid double POSTs or missing cookies we use sourceCache for the top
-        // window load (issue 7401).
-        var sourceClient = threadClient.source(this);
+        // To avoid double loads (with missing cookies, even) we use sourceCache for
+        // the top window load. See issue 7401.
         var sourceCache = this.context.sourceCache;
-        var url = this.href;
-        if (url === this.context.window.location.href &&
-            sourceCache.isCached(sourceCache.removeAnchor(url)))
+        var loadedSource = (this.href === this.context.window.location.href ?
+            this.loadFromSourceCache(sourceCache, this.href) : null);
+        if (loadedSource)
         {
             // Use a timeout to call onSourceLoaded asynchronously, otherwise
-            // syntax highlighing breaks somehow.
+            // syntax highlighing breaks (somehow).
             setTimeout(() => {
                 this.onSourceLoaded({
-                    source: sourceCache.loadText(url),
+                    source: loadedSource,
                     contentType: "text/html",
                 });
             });
         }
         else
         {
+            var sourceClient = threadClient.source(this);
             sourceClient.source(this.onSourceLoaded.bind(this));
         }
+    },
+
+    loadFromSourceCache: function(sourceCache, url)
+    {
+        url = sourceCache.removeAnchor(url);
+        if (!sourceCache.isCached(url))
+        {
+            // Try to load things from the Firefox cache. If this succeeds, the
+            // response will be added to the sourceCache (synchronously).
+            sourceCache.loadText(url, undefined, undefined, {addPostData: true});
+        }
+        return sourceCache.isCached(url) ? sourceCache.loadText(url) : null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

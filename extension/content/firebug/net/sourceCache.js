@@ -49,13 +49,13 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
         return (this.cache[url] ? true : false);
     },
 
-    loadText: function(url, method, file)
+    loadText: function(url, method, file, options)
     {
-        var lines = this.load(url, method, file);
+        var lines = this.load(url, method, file, options);
         return lines ? lines.join("") : null;
     },
 
-    load: function(url, method, file)
+    load: function(url, method, file, options)
     {
         if (FBTrace.DBG_CACHE)
         {
@@ -155,7 +155,7 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
         // Unfortunately, the URL isn't available, so let's try to use FF cache.
         // Note that an additional network request to the server could be made
         // in this method (a double-load).
-        return this.loadFromCache(url, method, file);
+        return this.loadFromCache(url, method, file, options);
     },
 
     store: function(url, text)
@@ -238,7 +238,7 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
 
             if (channel instanceof nsIUploadChannel)
             {
-                var postData = getPostStream(this.context);
+                var postData = this.getPostStream();
                 if (postData)
                 {
                     var uploadChannel = Xpcom.QI(channel, nsIUploadChannel);
@@ -252,7 +252,7 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
             if (channel instanceof nsICachingChannel)
             {
                 var cacheChannel = Xpcom.QI(channel, nsICachingChannel);
-                cacheChannel.cacheKey = getCacheKey(this.context);
+                cacheChannel.cacheKey = this.getCacheKey();
                 if (FBTrace.DBG_CACHE)
                     FBTrace.sysout("sourceCache.load cacheChannel key" + cacheChannel.cacheKey);
             }
@@ -369,7 +369,42 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
             return (lines.length == 1) ?
                 lines[0] : "(" + lineNo + " out of range " + lines.length + ")";
         }
-    }
+    },
+
+    getCacheKey: function()
+    {
+        try
+        {
+            var webNav = this.context.browser.webNavigation;
+            var descriptor = Xpcom.QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
+            var entry = Xpcom.QI(descriptor, Ci.nsISHEntry);
+            return entry.cacheKey;
+        }
+        catch (exc)
+        {
+        }
+    },
+
+    getPostStream: function()
+    {
+        try
+        {
+            var webNav = this.context.browser.webNavigation;
+            var descriptor = Xpcom.QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
+            var entry = Xpcom.QI(descriptor, Ci.nsISHEntry);
+
+            if (entry.postData)
+            {
+                // Seek to the beginning, or it will probably start reading at the end
+                var postStream = Xpcom.QI(entry.postData, Ci.nsISeekableStream);
+                postStream.seek(0, 0);
+                return postStream;
+            }
+         }
+         catch (exc)
+         {
+         }
+    },
 });
 
 // xxxHonza getPostText and Http.readPostTextFromRequest are copied from
@@ -384,43 +419,6 @@ function getPostText(file, context)
         file.postText = Http.readPostTextFromRequest(file.request, context);
 
     return file.postText;
-}
-
-// ********************************************************************************************* //
-
-function getPostStream(context)
-{
-    try
-    {
-        var webNav = context.browser.webNavigation;
-        var descriptor = Xpcom.QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
-        var entry = Xpcom.QI(descriptor, Ci.nsISHEntry);
-
-        if (entry.postData)
-        {
-            // Seek to the beginning, or it will probably start reading at the end
-            var postStream = Xpcom.QI(entry.postData, Ci.nsISeekableStream);
-            postStream.seek(0, 0);
-            return postStream;
-        }
-     }
-     catch (exc)
-     {
-     }
-}
-
-function getCacheKey(context)
-{
-    try
-    {
-        var webNav = context.browser.webNavigation;
-        var descriptor = Xpcom.QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
-        var entry = Xpcom.QI(descriptor, Ci.nsISHEntry);
-        return entry.cacheKey;
-     }
-     catch (exc)
-     {
-     }
 }
 
 // ********************************************************************************************* //

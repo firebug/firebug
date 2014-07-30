@@ -420,7 +420,7 @@ Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
         return this.cache[url];
     },
 
-    loadFromCache: function(url, method, file)
+    loadFromCache: function(url, method, file, options)
     {
         // The ancestor implementation (SourceCache) uses ioService.newChannel, which
         // can result in additional request to the server (in case the response can't
@@ -461,6 +461,37 @@ Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
             var doc = this.context.window ? this.context.window.document : null;
             if (doc)
                 charset = doc.characterSet;
+
+            // XXX We could probably instead check
+            // (url == this.context.browser.contentWindow.location.href)
+            // here, just like sourceCache, but I'd rather avoid changing behavior
+            // of crufty-but-working legacy code.
+            if (options && options.addPostData)
+            {
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.sysout("tabCache.load with post data");
+
+                if (channel instanceof Ci.nsIUploadChannel)
+                {
+                    var postData = this.getPostStream();
+                    if (postData)
+                    {
+                        var uploadChannel = Xpcom.QI(channel, Ci.nsIUploadChannel);
+                        uploadChannel.setUploadStream(postData, "", -1);
+
+                        if (FBTrace.DBG_CACHE)
+                            FBTrace.sysout("tabCache.load uploadChannel set");
+                    }
+                }
+
+                if (channel instanceof Ci.nsICachingChannel)
+                {
+                    var cacheChannel = Xpcom.QI(channel, Ci.nsICachingChannel);
+                    cacheChannel.cacheKey = this.getCacheKey();
+                    if (FBTrace.DBG_CACHE)
+                        FBTrace.sysout("tabCache.load cacheChannel key" + cacheChannel.cacheKey);
+                }
+            }
 
             stream = channel.open();
 
