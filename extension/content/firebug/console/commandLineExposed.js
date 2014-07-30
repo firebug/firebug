@@ -16,6 +16,8 @@ function(Obj, Wrapper, Locale, DebuggerLib, CommandLineAPI) {
 // ********************************************************************************************* //
 // Constants
 
+var Cu = Components.utils;
+
 var Trace = FBTrace.to("DBG_COMMANDLINE");
 var TraceError = FBTrace.toError();
 
@@ -74,14 +76,12 @@ function createFirebugCommandLine(context, win, dbgGlobal)
     // The commandLine object.
     commandLine = Object.create(null);
 
-    var console = Firebug.ConsoleExposed.createFirebugConsole(context, win);
-    // The command line API instance.
-    var commands = CommandLineAPI.getCommandLineAPI(context);
-
-    // Helpers for command creation.
+    // Helpers for command creation. We use unsafeCloneFunctionIntoContentScope because
+    // we need to support cd(crossOriginWindow).
+    var sandbox = Cu.Sandbox(win, {wantXrays: false});
     function createCommandHandler(command)
     {
-        var wrappedCommand = function()
+        var wrappedCommand = Wrapper.unsafeCloneFunctionIntoContentScope(win, sandbox, function()
         {
             try
             {
@@ -91,7 +91,7 @@ function createFirebugCommandLine(context, win, dbgGlobal)
             {
                 throw new Error(ex.message, ex.fileName, ex.lineNumber);
             }
-        };
+        });
         return dbgGlobal.makeDebuggeeValue(wrappedCommand);
     }
 
@@ -102,7 +102,7 @@ function createFirebugCommandLine(context, win, dbgGlobal)
         // Callable getters are commands whose syntax are both `command` and `command()`.
         // The help command has this syntax for example.
         if (config.isCallableGetter === true)
-            debuggeeObj = function(){ return dbgObject.handle(); };
+            debuggeeObj = function() { return dbgObject.handle(); };
 
         dbgObject = dbgGlobal.makeDebuggeeValue(debuggeeObj);
         dbgObject.handle = function()
@@ -134,14 +134,16 @@ function createFirebugCommandLine(context, win, dbgGlobal)
         };
     }
 
-    // Define command line methods.
+    // Register standard command line methods.
+    var commands = CommandLineAPI.getCommandLineAPI(context);
     for (var commandName in commands)
     {
         var command = commands[commandName];
         commandLine[commandName] = createCommandHandler(command);
     }
 
-    // Register shortcut.
+    // Register console shortcuts.
+    var console = Firebug.ConsoleExposed.createFirebugConsole(context, win);
     consoleShortcuts.forEach(function(name)
     {
         var command = console[name].bind(console);
@@ -152,7 +154,7 @@ function createFirebugCommandLine(context, win, dbgGlobal)
     for (var name in userCommands)
     {
         var config = userCommands[name];
-        var command = createUserCommandHandler(config, name);
+        var command = createUserCommandHandler(config);
         if (userCommands[name].getter)
             commandLine[name] = createVariableHandler(command, config);
         else
