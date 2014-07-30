@@ -130,7 +130,9 @@ var ClosureInspector =
                 for (var j = 0; j < toTest.length; ++j)
                 {
                     var f = toTest[j];
-                    if (f && f.environment && this.isScopeInteresting(f.environment))
+                    if (!f || f.global !== dbgObj.global)
+                        continue;
+                    if (f.environment && this.isScopeInteresting(f.environment))
                         return f;
                 }
             }
@@ -155,10 +157,13 @@ var ClosureInspector =
             throw new TypeError("can't get scope of non-object");
 
         var objGlobal = Cu.getGlobalForObject(obj);
+
+        // Do a security check. This is automatic in Fx33+, but do it manually
+        // (with the same error message) for compatiblity with older versions.
         if (win !== objGlobal && !(win.document && objGlobal.document &&
             win.document.nodePrincipal.subsumes(objGlobal.document.nodePrincipal)))
         {
-            throw new Error("permission denied to access cross origin scope");
+            throw new Error("Permission denied to pass object to chrome");
         }
 
         return DebuggerLib.withTemporaryDebugger(context, objGlobal, function(dbgGlobal)

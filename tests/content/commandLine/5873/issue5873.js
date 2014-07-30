@@ -218,14 +218,15 @@ function runTest()
                 taskList.push(verifyCompletionPopupForA);
 
                 // Verify cross-compartment permissions
+                var errMsg = "Error: Permission denied to pass object to chrome";
                 taskList.push(FBTest.executeCommandAndVerify, "cd.%context",
-                    "Error: permission denied to access cross origin scope", "span", "errorMessage");
+                    errMsg, "span", "errorMessage");
                 if ("sandbox" in document.createElement("iframe"))
                 {
                     taskList.push(FBTest.executeCommandAndVerify, "frames[1].%framePriv",
-                        "Error: permission denied to access cross origin scope", "span", "errorMessage");
+                        errMsg, "span", "errorMessage");
                     taskList.push(FBTest.executeCommandAndVerify, "frames[1].location.%framePriv",
-                        "Error: permission denied to access cross origin scope", "span", "errorMessage");
+                        errMsg, "span", "errorMessage");
                 }
                 taskList.push(FBTest.executeCommandAndVerify, "frames[0].location.%framePriv",
                     "2", "span", "objectBox-number");
