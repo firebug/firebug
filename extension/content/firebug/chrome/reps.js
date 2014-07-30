@@ -230,13 +230,18 @@ FirebugReps.Func = domplate(Rep,
 
     summarizeFunction: function(fn)
     {
-        var fnText = Str.safeToString(fn);
+        // XXX For now, use unwrappedFn for stringification, because an X-rayed
+        // "Window" constructor otherwise serializes as
+        // [object XrayWrapper function Window() { [native code] }]
+        // in Firefox 32 and below.
+        var unwrappedFn = Wrapper.unwrapObject(fn);
+        var fnText = Str.safeToString(unwrappedFn);
         var regularFn = /^function\s*([^(]*)(\([^)]*\))/.exec(fnText);
         var result;
         if (regularFn)
         {
             // XXX use Debugger.Object.displayName here?
-            var displayName = Wrapper.unwrapObject(fn).displayName;
+            var displayName = unwrappedFn.displayName;
             var name = regularFn[1] || displayName || "function";
             if (name == "anonymous" && displayName)
                 name = displayName;
