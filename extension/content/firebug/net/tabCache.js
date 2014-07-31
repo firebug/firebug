@@ -462,7 +462,7 @@ Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
             if (doc)
                 charset = doc.characterSet;
 
-            // XXX We could probably instead check
+            // xxxSimon We could probably instead check
             // (url == this.context.browser.contentWindow.location.href)
             // here, just like sourceCache, but I'd rather avoid changing behavior
             // of crufty-but-working legacy code.
