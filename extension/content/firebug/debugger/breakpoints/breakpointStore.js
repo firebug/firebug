@@ -379,11 +379,11 @@ var BreakpointStore = Obj.extend(Module,
         });
     },
 
-    findBreakpoint: function(url, lineNo, type)
+    findBreakpoint: function(url, lineNo, type, dynamic)
     {
         type = type || BP_NORMAL;
 
-        var bps = this.getBreakpoints(url);
+        var bps = this.getBreakpoints(url, dynamic);
         if (!bps)
             return null;
 

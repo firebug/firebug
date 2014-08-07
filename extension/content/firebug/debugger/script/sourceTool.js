@@ -566,7 +566,7 @@ BreakpointHitHandler.prototype =
 
         // Send "pause" packet with a new "dynamic-breakpoint" type.
         // The debugging will start as usual within {@link DebuggerTool#paused} method.
-        return threadActor._pauseAndRespond(frame, "dynamic-breakpoint");
+        return threadActor._pauseAndRespond(frame, {type: "dynamic-breakpoint"});
     }
 }
 
