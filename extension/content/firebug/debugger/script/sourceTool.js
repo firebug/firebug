@@ -70,6 +70,11 @@ var dynamicTypesMap = {
 };
 
 // ********************************************************************************************* //
+// Variables
+
+var wmDynamicScriptsUrl = new WeakMap();
+
+// ********************************************************************************************* //
 // Source Tool
 
 function SourceTool(context)
@@ -714,6 +719,7 @@ function hasChildScript(scripts, script)
 
 function computeDynamicUrl(script, context)
 {
+
     // If //# sourceURL is provided just use it. Use introduction URL as the
     // base URL if sourceURL is relative.
     // xxxHonza: displayURL for Functions is set asynchronously, why?.
@@ -735,6 +741,11 @@ function computeDynamicUrl(script, context)
         return Url.normalizeURL(introScript.url + "/" + displayURL);
     }
 
+    // If the url has already been computed, return the result.
+    var url = wmDynamicScriptsUrl.get(script.source);
+    if (url)
+        return url;
+
     // Compute unique URL from location information. We don't want to use any
     // random numbers or counters since breakpoints derive URLs too and they
     // should be persistent.
@@ -744,7 +755,7 @@ function computeDynamicUrl(script, context)
     // Additional auto clean logic might be needed, something like:
     // If an URL is not loaded within a week or two, remove all breakpoints
     // associated with that URL.
-    var url = script.source.url;
+    url = script.source.url;
     var element = script.source.element;
     if (element)
         element = element.unsafeDereference();
@@ -779,45 +790,29 @@ function computeDynamicUrl(script, context)
     var sourceFile = context.getSourceFile(uniqueUrl);
     if (sourceFile)
     {
-        // Use hash of the script source as unique identifier.
-        var hash = getSourceHash(script.source.text);
-
-        if (!context.uniqueUrlMap)
+        if (!context.uniqueUrlCounterMap)
         {
-            context.uniqueUrlMap = new Map();
-            context.uniqueUrlCounter = 0;
+            context.uniqueUrlCounterMap = new Map();
         }
 
-        var index = context.uniqueUrlMap.get(hash);
-        if (typeof index == "undefined")
-        {
-            index = ++context.uniqueUrlCounter;
-            context.uniqueUrlMap.set(hash, index);
-        }
+        var index = (context.uniqueUrlCounterMap.get(uniqueUrl) || 0);
+        // Increment the index because of this script.
+        index++;
 
+        // Update the counter map.
+        context.uniqueUrlCounterMap.set(uniqueUrl, index);
+
+        // Update the unique URL so it is really unique.
         uniqueUrl += " (" + index + ")";
     }
+
+    // Associate the unique URL to the script source so we compute it only once.
+    wmDynamicScriptsUrl.set(script.source, uniqueUrl);
 
     return uniqueUrl;
 }
 
 // ********************************************************************************************* //
-
-function getSourceHash(source)
-{
-    var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].
-        createInstance(Ci.nsIScriptableUnicodeConverter);
-    converter.charset = "UTF-8";
-
-    var result = {};
-    var data = converter.convertToByteArray(source, result);
-    var ch = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
-
-    ch.init(ch.MD5);
-    ch.update(data, data.length);
-
-    return ch.finish(true);
-}
 
 function getElementId(script)
 {
