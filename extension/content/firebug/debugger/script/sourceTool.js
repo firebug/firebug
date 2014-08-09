@@ -70,11 +70,6 @@ var dynamicTypesMap = {
 };
 
 // ********************************************************************************************* //
-// Variables
-
-var wmDynamicScriptsUrl = new WeakMap();
-
-// ********************************************************************************************* //
 // Source Tool
 
 function SourceTool(context)
@@ -741,8 +736,11 @@ function computeDynamicUrl(script, context)
         return Url.normalizeURL(introScript.url + "/" + displayURL);
     }
 
+    if (!context.wmDynamicScriptsUrl)
+        context.wmDynamicScriptsUrl = new WeakMap();
+
     // If the url has already been computed, return the result.
-    var url = wmDynamicScriptsUrl.get(script.source);
+    var url = context.wmDynamicScriptsUrl.get(script.source);
     if (url)
         return url;
 
@@ -807,7 +805,7 @@ function computeDynamicUrl(script, context)
     }
 
     // Associate the unique URL to the script source so we compute it only once.
-    wmDynamicScriptsUrl.set(script.source, uniqueUrl);
+    context.wmDynamicScriptsUrl.set(script.source, uniqueUrl);
 
     return uniqueUrl;
 }
