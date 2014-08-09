@@ -421,24 +421,43 @@ SourceEditor.prototype =
         // xxxHonza: the default 'mixedmode' mode should be set only if the text
         // is actually a markup (first letter == '<'?). Note that applying mixed mode
         // on plain JS doesn't work (no color syntax at all).
-        var mode = "htmlmixed";
+        var mode = {
+            name: "htmlmixed",
+            src: htmlMixedModeSrc
+        };
         switch (type)
         {
             case "js":
-                mode = "javascript";
+                mode.name = "javascript";
+                mode.src = jsModeSrc;
                 break;
             case "css":
-                mode = "css";
+                mode.name = "css";
+                mode.src = cssModeSrc;
                 break;
             case "xml":
-                mode = "xml";
+                mode.name = "xml";
+                mode.src = xmlModeSrc;
                 break;
         }
-        this.editorObject.setOption("mode", mode);
+
+        // When no mode is still set for the text, it seems that CM applies the
+        // first mode that was found and causes loading the text slowly.
+        this.editorObject.setOption("mode", "text/plain");
 
         text = text || "";
         this.editorObject.setValue(text);
+
+        Dom.addScriptAsync(this.parentNode.ownerDocument,
+            mode.src,
+            this.onLoadedModeFile.bind(this, mode.name));
     },
+
+    onLoadedModeFile: function(modeName)
+    {
+        this.editorObject.setOption("mode", modeName);
+    },
+
     getText: function()
     {
         return this.editorObject.getValue();

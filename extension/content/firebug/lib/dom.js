@@ -256,6 +256,20 @@ Dom.addScript = function(doc, id, src)
     return element;
 };
 
+Dom.addScriptAsync = function(doc, src, successCallback)
+{
+    var script = doc.createElement("script");
+    script.type = "text/javascript";
+    script.async = true;
+    script.src = src;
+    script.addEventListener("load", function (event)
+    {
+        successCallback();
+    });
+
+    doc.documentElement.appendChild(script);
+};
+
 Dom.setOuterHTML = function(element, html)
 {
     try
