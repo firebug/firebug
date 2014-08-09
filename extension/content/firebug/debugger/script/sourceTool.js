@@ -757,18 +757,21 @@ function computeDynamicUrl(script, context)
     var type = script.source.introductionType;
     switch (type)
     {
-    case "eventHandler":
-        uniqueUrl = url + id + " " + element.textContent;
+        case "eventHandler":
+            uniqueUrl = url + id + " " + element.textContent;
+            break;
 
-    case "scriptElement":
-        // xxxHonza: how else we could identify a <script> based Script if ID attribute
-        // is not set and the xpath is like script[2]?
-        uniqueUrl = url + id;
+        case "scriptElement":
+            // xxxHonza: how else we could identify a <script> based Script if ID attribute
+            // is not set and the xpath is like script[2]?
+            uniqueUrl = url + id;
+            break;
 
-    case "eval":
-    case "Function":
-        // xxxHonza: TODO These URLs are already unique, but will be removed (see Bug 977255)
-        uniqueUrl = url;
+        case "eval":
+        case "Function":
+            // xxxHonza: TODO These URLs are already unique, but will be removed (see Bug 977255)
+            uniqueUrl = url;
+            break;
     }
 
     // Workaround for issue 7521. Make sure dynamic scripts always have
