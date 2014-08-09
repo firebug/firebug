@@ -186,10 +186,6 @@ SourceEditor.prototype =
         for (var prop in config)
             newConfig[prop] = Wrapper.cloneIntoContentScope(this.win, config[prop]);
 
-        // Is the user interested to disabel syntax highlighting? See Issue 7560.
-        if(!Options.get("enableSyntaxHighlighting"))
-            newConfig["maxHighlightLength"] = 0;
-
         Cu.makeObjectPropsNormal(newConfig);
 
         var self = this;
@@ -422,32 +418,23 @@ SourceEditor.prototype =
 
         Trace.sysout("sourceEditor.setText: " + type + " " + text, text);
 
-        if(Options.get("enableSyntaxHighlighting"))
+        // xxxHonza: the default 'mixedmode' mode should be set only if the text
+        // is actually a markup (first letter == '<'?). Note that applying mixed mode
+        // on plain JS doesn't work (no color syntax at all).
+        var mode = "htmlmixed";
+        switch (type)
         {
-            // xxxHonza: the default 'mixedmode' mode should be set only if the text
-            // is actually a markup (first letter == '<'?). Note that applying mixed mode
-            // on plain JS doesn't work (no color syntax at all).
-            var mode = "htmlmixed";
-            switch (type)
-            {
-                case "js":
-                    mode = "javascript";
-                    break;
-                case "css":
-                    mode = "css";
-                    break;
-                case "xml":
-                    mode = "xml";
-                    break;
-            }
-            this.editorObject.setOption("mode", mode);
+            case "js":
+                mode = "javascript";
+                break;
+            case "css":
+                mode = "css";
+                break;
+            case "xml":
+                mode = "xml";
+                break;
         }
-        else
-        {
-            // No need to set the mode for the source when the user
-            // doesn't want to see syntax highlighting.
-            this.editorObject.setOption("mode", "plain/text");
-        }
+        this.editorObject.setOption("mode", mode);
 
         text = text || "";
         this.editorObject.setValue(text);
