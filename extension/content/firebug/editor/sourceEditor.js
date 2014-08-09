@@ -31,6 +31,7 @@ var Cu = Components.utils;
 var codeMirrorSrc = "chrome://firebug/content/editor/codemirror/codemirror.js";
 var showHintSrc = "chrome://firebug/content/editor/codemirror/addon/show-hint.js";
 var searchCursorSrc = "chrome://firebug/content/editor/codemirror/addon/search/searchcursor.js";
+var loadmodeSrc = "chrome://firebug/content/editor/codemirror/addon/mode/loadmode.js";
 var jsModeSrc = "chrome://firebug/content/editor/codemirror/mode/javascript.js";
 var htmlMixedModeSrc = "chrome://firebug/content/editor/codemirror/mode/htmlmixed.js";
 var xmlModeSrc = "chrome://firebug/content/editor/codemirror/mode/xml.js";
@@ -270,11 +271,16 @@ SourceEditor.prototype =
         loader.addScript(doc, "cm", codeMirrorSrc);
         loader.addScript(doc, "cm-showhint", showHintSrc);
         loader.addScript(doc, "cm-searchcursor", searchCursorSrc);
+        loader.addScript(doc, "cm-loadmode", loadmodeSrc);
+
+        // As the modes load asynchronously on the demand(see setText()),
+        // they don't need to load at the start-up.
+        /*
         loader.addScript(doc, "cm-js", jsModeSrc);
         loader.addScript(doc, "cm-xml", xmlModeSrc);
         loader.addScript(doc, "cm-css", cssModeSrc);
         loader.addScript(doc, "cm-htmlmixed", htmlMixedModeSrc);
-
+        */
         if (loader == this)
             callback();
     },
@@ -421,25 +427,48 @@ SourceEditor.prototype =
         // xxxHonza: the default 'mixedmode' mode should be set only if the text
         // is actually a markup (first letter == '<'?). Note that applying mixed mode
         // on plain JS doesn't work (no color syntax at all).
-        var mode = "htmlmixed";
+        var mode = {name: "htmlmixed", src: htmlMixedModeSrc };
         switch (type)
         {
             case "js":
-                mode = "javascript";
+                mode.name = "javascript";
+                mode.src = jsModeSrc;
                 break;
             case "css":
-                mode = "css";
+                mode.name = "css";
+                mode.src = cssModeSrc;
                 break;
             case "xml":
-                mode = "xml";
+                mode.name = "xml";
+                mode.src = xmlModeSrc;
                 break;
         }
-        this.editorObject.setOption("mode", mode);
 
         text = text || "";
         this.editorObject.setValue(text);
-    },
 
+        // set |modeURL| to show CM the path where
+        // the mode can be loaded from.
+        var cmSingleton = this.getCodeMirrorSingleton();
+        cmSingleton.modeURL = mode.src;
+
+        // Although it doesn't works just now, because of lien #40 in
+        // codemirror/addon/mode/loadmode.js(|others| value is undefind),
+        // I didn't spend more time to write my own method(see the comment
+        // in the onModeLoaded()).
+        cmSingleton.requireMode(mode.name,
+            this.onModeLoaded.bind(this, mode.name));
+    },
+    onModeLoaded: function(modeName) {
+        // @reviewer(s): The performance penalty is here. The time taken to
+        // load the js mode files don't affect like this, so I think we should
+        // find a way to apply the modes asynchronously, line by line when the
+        // viewport is changed(onScrolling e.g.). I'm thinking of runmode
+        // addon here: http://codemirror.net/doc/manual.html#addon_runmode, but
+        // there is still a problem that runMode() needs an argument(third one)
+        // to populate the output. Any thought?
+        this.editorObject.setOption("mode", modeName);
+    },
     getText: function()
     {
         return this.editorObject.getValue();
