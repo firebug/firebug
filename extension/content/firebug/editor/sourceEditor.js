@@ -439,16 +439,6 @@ SourceEditor.prototype =
         text = text || "";
         this.editorObject.setValue(text);
     },
-    onModeLoaded: function(modeName) {
-        // @reviewer(s): The performance penalty is here. The time taken to
-        // load the js mode files don't affect like this, so I think we should
-        // find a way to apply the modes asynchronously, line by line when the
-        // viewport is changed(onScrolling e.g.). I'm thinking of runmode
-        // addon here: http://codemirror.net/doc/manual.html#addon_runmode, but
-        // there is still a problem that runMode() needs an argument(third one)
-        // to populate the output. Any thought?
-        this.editorObject.setOption("mode", modeName);
-    },
     getText: function()
     {
         return this.editorObject.getValue();
