@@ -714,7 +714,6 @@ function hasChildScript(scripts, script)
 
 function computeDynamicUrl(script, context)
 {
-
     // If //# sourceURL is provided just use it. Use introduction URL as the
     // base URL if sourceURL is relative.
     // xxxHonza: displayURL for Functions is set asynchronously, why?.
