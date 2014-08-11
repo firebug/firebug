@@ -215,14 +215,17 @@ var BreakpointModule = Obj.extend(Firebug.Module,
     {
         var type = packet.why.type;
         var tool = context.getTool("debugger");
+        var isDynamic = type == "dynamic-breakpoint";
 
         Trace.sysout("breakpointModule.shouldBreakDebugger;", packet);
 
         // If paused by a breakpoint, evaluate optional condition expression.
-        if (type == "breakpoint")
+        if (type == "breakpoint" || isDynamic)
         {
             var location = packet.frame.where;
-            var bp = BreakpointStore.findBreakpoint(location.url, location.line - 1, -1);
+            var bp = BreakpointStore.findBreakpoint(location.url, location.line - 1, -1, isDynamic);
+
+            Trace.sysout("breakpointModule.shouldBreakDebugger; Testing this breakpoint", bp);
 
             // xxxHonza: hack, breakpoints in dynamic scripts are using different URLs., fix me.
             if (!bp)

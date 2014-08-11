@@ -233,7 +233,7 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
 
     newSource: function(sourceFile)
     {
-        // Get all breakpoints (including dynamic breakpoints) that belong to the
+        // Get all breakpoints (not including dynamic breakpoints) that belong to the
         // newly created source.
         var url = sourceFile.getURL();
         var bps = BreakpointStore.getBreakpoints(url/*, true*/);

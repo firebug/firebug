@@ -213,9 +213,7 @@ SourceTool.prototype = Obj.extend(new Tool(),
         if (!sourceFile || !sourceFile.dynamic)
             return;
 
-        var sourceFile = this.context.getSourceFile(bp.href);
-        var scripts = sourceFile.scripts;
-        if (!scripts.length)
+        if (!sourceFile.scripts.length)
         {
             TraceError.sysout("sourceTool.onAddBreakpoint; ERROR no script object!");
             return;
@@ -225,12 +223,12 @@ SourceTool.prototype = Obj.extend(new Tool(),
 
         // Set the breakpoint in all scripts associated with the same URL
         // as the breakpoint.
-        for (var parentScript of scripts)
+        for (var parentScript of sourceFile.scripts)
         {
             var childScripts = parentScript.getChildScripts();
 
             var scripts = [parentScript];
-            scripts.push.apply(scripts, childScripts);
+            [].push.apply(scripts, childScripts);
 
             for (var script of scripts)
             {
@@ -262,7 +260,6 @@ SourceTool.prototype = Obj.extend(new Tool(),
             return;
         }
 
-        var sourceFile = this.context.getSourceFile(bp.href);
         var scripts = sourceFile.scripts;
         if (!scripts.length)
         {
@@ -274,8 +271,8 @@ SourceTool.prototype = Obj.extend(new Tool(),
         {
             var childScripts = parentScript.getChildScripts();
 
-            var scripts = [parentScript];
-            scripts.push.apply(scripts, childScripts);
+            scripts = [parentScript];
+            [].push.apply(scripts, childScripts);
 
             for (var script of scripts)
             {
@@ -436,7 +433,7 @@ DynamicSourceCollector.prototype =
         if (!sourceFile)
         {
             // xxxHonza: there should be only one place where instance of SourceFile is created.
-            var sourceFile = new SourceFile(this.context, null, url, false, false);
+            sourceFile = new SourceFile(this.context, null, url, false, false);
 
             // xxxHonza: duplicated from {@link SourceFile}
             var source = script.source.text.replace(/\r\n/gm, "\n");
@@ -547,7 +544,7 @@ BreakpointHitHandler.prototype =
 
         var threadActor = DebuggerLib.getThreadActor(this.context.browser);
 
-        var {url} = threadActor.synchronize(
+        threadActor.synchronize(
             threadActor.sources.getOriginalLocation({
                 url: this.bp.href,
                 line: this.bp.lineNo,
@@ -566,9 +563,9 @@ BreakpointHitHandler.prototype =
 
         // Send "pause" packet with a new "dynamic-breakpoint" type.
         // The debugging will start as usual within {@link DebuggerTool#paused} method.
-        return threadActor._pauseAndRespond(frame, "dynamic-breakpoint");
+        return threadActor._pauseAndRespond(frame, {type: "dynamic-breakpoint"});
     }
-}
+};
 
 // ********************************************************************************************* //
 // StackFrame Patch
@@ -657,7 +654,7 @@ ErrorStackTraceObserver.getSourceFile = function(context, script)
         return getSourceFileByScript(context, script);
 
     return originalGetSourceFile.apply(ErrorStackTraceObserver, arguments);
-}
+};
 
 // ********************************************************************************************* //
 // SourceFile Patch
@@ -731,7 +728,7 @@ function computeDynamicUrl(script, context)
             // xxxHonza: hide this, scriptElement scripts don't have introductionScript.
             //TraceError.sysout("sourceTool.computeDynamicUrl; ERROR No introductionScript: " +
             //    script.source.url);
-            return Url.normalizeURL(script.source.url + "/" + displayURL);displayURL;
+            return Url.normalizeURL(script.source.url + "/" + displayURL);
         }
 
         return Url.normalizeURL(introScript.url + "/" + displayURL);
@@ -757,18 +754,21 @@ function computeDynamicUrl(script, context)
     var type = script.source.introductionType;
     switch (type)
     {
-    case "eventHandler":
-        uniqueUrl = url + id + " " + element.textContent;
+        case "eventHandler":
+            uniqueUrl = url + id + " " + element.textContent;
+            break;
 
-    case "scriptElement":
-        // xxxHonza: how else we could identify a <script> based Script if ID attribute
-        // is not set and the xpath is like script[2]?
-        uniqueUrl = url + id;
+        case "scriptElement":
+            // xxxHonza: how else we could identify a <script> based Script if ID attribute
+            // is not set and the xpath is like script[2]?
+            uniqueUrl = url + id;
+            break;
 
-    case "eval":
-    case "Function":
-        // xxxHonza: TODO These URLs are already unique, but will be removed (see Bug 977255)
-        uniqueUrl = url;
+        case "eval":
+        case "Function":
+            // xxxHonza: TODO These URLs are already unique, but will be removed (see Bug 977255)
+            uniqueUrl = url;
+            break;
     }
 
     // Workaround for issue 7521. Make sure dynamic scripts always have
