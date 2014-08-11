@@ -213,8 +213,7 @@ SourceTool.prototype = Obj.extend(new Tool(),
         if (!sourceFile || !sourceFile.dynamic)
             return;
 
-        var scripts = sourceFile.scripts;
-        if (!scripts.length)
+        if (!sourceFile.scripts.length)
         {
             TraceError.sysout("sourceTool.onAddBreakpoint; ERROR no script object!");
             return;
@@ -224,11 +223,11 @@ SourceTool.prototype = Obj.extend(new Tool(),
 
         // Set the breakpoint in all scripts associated with the same URL
         // as the breakpoint.
-        for (var parentScript of scripts)
+        for (var parentScript of sourceFile.scripts)
         {
             var childScripts = parentScript.getChildScripts();
 
-            scripts = [parentScript];
+            var scripts = [parentScript];
             [].push.apply(scripts, childScripts);
 
             for (var script of scripts)
