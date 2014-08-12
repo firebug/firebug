@@ -791,7 +791,7 @@ function computeDynamicUrl(script, context)
             context.uniqueUrlCounterMap = new Map();
         }
 
-        var index = (context.uniqueUrlCounterMap.get(uniqueUrl) || 0);
+        var index = (context.uniqueUrlCounterMap.get(uniqueUrl) || 1);
         // Increment the index because of this script.
         index++;
 
