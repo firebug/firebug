@@ -413,6 +413,7 @@ DynamicSourceCollector.prototype =
 
     addDynamicScript: function(script, type)
     {
+        Trace.sysout("sourceTool.addDynamicScript; enter in function", script);
         // Dynamic scripts use unique URL that is composed from script's location
         // such as line and column number.
         var url = computeDynamicUrl(script, this.context);
@@ -737,11 +738,6 @@ function computeDynamicUrl(script, context)
     if (!context.wmDynamicScriptsUrl)
         context.wmDynamicScriptsUrl = new WeakMap();
 
-    // If the url has already been computed, return the result.
-    var url = context.wmDynamicScriptsUrl.get(script.source);
-    if (url)
-        return url;
-
     // Compute unique URL from location information. We don't want to use any
     // random numbers or counters since breakpoints derive URLs too and they
     // should be persistent.
@@ -751,7 +747,7 @@ function computeDynamicUrl(script, context)
     // Additional auto clean logic might be needed, something like:
     // If an URL is not loaded within a week or two, remove all breakpoints
     // associated with that URL.
-    url = script.source.url;
+    var url = script.source.url;
     var element = script.source.element;
     if (element)
         element = element.unsafeDereference();
@@ -786,24 +782,19 @@ function computeDynamicUrl(script, context)
     var sourceFile = context.getSourceFile(uniqueUrl);
     if (sourceFile)
     {
-        if (!context.uniqueUrlCounterMap)
+        Trace.sysout("sourceTool.computeDynamicUrl; URL already computed. Testing whether " +
+            "the source is the same or not.", sourceFile);
+        if (!(sourceFile.scripts && sourceFile.scripts.length > 0 &&
+            sourceFile.scripts[0].source.text === script.source.text))
         {
-            context.uniqueUrlCounterMap = new Map();
+            Trace.sysout("sourceTool.computeDynamicUrl; Creating a new unique URL for Source File",
+                sourceFile);
+            var index = (context.uniqueUrlCounter || 0) + 1;
+            context.uniqueUrlCounter = sourceFile.uniqueUrlIndex = index;
+            // Update the unique URL so it is really unique.
+            uniqueUrl += " (" + index + ")";
         }
-
-        var index = (context.uniqueUrlCounterMap.get(uniqueUrl) || 1);
-        // Increment the index because of this script.
-        index++;
-
-        // Update the counter map.
-        context.uniqueUrlCounterMap.set(uniqueUrl, index);
-
-        // Update the unique URL so it is really unique.
-        uniqueUrl += " (" + index + ")";
     }
-
-    // Associate the unique URL to the script source so we compute it only once.
-    context.wmDynamicScriptsUrl.set(script.source, uniqueUrl);
 
     return uniqueUrl;
 }
