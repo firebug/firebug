@@ -735,9 +735,6 @@ function computeDynamicUrl(script, context)
         return Url.normalizeURL(introScript.url + "/" + displayURL);
     }
 
-    if (!context.wmDynamicScriptsUrl)
-        context.wmDynamicScriptsUrl = new WeakMap();
-
     // Compute unique URL from location information. We don't want to use any
     // random numbers or counters since breakpoints derive URLs too and they
     // should be persistent.
