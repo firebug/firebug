@@ -187,7 +187,7 @@ Firebug.TabWatcher = Obj.extend(new EventSource(),
                 FBTrace.sysout("tabWatcher.watchTopWindow; page already watched");
                 return;
             }
-            context.reused = true;
+            context.beingReused = true;
         }
         else // then we've not looked this window in this session
         {
@@ -321,6 +321,8 @@ Firebug.TabWatcher = Obj.extend(new EventSource(),
         }
 
         this.watchContext(win, context);  // calls showContext
+
+        context.beingReused = false;
     },
 
     // Listeners decide to show or not
