@@ -231,7 +231,7 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
         // xxxFlorent: FIXME? Opening Firebug twice in detached mode on the same webpage doesn't
         // give the Focus to the Command Line.
         if (this.context.window.document.readyState === "complete" && !isAboutLocation &&
-            !(Firebug.isDetached() && !hasSwitchedPanel) && !this.context.reused)
+            !(Firebug.isDetached() && !hasSwitchedPanel) && !this.context.beingReused)
         {
             CommandLine.focus(this.context);
         }
