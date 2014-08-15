@@ -781,15 +781,31 @@ function computeDynamicUrl(script, context)
     {
         Trace.sysout("sourceTool.computeDynamicUrl; URL already computed. Testing whether " +
             "the source is the same or not.", sourceFile);
-        if (!(sourceFile.scripts && sourceFile.scripts.length > 0 &&
-            sourceFile.scripts[0].source.text === script.source.text))
+
+        if (!sourceFile.otherUniqueUrlsAtSameLocation)
+            sourceFile.otherUniqueUrlsAtSameLocation = [uniqueUrl];
+
+        // Lookup the matching source files 
+        var matchingSourceFileUrl = sourceFile.otherUniqueUrlsAtSameLocation.find((url) =>
+        {
+            var sf = context.getSourceFile(url);
+            return sf.scripts && sf.scripts.length > 0 &&
+                sf.scripts[0].source.text === script.source.text;
+        });
+
+        if (matchingSourceFileUrl)
+        {
+            uniqueUrl = matchingSourceFileUrl;
+        }
+        else
         {
             Trace.sysout("sourceTool.computeDynamicUrl; Creating a new unique URL for Source File",
                 sourceFile);
-            var index = (context.uniqueUrlCounter || 0) + 1;
-            context.uniqueUrlCounter = sourceFile.uniqueUrlIndex = index;
+            var index = (sourceFile.uniqueUrlIndex || 0) + 1;
+            sourceFile.uniqueUrlIndex = index;
             // Update the unique URL so it is really unique.
             uniqueUrl += " (" + index + ")";
+            sourceFile.otherUniqueUrlsAtSameLocation.push(uniqueUrl);
         }
     }
 
