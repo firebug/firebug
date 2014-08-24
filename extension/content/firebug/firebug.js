@@ -304,6 +304,18 @@ window.Firebug =
     {
         window.removeEventListener("unload", shutdownFirebug, false);
 
+        // Save the UI attributes, so they can be persisted across browser sessions
+        try {
+            var xulStore = Cc["@mozilla.org/xul/xulstore;1"].getService(Ci.nsIXULStore);
+            var attributes = ["width", "height"];
+            attributes.forEach((attr) => {
+                var value = Firebug.browserOverlay.doc.getElementById("fbMainFrame").
+                    getAttribute(attr);
+                xulStore.setValue(Firebug.browserOverlay.doc, "fbMainFrame", attr, value);
+            });
+        }
+        catch (e) {}
+
         Events.dispatch(modules, "disable", [Firebug.chrome]);
     },
 

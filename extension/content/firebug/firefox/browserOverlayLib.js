@@ -269,18 +269,30 @@ function updatePersistedValues(doc, options)
 {
     var persist = options.persist.split(",");
     var id = options.id;
-    var RDF = Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService);
-    var store = doc.defaultView.PlacesUIUtils.localStore; //this.RDF.GetDataSource("rdf:local-store");
-    var root = RDF.GetResource("chrome://browser/content/browser.xul#" + id);
-
-    var getPersist = function getPersist(aProperty)
+    try
     {
-        var property = RDF.GetResource(aProperty);
-        var target = store.GetTarget(root, property, true);
+        var xulStore = Cc["@mozilla.org/xul/xulstore;1"].getService(Ci.nsIXULStore);
 
-        if (target instanceof Ci.nsIRDFLiteral)
-            return target.Value;
-    };
+        var getPersist = function getPersist(attr)
+        {
+            return xulStore.getValue(doc, id, attr);
+        }
+    }
+    catch(e)
+    {
+        var RDF = Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService);
+        var store = doc.defaultView.PlacesUIUtils.localStore; //this.RDF.GetDataSource("rdf:local-store");
+        var root = RDF.GetResource("chrome://browser/content/browser.xul#" + id);
+
+        var getPersist = function getPersist(aProperty)
+        {
+            var property = RDF.GetResource(aProperty);
+            var target = store.GetTarget(root, property, true);
+
+            if (target instanceof Ci.nsIRDFLiteral)
+                return target.Value;
+        };
+    }
 
     for (var i=0; i<persist.length; i++)
     {
