@@ -89,7 +89,7 @@ var CookieUtils =
     parseFromString: function(string)
     {
         var cookie = new Object();
-        var pairs = string.split("; ");
+        var pairs = string.split(/;\s*/);
 
         for (var i=0; i<pairs.length; i++)
         {
