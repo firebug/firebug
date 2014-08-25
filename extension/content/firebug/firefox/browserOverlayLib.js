@@ -275,7 +275,7 @@ function updatePersistedValues(doc, options)
 
         var getPersist = function getPersist(attr)
         {
-            return xulStore.getValue(doc, id, attr);
+            return xulStore.getValue(doc.documentURI, id, attr);
         }
     }
     catch(e)

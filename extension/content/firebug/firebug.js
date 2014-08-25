@@ -311,7 +311,8 @@ window.Firebug =
             attributes.forEach((attr) => {
                 var value = Firebug.browserOverlay.doc.getElementById("fbMainFrame").
                     getAttribute(attr);
-                xulStore.setValue(Firebug.browserOverlay.doc, "fbMainFrame", attr, value);
+                xulStore.setValue(Firebug.browserOverlay.doc.documentURI, "fbMainFrame", attr,
+                    value);
             });
         }
         catch (e) {}
