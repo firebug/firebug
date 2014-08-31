@@ -790,7 +790,8 @@ function computeDynamicUrl(script, context)
         {
             var sf = context.getSourceFile(url);
             return sf.scripts && sf.scripts.length > 0 &&
-                sf.scripts[0].source.text === script.source.text;
+                (sf.scripts[0].source === script.source ||
+                sf.scripts[0].source.text === script.source.text);
         });
 
         if (matchingSourceFileUrl)
