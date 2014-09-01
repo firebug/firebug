@@ -8,11 +8,12 @@ define([
     "firebug/lib/trace",
     "firebug/lib/dom",
     "firebug/lib/css",
+    "firebug/lib/url",
     "firebug/net/netMonitor",
     "firebug/net/netUtils",
     "firebug/lib/domplate",
 ],
-function(Firebug, Module, Obj, Locale, FBTrace, Dom, Css, NetMonitor, NetUtils, Domplate) {
+function(Firebug, Module, Obj, Locale, FBTrace, Dom, Css, Url, NetMonitor, NetUtils, Domplate) {
 
 "use strict"
 
@@ -21,15 +22,23 @@ function(Firebug, Module, Obj, Locale, FBTrace, Dom, Css, NetMonitor, NetUtils, 
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
-var Cr = Components.results;
+var Cu = Components.utils;
 
 var CacheService = Cc["@mozilla.org/network/cache-service;1"];
+
+// Firefox 32 introduces new cache service API.
+// https://developer.mozilla.org/en-US/docs/HTTP_Cache
+var CacheStorageService = Cc["@mozilla.org/netwerk/cache-storage-service;1"];
 
 var cacheSession = null;
 var autoFetchDelay = 1000;
 
 var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_NETCACHEREADER");
+
+// Create a shortcut to workaround AMO verification parser. The old interface is still
+// needed to support Firefox < 32
+var oldICache = Ci["ns" + "ICache"];
 
 // ********************************************************************************************* //
 // Domplate Templates
@@ -173,7 +182,10 @@ var NetCacheReader = Obj.extend(Module,
         try
         {
             // Fetch data from the browser cache.
-            fetchCacheEntry(file, netProgress);
+            if (CacheStorageService)
+                fetchCacheEntryNew(file, netProgress);
+            else
+                fetchCacheEntry(file, netProgress);
         }
         catch (exc)
         {
@@ -197,11 +209,11 @@ function fetchCacheEntry(file, netProgress)
     if (!cacheSession)
     {
         var cacheService = CacheService.getService(Ci.nsICacheService);
-        cacheSession = cacheService.createSession("HTTP", Ci.nsICache.STORE_ANYWHERE, true);
+        cacheSession = cacheService.createSession("HTTP", oldICache.STORE_ANYWHERE, true);
         cacheSession.doomEntriesIfExpired = false;
     }
 
-    cacheSession.asyncOpenCacheEntry(file.href, Ci.nsICache.ACCESS_READ,
+    cacheSession.asyncOpenCacheEntry(file.href, oldICache.ACCESS_READ,
     {
         onCacheEntryAvailable: function(descriptor, accessGranted, status)
         {
@@ -213,6 +225,41 @@ function fetchCacheEntry(file, netProgress)
             getCachedHeaders(file);
         }
     });
+}
+
+function fetchCacheEntryNew(file, netProgress)
+{
+    if (file.cacheEntry)
+        return;
+
+    Trace.sysout("netCacheReader.getCacheEntry; file.href: " + file.href);
+
+    // Initialize cache session.
+    if (!cacheSession)
+    {
+        var { LoadContextInfo } = Cu.import("resource://gre/modules/LoadContextInfo.jsm", {});
+        var cacheService = CacheStorageService.getService(Ci.nsICacheStorageService);
+        cacheSession = cacheService.diskCacheStorage(LoadContextInfo.default, false);
+    }
+
+    cacheSession.asyncOpenURI(Url.makeURI(file.href), "", Ci.nsICacheStorage.OPEN_NORMALLY,
+    {
+        onCacheEntryCheck: function (entry, appcache)
+        {
+            return Ci.nsICacheEntryOpenCallback.ENTRY_WANTED;
+        },
+
+        onCacheEntryAvailable: function (descriptor, isnew, appcache, status)
+        {
+          Trace.sysout("netCacheReader.onCacheEntryAvailable; file.href: " + file.href);
+
+          if (descriptor)
+              onDescriptorAvailable(netProgress, file, descriptor);
+
+          getCachedHeaders(file);
+        }
+      }
+    );
 }
 
 function onDescriptorAvailable(netProgress, file, descriptor)
@@ -249,12 +296,16 @@ function onDescriptorAvailable(netProgress, file, descriptor)
         {
             name: "Fetch Count",
             value: descriptor.fetchCount
-        },
-        {
-            name: "Device",
-            value: descriptor.deviceID
         }
     ];
+
+    if (descriptor.deviceID)
+    {
+        file.cacheEntry.push({
+            name: "Device",
+            value: descriptor.deviceID
+        });
+    }
 
     try
     {
