@@ -29,7 +29,7 @@ const Cr = Components.results;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const reIgnore = /about:|javascript:|resource:|chrome:|jar:/;
-const reResponseStatus = /HTTP\/1\.\d\s(\d+)\s(.*)/;
+const reResponseStatus = /HTTP\/\d\.\d\s(\d+)\s(.*)/;
 
 var panelName = "net";
 
