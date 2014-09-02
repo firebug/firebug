@@ -413,6 +413,7 @@ DynamicSourceCollector.prototype =
 
     addDynamicScript: function(script, type)
     {
+        Trace.sysout("sourceTool.addDynamicScript; enter in function", script);
         // Dynamic scripts use unique URL that is composed from script's location
         // such as line and column number.
         var url = computeDynamicUrl(script, this.context);
@@ -778,45 +779,41 @@ function computeDynamicUrl(script, context)
     var sourceFile = context.getSourceFile(uniqueUrl);
     if (sourceFile)
     {
-        // Use hash of the script source as unique identifier.
-        var hash = getSourceHash(script.source.text);
+        Trace.sysout("sourceTool.computeDynamicUrl; URL already computed. Testing whether " +
+            "the source is the same or not.", sourceFile);
 
-        if (!context.uniqueUrlMap)
+        if (!sourceFile.otherUniqueUrlsAtSameLocation)
+            sourceFile.otherUniqueUrlsAtSameLocation = [uniqueUrl];
+
+        // Lookup the matching source files.
+        var matchingSourceFileUrl = sourceFile.otherUniqueUrlsAtSameLocation.find((url) =>
         {
-            context.uniqueUrlMap = new Map();
-            context.uniqueUrlCounter = 0;
-        }
+            var sf = context.getSourceFile(url);
+            return sf.scripts && sf.scripts.length > 0 &&
+                (sf.scripts[0].source === script.source ||
+                sf.scripts[0].source.text === script.source.text);
+        });
 
-        var index = context.uniqueUrlMap.get(hash);
-        if (typeof index == "undefined")
+        if (matchingSourceFileUrl)
         {
-            index = ++context.uniqueUrlCounter;
-            context.uniqueUrlMap.set(hash, index);
+            uniqueUrl = matchingSourceFileUrl;
         }
-
-        uniqueUrl += " (" + index + ")";
+        else
+        {
+            Trace.sysout("sourceTool.computeDynamicUrl; Creating a new unique URL for Source File",
+                sourceFile);
+            var index = (sourceFile.uniqueUrlIndex || 0) + 1;
+            sourceFile.uniqueUrlIndex = index;
+            // Update the unique URL so it is really unique.
+            uniqueUrl += " (" + index + ")";
+            sourceFile.otherUniqueUrlsAtSameLocation.push(uniqueUrl);
+        }
     }
 
     return uniqueUrl;
 }
 
 // ********************************************************************************************* //
-
-function getSourceHash(source)
-{
-    var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].
-        createInstance(Ci.nsIScriptableUnicodeConverter);
-    converter.charset = "UTF-8";
-
-    var result = {};
-    var data = converter.convertToByteArray(source, result);
-    var ch = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
-
-    ch.init(ch.MD5);
-    ch.update(data, data.length);
-
-    return ch.finish(true);
-}
 
 function getElementId(script)
 {
