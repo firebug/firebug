@@ -36,7 +36,8 @@ var autoFetchDelay = 1000;
 var TraceError = FBTrace.toError();
 var Trace = FBTrace.to("DBG_NETCACHEREADER");
 
-// Concatenated the interface string to workaround the AMO verification parser.
+// Concatenated the interface string as workaround, so we don't get a warning from the AMO
+// verification parser.
 // The old interface is still needed to support Firefox < 32.
 var oldICache = Ci["ns" + "ICache"];
 
