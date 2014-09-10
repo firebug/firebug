@@ -767,7 +767,7 @@ function computeDynamicUrl(script, context)
 
             if (url.charAt(0) === "/")
             {
-                var reURLPrefix = /^.*:\/\/.*?(?=\/)/;
+                var reURLPrefix = /^[^:]*:\/{2,3}.*?(?=\/)/;
                 var urlPrefix = loc.match(reURLPrefix);
                 if (urlPrefix)
                     url = urlPrefix[0] + url;
