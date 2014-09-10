@@ -749,6 +749,40 @@ function computeDynamicUrl(script, context)
     if (element)
         element = element.unsafeDereference();
 
+
+    // 'displayURL' is not correctly recognized in all cases, so fix the remaining cases here.
+    // (see issue 6813, issue 6969, https://bugzil.la/981987 and https://bugzil.la/1065259)
+    var reSourceURL = /\/\/[@#]\ssource(Mapping)?URL=\s*(\S*?)\s*$/m;
+    var sourceURLMatch = script.source.text.match(reSourceURL);
+    if (sourceURLMatch)
+    {
+        var url = sourceURLMatch[2];
+
+        // Add context info to the sourceURL so eval'd sources are grouped
+        // correctly in the source file list
+        if (url && !url.contains("://"))
+        {
+            var loc = script.source.introductionScript ?
+                script.source.introductionScript.url : script.source.url;
+
+            if (url.charAt(0) === "/")
+            {
+                var reURLPrefix = /^.*:\/\/.*?(?=\/)/;
+                var urlPrefix = loc.match(reURLPrefix);
+                if (urlPrefix)
+                    url = urlPrefix[0] + url;
+            }
+            else
+            {
+                if (loc.charAt(loc.length - 1) !== "/")
+                    loc += "/"; 
+                url = loc + url;
+            }
+        }
+
+        return Url.normalizeURL(new String(url));
+    }
+
     var uniqueUrl = url;
 
     var id = getElementId(script);
@@ -767,7 +801,8 @@ function computeDynamicUrl(script, context)
 
         case "eval":
         case "Function":
-            // xxxHonza: TODO These URLs are already unique, but will be removed (see Bug 977255)
+            // xxxHonza: TODO These URLs are already unique, but will be removed
+            // (see https://bugzil.la/957798)
             uniqueUrl = url;
             break;
     }
