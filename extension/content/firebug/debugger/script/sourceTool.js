@@ -780,7 +780,7 @@ function computeDynamicUrl(script, context)
             }
         }
 
-        return Url.normalizeURL(new String(url));
+        return Url.normalizeURL(url);
     }
 
     var uniqueUrl = url;
