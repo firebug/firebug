@@ -105,7 +105,7 @@ Url.splitDataURL = function(url)
     return props;
 };
 
-const reSplitFile = /(.*?):\/{2,3}([^\/]*)(.*?)([^\/]*?)($|\?.*)/;
+const reSplitFile = /^([^:]*):\/{2,3}([^\/]*)(.*?)([^\/]*?)($|\?.*)/;
 Url.splitURLTrue = function(url)
 {
     var m = reSplitFile.exec(url);
