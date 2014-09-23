@@ -752,7 +752,7 @@ function computeDynamicUrl(script, context)
 
     // 'displayURL' is not correctly recognized in all cases, so fix the remaining cases here.
     // (see issue 6813, issue 6969, https://bugzil.la/981987 and https://bugzil.la/1065259)
-    var reSourceURL = /\/\/[@#]\ssource(Mapping)?URL=\s*(\S*?)\s*$/m;
+    var reSourceURL = /\/\/[@#]\ssourceURL=\s*(\S*?)\s*$/m;
     var sourceURLMatch = script.source.text.match(reSourceURL);
     if (sourceURLMatch)
     {
