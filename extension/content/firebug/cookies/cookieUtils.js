@@ -114,27 +114,11 @@ var CookieUtils =
                         break;
 
                     case "max-age":
-                        //Remove dash from variable name
                         cookie.maxAge = option[1];
                         break;
 
                     case "expires":
-                        var value = option[1];
-                        value = value.replace(/-/g, " ");
-                        cookie[name] = Date.parse(value) / 1000;
-
-                        // Log error if the date isn't correctly parsed.
-                        if (FBTrace.DBG_COOKIES)
-                        {
-                            var tempDate = new Date(cookie[name] * 1000);
-                            if (value != tempDate.toGMTString())
-                            {
-                                FBTrace.sysout("cookies.parseFromString: ERROR, " +
-                                    "from: " + value +
-                                    ", to: " + tempDate.toGMTString() +
-                                    ", cookie: " + string);
-                            }
-                        }
+                        cookie[name] = parseDate(option[1]);
                         break;
 
                     default:
@@ -142,6 +126,13 @@ var CookieUtils =
                 }
             }
         }
+
+        // If the expiration date and the max. age are not set for the cookie,
+        // it is a session cookie and therefore needs to be marked as such
+        // by setting the expiration date to 0
+        // (see issue 7658)
+        if (!cookie.hasOwnProperty("expires") && !cookie.hasOwnProperty("maxAge"))
+            cookie.expires = 0;
 
         return cookie;
     },
@@ -178,6 +169,37 @@ var CookieUtils =
         return Wrapper.cloneIntoContentScope(global, cookie);
     }
 };
+
+// ********************************************************************************************* //
+// Helper functions
+
+function parseDate(dateString)
+{
+    // Date.parse() doesn't support the 2-digit year format and dashes,
+    // so reformat it appropriatly
+    // (see issue 7658)
+    dateString = dateString.replace(/(\d\d)(\s|-)([a-z]+|\d\d)\2(\d{2,4})/i, (...match) =>
+    {
+        return match[1] + " " + match[3] + " " +
+            (match[4].length === 2 ? "20" + match[4] : match[4]);
+    });
+
+    var date = Date.parse(dateString) / 1000;
+
+    // Log error if the date isn't correctly parsed.
+    if (FBTrace.DBG_COOKIES)
+    {
+        var tempDate = new Date(date * 1000);
+        if (dateString != tempDate.toGMTString())
+        {
+            FBTrace.sysout("CookieUtils.parseDate: ERROR, " +
+                "from: " + dateString +
+                ", to: " + tempDate.toGMTString());
+        }
+    }
+
+    return date;
+}
 
 // ********************************************************************************************* //
 
