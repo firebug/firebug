@@ -417,7 +417,7 @@ var NetHttpObserver =
 
         try
         {
-            if (FBTrace.DBG_NET_EVENTS)
+            //if (FBTrace.DBG_NET_EVENTS)
             {
                 FBTrace.sysout("net.events.observe " + (topic ? topic.toUpperCase() : topic) +
                     ", " + ((subject instanceof Ci.nsIRequest) ? Http.safeGetRequestName(subject) : "") +
@@ -427,7 +427,13 @@ var NetHttpObserver =
             if (!(subject instanceof Ci.nsIHttpChannel))
                 return;
 
+            var loadContext = Http.getRequestLoadContext(subject);
+            FBTrace.sysout("!!! loadContex " + loadContext, subject);
+
             var win = Http.getWindowForRequest(subject);
+            
+            FBTrace.sysout("!!! win " + win);
+            
             var context = Firebug.connection.getContextByWindow(win);
 
             // The context doesn't have to exist yet. In such cases a temp Net context is

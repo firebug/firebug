@@ -232,14 +232,24 @@ function fetchCacheEntryNew(file, netProgress)
     if (file.cacheEntry)
         return;
 
-    Trace.sysout("netCacheReader.getCacheEntry; file.href: " + file.href);
+    FBTrace.sysout("netCacheReader.getCacheEntry; file.href: " + file.href, {
+      file: file, netProgress: netProgress
+    });
 
+    FBTrace.sysout("request", file.request);
+    
     // Initialize cache session.
     if (!cacheSession)
     {
         var { LoadContextInfo } = Cu.import("resource://gre/modules/LoadContextInfo.jsm", {});
         var cacheService = CacheStorageService.getService(Ci.nsICacheStorageService);
-        cacheSession = cacheService.diskCacheStorage(LoadContextInfo.default, false);
+        var { PrivateBrowsingUtils } = Cu.import("resource://gre/modules/PrivateBrowsingUtils.jsm", {});
+
+        var loadContext = PrivateBrowsingUtils.privacyContextFromWindow(
+            netProgress.context.window, false);
+
+        cacheSession = cacheService.diskCacheStorage(
+            LoadContextInfo.fromLoadContext(loadContext), false);
     }
 
     cacheSession.asyncOpenURI(Url.makeURI(file.href), "", Ci.nsICacheStorage.OPEN_NORMALLY,
