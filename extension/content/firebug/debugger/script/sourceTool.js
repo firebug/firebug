@@ -757,7 +757,6 @@ function computeDynamicUrl(script, context)
     // (see issue 6813, issue 6969, https://bugzil.la/981987 and https://bugzil.la/1065259)
     var reSourceURL = /\/\/[@#]\ssourceURL=\s*(\S*?)\s*$/m;
     var sourceURLMatch = script.source.text.match(reSourceURL);
-    FBTrace.sysout("sourceURLMatch", sourceURLMatch);
     if (sourceURLMatch)
     {
         url = sourceURLMatch[1];
@@ -766,7 +765,6 @@ function computeDynamicUrl(script, context)
         // correctly in the source file list
         if (url && !url.contains("://"))
         {
-            FBTrace.sysout("introductionScript", script.source.introductionScript.url);
             var loc = script.source.introductionScript ?
                 script.source.introductionScript.url : script.source.url;
 
@@ -785,7 +783,6 @@ function computeDynamicUrl(script, context)
             }
         }
 
-        FBTrace.sysout("url", {script: script, loc: loc, url: Url.normalizeURL(url)});
         return Url.normalizeURL(url);
     }
 
