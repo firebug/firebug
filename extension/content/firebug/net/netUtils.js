@@ -229,7 +229,7 @@ var NetUtils =
             return file.postText;
 
         var limit = Options.get("netDisplayedPostBodyLimit");
-        if (file.postText.length > limit && !noLimit)
+        if (limit !== 0 && file.postText.length > limit && !noLimit)
         {
             return Str.cropString(file.postText, limit,
                 "\n\n... " + Locale.$STR("net.postDataSizeLimitMessage") + " ...\n\n");

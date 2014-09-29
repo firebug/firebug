@@ -495,6 +495,9 @@ DynamicSourceCollector.prototype =
         }
 
         sourceFile.scripts.push(script);
+        // Keep the length of the first original source.
+        // It is used to optimize the comparison of two sources in computeDynamicUrl.
+        sourceFile.originalSourceLength = script.source ? script.source.text.length : undefined;
 
         // Initialize breakpoints for the new script.
         var bps = BreakpointStore.getBreakpoints(sourceFile.href);
@@ -786,12 +789,18 @@ function computeDynamicUrl(script, context)
             sourceFile.otherUniqueUrlsAtSameLocation = [uniqueUrl];
 
         // Lookup the matching source files.
+        var newScriptLength = script.source.text.length;
         var matchingSourceFileUrl = sourceFile.otherUniqueUrlsAtSameLocation.find((url) =>
         {
             var sf = context.getSourceFile(url);
-            return sf.scripts && sf.scripts.length > 0 &&
-                (sf.scripts[0].source === script.source ||
-                sf.scripts[0].source.text === script.source.text);
+
+            if (!sf.scripts || sf.scripts.length === 0)
+                return;
+
+            var curScript = sf.scripts[0];
+            return curScript.source === script.source ||
+                sf.originalSourceLength === newScriptLength &&
+                curScript.source.text === script.source.text;
         });
 
         if (matchingSourceFileUrl)
