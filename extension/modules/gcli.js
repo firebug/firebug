@@ -123,7 +123,10 @@ var commands = [];
 
 function addCommand(command)
 {
-    scope.gcli.addCommand(command);
+    if (scope.gcli.addCommand)
+        scope.gcli.addCommand(command);
+    else
+        scope.gcli.addItems([command]);
     commands.push(command);
 }
 
