@@ -448,9 +448,13 @@ SourceEditor.prototype =
         text = text || "";
         this.editorObject.setValue(text);
 
-        Dom.addScriptAsync(this.parentNode.ownerDocument,
-            mode.src,
-            this.onLoadedModeFile.bind(this, mode.name));
+        // See issue #7679.
+        if(Options.get("enableSyntaxHighlight"))
+        {
+            Dom.addScriptAsync(this.parentNode.ownerDocument,
+                mode.src,
+                this.onLoadedModeFile.bind(this, mode.name));
+        }
     },
 
     onLoadedModeFile: function(modeName)
