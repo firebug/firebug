@@ -448,8 +448,7 @@ SourceEditor.prototype =
         text = text || "";
         this.editorObject.setValue(text);
 
-        // See issue #7679.
-        if(Options.get("enableSyntaxHighlight"))
+        if(Options.get("enableSyntaxHighlighting"))
         {
             Dom.addScriptAsync(this.parentNode.ownerDocument,
                 mode.src,
