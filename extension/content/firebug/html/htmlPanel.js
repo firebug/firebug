@@ -2073,6 +2073,8 @@ function getNodeBoxTag(nodeBox)
     var nodeBoxType = m[1];
     if (nodeBoxType == "container")
         return HTMLReps.Element.tag;
+    else if (nodeBoxType == "html")
+        return HTMLReps.HTMLHtmlElement.tag;
     else if (nodeBoxType == "text")
         return HTMLReps.TextElement.tag;
     else if (nodeBoxType == "empty")
