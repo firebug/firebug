@@ -12,7 +12,7 @@
     </resources>
     <content>
         <xul:panel anonid="panel" norestorefocus="true" noautofocus="true"
-            ignorekeys="true" role="presentation" type="arrow" noautohide="true" class="panel">
+            ignorekeys="true" role="presentation" type="arrow" class="panel">
             <xul:hbox>
                 <xul:vbox class="iconbox">
                     <xul:image src="chrome://firebug/skin/firebug64.png"/>
