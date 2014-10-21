@@ -33,10 +33,10 @@
                         class="text-link popup-notification-learnmore-link learnMore"
                         href="https://getfirebug.com/"/>
                     <xul:hbox align="right">
-                        <xul:button anonid="upgrade" type="menu-button"
+                        <xul:button anonid="upgrade" type="menu-button" oncommand="onUpgrade(event)"
                             class="popup-notification-menubutton">
                             <xul:menupopup>
-                                <xul:menuitem anonid="disable"/>
+                                <xul:menuitem anonid="disable" oncommand="onDisable(event)"/>
                             </xul:menupopup>
                         </xul:button>
                     </xul:hbox>
@@ -80,6 +80,21 @@
                 panel.openPopup(startButton.button, "after_end", -offsetX, -offsetY, false, false);
             ]]></body>
         </method>
+
+        <method name="onDisable">
+            <parameter name="event" />
+            <body><![CDATA[
+            event.stopPropagation();
+            ]]></body>
+        </method>
+
+        <method name="onUpgrade">
+            <parameter name="event" />
+            <body><![CDATA[
+            event.stopPropagation();
+            ]]></body>
+        </method>
+
     </implementation>
 
 </binding>
