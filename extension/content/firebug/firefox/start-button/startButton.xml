@@ -19,28 +19,25 @@
     </content>
 
     <implementation>
-        <constructor><![CDATA[
-            var content = document.getElementById("content");
-            if (content.mCurrentBrowser.isRemoteBrowser)
-            {
-                this.removeAttribute("contextmenu");
-                this.setAttribute("type", "button");
-
-                this.button.classList.remove("toolbarbutton-menubutton-button");
-                this.button.classList.add("toolbarbutton-1");
-                this.button.classList.add("chromeclass-toolbar-additional");
-
-                var dropMarker = document.getAnonymousElementByAttribute(this,
-                    "anonid", "dropmarker");
-                dropMarker.setAttribute("collapsed", "true");
-            }
-        ]]></constructor>
-
         <property name="button">
             <xbl:getter><![CDATA[
                 return document.getAnonymousElementByAttribute(this, "anonid", "button");
             ]]></xbl:getter>
         </property>
+
+        <method name="mutliprocessEnabled">
+            <body><![CDATA[
+            this.removeAttribute("contextmenu");
+            this.setAttribute("type", "button");
+
+            this.button.classList.remove("toolbarbutton-menubutton-button");
+            this.button.classList.add("toolbarbutton-1");
+            this.button.classList.add("chromeclass-toolbar-additional");
+            var dropMarker = document.getAnonymousElementByAttribute(this,
+                "anonid", "dropmarker");
+            dropMarker.setAttribute("collapsed", "true");
+            ]]></body>
+        </method>
     </implementation>
 
 </binding>

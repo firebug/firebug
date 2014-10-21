@@ -89,6 +89,10 @@ BrowserOverlay.prototype =
 
         this.internationalize();
         this.allPagesActivation();
+
+        if (this.isMultiprocessEnabled()) {
+          this.initializeMultiprocessUI();
+        }
     },
 
     internationalize: function()
@@ -132,8 +136,7 @@ BrowserOverlay.prototype =
     startFirebug: function(callback)
     {
         // Special case for e10s enabled browser.
-        var content = $(this.doc, "content");
-        if (content.mCurrentBrowser.isRemoteBrowser) {
+        if (this.isMultiprocessEnabled()) {
           this.showMultiprocessNotification();
           return;
         }
@@ -595,6 +598,29 @@ BrowserOverlay.prototype =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Remote Browser (aka e10s enabled browser)
+
+    isMultiprocessEnabled: function()
+    {
+        var content = $(this.doc, "content");
+        if (content.mCurrentBrowser.isRemoteBrowser)
+          return true;
+
+        if (this.win.gBrowser.isRemoteBrowser)
+          return true;
+
+        if (Options.getPref("browser.tabs", "remote.autostart"))
+          return true;
+
+        return false;
+    },
+
+    initializeMultiprocessUI: function()
+    {
+      this.win.setTimeout(() => {
+        var startButton = this.doc.getElementById("firebug-button");
+        startButton.mutliprocessEnabled();
+      });
+    },
 
     showMultiprocessNotification: function()
     {
