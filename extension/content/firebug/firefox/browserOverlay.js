@@ -31,6 +31,7 @@ Locale.registerStringBundle("chrome://firebug/locale/selectors.properties");
 Locale.registerStringBundle("chrome://firebug/locale/keys.properties");
 Locale.registerStringBundle("chrome://global-platform/locale/platformKeys.properties");
 Locale.registerStringBundle("chrome://global/locale/keys.properties");
+Locale.registerStringBundle("chrome://firebug/locale/multiprocess-notification.properties");
 
 Cu.import("resource://firebug/loader.js");
 Cu.import("resource://firebug/fbtrace.js");
@@ -129,6 +130,13 @@ BrowserOverlay.prototype =
      */
     startFirebug: function(callback)
     {
+        // Special case for e10s enabled browser.
+        var content = $(this.doc, "content");
+        if (content.mCurrentBrowser.isRemoteBrowser) {
+          this.showMultiprocessNotification();
+          return;
+        }
+
         if (this.win.Firebug.waitingForFirstLoad)
             return;
 
@@ -139,8 +147,6 @@ BrowserOverlay.prototype =
             FBTrace.sysout("overlay; Load Firebug...", (callback ? callback.toString() : ""));
 
         this.win.Firebug.waitingForFirstLoad = true;
-
-        var container = $(this.doc, "appcontent");
 
         // List of Firebug scripts that must be loaded into the global scope (browser.xul)
         // FBTrace is no longer loaded into the global space.
@@ -159,6 +165,8 @@ BrowserOverlay.prototype =
             // isn't parsed when inserted into the second browser window. See issue 6731
             // $script(self.doc, url);
         });
+
+        var container = $(this.doc, "appcontent");
 
         // Create Firebug splitter element.
         $el(this.doc, "splitter", {id: "fbContentSplitter", collapsed: "true"}, container);
@@ -582,7 +590,24 @@ BrowserOverlay.prototype =
             "nsIVersionComparator");
 
         return versionChecker.compare(version, currentVersion);
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Remote Browser (aka e10s enabled browser)
+
+    showMultiprocessNotification: function()
+    {
+        var popupSet = $(this.doc, "mainPopupSet");
+        var panel = this.doc.querySelector("fbMultiprocessNotificationPanel");
+        if (!panel)
+        {
+            panel = this.doc.createElement("fbMultiprocessNotificationPanel");
+            popupSet.appendChild(panel);
+        }
+
+        panel.internationalize(Locale);
+        panel.open();
+    },
 };
 
 // ********************************************************************************************* //

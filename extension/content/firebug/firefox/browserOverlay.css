@@ -192,3 +192,34 @@
 .firebugButtonTooltip .panelName.on {
     color: black;
 }
+
+/*************************************************************************************************/
+/* Start Button - Multiprocess Notification Panel */
+
+fbMultiprocessNotificationPanel {
+    -moz-binding: url("chrome://firebug/content/firefox/multiprocessNotificationPanel.xml#panel");
+}
+
+fbMultiprocessNotificationPanel .iconbox{
+    padding-right: 10px;
+}
+
+fbMultiprocessNotificationPanel .desc {
+    max-width: 300px;
+}
+
+fbMultiprocessNotificationPanel .warn {
+    max-width: 275px;
+}
+
+fbMultiprocessNotificationPanel .warn {
+    color: gray;
+}
+
+fbMultiprocessNotificationPanel .warningbox {
+    margin-top: 15px;
+}
+
+fbMultiprocessNotificationPanel .warningicon {
+    margin-right: 4px;
+}
