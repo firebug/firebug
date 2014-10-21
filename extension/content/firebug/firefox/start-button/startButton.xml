@@ -23,7 +23,9 @@
             var content = document.getElementById("content");
             if (content.mCurrentBrowser.isRemoteBrowser)
             {
+                this.removeAttribute("contextmenu");
                 this.setAttribute("type", "button");
+
                 this.button.classList.remove("toolbarbutton-menubutton-button");
                 this.button.classList.add("toolbarbutton-1");
                 this.button.classList.add("chromeclass-toolbar-additional");
