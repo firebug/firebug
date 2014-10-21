@@ -36,6 +36,7 @@ Locale.registerStringBundle("chrome://firebug/locale/multiprocess-notification.p
 
 Cu.import("resource://firebug/loader.js");
 Cu.import("resource://firebug/fbtrace.js");
+Cu.import("resource://gre/modules/AddonManager.jsm");
 
 var servicesScope = {};
 Cu.import("resource://gre/modules/Services.jsm", servicesScope);
@@ -652,7 +653,10 @@ BrowserOverlay.prototype =
     {
       Events.cancelEvent(event);
 
-      FBTrace.sysout("onUpgradeFirebug");
+      // xxxHonza: TODO:
+      // - Install Firebug 3 (alpha) from getfirebug.com
+      // - Setup a page for "Learn more..." link in the notification
+      //  AddonManager.installAddonsFromWebpage
     },
 };
 
