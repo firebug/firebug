@@ -5,6 +5,7 @@ define([
     "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/lib/locale",
+    "firebug/lib/http",
     "firebug/lib/trace",
     "firebug/lib/dom",
     "firebug/lib/css",
@@ -13,7 +14,7 @@ define([
     "firebug/net/netUtils",
     "firebug/lib/domplate",
 ],
-function(Firebug, Module, Obj, Locale, FBTrace, Dom, Css, Url, NetMonitor, NetUtils, Domplate) {
+function(Firebug, Module, Obj, Locale, Http, FBTrace, Dom, Css, Url, NetMonitor, NetUtils, Domplate) {
 
 "use strict"
 
@@ -240,7 +241,18 @@ function fetchCacheEntryNew(file, netProgress)
     {
         var { LoadContextInfo } = Cu.import("resource://gre/modules/LoadContextInfo.jsm", {});
         var cacheService = CacheStorageService.getService(Ci.nsICacheStorageService);
-        cacheSession = cacheService.diskCacheStorage(LoadContextInfo.default, false);
+        var defaultLoadContext = LoadContextInfo.default;
+        var win = Http.getWindowForRequest(file.request);
+        if (win)
+        {
+            let loadContext = win.QueryInterface(Ci.nsIInterfaceRequestor)
+                .getInterface(Ci.nsIWebNavigation)
+                .QueryInterface(Ci.nsILoadContext);
+
+            defaultLoadContext = LoadContextInfo.fromLoadContext(loadContext, false)
+        }
+
+        cacheSession = cacheService.diskCacheStorage(defaultLoadContext, false);
     }
 
     cacheSession.asyncOpenURI(Url.makeURI(file.href), "", Ci.nsICacheStorage.OPEN_NORMALLY,
