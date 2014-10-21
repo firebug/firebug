@@ -4,6 +4,7 @@ define([
     "firebug/lib/trace",
     "firebug/lib/options",
     "firebug/lib/locale",
+    "firebug/lib/events",
     "firebug/lib/array",
     "firebug/lib/string",
     "firebug/lib/xpcom",
@@ -13,7 +14,7 @@ define([
     "firebug/firefox/browserToolbar",
     "firebug/lib/system",
 ],
-function(FBTrace, Options, Locale, Arr, Str, Xpcom, BrowserOverlayLib, BrowserCommands,
+function(FBTrace, Options, Locale, Events, Arr, Str, Xpcom, BrowserOverlayLib, BrowserCommands,
     BrowserMenu, BrowserToolbar, System) {
 
 // ********************************************************************************************* //
@@ -602,11 +603,30 @@ BrowserOverlay.prototype =
         if (!panel)
         {
             panel = this.doc.createElement("fbMultiprocessNotificationPanel");
+            panel.setAttribute("upgradecommand", "Firebug.browserOverlay.onUpgradeFirebug(event)");
+            panel.setAttribute("disablecommand", "Firebug.browserOverlay.onDisableE10s(event)");
             popupSet.appendChild(panel);
         }
 
         panel.internationalize(Locale);
         panel.open();
+    },
+
+    onDisableE10s: function(event)
+    {
+      Events.cancelEvent(event);
+
+      Options.setPref("browser.tabs", "remote.autostart", false);
+
+      Cc["@mozilla.org/toolkit/app-startup;1"].getService(Ci.nsIAppStartup).
+          quit(Ci.nsIAppStartup.eRestart | Ci.nsIAppStartup.eAttemptQuit);
+    },
+
+    onUpgradeFirebug: function(event)
+    {
+      Events.cancelEvent(event);
+
+      FBTrace.sysout("onUpgradeFirebug");
     },
 };
 
