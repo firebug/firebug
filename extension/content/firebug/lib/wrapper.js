@@ -128,7 +128,8 @@ function isPrimitive(obj)
 function cloneFunction(win, func)
 {
     var obj = XPCNativeWrapper.unwrap(new win.Object());
-    Object.defineProperty(obj, "f", {value: func});
+    var desc = {value: func, writable: true, configurable: true, enumerable: true};
+    Object.defineProperty(obj, "f", desc);
     Cu.makeObjectPropsNormal(obj);
     return obj.f;
 }
