@@ -1297,27 +1297,6 @@ LineHighlighter.prototype =
 };
 
 // ********************************************************************************************* //
-// Support for Debugging - Tracing
-
-/**
- * Expose FBTrace to the Firebug UI (panel.html). This help to debug problems
- * with CodeMirror, since tracing lines can be directly inserted into CM code.
- * See also {@SourceEditor.init} where the exposure happens.
- */
-var ExposedFBTrace =
-{
-    sysout: function(msg, obj)
-    {
-        FBTrace.sysout(msg, obj);
-    },
-
-    __exposedProps__:
-    {
-        sysout: "r"
-    }
-};
-
-// ********************************************************************************************* //
 // Support for Debugging - Async script loader
 
 function ScriptLoader(doc, callback)
@@ -1330,7 +1309,9 @@ function ScriptLoader(doc, callback)
     // Expose FBTrace into the panel.html (and codemirror.js), so
     // debugging is easier. Should *not* be part of the distribution.
     var view = Wrapper.getContentView(doc.defaultView);
-    view.FBTrace = ExposedFBTrace;
+    view.FBTrace = Wrapper.cloneIntoContentScope(view, {
+        sysout: function() { FBTrace.sysout.apply(FBTrace, arguments); }
+    });
 }
 
 /**
