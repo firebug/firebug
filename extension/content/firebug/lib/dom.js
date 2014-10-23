@@ -998,10 +998,12 @@ Dom.isInlineEventHandler = function(name)
 
 var WindowProps =
 {
+    "FontFaceSet": 1,
     "Infinity": 1,
     "InstallTrigger": 1,
     "NaN": 1,
     "SpeechSynthesis": 1,
+    "clearMaxGCPauseAccumulator": 1,
     "decodeURI": 1,
     "decodeURIComponent": 1,
     "dumpProfile": 1,
@@ -1009,6 +1011,7 @@ var WindowProps =
     "encodeURIComponent": 1,
     "escape": 1,
     "external": 1,
+    "getMaxGCPauseSinceClear": 1,
     "isFinite": 1,
     "isNaN": 1,
     "netscape": 1,
