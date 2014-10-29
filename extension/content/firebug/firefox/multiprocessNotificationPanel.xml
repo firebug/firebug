@@ -33,6 +33,9 @@
                         class="text-link popup-notification-learnmore-link learnMore"
                         href="https://getfirebug.com/"/>
                     <xul:hbox align="right">
+                        <xul:progressmeter anonid="progress" class="progress"
+                            mode="determined" value="0" collapsed="true"/>
+                        <xul:spacer width="20px" />
                         <xul:button anonid="upgrade" type="menu-button"
                             xbl:inherits="oncommand=upgradecommand"
                             class="popup-notification-menubutton">
@@ -41,8 +44,10 @@
                                     xbl:inherits="oncommand=disablecommand"/>
                             </xul:menupopup>
                         </xul:button>
+                        <xul:button anonid="cancel" type="button" collapsed="true"
+                            xbl:inherits="oncommand=cancelcommand">
+                        </xul:button>
                     </xul:hbox>
-
                 </xul:vbox>
             </xul:hbox>
         </xul:panel>
@@ -69,6 +74,9 @@
 
                 var disableMenu = document.getAnonymousElementByAttribute(this, "anonid", "disable");
                 disableMenu.label = Locale.$STR("multiprocess.disable");
+
+                var cancelButton = document.getAnonymousElementByAttribute(this, "anonid", "cancel");
+                cancelButton.label = Locale.$STR("multiprocess.cancel");
             ]]></body>
         </method>
 
@@ -82,6 +90,24 @@
                 panel.openPopup(startButton.button, "after_end", -offsetX, -offsetY, false, false);
             ]]></body>
         </method>
+
+        <property name="progress">
+            <getter><![CDATA[
+                return document.getAnonymousElementByAttribute(this, "anonid", "progress");
+            ]]></getter>
+        </property>
+
+        <property name="upgradeButton">
+            <getter><![CDATA[
+                return document.getAnonymousElementByAttribute(this, "anonid", "upgrade");
+            ]]></getter>
+        </property>
+
+        <property name="cancelButton">
+            <getter><![CDATA[
+                return document.getAnonymousElementByAttribute(this, "anonid", "cancel");
+            ]]></getter>
+        </property>
     </implementation>
 </binding>
 </bindings>

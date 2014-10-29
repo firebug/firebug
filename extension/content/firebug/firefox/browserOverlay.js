@@ -14,8 +14,8 @@ define([
     "firebug/firefox/browserToolbar",
     "firebug/lib/system",
 ],
-function(FBTrace, Options, Locale, Events, Arr, Str, Xpcom, BrowserOverlayLib, BrowserCommands,
-    BrowserMenu, BrowserToolbar, System) {
+function(FBTrace, Options, Locale, Events, Arr, Str, Xpcom, BrowserOverlayLib,
+    BrowserCommands, BrowserMenu, BrowserToolbar, System) {
 
 // ********************************************************************************************* //
 // Constants
@@ -617,10 +617,11 @@ BrowserOverlay.prototype =
 
     initializeMultiprocessUI: function()
     {
+      // xxxHonza: when exactly is the binding applied?
       this.win.setTimeout(() => {
         var startButton = this.doc.getElementById("firebug-button");
         startButton.mutliprocessEnabled();
-      });
+      }, 400);
     },
 
     showMultiprocessNotification: function()
@@ -632,6 +633,7 @@ BrowserOverlay.prototype =
             panel = this.doc.createElement("fbMultiprocessNotificationPanel");
             panel.setAttribute("upgradecommand", "Firebug.browserOverlay.onUpgradeFirebug(event)");
             panel.setAttribute("disablecommand", "Firebug.browserOverlay.onDisableE10s(event)");
+            panel.setAttribute("cancelcommand", "Firebug.browserOverlay.onCancelUpgrade(event)");
             popupSet.appendChild(panel);
         }
 
@@ -645,20 +647,121 @@ BrowserOverlay.prototype =
 
       Options.setPref("browser.tabs", "remote.autostart", false);
 
-      Cc["@mozilla.org/toolkit/app-startup;1"].getService(Ci.nsIAppStartup).
-          quit(Ci.nsIAppStartup.eRestart | Ci.nsIAppStartup.eAttemptQuit);
+      restartFirefox();
     },
 
     onUpgradeFirebug: function(event)
     {
-      Events.cancelEvent(event);
+        Events.cancelEvent(event);
 
-      // xxxHonza: TODO:
-      // - Install Firebug 3 (alpha) from getfirebug.com
-      // - Setup a page for "Learn more..." link in the notification
-      //  AddonManager.installAddonsFromWebpage
+        var self = this;
+        var panel = this.doc.querySelector("fbMultiprocessNotificationPanel");
+
+        // Listen for installation end
+        var listener =
+        {
+          onInstallEnded: function(install, addon)
+          {
+              install.removeListener(listener);
+              self.install = null;
+
+              // Bug 749745: on FF14+, onInstallEnded is called just before `startup()`
+              // is called, but we expect to resolve the promise only after it.
+              // As startup is called synchronously just after onInstallEnded,
+              // a simple setTimeout(0) is enough
+              self.win.setTimeout(function()
+              {
+                restartFirefox();
+              }, 0);
+          },
+          onInstallFailed: function (install)
+          {
+              install.removeListener(listener);
+              self.install = null;
+              Cu.reportError(install.error);
+          },
+          onDownloadFailed: function(install)
+          {
+              this.onInstallFailed(install);
+          },
+          onDownloadStarted: function(install)
+          {
+              panel.progress.setAttribute("value", "0");
+              panel.upgradeButton.setAttribute("collapsed", "true");
+              panel.progress.removeAttribute("collapsed");
+              panel.cancelButton.removeAttribute("collapsed");
+          },
+          onDownloadProgress: function(install)
+          {
+              var value = install.progress / (install.maxProgress / 100);
+              panel.progress.value = value;
+          }
+        };
+
+        findFirebugUpdate(function(url)
+        {
+            AddonManager.getInstallForURL(url, (install) =>
+            {
+                install.addListener(listener);
+                install.install();
+                self.install = install;
+            }, "application/x-xpinstall");
+        });
+
+        // TODO: Setup a page for "Learn more..." link in the notification
     },
+
+    onCancelUpgrade: function(event)
+    {
+        Events.cancelEvent(event);
+
+        if (!this.install)
+          return;
+
+        this.install.cancel();
+        this.install = null;
+
+        var panel = this.doc.querySelector("fbMultiprocessNotificationPanel");
+        panel.upgradeButton.removeAttribute("collapsed");
+        panel.progress.setAttribute("value", "0");
+        panel.progress.setAttribute("collapsed", "true");
+        panel.cancelButton.setAttribute("collapsed", "true");
+    }
 };
+
+function findFirebugUpdate(callback)
+{
+    const XMLHttpRequest = Components.Constructor(
+      "@mozilla.org/xmlextras/xmlhttprequest;1", "nsIXMLHttpRequest");
+
+    var url = "https://getfirebug.com/releases/firebug/3.0/update.rdf";
+    var xhr = new XMLHttpRequest({mozAnon: true});
+    xhr.open("GET", url, true);
+
+    xhr.onload = function()
+    {
+        if (xhr.status !== 200)
+          return;
+
+        var parser = Xpcom.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
+        var doc = parser.parseFromString(xhr.responseText, "text/xml");
+        var root = doc.documentElement;
+        var link = root.querySelector("updateLink");
+        callback(link.textContent);
+    };
+
+    xhr.onerror = function(e)
+    {
+        Cu.reportError(e.target.status);
+    };
+
+    xhr.send(null);
+}
+
+function restartFirefox() {
+    Cc["@mozilla.org/toolkit/app-startup;1"].getService(Ci.nsIAppStartup).
+        quit(Ci.nsIAppStartup.eRestart | Ci.nsIAppStartup.eAttemptQuit);
+}
 
 // ********************************************************************************************* //
 // Registration

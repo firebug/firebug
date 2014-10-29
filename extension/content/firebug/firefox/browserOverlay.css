@@ -223,3 +223,7 @@ fbMultiprocessNotificationPanel .warningbox {
 fbMultiprocessNotificationPanel .warningicon {
     margin-right: 4px;
 }
+
+fbMultiprocessNotificationPanel .progress {
+    margin: 8px;
+}
