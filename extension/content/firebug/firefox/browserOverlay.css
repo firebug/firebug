@@ -200,10 +200,16 @@ fbMultiprocessNotificationPanel {
     -moz-binding: url("chrome://firebug/content/firefox/multiprocessNotificationPanel.xml#panel");
 }
 
-fbMultiprocessNotificationPanel .iconbox{
+fbAuroraNotificationPanel {
+    -moz-binding: url("chrome://firebug/content/firefox/auroraNotificationPanel.xml#panel");
+}
+
+fbAuroraNotificationPanel .iconbox,
+fbMultiprocessNotificationPanel .iconbox {
     padding-right: 10px;
 }
 
+fbAuroraNotificationPanel .desc,
 fbMultiprocessNotificationPanel .desc {
     max-width: 300px;
 }
@@ -224,6 +230,7 @@ fbMultiprocessNotificationPanel .warningicon {
     margin-right: 4px;
 }
 
+fbAuroraNotificationPanel .progress,
 fbMultiprocessNotificationPanel .progress {
     margin: 8px;
 }

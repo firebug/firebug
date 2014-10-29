@@ -20,8 +20,11 @@
 
     <implementation>
         <constructor><![CDATA[
-        if (Firebug.browserOverlay.isMultiprocessEnabled())
-            this.mutliprocessEnabled();
+        if (Firebug.browserOverlay.isMultiprocessEnabled() ||
+            Firebug.browserOverlay.isAuroraChannel())
+        {
+            this.disableFirebugActions();
+        }
         ]]></constructor>
 
         <property name="button">
@@ -30,7 +33,7 @@
             ]]></xbl:getter>
         </property>
 
-        <method name="mutliprocessEnabled">
+        <method name="disableFirebugActions">
             <body><![CDATA[
             this.removeAttribute("contextmenu");
             this.setAttribute("type", "button");
@@ -43,6 +46,21 @@
             dropMarker.setAttribute("collapsed", "true");
             ]]></body>
         </method>
+
+        <method name="enableFirebugActions">
+            <body><![CDATA[
+            this.setAttribute("contextmenu", "fbStatusContextMenu");
+            this.setAttribute("type", "menu-button");
+
+            this.button.classList.add("toolbarbutton-menubutton-button");
+            this.button.classList.remove("toolbarbutton-1");
+            this.button.classList.remove("chromeclass-toolbar-additional");
+            var dropMarker = document.getAnonymousElementByAttribute(this,
+                "anonid", "dropmarker");
+            dropMarker.removeAttribute("collapsed");
+            ]]></body>
+        </method>
+
     </implementation>
 
 </binding>

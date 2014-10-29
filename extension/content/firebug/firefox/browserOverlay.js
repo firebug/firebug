@@ -137,6 +137,10 @@ BrowserOverlay.prototype =
           this.showMultiprocessNotification();
           return;
         }
+        else if (this.isAuroraChannel()) {
+          this.showAuroraNotification();
+          return;
+        }
 
         if (this.win.Firebug.waitingForFirstLoad)
             return;
@@ -609,6 +613,67 @@ BrowserOverlay.prototype =
           return true;
 
         return false;
+    },
+
+    isAuroraChannel: function() {
+      if (this.notNow)
+          return false;
+
+      if (Options.get("noThanksFirebugNext"))
+          return false;
+
+      return (servicesScope.Services.prefs.getCharPref("app.update.channel") == "aurora");
+    },
+
+    showAuroraNotification: function()
+    {
+        var popupSet = $(this.doc, "mainPopupSet");
+        var panel = this.doc.querySelector("fbAuroraNotificationPanel");
+        if (!panel)
+        {
+            panel = this.doc.createElement("fbAuroraNotificationPanel");
+            panel.setAttribute("upgradecommand", "Firebug.browserOverlay.onUpgradeFirebug(event)");
+            panel.setAttribute("notnowcommand", "Firebug.browserOverlay.onNotNow(event)");
+            panel.setAttribute("nothankscommand", "Firebug.browserOverlay.onNoThanks(event)");
+            panel.setAttribute("cancelcommand", "Firebug.browserOverlay.onCancelUpgrade(event)");
+            popupSet.appendChild(panel);
+        }
+
+        panel.internationalize(Locale);
+        panel.open();
+    },
+
+    onNoThanks: function(event)
+    {
+        Events.cancelEvent(event);
+
+        // Not sure why the timeout needs to be here, but the 'close'
+        // method is only available asynchronously.
+        this.win.setTimeout(() => {
+          Options.set("noThanksFirebugNext", true);
+          this.openFirebug2(event.target);
+        });
+    },
+
+    onNotNow: function(event)
+    {
+        Events.cancelEvent(event);
+
+        this.win.setTimeout(() => {
+          this.notNow = true;
+          this.openFirebug2(event.target);
+        });
+    },
+
+    openFirebug2: function(panel)
+    {
+        var button = this.doc.getElementById("firebug-button");
+        button.enableFirebugActions();
+        panel.close();
+
+        this.startFirebug(function(Firebug) {
+            Firebug.toggleBar(true);
+        });
     },
 
     showMultiprocessNotification: function()
