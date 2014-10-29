@@ -59,14 +59,16 @@ Wrapper.isChromeObject = function(obj, chromeWin)
 };
 
 /**
- * Create a content-accessible view of a simple chrome object. All properties
- * are marked as non-writable, except if they have explicit getters/setters.
+ * Create a content-accessible view of a simple chrome object or function. All
+ * properties are marked as non-writable, except if they have explicit getters/setters.
  */
 Wrapper.cloneIntoContentScope = function(global, obj)
 {
+    global = Wrapper.wrapObject(global);
+    if (typeof obj === "function")
+        return cloneFunction(global, obj);
     if (!obj || typeof obj !== "object")
         return obj;
-    global = Wrapper.wrapObject(global);
     var newObj = (Array.isArray(obj) ? new global.Array() : new global.Object());
     newObj = XPCNativeWrapper.unwrap(newObj);
     for (var prop in obj)
@@ -128,7 +130,8 @@ function isPrimitive(obj)
 function cloneFunction(win, func)
 {
     var obj = XPCNativeWrapper.unwrap(new win.Object());
-    Object.defineProperty(obj, "f", {value: func});
+    var desc = {value: func, writable: true, configurable: true, enumerable: true};
+    Object.defineProperty(obj, "f", desc);
     Cu.makeObjectPropsNormal(obj);
     return obj.f;
 }

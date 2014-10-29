@@ -191,24 +191,25 @@ SourceEditor.prototype =
         var self = this;
 
         // Create editor;
-        this.editorObject = contentView.CodeMirror(function(view)
+        var clone = this.cloneIntoCMScope.bind(this);
+        this.editorObject = contentView.CodeMirror(clone(function(view)
         {
             Trace.sysout("sourceEditor.onEditorCreate;");
 
             parentNode.appendChild(view);
             self.view = view;
-        }, newConfig);
+        }), newConfig);
 
         // Mark lines so, we can search for them (see e.g. getLineIndex method).
-        this.editorObject.on("renderLine", function(cm, lineHandle, element)
+        this.editorObject.on("renderLine", clone(function(cm, lineHandle, element)
         {
             Css.setClass(element, "firebug-line");
-        });
+        }));
 
         // xxxHonza: 'contextmenu' event provides wrong target (clicked) element.
         // So, handle 'mousedown' first to remember the clicked element, etc. and
         // allow to use it through getContextMenuInfo.
-        var scroller = this.editorObject.display.scroller;
+        var scroller = Wrapper.wrapObject(this.editorObject.display.scroller);
         scroller.addEventListener("mousedown", this.onMouseDown.bind(this));
 
         Trace.sysout("sourceEditor.init; ", this.view);
@@ -292,8 +293,6 @@ SourceEditor.prototype =
     {
         Trace.sysout("sourceEditor.addEventListener; " + type);
 
-        var editorNode;
-
         if (isBuiltInEvent(type))
         {
             var func = function()
@@ -317,12 +316,11 @@ SourceEditor.prototype =
                         return;
                 }
 
-                editorNode = this.editorObject.getWrapperElement();
-                editorNode.addEventListener(type, handler, false);
+                this.getViewElement().addEventListener(type, handler, false);
             }
 
             this.BuiltInEventsHandlers[type].push({ handler: handler, func: func });
-            this.editorObject.on(type, func);
+            this.editorObject.on(type, this.cloneIntoCMScope(func));
         }
         else if (type == SourceEditor.Events.breakpointChange)
         {
@@ -344,10 +342,7 @@ SourceEditor.prototype =
             }
 
             if (supportedEvent)
-            {
-                editorNode = this.editorObject.getWrapperElement();
-                editorNode.addEventListener(type, handler, false);
-            }
+                this.getViewElement().addEventListener(type, handler, false);
         }
     },
 
@@ -400,10 +395,7 @@ SourceEditor.prototype =
             }
 
             if (supportedEvent)
-            {
-                var editorNode = this.editorObject.getWrapperElement();
-                editorNode.removeEventListener(type, handler, false);
-            }
+                this.getViewElement().removeEventListener(type, handler, false);
         }
     },
 
@@ -656,7 +648,7 @@ SourceEditor.prototype =
     {
         var clone = this.cloneIntoCMScope.bind(this);
         var self = this;
-        var contentHintFunction = function(editor)
+        var contentHintFunction = clone(function(editor)
         {
             editor = Wrapper.unwrapObject(editor);
             var ret = hintFunction(self, editor);
@@ -670,7 +662,7 @@ SourceEditor.prototype =
                 from: clone(ret.from),
                 to: clone(ret.to)
             });
-        };
+        });
         this.getCodeMirrorSingleton().showHint(this.editorObject, contentHintFunction);
     },
 
@@ -1107,17 +1099,17 @@ SourceEditor.prototype =
 
     getViewElement: function()
     {
-        return this.editorObject.getWrapperElement();
+        return Wrapper.wrapObject(this.editorObject.getWrapperElement());
     },
 
     getGutterElement: function()
     {
-        return this.editorObject.getGutterElement();
+        return Wrapper.wrapObject(this.editorObject.getGutterElement());
     },
 
     getScrollerElement: function()
     {
-        return this.editorObject.getScrollerElement();
+        return Wrapper.wrapObject(this.editorObject.getScrollerElement());
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1297,27 +1289,6 @@ LineHighlighter.prototype =
 };
 
 // ********************************************************************************************* //
-// Support for Debugging - Tracing
-
-/**
- * Expose FBTrace to the Firebug UI (panel.html). This help to debug problems
- * with CodeMirror, since tracing lines can be directly inserted into CM code.
- * See also {@SourceEditor.init} where the exposure happens.
- */
-var ExposedFBTrace =
-{
-    sysout: function(msg, obj)
-    {
-        FBTrace.sysout(msg, obj);
-    },
-
-    __exposedProps__:
-    {
-        sysout: "r"
-    }
-};
-
-// ********************************************************************************************* //
 // Support for Debugging - Async script loader
 
 function ScriptLoader(doc, callback)
@@ -1330,7 +1301,9 @@ function ScriptLoader(doc, callback)
     // Expose FBTrace into the panel.html (and codemirror.js), so
     // debugging is easier. Should *not* be part of the distribution.
     var view = Wrapper.getContentView(doc.defaultView);
-    view.FBTrace = ExposedFBTrace;
+    view.FBTrace = Wrapper.cloneIntoContentScope(view, {
+        sysout: function() { FBTrace.sysout.apply(FBTrace, arguments); }
+    });
 }
 
 /**

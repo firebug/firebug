@@ -28,6 +28,10 @@ var CommandLineAPI = {};
 CommandLineAPI.getCommandLineAPI = function(context)
 {
     var commands = Object.create(null);
+    var clone = function(object)
+    {
+        return Wrapper.cloneIntoContentScope(context.baseWindow, object);
+    };
 
     // returns unwrapped elements from the page
     commands.$ = function(selector, start)
@@ -60,7 +64,7 @@ CommandLineAPI.getCommandLineAPI = function(context)
             result = context.baseWindow.document.querySelectorAll(selector);
         }
 
-        return Arr.cloneArray(result);
+        return clone(Arr.cloneArray(result));
     };
 
     // returns unwrapped elements from the page
@@ -91,10 +95,11 @@ CommandLineAPI.getCommandLineAPI = function(context)
                 break;
         }
 
-        var doc = Wrapper.unwrapObject(context.baseWindow.document);
         try
         {
-            return Xpath.evaluateXPath(doc, xpath, contextNode, XPathResultType);
+            var doc = context.baseWindow.document;
+            var res = Xpath.evaluateXPath(doc, xpath, contextNode, XPathResultType);
+            return (Array.isArray(res) ? clone(res) : res);
         }
         catch(ex)
         {
@@ -154,13 +159,13 @@ CommandLineAPI.getCommandLineAPI = function(context)
     commands.keys = function(o)
     {
         // the object is from the page, unwrapped
-        return Arr.keys(o);
+        return clone(Arr.keys(o));
     };
 
     commands.values = function(o)
     {
         // the object is from the page, unwrapped
-        return Arr.values(o);
+        return clone(Arr.values(o));
     };
 
     commands.traceAll = function()

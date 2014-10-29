@@ -538,7 +538,7 @@ var NetUtils =
 
         function cloneHeaders(headers)
         {
-            var newHeaders = [];
+            var newHeaders = new global.Array();
             for (var i=0; headers && i<headers.length; i++)
             {
                 var header = {name: headers[i].name, value: headers[i].value};

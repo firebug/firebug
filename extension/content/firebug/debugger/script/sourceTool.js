@@ -59,6 +59,7 @@ var versionComparator = Cc["@mozilla.org/xpcom/version-comparator;1"]
     .getService(Ci.nsIVersionComparator);
 var fx30 = (versionComparator.compare(appInfo.version, "30a1") >= 0 &&
     versionComparator.compare(appInfo.version, "30.*") <= 0);
+var fx35OrEarlier = (versionComparator.compare(appInfo.version, "36a1") < 0);
 
 var dynamicTypesMap = {
     "eval": CompilationUnit.EVAL,
@@ -614,13 +615,13 @@ function buildStackFrame(frame, context)
         // Use proper (dynamically generated) URL.
         stackFrame.href = sourceFile.href;
 
-        // xxxHonza: line numbers seem to be wrong for 'scriptElement' scripts,
-        // but only for those that are injected into the page using textContent
+        // Prior to Firefox 36, line numbers were wrong for dynamically injected
+        // 'scriptElement' scripts that don't refer to an external resource, e.g.:
         // var script = document.createElement("script");
         // script.textContent = source;
         // document.body.appendChild(scriptTag);
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=982153
-        if (script.source.introductionType == "scriptElement")
+        // See https://bugzilla.mozilla.org/show_bug.cgi?id=982153.
+        if (fx35OrEarlier && script.source.introductionType == "scriptElement")
         {
             var element = DebuggerLib.unwrapDebuggeeValue(script.source.element);
             var src = element.getAttribute("src");
