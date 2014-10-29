@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<!-- See license.txt for terms of usage -->
+
+<bindings xmlns="http://www.mozilla.org/xbl"
+    xmlns:xbl="http://www.mozilla.org/xbl"
+    xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    xmlns:html="http://www.w3.org/1999/xhtml">
+
+<binding id="panel">
+    <resources>
+      <stylesheet src="chrome://global/skin/notification.css"/>
+    </resources>
+    <content>
+        <xul:panel anonid="panel" norestorefocus="true" noautofocus="true"
+            ignorekeys="true" role="presentation" type="arrow" class="panel">
+            <xul:hbox>
+                <xul:vbox class="iconbox">
+                    <xul:image src="chrome://firebug/skin/firebug64.png"/>
+                </xul:vbox>
+                <xul:vbox>
+                    <xul:description anonid="desc" class="desc" />
+                    <xul:hbox class="warningbox">
+                        <xul:vbox>
+                            <xul:spacer flex="1"/>
+                            <xul:image src="chrome://firebug/skin/warning.svg" class="warningicon"/>
+                            <xul:spacer flex="1"/>
+                        </xul:vbox>
+                        <xul:vbox>
+                            <xul:description anonid="warning" class="warn" />
+                        </xul:vbox>
+                    </xul:hbox>
+                    <xul:label anonid="learnMore"
+                        class="text-link popup-notification-learnmore-link learnMore"
+                        href="https://getfirebug.com/"/>
+                    <xul:hbox align="right">
+                        <xul:progressmeter anonid="progress" class="progress"
+                            mode="determined" value="0" collapsed="true"/>
+                        <xul:spacer width="20px" />
+                        <xul:button anonid="upgrade" type="menu-button"
+                            xbl:inherits="oncommand=upgradecommand"
+                            class="popup-notification-menubutton">
+                            <xul:menupopup>
+                                <xul:menuitem anonid="disable"
+                                    xbl:inherits="oncommand=disablecommand"/>
+                            </xul:menupopup>
+                        </xul:button>
+                        <xul:button anonid="cancel" type="button" collapsed="true"
+                            xbl:inherits="oncommand=cancelcommand">
+                        </xul:button>
+                    </xul:hbox>
+                </xul:vbox>
+            </xul:hbox>
+        </xul:panel>
+    </content>
+
+    <implementation>
+        <constructor><![CDATA[
+        ]]></constructor>
+
+        <method name="internationalize">
+            <parameter name="Locale" />
+            <body><![CDATA[
+                var desc = document.getAnonymousElementByAttribute(this, "anonid", "desc");
+                desc.textContent = Locale.$STR("multiprocess.description");
+
+                var warn = document.getAnonymousElementByAttribute(this, "anonid", "warning");
+                warn.textContent = Locale.$STR("multiprocess.warning");
+
+                var learnMore = document.getAnonymousElementByAttribute(this, "anonid", "learnMore");
+                learnMore.textContent = Locale.$STR("multiprocess.learnMore");
+
+                var upgradeButton = document.getAnonymousElementByAttribute(this, "anonid", "upgrade");
+                upgradeButton.label = Locale.$STR("multiprocess.upgrade");
+
+                var disableMenu = document.getAnonymousElementByAttribute(this, "anonid", "disable");
+                disableMenu.label = Locale.$STR("multiprocess.disable");
+
+                var cancelButton = document.getAnonymousElementByAttribute(this, "anonid", "cancel");
+                cancelButton.label = Locale.$STR("multiprocess.cancel");
+            ]]></body>
+        </method>
+
+        <method name="open">
+            <body><![CDATA[
+                var offsetY = 0;
+                var offsetX = 0;
+                var target = document.getElementById("nav-bar-customization-target");
+
+                var startButton = document.getElementById("firebug-button");
+                if (startButton) {
+                    var style = document.defaultView.getComputedStyle(startButton.button);
+                    offsetY = parseInt(style["padding-bottom"]);
+                    offsetX = parseInt(style["width"])/2;
+                    target = startButton.button;
+                }
+
+                var panel = document.getAnonymousElementByAttribute(this, "anonid", "panel");
+                panel.openPopup(target, "after_end", -offsetX, -offsetY, false, false);
+            ]]></body>
+        </method>
+
+        <property name="progress">
+            <getter><![CDATA[
+                return document.getAnonymousElementByAttribute(this, "anonid", "progress");
+            ]]></getter>
+        </property>
+
+        <property name="upgradeButton">
+            <getter><![CDATA[
+                return document.getAnonymousElementByAttribute(this, "anonid", "upgrade");
+            ]]></getter>
+        </property>
+
+        <property name="cancelButton">
+            <getter><![CDATA[
+                return document.getAnonymousElementByAttribute(this, "anonid", "cancel");
+            ]]></getter>
+        </property>
+    </implementation>
+</binding>
+</bindings>

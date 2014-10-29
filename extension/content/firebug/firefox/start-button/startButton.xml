@@ -15,8 +15,35 @@
             anonid="button" flex="1" allowevents="true"
             xbl:inherits="disabled,crop,image,label,accesskey,command,align,dir,pack,orient"/>
         <xul:dropmarker type="menu-button" class="toolbarbutton-menubutton-dropmarker"
-            xbl:inherits="align,dir,pack,orient,disabled,label"/>
+            anonid="dropmarker" xbl:inherits="align,dir,pack,orient,disabled,label"/>
     </content>
+
+    <implementation>
+        <constructor><![CDATA[
+        if (Firebug.browserOverlay.isMultiprocessEnabled())
+            this.mutliprocessEnabled();
+        ]]></constructor>
+
+        <property name="button">
+            <xbl:getter><![CDATA[
+                return document.getAnonymousElementByAttribute(this, "anonid", "button");
+            ]]></xbl:getter>
+        </property>
+
+        <method name="mutliprocessEnabled">
+            <body><![CDATA[
+            this.removeAttribute("contextmenu");
+            this.setAttribute("type", "button");
+
+            this.button.classList.remove("toolbarbutton-menubutton-button");
+            this.button.classList.add("toolbarbutton-1");
+            this.button.classList.add("chromeclass-toolbar-additional");
+            var dropMarker = document.getAnonymousElementByAttribute(this,
+                "anonid", "dropmarker");
+            dropMarker.setAttribute("collapsed", "true");
+            ]]></body>
+        </method>
+    </implementation>
 
 </binding>
 
