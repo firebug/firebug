@@ -90,10 +90,6 @@ BrowserOverlay.prototype =
 
         this.internationalize();
         this.allPagesActivation();
-
-        if (this.isMultiprocessEnabled()) {
-          this.initializeMultiprocessUI();
-        }
     },
 
     internationalize: function()
@@ -613,15 +609,6 @@ BrowserOverlay.prototype =
           return true;
 
         return false;
-    },
-
-    initializeMultiprocessUI: function()
-    {
-      // xxxHonza: when exactly is the binding applied?
-      this.win.setTimeout(() => {
-        var startButton = this.doc.getElementById("firebug-button");
-        startButton.mutliprocessEnabled();
-      }, 400);
     },
 
     showMultiprocessNotification: function()

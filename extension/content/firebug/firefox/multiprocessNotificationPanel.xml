@@ -82,12 +82,20 @@
 
         <method name="open">
             <body><![CDATA[
-                var panel = document.getAnonymousElementByAttribute(this, "anonid", "panel");
+                var offsetY = 0;
+                var offsetX = 0;
+                var target = document.getElementById("nav-bar-customization-target");
+
                 var startButton = document.getElementById("firebug-button");
-                var style = document.defaultView.getComputedStyle(startButton.button);
-                var offsetY = parseInt(style["padding-bottom"]);
-                var offsetX = parseInt(style["width"])/2;
-                panel.openPopup(startButton.button, "after_end", -offsetX, -offsetY, false, false);
+                if (startButton) {
+                    var style = document.defaultView.getComputedStyle(startButton.button);
+                    offsetY = parseInt(style["padding-bottom"]);
+                    offsetX = parseInt(style["width"])/2;
+                    target = startButton.button;
+                }
+
+                var panel = document.getAnonymousElementByAttribute(this, "anonid", "panel");
+                panel.openPopup(target, "after_end", -offsetX, -offsetY, false, false);
             ]]></body>
         </method>
 

@@ -19,6 +19,11 @@
     </content>
 
     <implementation>
+        <constructor><![CDATA[
+        if (Firebug.browserOverlay.isMultiprocessEnabled())
+            this.mutliprocessEnabled();
+        ]]></constructor>
+
         <property name="button">
             <xbl:getter><![CDATA[
                 return document.getAnonymousElementByAttribute(this, "anonid", "button");
