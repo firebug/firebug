@@ -26,8 +26,11 @@ var TraceError = FBTrace.toError();
 
 var BrowserMenu =
 {
-    overlay: function(doc)
+    overlay: function(overlay)
     {
+        this.browserOverlay = overlay;
+
+        var doc = overlay.doc;
         this.overlayStartButtonMenu(doc);
         this.overlayFirebugMenu(doc);
         this.overlayFirefoxMenu(doc);
@@ -39,68 +42,86 @@ var BrowserMenu =
 
     overlayStartButtonMenu: function(doc)
     {
-        $menupopupOverlay(doc, $(doc, "mainPopupSet"), [
+        var menuItems =
+        [
+            $menu(doc,
+            {
+                id: "menu_firebug_menuLocation",
+                label: "firebug.uiLocation",
+                tooltiptext: "firebug.menu.tip.UI_Location"
+            },
+            [
+                $menupopup(doc, {
+                    onpopupshowing: "Firebug.browserOverlay.onPositionPopupShowing(this)"
+                })
+            ]),
+            $menuseparator(doc),
+            $menuitem(doc, {
+                id: "menu_firebug_ClearConsole",
+                label: "firebug.ClearConsole",
+                tooltiptext: "firebug.ClearTooltip",
+                command: "cmd_firebug_clearConsole",
+                key: "key_firebug_clearConsole"
+            }),
+            $menuitem(doc, {
+                id: "menu_firebug_showErrorCount",
+                type: "checkbox",
+                label: "firebug.Show_Error_Count",
+                tooltiptext: "firebug.menu.tip.Show_Error_Count",
+                oncommand: "Firebug.browserOverlay.onToggleOption(this)",
+                option: "showErrorCount"
+            }),
+            $menuseparator(doc),
+            $menuitem(doc, {
+                id: "menu_firebug_enablePanels",
+                label: "firebug.menu.Enable_All_Panels",
+                tooltiptext: "firebug.menu.tip.Enable_All_Panels",
+                command: "cmd_firebug_enablePanels"
+            }),
+            $menuitem(doc, {
+                id: "menu_firebug_disablePanels",
+                label: "firebug.menu.Disable_All_Panels",
+                tooltiptext: "firebug.menu.tip.Disable_All_Panels",
+                command: "cmd_firebug_disablePanels"
+            }),
+            $menuseparator(doc),
+            $menuitem(doc, {
+                id: "menu_firebug_AllOn",
+                type: "checkbox",
+                label: "On_for_all_web_pages",
+                tooltiptext: "firebug.menu.tip.On_for_all_Web_Sites",
+                command: "cmd_firebug_allOn",
+                option: "allPagesActivation"
+            }),
+            $menuitem(doc, {
+                id: "menu_firebug_clearActivationList",
+                label: "firebug.menu.Clear_Activation_List",
+                tooltiptext: "firebug.menu.tip.Clear_Activation_List",
+                command: "cmd_firebug_clearActivationList"
+            })
+        ];
+
+        if (this.browserOverlay.isMultiprocessEnabled() || this.browserOverlay.auroraChannel)
+        {
+            var upgradeItem = $menuitem(doc, {
+                id: "menu_firebug_upgradeFirebug",
+                label: "upgrade.upgradeFirebug",
+                tooltiptext: "upgrade.tip.upgradeFirebug",
+                command: "cmd_firebug_upgradeFirebug",
+            });
+
+            menuItems.unshift($menuseparator(doc));
+            menuItems.unshift(upgradeItem);
+        }
+
+        var parentNode = $(doc, "mainPopupSet");
+        $menupopupOverlay(doc, parentNode, [
             $menupopup(doc,
             {
                 id: "fbStatusContextMenu",
                 onpopupshowing: "Firebug.browserOverlay.onOptionsShowing(this)"
             },
-            [
-                $menu(doc,
-                {
-                    label: "firebug.uiLocation",
-                    tooltiptext: "firebug.menu.tip.UI_Location"
-                },
-                [
-                    $menupopup(doc, {
-                        onpopupshowing: "Firebug.browserOverlay.onPositionPopupShowing(this)"
-                    })
-                ]),
-                $menuseparator(doc),
-                $menuitem(doc, {
-                    id: "menu_firebug_ClearConsole",
-                    label: "firebug.ClearConsole",
-                    tooltiptext: "firebug.ClearTooltip",
-                    command: "cmd_firebug_clearConsole",
-                    key: "key_firebug_clearConsole"
-                }),
-                $menuitem(doc, {
-                    id: "menu_firebug_showErrorCount",
-                    type: "checkbox",
-                    label: "firebug.Show_Error_Count",
-                    tooltiptext: "firebug.menu.tip.Show_Error_Count",
-                    oncommand: "Firebug.browserOverlay.onToggleOption(this)",
-                    option: "showErrorCount"
-                }),
-                $menuseparator(doc),
-                $menuitem(doc, {
-                    id: "menu_firebug_enablePanels",
-                    label: "firebug.menu.Enable_All_Panels",
-                    tooltiptext: "firebug.menu.tip.Enable_All_Panels",
-                    command: "cmd_firebug_enablePanels"
-                }),
-                $menuitem(doc, {
-                    id: "menu_firebug_disablePanels",
-                    label: "firebug.menu.Disable_All_Panels",
-                    tooltiptext: "firebug.menu.tip.Disable_All_Panels",
-                    command: "cmd_firebug_disablePanels"
-                }),
-                $menuseparator(doc),
-                $menuitem(doc, {
-                    id: "menu_firebug_AllOn",
-                    type: "checkbox",
-                    label: "On_for_all_web_pages",
-                    tooltiptext: "firebug.menu.tip.On_for_all_Web_Sites",
-                    command: "cmd_firebug_allOn",
-                    option: "allPagesActivation"
-                }),
-                $menuitem(doc, {
-                    id: "menu_firebug_clearActivationList",
-                    label: "firebug.menu.Clear_Activation_List",
-                    tooltiptext: "firebug.menu.tip.Clear_Activation_List",
-                    command: "cmd_firebug_clearActivationList"
-                })
-            ])
+            menuItems)
         ]);
     },
 

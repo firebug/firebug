@@ -24,7 +24,7 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-var {$, $el, $stylesheet, $menuitem} = BrowserOverlayLib;
+var {$, $el, $stylesheet, $menuitem, $menuseparator} = BrowserOverlayLib;
 
 Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
 Locale.registerStringBundle("chrome://firebug/locale/cookies.properties");
@@ -43,6 +43,8 @@ Cu.import("resource://gre/modules/Services.jsm", servicesScope);
 
 const firstRunPage = "https://getfirebug.com/firstrun#Firebug ";
 
+const auroraChannel = servicesScope.Services.prefs.getCharPref("app.update.channel") == "aurora";
+
 // ********************************************************************************************* //
 // BrowserOverlay Implementation
 
@@ -57,6 +59,8 @@ BrowserOverlay.prototype =
     // When Firebug is disabled or uninstalled this elements must be removed from
     // chrome UI (XUL).
     nodesToRemove: [],
+
+    auroraChannel: auroraChannel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
@@ -85,7 +89,7 @@ BrowserOverlay.prototype =
         var version = this.getVersion();
 
         BrowserCommands.overlay(this.doc);
-        BrowserMenu.overlay(this.doc);
+        BrowserMenu.overlay(this);
         BrowserToolbar.overlay(this.doc, version);
 
         this.internationalize();
@@ -134,12 +138,12 @@ BrowserOverlay.prototype =
     {
         // Special case for e10s enabled browser.
         if (this.isMultiprocessEnabled()) {
-          this.showMultiprocessNotification();
-          return;
+            this.showMultiprocessNotification();
+            return;
         }
         else if (this.isAuroraChannel()) {
-          this.showAuroraNotification();
-          return;
+            this.showAuroraNotification();
+            return;
         }
 
         if (this.win.Firebug.waitingForFirstLoad)
@@ -598,6 +602,16 @@ BrowserOverlay.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Upgrade Firebug
+
+    upgradeFirebug: function(event)
+    {
+        Events.cancelEvent(event);
+
+        this.showUpgradeNotification();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Remote Browser (aka e10s enabled browser)
 
     isMultiprocessEnabled: function()
@@ -622,8 +636,11 @@ BrowserOverlay.prototype =
       if (Options.get("noThanksFirebugNext"))
           return false;
 
-      return (servicesScope.Services.prefs.getCharPref("app.update.channel") == "aurora");
+      return auroraChannel;
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Aurora notification
 
     showAuroraNotification: function()
     {
@@ -632,10 +649,10 @@ BrowserOverlay.prototype =
         if (!panel)
         {
             panel = this.doc.createElement("fbAuroraNotificationPanel");
-            panel.setAttribute("upgradecommand", "Firebug.browserOverlay.onUpgradeFirebug(event)");
+            panel.setAttribute("upgradecommand", "Firebug.browserOverlay.onUpgradeFirebug(event, 'fbAuroraNotificationPanel')");
             panel.setAttribute("notnowcommand", "Firebug.browserOverlay.onNotNow(event)");
             panel.setAttribute("nothankscommand", "Firebug.browserOverlay.onNoThanks(event)");
-            panel.setAttribute("cancelcommand", "Firebug.browserOverlay.onCancelUpgrade(event)");
+            panel.setAttribute("cancelcommand", "Firebug.browserOverlay.onCancelUpgrade(event, 'fbAuroraNotificationPanel')");
             popupSet.appendChild(panel);
         }
 
@@ -676,6 +693,28 @@ BrowserOverlay.prototype =
         });
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Manual upgrade panel
+
+    showUpgradeNotification: function()
+    {
+        var popupSet = $(this.doc, "mainPopupSet");
+        var panel = this.doc.querySelector("fbUpgradeNotificationPanel");
+        if (!panel)
+        {
+            panel = this.doc.createElement("fbUpgradeNotificationPanel");
+            panel.setAttribute("upgradecommand", "Firebug.browserOverlay.onUpgradeFirebug(event, 'fbUpgradeNotificationPanel')");
+            panel.setAttribute("cancelcommand", "Firebug.browserOverlay.onCancelUpgrade(event, 'fbUpgradeNotificationPanel')");
+            popupSet.appendChild(panel);
+        }
+
+        panel.internationalize(Locale);
+        panel.open();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // e10s enabled browser Notification
+
     showMultiprocessNotification: function()
     {
         var popupSet = $(this.doc, "mainPopupSet");
@@ -683,9 +722,9 @@ BrowserOverlay.prototype =
         if (!panel)
         {
             panel = this.doc.createElement("fbMultiprocessNotificationPanel");
-            panel.setAttribute("upgradecommand", "Firebug.browserOverlay.onUpgradeFirebug(event)");
+            panel.setAttribute("upgradecommand", "Firebug.browserOverlay.onUpgradeFirebug(event, 'fbMultiprocessNotificationPanel')");
             panel.setAttribute("disablecommand", "Firebug.browserOverlay.onDisableE10s(event)");
-            panel.setAttribute("cancelcommand", "Firebug.browserOverlay.onCancelUpgrade(event)");
+            panel.setAttribute("cancelcommand", "Firebug.browserOverlay.onCancelUpgrade(event, 'fbMultiprocessNotificationPanel')");
             popupSet.appendChild(panel);
         }
 
@@ -702,12 +741,12 @@ BrowserOverlay.prototype =
       restartFirefox();
     },
 
-    onUpgradeFirebug: function(event)
+    onUpgradeFirebug: function(event, panelId)
     {
         Events.cancelEvent(event);
 
         var self = this;
-        var panel = this.doc.querySelector("fbMultiprocessNotificationPanel");
+        var panel = this.doc.querySelector(panelId);
 
         // Listen for installation end
         var listener =
@@ -763,7 +802,7 @@ BrowserOverlay.prototype =
         // TODO: Setup a page for "Learn more..." link in the notification
     },
 
-    onCancelUpgrade: function(event)
+    onCancelUpgrade: function(event, panelId)
     {
         Events.cancelEvent(event);
 
@@ -773,12 +812,12 @@ BrowserOverlay.prototype =
         this.install.cancel();
         this.install = null;
 
-        var panel = this.doc.querySelector("fbMultiprocessNotificationPanel");
+        var panel = this.doc.querySelector(panelId);
         panel.upgradeButton.removeAttribute("collapsed");
         panel.progress.setAttribute("value", "0");
         panel.progress.setAttribute("collapsed", "true");
         panel.cancelButton.setAttribute("collapsed", "true");
-    }
+    },
 };
 
 function findFirebugUpdate(callback)

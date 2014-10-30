@@ -65,6 +65,7 @@ var BrowserCommands =
         $command(doc, "cmd_firebug_resetAllOptions", "Firebug.resetAllOptions(true);");
         $command(doc, "cmd_firebug_toggleProfiling", ""); //todo
         $command(doc, "cmd_firebug_openInEditor", "Firebug.ExternalEditors.onContextMenuCommand(event)");
+        $command(doc, "cmd_firebug_upgradeFirebug", "Firebug.browserOverlay.upgradeFirebug(event)");
     },
 
     overlayShortcuts: function(doc)

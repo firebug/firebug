@@ -204,14 +204,25 @@ fbAuroraNotificationPanel {
     -moz-binding: url("chrome://firebug/content/firefox/auroraNotificationPanel.xml#panel");
 }
 
+fbUpgradeNotificationPanel {
+    -moz-binding: url("chrome://firebug/content/firefox/upgradeFirebugPanel.xml#panel");
+}
+
+fbUpgradeNotificationPanel .iconbox,
 fbAuroraNotificationPanel .iconbox,
 fbMultiprocessNotificationPanel .iconbox {
     padding-right: 10px;
 }
 
+fbUpgradeNotificationPanel .desc,
 fbAuroraNotificationPanel .desc,
 fbMultiprocessNotificationPanel .desc {
     max-width: 300px;
+}
+
+fbUpgradeNotificationPanel .title {
+    font-weight: bold;
+    font-size: 16px;
 }
 
 fbMultiprocessNotificationPanel .warn {
@@ -230,6 +241,7 @@ fbMultiprocessNotificationPanel .warningicon {
     margin-right: 4px;
 }
 
+fbUpgradeNotificationPanel .progress,
 fbAuroraNotificationPanel .progress,
 fbMultiprocessNotificationPanel .progress {
     margin: 8px;
