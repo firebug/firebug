@@ -22,7 +22,7 @@
                     <xul:description anonid="desc2" class="desc" />
                     <xul:label anonid="learnMore"
                         class="text-link popup-notification-learnmore-link learnMore"
-                        href="https://getfirebug.com/"/>
+                        href="https://getfirebug.com/firebug3"/>
                     <xul:hbox align="right">
                         <xul:progressmeter anonid="progress" class="progress"
                             mode="determined" value="0" collapsed="true"/>
