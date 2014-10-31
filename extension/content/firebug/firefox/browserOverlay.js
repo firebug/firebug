@@ -609,6 +609,9 @@ BrowserOverlay.prototype =
         Events.cancelEvent(event);
 
         this.showUpgradeNotification();
+
+        // Start download automatically
+        this.onUpgradeFirebug(event, 'fbUpgradeNotificationPanel');
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
