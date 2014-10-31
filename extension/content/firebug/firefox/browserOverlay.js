@@ -801,8 +801,6 @@ BrowserOverlay.prototype =
                 self.install = install;
             }, "application/x-xpinstall");
         });
-
-        // TODO: Setup a page for "Learn more..." link in the notification
     },
 
     onCancelUpgrade: function(event, panelId)
