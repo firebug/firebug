@@ -43,7 +43,12 @@ Cu.import("resource://gre/modules/Services.jsm", servicesScope);
 
 const firstRunPage = "https://getfirebug.com/firstrun#Firebug ";
 
-const auroraChannel = servicesScope.Services.prefs.getCharPref("app.update.channel") == "aurora";
+var auroraChannel = "";
+try {
+  auroraChannel = servicesScope.Services.prefs.getCharPref("app.update.channel") == "aurora";
+}
+catch (err) {
+}
 
 // ********************************************************************************************* //
 // BrowserOverlay Implementation
