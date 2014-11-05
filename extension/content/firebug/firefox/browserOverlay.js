@@ -45,10 +45,17 @@ const firstRunPage = "https://getfirebug.com/firstrun#Firebug ";
 
 var auroraChannel = "";
 try {
-  auroraChannel = servicesScope.Services.prefs.getCharPref("app.update.channel") == "aurora";
+  var value = servicesScope.Services.prefs.getCharPref("app.update.channel");
+  auroraChannel = (value == "aurora") || (value == "nightly-gum");
 }
 catch (err) {
 }
+
+// xxxHonza: getfirebug.com (or just the firebug/3.0 directory) is
+// surprisingly often not available.
+var downloadError = "Failed to get the latest Firebug 3 XPI from:\n\n" +
+    "https://getfirebug.com/releases/firebug/3.0/\n\n" +
+    "Try again or download the latest XPI manually.";
 
 // ********************************************************************************************* //
 // BrowserOverlay Implementation
@@ -777,7 +784,15 @@ BrowserOverlay.prototype =
           {
               install.removeListener(listener);
               self.install = null;
+
               Cu.reportError(install.error);
+              Cu.reportError(downloadError);
+
+              panel.upgradeButton.removeAttribute("collapsed");
+              panel.progress.setAttribute("collapsed", "true");
+              panel.cancelButton.setAttribute("collapsed", "true");
+
+              self.win.alert(downloadError);
           },
           onDownloadFailed: function(install)
           {
@@ -799,6 +814,13 @@ BrowserOverlay.prototype =
 
         findFirebugUpdate(function(url)
         {
+            if (!url)
+            {
+                Cu.reportError(downloadError);
+                self.win.alert(downloadError);
+                return;
+            }
+
             AddonManager.getInstallForURL(url, (install) =>
             {
                 install.addListener(listener);
@@ -828,23 +850,34 @@ BrowserOverlay.prototype =
 
 function findFirebugUpdate(callback)
 {
-    const XMLHttpRequest = Components.Constructor(
-      "@mozilla.org/xmlextras/xmlhttprequest;1", "nsIXMLHttpRequest");
-
+    var xhr = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
     var url = "https://getfirebug.com/releases/firebug/3.0/update.rdf";
-    var xhr = new XMLHttpRequest({mozAnon: true});
     xhr.open("GET", url, true);
 
     xhr.onload = function()
     {
-        if (xhr.status !== 200)
-          return;
+        if (xhr.readyState !== 4)
+            return;
 
-        var parser = Xpcom.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
-        var doc = parser.parseFromString(xhr.responseText, "text/xml");
-        var root = doc.documentElement;
-        var link = root.querySelector("updateLink");
-        callback(link.textContent);
+        if (xhr.status !== 200)
+        {
+            callback(null);
+            return;
+        }
+
+        try
+        {
+            var parser = Xpcom.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
+            var doc = parser.parseFromString(xhr.responseText, "text/xml");
+            var root = doc.documentElement;
+            var link = root.querySelector("updateLink");
+            callback(link.textContent);
+        }
+        catch (err)
+        {
+            FBTrace.sysout("EXCEPTION " + err, err);
+            callback(null);
+        }
     };
 
     xhr.onerror = function(e)
