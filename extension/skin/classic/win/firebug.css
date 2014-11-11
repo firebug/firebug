@@ -230,7 +230,7 @@ panelTab[selected="true"] > panelTabMenu {
 #fbPanelStatus {
     margin-top: 0;
     -moz-margin-end: 5px;
-    margin-bottom: 0
+    margin-bottom: 0;
     -moz-margin-start: 0;
     overflow: hidden;
 }
