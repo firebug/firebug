@@ -440,9 +440,12 @@ SourceEditor.prototype =
         text = text || "";
         this.editorObject.setValue(text);
 
-        Dom.addScriptAsync(this.parentNode.ownerDocument,
-            mode.src,
-            this.onLoadedModeFile.bind(this, mode.name));
+        if(Options.get("enableSyntaxHighlighting"))
+        {
+            Dom.addScriptAsync(this.parentNode.ownerDocument,
+                mode.src,
+                this.onLoadedModeFile.bind(this, mode.name));
+        }
     },
 
     onLoadedModeFile: function(modeName)
