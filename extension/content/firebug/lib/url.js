@@ -418,14 +418,14 @@ Url.normalizeURL = function(url)
         return url;
 
     // Normalize path traversals (a/b/../c -> a/c).
-    while (url.contains("/../") && url[0] != "/")
+    while (url.indexOf("/../") !== -1 && url[0] != "/")
         url = url.replace(/[^\/]+\/\.\.\//g, "");
 
     // Issue 1496, avoid #
     url = url.replace(/#.*/, "");
 
     // For script tags inserted dynamically sometimes the script.fileName is bogus
-    if (url.contains("->"))
+    if (url.indexOf("->") !== -1)
         url = url.replace(/[^\s]*\s->\s/, "");
 
     if (url.startsWith("chrome:"))

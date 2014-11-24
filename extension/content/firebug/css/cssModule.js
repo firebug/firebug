@@ -288,7 +288,7 @@ Firebug.CSSModule = Obj.extend(Module, Firebug.EditorSelector,
 
         if (!type)
         {
-            if (m[11] && m[11].contains("gradient"))
+            if (m[11] && m[11].indexOf("gradient") !== -1)
             {
                 var arg = value.substr(m[0].length).match(/\((?:(?:[^\(\)]*)|(?:\(.*?\)))+\)/);
                 if (!arg)
