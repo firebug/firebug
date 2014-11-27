@@ -108,6 +108,7 @@ pref("extensions.firebug.filterSystemURLs", true);
 pref("extensions.firebug.maxScriptLineLength", 10000);
 pref("extensions.firebug.breakOnExceptions", false);
 pref("extensions.firebug.ignoreCaughtExceptions", false);
+pref("extensions.firebug.enableSyntaxHighlighting", true);
 
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);
