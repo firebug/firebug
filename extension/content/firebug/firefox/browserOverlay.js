@@ -638,7 +638,7 @@ BrowserOverlay.prototype =
         if (this.win.gBrowser.isRemoteBrowser)
           return true;
 
-        if (Options.getPref("browser.tabs", "remote.autostart"))
+        if (servicesScope.Services.appinfo.browserTabsRemoteAutostart)
           return true;
 
         return false;
@@ -751,7 +751,10 @@ BrowserOverlay.prototype =
     {
       Events.cancelEvent(event);
 
+      // xxxHonza: there is no other way to disable e10s that set
+      // both realated prefs. It's unlikely that there will be .2
       Options.setPref("browser.tabs", "remote.autostart", false);
+      Options.setPref("browser.tabs", "remote.autostart.1", false);
 
       restartFirefox();
     },
