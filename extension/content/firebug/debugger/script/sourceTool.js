@@ -4,6 +4,7 @@ define([
     "firebug/firebug",
     "firebug/lib/trace",
     "firebug/lib/object",
+    "firebug/lib/options",
     "firebug/lib/string",
     "firebug/lib/url",
     "firebug/lib/xpath",
@@ -18,7 +19,7 @@ define([
     "firebug/remoting/debuggerClient",
     "arch/compilationunit",
 ],
-function (Firebug, FBTrace, Obj, Str, Url, Xpath, Xpcom, Tool, ErrorStackTraceObserver,
+function (Firebug, FBTrace, Obj, Options, Str, Url, Xpath, Xpcom, Tool, ErrorStackTraceObserver,
     BreakpointStore, BreakpointTool, SourceFile, StackFrame, DebuggerLib,
     DebuggerClient, CompilationUnit) {
 
@@ -313,6 +314,8 @@ DynamicSourceCollector.prototype =
         this.originalOnNewScript = dbg.onNewScript;
 
         dbg.onNewScript = this.onNewScript.bind(this);
+        this.context.numberOfDynamicScripts = 0;
+        this.maxNumberOfDynamicScripts = Options.get("maxNumberOfDynamicScripts");
     },
 
     detach: function()
@@ -450,6 +453,16 @@ DynamicSourceCollector.prototype =
             sourceFile.dynamic = true;
 
             this.context.addSourceFile(sourceFile);
+        }
+
+        // If we reach the limit of dynamic scripts, we stop listening on dynamic script additions.
+        // This prevents unresponsive warnings on pages like ones using Polymer.
+        if (this.maxNumberOfDynamicScripts >= 0 &&
+            this.context.numberOfDynamicScripts > this.maxNumberOfDynamicScripts)
+        {
+            var dbg = DebuggerLib.getThreadDebugger(this.context);
+            if (dbg)
+                dbg.onNewScript = this.originalOnNewScript;
         }
 
         // Register new script object in the source file object, before "newSource" event.
@@ -816,6 +829,7 @@ function computeDynamicUrl(script, context)
             sourceFile.uniqueUrlIndex = index;
             // Update the unique URL so it is really unique.
             uniqueUrl += " (" + index + ")";
+            context.numberOfDynamicScripts++;
             sourceFile.otherUniqueUrlsAtSameLocation.push(uniqueUrl);
         }
     }
