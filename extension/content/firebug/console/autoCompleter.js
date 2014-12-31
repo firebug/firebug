@@ -1864,7 +1864,7 @@ function setCompletionsFromObject(out, object, context)
                 // The object is a large array. To avoid RangeErrors from
                 // `target.push.apply` and a slow `Object.getOwnPropertyNames`,
                 // we just skip this level ("length" is also on the prototype,
-                // and numeric property would get hidden later anyway).
+                // and numeric properties would get hidden later anyway).
             }
             else
             {
@@ -2388,6 +2388,14 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, opt
             {
                 return !rePositiveNumber.test(x) && x !== "0";
             });
+        }
+
+        if (!spreExpr)
+        {
+            // For global completions, hide results starting with a digit, since they conflict
+            // with typing numbers. An interested user would type 'window.<name>', anyway.
+            var reValid = /^[^0-9]/;
+            out.completions = out.completions.filter((x) => reValid.test(x));
         }
 
         // Sort the completions, and avoid duplicates.
