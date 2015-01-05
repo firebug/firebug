@@ -209,6 +209,11 @@ DebuggerLib.getThreadDebugger = function(context)
  */
 DebuggerLib.getThreadDebuggeeGlobalForContext = function(context, global)
 {
+    // Fx27+; this works even with cross-origin frames.
+    var dbg = DebuggerLib.getThreadDebugger(context);
+    if (dbg && dbg.makeGlobalObjectReference)
+        return dbg.makeGlobalObjectReference(global);
+
     var threadActor = DebuggerLib.getThreadActor(context.browser);
     if (!threadActor || !threadActor.globalDebugObject)
         return null;
