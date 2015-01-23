@@ -222,6 +222,13 @@ var ScriptPanelWarning =
 
     showWarning: function(panel)
     {
+        if (!panel.context.window)
+        {
+            TraceError.sysout("scriptPanelWarning.showWarning; ERROR " +
+                "no window!", panel.context);
+            return;
+        }
+
         var location = panel.getDefaultLocation();
         var jsEnabled = Options.getPref("javascript", "enabled");
         var activitySuspended = this.isActivitySuspended();

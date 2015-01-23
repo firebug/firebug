@@ -455,6 +455,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     showThisCompilationUnit: function(compilationUnit)
     {
+        if (!compilationUnit.getURL())
+        {
+            TraceError.sysout("scriptPanel.showThisCompilationUnit; no URL?");
+            return false;
+        }
+
         if (compilationUnit.getURL().lastIndexOf("chrome://", 0) === 0)
             return false;
 
@@ -1751,8 +1757,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // before the ScriptPanel is initialized and adds itself to the DebuggerTool
         // as a listener.
 
-        Trace.sysout("scriptPanel.newSource; " + sourceFile.href, sourceFile);
-
         // New script has been appended, update the default location if necessary.
         // xxxHonza: Do not use this.navigate() method since it would fire "onPanelNavigate"
         // event and cause {@linke NavigationHistory} to be updated (issue 6950).
@@ -1764,7 +1768,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             this.location = this.getDefaultLocation();
 
             Trace.sysout("scriptPanel.newSource; this.location.getURL() = " +
-                this.location.getURL());
+                (this.location ? this.location.getURL() : "no url"));
 
             this.updateLocation(this.location);
             Firebug.chrome.syncLocationList();

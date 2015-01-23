@@ -167,6 +167,10 @@ SourceTool.prototype = Obj.extend(new Tool(),
             return;
         }
 
+        // There is no URL for e.g. event handler scripts.
+        if (!script.url)
+          script.url = this.context.getName() + "@" + script.actor;
+
         // Create a source file and append it into the context. This is the only
         // place where an instance of {@link SourceFile} is created.
         var sourceFile = new SourceFile(this.context, script.actor, script.url,
@@ -511,6 +515,10 @@ DynamicSourceCollector.prototype =
         var threadActor = DebuggerLib.getThreadActor(this.context.browser);
         if (!threadActor._allowSource(script.url))
             return false;
+
+        // Firefox 38 removes the breakpointStore
+        if (!threadActor.breakpointStore)
+          return false;
 
         var endLine = script.startLine + script.lineCount - 1;
         for (var bp of threadActor.breakpointStore.findBreakpoints({url: script.url}))

@@ -291,6 +291,18 @@ SourceEditor.prototype =
 
     addEventListener: function(type, handler)
     {
+      try
+      {
+          this.addEventListenerInternal(type, handler);
+      }
+      catch (err)
+      {
+          TraceError.sysout("sourceEditor.addEventListener; ERROR " + err, err);
+      }
+    },
+
+    addEventListenerInternal: function(type, handler)
+    {
         Trace.sysout("sourceEditor.addEventListener; " + type);
 
         if (isBuiltInEvent(type))

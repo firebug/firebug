@@ -198,9 +198,13 @@ StackFrame.buildStackFrame = function(frame, context)
         return;
     }
 
-    var sourceFile = context.getSourceFile(frame.where.url);
+    // The packet structure changed, make sure to read the URL
+    // from expected location.
+    var url = frame.where.source ? frame.where.source.url : frame.where.url;
+
+    var sourceFile = context.getSourceFile(url);
     if (!sourceFile)
-        sourceFile = {href: frame.where.url};
+        sourceFile = {href: url};
 
     var args = [];
     var bindings = frame.environment.bindings;

@@ -187,6 +187,11 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
             return doResume(this);
         }
 
+        // Backward compatibility with the protocol (URL is now in the source).
+        if (!packet.frame.where.url) {
+          packet.frame.where.url = packet.frame.where.source.url;
+        }
+
         // See: https://bugzilla.mozilla.org/show_bug.cgi?id=829028
         // Avoid double-break at the same line (e.g. breakpoint + step-over)
 
@@ -302,6 +307,14 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
         // Get frames from ThreadClient's stack-frame cache and build stack trace object,
         // which is stored in the context.
         var frames = this.context.activeThread.cachedFrames;
+
+        // Backward compatibility
+        for (var i=0; i<frames.length; i++)
+        {
+            var frame = frames[i];
+            if (!frame.where.url)
+                frame.where.url = frame.where.source.url;
+        }
 
         Trace.sysout("debuggerTool.framesadded; frames: ", frames);
 

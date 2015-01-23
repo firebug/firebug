@@ -100,6 +100,12 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         {
             Trace.sysout("breakpointTool.onAddBreakpoint; callback executed", response);
 
+            // Protocol change, URL is now stored in the source.
+            // Make a copy to the expected location.
+            if (!bpClient.location.url) {
+              bpClient.location.url = bpClient.source._form.href;
+            }
+
             // Do not log error if it's 'noScript'. It's quite common that breakpoints
             // are set before scripts exists (or no longer exists since garbage collected).
             if (response.error && response.error != "noScript")
@@ -142,7 +148,12 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             // the UI is properly (and asynchronously) updated everywhere.
             self.dispatch("onBreakpointAdded", [self.context, bp]);
 
-            Firebug.dispatchEvent(self.context.browser, "onBreakpointAdded", [bp]);
+            // Adding breakpoints is asynchronous, it might happen that the
+            // context (and browser) is closed soon than the async process
+            // finishes, so avoid exception.
+            // It would be better to avoid such scenarios.
+            if (self.context.browser)
+                Firebug.dispatchEvent(self.context.browser, "onBreakpointAdded", [bp]);
 
             // The info about the original line should not be needed any more.
             delete bp.params.originLineNo;
@@ -373,16 +384,27 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             // executed as soon as we receive a response.
             if (!isNormalDisabledBreakpoint(bp))
             {
-                self.context.activeThread.setBreakpoint(location,
-                    self.onSetBreakpoint.bind(self, callback));
+                // The protocol changed in Firefox 36. Setting a breakpoint
+                // is now done through source actor not thread actor.
+                // See also:
+                // https://bugzilla.mozilla.org/show_bug.cgi?id=1105493
+                // https://code.google.com/p/fbug/issues/detail?id=7724
+                var setBreakpoint = self.context.activeThread.setBreakpoint;
+                if (typeof setBreakpoint == "function")
+                {
+                    self.context.activeThread.setBreakpoint(location,
+                        self.onSetBreakpoint.bind(self, callback));
+                }
+                else
+                {
+                    var sourceFile = self.context.getSourceFile(url);
+                    if (sourceFile)
+                    {
+                        let sourceClient = sourceFile.getClient();
+                        sourceClient.setBreakpoint(location, self.onSetBreakpoint.bind(self, callback));
+                    }
+                }
             }
-        }
-
-        // If the debuggee is paused, just set the breakpoint.
-        if (thread.paused)
-        {
-            doSetBreakpoint(callback);
-            return;
         }
 
         // If the previous async-process hasn't finished yet, put arguments in a queue.
@@ -396,6 +418,22 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
         }
 
         this.setBreakpointInProgress = true;
+
+        // If the debuggee is paused, just set the breakpoint.
+        if (thread.paused)
+        {
+            doSetBreakpoint(function(response, bpClient)
+            {
+                self.setBreakpointInProgress = false;
+
+                callback(response, bpClient);
+
+                // Set breakpoints waiting in the queue.
+                if (self.queue.length > 0)
+                    self.setBreakpoint.apply(self, self.queue.shift());
+            });
+            return;
+        }
 
         // Otherwise, force a pause in order to set the breakpoint.
         // xxxHonza: this sometimes generates 'alreadyPaused' packet, fix me.
@@ -501,10 +539,9 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             Trace.sysout("breakpointTool.doSetBreakpoints; ", arr);
 
             // Iterate all breakpoints in the given array and set them step by step.
-            // The thread is paused at this point. The following loop generates a set of
-            // 'setBreakpoint' packets that are put in an internal queue (in the underlying
-            // RDP framework) and handled step by step, i.e. the next 'setBreakpoint' packet
-            // is sent as soon as a response for the previous one is received.
+            // The following loop resumes/interrupts the thread for every bp set.
+            // This should be optimized by using Promises (callbacks make this
+            // a lot more complicated).
             for (var i = 0; i < arr.length; i++)
                 self.onAddBreakpoint(arr[i]);
 

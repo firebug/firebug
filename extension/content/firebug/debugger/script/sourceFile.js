@@ -242,6 +242,11 @@ SourceFile.prototype =
     getSourceLink: function()
     {
         return new SourceLink(this.href, null, "js");
+    },
+
+    getClient: function()
+    {
+        return this.context.activeThread.source(this);
     }
 }
 

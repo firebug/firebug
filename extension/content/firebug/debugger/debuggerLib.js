@@ -374,6 +374,12 @@ DebuggerLib.isExecutableLine = function(context, location)
         return;
     }
 
+    if (!location.url)
+    {
+        TraceError.sysout("debuggerClient.isExecutableLine; ERROR No URL?");
+        return;
+    }
+
     // Set 'innermost' property to false to get any script that is presented
     // on the specified line (see also issue 7176).
     var query = {
