@@ -109,7 +109,7 @@ pref("extensions.firebug.maxScriptLineLength", 10000);
 pref("extensions.firebug.breakOnExceptions", false);
 pref("extensions.firebug.ignoreCaughtExceptions", false);
 pref("extensions.firebug.enableSyntaxHighlighting", true);
-pref("extensions.firebug.maxNumberOfDynamicScripts", 300);
+pref("extensions.firebug.maxNumberOfDynamicScripts", 150);
 
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);
