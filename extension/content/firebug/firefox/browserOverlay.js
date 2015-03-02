@@ -580,7 +580,7 @@ BrowserOverlay.prototype =
         var version = this.getVersion();
         var url = firstRunPage + version;
 
-        var browser = win.gBrowser;
+        var browser = win.gBrowser || win.getBrowser();
         if (!browser)
         {
             FBTrace.sysout("browserOverlay.openFirstRunPage; ERROR there is no gBrowser!");
@@ -635,7 +635,8 @@ BrowserOverlay.prototype =
         if (content.mCurrentBrowser.isRemoteBrowser)
           return true;
 
-        if (this.win.gBrowser.isRemoteBrowser)
+        var browser = this.win.gBrowser || this.win.getBrowser();
+        if (browser.isRemoteBrowser)
           return true;
 
         if (servicesScope.Services.appinfo.browserTabsRemoteAutostart)
