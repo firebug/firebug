@@ -34,8 +34,7 @@ var Cu = Components.utils;
 var scope = Cu.import("resource://gre/modules/devtools/Loader.jsm", {});
 var {ConsoleAPIListener} = scope.devtools.require("devtools/toolkit/webconsole/utils");
 
-// Note: createDefaultReturnValueInstance() is a local helper (see below).
-var defaultReturnValue = createDefaultReturnValueInstance();
+var defaultReturnValue = Object.preventExtensions(Object.create(null));
 
 var Trace = FBTrace.to("DBG_CONSOLE");
 var TraceError = FBTrace.toError();
@@ -492,27 +491,6 @@ Firebug.ConsoleListener =
     {
     }
 };
-
-// ********************************************************************************************* //
-// Local Helpers
-
-function createDefaultReturnValueInstance()
-{
-    var proto =
-    {
-        __exposedProps__:
-        {
-            "toString": "rw"
-        },
-
-        toString: function()
-        {
-            return undefined;
-        }
-    };
-
-    return Object.preventExtensions(Object.create(proto));
-}
 
 // ********************************************************************************************* //
 // Registration
