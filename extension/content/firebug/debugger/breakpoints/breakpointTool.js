@@ -407,18 +407,6 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             }
         }
 
-        // If the previous async-process hasn't finished yet, put arguments in a queue.
-        if (this.setBreakpointInProgress)
-        {
-            Trace.sysout("breakpointTool.setBreakpoint; Setting BP in progress, wait " +
-                 url + " (" + lineNumber + ")");
-
-            this.queue.push(arguments);
-            return;
-        }
-
-        this.setBreakpointInProgress = true;
-
         // If the debuggee is paused, just set the breakpoint.
         if (thread.paused)
         {
@@ -434,6 +422,18 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
             });
             return;
         }
+
+        // If the previous async-process hasn't finished yet, put arguments in a queue.
+        if (this.setBreakpointInProgress)
+        {
+            Trace.sysout("breakpointTool.setBreakpoint; Setting BP in progress, wait " +
+                 url + " (" + lineNumber + ")");
+
+            this.queue.push(arguments);
+            return;
+        }
+
+        this.setBreakpointInProgress = true;
 
         // Otherwise, force a pause in order to set the breakpoint.
         // xxxHonza: this sometimes generates 'alreadyPaused' packet, fix me.
