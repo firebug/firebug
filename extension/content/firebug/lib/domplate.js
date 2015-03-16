@@ -1313,12 +1313,29 @@ function defineTags()
     }
 }
 
+// APIs for associating elements with data, future compatible with Firebug.next.
+// The data is currently stored as expandos on the elements, or in the case of
+// elements from unprivileged content, expandos on the elements' unwaived xray
+// wrappers. Note that the latter expandos are local to the current
+// compartment, and thus to Firebug when compartment_per_addon is set.
+Domplate.getElementData = function(elem, name)
+{
+    return elem[name];
+};
+
+Domplate.setElementData = function(elem, name, value)
+{
+    elem[name] = value;
+};
+
 // xxxHonza: Domplate is injected into FBL namespace only for backward
 // compatibility with extensions.
 // We need to mark this as deprecated.
 FBL.TAG = Domplate.TAG;
 FBL.FOR = Domplate.FOR;
 FBL.DomplateTag = Domplate.DomplateTag;
+FBL.getElementData = Domplate.getElementData;
+FBL.setElementData = Domplate.setElementData;
 
 defineTags(
     "a", "button", "br", "canvas", "col", "colgroup", "div", "fieldset", "form", "h1", "h2",
