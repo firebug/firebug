@@ -1450,9 +1450,10 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             if (!cssValueInfo)
                 return false;
 
-            if (cssValueInfo.value === "currentcolor")
+            if (cssValueInfo.type === "colorKeyword" || cssValueInfo.type === "gradient")
             {
-                cssValueInfo.value = this.getCurrentColor();
+                var currentColor = this.getCurrentColor();
+                cssValueInfo.value = cssValueInfo.value.replace(/currentcolor/gi, currentColor);
                 if (cssValueInfo.value === "")
                     return false;
             }
