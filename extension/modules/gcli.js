@@ -25,7 +25,7 @@ try
 catch (err)
 {
     if (FBTrace.DBG_ERRORS)
-        FBTrace.sysout("ERROR GCLI not available");
+        FBTrace.sysout("ERROR GCLI not available " + err, err);
 }
 
 // Load the Locale module and make sure Firebug string bundle is registered
