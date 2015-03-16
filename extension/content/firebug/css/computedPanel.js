@@ -668,6 +668,14 @@ CSSComputedPanel.prototype = Obj.extend(Panel,
             if (!cssValue)
                 return false;
 
+            if (cssValue.type === "colorKeyword" || cssValue.type === "gradient")
+            {
+                var currentColor = this.getCurrentColor();
+                cssValue.value = cssValue.value.replace(/currentcolor/gi, currentColor);
+                if (cssValue.value === "")
+                    return false;
+            }
+
             if (cssValue.value == this.infoTipValue)
                 return true;
 
@@ -710,6 +718,12 @@ CSSComputedPanel.prototype = Obj.extend(Panel,
 
             return false;
         }
+    },
+
+    getCurrentColor: function()
+    {
+        var cs = this.selection.ownerDocument.defaultView.getComputedStyle(this.selection);
+        return cs.getPropertyValue("color");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
