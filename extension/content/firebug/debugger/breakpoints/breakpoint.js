@@ -7,7 +7,7 @@ function(FBTrace) {
 
 // ********************************************************************************************* //
 
-function Breakpoint(href, lineNumber, disabled,type)
+function Breakpoint(href, lineNumber, disabled, type)
 {
     this.href = href;
     this.lineNo = lineNumber;

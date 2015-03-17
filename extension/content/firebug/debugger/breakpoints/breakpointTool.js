@@ -95,6 +95,14 @@ BreakpointTool.prototype = Obj.extend(new Tool(),
     {
         Trace.sysout("breakpointTool.onAddBreakpoint; (" + bp.lineNo + ")", bp);
 
+        // Do not create server side actors for disabled breakpoints.
+        if (bp.disabled)
+        {
+          this.dispatch("onBreakpointAdded", [this.context, bp]);
+          Firebug.dispatchEvent(this.context.browser, "onBreakpointAdded", [bp]);
+          return;
+        }
+
         var self = this;
         this.setBreakpoint(bp.href, bp.lineNo, function(response, bpClient)
         {

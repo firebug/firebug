@@ -221,7 +221,7 @@ var BreakpointStore = Obj.extend(Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    addBreakpoint: function(url, lineNo, condition, type)
+    addBreakpoint: function(url, lineNo, condition, type, disabled = false)
     {
         type = type || BP_NORMAL;
 
@@ -239,7 +239,7 @@ var BreakpointStore = Obj.extend(Module,
         // will be kept otherwise removed.
         if (condition != null)
         {
-            var bp = new Breakpoint(url, lineNo, false, type);
+            var bp = new Breakpoint(url, lineNo, disabled, type);
             bp.condition = condition;
 
             // We just need to find the actual location of a breakpoint.
@@ -270,7 +270,7 @@ var BreakpointStore = Obj.extend(Module,
             if (!this.breakpoints[url])
                 this.breakpoints[url] = [];
 
-            var bp = new Breakpoint(url, lineNo, false, type);
+            var bp = new Breakpoint(url, lineNo, disabled, type);
             this.breakpoints[url].push(bp);
 
             Trace.sysout("breakpointStore.addBreakpoint; NEW BP: " +
