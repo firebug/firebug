@@ -499,9 +499,9 @@ var FirebugChrome =
 
         if (!this.inDetachedScope)
         {
-            Dom.collapse(Firefox.getElementById('fbMainFrame'), !shouldShow);
+            Dom.collapse(Firefox.getElementById("fbMainFrame"), !shouldShow);
 
-            var contentSplitter = Firefox.getElementById('fbContentSplitter');
+            var contentSplitter = Firefox.getElementById("fbContentSplitter");
             if (contentSplitter)
                 contentSplitter.setAttribute("collapsed", !shouldShow);
         }
@@ -1039,6 +1039,17 @@ var FirebugChrome =
         splitter.setAttribute("orient", vertical ? "vertical" : "horizontal");
         splitter.setAttribute("dir", after ? "" : "reverse");
         container.insertBefore(splitter, after ? null: container.firstChild);
+
+        // See: https://code.google.com/p/fbug/issues/detail?id=7717
+        // There is a new <notificationbox> element placed whihin
+        // the <appcontent> right before <tabbrowser>.
+        // If Firebug is positioned at the top, the splitter must
+        // change height of the tab-browser (which is using 'flex')
+        // not height of the <notificationbox>.
+        if (pos == "top")
+            splitter.setAttribute("resizeafter", "flex");
+        else
+            splitter.removeAttribute("resizeafter");
 
         var frame = document.getElementById("fbMainFrame");
 
