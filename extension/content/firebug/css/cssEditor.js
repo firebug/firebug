@@ -248,7 +248,7 @@ CSSEditor.prototype = domplate(InlineEditor.prototype,
             var saveSuccess = (rule.conditionText == value);
             this.box.setAttribute("saveSuccess", saveSuccess);
         }
-        else if (rule instanceof window.CSSCharsetRule)
+        else if (window.CSSCharsetRule && rule instanceof window.CSSCharsetRule)
         {
             target.textContent = value;
 

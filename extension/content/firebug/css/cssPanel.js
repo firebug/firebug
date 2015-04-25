@@ -485,7 +485,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 {
                     rules.push({tag: CSSReps.CSSImportRuleTag.tag, rule: rule});
                 }
-                else if (rule instanceof window.CSSCharsetRule)
+                else if (window.CSSCharsetRule && rule instanceof window.CSSCharsetRule)
                 {
                     rules.push({tag: CSSReps.CSSCharsetRuleTag.tag, rule: rule});
                 }

@@ -1717,7 +1717,7 @@ FirebugReps.CSSRule = domplate(Rep,
         {
             return "CSSMediaRule";
         }
-        else if (rule instanceof window.CSSCharsetRule)
+        else if (window.CSSCharsetRule && rule instanceof window.CSSCharsetRule)
         {
             return "CSSCharsetRule";
         }
@@ -1773,7 +1773,7 @@ FirebugReps.CSSRule = domplate(Rep,
         {
             return rule.media.mediaText;
         }
-        else if (rule instanceof window.CSSCharsetRule)
+        else if (window.CSSCharsetRule && rule instanceof window.CSSCharsetRule)
         {
             return rule.encoding;
         }
