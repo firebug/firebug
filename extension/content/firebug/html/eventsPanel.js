@@ -406,7 +406,7 @@ EventsPanel.prototype = Obj.extend(Firebug.Panel,
     getListeners: function(target)
     {
         var normal = this.getNormalEventListeners(target);
-        var disabled = this.getDisabledMap(this.context).get(target, []);
+        var disabled = this.getDisabledMap(this.context).get(target) || [];
 
         // Try to insert the disabled listeners at their previous positions. This will be
         // wrong in case listeners have been removed since those positions were recorded,
