@@ -294,7 +294,7 @@
 /************************************************************************************************/
 
 .cookieNameLabel {
-    -moz-box-sizing: padding-box;
+    box-sizing: border-box;
     overflow: hidden;
     padding-top: 1px;
     font-weight: bold;
