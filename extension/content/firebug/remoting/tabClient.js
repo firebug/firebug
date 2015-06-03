@@ -305,9 +305,9 @@ TabClient.prototype = Obj.extend(new EventSource(),
         var threadActorObj = DebuggerLib.getThreadActor(this.browser);
         threadActorObj.global = this.window.wrappedJSObject;
 
-        // xxxHonza: The useSourceMaps options might be used by issue 5765 
+        // Enable pretty printing. See also: https://github.com/firebug/firebug/issues/7906
         var options = {
-            //useSourceMaps: true
+            useSourceMaps: true
         };
 
         this.tabClient.attachThread(options, this.onThreadAttached.bind(this));
