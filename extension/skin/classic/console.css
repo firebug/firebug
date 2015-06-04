@@ -804,7 +804,7 @@ of an error log is affected (higher than other logs). */
 .spyTitle {
     color: #000000;
     font-weight: bold;
-    -moz-box-sizing: padding-box;
+    box-sizing: border-box;
     overflow: hidden;
     z-index: 100;
     padding-left: 18px;

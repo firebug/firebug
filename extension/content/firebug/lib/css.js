@@ -1254,7 +1254,6 @@ Css.cssKeywords =
 
     "boxModels":
     [
-        "padding-box",
         "border-box",
         "content-box"
     ],

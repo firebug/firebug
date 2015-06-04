@@ -233,7 +233,7 @@
 }
 
 .netHrefLabel {
-    -moz-box-sizing: padding-box;
+    box-sizing: border-box;
     overflow: hidden;
     z-index: 10;
     position: absolute;
@@ -248,7 +248,7 @@
     display: none;
     -moz-user-select: none;
     padding-right: 10px;
-    padding-bottom: 2px;
+    padding-bottom: 3px;
     max-width: calc(100% - 38px);
     background: #FFFFFF;
     z-index: 200;
@@ -402,7 +402,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .netTimeLabel {
-    -moz-box-sizing: padding-box;
+    box-sizing: border-box;
     position: absolute;
     top: 1px;
     left: 100%;

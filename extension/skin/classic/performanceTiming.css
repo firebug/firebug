@@ -23,7 +23,7 @@
 }
 
 .perfTimingBarLabel {
-    -moz-box-sizing: padding-box;
+    box-sizing: border-box;
     position: absolute;
     top: 1px;
     left: 100%;

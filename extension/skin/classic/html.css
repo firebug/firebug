@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 .panelNode-html {
-    -moz-box-sizing: padding-box;
+    box-sizing: border-box;
     padding: 4px 0 0 2px;
     word-wrap: break-word;
 }
