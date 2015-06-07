@@ -123,7 +123,11 @@ var FunctionMonitor = Obj.extend(Module,
         Trace.sysout("functionMonitor.monitorScript; " + script.url + ", " +
             script.startLine);
 
-        var location = {line: script.startLine, url: script.url};
+        var url = script.url;
+        var columnOffsets = script.getAllColumnOffsets();
+        if (!columnOffsets || !columnOffsets.length)
+            return false;
+        var location = {line: columnOffsets[0].lineNumber, url: script.url};
 
         // If the first line of the script contains no code, slide down to
         // the next line that has runnable code.
