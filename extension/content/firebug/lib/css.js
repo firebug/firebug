@@ -1457,10 +1457,12 @@ Css.cssKeywords =
     [
         "matrix()",
         "matrix3d()",
+        "perspective()",
         "rotate()",
         "rotateX()",
         "rotateY()",
         "rotateZ()",
+        "rotate3d()",
         "scale()",
         "scaleX()",
         "scaleY()",
@@ -1471,7 +1473,8 @@ Css.cssKeywords =
         "translate()",
         "translateX()",
         "translateY()",
-        "translateZ()"
+        "translateZ()",
+        "translate3d()"
     ],
 
     "mozFontFeatureSettings":
