@@ -1202,6 +1202,7 @@ Css.unitlessProperties =
     "font-weight": 1,
     "line-height": 1,
     "opacity": 1,
+    "order": 1,
     "orphans": 1,
     "widows": 1,
     "z-index": 1,
