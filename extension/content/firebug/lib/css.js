@@ -1202,6 +1202,7 @@ Css.unitlessProperties =
     "font-weight": 1,
     "line-height": 1,
     "opacity": 1,
+    "order": 1,
     "orphans": 1,
     "widows": 1,
     "z-index": 1,
@@ -1457,10 +1458,12 @@ Css.cssKeywords =
     [
         "matrix()",
         "matrix3d()",
+        "perspective()",
         "rotate()",
         "rotateX()",
         "rotateY()",
         "rotateZ()",
+        "rotate3d()",
         "scale()",
         "scaleX()",
         "scaleY()",
@@ -1471,7 +1474,8 @@ Css.cssKeywords =
         "translate()",
         "translateX()",
         "translateY()",
-        "translateZ()"
+        "translateZ()",
+        "translate3d()"
     ],
 
     "mozFontFeatureSettings":
