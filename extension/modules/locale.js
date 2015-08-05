@@ -65,7 +65,7 @@ Locale.$STR = function(name, bundle)
     if (!name)
         return "";
 
-    var strKey = name.replace(" ", "_", "g");
+    var strKey = name.replace(/ /g, "_");
 
     if (!PrefLoader.getPref("useDefaultLocale"))
     {
@@ -100,14 +100,14 @@ Locale.$STR = function(name, bundle)
     var index = name.lastIndexOf(".");
     if (index > 0 && name.charAt(index-1) != "\\")
         name = name.substr(index + 1);
-    name = name.replace("_", " ", "g");
+    name = name.replace(/_/g, " ");
 
     return name;
 };
 
 Locale.$STRF = function(name, args, bundle)
 {
-    var strKey = name.replace(" ", "_", "g");
+    var strKey = name.replace(/ /g, "_");
 
     if (!PrefLoader.getPref("useDefaultLocale"))
     {

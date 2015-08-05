@@ -67,8 +67,7 @@ require.execCbOFF = function (name)
                             (typeof value == "function"/* || typeof value == "object"*/))
                         {
                                 var funcName = name + "_" + prop;
-                                funcName = funcName.replace("/", "_", "g");
-                                funcName = funcName.replace("-", "_", "g");
+                                funcName = funcName.replace(/[\/\-]/g, "_");
                                 var namedFunction = eval("(function(){ return function " + funcName +
                                     "(){return true;} })()");
                                 value.displayName = namedFunction;
