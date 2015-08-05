@@ -77,6 +77,7 @@ var dynamicTypesMap = {
 function SourceTool(context)
 {
     this.context = context;
+    this.ignoreDynamicScripts = Options.get("ignoreDynamicScripts");
 }
 
 /**
@@ -158,6 +159,15 @@ SourceTool.prototype = Obj.extend(new Tool(),
         {
             Trace.sysout("sourceTool.addScript; A script ignored " + script.type +
                 ", " + script.url, script);
+            return;
+        }
+
+        // Reject dynamic scripts if the option to listen them is turned off.
+        if (this.ignoreDynamicScripts &&
+            dynamicTypesMap[script.introductionType] &&
+            script.introductionType !== "scriptElement") {
+            Trace.sysout("sourceTool.updateScriptFiles; dynamic script introduced and " +
+                "ignored as the user set the preference \"ignoreDynamicScripts\" to true");
             return;
         }
 
@@ -312,6 +322,9 @@ DynamicSourceCollector.prototype =
 {
     attach: function()
     {
+        if (this.sourceTool.ignoreDynamicScripts)
+            return;
+
         var dbg = DebuggerLib.getThreadDebugger(this.context);
 
         // Monkey patch the current debugger.
@@ -526,8 +539,9 @@ DynamicSourceCollector.prototype =
     restoreBreakpoints: function(script)
     {
         var threadActor = DebuggerLib.getThreadActor(this.context.browser);
-        if (!threadActor._allowSource(script.url))
+        if (!allowSource(threadActor, script)) {
             return false;
+        }
 
         // Firefox 38 removes the breakpointStore
         if (!threadActor.breakpointStore)
@@ -863,6 +877,12 @@ function getElementId(script)
         return "/" + id + " " + attrName;
 
     return Xpath.getElementTreeXPath(element) + " " + attrName;
+}
+
+function allowSource(threadActor, script) {
+    return threadActor._allowSource ?
+        threadActor._allowSource(script.url) :
+        threadActor.sources.allowSource(script.source);
 }
 
 // ********************************************************************************************* //
