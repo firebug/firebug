@@ -1707,7 +1707,9 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Rep, new EventSource(),
         var file = netInfoBox.repObject;
 
         // Use the original file object (workaround for issue #7928)
-        file = file.context.netProgress.getRequestFile(file.request) || file;
+        if (file.context) {
+          file = file.context.netProgress.getRequestFile(file.request) || file;
+        }
 
         if (target.sourceDisplayed)
         {
