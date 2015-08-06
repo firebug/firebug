@@ -123,10 +123,23 @@ var commands = [];
 
 function addCommand(command)
 {
+    // API for registering GCLI commands has changed in Firefox 42
+    // The new API are not supported at the moment.
+    // Some pointers:
+    // All modules in
+    // https://dxr.mozilla.org/mozilla-central/source/toolkit/devtools/gcli/commands
+    // export their items, for example:
+    // https://dxr.mozilla.org/mozilla-central/source/toolkit/devtools/gcli/commands/cookie.js#54
+    // And the code that does most of the loading for built-in commands is:
+    // https://dxr.mozilla.org/mozilla-central/source/toolkit/devtools/gcli/commands/index.js
+    // Test with a helper API:
+    // https://dxr.mozilla.org/mozilla-central/source/browser/devtools/commandline/test/helpers.js#469
+
     if (scope.gcli.addCommand)
         scope.gcli.addCommand(command);
-    else
+    else if (scope.gcli.addItems)
         scope.gcli.addItems([command]);
+
     commands.push(command);
 }
 
