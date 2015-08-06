@@ -489,6 +489,8 @@ function handleException(exc, origExpr, context, onError, dbgGlobal)
     {
         Obj.getPropertyNames(exc).forEach(function(prop)
         {
+            if (prop === '__proto__')
+                return;
             result[prop] = exc[prop];
         });
         result.stack = exc.stack;
