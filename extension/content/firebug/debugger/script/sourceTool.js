@@ -814,7 +814,7 @@ function computeDynamicUrl(script, context)
     // Workaround for issue 7521. Make sure dynamic scripts always have
     // unique URL if the source differs.
     // It solves the problem where eval on the same location (i.e. wrapped
-    // within a fucntion) is used to generate different scripts.
+    // within a function) is used to generate different scripts.
     var sourceFile = context.getSourceFile(uniqueUrl);
     if (sourceFile)
     {

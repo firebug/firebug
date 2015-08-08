@@ -159,7 +159,7 @@ var ClosureInspector =
         var objGlobal = Cu.getGlobalForObject(obj);
 
         // Do a security check. This is automatic in Fx33+, but do it manually
-        // (with the same error message) for compatiblity with older versions.
+        // (with the same error message) for compatibility with older versions.
         if (win !== objGlobal && !(win.document && objGlobal.document &&
             win.document.nodePrincipal.subsumes(objGlobal.document.nodePrincipal)))
         {

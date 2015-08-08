@@ -174,7 +174,7 @@ Search.ReversibleIterator = function(length, start, reverse)
  *
  * @constructor
  * @param {String} literal Text to search for
- * @param {Boolean} reverse Truthy to preform a reverse search, falsy to perform a forward seach
+ * @param {Boolean} reverse Truthy to preform a reverse search, falsy to perform a forward search
  * @param {Boolean} caseSensitive Truthy to perform a case sensitive search, falsy to perform
  * a case insensitive search.
  */

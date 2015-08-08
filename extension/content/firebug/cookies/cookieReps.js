@@ -215,7 +215,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
             return "";
 
         // The first character is space so, if the table is sorted according
-        // to this column, all "Session" cookies are displayed at the begining.
+        // to this column, all "Session" cookies are displayed at the beginning.
         if (CookieUtils.isSessionCookie(cookie.cookie))
             return " " + Locale.$STR("cookies.Session");
 

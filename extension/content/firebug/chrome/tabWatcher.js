@@ -954,7 +954,7 @@ var TabProgressListener = Obj.extend(Http.BaseProgressListener,
             // switching to about:blank tab, see issue 4040
             //
             // 2) But we also want to skip "about:blank" in case a new tab is opened
-            // (new tab is about:blank at the beggining), no context exists and Firebug
+            // (new tab is about:blank at the beginning), no context exists and Firebug
             // is suspended for all contexts, see issue5916
             // There is a workaround for this case in {@TabWatchListener.showContext]
             //

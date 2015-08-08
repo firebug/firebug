@@ -10,7 +10,7 @@ function runTest(request)
                 classes: "netRow category-xhr hasHeaders loaded"
             };
 
-            // Asynchronously wait for the request beeing displayed.
+            // Asynchronously wait for the request being displayed.
             FBTest.waitForDisplayedElement("net", options, function(netRow)
             {
                 // Expand the test request with params

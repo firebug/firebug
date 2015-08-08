@@ -372,8 +372,8 @@ var TestResultTabView = domplate(
 // ********************************************************************************************* //
 
 /**
- * This template displays a parse-erros that can occurs when parsing
- * expected and acuall results (see compare method).
+ * This template displays a parse-errors that can occurs when parsing
+ * expected and actuall results (see compare method).
  *
  * @domplate
  */

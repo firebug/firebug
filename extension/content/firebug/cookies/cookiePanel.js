@@ -499,7 +499,7 @@ CookiePanel.prototype = Obj.extend(ActivablePanel,
 // Cookie Breakpoints
 
 /**
- * @class Represents an {@link Debugger} listener. This listener is reponsible for
+ * @class Represents an {@link Debugger} listener. This listener is responsible for
  * providing a list of cookie breakpoints for the Breakpoints side panel.
  */
 CookieModule.DebuggerListener =

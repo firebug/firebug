@@ -26,7 +26,7 @@ function runTest()
                                 var conditionEditor = scriptPanel.
                                     panelNode.querySelector(".conditionEditor");
 
-                                FBTest.ok(conditionEditor, "The condtion editor should display to the user.");
+                                FBTest.ok(conditionEditor, "The condition editor should display to the user.");
                                 FBTest.testDone();
                             });
                         }

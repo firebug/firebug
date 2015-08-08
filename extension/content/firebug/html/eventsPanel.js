@@ -260,7 +260,7 @@ EventsPanel.prototype = Obj.extend(Firebug.Panel,
             return null;
         try
         {
-            // Pattern match on the occurance of '<minified name>.event.<funcName>.apply'.
+            // Pattern match on the occurrence of '<minified name>.event.<funcName>.apply'.
             var matches = /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\.event\.(dispatch|handle)\.apply/.exec(src);
             var jqName = (matches && matches[1]) || "";
             dbgEnv = dbgEnv.find(jqName);

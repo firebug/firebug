@@ -9,7 +9,7 @@ function runTest()
                 classes: "logRow logRow-spy error loaded"
             };
 
-            // Asynchronously wait for the request beeing displayed.
+            // Asynchronously wait for the request being displayed.
             FBTest.waitForDisplayedElement("console", options, function(logRow)
             {
                 FBTest.testDone();

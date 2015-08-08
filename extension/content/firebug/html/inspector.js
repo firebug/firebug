@@ -1501,7 +1501,7 @@ function attachStyles(context, doc)
         highlightStyleCache.set(doc, style);
     }
 
-    // Cater for the possiblity that someone might have removed our stylesheet.
+    // Cater for the possibility that someone might have removed our stylesheet.
     if (!style.parentNode)
         Css.addStyleSheet(doc, style);
 }
