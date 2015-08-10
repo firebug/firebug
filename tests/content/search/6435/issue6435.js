@@ -17,7 +17,7 @@ function runTest()
                 executeSearchTest("test", false, false, function(counter)
                 {
                     FBTest.compare(4, counter, "There must be precise number " +
-                         "of occurences (4) actual: " + counter);
+                         "of occurrences (4) actual: " + counter);
                     callback();
                 });
             });
@@ -28,7 +28,7 @@ function runTest()
                 executeSearchTest("test", false, true, function(counter)
                 {
                     FBTest.compare(2, counter, "There must be precise number " +
-                        "of occurences (2) actual: " + counter);
+                        "of occurrences (2) actual: " + counter);
                     callback();
                 });
             });
@@ -39,7 +39,7 @@ function runTest()
                 executeSearchTest("21", false, false, function(counter)
                 {
                     FBTest.compare(2, counter, "There must be precise number " +
-                        "of occurences (2) actual: " + counter);
+                        "of occurrences (2) actual: " + counter);
                     callback();
                 });
             });
@@ -71,7 +71,7 @@ function executeSearchTest(text, reverse, caseSensitive, callback)
 
         var match = sel.getRangeAt(0);
 
-        // OK, we have found the first occurence again, so finish the test.
+        // OK, we have found the first occurrence again, so finish the test.
         FBTest.sysout("search.match; ", match);
         if (firstMatch && (firstMatch.compareBoundaryPoints(Range.START_TO_START, match) ||
             firstMatch.compareBoundaryPoints(Range.END_TO_END, match)) == 0)

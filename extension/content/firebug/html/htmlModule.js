@@ -102,7 +102,7 @@ var HTMLModule = Obj.extend(Module,
 // Mutation Breakpoints
 
 /**
- * @class Represents {@link Firebug.Debugger} listener. This listener is reponsible for
+ * @class Represents {@link Firebug.Debugger} listener. This listener is responsible for
  * providing a list of mutation-breakpoints into the Breakpoints side-panel.
  */
 HTMLModule.DebuggerListener =

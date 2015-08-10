@@ -57,7 +57,7 @@ function executeAndVerify(callback, target, actionID, expected)
         FBTest.executeContextMenuCommand(target, actionID);
     }
 
-    // Data can be copyied into the clipboard asynchronously,
+    // Data can be copied into the clipboard asynchronously,
     // so wait till they are available.
     FBTest.waitForClipboard(expected, executeContextMenuCommand, (text) =>
     {

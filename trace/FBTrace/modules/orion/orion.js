@@ -4113,7 +4113,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * Executes the action handler associated with the given name.
 		 * <p>
 		 * The application defined action takes precedence over predefined actions unless
-		 * the <code>defaultAction</code> paramater is <code>true</code>.
+		 * the <code>defaultAction</code> parameter is <code>true</code>.
 		 * </p>
 		 * <p>
 		 * If the application defined action returns <code>false</code>, the text view predefined
@@ -7020,7 +7020,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (!isWebkit) {
 				/*
 				* Feature in IE and Firefox.  It is not possible to get the style of an
-				* element if it is not layed out because one of the ancestor has
+				* element if it is not laid out because one of the ancestor has
 				* style.display = none.  This means that the view cannot be created in this
 				* situations, since no measuring can be performed.  The fix is to listen
 				* for DOMAttrModified and create or destroy the view when the style.display
@@ -11281,7 +11281,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 		];
 
 	// Scanner constants
-	var UNKOWN = 1;
+	var UNKNOWN = 1;
 	var KEYWORD = 2;
 	var STRING = 3;
 	var SINGLELINE_COMMENT = 4;
@@ -11365,7 +11365,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 							}
 						}
 					}
-					return UNKOWN;
+					return UNKNOWN;
 			}
 		},
 		_read: function() {
@@ -11417,7 +11417,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 							}
 						}
 						this._unread(c);
-						return UNKOWN;
+						return UNKNOWN;
 					case 39:	// SINGLE QUOTE -> char const
 						while(true) {
 							c = this._read();
@@ -11483,7 +11483,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 						c = this._read();
 					} while(!(c === 32 || c === 9 || c === -1));
 					this._unread(c);
-					return UNKOWN;
+					return UNKNOWN;
 			}
 		}
 	};
@@ -11520,7 +11520,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 							return HTML_MARKUP;
 						}
 					}
-					return UNKOWN;
+					return UNKNOWN;
 				case 64: // @
 					if (this._type === DOC_COMMENT) {
 						do {
@@ -11529,7 +11529,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 						this._unread(c);
 						return DOC_TAG;
 					}
-					return UNKOWN;
+					return UNKNOWN;
 				case 84: // T
 					if ((c = this._read()) === 79) { // O
 						if ((c = this._read()) === 68) { // D
@@ -11555,7 +11555,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 						c = this._read();
 					} while(!(c === 32 || c === 9 || c === -1 || c === 60 || c === 64 || c === 84));
 					this._unread(c);
-					return UNKOWN;
+					return UNKNOWN;
 			}
 		}
 	};
@@ -11573,7 +11573,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 				case 39: // SINGLE QUOTE
 				case -1:
 					this._unread(c);
-					return UNKOWN;
+					return UNKNOWN;
 			}
 		}
 	};

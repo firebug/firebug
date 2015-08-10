@@ -351,7 +351,7 @@ Http.safeGetXHRResponseText = function(xhr)
 };
 
 // ********************************************************************************************* //
-// IP Adress and port number (Requires Gecko 5).
+// IP Address and port number (Requires Gecko 5).
 
 Http.safeGetLocalAddress = function(request)
 {

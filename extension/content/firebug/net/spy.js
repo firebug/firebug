@@ -908,7 +908,7 @@ function onHTTPSpyAbort(spy)
 
     updateLogRow(spy);
 
-    // Notify Net pane about a request beeing aborted.
+    // Notify Net pane about a request being aborted.
     // xxxHonza: the net panel shoud find out this itself.
     var netProgress = spy.context.netProgress;
     if (netProgress)

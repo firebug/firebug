@@ -1000,7 +1000,7 @@ JSAutoCompleter.transformScopeOperator = function(expr, fname)
     var search = 0;
     for (;;)
     {
-        // Find the next occurrance of .%.
+        // Find the next occurrence of .%.
         var end = sexpr.indexOf(".%", search);
         if (end === -1)
             break;

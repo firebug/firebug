@@ -91,7 +91,7 @@ DomplateTag.prototype =
      * Initializer for DOM templates. Called to create new Functions objects like TR, TD,
      * OBJLINK, etc. See defineTag
      *
-     * @param args keyword argments for the template, the {} brace stuff after the tag name,
+     * @param args keyword arguments for the template, the {} brace stuff after the tag name,
      *      eg TR({...}, TD(...
      * @param oldTag a nested tag, eg the TD tag in TR({...}, TD(...
      */
@@ -750,7 +750,7 @@ DomplateLoop.prototype = copyObject(DomplateTag.prototype,
         var iterName;
         if (this.iter instanceof Parts)
         {
-            // We have a function with optional aruments or just one variable
+            // We have a function with optional arguments or just one variable
             var part = this.iter.parts[0];
 
             // Join our function arguments or variables

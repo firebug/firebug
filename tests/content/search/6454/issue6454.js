@@ -51,7 +51,7 @@ function executeSearchTest(text, reverse, caseSensitive, callback)
 
         var match = sel.getRangeAt(0);
 
-        // OK, we have found the first occurence again, so finish the test.
+        // OK, we have found the first occurrence again, so finish the test.
         FBTest.sysout("search.match; ", match);
         if (firstMatch && (firstMatch.compareBoundaryPoints(Range.START_TO_START, match) ||
             firstMatch.compareBoundaryPoints(Range.END_TO_END, match)) == 0)

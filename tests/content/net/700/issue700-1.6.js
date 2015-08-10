@@ -14,7 +14,7 @@ function runTest()
                 classes: "netRow category-xhr hasHeaders loaded"
             };
 
-            // Asynchronously wait for the request beeing displayed.
+            // Asynchronously wait for the request being displayed.
             FBTest.waitForDisplayedElement("net", options, function(netRow)
             {
                 var panelNode = FBTest.getPanel("net").panelNode;
