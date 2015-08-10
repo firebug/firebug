@@ -2349,7 +2349,7 @@ FirebugReps.XPathResult = domplate(FirebugReps.Arr,
         // xxxHonza: fix for test console/api/log-xpathresult
         // FirebugReps.Arr.hasSpecialProperties iterates object properties
         // (using Object.getOwnPropertyNames), but misses 'constructor' if the property
-        // is not explicitely accessed before. Any explanation for such behavior?
+        // is not explicitly accessed before. Any explanation for such behavior?
         // (btw. it was actually accessed, but order of 'supportsObject' calls changed when
         // 'Exception' rep moved into its own module, see issue: 6606)
         var ctor = array && array.constructor;

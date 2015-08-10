@@ -54,7 +54,7 @@ function onDataComplete(e)
                 for (var i = 0; i < 80000; i++)
                     responseText += i + " ";
 
-                // Compare expected and actuall (displayed) response text.
+                // Compare expected and actual (displayed) response text.
                 var text1 = responseText.substr(0, limit);
                 var text2 = responseBody.textContent.substr(0, limit);
                 FBTest.compare(text1, text2, "The response text must be properly displayed");

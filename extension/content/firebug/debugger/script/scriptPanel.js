@@ -1834,7 +1834,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         function failure(result, context)
         {
-            // We are mostly not interested in this evaluation error. It just polutes
+            // We are mostly not interested in this evaluation error. It just pollutes
             // the tracing console.
             // Trace.sysout("scriptPanel.populateInfoTip; ERROR " + result, result);
 

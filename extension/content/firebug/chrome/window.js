@@ -17,7 +17,7 @@ var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMe
 
 var Win = {};
 
-var window = {};     // these declarations exist to cause errors if we accidently
+var window = {};     // these declarations exist to cause errors if we accidentally
 var document = {};   // reference these globals
 
 // ********************************************************************************************* //

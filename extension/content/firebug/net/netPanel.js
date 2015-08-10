@@ -888,7 +888,7 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
             var tbody = this.table.querySelector(".netTableBody");
 
             // xxxHonza: Fake first row (shold be renamed, but it's a hack anyway).
-            // There is no way to insert a row befor the current first row in a table.
+            // There is no way to insert a row before the current first row in a table.
             // See Domplate.insertRows() comment for more details.
             NetRequestEntry.footerTag.insertRows({}, tbody);
 
@@ -1059,7 +1059,7 @@ NetPanel.prototype = Obj.extend(ActivablePanel,
     {
         var tbody = this.table.querySelector(".netTableBody");
 
-        // XXXjoe Don't update rows whose phase is done and layed out already
+        // XXXjoe Don't update rows whose phase is done and laid out already
         var phase;
         for (var row = tbody.firstChild; row; row = row.nextSibling)
         {

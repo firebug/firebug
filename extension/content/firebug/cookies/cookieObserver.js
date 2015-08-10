@@ -432,7 +432,7 @@ var CookieObserver = Obj.extend(BaseObserver,
 
     logEvent: function(eventObject, context, className)
     {
-        // xxxHonza: if the cookie is changed befor initContext, the log in
+        // xxxHonza: if the cookie is changed before initContext, the log in
         // console is lost.
         Firebug.Console.log(eventObject, context, className, null, true);
     }

@@ -240,7 +240,7 @@ var NetUtils =
 
     getResponseText: function(file, context)
     {
-        // The response can be also empty string so, check agains "undefined".
+        // The response can be also empty string so, check against "undefined".
         return (typeof(file.responseText) != "undefined") ?
             file.responseText :
             context.sourceCache.loadText(file.href, file.method, file);
@@ -371,7 +371,7 @@ var NetUtils =
      * The logic is as follows:
      * 1) If the request is an XHR, return 'xhr' as category
      * 2) Otherwise use the file extension to guess the MIME type.
-     *    This is prefered since MIME types in HTTP requests are often wrong.
+     *    This is preferred since MIME types in HTTP requests are often wrong.
      *    This part is based on the 'mimeExtensionMap' map.
      * 3) If the file extension is missing or unknown, try to get the MIME type
      *    from the HTTP request object.
@@ -389,7 +389,7 @@ var NetUtils =
      * The logic is as follows:
      * 1) If the request is an XHR, add 'xhr' as category
      * 2) Use the file extension to guess the MIME type.
-     *    This is prefered since MIME types in HTTP requests are often wrong.
+     *    This is preferred since MIME types in HTTP requests are often wrong.
      *    This part is based on the 'mimeExtensionMap' map.
      * 3) If the file extension is missing or unknown, try to get the MIME type
      *    from the HTTP request object.
@@ -408,7 +408,7 @@ var NetUtils =
             categories.push("xhr");
 
         // Guess mime-type according to the file extension. Using file extension
-        // is prefered way since mime-types in HTTP requests are often wrong.
+        // is preferred way since mime-types in HTTP requests are often wrong.
         var mimeType = this.getMimeType(null, file.href);
 
         // If no luck with file extension, let's try to get the mime-type from

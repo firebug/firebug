@@ -184,7 +184,7 @@ SourceEditor.EVENTS = {
    * The TextChanged event is fired when the editor content changes. The event
    * object properties:
    *   - start - the character offset in the document where the change has
-   *   occured.
+   *   occurred.
    *   - removedCharCount - the number of characters removed from the document.
    *   - addedCharCount - the number of characters added to the document.
    */

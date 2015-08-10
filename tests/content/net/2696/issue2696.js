@@ -13,7 +13,7 @@ function runTest()
             // 3) Select Net panel
             FBTest.enableNetPanel(() =>
             {
-                // Asynchronously wait for the request beeing displayed.
+                // Asynchronously wait for the request being displayed.
                 FBTest.waitForDisplayedElement("net", null, (netRow) =>
                 {
                     FBTest.ok(netRow, "There must be just one xhr request.");

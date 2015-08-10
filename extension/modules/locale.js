@@ -42,7 +42,7 @@ var Locale = {};
  * $STR("Label"); - search for key "Label" within the firebug.properties file
  *                 and returns its value. If the key doesn't exist returns "Label".
  *
- * $STR("Button Label"); - search for key "Button_Label" withing the firebug.properties
+ * $STR("Button Label"); - search for key "Button_Label" within the firebug.properties
  *                        file. If the key doesn't exist returns "Button Label".
  *
  * $STR("net.Response Header"); - search for key "net.Response_Header". If the key doesn't

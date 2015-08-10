@@ -1063,7 +1063,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Rep, new EventSource(),
                 Firebug.NetMonitor.NetInfoHeaders.renderHeaders(headersText,
                     file.responseHeaders, "ResponseHeaders");
 
-                // If the request comes from the BFCache do not display reponse headers.
+                // If the request comes from the BFCache do not display response headers.
                 // There is not real response from the server and all headers come from
                 // the cache. So, the user should see the 'Response Headers From Cache'
                 // section (see issue 5573).
