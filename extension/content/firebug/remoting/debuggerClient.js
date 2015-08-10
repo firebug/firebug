@@ -405,6 +405,12 @@ var DebuggerClient = Obj.extend(Firebug.Module,
 
     onThreadAttached: function(context)
     {
+        // "newSource" events are emitted by thread-actor now.
+        // https://hg.mozilla.org/integration/mozilla-inbound/rev/152f968b6b13
+        // https://github.com/firebug/firebug/issues/7918
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=1171967
+        context.activeThread.addListener("newSource", this.newSource);
+
         this.dispatch("onThreadAttached", [context, false]);
 
         Firebug.dispatchEvent(context.browser, "onThreadAttached");
@@ -412,6 +418,8 @@ var DebuggerClient = Obj.extend(Firebug.Module,
 
     onThreadDetached: function(context)
     {
+        context.activeThread.removeListener("newSource");
+
         this.dispatch("onThreadDetached", [context]);
 
         Firebug.dispatchEvent(context.browser, "onThreadDetached");
