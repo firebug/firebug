@@ -552,7 +552,9 @@ DebuggerLib.breakNow = function(context)
         // but we might want to change what global to use here.
         var global = context.getCurrentGlobal();
         var dbgGlobal = this.getInactiveDebuggeeGlobal(context, global);
-        return dbgGlobal.evalInGlobal("debugger;");
+        return dbgGlobal.executeInGlobal ?
+            dbgGlobal.executeInGlobal("debugger;") :
+            dbgGlobal.evalInGlobal("debugger;");
     }
 };
 
