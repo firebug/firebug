@@ -32,7 +32,17 @@ function(Firebug, FBTrace, Obj, Events, Locale, Search, Wrapper, Xml, Options, W
 
 var Cu = Components.utils;
 var scope = Cu.import("resource://gre/modules/devtools/Loader.jsm", {});
-var {ConsoleAPIListener} = scope.devtools.require("devtools/toolkit/webconsole/utils");
+var ConsoleAPIListener;
+
+try {
+    ConsoleAPIListener =
+        scope.devtools.require("devtools/toolkit/webconsole/utils").ConsoleAPIListener;
+}
+catch (ex) {
+    ConsoleAPIListener =
+        scope.devtools.require("devtools/shared/webconsole/utils").ConsoleAPIListener;
+}
+
 
 var defaultReturnValue = Object.preventExtensions(Object.create(null));
 
