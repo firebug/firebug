@@ -354,7 +354,7 @@ StackFrame.removeChromeFrames = function(trace)
     for (var i = 0; i < frames.length; i++)
     {
         var href = frames[i].href;
-        if (href && (href.startsWith("chrome:") || href.startsWith("resource:")))
+        if (!href || href.startsWith("chrome:") || href.startsWith("resource:"))
             continue;
 
         // xxxFlorent: should be reverted if we integrate
