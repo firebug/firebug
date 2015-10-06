@@ -237,8 +237,8 @@ function evaluateInGlobal(context, win, expr, origExpr, onSuccess, onError, opti
 {
     var dbgGlobal = DebuggerLib.getInactiveDebuggeeGlobal(context, win);
     var evalMethod = options.noCmdLineAPI ?
-                     dbgGlobal.evalInGlobal :
-                     dbgGlobal.evalInGlobalWithBindings;
+                     (dbgGlobal.executeInGlobal || dbgGlobal.evalInGlobal) :
+                     (dbgGlobal.executeInGlobalWithBindings || dbgGlobal.evalInGlobalWithBindings);
 
     var args = [dbgGlobal, evalMethod, dbgGlobal];
     args.push.apply(args, arguments);
@@ -528,8 +528,11 @@ function executeInWindowContext(win, func, args, dbgGlobal)
     var code = "(function() { callback(); })";
     var bindings = Object.create(null);
     bindings.callback = dbgGlobal.makeDebuggeeValue(listener);
-    var listenerInWindow = dbgGlobal.evalInGlobalWithBindings(code, bindings)
-        .return.unsafeDereference();
+    var listenerInWindow = (
+            dbgGlobal.executeInGlobalWithBindings ?
+            dbgGlobal.executeInGlobalWithBindings(code, bindings) :
+            dbgGlobal.evalInGlobalWithBindings(code, bindings)
+        ).return.unsafeDereference();
 
     win.document.addEventListener("firebugCommandLine", listenerInWindow);
 
