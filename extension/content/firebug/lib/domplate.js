@@ -868,7 +868,7 @@ function parseParts(str)
     if (!index)
     {
         // Double quotes in strings need to be escaped (see issue 6710)
-        return str.replace("\\", "\\\\", "g").replace('"', '\\"', "g");
+        return str.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
     }
 
     // If we have data after our last matched index we append it here as the final step

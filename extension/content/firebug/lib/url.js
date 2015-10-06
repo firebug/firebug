@@ -343,9 +343,7 @@ Url.isAbsoluteUrl = function(url)
 
 Url.absoluteURL = function(url, baseURL)
 {
-    // Replace "/./" with "/" using regular expressions (don't use string since /./
-    // can be treated as regular expressoin too, see 3551).
-    return Url.absoluteURLWithDots(url, baseURL).replace(/\/\.\//, "/", "g");
+    return Url.absoluteURLWithDots(url, baseURL).replace(/\/\.\//g, "/");
 };
 
 Url.absoluteURLWithDots = function(url, baseURL)
