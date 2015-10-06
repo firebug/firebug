@@ -14,6 +14,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/url",
     "firebug/lib/xml",
+    "firebug/lib/devtools",
     "firebug/chrome/menu",
     "firebug/chrome/panel",
     "firebug/css/cssModule",
@@ -22,7 +23,7 @@ define([
     "firebug/debugger/script/sourceLink",
 ],
 function(Firebug, Arr, Css, Dom, Domplate, Events, Locale, Obj, Options, Persist, Str, Url, Xml,
-    Menu, Panel, CSSModule, CSSReps, LoadHandler, SourceLink) {
+    DevTools, Menu, Panel, CSSModule, CSSReps, LoadHandler, SourceLink) {
 
 "use strict";
 
@@ -42,9 +43,9 @@ try
 {
     // Firefox 24
     // waiting for: https://bugzilla.mozilla.org/show_bug.cgi?id=867595
-    var scope = {}
-    Cu.import("resource://gre/modules/devtools/Loader.jsm", scope);
-    var {CssLogic} = scope.devtools.require("devtools/styleinspector/css-logic");
+    var {CssLogic} = DevTools.safeRequire(DevTools.devtools,
+      "devtools/shared/styleinspector/css-logic",
+      "devtools/styleinspector/css-logic");
 }
 catch (e)
 {

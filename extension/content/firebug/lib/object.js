@@ -4,9 +4,10 @@ define([
     "firebug/lib/trace",
     "firebug/lib/xpcom",
     "firebug/lib/array",
-    "firebug/lib/string"
+    "firebug/lib/string",
+    "firebug/lib/devtools",
 ],
-function(FBTrace, Xpcom, Arr, Str) {
+function(FBTrace, Xpcom, Arr, Str, DevTools) {
 
 "use strict";
 
@@ -219,14 +220,15 @@ Obj.isNonNativeGetter = function(obj, propName)
 {
     try
     {
-        var scope = {};
-        Cu.import("resource://gre/modules/devtools/WebConsoleUtils.jsm", scope);
+        var {Utils} = DevTools.safeRequire(DevTools.devtools,
+          "devtools/shared/webconsole/utils",
+          "devtools/toolkit/webconsole/utils");
 
-        if (scope.WebConsoleUtils.isNonNativeGetter)
+        if (Utils.isNonNativeGetter)
         {
             Obj.isNonNativeGetter = function(obj, propName)
             {
-                return scope.WebConsoleUtils.isNonNativeGetter(obj, propName);
+                return Utils.isNonNativeGetter.isNonNativeGetter(obj, propName);
             };
 
             return Obj.isNonNativeGetter(obj, propName);

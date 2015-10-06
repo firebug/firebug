@@ -10,6 +10,7 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/xml",
     "firebug/lib/options",
+    "firebug/lib/devtools",
     "firebug/chrome/window",
     "firebug/chrome/firefox",
     "firebug/chrome/panelNotification",
@@ -21,7 +22,7 @@ define([
     "firebug/dom/domBaseTree",
     "firebug/remoting/debuggerClient",
 ],
-function(Firebug, FBTrace, Obj, Events, Locale, Search, Wrapper, Xml, Options, Win, Firefox,
+function(Firebug, FBTrace, Obj, Events, Locale, Search, Wrapper, Xml, Options, DevTools, Win, Firefox,
     PanelNotification, ActivableModule, ConsoleBase, SourceLink, StackFrame, StackTrace,
     DomBaseTree, DebuggerClient) {
 
@@ -30,9 +31,9 @@ function(Firebug, FBTrace, Obj, Events, Locale, Search, Wrapper, Xml, Options, W
 // ********************************************************************************************* //
 // Constants
 
-var Cu = Components.utils;
-var scope = Cu.import("resource://gre/modules/devtools/Loader.jsm", {});
-var {ConsoleAPIListener} = scope.devtools.require("devtools/toolkit/webconsole/utils");
+var {ConsoleAPIListener} = DevTools.safeRequire(DevTools.devtools,
+  "devtools/shared/webconsole/utils",
+  "devtools/toolkit/webconsole/utils");
 
 var defaultReturnValue = Object.preventExtensions(Object.create(null));
 

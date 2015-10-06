@@ -41,8 +41,11 @@ var ScratchpadManager;
 
 try
 {
-    var scope = {};
-    Cu.import("resource:///modules/devtools/scratchpad-manager.jsm", scope);
+    // Module paths have changed, see also: https://bugzilla.mozilla.org/show_bug.cgi?id=912121
+    var scope = System.importModule([
+      "resource:///modules/devtools/client/scratchpad/scratchpad-manager.jsm",
+      "resource:///modules/devtools/scratchpad-manager.jsm
+    ]);
     ScratchpadManager = scope.ScratchpadManager;
 }
 catch(ex)
