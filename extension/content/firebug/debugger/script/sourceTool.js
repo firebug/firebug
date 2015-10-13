@@ -155,7 +155,8 @@ SourceTool.prototype = Obj.extend(new Tool(),
     {
         // Ignore scripts generated from 'clientEvaluate' packets. These scripts are
         // created e.g. as the user is evaluating expressions in the watch window.
-        if (DebuggerLib.isFrameLocationEval(script.url))
+        if (script.introductionType === "debugger eval" ||
+            DebuggerLib.isFrameLocationEval(script.url))
         {
             Trace.sysout("sourceTool.addScript; A script ignored " + script.type +
                 ", " + script.url, script);
