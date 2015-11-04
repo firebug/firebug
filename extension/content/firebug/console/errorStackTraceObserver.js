@@ -154,7 +154,7 @@ var ErrorStackTraceObserver = Obj.extend(Module,
             if (!sourceFile)
                 sourceFile = {href: script.url};
 
-            var line = script.getOffsetLine(state.offsets[i]);
+            var line = script.getOffsetLocation(state.offsets[i]).lineNumber;
             var args = state.argCopies[i];
 
             var stackFrame = new StackFrame(sourceFile, line, state.frameNames[i],
