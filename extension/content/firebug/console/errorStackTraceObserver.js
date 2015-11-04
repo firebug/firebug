@@ -154,9 +154,17 @@ var ErrorStackTraceObserver = Obj.extend(Module,
             if (!sourceFile)
                 sourceFile = {href: script.url};
 
-            var line = script.getOffsetLocation(state.offsets[i]).lineNumber;
-            var args = state.argCopies[i];
+            var line;
 
+            // getOffsetLocation has been introduced in Firefox 44 (Fx44)
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=863089
+            // https://github.com/firebug/firebug/issues/7961
+            if (typeof script.getOffsetLocation == "function")
+                line = script.getOffsetLocation(state.offsets[i]).lineNumber;
+            else
+                line = script.getOffsetLine(state.offsets[i]);
+
+            var args = state.argCopies[i];
             var stackFrame = new StackFrame(sourceFile, line, state.frameNames[i],
                 args, null, 0, context);
             trace.frames.push(stackFrame);
