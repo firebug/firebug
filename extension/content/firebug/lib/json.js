@@ -70,9 +70,10 @@ Json.parseJSONString = function(jsonString, originURL)
     }
     catch (exc) {}
 
-    // Give up if we don't have valid start, to avoid some unnecessary overhead.
+    // Give up if we don't have valid start, to avoid some unnecessary overhead,
+    // and if we don't start with comments (pseudoJsonToJson is meant to strip them).
     first = firstNonWs(jsonString);
-    if (first !== "[" && first !== "{" && isNaN(first) && first !== '"')
+    if (first !== "[" && first !== "{" && isNaN(first) && first !== '"' && first !== "/")
         return null;
 
     // Remove JavaScript comments, quote non-quoted identifiers, and merge
