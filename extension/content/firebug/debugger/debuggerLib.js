@@ -43,6 +43,10 @@ DebuggerLib.unwrapDebuggeeValue = function(obj)
     if (typeof obj !== "object" || obj === null)
         return obj;
 
+    if (typeof obj.unsafeDereference != "function") {
+      return;
+    }
+
     return Wrapper.unwrapObject(obj.unsafeDereference());
 };
 
@@ -146,6 +150,17 @@ DebuggerLib.getObject = function(context, actorId)
 
         if (!actor && threadActor._pausePool)
             actor = threadActor._pausePool.get(actorId);
+
+        // Check also the youngest frame that contains objects
+        // living in the scope.
+        // We could also iterate all frames through: threadActor.framePool,
+        // but it could have an impact on performance since this method
+        // is called quite often. It would have to be tested carefully.
+        if (!actor && threadActor.youngestFrame &&
+            threadActor.youngestFrame.actor &&
+            threadActor.youngestFrame.actor.frameLifetimePool) {
+          actor = threadActor.youngestFrame.actor.frameLifetimePool.get(actorId);
+        }
 
         if (!actor)
             return null;
