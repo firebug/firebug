@@ -11,13 +11,14 @@ define([
     "firebug/lib/options",
     "firebug/lib/promise",
     "firebug/lib/string",
+    "firebug/lib/devtools",
     "firebug/chrome/module",
     "firebug/chrome/menu",
     "firebug/console/autoCompleter",
     "firebug/console/commandLine",
     "firebug/editor/sourceEditor",
 ],
-function(Firebug, FBTrace, Obj, Events, Dom, Locale, Css, Options, Promise, Str, Module, Menu,
+function(Firebug, FBTrace, Obj, Events, Dom, Locale, Css, Options, Promise, Str, DevTools, Module, Menu,
     AutoCompleter, CommandLine, SourceEditor) {
 
 "use strict";
@@ -352,49 +353,32 @@ var CommandEditor = Obj.extend(Module,
             return;
 
         var worker = getPrettyPrintWorker();
+        if (!worker) {
+          return;
+        }
+
         var id = "firebug-" + Obj.getUniqueId();
         var deferred = Promise.defer();
 
-        var onReply = ({data}) =>
-        {
-            if (data.id !== id)
-                return;
+        return worker.performTask("pretty-print", {
+          url: "(command-editor)",
+          indent: Options.get("replaceTabs"),
+          source: this.getText()
+        }).then(data => {
+          this.setText(data.code);
+        }).then(null, error => {
+          TraceError.sysout("commandEditor.prettyPrint; ERROR " + error, error);
 
-            worker.removeEventListener("message", onReply, false);
+          // Remove stack trace info from the error message (separated by a newline,
+          // see pretty-print-worker.js)
+          var message = Str.safeToString(error);
+          var index = message.indexOf("\n");
+          if (index != -1)
+            message = message.substr(0, index);
 
-            if (data.error)
-            {
-                TraceError.sysout("commandEditor.prettyPrint; ERROR " + data.error, data);
-
-                // Remove stack trace info from the error message (separated by a newline,
-                // see pretty-print-worker.js)
-                var message = Str.safeToString(data.error);
-                var index = message.indexOf("\n");
-                message = message.substr(0, index);
-
-                // Log only an error message into the Console panel.
-                Firebug.Console.logFormatted([message], context, "error", true);
-
-                deferred.reject(data.error);
-            }
-            else
-            {
-                this.setText(data.code);
-
-                deferred.resolve(data.code);
-            }
-        };
-
-        worker.addEventListener("message", onReply, false);
-
-        worker.postMessage({
-            id: id,
-            url: "(command-editor)",
-            indent: Options.get("replaceTabs"),
-            source: this.getText()
+          // Log only an error message into the Console panel.
+          Firebug.Console.logFormatted([message], context, "error", true);
         });
-
-        return deferred.promise;
     }
 });
 
@@ -522,14 +506,15 @@ function getPrettyPrintWorker()
 {
     if (!prettyPrintWorker)
     {
-        prettyPrintWorker = new ChromeWorker(
-            "resource://gre/modules/devtools/server/actors/pretty-print-worker.js");
+        if (!DevTools.DevToolsWorker)
+          return null;
 
-        prettyPrintWorker.addEventListener("error", ({message, fileName, lineNo}) =>
-        {
-            TraceError.sysout("commandEditor.getPrettyPrintWorker; ERROR " + message +
-                " " + fileName + ":" + lineNo);
-        }, false);
+        prettyPrintWorker = new DevTools.DevToolsWorker(
+            DevTools.prettyPrintWorkerUrl, {
+                name: "pretty-print",
+                verbose: DevTools.DevToolsUtils.dumpn.wantLogging
+            }
+        );
     }
 
     return prettyPrintWorker;

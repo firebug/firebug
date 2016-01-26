@@ -4,8 +4,9 @@ define([
     "firebug/lib/object",
     "firebug/lib/trace",
     "firebug/lib/options",
+    "firebug/lib/devtools",
 ],
-function(Obj, FBTrace, Options) {
+function(Obj, FBTrace, Options, DevTools) {
 
 // ********************************************************************************************* //
 // Constants
@@ -14,8 +15,7 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
-
+var DebuggerServer = DevTools.DebuggerServer;
 var ObjectActor = DebuggerServer.ObjectActor;
 var propMax = Options.get("ObjectShortIteratorMax");
 

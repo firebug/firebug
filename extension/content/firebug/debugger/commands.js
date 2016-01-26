@@ -7,12 +7,13 @@ define([
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/options",
+    "firebug/lib/devtools",
     "firebug/chrome/module",
     "firebug/debugger/rdp",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/breakpoints/breakpointStore"
 ],
-function(Firebug, FBTrace, Obj, Options, Module, RDP, DebuggerLib, BreakpointStore) {
+function(Firebug, FBTrace, Obj, Options, DevTools, Module, RDP, DebuggerLib, BreakpointStore) {
 
 "use strict";
 
@@ -23,7 +24,7 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
+var DebuggerServer = DevTools.DebuggerServer;
 
 var Trace = FBTrace.to("DBG_DEBUGGER_COMMANDS");
 var TraceError = FBTrace.toError();

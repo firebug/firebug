@@ -3,10 +3,11 @@
 define([
     "firebug/lib/object",
     "firebug/lib/trace",
+    "firebug/lib/devtools",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/breakpoints/breakpointStore",
 ],
-function(Obj, FBTrace, DebuggerLib, BreakpointStore) {
+function(Obj, FBTrace, DevTools, DebuggerLib, BreakpointStore) {
 
 "use strict";
 
@@ -21,7 +22,7 @@ function(Obj, FBTrace, DebuggerLib, BreakpointStore) {
 
 var Cu = Components.utils;
 
-Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
+var DebuggerServer = DevTools.DebuggerServer;
 
 // xxxHonza: Firefox 32 changes the location of BreakpointActor object,
 // but implements support for server side breakpoint condition evaluation

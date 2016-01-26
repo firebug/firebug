@@ -3,8 +3,9 @@
 define([
     "firebug/lib/object",
     "firebug/lib/trace",
+    "firebug/lib/devtools",
 ],
-function(Obj, FBTrace) {
+function(Obj, FBTrace, DevTools) {
 
 // ********************************************************************************************* //
 // Constants
@@ -13,7 +14,7 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
+var DebuggerServer = DevTools.DebuggerServer;
 
 // ********************************************************************************************* //
 // Implementation

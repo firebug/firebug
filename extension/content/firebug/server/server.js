@@ -2,8 +2,9 @@
 
 define([
     "firebug/lib/trace",
+    "firebug/lib/devtools",
 ],
-function(FBTrace) {
+function(FBTrace, DevTools) {
 
 // xxxHonza: FBTrace isn't available when loading from within bootstrap.js
 // The default FBTrace implementation should buffer all logs that are fired
@@ -15,6 +16,8 @@ function(FBTrace) {
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
+
+var DebuggerServer = DevTools.DebuggerServer;
 
 // ********************************************************************************************* //
 // Module
@@ -28,8 +31,6 @@ var Server =
     {
         try
         {
-            Cu.import("resource:///modules/devtools/dbg-server.jsm");
-
             DebuggerServer.init(function() { return true; });
 
             // Add built-in actors (like e.g. debugger actors)

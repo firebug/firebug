@@ -74,8 +74,9 @@ function startup(params, reason)
     Services.obs.addObserver(windowWatcher, "chrome-document-global-created", false);
 
     // GCLI commands
-    Cu.import("resource://firebug/gcli.js");
-    FirebugGCLICommands.startup();
+    // Not supported anymore
+    //Cu.import("resource://firebug/gcli.js");
+    //FirebugGCLICommands.startup();
 }
 
 function shutdown(params, reason)

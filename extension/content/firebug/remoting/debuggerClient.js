@@ -6,12 +6,13 @@ define([
     "firebug/lib/object",
     "firebug/lib/options",
     "firebug/lib/events",
+    "firebug/lib/devtools",
     "firebug/chrome/tabWatcher",
     "firebug/chrome/firefox",
     "firebug/chrome/window",
     "firebug/remoting/tabClient",
 ],
-function(Firebug, FBTrace, Obj, Options, Events, TabWatcher, Firefox, Win, TabClient) {
+function(Firebug, FBTrace, Obj, Options, Events, DevTools, TabWatcher, Firefox, Win, TabClient) {
 
 "use strict";
 
@@ -24,11 +25,12 @@ var Trace = FBTrace.to("DBG_DEBUGGERCLIENT");
 var TraceConn = FBTrace.to("DBG_CONNECTION");
 var TraceError = FBTrace.toError();
 
-var dbgClientScope = {};
-var dbgServerScope = {};
-
-Cu["import"]("resource://gre/modules/devtools/dbg-client.jsm", dbgClientScope);
-Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm", dbgServerScope);
+var dbgClientScope = {
+  DebuggerClient: DevTools.DebuggerClient
+};
+var dbgServerScope = {
+  DebuggerServer: DevTools.DebuggerServer
+};
 
 // ********************************************************************************************* //
 // Module Implementation
@@ -109,10 +111,10 @@ var DebuggerClient = Obj.extend(Firebug.Module,
             {
                 // The debugger server might be already initialized either by Firebug
                 // in another browser window or by built-in devtools.
-                if (!DebuggerServer.initialized)
+                if (!dbgServerScope.DebuggerServer.initialized)
                 {
-                    DebuggerServer.init(function () { return true; });
-                    DebuggerServer.addBrowserActors();
+                    dbgServerScope.DebuggerServer.init(function () { return true; });
+                    dbgServerScope.DebuggerServer.addBrowserActors();
                 }
             }
             catch (e)
@@ -123,7 +125,7 @@ var DebuggerClient = Obj.extend(Firebug.Module,
 
         this.transport = (this.isRemoteDebugger) ?
             debuggerSocketConnect(Options.get("remoteHost"), Options.get("remotePort")) :
-            DebuggerServer.connectPipe();
+            dbgServerScope.DebuggerServer.connectPipe();
 
         // Load Firebug actors. If Firebug is running server side these actors
         // should also be loaded.

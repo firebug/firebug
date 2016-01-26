@@ -15,13 +15,14 @@ define([
     "firebug/lib/system",
     "firebug/lib/xpcom",
     "firebug/lib/object",
+    "firebug/lib/devtools",
     "firebug/chrome/tableRep",
     "firebug/console/console",
     "firebug/editor/editor",
     "firebug/editor/inlineEditor",
 ],
 function(Module, Rep, FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, Menu, System,
-    Xpcom, Obj, TableRep, Console, Editor, InlineEditor) {
+    Xpcom, Obj, DevTools, TableRep, Console, Editor, InlineEditor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -37,22 +38,7 @@ var Trace = FBTrace.to("DBG_COMMANDLINE");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-var ScratchpadManager;
-
-try
-{
-    // Module paths have changed, see also: https://bugzilla.mozilla.org/show_bug.cgi?id=912121
-    var scope = System.importModule([
-      "resource:///modules/devtools/client/scratchpad/scratchpad-manager.jsm",
-      "resource:///modules/devtools/scratchpad-manager.jsm"
-    ]);
-    ScratchpadManager = scope.ScratchpadManager;
-}
-catch(ex)
-{
-    // Scratchpad does not exists (when using Seamonkey ...)
-}
-
+var ScratchpadManager = DevTools.ScratchpadManager;
 var storageScope = {}, StorageService;
 Cu.import("resource://firebug/storageService.js", storageScope);
 StorageService = storageScope.StorageService;
@@ -307,7 +293,7 @@ var CommandLineIncludeRep = domplate(TableRep,
             }
         ];
 
-        if (ScratchpadManager)
+        if (typeof ScratchpadManager.openScratchpad == "function")
         {
             items.push({
                 label: "commandline.label.OpenInScratchpad",

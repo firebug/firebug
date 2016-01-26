@@ -4,9 +4,10 @@ define([
     "firebug/lib/object",
     "firebug/lib/trace",
     "firebug/lib/options",
+    "firebug/lib/devtools",
     "firebug/debugger/actors/elementActor",
 ],
-function(Obj, FBTrace, Options, ElementActor) {
+function(Obj, FBTrace, Options, DevTools, ElementActor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -15,8 +16,7 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
-
+var DebuggerServer = DevTools.DebuggerServer;
 var ThreadActor = DebuggerServer.ThreadActor;
 
 // ********************************************************************************************* //
