@@ -13,9 +13,10 @@ define([
     "firebug/firefox/browserMenu",
     "firebug/firefox/browserToolbar",
     "firebug/lib/system",
+    "firebug/lib/devtools",
 ],
 function(FBTrace, Options, Locale, Events, Arr, Str, Xpcom, BrowserOverlayLib,
-    BrowserCommands, BrowserMenu, BrowserToolbar, System) {
+    BrowserCommands, BrowserMenu, BrowserToolbar, System, DevTools) {
 
 // ********************************************************************************************* //
 // Constants
@@ -150,13 +151,18 @@ BrowserOverlay.prototype =
     {
         // Special case for e10s enabled browser.
         if (this.isMultiprocessEnabled()) {
+            this.showNewMultiprocessNotification();
+            return;
+        }
+
+        /*if (this.isMultiprocessEnabled()) {
             this.showMultiprocessNotification();
             return;
         }
         else if (this.isAuroraChannel()) {
             this.showAuroraNotification();
             return;
-        }
+        }*/
 
         if (this.win.Firebug.waitingForFirstLoad)
             return;
@@ -748,6 +754,28 @@ BrowserOverlay.prototype =
         panel.open();
     },
 
+    showNewMultiprocessNotification: function()
+    {
+        if (Options.get("noMultiprocessMessage"))
+        {
+          this.toggleDevTools();
+          return;
+        }
+
+        var popupSet = $(this.doc, "mainPopupSet");
+        var panel = this.doc.querySelector("fbNewMultiprocessNotificationPanel");
+        if (!panel)
+        {
+            panel = this.doc.createElement("fbNewMultiprocessNotificationPanel");
+            panel.setAttribute("opendevtoolscommand", "Firebug.browserOverlay.onOpenDevTools(event, 'fbMultiprocessNotificationPanel')");
+            panel.setAttribute("disablecommand", "Firebug.browserOverlay.onDisableE10s(event)");
+            popupSet.appendChild(panel);
+        }
+
+        panel.internationalize(Locale);
+        panel.open();
+    },
+
     onDisableE10s: function(event)
     {
       Events.cancelEvent(event);
@@ -757,7 +785,35 @@ BrowserOverlay.prototype =
       Options.setPref("browser.tabs", "remote.autostart", false);
       Options.setPref("browser.tabs", "remote.autostart.1", false);
 
+      var panel = this.doc.querySelector("fbNewMultiprocessNotificationPanel");
+      Options.set("noMultiprocessMessage", panel.notAgain.checked);
+
       restartFirefox();
+    },
+
+    onOpenDevTools: function(event)
+    {
+      Events.cancelEvent(event);
+
+      var panel = this.doc.querySelector("fbNewMultiprocessNotificationPanel");
+      Options.set("noMultiprocessMessage", panel.notAgain.checked);
+
+      panel.close();
+
+      this.toggleDevTools(true);
+    },
+
+    toggleDevTools: function(forceOpen) {
+      var toolbox = getToolbox(this.win);
+      if (toolbox && forceOpen) {
+        return;
+      }
+
+      if (toolbox) {
+        destroyToolbox(this.win);
+      } else {
+        showToolbox(this.win);
+      }
     },
 
     onUpgradeFirebug: function(event, panelId)
@@ -852,6 +908,8 @@ BrowserOverlay.prototype =
     },
 };
 
+// Helpers
+
 function findFirebugUpdate(callback)
 {
     var xhr = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
@@ -892,9 +950,39 @@ function findFirebugUpdate(callback)
     xhr.send(null);
 }
 
-function restartFirefox() {
+function restartFirefox()
+{
     Cc["@mozilla.org/toolkit/app-startup;1"].getService(Ci.nsIAppStartup).
         quit(Ci.nsIAppStartup.eRestart | Ci.nsIAppStartup.eAttemptQuit);
+}
+
+function getCurrentTab(win)
+{
+    let browserDoc = win.top.document;
+    let browser = browserDoc.getElementById("content");
+    return browser.selectedTab;
+}
+
+function showToolbox(win)
+{
+    let tab = getCurrentTab(win);
+    let target = DevTools.devtools.TargetFactory.forTab(tab);
+    return DevTools.gDevTools.showToolbox(target);
+}
+
+function destroyToolbox(win)
+{
+    let toolbox = getToolbox(win);
+    if (toolbox) {
+      return toolbox.destroy();
+    }
+}
+
+function getToolbox(win)
+{
+    let tab = getCurrentTab(win);
+    let target = DevTools.devtools.TargetFactory.forTab(tab);
+    return DevTools.gDevTools.getToolbox(target);
 }
 
 // ********************************************************************************************* //

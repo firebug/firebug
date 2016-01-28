@@ -200,6 +200,10 @@ fbMultiprocessNotificationPanel {
     -moz-binding: url("chrome://firebug/content/firefox/multiprocessNotificationPanel.xml#panel");
 }
 
+fbNewMultiprocessNotificationPanel {
+    -moz-binding: url("chrome://firebug/content/firefox/newMultiprocessNotificationPanel.xml#panel");
+}
+
 fbAuroraNotificationPanel {
     -moz-binding: url("chrome://firebug/content/firefox/auroraNotificationPanel.xml#panel");
 }
@@ -210,12 +214,14 @@ fbUpgradeNotificationPanel {
 
 fbUpgradeNotificationPanel .iconbox,
 fbAuroraNotificationPanel .iconbox,
+fbNewMultiprocessNotificationPanel .iconbox,
 fbMultiprocessNotificationPanel .iconbox {
     padding-right: 10px;
 }
 
 fbUpgradeNotificationPanel .desc,
 fbAuroraNotificationPanel .desc,
+fbNewMultiprocessNotificationPanel .desc,
 fbMultiprocessNotificationPanel .desc {
     max-width: 300px;
 }
@@ -225,24 +231,29 @@ fbUpgradeNotificationPanel .title {
     font-size: 16px;
 }
 
+fbNewMultiprocessNotificationPanel .warn,
 fbMultiprocessNotificationPanel .warn {
     max-width: 275px;
 }
 
+fbNewMultiprocessNotificationPanel .warn,
 fbMultiprocessNotificationPanel .warn {
     color: gray;
 }
 
+fbNewMultiprocessNotificationPanel .warningbox,
 fbMultiprocessNotificationPanel .warningbox {
     margin-top: 15px;
 }
 
+fbNewMultiprocessNotificationPanel .warningicon,
 fbMultiprocessNotificationPanel .warningicon {
     margin-right: 4px;
 }
 
 fbUpgradeNotificationPanel .progress,
 fbAuroraNotificationPanel .progress,
+fbNewMultiprocessNotificationPanel .progress,
 fbMultiprocessNotificationPanel .progress {
     margin: 8px;
 }
