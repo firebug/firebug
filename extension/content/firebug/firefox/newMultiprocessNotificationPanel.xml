@@ -26,7 +26,7 @@
 
                     <xul:label anonid="learnMore"
                         class="text-link popup-notification-learnmore-link learnMore"
-                        href="https://getfirebug.com/firebug3"/>
+                        href="https://getfirebug.com/merging-into-firefox-developer-tools"/>
 
                     <xul:hbox class="warningbox">
                         <xul:vbox>
