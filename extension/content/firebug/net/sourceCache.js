@@ -214,6 +214,7 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
         var channel;
         try
         {
+            // TODO use newChannel2 here
             channel = ioService.newChannel(url, null, null);
             channel.loadFlags |= LOAD_FROM_CACHE | LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
 

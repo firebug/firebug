@@ -440,6 +440,7 @@ Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
             if (url === "<unknown>")
                 return [Locale.$STR("message.sourceNotAvailableFor") + ": " + url];
 
+            // TODO use newChannel2 here
             var channel = ioService.newChannel(url, null, null);
 
             // These flag combination doesn't repost the request.

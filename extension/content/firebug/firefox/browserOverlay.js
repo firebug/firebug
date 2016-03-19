@@ -447,7 +447,17 @@ BrowserOverlay.prototype =
         var versionURL = "chrome://firebug/content/branch.properties";
         var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 
-        var channel = ioService.newChannel(versionURL, null, null);
+        var loadingPrincipal = servicesScope.Services.scriptSecurityManager.getSystemPrincipal();
+
+        var channel = ioService.newChannel2(
+            versionURL,
+            /* aOriginCharset */null,
+            /* aBaseURI */ null,
+            /* aLoadingNode */null,
+            loadingPrincipal,
+            /* aTriggeringPrincipal */ null,
+            /* aSecurityFlag */ Ci.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_DATA_IS_NULL,
+            /* aContentPolicyType */ Ci.nsIContentPolicy.TYPE_OTHER);
         var input = channel.open();
         var sis = Cc["@mozilla.org/scriptableinputstream;1"].
             createInstance(Ci.nsIScriptableInputStream);

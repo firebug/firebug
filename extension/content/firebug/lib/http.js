@@ -92,11 +92,22 @@ Http.readPostTextFromPage = function(url, context)
      }
 };
 
-Http.getResource = function(aURL, ignoreMissing)
+Http.getResource = function(aURL, ignoreMissing, doc)
 {
+    if (!doc) {
+        doc = Firebug.chrome.window.document;
+    }
     try
     {
-        var channel = ioService.newChannel(aURL, null, null);
+        var channel = ioService.newChannel2(
+            aURL,
+            /* aCharset */ null,
+            /* aBaseURI */ null,
+            /* aLoadingNode */ doc,
+            /* aLoadingPrincipal */ null,
+            /* aTriggeringPrincipal */ null,
+            /* aSecurityFlag */ null,
+            /* aContentPolicyType */ null);
         var input = channel.open();
 
         return Http.readFromStream(input);
