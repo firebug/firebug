@@ -106,7 +106,8 @@ exports.DevToolsUtils = safeRequire(devtools,
 
 exports.makeInfallible = exports.DevToolsUtils.makeInfallible;
 
-exports.gDevTools = safeImport(
+exports.gDevTools = safeGet(devtools,
+  "devtools/client/framework/devtools",
   "resource:///devtools/client/framework/gDevTools.jsm",
   "resource:///modules/devtools/client/framework/gDevTools.jsm",
   "resource:///modules/devtools/gDevTools.jsm"
