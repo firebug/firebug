@@ -38,6 +38,7 @@ Locale.registerStringBundle("chrome://firebug/locale/multiprocess-notification.p
 Cu.import("resource://firebug/loader.js");
 Cu.import("resource://firebug/fbtrace.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
+Cu.import("resource://gre/modules/NetUtil.jsm");
 
 var servicesScope = {};
 Cu.import("resource://gre/modules/Services.jsm", servicesScope);
@@ -449,15 +450,11 @@ BrowserOverlay.prototype =
 
         var loadingPrincipal = servicesScope.Services.scriptSecurityManager.getSystemPrincipal();
 
-        var channel = ioService.newChannel2(
-            versionURL,
-            /* aOriginCharset */null,
-            /* aBaseURI */ null,
-            /* aLoadingNode */null,
-            loadingPrincipal,
-            /* aTriggeringPrincipal */ null,
-            /* aSecurityFlag */ Ci.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_DATA_IS_NULL,
-            /* aContentPolicyType */ Ci.nsIContentPolicy.TYPE_OTHER);
+        var channel = NetUtil.newChannel({
+            uri: versionURL,
+            loadUsingSystemPrincipal: true
+        });
+
         var input = channel.open();
         var sis = Cc["@mozilla.org/scriptableinputstream;1"].
             createInstance(Ci.nsIScriptableInputStream);

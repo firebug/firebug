@@ -138,7 +138,8 @@ TracerWrapper.prototype =
 
         // Create FBTrace proxy. As soon as FBTrace console is available it'll forward
         // all calls to it.
-        return new Proxy({}, {
+        return new Proxy({},
+        {
             get: function(target, name)
             {
                 return self.FBTrace ? self.FBTrace[name] : self.tracer[name];

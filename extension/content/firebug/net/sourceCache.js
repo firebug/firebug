@@ -17,6 +17,8 @@ function(EventSource, Obj, Firebug, Xpcom, Url, Http, Options, Str) {
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const Cu = Components.utils;
+
 const nsIIOService = Ci.nsIIOService;
 const nsIRequest = Ci.nsIRequest;
 const nsICachingChannel = Ci.nsICachingChannel;
@@ -33,6 +35,8 @@ const LOAD_FROM_CACHE = nsIRequest.LOAD_FROM_CACHE;
 const LOAD_BYPASS_LOCAL_CACHE_IF_BUSY = nsICachingChannel.LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
 
 const NS_BINDING_ABORTED = 0x804b0002;
+
+Cu.import("resource://gre/modules/NetUtil.jsm");
 
 // ********************************************************************************************* //
 
@@ -214,8 +218,11 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
         var channel;
         try
         {
-            // TODO use newChannel2 here
-            channel = ioService.newChannel(url, null, null);
+            channel = NetUtil.newChannel({
+                uri: url,
+                loadUsingSystemPrincipal: true
+            });
+
             channel.loadFlags |= LOAD_FROM_CACHE | LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
 
             if (method && (channel instanceof nsIHttpChannel))
