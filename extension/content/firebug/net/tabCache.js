@@ -27,8 +27,11 @@ function(ActivableModule, Obj, Firebug, Xpcom, HttpRequestObserver, HttpResponse
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const Cu = Components.utils;
 
 const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+
+Cu.import("resource://gre/modules/NetUtil.jsm");
 
 // List of text content types. These content-types are cached.
 var contentTypes =
@@ -440,7 +443,10 @@ Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
             if (url === "<unknown>")
                 return [Locale.$STR("message.sourceNotAvailableFor") + ": " + url];
 
-            var channel = ioService.newChannel(url, null, null);
+            var channel = NetUtil.newChannel({
+                uri: url,
+                loadUsingSystemPrincipal: true
+            });
 
             // These flag combination doesn't repost the request.
             channel.loadFlags = Ci.nsIRequest.LOAD_FROM_CACHE |

@@ -17,9 +17,12 @@ function(Xpcom, FBTrace, Deprecated, StackFrame, Str) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
+const Cu = Components.utils;
 
 const NS_SEEK_SET = Ci.nsISeekableStream.NS_SEEK_SET;
 const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+
+Cu.import("resource://gre/modules/NetUtil.jsm");
 
 var Http = {};
 
@@ -96,7 +99,11 @@ Http.getResource = function(aURL, ignoreMissing)
 {
     try
     {
-        var channel = ioService.newChannel(aURL, null, null);
+        var channel = NetUtil.newChannel({
+            uri: aURL,
+            loadUsingSystemPrincipal: true
+        });
+
         var input = channel.open();
 
         return Http.readFromStream(input);
