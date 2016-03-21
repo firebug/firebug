@@ -22,22 +22,9 @@
 
                     <xul:hbox class="warningbox"></xul:hbox>
 
-                    <xul:description anonid="desc2" class="desc" />
-
                     <xul:label anonid="learnMore"
                         class="text-link popup-notification-learnmore-link learnMore"
                         href="https://getfirebug.com/merging-into-firefox-developer-tools"/>
-
-                    <xul:hbox class="warningbox">
-                        <xul:vbox>
-                            <xul:spacer flex="1"/>
-                            <xul:image src="chrome://firebug/skin/warning.svg" class="warningicon"/>
-                            <xul:spacer flex="1"/>
-                        </xul:vbox>
-                        <xul:vbox>
-                            <xul:description anonid="warning" class="warn" />
-                        </xul:vbox>
-                    </xul:hbox>
 
                     <xul:hbox class="warningbox">
                         <xul:vbox>
@@ -74,12 +61,6 @@
             <body><![CDATA[
                 var desc = document.getAnonymousElementByAttribute(this, "anonid", "desc");
                 desc.textContent = Locale.$STR("multiprocess.description");
-
-                var desc2 = document.getAnonymousElementByAttribute(this, "anonid", "desc2");
-                desc2.textContent = Locale.$STR("multiprocess.description2");
-
-                var warn = document.getAnonymousElementByAttribute(this, "anonid", "warning");
-                warn.textContent = Locale.$STR("multiprocess.warning2");
 
                 var learnMore = document.getAnonymousElementByAttribute(this, "anonid", "learnMore");
                 learnMore.textContent = Locale.$STR("multiprocess.learnMore");
