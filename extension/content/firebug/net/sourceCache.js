@@ -8,9 +8,10 @@ define([
     "firebug/lib/url",
     "firebug/lib/http",
     "firebug/lib/options",
-    "firebug/lib/string"
+    "firebug/lib/string",
+    "firebug/lib/channel"
 ],
-function(EventSource, Obj, Firebug, Xpcom, Url, Http, Options, Str) {
+function(EventSource, Obj, Firebug, Xpcom, Url, Http, Options, Str, Channel) {
 
 // ********************************************************************************************* //
 // Constants
@@ -19,15 +20,12 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 
-const nsIIOService = Ci.nsIIOService;
 const nsIRequest = Ci.nsIRequest;
 const nsICachingChannel = Ci.nsICachingChannel;
 const nsIScriptableInputStream = Ci.nsIScriptableInputStream;
 const nsIUploadChannel = Ci.nsIUploadChannel;
 const nsIHttpChannel = Ci.nsIHttpChannel;
 
-const IOService = Cc["@mozilla.org/network/io-service;1"];
-const ioService = IOService.getService(nsIIOService);
 const ScriptableInputStream = Cc["@mozilla.org/scriptableinputstream;1"];
 const chromeReg = Xpcom.CCSV("@mozilla.org/chrome/chrome-registry;1", "nsIToolkitChromeRegistry");
 
@@ -35,8 +33,6 @@ const LOAD_FROM_CACHE = nsIRequest.LOAD_FROM_CACHE;
 const LOAD_BYPASS_LOCAL_CACHE_IF_BUSY = nsICachingChannel.LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
 
 const NS_BINDING_ABORTED = 0x804b0002;
-
-Cu.import("resource://gre/modules/NetUtil.jsm");
 
 // ********************************************************************************************* //
 
@@ -218,11 +214,7 @@ Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
         var channel;
         try
         {
-            channel = NetUtil.newChannel({
-                uri: url,
-                loadUsingSystemPrincipal: true
-            });
-
+            channel = Channel.new(url);
             channel.loadFlags |= LOAD_FROM_CACHE | LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
 
             if (method && (channel instanceof nsIHttpChannel))

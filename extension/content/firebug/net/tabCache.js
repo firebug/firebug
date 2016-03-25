@@ -18,9 +18,11 @@ define([
     "firebug/trace/traceListener",
     "firebug/net/sourceCache",
     "firebug/lib/options",
+    "firebug/lib/channel",
 ],
 function(ActivableModule, Obj, Firebug, Xpcom, HttpRequestObserver, HttpResponseObserver, Locale,
-    Events, Url, Http, Str, Win, JSONViewerModel, TraceModule, TraceListener, SourceCache, Options) {
+    Events, Url, Http, Str, Win, JSONViewerModel, TraceModule, TraceListener, SourceCache,
+    Options, Channel) {
 
 // ********************************************************************************************* //
 // Constants
@@ -28,10 +30,6 @@ function(ActivableModule, Obj, Firebug, Xpcom, HttpRequestObserver, HttpResponse
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
-
-const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-
-Cu.import("resource://gre/modules/NetUtil.jsm");
 
 // List of text content types. These content-types are cached.
 var contentTypes =
@@ -443,10 +441,7 @@ Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
             if (url === "<unknown>")
                 return [Locale.$STR("message.sourceNotAvailableFor") + ": " + url];
 
-            var channel = NetUtil.newChannel({
-                uri: url,
-                loadUsingSystemPrincipal: true
-            });
+            var channel = Channel.new(url);
 
             // These flag combination doesn't repost the request.
             channel.loadFlags = Ci.nsIRequest.LOAD_FROM_CACHE |

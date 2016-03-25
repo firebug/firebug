@@ -5,9 +5,10 @@ define([
     "firebug/lib/trace",
     "firebug/lib/deprecated",
     "firebug/debugger/stack/stackFrame",
-    "firebug/lib/string"
+    "firebug/lib/string",
+    "firebug/lib/channel",
 ],
-function(Xpcom, FBTrace, Deprecated, StackFrame, Str) {
+function(Xpcom, FBTrace, Deprecated, StackFrame, Str, Channel) {
 
 "use strict";
 
@@ -20,9 +21,6 @@ const Cr = Components.results;
 const Cu = Components.utils;
 
 const NS_SEEK_SET = Ci.nsISeekableStream.NS_SEEK_SET;
-const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-
-Cu.import("resource://gre/modules/NetUtil.jsm");
 
 var Http = {};
 
@@ -99,11 +97,7 @@ Http.getResource = function(aURL, ignoreMissing)
 {
     try
     {
-        var channel = NetUtil.newChannel({
-            uri: aURL,
-            loadUsingSystemPrincipal: true
-        });
-
+        var channel = Channel.new(aURL);
         var input = channel.open();
 
         return Http.readFromStream(input);
