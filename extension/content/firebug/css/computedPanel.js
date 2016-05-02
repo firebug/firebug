@@ -44,6 +44,7 @@ try
     // Firefox 24
     // waiting for: https://bugzilla.mozilla.org/show_bug.cgi?id=867595
     var {CssLogic} = DevTools.safeRequire(DevTools.devtools,
+      "devtools/shared/inspector/css-logic",
       "devtools/shared/styleinspector/css-logic",
       "devtools/styleinspector/css-logic");
 }
