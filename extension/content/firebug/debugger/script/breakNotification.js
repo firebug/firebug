@@ -305,6 +305,8 @@ BreakNotification.prototype = domplate(Rep,
         this.listener.onNotificationShow(this);
         return;
 
+        // xxxSebastian: Code is unreachable, therefore commented out
+        /*
         // Animation
         var self = this;
         var delta = Math.max(3, Math.floor(this.box.clientHeight/5));
@@ -326,6 +328,7 @@ BreakNotification.prototype = domplate(Rep,
         }, 15);
 
         return this.box;
+        */
     },
 
     hide: function()

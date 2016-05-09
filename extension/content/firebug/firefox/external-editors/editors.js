@@ -211,7 +211,7 @@ EditorManager.prototype =
 
         try
         {
-            var editors = this._data.map(function(x) x.id);
+            var editors = this._data.map(x => x.id);
             prefs.setCharPref(this._prefName, editors.join(","));
         }
         catch (exc)

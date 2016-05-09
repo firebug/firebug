@@ -956,6 +956,7 @@ NetProgress.prototype =
 function logTime(file, title, time)
 {
     // xxxHonza: just for debugging purposes.
+    /*
     return;
 
     if (!file._timings)
@@ -969,6 +970,7 @@ function logTime(file, title, time)
         index: ++file._timings.counter,
         time: time
     });
+    */
 }
 
 // ********************************************************************************************* //

@@ -417,7 +417,7 @@ Url.normalizeURL = function(url)
 
     // Normalize path traversals (a/b/../c -> a/c).
     while (url.indexOf("/../") !== -1 && url[0] != "/")
-        url = url.replace(/[^\/]+\/\.\.\//g, "");
+        url = url.replace(/[^\/]+\/+\.\.\//g, "");
 
     // Issue 1496, avoid #
     url = url.replace(/#.*/, "");
