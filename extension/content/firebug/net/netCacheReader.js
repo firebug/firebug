@@ -279,8 +279,16 @@ function onDescriptorAvailable(netProgress, file, descriptor)
 {
     Trace.sysout("netCacheReader.onDescriptorAvailable; file.href: " + file.href, descriptor);
 
+    // Avoid error message in the Console panel.
+    // See also: https://github.com/firebug/firebug/issues/8003
+    let descriptorDataSize = 0;
+    try {
+        descriptorDataSize = descriptor.dataSize;
+    } catch (err) {
+    }
+
     if (file.size <= 0)
-        file.size = descriptor.dataSize;
+        file.size = descriptorDataSize;
 
     if (descriptor.lastModified && descriptor.lastFetched &&
         descriptor.lastModified < Math.floor(file.startTime/1000))
@@ -304,7 +312,7 @@ function onDescriptorAvailable(netProgress, file, descriptor)
         },
         {
             name: "Data Size",
-            value: descriptor.dataSize
+            value: descriptorDataSize
         },
         {
             name: "Fetch Count",
