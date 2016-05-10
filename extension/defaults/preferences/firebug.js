@@ -28,6 +28,10 @@ pref("extensions.firebug.hideDefaultInspector", false);
 pref("extensions.firebug.delayLoad", true);
 pref("extensions.firebug.clearAnnotationsConfirmation", true);
 
+// Multiprocess Notification
+pref("extensions.firebug.noMultiprocessMessage", false);
+pref("extensions.firebug.activateFirebugTheme", true);
+
 // Remoting
 pref("extensions.firebug.serverHost", "localhost");
 pref("extensions.firebug.serverPort", 5999);

@@ -219,6 +219,22 @@ fbMultiprocessNotificationPanel .iconbox {
     padding-right: 10px;
 }
 
+fbNewMultiprocessNotificationPanel .closeButton {
+    background-image: url(chrome://firebug/skin/mac/close.svg);
+    width: 13px;
+    height: 13px;
+    border: none;
+    cursor: pointer;
+}
+
+fbNewMultiprocessNotificationPanel .closeButton:hover {
+    filter: url(resource://firebugui/filters.svg#darken);
+}
+
+fbNewMultiprocessNotificationPanel .closeButton:active {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
+}
+
 fbUpgradeNotificationPanel .desc,
 fbAuroraNotificationPanel .desc,
 fbNewMultiprocessNotificationPanel .desc,

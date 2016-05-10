@@ -764,6 +764,9 @@ BrowserOverlay.prototype =
           return;
         }
 
+        this.oldTheme = Options.getPref("devtools", "theme");
+        this.oldTheme = (this.oldTheme == "firebug") ? "light" : this.oldTheme;
+
         var popupSet = $(this.doc, "mainPopupSet");
         var panel = this.doc.querySelector("fbNewMultiprocessNotificationPanel");
         if (!panel)
@@ -771,11 +774,25 @@ BrowserOverlay.prototype =
             panel = this.doc.createElement("fbNewMultiprocessNotificationPanel");
             panel.setAttribute("opendevtoolscommand", "Firebug.browserOverlay.onOpenDevTools(event, 'fbMultiprocessNotificationPanel')");
             panel.setAttribute("disablecommand", "Firebug.browserOverlay.onDisableE10s(event)");
+            panel.setAttribute("activatefirebugtheme", "Firebug.browserOverlay.onActivateFirebugTheme(event)");
+
             popupSet.appendChild(panel);
+        }
+
+        let firebugTheme = Options.get("activateFirebugTheme");
+        panel.firebugTheme.checked = firebugTheme;
+
+        //panel.notAgain.checked = false;
+
+        if (firebugTheme)
+        {
+            this.activateFirebugTheme("firebug");
         }
 
         panel.internationalize(Locale);
         panel.open();
+
+        this.toggleDevTools(true);
     },
 
     onDisableE10s: function(event)
@@ -788,7 +805,8 @@ BrowserOverlay.prototype =
       Options.setPref("browser.tabs", "remote.autostart.1", false);
 
       var panel = this.doc.querySelector("fbNewMultiprocessNotificationPanel");
-      Options.set("noMultiprocessMessage", panel.notAgain.checked);
+      //Options.set("noMultiprocessMessage", panel.notAgain.checked);
+      Options.set("noMultiprocessMessage", true);
 
       restartFirefox();
     },
@@ -798,11 +816,33 @@ BrowserOverlay.prototype =
       Events.cancelEvent(event);
 
       var panel = this.doc.querySelector("fbNewMultiprocessNotificationPanel");
-      Options.set("noMultiprocessMessage", panel.notAgain.checked);
+      //Options.set("noMultiprocessMessage", panel.notAgain.checked);
+      Options.set("noMultiprocessMessage", true);
 
       panel.close();
+    },
 
-      this.toggleDevTools(true);
+    onActivateFirebugTheme: function(event) {
+      var panel = this.doc.querySelector("fbNewMultiprocessNotificationPanel");
+      var newTheme = panel.firebugTheme.checked ? "firebug" : this.oldTheme;
+
+      Options.set("activateFirebugTheme", panel.firebugTheme.checked);
+
+      this.activateFirebugTheme(newTheme);
+    },
+
+    activateFirebugTheme: function(newTheme) {
+      var oldTheme = Options.getPref("devtools", "theme");
+
+      Options.setPref("devtools", "theme", newTheme);
+
+      let data = {
+        pref: "devtools.theme",
+        newValue: newTheme,
+        oldValue: oldTheme
+      };
+
+      DevTools.gDevTools.emit("pref-changed", data);
     },
 
     toggleDevTools: function(forceOpen) {

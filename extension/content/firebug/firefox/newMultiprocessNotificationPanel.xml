@@ -14,10 +14,12 @@
         <xul:panel anonid="panel" norestorefocus="true" noautofocus="true"
             ignorekeys="true" role="presentation" type="arrow" class="panel">
             <xul:hbox>
-                <xul:vbox class="iconbox">
-                    <xul:image src="chrome://firebug/skin/firebug64.png"/>
-                </xul:vbox>
-                <xul:vbox>
+               <xul:vbox class="iconbox">
+                   <xul:image src="chrome://firebug/skin/firebug64.png"/>
+               </xul:vbox>
+               <xul:vbox>
+                    <xul:hbox class="warningbox"></xul:hbox>
+
                     <xul:description anonid="desc" class="desc" />
 
                     <xul:hbox class="warningbox"></xul:hbox>
@@ -26,11 +28,22 @@
                         class="text-link popup-notification-learnmore-link learnMore"
                         href="https://getfirebug.com/merging-into-firefox-developer-tools"/>
 
+                    <xul:hbox class="warningbox"></xul:hbox>
+
+                    <xul:description anonid="desc3" class="desc" />
+
                     <xul:hbox class="warningbox">
                         <xul:vbox>
-                            <xul:checkbox anonid="notAgain" checked="false"/>
+                            <xul:checkbox anonid="firebugTheme" checked="true"
+                                xbl:inherits="oncommand=activatefirebugtheme" />
                         </xul:vbox>
                     </xul:hbox>
+
+                    <!-- <xul:hbox class="warningbox">
+                        <xul:vbox>
+                            <xul:checkbox anonid="notAgain" checked="false" />
+                        </xul:vbox>
+                    </xul:hbox> -->
 
                     <xul:hbox class="warningbox" style="height: 10px;"></xul:hbox>
 
@@ -48,7 +61,10 @@
                         </xul:button>
                     </xul:hbox>
                 </xul:vbox>
-            </xul:hbox>
+                <xul:vbox>
+                    <xul:image class="closeButton" anonid="closeButton"/>
+                </xul:vbox>
+             </xul:hbox>
         </xul:panel>
     </content>
 
@@ -62,17 +78,25 @@
                 var desc = document.getAnonymousElementByAttribute(this, "anonid", "desc");
                 desc.textContent = Locale.$STR("multiprocess.description");
 
+                var desc3 = document.getAnonymousElementByAttribute(this, "anonid", "desc3");
+                desc3.textContent = Locale.$STR("multiprocess.description3");
+
                 var learnMore = document.getAnonymousElementByAttribute(this, "anonid", "learnMore");
                 learnMore.textContent = Locale.$STR("multiprocess.learnMore");
 
-                var notAgain = document.getAnonymousElementByAttribute(this, "anonid", "notAgain");
-                notAgain.label = Locale.$STR("multiprocess.notAgain");
+                //var notAgain = document.getAnonymousElementByAttribute(this, "anonid", "notAgain");
+                //notAgain.label = Locale.$STR("multiprocess.notAgain");
 
                 var openDevToolsButton = document.getAnonymousElementByAttribute(this, "anonid", "opendevtools");
                 openDevToolsButton.label = Locale.$STR("multiprocess.openDevTools");
 
                 var disableMenu = document.getAnonymousElementByAttribute(this, "anonid", "disable");
                 disableMenu.label = Locale.$STR("multiprocess.disable");
+
+                this.firebugTheme.label = Locale.$STR("multiprocess.activateFirebugTheme");
+
+                var closeButton = document.getAnonymousElementByAttribute(this, "anonid", "closeButton");
+                closeButton.addEventListener('click', this.close.bind(this), false);
             ]]></body>
         </method>
 
@@ -111,6 +135,12 @@
         <property name="notAgain">
             <getter><![CDATA[
                 return document.getAnonymousElementByAttribute(this, "anonid", "notAgain");
+            ]]></getter>
+        </property>
+
+        <property name="firebugTheme">
+            <getter><![CDATA[
+                return document.getAnonymousElementByAttribute(this, "anonid", "firebugTheme");
             ]]></getter>
         </property>
     </implementation>
