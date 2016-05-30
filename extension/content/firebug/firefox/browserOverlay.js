@@ -766,6 +766,7 @@ BrowserOverlay.prototype =
 
         this.oldTheme = Options.getPref("devtools", "theme");
         this.oldTheme = (this.oldTheme == "firebug") ? "light" : this.oldTheme;
+        this.domPanelWasEnabled = Options.getPref("devtools", "dom.enabled");
 
         var popupSet = $(this.doc, "mainPopupSet");
         var panel = this.doc.querySelector("fbNewMultiprocessNotificationPanel");
@@ -787,6 +788,7 @@ BrowserOverlay.prototype =
         if (firebugTheme)
         {
             this.activateFirebugTheme("firebug");
+            this.enableDomPanel(true);
         }
 
         panel.internationalize(Locale);
@@ -826,9 +828,14 @@ BrowserOverlay.prototype =
       var panel = this.doc.querySelector("fbNewMultiprocessNotificationPanel");
       var newTheme = panel.firebugTheme.checked ? "firebug" : this.oldTheme;
 
+      // Remember state of the checkbox.
       Options.set("activateFirebugTheme", panel.firebugTheme.checked);
 
+      // Activate/deactivate Firebug theme.
       this.activateFirebugTheme(newTheme);
+
+      // When Firebug theme is activated show also the DOM panel.
+      this.enableDomPanel(panel.firebugTheme.checked);
     },
 
     activateFirebugTheme: function(newTheme) {
@@ -843,6 +850,23 @@ BrowserOverlay.prototype =
       };
 
       DevTools.gDevTools.emit("pref-changed", data);
+    },
+
+    enableDomPanel: function(enable) {
+      var enableDomPanel = enable ? true : this.domPanelWasEnabled;
+      var currValue = Options.getPref("devtools", "dom.enabled");
+      if (currValue == enableDomPanel) {
+        return;
+      }
+
+      Options.setPref("devtools", "dom.enabled", enableDomPanel);
+
+      if (enableDomPanel) {
+        DevTools.gDevTools.emit("tool-registered", "dom");
+      } else {
+        let toolDefinition = DevTools.gDevTools._tools.get("dom");
+        DevTools.gDevTools.emit("tool-unregistered", toolDefinition);
+      }
     },
 
     toggleDevTools: function(forceOpen) {
