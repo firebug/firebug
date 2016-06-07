@@ -26,7 +26,7 @@
 
                     <xul:label anonid="learnMore"
                         class="text-link popup-notification-learnmore-link learnMore"
-                        href="https://getfirebug.com/merging-into-firefox-developer-tools"/>
+                        href="https://getfirebug.com/unifying-firebug-and-firefox-devtools"/>
 
                     <xul:hbox class="warningbox"></xul:hbox>
 
