@@ -2,6 +2,11 @@ Firebug
 =======
 *Web Development Evolved* [getfirebug.com](https://getfirebug.com)
 
+**The Firebug extension isn't being developed or maintained
+[any longer](https://blog.getfirebug.com/2016/02/08/merging-firebug-into-the-built-in-firefox-developer-tools/).
+We invite you to use the
+[Firefox built-in DevTools](https://developer.mozilla.org/en-US/docs/Tools) instead.**
+
 [Download](https://addons.mozilla.org/en-US/firefox/addon/firebug/)
 
 License
