@@ -436,17 +436,17 @@ var BrowserMenu =
     overlayFirefoxMenu: function(doc)
     {
         // Firefox page context menu
-      if (!this.browserOverlay.isMultiprocessEnabled() && !this.browserOverlay.auroraChannel) {
-        $menupopupOverlay(doc, $(doc, "contentAreaContextMenu"), [
-              $menuseparator(doc),
-              $menuitem(doc, {
-                  id: "menu_firebug_firebugInspect",
-                  label: "firebug.InspectElementWithFirebug",
-                  command: "cmd_firebug_inspect",
-                  "class": "menuitem-iconic"
-              })
-          ]);
-      }
+        if (!this.browserOverlay.isMultiprocessEnabled()) {
+            $menupopupOverlay(doc, $(doc, "contentAreaContextMenu"), [
+                $menuseparator(doc),
+                $menuitem(doc, {
+                    id: "menu_firebug_firebugInspect",
+                    label: "firebug.InspectElementWithFirebug",
+                    command: "cmd_firebug_inspect",
+                    "class": "menuitem-iconic"
+                })
+            ]);
+        }
 
         // Firefox view menu
         $menupopupOverlay(doc, $(doc, "menu_viewPopup"),
