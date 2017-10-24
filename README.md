@@ -2,10 +2,7 @@ Firebug
 =======
 *Web Development Evolved* [getfirebug.com](https://getfirebug.com)
 
-**The Firebug extension isn't being developed or maintained
-[any longer](https://blog.getfirebug.com/2016/02/08/merging-firebug-into-the-built-in-firefox-developer-tools/).
-We invite you to use the
-[Firefox built-in DevTools](https://developer.mozilla.org/en-US/docs/Tools) instead.**
+**On November 14, with the launch of Firefox Quantum (AKA 57), support for old school extensions will stop in Firefox. That means Firebug will no longer work for many developers. However, the work continues in the great Firefox devtools. You can try Firefox devtools by updating your [release browser](https://www.mozilla.org/en-US/firefox/new/?utm_source=github&utm_campaign=switch) or [downloading Developer Edition](https://www.mozilla.org/en-US/firefox/developer/?utm_source=github&utm_campaign=switch).**
 
 [Download](https://addons.mozilla.org/en-US/firefox/addon/firebug/)
 
